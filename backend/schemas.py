@@ -5,7 +5,7 @@ RF-1.04: usuario_id é extraído do JWT (get_current_user), NÃO do body.
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 # ── Auth ──────────────────────────────────────────────────────
@@ -46,6 +46,41 @@ class TarefaUpdate(BaseModel):
     data_vencimento: Optional[datetime] = None
 
 
+# ── Labels (Sprint 1) ────────────────────────────────────────
+class LabelCreate(BaseModel):
+    nome: str
+    cor: str = "#8b5cf6"
+
+
+class LabelResponse(BaseModel):
+    id: int
+    nome: str
+    cor: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ── Subtarefas (Sprint 1) ────────────────────────────────────
+class SubtarefaCreate(BaseModel):
+    titulo: str
+    ordem: int = 0
+
+
+class SubtarefaUpdate(BaseModel):
+    titulo: Optional[str] = None
+    concluida: Optional[bool] = None
+    ordem: Optional[int] = None
+
+
+class SubtarefaResponse(BaseModel):
+    id: int
+    titulo: str
+    concluida: bool
+    ordem: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class TarefaResponse(BaseModel):
     id: int
     titulo: str
@@ -57,9 +92,10 @@ class TarefaResponse(BaseModel):
     notas_locais: Optional[str] = None
     data_vencimento: Optional[datetime] = None
     created_at: Optional[datetime] = None
+    subtarefas: list[SubtarefaResponse] = []
+    labels: list[LabelResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ── Integrações ──────────────────────────────────────────────
@@ -126,8 +162,7 @@ class SessaoFocoResponse(BaseModel):
     xp_ganho: int
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class GamificacaoProfileResponse(BaseModel):
@@ -137,6 +172,14 @@ class GamificacaoProfileResponse(BaseModel):
     ultima_sessao_data: Optional[datetime] = None
     xp_ganho: int = 0
     streak_bonus: bool = False
+
+
+# ── Streaks de Hábitos (Sprint 1) ────────────────────────────
+class HabitoStreakResponse(BaseModel):
+    habito_id: int
+    nome_exibicao: str
+    streak_dias: int
+    ultima_data: Optional[str] = None
 
 
 # ── Motor de Triagem / Palavras-Chave ────────────────────────
@@ -152,8 +195,7 @@ class PalavraChaveResponse(BaseModel):
     peso: int
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProcessarMensagemRequest(BaseModel):

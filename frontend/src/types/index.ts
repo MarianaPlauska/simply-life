@@ -1,3 +1,16 @@
+export interface Label {
+  id: number;
+  nome: string;
+  cor: string;
+}
+
+export interface Subtarefa {
+  id: number;
+  titulo: string;
+  concluida: boolean;
+  ordem: number;
+}
+
 export interface TarefaUnificada {
   id: number;
   usuario_id: number;
@@ -11,4 +24,13 @@ export interface TarefaUnificada {
   notas_locais: string | null;
   data_vencimento: string | null;
   created_at: string | null;
+  subtarefas: Subtarefa[];
+  labels: Label[];
+}
+
+export interface HabitoStreak {
+  habito_id: number;
+  nome_exibicao: string;
+  streak_dias: number;
+  ultima_data: string | null;
 }

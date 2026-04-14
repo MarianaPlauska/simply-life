@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float, DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float, DateTime, Date, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import database
@@ -43,6 +43,9 @@ class TarefaUnificada(database.Base):
     palavra_chave_id = Column(Integer, ForeignKey("palavras_chave.id"), nullable=True)
     dono = relationship("Usuario", back_populates="tarefas")
     palavra_chave = relationship("PalavraChave", foreign_keys=[palavra_chave_id])
+    # Sprint 1: subtarefas e labels
+    subtarefas = relationship("Subtarefa", back_populates="tarefa", cascade="all, delete-orphan", order_by="Subtarefa.ordem")
+    labels = relationship("Label", secondary="tarefa_labels", lazy="joined")
 
 # 3. integrações 
 class Integracao(database.Base):
@@ -119,6 +122,8 @@ class HabitoDiario(database.Base):
     meta_diaria = Column(Integer) # Ex: 8 (copos), 8 (horas)
     progresso_atual = Column(Integer, default=0)
     unidade = Column(String) # Ex: "ml", "horas", "páginas"
+    # Sprint 1: relação com histórico
+    historico = relationship("HistoricoHabito", back_populates="habito", cascade="all, delete-orphan")
 
 # 10. palavras-chave para triagem (Motor de IA)
 class PalavraChave(database.Base):
@@ -130,7 +135,7 @@ class PalavraChave(database.Base):
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     usuario = relationship("Usuario")
 
-# 10. sessões de foco (gamificação)
+# 11. sessões de foco (gamificação)
 class SessaoFoco(database.Base):
     __tablename__ = "sessoes_foco"
     id = Column(Integer, primary_key=True, index=True)
@@ -141,3 +146,50 @@ class SessaoFoco(database.Base):
     created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     usuario = relationship("Usuario", back_populates="sessoes_foco")
     tarefa = relationship("TarefaUnificada")
+
+# ── Sprint 1: Novos models ──────────────────────────────────────
+
+# 12. Labels (tags para tarefas)
+class Label(database.Base):
+    __tablename__ = "labels"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    nome = Column(String(50), nullable=False)
+    cor = Column(String(7), default="#8b5cf6")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    dono = relationship("Usuario")
+
+# 13. Associação tarefa <-> label (N:N)
+class TarefaLabel(database.Base):
+    __tablename__ = "tarefa_labels"
+    __table_args__ = (
+        UniqueConstraint('tarefa_id', 'label_id', name='uq_tarefa_label'),
+    )
+    id = Column(Integer, primary_key=True, index=True)
+    tarefa_id = Column(Integer, ForeignKey("tarefas_unificadas.id", ondelete="CASCADE"), nullable=False)
+    label_id = Column(Integer, ForeignKey("labels.id", ondelete="CASCADE"), nullable=False)
+
+# 14. Subtarefas
+class Subtarefa(database.Base):
+    __tablename__ = "subtarefas"
+    id = Column(Integer, primary_key=True, index=True)
+    tarefa_id = Column(Integer, ForeignKey("tarefas_unificadas.id", ondelete="CASCADE"), nullable=False)
+    titulo = Column(String(200), nullable=False)
+    concluida = Column(Integer, default=0)
+    ordem = Column(Integer, default=0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    tarefa = relationship("TarefaUnificada", back_populates="subtarefas")
+
+# 15. Histórico de hábitos (para streaks reais)
+class HistoricoHabito(database.Base):
+    __tablename__ = "historico_habitos"
+    __table_args__ = (
+        UniqueConstraint('habito_id', 'data', name='uq_habito_data'),
+    )
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    habito_id = Column(Integer, ForeignKey("habitos_diarios.id", ondelete="CASCADE"), nullable=False)
+    data = Column(Date, nullable=False)
+    concluido = Column(Integer, default=1)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    habito = relationship("HabitoDiario", back_populates="historico")

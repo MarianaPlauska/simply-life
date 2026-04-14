@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { TarefaUnificada } from '../types';
+import type { TarefaUnificada, Label, Subtarefa, HabitoStreak } from '../types';
 
 export type ActiveView =
   | 'dashboard'
@@ -256,6 +256,19 @@ interface TaskStore {
   resetFocus: () => void;
   fetchGamificacao: () => Promise<void>;
   finalizarSessaoFoco: (minutos: number, tarefaId?: number | null) => Promise<void>;
+  // Labels + Subtarefas (Sprint 1)
+  labels: Label[];
+  fetchLabels: () => Promise<void>;
+  createLabel: (nome: string, cor?: string) => Promise<void>;
+  deleteLabel: (id: number) => Promise<void>;
+  createSubtarefa: (tarefaId: number, titulo: string) => Promise<void>;
+  updateSubtarefa: (id: number, dados: Partial<Subtarefa>) => Promise<void>;
+  deleteSubtarefa: (id: number, tarefaId: number) => Promise<void>;
+  addLabelToTarefa: (tarefaId: number, labelId: number) => Promise<void>;
+  removeLabelFromTarefa: (tarefaId: number, labelId: number) => Promise<void>;
+  // Streaks de hábitos (Sprint 1)
+  habitosStreaks: HabitoStreak[];
+  fetchHabitosStreaks: () => Promise<void>;
   // Motor de Triagem
   palavrasChave: PalavraChave[];
   fetchPalavrasChave: () => Promise<void>;
@@ -325,6 +338,8 @@ export const useTaskStore = create<TaskStore>()(
   isFocusModeActive: false,
   focusState: { phase: 'idle', targetTaskId: null, secondsLeft: 0, totalSeconds: 0, sessionsCompleted: 0, endTimestampMs: null },
   gamificacao: { xp: 0, xp_total: 0, streak_days: 0, streak_atual: 0, nivel: 0, ultima_sessao_foco: null, ultima_sessao_data: null },
+  labels: [] as Label[],
+  habitosStreaks: [] as HabitoStreak[],
   palavrasChave: [] as PalavraChave[],
 
   fetchDashboard: async () => {
@@ -969,6 +984,158 @@ export const useTaskStore = create<TaskStore>()(
       }
     } catch (e) {
       console.error('finalizarSessaoFoco:', e);
+    }
+  },
+
+  // ── Labels + Subtarefas (Sprint 1) ────────────────────────
+  fetchLabels: async () => {
+    try {
+      const res = await fetch(`${API}/labels`, { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      set({ labels: data });
+    } catch (e) {
+      console.error('fetchLabels:', e);
+    }
+  },
+
+  createLabel: async (nome: string, cor = '#8b5cf6') => {
+    try {
+      const res = await fetch(`${API}/labels`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ nome, cor }),
+      });
+      if (res.ok) {
+        const nova = await res.json();
+        set((s) => ({ labels: [...s.labels, nova] }));
+      }
+    } catch (e) {
+      console.error('createLabel:', e);
+    }
+  },
+
+  deleteLabel: async (id: number) => {
+    try {
+      const res = await fetch(`${API}/labels/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        set((s) => ({ labels: s.labels.filter((l) => l.id !== id) }));
+      }
+    } catch (e) {
+      console.error('deleteLabel:', e);
+    }
+  },
+
+  createSubtarefa: async (tarefaId: number, titulo: string) => {
+    try {
+      const res = await fetch(`${API}/tarefas/${tarefaId}/subtarefas`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ titulo }),
+      });
+      if (res.ok) {
+        const nova = await res.json();
+        set((s) => ({
+          tarefas: s.tarefas.map((t) =>
+            t.id === tarefaId ? { ...t, subtarefas: [...(t.subtarefas || []), nova] } : t
+          ),
+        }));
+      }
+    } catch (e) {
+      console.error('createSubtarefa:', e);
+    }
+  },
+
+  updateSubtarefa: async (id: number, dados: Partial<Subtarefa>) => {
+    try {
+      const res = await fetch(`${API}/subtarefas/${id}`, {
+        method: 'PATCH',
+        headers: authHeaders(),
+        body: JSON.stringify(dados),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        set((s) => ({
+          tarefas: s.tarefas.map((t) => ({
+            ...t,
+            subtarefas: (t.subtarefas || []).map((sub) =>
+              sub.id === id ? { ...sub, ...updated } : sub
+            ),
+          })),
+        }));
+      }
+    } catch (e) {
+      console.error('updateSubtarefa:', e);
+    }
+  },
+
+  deleteSubtarefa: async (id: number, tarefaId: number) => {
+    try {
+      const res = await fetch(`${API}/subtarefas/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        set((s) => ({
+          tarefas: s.tarefas.map((t) =>
+            t.id === tarefaId
+              ? { ...t, subtarefas: (t.subtarefas || []).filter((sub) => sub.id !== id) }
+              : t
+          ),
+        }));
+      }
+    } catch (e) {
+      console.error('deleteSubtarefa:', e);
+    }
+  },
+
+  addLabelToTarefa: async (tarefaId: number, labelId: number) => {
+    try {
+      const res = await fetch(`${API}/tarefas/${tarefaId}/labels/${labelId}`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        // Refresh tarefa to get updated labels
+        get().fetchTarefas();
+      }
+    } catch (e) {
+      console.error('addLabelToTarefa:', e);
+    }
+  },
+
+  removeLabelFromTarefa: async (tarefaId: number, labelId: number) => {
+    try {
+      const res = await fetch(`${API}/tarefas/${tarefaId}/labels/${labelId}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        set((s) => ({
+          tarefas: s.tarefas.map((t) =>
+            t.id === tarefaId
+              ? { ...t, labels: (t.labels || []).filter((l) => l.id !== labelId) }
+              : t
+          ),
+        }));
+      }
+    } catch (e) {
+      console.error('removeLabelFromTarefa:', e);
+    }
+  },
+
+  // ── Streaks de hábitos (Sprint 1) ─────────────────────────
+  fetchHabitosStreaks: async () => {
+    try {
+      const res = await fetch(`${API}/habitos/streaks`, { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      set({ habitosStreaks: data });
+    } catch (e) {
+      console.error('fetchHabitosStreaks:', e);
     }
   },
 

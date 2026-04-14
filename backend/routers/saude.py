@@ -1,17 +1,77 @@
 """
-routers/saude.py — Medicamentos e Hábitos Diários
+routers/saude.py — Medicamentos, Hábitos Diários e Streaks
 RF-1.04: Todas as queries filtram por usuario_id = current_user.id
+Sprint 1: Registro automático em historico_habitos + endpoint de streaks
 """
+from datetime import date, datetime, timedelta, timezone
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 import database
 import models
 from auth import get_current_user
-from schemas import MedicamentoCreate, HabitoCreate
+from schemas import MedicamentoCreate, HabitoCreate, HabitoStreakResponse
 
 router = APIRouter(tags=["Saúde"])
+
+
+# ── Helpers ───────────────────────────────────────────────────
+
+def _registrar_conclusao_habito(db: Session, usuario_id: int, habito_id: int):
+    """Registra conclusão do hábito de hoje no historico_habitos (idempotente)."""
+    hoje = date.today()
+    existe = (
+        db.query(models.HistoricoHabito)
+        .filter(
+            models.HistoricoHabito.habito_id == habito_id,
+            models.HistoricoHabito.data == hoje,
+        )
+        .first()
+    )
+    if not existe:
+        registro = models.HistoricoHabito(
+            usuario_id=usuario_id,
+            habito_id=habito_id,
+            data=hoje,
+            concluido=1,
+        )
+        db.add(registro)
+        db.flush()
+
+
+def _calcular_streak(db: Session, habito_id: int) -> int:
+    """Calcula dias consecutivos de conclusão, contando de hoje para trás."""
+    registros = (
+        db.query(models.HistoricoHabito.data)
+        .filter(
+            models.HistoricoHabito.habito_id == habito_id,
+            models.HistoricoHabito.concluido == 1,
+        )
+        .order_by(models.HistoricoHabito.data.desc())
+        .all()
+    )
+    if not registros:
+        return 0
+
+    datas = [r.data for r in registros]
+    hoje = date.today()
+
+    # Se hoje não está nos registros, o streak começa em 0
+    if datas[0] != hoje:
+        return 0
+
+    streak = 1
+    for i in range(1, len(datas)):
+        esperado = hoje - timedelta(days=i)
+        if datas[i] == esperado:
+            streak += 1
+        else:
+            break
+
+    return streak
 
 
 # ── Medicamentos ──────────────────────────────────────────────
@@ -121,8 +181,14 @@ def incrementar_habito(
     if not h:
         return JSONResponse(status_code=404, content={"erro": "Hábito não encontrado"})
     h.progresso_atual = min(h.progresso_atual + 1, h.meta_diaria)
+
+    # Sprint 1: registra no histórico quando meta é atingida
+    if h.progresso_atual >= h.meta_diaria:
+        _registrar_conclusao_habito(db, current_user.id, habito_id)
+
     db.commit()
-    return {"progresso_atual": h.progresso_atual, "meta_diaria": h.meta_diaria}
+    streak = _calcular_streak(db, habito_id)
+    return {"progresso_atual": h.progresso_atual, "meta_diaria": h.meta_diaria, "streak": streak}
 
 
 @router.patch("/habitos/{habito_id}/decrementar")
@@ -159,3 +225,34 @@ def deletar_habito(
     db.delete(h)
     db.commit()
     return {"status": "sucesso"}
+
+
+# ── Streaks de Hábitos (Sprint 1) ─────────────────────────────
+
+@router.get("/habitos/streaks")
+def listar_streaks(
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    """Retorna o streak atual (dias consecutivos) para cada hábito do usuário."""
+    habitos = (
+        db.query(models.HabitoDiario)
+        .filter(models.HabitoDiario.usuario_id == current_user.id)
+        .all()
+    )
+    result = []
+    for h in habitos:
+        streak = _calcular_streak(db, h.id)
+        ultimo = (
+            db.query(models.HistoricoHabito.data)
+            .filter(models.HistoricoHabito.habito_id == h.id)
+            .order_by(models.HistoricoHabito.data.desc())
+            .first()
+        )
+        result.append(HabitoStreakResponse(
+            habito_id=h.id,
+            nome_exibicao=h.nome_exibicao,
+            streak_dias=streak,
+            ultima_data=str(ultimo.data) if ultimo else None,
+        ).model_dump())
+    return result

@@ -1,5 +1,5 @@
-﻿"""
-routers/tarefas.py — Kanban, Webhook, Anotações, Notificações
+"""
+routers/tarefas.py — Kanban, Webhook, Anotações, Notificações, Labels, Subtarefas
 RF-1.04: Todas as queries filtram por usuario_id = current_user.id
 RF-2.01: Motor de scoring via logic/scoring.py
 RF-2.02: Filtro de keywords ativo no webhook
@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 import database
 import models
@@ -21,6 +21,11 @@ from schemas import (
     TarefaCreate,
     TarefaUpdate,
     TarefaResponse,
+    LabelCreate,
+    LabelResponse,
+    SubtarefaCreate,
+    SubtarefaUpdate,
+    SubtarefaResponse,
 )
 
 router = APIRouter(tags=["Tarefas & Domínios"])
@@ -38,6 +43,7 @@ def _get_tarefa_or_404(
 ) -> models.TarefaUnificada:
     tarefa = (
         db.query(models.TarefaUnificada)
+        .options(joinedload(models.TarefaUnificada.subtarefas), joinedload(models.TarefaUnificada.labels))
         .filter(
             models.TarefaUnificada.id == tarefa_id,
             models.TarefaUnificada.usuario_id == user_id,
@@ -50,7 +56,22 @@ def _get_tarefa_or_404(
 
 
 def _tarefa_to_response(t: models.TarefaUnificada) -> dict:
-    return TarefaResponse.model_validate(t).model_dump(mode="json")
+    return TarefaResponse(
+        id=t.id,
+        titulo=t.titulo,
+        descricao=t.descricao,
+        status=t.status,
+        prioridade=t.prioridade,
+        origem=t.origem,
+        score_urgencia=t.score_urgencia,
+        notas_locais=t.notas_locais,
+        data_vencimento=t.data_vencimento,
+        created_at=t.created_at,
+        subtarefas=[SubtarefaResponse(
+            id=s.id, titulo=s.titulo, concluida=bool(s.concluida), ordem=s.ordem
+        ) for s in (t.subtarefas or [])],
+        labels=[LabelResponse(id=l.id, nome=l.nome, cor=l.cor) for l in (t.labels or [])],
+    ).model_dump(mode="json")
 
 
 def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
@@ -112,11 +133,19 @@ def listar_tarefas(
 ):
     tarefas = (
         db.query(models.TarefaUnificada)
+        .options(joinedload(models.TarefaUnificada.subtarefas), joinedload(models.TarefaUnificada.labels))
         .filter(models.TarefaUnificada.usuario_id == current_user.id)
         .order_by(models.TarefaUnificada.score_urgencia.desc())
         .all()
     )
-    return {"total": len(tarefas), "tarefas": [_tarefa_to_response(t) for t in tarefas]}
+    # Deduplicate (joinedload may cause duplicates with multiple relationships)
+    seen = set()
+    unique = []
+    for t in tarefas:
+        if t.id not in seen:
+            seen.add(t.id)
+            unique.append(t)
+    return {"total": len(unique), "tarefas": [_tarefa_to_response(t) for t in unique]}
 
 
 @router.post("/tarefas", status_code=201, response_model=dict)
@@ -258,6 +287,193 @@ def receber_webhook(
 ):
     background_tasks.add_task(motor_de_score_worker, current_user.id, dados, db)
     return {"status": "Recebido com sucesso. Triagem iniciada."}
+
+
+# ── Labels ────────────────────────────────────────────────────
+
+@router.get("/labels")
+def listar_labels(
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    labels = (
+        db.query(models.Label)
+        .filter(models.Label.usuario_id == current_user.id)
+        .order_by(models.Label.nome)
+        .all()
+    )
+    return [LabelResponse.model_validate(l).model_dump() for l in labels]
+
+
+@router.post("/labels", status_code=201)
+def criar_label(
+    dados: LabelCreate,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    # Verificar duplicata
+    existe = (
+        db.query(models.Label)
+        .filter(models.Label.usuario_id == current_user.id, models.Label.nome == dados.nome)
+        .first()
+    )
+    if existe:
+        raise HTTPException(status_code=409, detail=f"Label '{dados.nome}' já existe.")
+
+    nova = models.Label(
+        usuario_id=current_user.id,
+        nome=dados.nome,
+        cor=dados.cor,
+    )
+    db.add(nova)
+    db.commit()
+    db.refresh(nova)
+    return LabelResponse.model_validate(nova).model_dump()
+
+
+@router.delete("/labels/{label_id}")
+def deletar_label(
+    label_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    label = (
+        db.query(models.Label)
+        .filter(models.Label.id == label_id, models.Label.usuario_id == current_user.id)
+        .first()
+    )
+    if not label:
+        raise HTTPException(status_code=404, detail="Label não encontrada")
+    db.delete(label)
+    db.commit()
+    return {"status": "sucesso", "id": label_id}
+
+
+# ── Subtarefas ────────────────────────────────────────────────
+
+@router.post("/tarefas/{tarefa_id}/subtarefas", status_code=201)
+def criar_subtarefa(
+    tarefa_id: int,
+    dados: SubtarefaCreate,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
+    nova = models.Subtarefa(
+        tarefa_id=tarefa.id,
+        titulo=dados.titulo,
+        ordem=dados.ordem,
+    )
+    db.add(nova)
+    db.commit()
+    db.refresh(nova)
+    return SubtarefaResponse(id=nova.id, titulo=nova.titulo, concluida=bool(nova.concluida), ordem=nova.ordem).model_dump()
+
+
+@router.patch("/subtarefas/{subtarefa_id}")
+def atualizar_subtarefa(
+    subtarefa_id: int,
+    dados: SubtarefaUpdate,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    sub = db.query(models.Subtarefa).filter(models.Subtarefa.id == subtarefa_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subtarefa não encontrada")
+    # Verifica ownership via tarefa pai
+    tarefa = (
+        db.query(models.TarefaUnificada)
+        .filter(models.TarefaUnificada.id == sub.tarefa_id, models.TarefaUnificada.usuario_id == current_user.id)
+        .first()
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Subtarefa não encontrada")
+
+    if dados.titulo is not None:
+        sub.titulo = dados.titulo
+    if dados.concluida is not None:
+        sub.concluida = 1 if dados.concluida else 0
+    if dados.ordem is not None:
+        sub.ordem = dados.ordem
+
+    db.commit()
+    db.refresh(sub)
+    return SubtarefaResponse(id=sub.id, titulo=sub.titulo, concluida=bool(sub.concluida), ordem=sub.ordem).model_dump()
+
+
+@router.delete("/subtarefas/{subtarefa_id}")
+def deletar_subtarefa(
+    subtarefa_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    sub = db.query(models.Subtarefa).filter(models.Subtarefa.id == subtarefa_id).first()
+    if not sub:
+        raise HTTPException(status_code=404, detail="Subtarefa não encontrada")
+    tarefa = (
+        db.query(models.TarefaUnificada)
+        .filter(models.TarefaUnificada.id == sub.tarefa_id, models.TarefaUnificada.usuario_id == current_user.id)
+        .first()
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Subtarefa não encontrada")
+
+    db.delete(sub)
+    db.commit()
+    return {"status": "sucesso", "id": subtarefa_id}
+
+
+# ── Labels em Tarefas (associar / remover) ────────────────────
+
+@router.post("/tarefas/{tarefa_id}/labels/{label_id}", status_code=201)
+def adicionar_label_tarefa(
+    tarefa_id: int,
+    label_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
+    label = (
+        db.query(models.Label)
+        .filter(models.Label.id == label_id, models.Label.usuario_id == current_user.id)
+        .first()
+    )
+    if not label:
+        raise HTTPException(status_code=404, detail="Label não encontrada")
+
+    # Verificar se já está associada
+    existe = (
+        db.query(models.TarefaLabel)
+        .filter(models.TarefaLabel.tarefa_id == tarefa.id, models.TarefaLabel.label_id == label.id)
+        .first()
+    )
+    if existe:
+        return {"status": "já associada"}
+
+    assoc = models.TarefaLabel(tarefa_id=tarefa.id, label_id=label.id)
+    db.add(assoc)
+    db.commit()
+    return {"status": "sucesso", "tarefa_id": tarefa.id, "label_id": label.id}
+
+
+@router.delete("/tarefas/{tarefa_id}/labels/{label_id}")
+def remover_label_tarefa(
+    tarefa_id: int,
+    label_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
+    assoc = (
+        db.query(models.TarefaLabel)
+        .filter(models.TarefaLabel.tarefa_id == tarefa.id, models.TarefaLabel.label_id == label_id)
+        .first()
+    )
+    if not assoc:
+        raise HTTPException(status_code=404, detail="Label não associada a esta tarefa")
+    db.delete(assoc)
+    db.commit()
+    return {"status": "sucesso"}
 
 
 # ── Anotações ─────────────────────────────────────────────────

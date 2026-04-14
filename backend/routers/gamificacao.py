@@ -127,7 +127,17 @@ def completar_sessao(
 @router.get("/perfil", status_code=200)
 def perfil_gamificacao(
     usuario: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
 ):
+    # Sprint 1: calcular maior streak de hábitos
+    from routers.saude import _calcular_streak
+    habitos = (
+        db.query(models.HabitoDiario)
+        .filter(models.HabitoDiario.usuario_id == usuario.id)
+        .all()
+    )
+    max_habito_streak = max((_calcular_streak(db, h.id) for h in habitos), default=0)
+
     return {
         "xp": usuario.xp_total or usuario.xp or 0,
         "xp_total": usuario.xp_total or usuario.xp or 0,
@@ -136,4 +146,5 @@ def perfil_gamificacao(
         "ultima_sessao_foco": usuario.ultima_sessao_foco,
         "ultima_sessao_data": usuario.ultima_sessao_data.isoformat() if usuario.ultima_sessao_data else None,
         "nivel": (usuario.xp_total or usuario.xp or 0) // 100,
+        "habitos_streak": max_habito_streak,
     }
