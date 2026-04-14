@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { Skeleton, CardSkeleton } from '../dashboard/DashboardPrimitives';
 import { HeroSection } from '../dashboard/HeroSection';
@@ -8,6 +8,7 @@ import { KeywordsRadarSection } from '../dashboard/KeywordsRadarSection';
 import { FocusScoreSection } from '../dashboard/FocusScoreSection';
 import { SmartNudgesSection } from '../dashboard/SmartNudgesSection';
 import { AgendaSection } from '../dashboard/AgendaSection';
+import { Bug, Loader2 } from 'lucide-react';
 
 
 export function DashboardHome() {
@@ -28,18 +29,44 @@ export function DashboardHome() {
   const fetchPreferencias = useTaskStore((s) => s.fetchPreferencias);
   const tarefas = useTaskStore((s) => s.tarefas);
   const fetchTarefas = useTaskStore((s) => s.fetchTarefas);
+  const simularEmail = useTaskStore((s) => s.simularEmailRecebido);
+  const fetchPalavrasChave = useTaskStore((s) => s.fetchPalavrasChave);
   const hasFetched = useRef(false);
+  const [mockLoading, setMockLoading] = useState(false);
 
   useEffect(() => {
     if (hasFetched.current) return;
     hasFetched.current = true;
-    fetchDashboard();
-    fetchNotificacoes();
-    fetchPreferencias();
-    fetchTarefas();
-    checkGoogleStatus().then(() => fetchCalendarEvents());
+
+    // carrega em lotes de 2 pra não estourar o limite de sockets do chrome
+    const init = async () =>
+    {
+      await Promise.all([fetchDashboard(), fetchTarefas()]);
+      await Promise.all([fetchNotificacoes(), fetchPreferencias()]);
+      await Promise.all([fetchPalavrasChave(), checkGoogleStatus()]);
+      fetchCalendarEvents();
+    };
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // dispara a simulação de email pelo motor de triagem
+  const handleMockEmail = async () =>
+  {
+    if ( mockLoading ) return;
+    setMockLoading(true);
+    try
+    {
+      await simularEmail(
+        'E-mail do Diretor: Mariana, por favor, verifique aquele pagamento urgente da plataforma.',
+        'Diretoria'
+      );
+    }
+    finally
+    {
+      setMockLoading(false);
+    }
+  };
 
   const naoLidas = resumo?.notificacoes_nao_lidas ?? notificacoes.filter((n) => !n.lida).length;
   const tarefasIA = tarefas.filter((t) => t.origem && t.origem !== 'manual' && t.prioridade === 'critica').length;
@@ -65,7 +92,29 @@ export function DashboardHome() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-16 pb-24 text-zinc-50">
       {/* Camada 1 — Contexto Imediato */}
-      <HeroSection resumo={resumo} naoLidas={naoLidas} />
+      <div className="relative">
+        <HeroSection resumo={resumo} naoLidas={naoLidas} />
+
+        {/* botão de debug — simula email recebido pelo motor de triagem */}
+        <button
+          id="debug-mock-email"
+          onClick={handleMockEmail}
+          disabled={mockLoading}
+          title="Simular E-mail (debug)"
+          className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5
+            rounded-xl text-[10px] font-medium tracking-wide uppercase
+            bg-zinc-900/60 backdrop-blur-sm border border-white/5
+            text-zinc-600 opacity-30 hover:opacity-100
+            hover:border-violet-500/30 hover:text-violet-400
+            transition-all duration-300 disabled:cursor-wait"
+        >
+          {mockLoading
+            ? <Loader2 className="w-3 h-3 animate-spin" />
+            : <Bug className="w-3 h-3" />
+          }
+          <span>Simular E-mail</span>
+        </button>
+      </div>
       <KPISection resumo={resumo} tarefasIA={tarefasIA} />
 
       {/* Camada 2 — Fluxo Tático */}

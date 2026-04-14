@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Clock, Languages, Code2, Mail, MessageSquare, CheckSquare, Square, AlertTriangle, Zap } from 'lucide-react';
+import { Clock, Languages, Code2, Mail, MessageSquare, CheckSquare, Square, AlertTriangle, Zap, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
 
@@ -13,6 +13,7 @@ interface KanbanCardProps {
 const ORIGINS: Record<string, { label: string; Icon: React.ElementType; color: string }> = {
   manual: { label: 'Manual', Icon: Square, color: 'text-zinc-400' },
   gmail_triage: { label: 'Gmail', Icon: Mail, color: 'text-blue-400' },
+  gmail_mock: { label: 'Gmail (mock)', Icon: Mail, color: 'text-violet-400' },
   webhook: { label: 'Webhook', Icon: Code2, color: 'text-violet-400' },
 };
 
@@ -41,12 +42,6 @@ const PRIORIDADE_STYLES: Record<string, { bg: string; text: string; dot: string 
   baixa:   { bg: 'bg-zinc-500/10', text: 'text-zinc-400', dot: 'bg-zinc-500' },
 };
 
-/* Simulated subtask progress */
-function getSubtasks(id: number) {
-  const done = id % 3;
-  const total = done + 1 + (id % 2);
-  return { done, total };
-}
 
 export function KanbanCard({ tarefa }: KanbanCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -74,12 +69,17 @@ export function KanbanCard({ tarefa }: KanbanCardProps) {
 
   const origin = getOrigin(tarefa.origem || 'manual');
   const urgency = getUrgencyBadge(tarefa.score_urgencia);
-  const subtasks = getSubtasks(tarefa.id);
   const elapsed = getElapsed(tarefa.id);
+
   const OriginIcon = origin.Icon;
   const isCriticalFocus = tarefa.score_urgencia > 100;
+  // tarefa veio pelo motor de triagem (gmail real ou mock)
+  const isIA = tarefa.origem === 'gmail_triage' || tarefa.origem === 'gmail_mock';
   const prio = tarefa.prioridade || 'media';
   const prioStyle = PRIORIDADE_STYLES[prio] || PRIORIDADE_STYLES.media;
+  // subtarefas reais do sprint 1 — usa dados do backend
+  const subs = tarefa.subtarefas || [];
+  const subtasks = { done: subs.filter((s) => s.concluida).length, total: subs.length };
 
   return (
     <article
@@ -89,10 +89,17 @@ export function KanbanCard({ tarefa }: KanbanCardProps) {
       {...attributes}
       role="listitem"
       aria-label={`Tarefa: ${tarefa.titulo}, urgencia ${urgency.label}`}
-      className={`bg-zinc-900/60 border rounded-xl overflow-hidden
-        hover:border-zinc-700 transition-all cursor-grab active:cursor-grabbing group
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50
-        ${isCriticalFocus ? 'border-red-500/60 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.15)]' : 'border-zinc-800/60'}`}
+      className={[
+        'bg-zinc-900/60 border rounded-xl overflow-hidden',
+        'hover:border-zinc-700 transition-all cursor-grab active:cursor-grabbing group',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50',
+        // tarefa capturada pela ia — borda violeta brilhante
+        isIA
+          ? 'border-violet-500/40 shadow-[0_0_20px_rgba(139,92,246,0.12)]'
+          : isCriticalFocus
+            ? 'border-red-500/60 animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.15)]'
+            : 'border-zinc-800/60',
+      ].join(' ')}
       tabIndex={0}
     >
       {/* Card Header */}
@@ -106,6 +113,16 @@ export function KanbanCard({ tarefa }: KanbanCardProps) {
           <span>ha {elapsed}</span>
         </div>
       </div>
+
+      {/* badge ia — aparece quando a tarefa foi capturada automaticamente */}
+      {isIA && (
+        <div className="flex items-center gap-1 px-4 pt-1.5 pb-0">
+          <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20">
+            <Sparkles className="w-3 h-3 text-violet-400" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-violet-400">capturada por ia</span>
+          </div>
+        </div>
+      )}
 
       {/* Body */}
       <div className="px-4 pt-3 pb-2">
