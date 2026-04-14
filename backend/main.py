@@ -7,6 +7,7 @@ Responsabilidades:
   • Iniciar worker de background (polling)
 """
 import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -33,6 +34,22 @@ from routers import financas as financas_router
 from routers import saude as saude_router
 from routers import dashboard as dashboard_router
 from routers import integracoes as integracoes_router
+from routers import gamificacao as gamificacao_router
+
+# ── Worker de background (polling) ────────────────────────────
+async def motor_busca_ativa():
+    while True:
+        print("🕵️‍♂️ [Worker] Checando novas demandas de serviços externos...")
+        await asyncio.sleep(60)
+
+
+# ── Lifespan (substitui @app.on_event) ───────────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(motor_busca_ativa())
+    yield
+    task.cancel()
+
 
 # ── Cria tabelas (se não existirem) ──────────────────────────
 models.database.Base.metadata.create_all(bind=database.engine)
@@ -40,7 +57,7 @@ models.database.Base.metadata.create_all(bind=database.engine)
 # ── Rate Limiter (RNF-1.02) ──────────────────────────────────
 limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
 
-app = FastAPI(title="API - Simply-Life OS")
+app = FastAPI(title="API - Simply-Life OS", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -69,14 +86,4 @@ app.include_router(financas_router.router)
 app.include_router(saude_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(integracoes_router.router)
-
-# ── Worker de background (polling) ────────────────────────────
-async def motor_busca_ativa():
-    while True:
-        print("🕵️‍♂️ [Worker] Checando novas demandas de serviços externos...")
-        await asyncio.sleep(60)
-
-
-@app.on_event("startup")
-async def iniciar_motor_background():
-    asyncio.create_task(motor_busca_ativa())
+app.include_router(gamificacao_router.router)

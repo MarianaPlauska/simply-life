@@ -2,6 +2,7 @@
 schemas.py — Pydantic models compartilhados entre routers.
 RF-1.04: usuario_id é extraído do JWT (get_current_user), NÃO do body.
 """
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -28,14 +29,37 @@ class WebhookPayload(BaseModel):
 
 class TarefaCreate(BaseModel):
     titulo: str
+    descricao: Optional[str] = None
     notas_locais: Optional[str] = None
     status: str = "pendente"
+    prioridade: str = "media"
+    origem: str = "manual"
+    data_vencimento: Optional[datetime] = None
 
 
 class TarefaUpdate(BaseModel):
     titulo: Optional[str] = None
+    descricao: Optional[str] = None
     status: Optional[str] = None
+    prioridade: Optional[str] = None
     notas_locais: Optional[str] = None
+    data_vencimento: Optional[datetime] = None
+
+
+class TarefaResponse(BaseModel):
+    id: int
+    titulo: str
+    descricao: Optional[str] = None
+    status: str
+    prioridade: str
+    origem: str
+    score_urgencia: int
+    notas_locais: Optional[str] = None
+    data_vencimento: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
 
 
 # ── Integrações ──────────────────────────────────────────────

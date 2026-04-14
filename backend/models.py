@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime, timezone
 import database
 
-# 1. Usuários
+# 1. usuários
 class Usuario(database.Base):
     __tablename__ = "usuarios"
     id = Column(Integer, primary_key=True, index=True)
@@ -13,22 +14,30 @@ class Usuario(database.Base):
     ativo = Column(Integer, default=1)
     criado_em = Column(String, nullable=True)
     ultimo_login = Column(String, nullable=True)
+    xp = Column(Integer, default=0)
+    streak_days = Column(Integer, default=0)
+    ultima_sessao_foco = Column(String, nullable=True)
     tarefas = relationship("TarefaUnificada", back_populates="dono")
 
-# 2. Tarefas Unificadas
+# 2. tarefas Unificadas
 class TarefaUnificada(database.Base):
     __tablename__ = "tarefas_unificadas"
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
     titulo = Column(String)
-    snippet_100_char = Column(String(100)) 
+    descricao = Column(Text, nullable=True)
+    snippet_100_char = Column(String(100))
     score_urgencia = Column(Integer, default=0)
-    status = Column(String, default="pendente")
+    status = Column(String, default="pendente")        # pendente, em_progresso, concluida
+    prioridade = Column(String, default="media")        # baixa, media, alta, critica
+    origem = Column(String, default="manual")           # manual, gmail_triage, webhook
+    data_vencimento = Column(DateTime, nullable=True)
     notas_locais = Column(Text, nullable=True)
     hash_seguranca = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     dono = relationship("Usuario", back_populates="tarefas")
 
-# 3. Integrações (Cofre de Tokens)
+# 3. integrações 
 class Integracao(database.Base):
     __tablename__ = "integracoes"
     id = Column(Integer, primary_key=True, index=True)
@@ -39,7 +48,7 @@ class Integracao(database.Base):
     hash_seguranca = Column(String, nullable=True)
     dono = relationship("Usuario")
 
-# 4. Anotações (Brain Dump / Segundo Cérebro)
+# 4.anotações 
 class Anotacao(database.Base):
     __tablename__ = "anotacoes"
     id = Column(Integer, primary_key=True, index=True)
@@ -50,7 +59,7 @@ class Anotacao(database.Base):
     categoria = Column(String, default="pessoal")
     dono = relationship("Usuario")
 
-# 5. Preferências da IA (As Keywords do Usuário)
+# 5. Keywords do Usuário
 class PreferenciasUsuario(database.Base):
     __tablename__ = "preferencias_usuario"
     id = Column(Integer, primary_key=True, index=True)
@@ -58,7 +67,7 @@ class PreferenciasUsuario(database.Base):
     palavras_chave_email = Column(String, default="")
     modulos_fixados = Column(String, default="dashboard,kanban") 
 
-# 6. Planejador Financeiro
+# 6. finanças
 class Despesa(database.Base):
     __tablename__ = "despesas"
     id = Column(Integer, primary_key=True, index=True)
@@ -70,7 +79,7 @@ class Despesa(database.Base):
     status_pagamento = Column(String, default="pendente")
     hash_seguranca = Column(String, nullable=True)
 
-# 7. Saúde e Hábitos
+# 7. saúde e Hábitos
 class Medicamento(database.Base):
     __tablename__ = "medicamentos"
     id = Column(Integer, primary_key=True, index=True)
@@ -79,7 +88,7 @@ class Medicamento(database.Base):
     horario = Column(String)
     tomado_hoje = Column(Integer, default=0)
 
-# 8. Notificações do Sistema
+# 8. motificações do Sistema
 class Notificacao(database.Base):
     __tablename__ = "notificacoes"
     id = Column(Integer, primary_key=True, index=True)
@@ -92,7 +101,7 @@ class Notificacao(database.Base):
     score_urgencia = Column(Integer, default=0)
     criado_em = Column(String, nullable=True)
 
-# 9. Hábitos Dinâmicos e Bem-Estar
+# 9. hábitos Dinâmicos e Bem-Estar
 class HabitoDiario(database.Base):
     __tablename__ = "habitos_diarios"
     id = Column(Integer, primary_key=True, index=True)

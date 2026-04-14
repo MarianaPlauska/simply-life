@@ -26,7 +26,8 @@ export function AnotacoesView() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [focusMode, setFocusMode] = useState(false);
 
-  useEffect(() => { fetchAnotacoes(); }, [fetchAnotacoes]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchAnotacoes(); }, []);
 
   useEffect(() => {
     if (anotacoes.length > 0 && selectedId === null) {

@@ -6,9 +6,9 @@ import { KanbanCard } from './KanbanCard';
 import { KanbanColumn } from './KanbanColumn';
 
 const COLUMNS = [
-  { id: 'pendente', title: 'Fazer em 1h', dotColor: 'bg-red-500', wipLimit: 5 },
-  { id: 'hoje', title: 'Fazer Hoje', dotColor: 'bg-amber-500', wipLimit: 8 },
-  { id: 'concluida', title: 'Concluida', dotColor: 'bg-emerald-500', wipLimit: 20 },
+  { id: 'pendente', title: 'Pendente', dotColor: 'bg-red-500', wipLimit: 5 },
+  { id: 'em_progresso', title: 'Em Progresso', dotColor: 'bg-amber-500', wipLimit: 8 },
+  { id: 'concluida', title: 'Concluída', dotColor: 'bg-emerald-500', wipLimit: 20 },
 ] as const;
 
 function DevIngestaoModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -76,7 +76,8 @@ export function KanbanBoard() {
 
   useEffect(() => {
     fetchTarefas();
-  }, [fetchTarefas]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;

@@ -1,27 +1,41 @@
 // frontend/src/App.tsx
+import { lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { GlassHeader } from './components/layout/GlassHeader';
-import { DashboardHome } from './components/layout/DashboardHome';
-import { KanbanBoard } from './components/kanban/KanbanBoard';
-import { AnotacoesView } from './components/Anotacoes/AnotacoesView';
-import { FocusModeView } from './components/FocusModeView';
-import { SettingsView } from './components/Settings/SettingsView';
-import { FinanceView } from './components/Finance/FinanceView';
-import { HealthView } from './components/Health/HealthView';
-import { PreferencesView } from './components/Settings/PreferencesView';
-import { FinancePlannerView } from './components/Finance/FinancePlannerView';
-import { CalendarView } from './components/Calendar/CalendarView';
-import { DriveVaultView } from './components/Drive/DriveVaultView';
 import { QuickCaptureModal } from './components/Anotacoes/QuickCaptureModal';
 import { LoginView } from './components/Auth/LoginView';
-import { ProfileView } from './components/Auth/ProfileView';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { GoogleCallbackView } from './components/Auth/GoogleCallbackView';
+import { CommandPalette } from './components/ui/CommandPalette';
+import { AmbientBackground } from './components/ui/AmbientBackground';
 import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
 import { CalendarDays, Briefcase, Brain, Rocket } from 'lucide-react';
+
+// Lazy-loaded views
+const DashboardHome    = lazy(() => import('./components/layout/DashboardHome').then((m) => ({ default: m.DashboardHome })));
+const KanbanBoard      = lazy(() => import('./components/kanban/KanbanBoard').then((m) => ({ default: m.KanbanBoard })));
+const AnotacoesView    = lazy(() => import('./components/Anotacoes/AnotacoesView').then((m) => ({ default: m.AnotacoesView })));
+const FocusModeView    = lazy(() => import('./components/FocusModeView').then((m) => ({ default: m.FocusModeView })));
+const FocusImmersiveOverlay = lazy(() => import('./components/FocusModeView').then((m) => ({ default: m.FocusImmersiveOverlay })));
+const SettingsView     = lazy(() => import('./components/Settings/SettingsView').then((m) => ({ default: m.SettingsView })));
+const FinanceView      = lazy(() => import('./components/Finance/FinanceView').then((m) => ({ default: m.FinanceView })));
+const HealthView       = lazy(() => import('./components/Health/HealthView').then((m) => ({ default: m.HealthView })));
+const PreferencesView  = lazy(() => import('./components/Settings/PreferencesView').then((m) => ({ default: m.PreferencesView })));
+const FinancePlannerView = lazy(() => import('./components/Finance/FinancePlannerView').then((m) => ({ default: m.FinancePlannerView })));
+const CalendarView     = lazy(() => import('./components/Calendar/CalendarView').then((m) => ({ default: m.CalendarView })));
+const DriveVaultView   = lazy(() => import('./components/Drive/DriveVaultView').then((m) => ({ default: m.DriveVaultView })));
+const ProfileView      = lazy(() => import('./components/Auth/ProfileView').then((m) => ({ default: m.ProfileView })));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[60vh]">
+      <div className="w-8 h-8 rounded-full border-2 border-zinc-700 border-t-violet-500 animate-spin" />
+    </div>
+  );
+}
 
 function useAccessibilityInit() {
   const a = useTaskStore((s) => s.accessibility);
@@ -47,7 +61,7 @@ function PlaceholderView({ title, subtitle, icon: Icon }: { title: string; subti
   );
 }
 
-/* ── Route ↔ ActiveView mapping ──────────────────────────────── */
+/* ── ActiveView mapping ──────────────────────────────── */
 const ROUTE_MAP: Record<string, ActiveView> = {
   '/':              'dashboard',
   '/kanban':        'kanban',
@@ -70,11 +84,6 @@ const VIEW_TO_PATH: Record<ActiveView, string> = Object.fromEntries(
   Object.entries(ROUTE_MAP).map(([path, view]) => [view, path])
 ) as Record<ActiveView, string>;
 
-/**
- * Bidirectional sync: URL ↔ Zustand activeView.
- * - URL change → updates activeView in store
- * - setActiveView() anywhere in the app → navigates to the correct URL
- */
 function NavigationSync() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -83,7 +92,6 @@ function NavigationSync() {
   const lastPathRef = useRef(location.pathname);
   const lastViewRef = useRef(activeView);
 
-  // URL → Store
   useEffect(() => {
     const viewFromUrl = ROUTE_MAP[location.pathname];
     if (viewFromUrl && viewFromUrl !== activeView) {
@@ -93,7 +101,6 @@ function NavigationSync() {
     lastPathRef.current = location.pathname;
   }, [location.pathname, activeView, setActiveView]);
 
-  // Store → URL (for setActiveView calls from buttons, nudges, etc.)
   useEffect(() => {
     const pathForView = VIEW_TO_PATH[activeView];
     if (pathForView && pathForView !== location.pathname && activeView !== lastViewRef.current) {
@@ -105,40 +112,48 @@ function NavigationSync() {
   return null;
 }
 
-/* ── Layout shell (Header + Sidebar + routed content) ──────── */
+/* ── Layout ──────── */
 function AppLayout() {
+  const mainRef = useRef<HTMLElement>(null);
   return (
     <div className="flex h-screen w-full bg-zinc-950 text-zinc-200 overflow-hidden">
+      <AmbientBackground scrollContainerRef={mainRef} />
       <QuickCaptureModal />
+      <CommandPalette />
       <NavigationSync />
+      <Suspense fallback={null}>
+        <FocusImmersiveOverlay />
+      </Suspense>
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <GlassHeader />
-        <main className="flex-1 overflow-y-auto px-6 pt-6 pb-8" role="main">
-          <Routes>
-            <Route index element={<DashboardHome />} />
-            <Route path="kanban" element={<KanbanBoard />} />
-            <Route path="anotacoes" element={<AnotacoesView />} />
-            <Route path="foco" element={<FocusModeView />} />
-            <Route path="configuracoes" element={<SettingsView />} />
-            <Route path="financeiro" element={<FinanceView />} />
-            <Route path="saude" element={<HealthView />} />
-            <Route path="preferencias" element={<PreferencesView />} />
-            <Route path="perfil" element={<ProfileView />} />
-            <Route path="planner" element={<FinancePlannerView />} />
-            <Route path="calendario" element={<CalendarView />} />
-            <Route path="drive" element={<DriveVaultView />} />
-            <Route path="superhuman" element={
-              <PlaceholderView title="Agenda" subtitle="Conecte sua conta Google para sincronizar eventos e compromissos." icon={CalendarDays} />
-            } />
-            <Route path="inteligencia" element={
-              <PlaceholderView title="Motor de Inteligência" subtitle="O filtro de keywords está ativo nas Preferências. Configure suas palavras-chave para triagem automática." icon={Brain} />
-            } />
-            <Route path="carreira" element={
-              <PlaceholderView title="Radar de Carreira" subtitle="Monitoramento de vagas e oportunidades profissionais será ativado em breve." icon={Briefcase} />
-            } />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+        <main ref={mainRef} className="flex-1 overflow-y-auto px-6 pt-6 pb-8" role="main">
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route index element={<DashboardHome />} />
+              <Route path="kanban" element={<KanbanBoard />} />
+              <Route path="anotacoes" element={<AnotacoesView />} />
+              <Route path="foco" element={<FocusModeView />} />
+              <Route path="configuracoes" element={<SettingsView />} />
+              <Route path="financeiro" element={<FinanceView />} />
+              <Route path="saude" element={<HealthView />} />
+              <Route path="preferencias" element={<PreferencesView />} />
+              <Route path="perfil" element={<ProfileView />} />
+              <Route path="planner" element={<FinancePlannerView />} />
+              <Route path="calendario" element={<CalendarView />} />
+              <Route path="drive" element={<DriveVaultView />} />
+              <Route path="superhuman" element={
+                <PlaceholderView title="Agenda" subtitle="Conecte sua conta Google para sincronizar eventos e compromissos." icon={CalendarDays} />
+              } />
+              <Route path="inteligencia" element={
+                <PlaceholderView title="Motor de Inteligência" subtitle="O filtro de keywords está ativo nas Preferências. Configure suas palavras-chave para triagem automática." icon={Brain} />
+              } />
+              <Route path="carreira" element={
+                <PlaceholderView title="Radar de Carreira" subtitle="Monitoramento de vagas e oportunidades profissionais será ativado em breve." icon={Briefcase} />
+              } />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

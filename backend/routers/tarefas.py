@@ -4,10 +4,9 @@ RF-1.04: Todas as queries filtram por usuario_id = current_user.id
 RF-2.01: Motor de scoring via logic/scoring.py
 RF-2.02: Filtro de keywords ativo no webhook
 """
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 import database
@@ -20,12 +19,39 @@ from schemas import (
     NotificacaoCreate,
     TarefaCreate,
     TarefaUpdate,
+    TarefaResponse,
 )
 
 router = APIRouter(tags=["Tarefas & Domínios"])
 
+VALID_STATUS = {"pendente", "em_progresso", "concluida"}
+VALID_PRIORIDADE = {"baixa", "media", "alta", "critica"}
 
-# ── Background worker (usa scoring module) ────────────────────
+
+# ── Helpers ───────────────────────────────────────────────────
+
+def _get_tarefa_or_404(
+    tarefa_id: int,
+    user_id: int,
+    db: Session,
+) -> models.TarefaUnificada:
+    tarefa = (
+        db.query(models.TarefaUnificada)
+        .filter(
+            models.TarefaUnificada.id == tarefa_id,
+            models.TarefaUnificada.usuario_id == user_id,
+        )
+        .first()
+    )
+    if not tarefa:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tarefa não encontrada")
+    return tarefa
+
+
+def _tarefa_to_response(t: models.TarefaUnificada) -> dict:
+    return TarefaResponse.model_validate(t).model_dump(mode="json")
+
+
 def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
     prefs = db.query(models.PreferenciasUsuario).filter(
         models.PreferenciasUsuario.usuario_id == usuario_id
@@ -41,11 +67,13 @@ def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
         snippet_100_char=snippet_seguro,
         score_urgencia=urgencia,
         status="pendente",
+        prioridade="media",
+        origem=dados.plataforma,
+        created_at=datetime.now(timezone.utc),
     )
     db.add(nova_tarefa)
     db.commit()
 
-    # Notificação pró-ativa: só cria se score ≥ threshold crítico (RF-2.01)
     if urgencia > 120:
         notif = models.Notificacao(
             usuario_id=usuario_id,
@@ -54,12 +82,11 @@ def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
             mensagem=f"Score {urgencia} — Ação imediata requerida. Origem: {dados.plataforma}",
             urgencia="critica",
             score_urgencia=urgencia,
-            criado_em=datetime.now().isoformat(),
+            criado_em=datetime.now(timezone.utc).isoformat(),
         )
         db.add(notif)
         db.commit()
     elif urgencia > 60:
-        # Notificação informativa para tarefas de alta prioridade
         notif = models.Notificacao(
             usuario_id=usuario_id,
             tipo="tarefa",
@@ -67,7 +94,7 @@ def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
             mensagem=f"Score {urgencia} — Origem: {dados.plataforma}",
             urgencia="alta" if urgencia > 80 else "normal",
             score_urgencia=urgencia,
-            criado_em=datetime.now().isoformat(),
+            criado_em=datetime.now(timezone.utc).isoformat(),
         )
         db.add(notif)
         db.commit()
@@ -75,7 +102,7 @@ def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
     print(f"✅ Tarefa Triada! Score Final: {urgencia} | Keywords: {keywords}")
 
 
-# ── Endpoints ─────────────────────────────────────────────────
+# ── CRUD Tarefas ──────────────────────────────────────────────
 
 @router.get("/tarefas")
 def listar_tarefas(
@@ -88,79 +115,99 @@ def listar_tarefas(
         .order_by(models.TarefaUnificada.score_urgencia.desc())
         .all()
     )
-    return {"total": len(tarefas), "tarefas": tarefas}
+    return {"total": len(tarefas), "tarefas": [_tarefa_to_response(t) for t in tarefas]}
 
 
-@router.post("/webhook/ingestao")
-def receber_webhook(
-    dados: WebhookPayload,
-    background_tasks: BackgroundTasks,
-    current_user: models.Usuario = Depends(get_current_user),
-    db: Session = Depends(database.get_db),
-):
-    background_tasks.add_task(motor_de_score_worker, current_user.id, dados, db)
-    return {"status": "Recebido com sucesso. Triagem iniciada."}
-
-
-# ── CRUD Tarefas ──────────────────────────────────────────────
-
-@router.post("/tarefas", status_code=201)
+@router.post("/tarefas", status_code=201, response_model=dict)
 def criar_tarefa(
     dados: TarefaCreate,
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
 ):
+    if dados.status not in VALID_STATUS:
+        raise HTTPException(status_code=422, detail=f"Status inválido. Use: {VALID_STATUS}")
+    if dados.prioridade not in VALID_PRIORIDADE:
+        raise HTTPException(status_code=422, detail=f"Prioridade inválida. Use: {VALID_PRIORIDADE}")
+
     nova = models.TarefaUnificada(
         usuario_id=current_user.id,
         titulo=dados.titulo,
+        descricao=dados.descricao,
         snippet_100_char=dados.titulo[:100],
         status=dados.status,
+        prioridade=dados.prioridade,
+        origem=dados.origem,
+        data_vencimento=dados.data_vencimento,
         notas_locais=dados.notas_locais,
         score_urgencia=0,
+        created_at=datetime.now(timezone.utc),
     )
     db.add(nova)
     db.commit()
     db.refresh(nova)
-    return {"tarefa": {
-        "id": nova.id, "titulo": nova.titulo, "status": nova.status,
-        "notas_locais": nova.notas_locais, "score_urgencia": nova.score_urgencia,
-        "snippet_100_char": nova.snippet_100_char,
-    }}
+    return {"tarefa": _tarefa_to_response(nova)}
+
+
+@router.put("/tarefas/{tarefa_id}")
+def atualizar_tarefa_completa(
+    tarefa_id: int,
+    dados: TarefaCreate,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    """PUT — atualização completa (todos os campos obrigatórios)."""
+    tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
+
+    if dados.status not in VALID_STATUS:
+        raise HTTPException(status_code=422, detail=f"Status inválido. Use: {VALID_STATUS}")
+    if dados.prioridade not in VALID_PRIORIDADE:
+        raise HTTPException(status_code=422, detail=f"Prioridade inválida. Use: {VALID_PRIORIDADE}")
+
+    tarefa.titulo = dados.titulo
+    tarefa.descricao = dados.descricao
+    tarefa.snippet_100_char = dados.titulo[:100]
+    tarefa.status = dados.status
+    tarefa.prioridade = dados.prioridade
+    tarefa.origem = dados.origem
+    tarefa.data_vencimento = dados.data_vencimento
+    tarefa.notas_locais = dados.notas_locais
+
+    db.commit()
+    db.refresh(tarefa)
+    return {"tarefa": _tarefa_to_response(tarefa)}
 
 
 @router.patch("/tarefas/{tarefa_id}")
-def atualizar_tarefa(
+def atualizar_tarefa_parcial(
     tarefa_id: int,
     dados: TarefaUpdate,
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
 ):
-    tarefa = (
-        db.query(models.TarefaUnificada)
-        .filter(
-            models.TarefaUnificada.id == tarefa_id,
-            models.TarefaUnificada.usuario_id == current_user.id,
-        )
-        .first()
-    )
-    if not tarefa:
-        return JSONResponse(status_code=404, content={"erro": "Tarefa não encontrada"})
+    """PATCH — atualização parcial (apenas campos enviados)."""
+    tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
 
     if dados.titulo is not None:
         tarefa.titulo = dados.titulo
         tarefa.snippet_100_char = dados.titulo[:100]
+    if dados.descricao is not None:
+        tarefa.descricao = dados.descricao
     if dados.status is not None:
+        if dados.status not in VALID_STATUS:
+            raise HTTPException(status_code=422, detail=f"Status inválido. Use: {VALID_STATUS}")
         tarefa.status = dados.status
+    if dados.prioridade is not None:
+        if dados.prioridade not in VALID_PRIORIDADE:
+            raise HTTPException(status_code=422, detail=f"Prioridade inválida. Use: {VALID_PRIORIDADE}")
+        tarefa.prioridade = dados.prioridade
     if dados.notas_locais is not None:
         tarefa.notas_locais = dados.notas_locais
+    if dados.data_vencimento is not None:
+        tarefa.data_vencimento = dados.data_vencimento
 
     db.commit()
     db.refresh(tarefa)
-    return {"tarefa": {
-        "id": tarefa.id, "titulo": tarefa.titulo, "status": tarefa.status,
-        "notas_locais": tarefa.notas_locais, "score_urgencia": tarefa.score_urgencia,
-        "snippet_100_char": tarefa.snippet_100_char,
-    }}
+    return {"tarefa": _tarefa_to_response(tarefa)}
 
 
 @router.delete("/tarefas/{tarefa_id}")
@@ -169,17 +216,7 @@ def deletar_tarefa(
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
 ):
-    tarefa = (
-        db.query(models.TarefaUnificada)
-        .filter(
-            models.TarefaUnificada.id == tarefa_id,
-            models.TarefaUnificada.usuario_id == current_user.id,
-        )
-        .first()
-    )
-    if not tarefa:
-        return JSONResponse(status_code=404, content={"erro": "Tarefa não encontrada"})
-
+    tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
     db.delete(tarefa)
     db.commit()
     return {"status": "sucesso", "id": tarefa_id}
@@ -196,15 +233,30 @@ def buscar_tarefas(
         models.TarefaUnificada.usuario_id == current_user.id
     )
     if q:
+        safe_q = q.replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{safe_q}%"
         query = query.filter(
-            models.TarefaUnificada.titulo.ilike(f"%{q}%")
-            | models.TarefaUnificada.notas_locais.ilike(f"%{q}%")
+            models.TarefaUnificada.titulo.ilike(pattern)
+            | models.TarefaUnificada.notas_locais.ilike(pattern)
         )
     if status_filter:
+        if status_filter not in VALID_STATUS:
+            raise HTTPException(status_code=422, detail=f"Status inválido. Use: {VALID_STATUS}")
         query = query.filter(models.TarefaUnificada.status == status_filter)
 
     tarefas = query.order_by(models.TarefaUnificada.score_urgencia.desc()).all()
-    return {"total": len(tarefas), "tarefas": tarefas}
+    return {"total": len(tarefas), "tarefas": [_tarefa_to_response(t) for t in tarefas]}
+
+
+@router.post("/webhook/ingestao")
+def receber_webhook(
+    dados: WebhookPayload,
+    background_tasks: BackgroundTasks,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    background_tasks.add_task(motor_de_score_worker, current_user.id, dados, db)
+    return {"status": "Recebido com sucesso. Triagem iniciada."}
 
 
 # ── Anotações ─────────────────────────────────────────────────

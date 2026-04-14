@@ -115,6 +115,25 @@ export interface CalendarEvent {
   descricao: string | null;
 }
 
+export type FocusPhase = 'idle' | 'focus' | 'break' | 'completed';
+
+export interface FocusState {
+  phase: FocusPhase;
+  targetTaskId: number | null;
+  secondsLeft: number;
+  totalSeconds: number;
+  sessionsCompleted: number;
+  /** Wall-clock timestamp (ms) when current phase ends — used for tab-resume accuracy */
+  endTimestampMs: number | null;
+}
+
+export interface GamificacaoProfile {
+  xp: number;
+  streak_days: number;
+  nivel: number;
+  ultima_sessao_foco: string | null;
+}
+
 export interface DashboardResumo {
   saudacao_ia: string;
   tarefas_total: number;
@@ -139,6 +158,7 @@ interface TaskStore {
   activeView: ActiveView;
   anotacoes: Anotacao[];
   isQuickCaptureOpen: boolean;
+  isCommandPaletteOpen: boolean;
   timerConfig: TimerConfig;
   interactionScore: Record<string, number>;
   sidebarCollapsed: boolean;
@@ -177,6 +197,7 @@ interface TaskStore {
   moveTask: (taskId: number, newStatus: string) => void;
   setActiveView: (view: ActiveView) => void;
   setQuickCaptureOpen: (isOpen: boolean) => void;
+  setCommandPaletteOpen: (isOpen: boolean) => void;
   fetchAnotacoes: () => Promise<void>;
   addAnotacao: (conteudo: string, titulo?: string) => Promise<void>;
   setTimerConfig: (key: keyof TimerConfig, value: number) => void;
@@ -206,6 +227,17 @@ interface TaskStore {
   incrementHabito: (id: number) => Promise<void>;
   decrementHabito: (id: number) => Promise<void>;
   deleteHabito: (id: number) => Promise<void>;
+  // Focus Mode
+  isFocusModeActive: boolean;
+  focusState: FocusState;
+  gamificacao: GamificacaoProfile;
+  startFocusSession: (taskId?: number) => void;
+  pauseFocusSession: () => void;
+  tickFocus: () => void;
+  syncFocusFromClock: () => void;
+  completeFocusPhase: () => Promise<void>;
+  resetFocus: () => void;
+  fetchGamificacao: () => Promise<void>;
 }
 
 const API = 'http://127.0.0.1:8000';
@@ -227,6 +259,7 @@ export const useTaskStore = create<TaskStore>()(
   activeView: 'dashboard',
   anotacoes: [],
   isQuickCaptureOpen: false,
+  isCommandPaletteOpen: false,
   timerConfig: { pomodoroTime: 25, shortBreak: 5, longBreak: 15 },
   interactionScore: {},
   sidebarCollapsed: false,
@@ -265,6 +298,9 @@ export const useTaskStore = create<TaskStore>()(
   calendarLoading: false,
   calendarError: null,
   googleCalendarConnected: false,
+  isFocusModeActive: false,
+  focusState: { phase: 'idle', targetTaskId: null, secondsLeft: 0, totalSeconds: 0, sessionsCompleted: 0, endTimestampMs: null },
+  gamificacao: { xp: 0, streak_days: 0, nivel: 0, ultima_sessao_foco: null },
 
   fetchDashboard: async () => {
     set({ dashboardLoading: true });
@@ -384,6 +420,7 @@ export const useTaskStore = create<TaskStore>()(
   setActiveView: (view) => set({ activeView: view }),
 
   setQuickCaptureOpen: (isOpen) => set({ isQuickCaptureOpen: isOpen }),
+  setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
 
   fetchAnotacoes: async () => {
     try {
@@ -780,6 +817,101 @@ export const useTaskStore = create<TaskStore>()(
     } catch (err) {
       console.error('[processGoogleCallback] Network error:', err);
       return false;
+    }
+  },
+
+  // ── Focus Mode ──────────────────────────────────────────
+  startFocusSession: (taskId?: number) => {
+    const config = get().timerConfig;
+    const durationSecs = config.pomodoroTime * 60;
+    set({
+      isFocusModeActive: true,
+      focusState: {
+        phase: 'focus',
+        targetTaskId: taskId ?? null,
+        secondsLeft: durationSecs,
+        totalSeconds: durationSecs,
+        sessionsCompleted: get().focusState.sessionsCompleted,
+        endTimestampMs: Date.now() + durationSecs * 1000,
+      },
+    });
+  },
+
+  pauseFocusSession: () => {
+    const fs = get().focusState;
+    set({ isFocusModeActive: fs.phase === 'focus' ? false : get().isFocusModeActive });
+  },
+
+  /** Called every second by the component's setInterval; recalculates from wall clock */
+  tickFocus: () => {
+    const fs = get().focusState;
+    if (!fs.endTimestampMs) return;
+    const remaining = Math.max(0, Math.round((fs.endTimestampMs - Date.now()) / 1000));
+    set({ focusState: { ...fs, secondsLeft: remaining } });
+  },
+
+  /** Called by visibilitychange when the tab regains focus — snaps timer to wall clock */
+  syncFocusFromClock: () => {
+    const fs = get().focusState;
+    if (!fs.endTimestampMs || !get().isFocusModeActive) return;
+    const remaining = Math.max(0, Math.round((fs.endTimestampMs - Date.now()) / 1000));
+    set({ focusState: { ...fs, secondsLeft: remaining } });
+  },
+
+  completeFocusPhase: async () => {
+    const fs = get().focusState;
+    const config = get().timerConfig;
+
+    if (fs.phase === 'focus') {
+      const newCount = fs.sessionsCompleted + 1;
+      try {
+        const res = await fetch(`${API}/gamificacao/completar-sessao`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ minutos: Math.round(fs.totalSeconds / 60), tarefa_id: fs.targetTaskId }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          set({ gamificacao: { xp: data.xp_total, streak_days: data.streak_days, nivel: Math.floor(data.xp_total / 100), ultima_sessao_foco: new Date().toISOString() } });
+        }
+      } catch (e) {
+        console.error('completeFocusPhase:', e);
+      }
+      const breakTime = newCount % 4 === 0 ? config.longBreak : config.shortBreak;
+      const breakSecs = breakTime * 60;
+      set({
+        focusState: {
+          phase: 'break',
+          targetTaskId: fs.targetTaskId,
+          secondsLeft: breakSecs,
+          totalSeconds: breakSecs,
+          sessionsCompleted: newCount,
+          endTimestampMs: Date.now() + breakSecs * 1000,
+        },
+      });
+    } else if (fs.phase === 'break') {
+      set({
+        focusState: { ...fs, phase: 'completed', endTimestampMs: null },
+        isFocusModeActive: false,
+      });
+    }
+  },
+
+  resetFocus: () => {
+    set({
+      isFocusModeActive: false,
+      focusState: { phase: 'idle', targetTaskId: null, secondsLeft: 0, totalSeconds: 0, sessionsCompleted: 0, endTimestampMs: null },
+    });
+  },
+
+  fetchGamificacao: async () => {
+    try {
+      const res = await fetch(`${API}/gamificacao/perfil`, { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      set({ gamificacao: { xp: data.xp, streak_days: data.streak_days, nivel: data.nivel, ultima_sessao_foco: data.ultima_sessao_foco } });
+    } catch (e) {
+      console.error('fetchGamificacao:', e);
     }
   },
     }),

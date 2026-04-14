@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { Clock, Languages, Code2, Mail, MessageSquare, CheckSquare, Square, AlertTriangle } from 'lucide-react';
+import { Clock, Languages, Code2, Mail, MessageSquare, CheckSquare, Square, AlertTriangle, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
 
@@ -9,15 +9,17 @@ interface KanbanCardProps {
   tarefa: TarefaUnificada;
 }
 
-/* Simulated origin based on task id */
-const ORIGINS = [
-  { label: 'GitHub', Icon: Code2, color: 'text-zinc-400' },
-  { label: 'Gmail', Icon: Mail, color: 'text-blue-400' },
-  { label: 'Teams', Icon: MessageSquare, color: 'text-violet-400' },
-];
+/* Origin icon mapping */
+const ORIGINS: Record<string, { label: string; Icon: React.ElementType; color: string }> = {
+  manual: { label: 'Manual', Icon: Square, color: 'text-zinc-400' },
+  gmail_triage: { label: 'Gmail', Icon: Mail, color: 'text-blue-400' },
+  webhook: { label: 'Webhook', Icon: Code2, color: 'text-violet-400' },
+};
 
-function getOrigin(id: number) {
-  return ORIGINS[id % ORIGINS.length];
+const FALLBACK_ORIGIN = { label: 'Outro', Icon: MessageSquare, color: 'text-zinc-400' };
+
+function getOrigin(origem: string) {
+  return ORIGINS[origem] || FALLBACK_ORIGIN;
 }
 
 function getElapsed(id: number) {
@@ -31,6 +33,13 @@ function getUrgencyBadge(score: number) {
   if (score > 40) return { label: 'Atencao', bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500' };
   return { label: 'Normal', bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-500' };
 }
+
+const PRIORIDADE_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
+  critica: { bg: 'bg-red-500/10', text: 'text-red-400', dot: 'bg-red-500' },
+  alta:    { bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500' },
+  media:   { bg: 'bg-blue-500/10', text: 'text-blue-400', dot: 'bg-blue-500' },
+  baixa:   { bg: 'bg-zinc-500/10', text: 'text-zinc-400', dot: 'bg-zinc-500' },
+};
 
 /* Simulated subtask progress */
 function getSubtasks(id: number) {
@@ -63,12 +72,14 @@ export function KanbanCard({ tarefa }: KanbanCardProps) {
     }, 1200);
   };
 
-  const origin = getOrigin(tarefa.id);
+  const origin = getOrigin(tarefa.origem || 'manual');
   const urgency = getUrgencyBadge(tarefa.score_urgencia);
   const subtasks = getSubtasks(tarefa.id);
   const elapsed = getElapsed(tarefa.id);
   const OriginIcon = origin.Icon;
   const isCriticalFocus = tarefa.score_urgencia > 100;
+  const prio = tarefa.prioridade || 'media';
+  const prioStyle = PRIORIDADE_STYLES[prio] || PRIORIDADE_STYLES.media;
 
   return (
     <article
@@ -104,6 +115,10 @@ export function KanbanCard({ tarefa }: KanbanCardProps) {
             <span className={`inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${urgency.bg} ${urgency.text}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${urgency.dot}`} />
               {urgency.label}
+            </span>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${prioStyle.bg} ${prioStyle.text}`}>
+              <Zap className="w-3 h-3" />
+              {prio}
             </span>
             {isCriticalFocus && (
               <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-red-500/20 text-red-400 animate-pulse">

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTaskStore } from '../../store/useTaskStore';
-import { AmbientBackground, Skeleton, CardSkeleton } from '../dashboard/DashboardPrimitives';
+import { Skeleton, CardSkeleton } from '../dashboard/DashboardPrimitives';
 import { HeroSection } from '../dashboard/HeroSection';
 import { KPISection } from '../dashboard/KPISection';
 import { HealthSection } from '../dashboard/HealthSection';
@@ -9,10 +9,6 @@ import { FocusScoreSection } from '../dashboard/FocusScoreSection';
 import { SmartNudgesSection } from '../dashboard/SmartNudgesSection';
 import { AgendaSection } from '../dashboard/AgendaSection';
 
-/* ══════════════════════════════════════════════════════════════
-   DashboardHome — Thin Orchestrator
-   Imports all sub-components and manages store subscriptions.
-   ══════════════════════════════════════════════════════════════ */
 
 export function DashboardHome() {
   const fetchDashboard = useTaskStore((s) => s.fetchDashboard);
@@ -37,68 +33,61 @@ export function DashboardHome() {
     checkGoogleStatus();
     fetchCalendarEvents();
     fetchPreferencias();
-  }, [fetchDashboard, fetchNotificacoes, checkGoogleStatus, fetchCalendarEvents, fetchPreferencias]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const naoLidas = resumo?.notificacoes_nao_lidas ?? notificacoes.filter((n) => !n.lida).length;
 
   /* ── Loading State ─────────────────────────────────────────── */
   if (loading && !resumo) {
     return (
-      <div className="min-h-screen bg-zinc-950 text-zinc-50 relative overflow-x-hidden">
-        <AmbientBackground />
-        <div className="relative z-10 max-w-5xl mx-auto p-6 space-y-12 pb-24">
-          <div className="space-y-3">
-            <Skeleton className="h-8 w-80" />
-            <Skeleton className="h-4 w-[420px]" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <CardSkeleton /><CardSkeleton /><CardSkeleton />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <CardSkeleton /><CardSkeleton /><CardSkeleton />
-          </div>
+      <div className="max-w-5xl mx-auto p-6 space-y-12 pb-24">
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-80" />
+          <Skeleton className="h-4 w-[420px]" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <CardSkeleton /><CardSkeleton /><CardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <CardSkeleton /><CardSkeleton /><CardSkeleton />
         </div>
       </div>
     );
   }
 
-  /* ── Main Layout ───────────────────────────────────────────── */
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 relative overflow-x-hidden">
-      <AmbientBackground />
+    <div className="max-w-5xl mx-auto p-6 space-y-16 pb-24 text-zinc-50">
+      {/* Camada 1 — Contexto Imediato */}
+      <HeroSection resumo={resumo} naoLidas={naoLidas} />
+      <KPISection resumo={resumo} />
 
-      <div className="relative z-10 max-w-5xl mx-auto p-6 space-y-16 pb-24">
-        {/* Camada 1 — Contexto Imediato */}
-        <HeroSection resumo={resumo} naoLidas={naoLidas} />
-        <KPISection resumo={resumo} />
+      {/* Camada 2 — Fluxo Tático */}
+      <HealthSection resumo={resumo} />
 
-        {/* Camada 2 — Fluxo Tático */}
-        <HealthSection resumo={resumo} />
+      {/* Camada 2.5 — Gamificação & Score */}
+      <FocusScoreSection resumo={resumo} scoreDiario={scoreDiario} />
 
-        {/* Camada 2.5 — Gamificação & Score */}
-        <FocusScoreSection resumo={resumo} scoreDiario={scoreDiario} />
+      {/* Camada 3 — Radar de Monitoramento */}
+      <KeywordsRadarSection keywords={keywords} />
 
-        {/* Camada 3 — Radar de Monitoramento */}
-        <KeywordsRadarSection keywords={keywords} />
+      {/* Camada 3.5 — Insights Proativos (JARVIS) */}
+      <SmartNudgesSection
+        resumo={resumo}
+        calendarEvents={calendarEvents}
+        saldoMes={resumo?.saldo_mes ?? 0}
+        keywords={keywords}
+        setActiveView={setActiveView}
+      />
 
-        {/* Camada 3.5 — Insights Proativos (JARVIS) */}
-        <SmartNudgesSection
-          resumo={resumo}
-          calendarEvents={calendarEvents}
-          saldoMes={resumo?.saldo_mes ?? 0}
-          keywords={keywords}
-          setActiveView={setActiveView}
-        />
-
-        {/* Camada 4 — Agenda */}
-        <AgendaSection
-          calendarEvents={calendarEvents}
-          calendarLoading={calendarLoading}
-          calendarError={calendarError}
-          googleConnected={googleConnected}
-          setActiveView={setActiveView}
-        />
-      </div>
+      {/* Camada 4 — Agenda */}
+      <AgendaSection
+        calendarEvents={calendarEvents}
+        calendarLoading={calendarLoading}
+        calendarError={calendarError}
+        googleConnected={googleConnected}
+        setActiveView={setActiveView}
+      />
     </div>
   );
 }

@@ -272,7 +272,8 @@ export function SettingsView() {
   const [savingKw, setSavingKw] = useState(false);
 
   useEffect(() => { setKwInput(keywords.join(', ')); }, [keywords]);
-  useEffect(() => { fetchPreferencias(); }, [fetchPreferencias]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchPreferencias(); }, []);
 
   const handleSaveKeywords = async () => {
     setSavingKw(true);

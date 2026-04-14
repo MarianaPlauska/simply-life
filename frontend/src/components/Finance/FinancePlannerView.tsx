@@ -89,7 +89,8 @@ export function FinancePlannerView() {
   const [editingMeta, setEditingMeta] = useState<string | null>(null);
   const [metaEditVal, setMetaEditVal] = useState('');
 
-  useEffect(() => { fetchTransactions(); }, [fetchTransactions]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchTransactions(); }, []);
 
   const now = new Date();
   const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);

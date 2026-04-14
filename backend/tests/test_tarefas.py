@@ -1,6 +1,3 @@
-"""Testes CRUD completo de tarefas: criar, listar, atualizar, deletar, buscar."""
-
-
 def test_criar_tarefa(client, auth_headers):
     resp = client.post("/tarefas", headers=auth_headers, json={
         "titulo": "Minha primeira tarefa",
@@ -29,12 +26,12 @@ def test_atualizar_tarefa(client, auth_headers):
 
     resp = client.patch(f"/tarefas/{tarefa_id}", headers=auth_headers, json={
         "titulo": "Atualizado",
-        "status": "hoje",
+        "status": "em_progresso",
     })
     assert resp.status_code == 200
     data = resp.json()["tarefa"]
     assert data["titulo"] == "Atualizado"
-    assert data["status"] == "hoje"
+    assert data["status"] == "em_progresso"
 
 
 def test_deletar_tarefa(client, auth_headers):
@@ -45,7 +42,7 @@ def test_deletar_tarefa(client, auth_headers):
     assert resp.status_code == 200
     assert resp.json()["status"] == "sucesso"
 
-    # Verificar que sumiu
+    
     resp = client.get("/tarefas", headers=auth_headers)
     assert resp.json()["total"] == 0
 
@@ -62,9 +59,9 @@ def test_buscar_tarefas(client, auth_headers):
 
 def test_buscar_por_status(client, auth_headers):
     client.post("/tarefas", headers=auth_headers, json={"titulo": "A", "status": "pendente"})
-    client.post("/tarefas", headers=auth_headers, json={"titulo": "B", "status": "hoje"})
+    client.post("/tarefas", headers=auth_headers, json={"titulo": "B", "status": "concluida"})
 
-    resp = client.get("/tarefas/busca?status_filter=hoje", headers=auth_headers)
+    resp = client.get("/tarefas/busca?status_filter=concluida", headers=auth_headers)
     assert resp.status_code == 200
     assert resp.json()["total"] == 1
 

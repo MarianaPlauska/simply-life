@@ -1,13 +1,14 @@
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Clock, MapPin } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Clock, MapPin, CalendarDays, Loader2 } from 'lucide-react';
+import { useTaskStore, type CalendarEvent } from '../../store/useTaskStore';
 
-/* ── Tipos ── */
-interface CalendarEvent {
-  id: number;
+/* ── Adapt store events to local display model ── */
+interface DisplayEvent {
+  id: string;
   titulo: string;
   data: string; // YYYY-MM-DD
   hora: string;
-  cor: 'blue' | 'red' | 'amber' | 'emerald' | 'ia';
+  cor: string;
   local?: string;
 }
 
@@ -16,19 +17,24 @@ const EVENT_COLORS: Record<string, { pill: string; dot: string; text: string }> 
   red: { pill: 'bg-red-500/15 text-red-400 border-red-500/20', dot: 'bg-red-500', text: 'text-red-400' },
   amber: { pill: 'bg-amber-500/15 text-amber-400 border-amber-500/20', dot: 'bg-amber-500', text: 'text-amber-400' },
   emerald: { pill: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20', dot: 'bg-emerald-500', text: 'text-emerald-400' },
-  ia: { pill: 'bg-ia/15 text-ia border-ia/20', dot: 'bg-ia', text: 'text-ia' },
+  violet: { pill: 'bg-violet-500/15 text-violet-400 border-violet-500/20', dot: 'bg-violet-500', text: 'text-violet-400' },
 };
 
-const MOCK_EVENTS: CalendarEvent[] = [
-  { id: 1, titulo: 'Daily Stand-up', data: '2026-01-12', hora: '09:00', cor: 'blue', local: 'Google Meet' },
-  { id: 2, titulo: 'Entrega Sprint 14', data: '2026-01-15', hora: '17:00', cor: 'red' },
-  { id: 3, titulo: 'Almoço com equipe', data: '2026-01-15', hora: '12:30', cor: 'emerald', local: 'Restaurante Bossa' },
-  { id: 4, titulo: '1:1 com gestor', data: '2026-01-20', hora: '10:00', cor: 'amber', local: 'Zoom' },
-  { id: 5, titulo: 'Sessão IA Review', data: '2026-01-22', hora: '14:00', cor: 'ia' },
-  { id: 6, titulo: 'Code Review', data: '2026-01-08', hora: '11:00', cor: 'blue' },
-  { id: 7, titulo: 'Hackathon interno', data: '2026-01-28', hora: '08:00', cor: 'emerald', local: 'Escritório' },
-  { id: 8, titulo: 'Deploy produção', data: '2026-01-30', hora: '22:00', cor: 'red' },
-];
+const COLOR_CYCLE = ['blue', 'emerald', 'amber', 'violet', 'red'];
+
+function storeToDisplay(events: CalendarEvent[]): DisplayEvent[] {
+  return events.map((ev, i) => {
+    const start = new Date(ev.inicio);
+    return {
+      id: `${ev.titulo}-${ev.inicio}-${i}`,
+      titulo: ev.titulo,
+      data: `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`,
+      hora: `${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`,
+      cor: COLOR_CYCLE[i % COLOR_CYCLE.length],
+      local: ev.local ?? undefined,
+    };
+  });
+}
 
 const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -46,14 +52,28 @@ export function CalendarView() {
   const [month, setMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(today.getDate());
 
+  const storeEvents = useTaskStore((s) => s.calendarEvents);
+  const loading = useTaskStore((s) => s.calendarLoading);
+  const error = useTaskStore((s) => s.calendarError);
+  const googleConnected = useTaskStore((s) => s.googleCalendarConnected);
+  const fetchCalendarEvents = useTaskStore((s) => s.fetchCalendarEvents);
+  const checkGoogleStatus = useTaskStore((s) => s.checkGoogleStatus);
+
+  useEffect(() => {
+    checkGoogleStatus();
+    fetchCalendarEvents();
+  }, [checkGoogleStatus, fetchCalendarEvents]);
+
+  const displayEvents = useMemo(() => storeToDisplay(storeEvents), [storeEvents]);
+
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
 
   const monthLabel = new Date(year, month).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   const eventsByDay = useMemo(() => {
-    const map: Record<number, CalendarEvent[]> = {};
-    MOCK_EVENTS.forEach((ev) => {
+    const map: Record<number, DisplayEvent[]> = {};
+    displayEvents.forEach((ev) => {
       const d = new Date(ev.data + 'T12:00:00');
       if (d.getFullYear() === year && d.getMonth() === month) {
         const day = d.getDate();
@@ -62,7 +82,7 @@ export function CalendarView() {
       }
     });
     return map;
-  }, [year, month]);
+  }, [displayEvents, year, month]);
 
   const selectedEvents = selectedDay ? (eventsByDay[selectedDay] || []) : [];
 
@@ -84,15 +104,34 @@ export function CalendarView() {
   return (
     <div className="max-w-6xl mx-auto pb-16">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Calendário</h1>
-        <p className="text-sm text-zinc-500 mt-1">Visão mensal dos seus compromissos</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Calendário</h1>
+          <p className="text-sm text-zinc-500 mt-1">
+            {googleConnected ? 'Sincronizado com Google Calendar' : 'Conecte o Google Calendar nas configurações'}
+          </p>
+        </div>
+        {loading && <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />}
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+          {error}
+        </div>
+      )}
+
+      {!googleConnected && !loading && storeEvents.length === 0 && (
+        <div className="mb-6 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-10 flex flex-col items-center gap-3 text-center">
+          <CalendarDays className="w-10 h-10 text-zinc-600" />
+          <p className="text-sm text-zinc-400">Nenhum evento disponível.</p>
+          <p className="text-xs text-zinc-600">Conecte sua conta Google em Configurações para sincronizar seus compromissos.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* ── Calendar Grid ── */}
         <div className="lg:col-span-3 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-sm p-6">
-          {/* Month Nav */}
+         
           <div className="flex items-center justify-between mb-6">
             <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-zinc-800/60 transition-colors">
               <ChevronLeft className="w-5 h-5 text-zinc-400" />
@@ -103,7 +142,7 @@ export function CalendarView() {
             </button>
           </div>
 
-          {/* Weekday Headers */}
+         
           <div className="grid grid-cols-7 mb-2">
             {WEEKDAYS.map((d) => (
               <div key={d} className="text-center text-[11px] font-semibold text-zinc-500 uppercase tracking-wider py-2">
@@ -112,7 +151,7 @@ export function CalendarView() {
             ))}
           </div>
 
-          {/* Day Cells */}
+          
           <div className="grid grid-cols-7">
             {Array.from({ length: firstDay }).map((_, i) => (
               <div key={`empty-${i}`} className="aspect-square" />
@@ -144,7 +183,7 @@ export function CalendarView() {
                   {dayEvents.length > 0 && (
                     <div className="flex gap-0.5 mt-1">
                       {dayEvents.slice(0, 3).map((ev) => (
-                        <div key={ev.id} className={`w-1.5 h-1.5 rounded-full ${EVENT_COLORS[ev.cor].dot}`} />
+                        <div key={ev.id} className={`w-1.5 h-1.5 rounded-full ${(EVENT_COLORS[ev.cor] || EVENT_COLORS.blue).dot}`} />
                       ))}
                     </div>
                   )}
@@ -154,7 +193,7 @@ export function CalendarView() {
           </div>
         </div>
 
-        {/* ── Day Agenda Sidebar ── */}
+      
         <div className="lg:col-span-1 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-sm p-5">
           <h3 className="text-[14px] font-semibold text-white mb-4">
             {selectedDay
@@ -169,7 +208,7 @@ export function CalendarView() {
               {selectedEvents
                 .sort((a, b) => a.hora.localeCompare(b.hora))
                 .map((ev) => {
-                  const colors = EVENT_COLORS[ev.cor];
+                  const colors = EVENT_COLORS[ev.cor] || EVENT_COLORS.blue;
                   return (
                     <div
                       key={ev.id}
