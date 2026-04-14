@@ -60,9 +60,9 @@ export function CalendarView() {
   const checkGoogleStatus = useTaskStore((s) => s.checkGoogleStatus);
 
   useEffect(() => {
-    checkGoogleStatus();
-    fetchCalendarEvents();
-  }, [checkGoogleStatus, fetchCalendarEvents]);
+    checkGoogleStatus().then(() => fetchCalendarEvents());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const displayEvents = useMemo(() => storeToDisplay(storeEvents), [storeEvents]);
 

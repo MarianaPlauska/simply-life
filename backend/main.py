@@ -35,6 +35,7 @@ from routers import saude as saude_router
 from routers import dashboard as dashboard_router
 from routers import integracoes as integracoes_router
 from routers import gamificacao as gamificacao_router
+from routers import triagem as triagem_router
 
 # ── Worker de background (polling) ────────────────────────────
 async def motor_busca_ativa():
@@ -51,8 +52,8 @@ async def lifespan(app: FastAPI):
     task.cancel()
 
 
-# ── Cria tabelas (se não existirem) ──────────────────────────
-models.database.Base.metadata.create_all(bind=database.engine)
+# ── Tabelas criadas via Alembic (não usar create_all em produção) ──
+# models.database.Base.metadata.create_all(bind=database.engine)
 
 # ── Rate Limiter (RNF-1.02) ──────────────────────────────────
 limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
@@ -87,3 +88,4 @@ app.include_router(saude_router.router)
 app.include_router(dashboard_router.router)
 app.include_router(integracoes_router.router)
 app.include_router(gamificacao_router.router)
+app.include_router(triagem_router.router)

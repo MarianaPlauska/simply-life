@@ -17,7 +17,12 @@ class Usuario(database.Base):
     xp = Column(Integer, default=0)
     streak_days = Column(Integer, default=0)
     ultima_sessao_foco = Column(String, nullable=True)
+    # Novos campos de gamificação (Fase 2)
+    xp_total = Column(Integer, default=0)
+    streak_atual = Column(Integer, default=0)
+    ultima_sessao_data = Column(DateTime, nullable=True)
     tarefas = relationship("TarefaUnificada", back_populates="dono")
+    sessoes_foco = relationship("SessaoFoco", back_populates="usuario")
 
 # 2. tarefas Unificadas
 class TarefaUnificada(database.Base):
@@ -35,7 +40,9 @@ class TarefaUnificada(database.Base):
     notas_locais = Column(Text, nullable=True)
     hash_seguranca = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    palavra_chave_id = Column(Integer, ForeignKey("palavras_chave.id"), nullable=True)
     dono = relationship("Usuario", back_populates="tarefas")
+    palavra_chave = relationship("PalavraChave", foreign_keys=[palavra_chave_id])
 
 # 3. integrações 
 class Integracao(database.Base):
@@ -112,3 +119,25 @@ class HabitoDiario(database.Base):
     meta_diaria = Column(Integer) # Ex: 8 (copos), 8 (horas)
     progresso_atual = Column(Integer, default=0)
     unidade = Column(String) # Ex: "ml", "horas", "páginas"
+
+# 10. palavras-chave para triagem (Motor de IA)
+class PalavraChave(database.Base):
+    __tablename__ = "palavras_chave"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    termo = Column(String(120), nullable=False)
+    peso = Column(Integer, default=1)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    usuario = relationship("Usuario")
+
+# 10. sessões de foco (gamificação)
+class SessaoFoco(database.Base):
+    __tablename__ = "sessoes_foco"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    tarefa_id = Column(Integer, ForeignKey("tarefas_unificadas.id"), nullable=True)
+    duracao_minutos = Column(Integer, nullable=False)
+    xp_ganho = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    usuario = relationship("Usuario", back_populates="sessoes_foco")
+    tarefa = relationship("TarefaUnificada")

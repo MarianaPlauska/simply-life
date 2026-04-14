@@ -115,6 +115,20 @@ export interface CalendarEvent {
   descricao: string | null;
 }
 
+export interface PalavraChave {
+  id: number;
+  user_id: number;
+  termo: string;
+  peso: number;
+  created_at?: string;
+}
+
+export interface ProcessarMensagemResult {
+  status: 'match' | 'ignorado';
+  termo_detectado?: string;
+  tarefa?: unknown;
+}
+
 export type FocusPhase = 'idle' | 'focus' | 'break' | 'completed';
 
 export interface FocusState {
@@ -129,9 +143,12 @@ export interface FocusState {
 
 export interface GamificacaoProfile {
   xp: number;
+  xp_total: number;
   streak_days: number;
+  streak_atual: number;
   nivel: number;
   ultima_sessao_foco: string | null;
+  ultima_sessao_data: string | null;
 }
 
 export interface DashboardResumo {
@@ -238,6 +255,13 @@ interface TaskStore {
   completeFocusPhase: () => Promise<void>;
   resetFocus: () => void;
   fetchGamificacao: () => Promise<void>;
+  finalizarSessaoFoco: (minutos: number, tarefaId?: number | null) => Promise<void>;
+  // Motor de Triagem
+  palavrasChave: PalavraChave[];
+  fetchPalavrasChave: () => Promise<void>;
+  addPalavraChave: (termo: string, peso?: number) => Promise<void>;
+  removePalavraChave: (id: number) => Promise<void>;
+  processarMensagem: (conteudo: string, origem: string, remetente: string) => Promise<ProcessarMensagemResult>;
 }
 
 const API = 'http://127.0.0.1:8000';
@@ -300,7 +324,8 @@ export const useTaskStore = create<TaskStore>()(
   googleCalendarConnected: false,
   isFocusModeActive: false,
   focusState: { phase: 'idle', targetTaskId: null, secondsLeft: 0, totalSeconds: 0, sessionsCompleted: 0, endTimestampMs: null },
-  gamificacao: { xp: 0, streak_days: 0, nivel: 0, ultima_sessao_foco: null },
+  gamificacao: { xp: 0, xp_total: 0, streak_days: 0, streak_atual: 0, nivel: 0, ultima_sessao_foco: null, ultima_sessao_data: null },
+  palavrasChave: [] as PalavraChave[],
 
   fetchDashboard: async () => {
     set({ dashboardLoading: true });
@@ -743,6 +768,11 @@ export const useTaskStore = create<TaskStore>()(
   },
 
   fetchCalendarEvents: async () => {
+   
+    if (get().googleCalendarConnected === false) {
+      set({ calendarLoading: false, calendarError: null, calendarEvents: [] });
+      return;
+    }
     set({ calendarLoading: true, calendarError: null });
     try {
       const res = await fetch(`${API}/integracoes/calendario/hoje`, { headers: authHeaders() });
@@ -752,7 +782,7 @@ export const useTaskStore = create<TaskStore>()(
         console.error('[fetchCalendarEvents] Backend error:', res.status, body);
         const detail = typeof body?.detail === 'string' ? body.detail : '';
         if (res.status === 403 || detail.toLowerCase().includes('permission') || detail.toLowerCase().includes('insufficient')) {
-          set({ calendarLoading: false, calendarError: '403' });
+          set({ calendarLoading: false, calendarError: '403', googleCalendarConnected: false });
         } else {
           set({ calendarLoading: false });
         }
@@ -850,7 +880,7 @@ export const useTaskStore = create<TaskStore>()(
     set({ focusState: { ...fs, secondsLeft: remaining } });
   },
 
-  /** Called by visibilitychange when the tab regains focus — snaps timer to wall clock */
+ 
   syncFocusFromClock: () => {
     const fs = get().focusState;
     if (!fs.endTimestampMs || !get().isFocusModeActive) return;
@@ -864,19 +894,8 @@ export const useTaskStore = create<TaskStore>()(
 
     if (fs.phase === 'focus') {
       const newCount = fs.sessionsCompleted + 1;
-      try {
-        const res = await fetch(`${API}/gamificacao/completar-sessao`, {
-          method: 'POST',
-          headers: authHeaders(),
-          body: JSON.stringify({ minutos: Math.round(fs.totalSeconds / 60), tarefa_id: fs.targetTaskId }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          set({ gamificacao: { xp: data.xp_total, streak_days: data.streak_days, nivel: Math.floor(data.xp_total / 100), ultima_sessao_foco: new Date().toISOString() } });
-        }
-      } catch (e) {
-        console.error('completeFocusPhase:', e);
-      }
+      // Chama finalizarSessaoFoco que persiste no banco
+      await get().finalizarSessaoFoco(Math.round(fs.totalSeconds / 60), fs.targetTaskId);
       const breakTime = newCount % 4 === 0 ? config.longBreak : config.shortBreak;
       const breakSecs = breakTime * 60;
       set({
@@ -909,11 +928,114 @@ export const useTaskStore = create<TaskStore>()(
       const res = await fetch(`${API}/gamificacao/perfil`, { headers: authHeaders() });
       if (!res.ok) return;
       const data = await res.json();
-      set({ gamificacao: { xp: data.xp, streak_days: data.streak_days, nivel: data.nivel, ultima_sessao_foco: data.ultima_sessao_foco } });
+      set({
+        gamificacao: {
+          xp: data.xp_total ?? data.xp ?? 0,
+          xp_total: data.xp_total ?? data.xp ?? 0,
+          streak_days: data.streak_atual ?? data.streak_days ?? 0,
+          streak_atual: data.streak_atual ?? data.streak_days ?? 0,
+          nivel: data.nivel ?? 0,
+          ultima_sessao_foco: data.ultima_sessao_foco,
+          ultima_sessao_data: data.ultima_sessao_data,
+        },
+      });
     } catch (e) {
       console.error('fetchGamificacao:', e);
     }
   },
+
+  finalizarSessaoFoco: async (minutos: number, tarefaId?: number | null) => {
+    try {
+      const res = await fetch(`${API}/gamificacao/finalizar-sessao`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ minutos, tarefa_id: tarefaId ?? null }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({
+          gamificacao: {
+            xp: data.xp_total,
+            xp_total: data.xp_total,
+            streak_days: data.streak_atual,
+            streak_atual: data.streak_atual,
+            nivel: data.nivel,
+            ultima_sessao_foco: new Date().toISOString(),
+            ultima_sessao_data: data.ultima_sessao_data,
+          },
+        });
+      } else if (res.status === 401) {
+        get().logout();
+      }
+    } catch (e) {
+      console.error('finalizarSessaoFoco:', e);
+    }
+  },
+
+  // ── Motor de Triagem ──────────────────────────────────────
+  fetchPalavrasChave: async () => {
+    try {
+      const res = await fetch(`${API}/triagem/palavras-chave`, { headers: authHeaders() });
+      if (!res.ok) return;
+      const data = await res.json();
+      set({ palavrasChave: data });
+    } catch (e) {
+      console.error('fetchPalavrasChave:', e);
+    }
+  },
+
+  addPalavraChave: async (termo: string, peso = 1) => {
+    try {
+      const res = await fetch(`${API}/triagem/palavras-chave`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ termo, peso }),
+      });
+      if (res.ok) {
+        const nova = await res.json();
+        set((s) => ({ palavrasChave: [...s.palavrasChave, nova] }));
+      }
+    } catch (e) {
+      console.error('addPalavraChave:', e);
+    }
+  },
+
+  removePalavraChave: async (id: number) => {
+    try {
+      const res = await fetch(`${API}/triagem/palavras-chave/${id}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      });
+      if (res.ok) {
+        set((s) => ({ palavrasChave: s.palavrasChave.filter((p) => p.id !== id) }));
+      }
+    } catch (e) {
+      console.error('removePalavraChave:', e);
+    }
+  },
+
+  processarMensagem: async (conteudo: string, origem: string, remetente: string) => {
+    try {
+      const res = await fetch(`${API}/triagem/processar-mensagem`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ conteudo, origem, remetente }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'match' && data.tarefa) {
+          // Adiciona a tarefa criada ao store local
+          get().fetchTarefas();
+        }
+        return { status: data.status, termo_detectado: data.termo_detectado, tarefa: data.tarefa };
+      }
+      return { status: 'ignorado' as const };
+    } catch (e) {
+      console.error('processarMensagem:', e);
+      return { status: 'ignorado' as const };
+    }
+  },
+
     }),
     {
       name: 'simply-life-store',

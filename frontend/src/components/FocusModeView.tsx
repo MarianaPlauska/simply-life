@@ -207,7 +207,7 @@ export function FocusImmersiveOverlay() {
     && activeView !== 'foco';
 
   const {
-    phase, mins, secs, circumference, strokeOffset, ringColor, phaseLabel, phaseColor,
+    mins, secs, circumference, strokeOffset, ringColor, phaseLabel, phaseColor,
     lastXpGain, canvasRef, sound, gamificacao, handleTogglePause, resetFocus,
   } = useFocusTimer();
 
@@ -306,7 +306,7 @@ export function FocusModeView() {
   const startFocusSession = useTaskStore((s) => s.startFocusSession);
   const fetchGamificacao = useTaskStore((s) => s.fetchGamificacao);
 
-  const { phase, secondsLeft, totalSeconds, sessionsCompleted, targetTaskId } = focusState;
+  const { phase, sessionsCompleted, targetTaskId } = focusState;
 
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 

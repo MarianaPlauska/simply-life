@@ -7,6 +7,7 @@ RF-2.02: Filtro de keywords ativo no webhook
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 import database

@@ -12,7 +12,7 @@ import { CommandPalette } from './components/ui/CommandPalette';
 import { AmbientBackground } from './components/ui/AmbientBackground';
 import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
-import { CalendarDays, Briefcase, Brain, Rocket } from 'lucide-react';
+import { CalendarDays, Briefcase, Rocket } from 'lucide-react';
 
 // Lazy-loaded views
 const DashboardHome    = lazy(() => import('./components/layout/DashboardHome').then((m) => ({ default: m.DashboardHome })));
@@ -28,6 +28,7 @@ const FinancePlannerView = lazy(() => import('./components/Finance/FinancePlanne
 const CalendarView     = lazy(() => import('./components/Calendar/CalendarView').then((m) => ({ default: m.CalendarView })));
 const DriveVaultView   = lazy(() => import('./components/Drive/DriveVaultView').then((m) => ({ default: m.DriveVaultView })));
 const ProfileView      = lazy(() => import('./components/Auth/ProfileView').then((m) => ({ default: m.ProfileView })));
+const PreferenciasIA   = lazy(() => import('./components/Settings/PreferenciasIA').then((m) => ({ default: m.PreferenciasIA })));
 
 function PageLoader() {
   return (
@@ -145,9 +146,7 @@ function AppLayout() {
               <Route path="superhuman" element={
                 <PlaceholderView title="Agenda" subtitle="Conecte sua conta Google para sincronizar eventos e compromissos." icon={CalendarDays} />
               } />
-              <Route path="inteligencia" element={
-                <PlaceholderView title="Motor de Inteligência" subtitle="O filtro de keywords está ativo nas Preferências. Configure suas palavras-chave para triagem automática." icon={Brain} />
-              } />
+              <Route path="inteligencia" element={<PreferenciasIA />} />
               <Route path="carreira" element={
                 <PlaceholderView title="Radar de Carreira" subtitle="Monitoramento de vagas e oportunidades profissionais será ativado em breve." icon={Briefcase} />
               } />

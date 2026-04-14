@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import {
-  ListChecks, AlertTriangle, CheckCircle2, DollarSign,
+  ListChecks, AlertTriangle, CheckCircle2, DollarSign, Sparkles,
 } from 'lucide-react';
 import {
   GlassCard, ProgressBar, CircularProgress, fmt,
@@ -8,7 +8,12 @@ import {
 } from './DashboardPrimitives';
 import type { DashboardResumo } from '../../store/useTaskStore';
 
-export function KPISection({ resumo }: { resumo: DashboardResumo | null }) {
+interface KPISectionProps {
+  resumo: DashboardResumo | null;
+  tarefasIA?: number;  // tarefas com origem != 'manual'
+}
+
+export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
   const tarefasTotal = resumo?.tarefas_total ?? 0;
   const tarefasConcluidas = resumo?.tarefas_concluidas ?? 0;
   const tarefasPct = tarefasTotal > 0
@@ -17,6 +22,7 @@ export function KPISection({ resumo }: { resumo: DashboardResumo | null }) {
   const despesaDia = resumo?.despesas_dia ?? 0;
   const saldoMes = resumo?.saldo_mes ?? 0;
   const inBudget = saldoMes >= 0;
+  const hasCriticas = (resumo?.tarefas_criticas ?? 0) > 0;
 
   return (
     <motion.div
@@ -69,41 +75,65 @@ export function KPISection({ resumo }: { resumo: DashboardResumo | null }) {
       </GlassCard>
 
       {/* ── Foco Critico ─────────────────────────────────────── */}
-      <GlassCard className={(resumo?.tarefas_criticas ?? 0) > 0 ? '!border-red-500/15' : ''}>
+      <GlassCard
+        className={[
+          hasCriticas ? '!border-red-500/15' : '',
+          tarefasIA > 0 ? 'relative overflow-visible' : '',
+        ].filter(Boolean).join(' ')}
+        style={tarefasIA > 0 ? {
+          background: 'linear-gradient(135deg, rgba(9,9,11,0.8) 0%, rgba(88,28,135,0.06) 100%)',
+          borderImage: undefined,
+          boxShadow: '0 0 0 1px rgba(139,92,246,0.15), 0 0 32px 0 rgba(139,92,246,0.04)',
+        } : undefined}
+      >
+        {/* Badge IA — aparece se alguma tarefa crítica foi capturada pelo motor */}
+        {tarefasIA > 0 && (
+          <div className="absolute -top-2.5 -right-2.5 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-600 border border-violet-400/30 shadow-lg shadow-violet-900/30">
+            <Sparkles className="w-3 h-3 text-violet-200" />
+            <span className="text-[10px] font-bold text-violet-100">{tarefasIA} IA</span>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              (resumo?.tarefas_criticas ?? 0) > 0 ? 'bg-red-500/10' : 'bg-emerald-500/10'
+              hasCriticas ? 'bg-red-500/10' : 'bg-emerald-500/10'
             }`}>
-              {(resumo?.tarefas_criticas ?? 0) > 0
+              {hasCriticas
                 ? <AlertTriangle className="w-5 h-5 text-red-400" />
                 : <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
             </div>
             <p className="text-[13px] font-medium text-zinc-400">Foco Critico</p>
           </div>
           <CircularProgress
-            pct={(resumo?.tarefas_criticas ?? 0) > 0 ? 100 : 0}
+            pct={hasCriticas ? 100 : 0}
             size={52}
             strokeWidth={4}
-            color={(resumo?.tarefas_criticas ?? 0) > 0 ? 'stroke-red-500' : 'stroke-emerald-500'}
+            color={hasCriticas ? 'stroke-red-500' : 'stroke-emerald-500'}
           >
             <span className={`text-[10px] font-bold tabular-nums ${
-              (resumo?.tarefas_criticas ?? 0) > 0 ? 'text-red-400' : 'text-emerald-400'
+              hasCriticas ? 'text-red-400' : 'text-emerald-400'
             }`}>
               {resumo?.tarefas_criticas ?? 0}
             </span>
           </CircularProgress>
         </div>
         <p className={`text-5xl font-extrabold tabular-nums tracking-tighter ${
-          (resumo?.tarefas_criticas ?? 0) > 0 ? 'text-red-400' : 'text-emerald-400'
+          hasCriticas ? 'text-red-400' : 'text-emerald-400'
         }`}>
           {resumo?.tarefas_criticas ?? 0}
         </p>
         <p className="text-[11px] text-zinc-500 mt-3">
-          {(resumo?.tarefas_criticas ?? 0) > 0
+          {hasCriticas
             ? 'Score >= 100 — acao imediata'
             : 'Nenhuma tarefa critica'}
         </p>
+        {tarefasIA > 0 && (
+          <p className="text-[10px] text-violet-400/70 mt-1 flex items-center gap-1">
+            <Sparkles className="w-3 h-3" />
+            {tarefasIA} capturada{tarefasIA !== 1 ? 's' : ''} pelo Motor IA
+          </p>
+        )}
       </GlassCard>
 
       {/* ── Financas ─────────────────────────────────────────── */}
@@ -133,3 +163,5 @@ export function KPISection({ resumo }: { resumo: DashboardResumo | null }) {
     </motion.div>
   );
 }
+
+

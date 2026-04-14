@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { Skeleton, CardSkeleton } from '../dashboard/DashboardPrimitives';
 import { HeroSection } from '../dashboard/HeroSection';
@@ -26,17 +26,23 @@ export function DashboardHome() {
   const keywords = useTaskStore((s) => s.keywords);
   const scoreDiario = useTaskStore((s) => s.scoreDiario);
   const fetchPreferencias = useTaskStore((s) => s.fetchPreferencias);
+  const tarefas = useTaskStore((s) => s.tarefas);
+  const fetchTarefas = useTaskStore((s) => s.fetchTarefas);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchDashboard();
     fetchNotificacoes();
-    checkGoogleStatus();
-    fetchCalendarEvents();
     fetchPreferencias();
+    fetchTarefas();
+    checkGoogleStatus().then(() => fetchCalendarEvents());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const naoLidas = resumo?.notificacoes_nao_lidas ?? notificacoes.filter((n) => !n.lida).length;
+  const tarefasIA = tarefas.filter((t) => t.origem && t.origem !== 'manual' && t.prioridade === 'critica').length;
 
   /* ── Loading State ─────────────────────────────────────────── */
   if (loading && !resumo) {
@@ -60,7 +66,7 @@ export function DashboardHome() {
     <div className="max-w-5xl mx-auto p-6 space-y-16 pb-24 text-zinc-50">
       {/* Camada 1 — Contexto Imediato */}
       <HeroSection resumo={resumo} naoLidas={naoLidas} />
-      <KPISection resumo={resumo} />
+      <KPISection resumo={resumo} tarefasIA={tarefasIA} />
 
       {/* Camada 2 — Fluxo Tático */}
       <HealthSection resumo={resumo} />

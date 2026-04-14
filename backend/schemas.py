@@ -1,4 +1,4 @@
-﻿"""
+"""
 schemas.py — Pydantic models compartilhados entre routers.
 RF-1.04: usuario_id é extraído do JWT (get_current_user), NÃO do body.
 """
@@ -110,3 +110,59 @@ class NotificacaoCreate(BaseModel):
     tipo: str = "sistema"
     urgencia: str = "normal"
     score_urgencia: int = 0
+
+
+# ── Gamificação / Sessão de Foco ─────────────────────────
+class FinalizarSessaoRequest(BaseModel):
+    minutos: int
+    tarefa_id: Optional[int] = None
+
+
+class SessaoFocoResponse(BaseModel):
+    id: int
+    user_id: int
+    tarefa_id: Optional[int] = None
+    duracao_minutos: int
+    xp_ganho: int
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class GamificacaoProfileResponse(BaseModel):
+    xp_total: int
+    streak_atual: int
+    nivel: int
+    ultima_sessao_data: Optional[datetime] = None
+    xp_ganho: int = 0
+    streak_bonus: bool = False
+
+
+# ── Motor de Triagem / Palavras-Chave ────────────────────────
+class PalavraChaveCreate(BaseModel):
+    termo: str
+    peso: int = 1
+
+
+class PalavraChaveResponse(BaseModel):
+    id: int
+    user_id: int
+    termo: str
+    peso: int
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class ProcessarMensagemRequest(BaseModel):
+    conteudo: str
+    origem: str = "manual"
+    remetente: str = ""
+
+
+class ProcessarMensagemResponse(BaseModel):
+    status: str                        # "match" | "ignorado"
+    termo_detectado: Optional[str] = None
+    tarefa: Optional[TarefaResponse] = None

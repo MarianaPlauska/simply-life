@@ -12,6 +12,7 @@ jobs:
     env:
       JWT_SECRET: ci-test-secret-do-not-use-in-production-1234567890
       FERNET_KEY: tT3BlbkFJ0Ek5GfL7d4j5z8k9m2n4p6r8t0v2x4z6A8C=
+      DATABASE_URL: sqlite:///./test_ci.db
     steps:
       - uses: actions/checkout@v4
 

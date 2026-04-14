@@ -5,9 +5,10 @@ Usa um banco SQLite em memória isolado para cada teste.
 import os
 import sys
 
-# Garante que JWT_SECRET e FERNET_KEY existam para testes
+# Garante que JWT_SECRET, FERNET_KEY e DATABASE_URL existam para testes
 os.environ.setdefault("JWT_SECRET", "test-secret-key-for-pytest-only-do-not-use")
 os.environ.setdefault("FERNET_KEY", "tT3BlbkFJ0Ek5GfL7d4j5z8k9m2n4p6r8t0v2x4z6A8C=")
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test_orquestrador.db")
 
 # Adiciona backend/ ao path para imports funcionarem
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -26,7 +27,7 @@ from auth import criar_access_token
 app.state.limiter.enabled = False
 
 
-# Banco em memória para testes
+# Banco em memória para testes (SQLite — não requer Postgres)
 TEST_DATABASE_URL = "sqlite:///./test_orquestrador.db"
 test_engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 TestSession = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)

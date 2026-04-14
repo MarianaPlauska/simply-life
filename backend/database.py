@@ -1,19 +1,24 @@
 # backend/database.py
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./orquestrador.db"
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL não definido. Adicione ao .env "
+        "(ex: postgresql://postgres:SENHA@db.xxx.supabase.co:5432/postgres)"
+    )
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# SQLAlchemy aceita tanto postgresql:// quanto postgres://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Base para criarmos tabelas depois
 Base = declarative_base()
 
-# Função para injetar o banco de dados nas rotas
 def get_db():
     db = SessionLocal()
     try:
