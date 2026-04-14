@@ -1,0 +1,16 @@
+# dependências de teste — usa sqlite em vez de psycopg2
+# instala o essencial sem precisar das libs nativas do postgres
+fastapi==0.135.3
+uvicorn==0.35.0
+sqlalchemy==2.0.49
+alembic==1.15.2
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1
+cryptography==46.0.7
+slowapi==0.1.9
+python-dotenv==1.1.1
+httpx==0.27.2
+pydantic==2.13.0
+pytest==8.3.5
+aiosqlite==0.20.0
