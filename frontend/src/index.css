@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Aplica o modo escuro padrão em todo o sistema */
+body {
+  @apply bg-fundo text-zinc-100 antialiased min-h-screen;
+}
+
+/* Scrollbar minimalista */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* Accessibility: high contrast mode */
+.high-contrast {
+  --tw-contrast: contrast(1.25);
+  filter: var(--tw-contrast);
+}
+
+/* Accessibility: reduced motion */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

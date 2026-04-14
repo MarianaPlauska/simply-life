@@ -1,0 +1,501 @@
+import { useEffect } from 'react';
+import {
+  AlertTriangle, CheckCircle2, DollarSign, ListChecks,
+  Pill, Sparkles, Sun, Moon, Sunset, Bell, Activity,
+  TrendingDown, Droplets, Dumbbell, Brain, BookOpen,
+  CalendarDays, MapPin, Link2, CalendarOff, Clock,
+} from 'lucide-react';
+import { useTaskStore } from '../../store/useTaskStore';
+
+/* ── Skeleton Loader ─────────────────────────────────────────── */
+function Skeleton({ className = '' }: { className?: string }) {
+  return (
+    <div className={`animate-pulse rounded-lg bg-zinc-800/60 ${className}`} />
+  );
+}
+
+function CardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-zinc-800/30 bg-zinc-900/30 backdrop-blur-sm p-6 space-y-4">
+      <div className="flex items-center gap-3">
+        <Skeleton className="w-10 h-10 rounded-xl" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+      <Skeleton className="h-8 w-20" />
+      <Skeleton className="h-2 w-full rounded-full" />
+    </div>
+  );
+}
+
+/* ── Helpers ──────────────────────────────────────────────────── */
+function fmt(value: number) {
+  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function getGreetIcon(): React.ElementType {
+  const h = new Date().getHours();
+  if (h < 12) return Sun;
+  if (h < 18) return Sunset;
+  return Moon;
+}
+
+const HABIT_ICONS: Record<string, React.ElementType> = {
+  agua: Droplets, exercicio: Dumbbell, meditacao: Brain, leitura: BookOpen,
+};
+
+/* ── Glass Card Wrapper ──────────────────────────────────────── */
+function GlassCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`relative overflow-hidden bg-zinc-900/40 backdrop-blur-2xl border border-zinc-800 rounded-3xl p-6 shadow-2xl transition-all duration-500 hover:bg-zinc-800/60 hover:border-zinc-700 hover:-translate-y-1 ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/* ── Progress Bar ────────────────────────────────────────────── */
+function ProgressBar({ pct, label = 'Progresso', color }: { pct: number; label?: string; color: string }) {
+  const clampedPct = Math.min(Math.max(pct, 0), 100);
+  return (
+    <div className="mt-6">
+      <div className="flex justify-between text-xs text-zinc-400 font-medium mb-2">
+        <span>{label}</span>
+        <span>{clampedPct}%</span>
+      </div>
+      <div className="w-full h-2 bg-zinc-950 rounded-full overflow-hidden border border-zinc-800/50 relative">
+        <div
+          className={`absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ${color}`}
+          style={{ width: `${clampedPct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ── Component ───────────────────────────────────────────────── */
+export function DashboardHome() {
+  const fetchDashboard = useTaskStore((s) => s.fetchDashboard);
+  const resumo = useTaskStore((s) => s.dashboardResumo);
+  const loading = useTaskStore((s) => s.dashboardLoading);
+  const notificacoes = useTaskStore((s) => s.notificacoes);
+  const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes);
+  const calendarEvents = useTaskStore((s) => s.calendarEvents);
+  const calendarLoading = useTaskStore((s) => s.calendarLoading);
+  const calendarError = useTaskStore((s) => s.calendarError);
+  const fetchCalendarEvents = useTaskStore((s) => s.fetchCalendarEvents);
+  const googleConnected = useTaskStore((s) => s.googleCalendarConnected);
+  const checkGoogleStatus = useTaskStore((s) => s.checkGoogleStatus);
+  const setActiveView = useTaskStore((s) => s.setActiveView);
+
+  useEffect(() => {
+    fetchDashboard();
+    fetchNotificacoes();
+    checkGoogleStatus();
+    fetchCalendarEvents();
+  }, [fetchDashboard, fetchNotificacoes, checkGoogleStatus, fetchCalendarEvents]);
+
+  const GreetIcon = getGreetIcon();
+  const naoLidas = resumo?.notificacoes_nao_lidas ?? notificacoes.filter((n) => !n.lida).length;
+
+  /* ── Loading State ─────────────────────────────────────────── */
+  if (loading && !resumo) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6 pb-24 p-8">
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-80" />
+          <Skeleton className="h-4 w-[420px]" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardSkeleton /><CardSkeleton /><CardSkeleton />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardSkeleton /><CardSkeleton /><CardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Derived data ──────────────────────────────────────────── */
+  const tarefasTotal = resumo?.tarefas_total ?? 0;
+  const tarefasConcluidas = resumo?.tarefas_concluidas ?? 0;
+  const tarefasPct = tarefasTotal > 0 ? Math.round((tarefasConcluidas / tarefasTotal) * 100) : 0;
+
+  const medsTotal = resumo?.medicamentos_total ?? 0;
+  const medsTomados = resumo?.medicamentos_tomados ?? 0;
+  const medsPct = medsTotal > 0 ? Math.round((medsTomados / medsTotal) * 100) : 0;
+
+  const habitosPct = resumo?.habitos_progresso_pct ?? 0;
+
+  const despesaDia = resumo?.despesas_dia ?? 0;
+  const saldoMes = resumo?.saldo_mes ?? 0;
+  const inBudget = saldoMes >= 0;
+
+  const allGood = resumo
+    ? resumo.tarefas_criticas === 0
+      && medsTomados === medsTotal
+      && habitosPct >= 100
+    : false;
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6 pb-24 p-8">
+
+      {/* ── Hero / Saudacao IA ────────────────────────────────── */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-violet-600/10 via-zinc-900/50 to-zinc-900/50 backdrop-blur-xl border border-violet-500/10 rounded-3xl p-8 mb-6">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(139,92,246,0.18),transparent_50%)] pointer-events-none" />
+        <div className="relative flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+              <GreetIcon className="w-6 h-6 text-amber-400 shrink-0" />
+              {resumo?.saudacao_ia.split('.')[0] || 'Carregando...'}
+            </h1>
+            {resumo && (
+              <p className="text-[13px] text-zinc-400 mt-1.5 leading-relaxed max-w-2xl">
+                {resumo.saudacao_ia.split('.').slice(1).join('.').trim()}
+              </p>
+            )}
+          </div>
+          <button className="relative p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/40 hover:bg-zinc-800/60 transition-colors shrink-0">
+            <Bell className="w-5 h-5 text-zinc-400" />
+            {naoLidas > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1 ring-2 ring-zinc-950">
+                {naoLidas > 9 ? '9+' : naoLidas}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* ── Row 1: KPIs Principais ────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        {/* Tarefas */}
+        <GlassCard>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center">
+              <ListChecks className="w-5 h-5 text-violet-400" />
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-zinc-400">Tarefas</p>
+              {tarefasTotal > 0 && (
+                <p className="text-[11px] text-zinc-600">
+                  {resumo?.tarefas_pendentes ?? 0} pendente{(resumo?.tarefas_pendentes ?? 0) !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+          </div>
+          {tarefasTotal > 0 ? (
+            <>
+              <p className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-4 tabular-nums">
+                {tarefasConcluidas}
+                <span className="text-xl text-zinc-600 font-normal">/{tarefasTotal}</span>
+              </p>
+              <ProgressBar pct={tarefasPct} label="Progresso" color="bg-gradient-to-r from-violet-500 to-indigo-500" />
+            </>
+          ) : (
+            <>
+              <p className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-4">—</p>
+              <ProgressBar pct={0} label="Progresso" color="bg-gradient-to-r from-violet-500 to-indigo-500" />
+              <p className="text-[10px] text-zinc-500 mt-2">Crie sua primeira tarefa</p>
+            </>
+          )}
+        </GlassCard>
+
+        {/* Foco Critico */}
+        <GlassCard className={(resumo?.tarefas_criticas ?? 0) > 0 ? '!border-red-500/20 !bg-red-500/[0.03]' : ''}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              (resumo?.tarefas_criticas ?? 0) > 0 ? 'bg-red-500/10' : 'bg-emerald-500/10'
+            }`}>
+              {(resumo?.tarefas_criticas ?? 0) > 0
+                ? <AlertTriangle className="w-5 h-5 text-red-400" />
+                : <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              }
+            </div>
+            <p className="text-[13px] font-medium text-zinc-400">Foco Critico</p>
+          </div>
+          <p className={`text-4xl md:text-5xl font-black tabular-nums tracking-tighter mt-4 ${
+            (resumo?.tarefas_criticas ?? 0) > 0 ? 'text-red-400' : 'text-emerald-400'
+          }`}>
+            {resumo?.tarefas_criticas ?? 0}
+          </p>
+          <p className="text-[11px] text-zinc-500 mt-3">
+            {(resumo?.tarefas_criticas ?? 0) > 0
+              ? 'Score >= 100 — acao imediata'
+              : 'Nenhuma tarefa critica'}
+          </p>
+        </GlassCard>
+
+        {/* Financas */}
+        <GlassCard>
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inBudget ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>
+              <DollarSign className={`w-5 h-5 ${inBudget ? 'text-emerald-400' : 'text-red-400'}`} />
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-zinc-400">Gastos Hoje</p>
+              <p className="text-[11px] text-zinc-600">Mensal: {fmt(resumo?.despesas_mes ?? 0)}</p>
+            </div>
+          </div>
+          <p className={`text-4xl md:text-5xl font-black tabular-nums tracking-tighter mt-4 ${inBudget ? 'text-white' : 'text-red-400'}`}>
+            {fmt(despesaDia)}
+          </p>
+          <p className={`text-[11px] mt-3 tabular-nums font-medium ${inBudget ? 'text-emerald-500' : 'text-red-400'}`}>
+            {inBudget ? '+' : ''}{fmt(saldoMes)} saldo mensal
+          </p>
+        </GlassCard>
+      </div>
+
+      {/* ── Row 2: Saude & Status ─────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        {/* Medicamentos */}
+        <GlassCard>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <Pill className="w-5 h-5 text-emerald-400" />
+            </div>
+            <p className="text-[13px] font-medium text-zinc-400">Medicamentos</p>
+          </div>
+          {medsTotal > 0 ? (
+            <>
+              <p className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-4 tabular-nums">
+                {medsTomados}
+                <span className="text-xl text-zinc-600 font-normal">/{medsTotal}</span>
+              </p>
+              <ProgressBar pct={medsPct} label={medsPct === 100 ? 'Completo ✓' : 'Progresso'} color={medsPct === 100 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-gradient-to-r from-emerald-600 to-emerald-400'} />
+            </>
+          ) : (
+            <>
+              <p className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-4">—</p>
+              <ProgressBar pct={0} label="Progresso" color="bg-gradient-to-r from-emerald-600 to-emerald-400" />
+              <p className="text-[10px] text-zinc-500 mt-2">Nenhum medicamento cadastrado</p>
+            </>
+          )}
+        </GlassCard>
+
+        {/* Habitos */}
+        <GlassCard>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-cyan-400" />
+            </div>
+            <p className="text-[13px] font-medium text-zinc-400">Habitos Diarios</p>
+          </div>
+          {(resumo?.habitos.length ?? 0) > 0 ? (
+            <>
+              <p className={`text-4xl md:text-5xl font-black tabular-nums tracking-tighter mt-4 ${
+                habitosPct >= 100 ? 'text-emerald-400' : habitosPct >= 50 ? 'text-white' : 'text-zinc-500'
+              }`}>
+                {habitosPct.toFixed(0)}%
+              </p>
+              <ProgressBar
+                pct={habitosPct}
+                label={`${resumo?.habitos.length} rastreador${(resumo?.habitos.length ?? 0) > 1 ? 'es' : ''}`}
+                color={habitosPct >= 100 ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : habitosPct >= 50 ? 'bg-gradient-to-r from-cyan-500 to-blue-400' : 'bg-zinc-600'}
+              />
+            </>
+          ) : (
+            <>
+              <p className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-4">0%</p>
+              <ProgressBar pct={0} label="Progresso" color="bg-gradient-to-r from-cyan-500 to-blue-400" />
+              <p className="text-[10px] text-zinc-500 mt-2">Configure seus hábitos</p>
+            </>
+          )}
+        </GlassCard>
+
+        {/* Status do Dia */}
+        <GlassCard className={allGood ? '!border-emerald-500/20 !bg-emerald-500/[0.03]' : ''}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+              allGood ? 'bg-emerald-500/10' : 'bg-zinc-800/60'
+            }`}>
+              {allGood
+                ? <Sparkles className="w-5 h-5 text-amber-400" />
+                : <TrendingDown className="w-5 h-5 text-zinc-500" />}
+            </div>
+            <p className="text-[13px] font-medium text-zinc-400">Status do Dia</p>
+          </div>
+          <p className={`text-lg font-semibold ${allGood ? 'text-emerald-400' : 'text-zinc-300'}`}>
+            {allGood ? 'Dia Perfeito' : 'Em progresso'}
+          </p>
+          <div className="mt-3 space-y-1.5">
+            <StatusRow
+              label="Criticas"
+              ok={(resumo?.tarefas_criticas ?? 1) === 0}
+              detail={`${resumo?.tarefas_criticas ?? 0} pendente${(resumo?.tarefas_criticas ?? 0) !== 1 ? 's' : ''}`}
+            />
+            <StatusRow
+              label="Medicamentos"
+              ok={medsTotal > 0 && medsTomados === medsTotal}
+              detail={medsTotal > 0 ? `${medsTomados}/${medsTotal}` : 'N/A'}
+            />
+            <StatusRow
+              label="Habitos"
+              ok={habitosPct >= 100}
+              detail={(resumo?.habitos.length ?? 0) > 0 ? `${habitosPct.toFixed(0)}%` : 'N/A'}
+            />
+          </div>
+        </GlassCard>
+      </div>
+
+      {/* ── Row 3: Detalhamento de Habitos ────────────────────── */}
+      {resumo && resumo.habitos.length > 0 && (
+        <GlassCard>
+          <h3 className="text-[14px] font-semibold text-white mb-4">Progresso dos Habitos</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {resumo.habitos.map((h) => {
+              const pct = h.meta_diaria > 0 ? Math.min((h.progresso_atual / h.meta_diaria) * 100, 100) : 0;
+              const done = pct >= 100;
+              const HIcon = HABIT_ICONS[h.nome_exibicao.toLowerCase()] || Activity;
+              return (
+                <div
+                  key={h.id}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${
+                    done ? 'border-emerald-500/20 bg-emerald-500/[0.04]' : 'border-zinc-800/40 bg-zinc-800/10'
+                  }`}
+                >
+                  <HIcon className={`w-4 h-4 shrink-0 ${done ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium text-zinc-300 truncate">{h.nome_exibicao}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex-1 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-emerald-500' : 'bg-cyan-500'}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className={`text-[10px] tabular-nums shrink-0 ${done ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                        {h.progresso_atual}/{h.meta_diaria}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </GlassCard>
+      )}
+
+      {/* ── Row 4: Agenda de Hoje (Google Calendar) ───────────── */}
+      <GlassCard className="!p-0 overflow-hidden">
+        <div className="p-6 pb-0">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <CalendarDays className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-[14px] font-semibold text-white">Agenda de Hoje</h3>
+                <p className="text-[11px] text-zinc-600">Google Calendar</p>
+              </div>
+            </div>
+            {googleConnected && calendarEvents.length > 0 && (
+              <span className="text-[11px] text-zinc-600 tabular-nums">
+                {calendarEvents.length} evento{calendarEvents.length !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {calendarLoading ? (
+          <div className="px-6 pb-6 space-y-3">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        ) : calendarError === '403' ? (
+          /* ── Error State: 403 insufficientPermissions ─────────── */
+          <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+              <AlertTriangle className="w-7 h-7 text-red-400" />
+            </div>
+            <p className="text-[15px] font-semibold text-red-400 mb-1">Permissao Negada</p>
+            <p className="text-[12px] text-red-300/70 max-w-sm mb-5 leading-relaxed">
+              Permissao negada pelo Google. Por favor, reconecte nas Configuracoes e nao esqueca de marcar a caixa de acesso a agenda na tela do Google.
+            </p>
+            <button
+              onClick={() => setActiveView('configuracoes')}
+              className="px-5 py-2.5 text-[13px] font-semibold rounded-xl bg-red-600 text-white hover:bg-red-500 transition-all flex items-center gap-2 shadow-lg shadow-red-500/20"
+            >
+              <Link2 className="w-4 h-4" />
+              Reconectar nas Configuracoes
+            </button>
+          </div>
+        ) : !googleConnected ? (
+          /* ── Empty State: Nao conectado ───────────────────────── */
+          <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-zinc-800/40 border border-zinc-800/30 flex items-center justify-center mb-4">
+              <CalendarOff className="w-7 h-7 text-zinc-600" />
+            </div>
+            <p className="text-[15px] font-semibold text-zinc-300 mb-1">Agenda Desconectada</p>
+            <p className="text-[12px] text-zinc-600 max-w-xs mb-5 leading-relaxed">
+              Conecte sua conta Google para visualizar compromissos e eventos do dia
+            </p>
+            <button
+              onClick={() => setActiveView('configuracoes')}
+              className="px-5 py-2.5 text-[13px] font-semibold rounded-xl bg-violet-600 text-white hover:bg-violet-500 transition-all flex items-center gap-2 shadow-lg shadow-violet-500/20"
+            >
+              <Link2 className="w-4 h-4" />
+              Ir para Integracoes
+            </button>
+          </div>
+        ) : calendarEvents.length === 0 ? (
+          /* ── Empty State: Conectado mas sem eventos ───────────── */
+          <div className="flex flex-col items-center justify-center py-10 px-6 text-center">
+            <CalendarDays className="w-8 h-8 text-zinc-700 mb-3" />
+            <p className="text-[13px] text-zinc-500">Nenhum evento para hoje</p>
+            <p className="text-[11px] text-zinc-600 mt-0.5">Seu dia esta livre</p>
+          </div>
+        ) : (
+          /* ── Timeline de eventos ─────────────────────────────── */
+          <div className="px-6 pb-4">
+            <div className="border-l-2 border-blue-500/20 ml-3 space-y-0">
+              {calendarEvents.map((ev, i) => {
+                const inicio = ev.inicio.includes('T')
+                  ? new Date(ev.inicio).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                  : 'Dia todo';
+                const fim = ev.fim.includes('T')
+                  ? new Date(ev.fim).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+                  : '';
+                return (
+                  <div key={i} className="relative pl-6 py-3 group">
+                    <div className="absolute left-[-5px] top-[18px] w-2 h-2 rounded-full bg-blue-400 ring-4 ring-zinc-950 group-hover:ring-blue-500/10 transition-all" />
+                    <div className="flex items-start gap-3">
+                      <div className="shrink-0 pt-0.5">
+                        <p className="text-[12px] font-semibold text-blue-400 tabular-nums flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {inicio}
+                        </p>
+                        {fim && <p className="text-[10px] text-zinc-600 tabular-nums ml-4">{fim}</p>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-zinc-200 truncate">{ev.titulo}</p>
+                        {ev.local && (
+                          <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5 truncate">
+                            <MapPin className="w-3 h-3 shrink-0" /> {ev.local}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </GlassCard>
+    </div>
+  );
+}
+
+/* ── Sub-component ───────────────────────────────────────────── */
+function StatusRow({ label, ok, detail }: { label: string; ok: boolean; detail: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-1.5">
+        {ok
+          ? <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+          : <div className="w-3 h-3 rounded-full border border-zinc-600" />}
+        <span className={`text-[11px] ${ok ? 'text-zinc-300' : 'text-zinc-500'}`}>{label}</span>
+      </div>
+      <span className={`text-[10px] tabular-nums ${ok ? 'text-emerald-400' : 'text-zinc-600'}`}>{detail}</span>
+    </div>
+  );
+}
