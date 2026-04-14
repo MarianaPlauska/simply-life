@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { TarefaUnificada, Label, Subtarefa, HabitoStreak } from '../types';
+import type { TarefaUnificada, Label, Subtarefa, HabitoStreak, BuscaResult } from '../types';
 
 export type ActiveView =
   | 'dashboard'
@@ -275,6 +275,12 @@ interface TaskStore {
   addPalavraChave: (termo: string, peso?: number) => Promise<void>;
   removePalavraChave: (id: number) => Promise<void>;
   processarMensagem: (conteudo: string, origem: string, remetente: string) => Promise<ProcessarMensagemResult>;
+  // teste de integração do motor de triagem (mock inbox)
+  simularEmailRecebido: (texto: string, remetente: string) => Promise<void>;
+  // busca global (sprint 2)
+  searchResults: BuscaResult | null;
+  searchLoading: boolean;
+  buscar: (query: string) => Promise<void>;
 }
 
 const API = 'http://127.0.0.1:8000';
@@ -341,6 +347,8 @@ export const useTaskStore = create<TaskStore>()(
   labels: [] as Label[],
   habitosStreaks: [] as HabitoStreak[],
   palavrasChave: [] as PalavraChave[],
+  searchResults: null,
+  searchLoading: false,
 
   fetchDashboard: async () => {
     set({ dashboardLoading: true });
@@ -1200,6 +1208,57 @@ export const useTaskStore = create<TaskStore>()(
     } catch (e) {
       console.error('processarMensagem:', e);
       return { status: 'ignorado' as const };
+    }
+  },
+
+  // simula um email entrando na caixa e passando pelo motor de triagem
+  // dispara post pra /triagem/processar-mensagem com origem 'gmail_mock'
+  // se o motor criar tarefa, atualiza o dashboard e a lista de tarefas
+  simularEmailRecebido: async (texto: string, remetente: string) =>
+  {
+    try
+    {
+      const resultado = await get().processarMensagem(texto, 'gmail_mock', remetente);
+      if ( resultado.status === 'match' )
+      {
+        // recarrega tudo pra refletir a nova tarefa no dashboard
+        await Promise.all([get().fetchTarefas(), get().fetchDashboard()]);
+      }
+    }
+    catch (e)
+    {
+      console.error('simularEmailRecebido:', e);
+    }
+  },
+
+  // busca global — chama GET /busca?q= e salva resultado no state
+  buscar: async (query: string) =>
+  {
+    if ( !query || query.trim().length < 2 )
+    {
+      set({ searchResults: null, searchLoading: false });
+      return;
+    }
+    set({ searchLoading: true });
+    try
+    {
+      const res = await fetch(`${API}/busca?q=${encodeURIComponent(query.trim())}&limite=8`, {
+        headers: authHeaders(),
+      });
+      if ( res.ok )
+      {
+        const data = await res.json();
+        set({ searchResults: data, searchLoading: false });
+      }
+      else
+      {
+        set({ searchResults: null, searchLoading: false });
+      }
+    }
+    catch (e)
+    {
+      console.error('buscar:', e);
+      set({ searchResults: null, searchLoading: false });
     }
   },
 

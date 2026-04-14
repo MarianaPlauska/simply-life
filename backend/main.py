@@ -36,6 +36,7 @@ from routers import dashboard as dashboard_router
 from routers import integracoes as integracoes_router
 from routers import gamificacao as gamificacao_router
 from routers import triagem as triagem_router
+from routers import busca as busca_router
 
 # ── Worker de background (polling) ────────────────────────────
 async def motor_busca_ativa():
@@ -89,3 +90,4 @@ app.include_router(dashboard_router.router)
 app.include_router(integracoes_router.router)
 app.include_router(gamificacao_router.router)
 app.include_router(triagem_router.router)
+app.include_router(busca_router.router)

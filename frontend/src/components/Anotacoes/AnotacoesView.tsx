@@ -4,6 +4,7 @@ import {
   Briefcase, User, Lightbulb, HeartPulse, BookOpen, Maximize2,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
+import { RichTextEditor } from '../ui/RichTextEditor';
 
 /* -- Category system -- */
 const CATEGORIAS = [
@@ -198,9 +199,11 @@ export function AnotacoesView() {
 
               <div className="flex-1 overflow-y-auto px-10 py-8">
                 <article className="max-w-2xl">
-                  <p className="text-[15px] leading-[1.8] text-zinc-300 whitespace-pre-wrap selection:bg-violet-500/20">
-                    {selectedNote.conteudo}
-                  </p>
+                  <RichTextEditor
+                    content={selectedNote.conteudo}
+                    placeholder="Comece a escrever..."
+                    onChange={() => {}}
+                  />
                 </article>
               </div>
             </>
@@ -254,9 +257,10 @@ export function AnotacoesView() {
 
             <div className="flex-1 overflow-y-auto px-8 pb-10">
               <article className="prose prose-invert prose-lg max-w-none">
-                <p className="text-[17px] leading-[2] text-zinc-200 whitespace-pre-wrap font-[Georgia,_serif] selection:bg-violet-500/30">
-                  {selectedNote.conteudo}
-                </p>
+                <div
+                  className="text-[17px] leading-[2] text-zinc-200 font-[Georgia,_serif] selection:bg-violet-500/30"
+                  dangerouslySetInnerHTML={{ __html: selectedNote.conteudo }}
+                />
               </article>
             </div>
 

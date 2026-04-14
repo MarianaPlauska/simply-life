@@ -208,3 +208,28 @@ class ProcessarMensagemResponse(BaseModel):
     status: str                        # "match" | "ignorado"
     termo_detectado: Optional[str] = None
     tarefa: Optional[TarefaResponse] = None
+
+
+# ── Busca Global (Sprint 2) ──────────────────────────────────
+class BuscaTarefaItem(BaseModel):
+    id: int
+    titulo: str
+    status: str
+    prioridade: str
+    origem: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BuscaAnotacaoItem(BaseModel):
+    id: int
+    titulo: Optional[str] = None
+    preview: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class BuscaResponse(BaseModel):
+    tarefas: list[BuscaTarefaItem] = []
+    anotacoes: list[BuscaAnotacaoItem] = []
+    total: int = 0

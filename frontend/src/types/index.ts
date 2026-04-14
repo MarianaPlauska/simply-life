@@ -34,3 +34,24 @@ export interface HabitoStreak {
   streak_dias: number;
   ultima_data: string | null;
 }
+
+// busca global (sprint 2)
+export interface BuscaTarefaItem {
+  id: number;
+  titulo: string;
+  status: string;
+  prioridade: string;
+  origem: string;
+}
+
+export interface BuscaAnotacaoItem {
+  id: number;
+  titulo: string | null;
+  preview: string;
+}
+
+export interface BuscaResult {
+  tarefas: BuscaTarefaItem[];
+  anotacoes: BuscaAnotacaoItem[];
+  total: number;
+}

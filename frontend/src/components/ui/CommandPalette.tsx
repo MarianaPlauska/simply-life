@@ -1,4 +1,4 @@
-// frontend/src/components/ui/CommandPalette.tsx
+// command palette com busca real integrada ao motor de busca global
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -20,11 +20,15 @@ import {
   Zap,
   Plus,
   Search,
+  Loader2,
+  FileText,
+  ListChecks,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 
-type CommandGroup = 'Navegar' | 'Ações';
+type CommandGroup = 'Resultados' | 'Navegar' | 'Ações';
 
 interface Command {
   id: string;
@@ -32,30 +36,41 @@ interface Command {
   group: CommandGroup;
   icon: LucideIcon;
   shortcut?: string;
+  subtitle?: string;
   action: () => void;
 }
 
-export function CommandPalette() {
+export function CommandPalette ()
+{
   const navigate = useNavigate();
   const isOpen = useTaskStore((s) => s.isCommandPaletteOpen);
   const setOpen = useTaskStore((s) => s.setCommandPaletteOpen);
   const setQuickCapture = useTaskStore((s) => s.setQuickCaptureOpen);
+  const buscar = useTaskStore((s) => s.buscar);
+  const searchResults = useTaskStore((s) => s.searchResults);
+  const searchLoading = useTaskStore((s) => s.searchLoading);
+  const setActiveView = useTaskStore((s) => s.setActiveView);
 
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const close = useCallback(() => {
+  const close = useCallback(() =>
+  {
     setOpen(false);
     setQuery('');
     setSelectedIndex(0);
   }, [setOpen]);
 
-  // Global Ctrl+K / Cmd+K to open
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+  // atalho global ctrl+k / cmd+k pra abrir
+  useEffect(() =>
+  {
+    const handler = (e: KeyboardEvent) =>
+    {
+      if ( (e.ctrlKey || e.metaKey) && e.key === 'k' )
+      {
         e.preventDefault();
         setOpen(true);
       }
@@ -64,14 +79,33 @@ export function CommandPalette() {
     return () => window.removeEventListener('keydown', handler);
   }, [setOpen]);
 
-  // Focus input on open
-  useEffect(() => {
-    if (isOpen) {
+  // foca o input quando abre
+  useEffect(() =>
+  {
+    if ( isOpen )
+    {
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [isOpen]);
 
-  const ALL_COMMANDS: Command[] = [
+  // debounce da busca — dispara 250ms depois de parar de digitar
+  useEffect(() =>
+  {
+    if ( debounceRef.current ) clearTimeout(debounceRef.current);
+
+    if ( query.trim().length >= 2 )
+    {
+      debounceRef.current = setTimeout(() => buscar(query), 250);
+    }
+
+    return () =>
+    {
+      if ( debounceRef.current ) clearTimeout(debounceRef.current);
+    };
+  }, [query, buscar]);
+
+  // ── comandos estáticos ─────────────────────────────────────
+  const STATIC_COMMANDS: Command[] = [
     { id: 'dashboard', label: 'Dashboard', group: 'Navegar', icon: LayoutDashboard, action: () => { navigate('/'); close(); } },
     { id: 'kanban', label: 'Kanban', group: 'Navegar', icon: KanbanSquare, action: () => { navigate('/kanban'); close(); } },
     { id: 'anotacoes', label: 'Anotações', group: 'Navegar', icon: StickyNote, action: () => { navigate('/anotacoes'); close(); } },
@@ -94,34 +128,81 @@ export function CommandPalette() {
       id: 'newtask', label: 'Nova Tarefa', group: 'Ações', icon: Plus,
       action: () => { navigate('/kanban'); close(); },
     },
-    {
-      id: 'search', label: 'Buscar Tarefas', group: 'Ações', icon: Search,
-      action: () => { navigate('/kanban'); close(); },
-    },
   ];
 
-  const filtered = query.trim()
-    ? ALL_COMMANDS.filter((c) => c.label.toLowerCase().includes(query.toLowerCase()))
-    : ALL_COMMANDS;
+  // ── comandos dinâmicos baseados na busca da api ────────────
+  const searchCommands: Command[] = [];
 
-  const groups: CommandGroup[] = ['Navegar', 'Ações'];
+  if ( searchResults && query.trim().length >= 2 )
+  {
+    // tarefas encontradas pela busca
+    for ( const t of searchResults.tarefas )
+    {
+      const isIA = t.origem === 'gmail_triage' || t.origem === 'gmail_mock';
+      searchCommands.push({
+        id: `search-tarefa-${t.id}`,
+        label: t.titulo,
+        subtitle: `${t.prioridade} · ${t.status}`,
+        group: 'Resultados',
+        icon: isIA ? Sparkles : ListChecks,
+        action: () =>
+        {
+          setActiveView('kanban');
+          navigate('/kanban');
+          close();
+        },
+      });
+    }
 
-  const flatList = groups.flatMap((g) => filtered.filter((c) => c.group === g));
+    // anotações encontradas pela busca
+    for ( const a of searchResults.anotacoes )
+    {
+      searchCommands.push({
+        id: `search-nota-${a.id}`,
+        label: a.titulo || 'Sem título',
+        subtitle: a.preview.slice(0, 60) + (a.preview.length > 60 ? '...' : ''),
+        group: 'Resultados',
+        icon: FileText,
+        action: () =>
+        {
+          setActiveView('anotacoes');
+          navigate('/anotacoes');
+          close();
+        },
+      });
+    }
+  }
 
- 
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { close(); return; }
-      if (e.key === 'ArrowDown') {
+  // ── filtragem local nos comandos estáticos ──────────────────
+  const filteredStatic = query.trim()
+    ? STATIC_COMMANDS.filter((c) => c.label.toLowerCase().includes(query.toLowerCase()))
+    : STATIC_COMMANDS;
+
+  // combina resultados da api + comandos locais
+  const allCommands = [...searchCommands, ...filteredStatic];
+
+  const groups: CommandGroup[] = ['Resultados', 'Navegar', 'Ações'];
+  const flatList = groups.flatMap((g) => allCommands.filter((c) => c.group === g));
+
+  // navegação com teclado
+  useEffect(() =>
+  {
+    if ( !isOpen ) return;
+    const handler = (e: KeyboardEvent) =>
+    {
+      if ( e.key === 'Escape' ) { close(); return; }
+      if ( e.key === 'ArrowDown' )
+      {
         e.preventDefault();
         setSelectedIndex((i) => Math.min(i + 1, flatList.length - 1));
       }
-      if (e.key === 'ArrowUp') {
+      if ( e.key === 'ArrowUp' )
+      {
         e.preventDefault();
         setSelectedIndex((i) => Math.max(i - 1, 0));
       }
-      if (e.key === 'Enter') {
+      if ( e.key === 'Enter' )
+      {
         e.preventDefault();
         flatList[selectedIndex]?.action();
       }
@@ -132,8 +213,9 @@ export function CommandPalette() {
 
   useEffect(() => { setSelectedIndex(0); }, [query]);
 
-  
-  useEffect(() => {
+  // auto-scroll pro item selecionado
+  useEffect(() =>
+  {
     const el = listRef.current?.querySelector(`[data-idx="${selectedIndex}"]`);
     el?.scrollIntoView({ block: 'nearest' });
   }, [selectedIndex]);
@@ -159,13 +241,16 @@ export function CommandPalette() {
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="w-full max-w-xl mx-4 bg-zinc-900/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
           >
-            {/* Search input */}
+            {/* input de busca — mostra spinner quando está carregando */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/8">
-              <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+              {searchLoading
+                ? <Loader2 className="w-4 h-4 text-violet-400 shrink-0 animate-spin" />
+                : <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+              }
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Buscar comandos e páginas..."
+                placeholder="Buscar tarefas, anotações, comandos..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-600 text-sm outline-none"
@@ -175,20 +260,25 @@ export function CommandPalette() {
               </kbd>
             </div>
 
-            {/* Results */}
+            {/* resultados */}
             <div ref={listRef} className="max-h-[60vh] overflow-y-auto py-2">
               {flatList.length === 0 ? (
                 <p className="text-center text-zinc-600 text-sm py-8">Nenhum resultado para &quot;{query}&quot;</p>
               ) : (
-                groups.map((group) => {
-                  const items = filtered.filter((c) => c.group === group);
-                  if (!items.length) return null;
+                groups.map((group) =>
+                {
+                  const items = allCommands.filter((c) => c.group === group);
+                  if ( !items.length ) return null;
                   return (
                     <div key={group}>
                       <p className="px-4 py-1.5 text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
-                        {group}
+                        {group === 'Resultados' && searchResults
+                          ? `Resultados (${searchResults.total})`
+                          : group
+                        }
                       </p>
-                      {items.map((cmd) => {
+                      {items.map((cmd) =>
+                      {
                         const idx = flatIdx++;
                         const isSelected = idx === selectedIndex;
                         return (
@@ -208,7 +298,12 @@ export function CommandPalette() {
                             ].join(' ')}>
                               <cmd.icon className={['w-4 h-4', isSelected ? 'text-violet-300' : 'text-zinc-500'].join(' ')} />
                             </div>
-                            <span className="flex-1 text-sm font-medium">{cmd.label}</span>
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-medium block truncate">{cmd.label}</span>
+                              {cmd.subtitle && (
+                                <span className="text-[11px] text-zinc-500 block truncate">{cmd.subtitle}</span>
+                              )}
+                            </div>
                             {cmd.shortcut && (
                               <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 text-xs font-mono">
                                 {cmd.shortcut}
