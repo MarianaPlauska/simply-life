@@ -1,7 +1,7 @@
-// Funções utilitárias compartilhadas entre componentes kanban
+// funções utilitárias compartilhadas entre componentes kanban
 import type { TarefaUnificada } from '../types';
 
-// ── Formatação de data ─────────────────────────────────────────
+// ── formatação de data ─────────────────────────────────────────
 
 export function formatDate (dateStr: string | null): string
 {
@@ -13,7 +13,7 @@ export function formatDate (dateStr: string | null): string
   });
 }
 
-// ── Info de data de vencimento com cor contextual ─────────────
+// ── info de data de vencimento com cor contextual ─────────────
 
 export function dueDateInfo (dateStr: string | null)
 {
@@ -28,7 +28,7 @@ export function dueDateInfo (dateStr: string | null)
   return { text: formatDate(dateStr), color: 'text-zinc-400', bg: 'bg-zinc-800/50' };
 }
 
-// ── Tempo decorrido desde criação ─────────────────────────────
+// ── tempo decorrido desde criação ─────────────────────────────
 
 export function getElapsed (createdAt: string | null, id: number): string
 {
@@ -46,7 +46,7 @@ export function getElapsed (createdAt: string | null, id: number): string
   return h < 24 ? `${h}h` : '1d';
 }
 
-// ── Badge de urgência ──────────────────────────────────────────
+// ── badge de urgência ──────────────────────────────────────────
 
 export function getUrgencyBadge (score: number)
 {
@@ -55,7 +55,7 @@ export function getUrgencyBadge (score: number)
   return              { label: 'Normal',  bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-500' };
 }
 
-// ── Comparação para sort da ListView ──────────────────────────
+// ── comparação para sort da ListView ──────────────────────────
 
 import { PRIO_ORDER, STATUS_ORDER } from '../constants/kanbanConfig';
 

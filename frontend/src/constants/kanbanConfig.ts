@@ -1,8 +1,8 @@
-// Constantes compartilhadas entre KanbanBoard, KanbanCard, TaskDetailModal e ListView
+// constantes compartilhadas entre KanbanBoard, KanbanCard, TaskDetailModal e ListView
 import { Square, Mail, Code2, MessageSquare } from 'lucide-react';
 import type React from 'react';
 
-// ── Prioridade ────────────────────────────────────────────────
+// ── prioridade ────────────────────────────────────────────────
 
 export const PRIO_LABELS: Record<string, string> = {
   critica: 'Crítica',
@@ -44,7 +44,7 @@ export const PRIORIDADE_CONFIG: Record<string, { label: string; color: string; b
 
 export const PRIO_OPTIONS = ['critica', 'alta', 'media', 'baixa'] as const;
 
-// ── Status ─────────────────────────────────────────────────────
+// ── status ─────────────────────────────────────────────────────
 
 export const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   pendente:     { label: 'Pendente',     color: 'text-red-400',     bg: 'bg-red-500/10'     },
@@ -60,7 +60,7 @@ export const STATUS_ORDER: Record<string, number> = {
 
 export const STATUS_OPTIONS = ['pendente', 'em_progresso', 'concluida'] as const;
 
-// ── Origem ─────────────────────────────────────────────────────
+// ── origem ─────────────────────────────────────────────────────
 
 export const ORIGINS: Record<string, { label: string; Icon: React.ElementType; color: string }> = {
   manual:       { label: 'Manual',       Icon: Square,         color: 'text-zinc-400'   },

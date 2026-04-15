@@ -3,15 +3,16 @@ import {
   X, Calendar, Clock, Tag, Hash, Zap, Sparkles,
   CheckSquare, Plus, Trash2, Pencil, Check, AlertTriangle, GripVertical,
   FileText, StickyNote, ArrowRight, Loader2, ChevronDown,
+  RefreshCw, Link, Activity, Timer, Play,
 } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
-import type { TarefaUnificada, Label, Subtarefa } from '../../types';
-import { ORIGINS, PRIORIDADE_CONFIG, STATUS_CONFIG, STATUS_OPTIONS, PRIO_OPTIONS } from '../../constants/kanbanConfig';
-import { formatDate, dueDateInfo } from '../../utils/kanbanHelpers';
+import { apiFetch } from '../../store/api';
+import type { TarefaUnificada, Label, Subtarefa, RecorrenciaTarefa, DependenciaTarefa, AtividadeTarefa, TempoTarefa } from '../../types';
+import { ORIGINS, ORIGINS_FALLBACK, PRIORIDADE_CONFIG, STATUS_CONFIG, STATUS_OPTIONS, PRIO_OPTIONS } from '../../constants/kanbanConfig';
 import { formatDate, dueDateInfo } from '../../utils/kanbanHelpers';
 
 interface TaskDetailModalProps {
@@ -114,7 +115,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
     if ( editingTitle ) titleInputRef.current?.focus();
   }, [editingTitle]);
 
-  const origin = ORIGINS[tarefaAtual.origem] || { label: 'Outro', Icon: MessageSquare, color: 'text-zinc-400' };
+  const origin = ORIGINS[tarefaAtual.origem] || ORIGINS_FALLBACK;
   const OriginIcon = origin.Icon;
   const prioConfig = PRIORIDADE_CONFIG[tarefaAtual.prioridade] || PRIORIDADE_CONFIG.media;
   const statusConfig = STATUS_CONFIG[tarefaAtual.status] || STATUS_CONFIG.pendente;
@@ -209,6 +210,108 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
     }
   };
 
+  // ── Sprint D: tempo, recorrência, dependências, atividade ──
+
+  const [activeTab, setActiveTab] = useState<'detalhes' | 'atividade'>('detalhes');
+  const [tempo, setTempo] = useState<TempoTarefa | null>(null);
+  const [recorrencia, setRecorrencia] = useState<RecorrenciaTarefa | null>(null);
+  const [dependencias, setDependencias] = useState<DependenciaTarefa[]>([]);
+  const [atividades, setAtividades] = useState<AtividadeTarefa[]>([]);
+  const [showFreqMenu, setShowFreqMenu] = useState(false);
+  const [showDepPicker, setShowDepPicker] = useState(false);
+  const [loadingD, setLoadingD] = useState(false);
+  const tarefas = useTaskStore((s) => s.tarefas);
+
+  // busca dados sprint D na abertura do modal
+  useEffect(() =>
+  {
+    let cancelled = false;
+    async function fetchD ()
+    {
+      setLoadingD(true);
+      const [rTempo, rRec, rDeps, rAtiv] = await Promise.allSettled([
+        apiFetch(`/tarefas/${tarefaAtual.id}/tempo`),
+        apiFetch(`/tarefas/${tarefaAtual.id}/recorrencia`),
+        apiFetch(`/tarefas/${tarefaAtual.id}/dependencias`),
+        apiFetch(`/tarefas/${tarefaAtual.id}/atividades`),
+      ]);
+      if ( cancelled ) return;
+      if ( rTempo.status === 'fulfilled' && rTempo.value.ok )
+        setTempo(await rTempo.value.json());
+      if ( rRec.status === 'fulfilled' && rRec.value.ok )
+      {
+        const j = await rRec.value.json();
+        setRecorrencia(j.recorrencia ?? null);
+      }
+      if ( rDeps.status === 'fulfilled' && rDeps.value.ok )
+      {
+        const j = await rDeps.value.json();
+        setDependencias(j.dependencias ?? []);
+      }
+      if ( rAtiv.status === 'fulfilled' && rAtiv.value.ok )
+      {
+        const j = await rAtiv.value.json();
+        setAtividades(j.atividades ?? []);
+      }
+      setLoadingD(false);
+    }
+    fetchD();
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tarefaAtual.id]);
+
+  const handleSaveRecorrencia = async (freq: string) =>
+  {
+    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/recorrencia`, {
+      method: 'POST',
+      body: JSON.stringify({ frequencia: freq }),
+    });
+    if ( res.ok )
+    {
+      const j = await res.json();
+      setRecorrencia(j.recorrencia);
+      toast.success(`Recorrência ${freq} ativada`);
+    }
+    setShowFreqMenu(false);
+  };
+
+  const handleRemoveRecorrencia = async () =>
+  {
+    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/recorrencia`, { method: 'DELETE' });
+    if ( res.ok )
+    {
+      setRecorrencia(null);
+      toast.success('Recorrência removida');
+    }
+  };
+
+  const handleAddDep = async (depId: number) =>
+  {
+    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/dependencias?depende_de_id=${depId}`, { method: 'POST' });
+    if ( res.ok )
+    {
+      const j = await res.json();
+      if ( j.dependencia ) setDependencias((prev) => [...prev, j.dependencia]);
+      toast.success('Dependência adicionada');
+    }
+    setShowDepPicker(false);
+  };
+
+  const handleRemoveDep = async (depItemId: number) =>
+  {
+    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/dependencias/${depItemId}`, { method: 'DELETE' });
+    if ( res.ok )
+    {
+      setDependencias((prev) => prev.filter((d) => d.id !== depItemId));
+      toast.success('Dependência removida');
+    }
+  };
+
+  const FREQ_LABELS: Record<string, string> = { diaria: 'Diária', semanal: 'Semanal', mensal: 'Mensal' };
+  const TIPO_ICON: Record<string, string> = {
+    criou: '✨', editou: '✏️', moveu: '↗️', concluiu: '✅', arquivou: '📦', comentou: '💬',
+  };
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8"
@@ -286,7 +389,57 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
           </div>
         </div>
 
-        {/* corpo: 2 colunas no desktop */}
+        {/* tabs: detalhes / atividade */}
+        <div className="flex border-b border-zinc-800/40">
+          <button
+            onClick={() => setActiveTab('detalhes')}
+            className={`flex items-center gap-1.5 px-5 py-2.5 text-[12px] font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === 'detalhes'
+                ? 'border-violet-500 text-violet-300'
+                : 'border-transparent text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5" /> Detalhes
+          </button>
+          <button
+            onClick={() => setActiveTab('atividade')}
+            className={`flex items-center gap-1.5 px-5 py-2.5 text-[12px] font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === 'atividade'
+                ? 'border-violet-500 text-violet-300'
+                : 'border-transparent text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" /> Atividade
+            {atividades.length > 0 && (
+              <span className="ml-1 text-[10px] bg-zinc-800 text-zinc-400 rounded-full px-1.5 py-0.5">{atividades.length}</span>
+            )}
+          </button>
+        </div>
+
+        {/* tab atividade */}
+        {activeTab === 'atividade' && (
+          <div className="p-6 space-y-3 min-h-[200px]">
+            {loadingD && <p className="text-[12px] text-zinc-500">Carregando...</p>}
+            {!loadingD && atividades.length === 0 && (
+              <p className="text-[12px] text-zinc-600">Nenhum evento registrado ainda.</p>
+            )}
+            {atividades.map((ativ) => (
+              <div key={ativ.id} className="flex items-start gap-3">
+                <span className="text-base leading-none mt-0.5">{TIPO_ICON[ativ.tipo] ?? '🔹'}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] text-zinc-300">{ativ.detalhe || ativ.tipo}</p>
+                  {ativ.created_at && (
+                    <p className="text-[11px] text-zinc-600 mt-0.5">{formatDate(ativ.created_at)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* tab detalhes (original) */}
+        {activeTab === 'detalhes' && (
+        /* corpo: 2 colunas no desktop */
         <div className="flex flex-col lg:flex-row">
           {/* coluna principal — conteúdo */}
           <div className="flex-1 p-6 space-y-6 border-b lg:border-b-0 lg:border-r border-zinc-800/30">
@@ -592,9 +745,129 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                 <Trash2 className="w-3.5 h-3.5" />
                 Excluir Tarefa
               </button>
+
+              {/* D1: iniciar foco nesta tarefa */}
+              <button
+                onClick={() =>
+                {
+                  useTaskStore.getState().startFocusSession(tarefa.id);
+                  useTaskStore.getState().setActiveView('focus');
+                  onClose();
+                }}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[12px] font-medium
+                           text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 rounded-lg
+                           hover:bg-emerald-500/10 transition-colors"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Iniciar Foco
+              </button>
+
+              {/* D2: tempo registrado em foco */}
+              <div className="pt-3 border-t border-zinc-800/30">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Timer className="w-3.5 h-3.5 text-zinc-500" />
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Tempo em Foco</span>
+                </div>
+                {tempo ? (
+                  <p className="text-[13px] font-semibold text-white">
+                    {tempo.total_minutos >= 60
+                      ? `${Math.floor(tempo.total_minutos / 60)}h ${tempo.total_minutos % 60}m`
+                      : `${tempo.total_minutos}m`}
+                    <span className="text-[11px] font-normal text-zinc-500 ml-1">
+                      em {tempo.sessoes.length} sessão{tempo.sessoes.length !== 1 ? 'ões' : ''}
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-[12px] text-zinc-600">Nenhuma sessão registrada</p>
+                )}
+              </div>
+
+              {/* D3: recorrência */}
+              <div className="pt-3 border-t border-zinc-800/30">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Recorrência</span>
+                  </div>
+                  {recorrencia && (
+                    <button onClick={handleRemoveRecorrencia} className="text-[10px] text-red-400 hover:text-red-300 transition-colors">
+                      Remover
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowFreqMenu(!showFreqMenu)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[12px] transition-colors ${
+                      recorrencia
+                        ? 'border-violet-500/30 bg-violet-500/5 text-violet-300'
+                        : 'border-zinc-800/40 text-zinc-500 hover:border-zinc-700'
+                    }`}
+                  >
+                    {recorrencia ? `${FREQ_LABELS[recorrencia.frequencia] ?? recorrencia.frequencia}` : 'Não se repete'}
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+                  {showFreqMenu && (
+                    <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-zinc-900 border border-zinc-700/60 rounded-lg shadow-xl py-1">
+                      {['diaria', 'semanal', 'mensal'].map((f) => (
+                        <button key={f} onClick={() => handleSaveRecorrencia(f)}
+                          className="w-full text-left px-3 py-2 text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors">
+                          {FREQ_LABELS[f]}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* D4: dependências */}
+              <div className="pt-3 border-t border-zinc-800/30">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <Link className="w-3.5 h-3.5 text-zinc-500" />
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Bloqueada por</span>
+                  </div>
+                  <button
+                    onClick={() => setShowDepPicker(!showDepPicker)}
+                    className="p-0.5 rounded text-zinc-500 hover:text-violet-400 transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  {dependencias.map((dep) => (
+                    <div key={dep.id} className="flex items-center gap-2 text-[12px]">
+                      <ArrowRight className="w-3 h-3 text-zinc-600 shrink-0" />
+                      <span className={`flex-1 truncate ${dep.depende_de_status === 'concluida' ? 'line-through text-zinc-600' : 'text-zinc-300'}`}>
+                        {dep.depende_de_titulo}
+                      </span>
+                      <button onClick={() => handleRemoveDep(dep.id)} className="text-zinc-600 hover:text-red-400 transition-colors">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {dependencias.length === 0 && !showDepPicker && (
+                    <p className="text-[11px] text-zinc-600">Sem dependências</p>
+                  )}
+                </div>
+                {showDepPicker && (
+                  <div className="mt-2 max-h-40 overflow-y-auto space-y-0.5 bg-zinc-900/60 border border-zinc-800/40 rounded-lg p-1.5">
+                    {tarefas
+                      .filter((t) => t.id !== tarefaAtual.id && t.status !== 'concluida' && !dependencias.some((d) => d.depende_de_id === t.id))
+                      .slice(0, 8)
+                      .map((t) => (
+                        <button key={t.id} onClick={() => handleAddDep(t.id)}
+                          className="w-full text-left px-2 py-1.5 rounded text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors truncate">
+                          {t.titulo}
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );

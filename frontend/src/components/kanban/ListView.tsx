@@ -1,11 +1,11 @@
 // C1: Vista lista (table view) alternativa ao board
 import { useState } from 'react';
 import {
-  ChevronDown, ChevronUp, Clock, Zap,
-  Calendar, Tag, Pencil, Trash2, Copy, MoreHorizontal,
+  ChevronDown, ChevronUp, Zap,
+  Pencil, Trash2, Copy, MoreHorizontal, CheckSquare, Square,
 } from 'lucide-react';
 import type { TarefaUnificada } from '../../types';
-import { STATUS_CONFIG as STATUS_BADGE, PRIO_BADGE, getOrigin, PRIO_ORDER, STATUS_ORDER } from '../../constants/kanbanConfig';
+import { STATUS_CONFIG as STATUS_BADGE, PRIO_BADGE, getOrigin } from '../../constants/kanbanConfig';
 import { compareValue } from '../../utils/kanbanHelpers';
 
 interface ListViewProps {

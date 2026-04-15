@@ -2,13 +2,14 @@ import { useState, useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  Clock, Languages, CheckSquare,
-  AlertTriangle, Zap, Sparkles, Calendar, MoreHorizontal, Pencil, Trash2, Copy,
+  Clock, Languages, CheckSquare, Square,
+  AlertTriangle, Zap, Sparkles, Calendar, MoreHorizontal, Pencil, Trash2, Copy, Timer,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
 import { PRIORITY_STRIP, PRIO_BADGE, getOrigin } from '../../constants/kanbanConfig';
 import { getElapsed, getUrgencyBadge } from '../../utils/kanbanHelpers';
+import { useTaskStore } from '../../store/useTaskStore';
 
 interface KanbanCardProps {
   tarefa: TarefaUnificada;
@@ -96,6 +97,9 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate }: KanbanCar
   const elapsed = getElapsed(tarefa.created_at, tarefa.id);
   const OriginIcon = origin.Icon;
   const isCriticalFocus = tarefa.score_urgencia > 100;
+  const focusPhase = useTaskStore((s) => s.focusState.phase);
+  const focusTargetId = useTaskStore((s) => s.focusState.targetTaskId);
+  const isInFocus = (focusPhase === 'focus' || focusPhase === 'break') && focusTargetId === tarefa.id;
   const isIA = tarefa.origem === 'gmail_triage' || tarefa.origem === 'gmail_mock' || tarefa.origem === 'gmail_api';
   const prio = tarefa.prioridade || 'media';
   const prioStyle = PRIO_BADGE[prio] || PRIO_BADGE.media;
@@ -121,9 +125,11 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate }: KanbanCar
         isDragging ? 'shadow-2xl shadow-violet-500/10 scale-[1.02] rotate-1' : '',
         isIA
           ? 'border-violet-500/30 shadow-[0_0_24px_rgba(139,92,246,0.08)]'
-          : isCriticalFocus
-            ? 'border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
-            : 'border-zinc-800/50',
+          : isInFocus
+            ? 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
+            : isCriticalFocus
+              ? 'border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.1)]'
+              : 'border-zinc-800/50',
       ].join(' ')}
       tabIndex={0}
     >
@@ -200,7 +206,7 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate }: KanbanCar
               <span className={`w-1.5 h-1.5 rounded-full ${urgency.dot}`} />
               {urgency.label}
             </span>
-            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${prioStyle.bg} ${prioStyle.text}`}>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${prioStyle.bg} ${prioStyle.color}`}>
               <Zap className="w-3 h-3" />
               {prio}
             </span>
@@ -208,6 +214,12 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate }: KanbanCar
               <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-red-500/20 text-red-400 animate-pulse">
                 <AlertTriangle className="w-3 h-3" />
                 Foco
+              </span>
+            )}
+            {isInFocus && (
+              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 animate-pulse">
+                <Timer className="w-3 h-3" />
+                Em Foco
               </span>
             )}
           </div>

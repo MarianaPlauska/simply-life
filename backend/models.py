@@ -235,7 +235,7 @@ class EntradaDiario(database.Base):
 
 # ── Sprint C: Templates de Tarefa (C7) ──────────────────────
 
-# 18. Templates reutilizáveis
+# 18. templates reutilizáveis
 class TarefaTemplate(database.Base):
     __tablename__ = "tarefa_templates"
     id = Column(Integer, primary_key=True, index=True)
@@ -245,3 +245,42 @@ class TarefaTemplate(database.Base):
     subtarefas_json = Column(Text, nullable=True)   # JSON array de strings: ["item1", "item2"]
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     dono = relationship("Usuario")
+
+# ── Sprint D: Integração Profunda ────────────────────────────
+
+# 19. recorrência de tarefa (D3)
+class TarefaRecorrencia(database.Base):
+    __tablename__ = "tarefa_recorrencias"
+    id = Column(Integer, primary_key=True, index=True)
+    tarefa_id = Column(Integer, ForeignKey("tarefas_unificadas.id", ondelete="CASCADE"), nullable=False, unique=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    frequencia = Column(String, nullable=False)  # 'diaria', 'semanal', 'mensal'
+    ativa = Column(Boolean, default=True)
+    proximo_em = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    tarefa = relationship("TarefaUnificada")
+
+# 20. dependência entre tarefas (D4)
+class TarefaDependencia(database.Base):
+    __tablename__ = "tarefa_dependencias"
+    __table_args__ = (
+        UniqueConstraint('tarefa_id', 'depende_de_id', name='uq_tarefa_dependencia'),
+    )
+    id = Column(Integer, primary_key=True, index=True)
+    tarefa_id = Column(Integer, ForeignKey("tarefas_unificadas.id", ondelete="CASCADE"), nullable=False)
+    depende_de_id = Column(Integer, ForeignKey("tarefas_unificadas.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    tarefa = relationship("TarefaUnificada", foreign_keys=[tarefa_id])
+    bloqueio = relationship("TarefaUnificada", foreign_keys=[depende_de_id])
+
+# 21. feed de atividade por tarefa (D5)
+class AtividadeTarefa(database.Base):
+    __tablename__ = "atividades_tarefa"
+    id = Column(Integer, primary_key=True, index=True)
+    tarefa_id = Column(Integer, ForeignKey("tarefas_unificadas.id", ondelete="CASCADE"), nullable=False)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    tipo = Column(String, nullable=False)  # 'criou', 'editou', 'moveu', 'concluiu'
+    detalhe = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    tarefa = relationship("TarefaUnificada")

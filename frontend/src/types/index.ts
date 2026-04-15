@@ -28,6 +28,36 @@ export interface TarefaUnificada {
   labels: Label[];
 }
 
+// sprint D — recorrência, dependências, atividade
+export interface RecorrenciaTarefa {
+  id: number;
+  tarefa_id: number;
+  frequencia: 'diaria' | 'semanal' | 'mensal';
+  ativa: boolean;
+  proximo_em: string | null;
+  created_at: string | null;
+}
+
+export interface DependenciaTarefa {
+  id: number;
+  tarefa_id: number;
+  depende_de_id: number;
+  depende_de_titulo: string;
+  depende_de_status: string;
+}
+
+export interface AtividadeTarefa {
+  id: number;
+  tipo: string;
+  detalhe: string | null;
+  created_at: string | null;
+}
+
+export interface TempoTarefa {
+  total_minutos: number;
+  sessoes: Array<{ id: number; duracao_minutos: number; created_at: string | null }>;
+}
+
 export interface HabitoStreak {
   habito_id: number;
   nome_exibicao: string;

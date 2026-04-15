@@ -366,3 +366,37 @@ class TemplateResponse(BaseModel):
     subtarefas: list[str] = []
     created_at: Optional[datetime] = None
 
+
+# ── Sprint D: Integração Profunda ────────────────────────────
+
+class RecorrenciaCreate(BaseModel):
+    frequencia: str  # 'diaria', 'semanal', 'mensal'
+
+class RecorrenciaResponse(BaseModel):
+    id: int
+    tarefa_id: int
+    frequencia: str
+    ativa: bool
+    proximo_em: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DependenciaItem(BaseModel):
+    id: int
+    tarefa_id: int
+    depende_de_id: int
+    depende_de_titulo: str = ""
+    depende_de_status: str = ""
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AtividadeResponse(BaseModel):
+    id: int
+    tipo: str
+    detalhe: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)

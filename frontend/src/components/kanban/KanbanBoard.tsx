@@ -1,16 +1,17 @@
-// KanbanBoard — Sprint C: power features (C1-C8)
+// KanbanBoard — Sprint C: power features (C1-C8) | Sprint D: Gantt view
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { DndContext, type DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import {
   FlaskConical, X, Send, Loader2, Search, SlidersHorizontal,
   LayoutGrid, List, Archive, RotateCcw, Trash2, ArrowRight,
-  ChevronDown, Zap, Copy,
+  ChevronDown, Zap, Copy, CalendarDays,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { KanbanCard } from './KanbanCard';
 import { KanbanColumn } from './KanbanColumn';
 import { TaskDetailModal } from './TaskDetailModal';
 import { ListView } from './ListView';
+import { GanttView } from './GanttView';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
 import { PRIO_LABELS, PRIO_ORDER, ORIGIN_LABELS } from '../../constants/kanbanConfig';
@@ -25,7 +26,7 @@ const PRIORIDADES = ['critica', 'alta', 'media', 'baixa'] as const;
 const ORIGENS     = ['manual', 'gmail_triage', 'gmail_mock', 'gmail_api', 'webhook'] as const;
 
 
-type ViewMode = 'board' | 'list';
+type ViewMode = 'board' | 'list' | 'gantt';
 type GroupBy  = 'none' | 'prioridade' | 'origem' | 'label';
 type Tab      = 'active' | 'arquivo';
 
@@ -506,6 +507,13 @@ export function KanbanBoard ()
                   >
                     <List className="w-4 h-4" />
                   </button>
+                  <button
+                    onClick={() => setViewMode('gantt')}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'gantt' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    title="Timeline / Gantt"
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                  </button>
                 </div>
               )}
 
@@ -640,6 +648,11 @@ export function KanbanBoard ()
             onEdit={handleEditCard}
             onDelete={handleDeleteCard}
             onDuplicate={handleDuplicate}
+          />
+        ) : viewMode === 'gantt' ? (
+          <GanttView
+            tarefas={filtered}
+            onSelectTarefa={(t) => setSelectedTarefa(t)}
           />
         ) : (
           renderBoard()
