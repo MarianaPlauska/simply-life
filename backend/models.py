@@ -193,3 +193,31 @@ class HistoricoHabito(database.Base):
     concluido = Column(Integer, default=1)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     habito = relationship("HabitoDiario", back_populates="historico")
+
+# ── Sprint 4: Bem-Estar Mental ───────────────────────────────
+
+# 16. Mood Tracker (humor diário)
+class DiarioHumor(database.Base):
+    __tablename__ = "diario_humor"
+    __table_args__ = (
+        UniqueConstraint('usuario_id', 'data', name='uq_humor_dia'),
+    )
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    data = Column(Date, nullable=False)
+    humor = Column(Integer, nullable=False)        # 1-5
+    emoji = Column(String(10), nullable=True)
+    nota = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    usuario = relationship("Usuario")
+
+# 17. Journaling (diário livre)
+class EntradaDiario(database.Base):
+    __tablename__ = "entradas_diario"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    data = Column(Date, nullable=False)
+    conteudo = Column(Text, nullable=False)
+    prompt_usado = Column(String(200), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    usuario = relationship("Usuario")

@@ -233,3 +233,52 @@ class BuscaResponse(BaseModel):
     tarefas: list[BuscaTarefaItem] = []
     anotacoes: list[BuscaAnotacaoItem] = []
     total: int = 0
+
+
+# ── Bem-Estar Mental (Sprint 4) ──────────────────────────────
+class HumorCreate(BaseModel):
+    humor: int                  # 1 a 5
+    emoji: str = ""
+    nota: str = ""
+
+
+class HumorResponse(BaseModel):
+    id: int
+    data: str
+    humor: int
+    emoji: str | None = None
+    nota: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class EntradaDiarioCreate(BaseModel):
+    conteudo: str
+    prompt_usado: str = ""
+
+
+class EntradaDiarioResponse(BaseModel):
+    id: int
+    data: str
+    conteudo: str
+    prompt_usado: str | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class WeeklyReviewResponse(BaseModel):
+    semana: str
+    humor_medio: float
+    registros_humor: int
+    tarefas_concluidas: int
+    tarefas_criadas: int
+    habitos_pct: float
+    despesas_total: float
+    foco_minutos: int
+    insight_ia: str
+
+
+class CorrelacaoResponse(BaseModel):
+    insights: list[str]
+    dados: list[dict]
+

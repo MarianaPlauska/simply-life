@@ -1,11 +1,3 @@
-"""
-main.py — Ponto de entrada da API Simply-Life OS.
-
-Responsabilidades:
-  • Inicializar FastAPI + middlewares (CORS, Rate Limiter)
-  • Registrar routers de domínio
-  • Iniciar worker de background (polling)
-"""
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -37,6 +29,7 @@ from routers import integracoes as integracoes_router
 from routers import gamificacao as gamificacao_router
 from routers import triagem as triagem_router
 from routers import busca as busca_router
+from routers import bem_estar as bem_estar_router
 
 # ── Worker de background (polling) ────────────────────────────
 async def motor_busca_ativa():
@@ -91,3 +84,4 @@ app.include_router(integracoes_router.router)
 app.include_router(gamificacao_router.router)
 app.include_router(triagem_router.router)
 app.include_router(busca_router.router)
+app.include_router(bem_estar_router.router)

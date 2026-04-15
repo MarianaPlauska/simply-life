@@ -179,14 +179,44 @@ CREATE TABLE IF NOT EXISTS historico_habitos (
 CREATE INDEX IF NOT EXISTS ix_historico_habitos_usuario_id ON historico_habitos (usuario_id);
 CREATE INDEX IF NOT EXISTS ix_historico_habitos_habito_id  ON historico_habitos (habito_id);
 
--- 16. alembic version tracking (para o alembic saber onde parar)
+-- =============================================================
+-- SPRINT 4: Bem-Estar Mental (Mood Tracker + Journaling)
+-- =============================================================
+
+-- 16. Diário de Humor (mood tracker — 1 registro por dia)
+CREATE TABLE IF NOT EXISTS diario_humor (
+    id         SERIAL PRIMARY KEY,
+    usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+    data       DATE NOT NULL,
+    humor      INTEGER NOT NULL,           -- 1 a 5
+    emoji      VARCHAR(10),
+    nota       TEXT,
+    created_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT uq_humor_dia UNIQUE (usuario_id, data)
+);
+CREATE INDEX IF NOT EXISTS ix_diario_humor_usuario_id ON diario_humor (usuario_id);
+CREATE INDEX IF NOT EXISTS ix_diario_humor_data       ON diario_humor (data);
+
+-- 17. Entradas de Diário (journaling livre)
+CREATE TABLE IF NOT EXISTS entradas_diario (
+    id           SERIAL PRIMARY KEY,
+    usuario_id   INTEGER NOT NULL REFERENCES usuarios(id),
+    data         DATE NOT NULL,
+    conteudo     TEXT NOT NULL,
+    prompt_usado VARCHAR(200),
+    created_at   TIMESTAMP DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ix_entradas_diario_usuario_id ON entradas_diario (usuario_id);
+CREATE INDEX IF NOT EXISTS ix_entradas_diario_data       ON entradas_diario (data);
+
+-- 18. alembic version tracking (para o alembic saber onde parar)
 CREATE TABLE IF NOT EXISTS alembic_version (
     version_num VARCHAR(32) NOT NULL,
     CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
 );
--- marca como já aplicada até a última migration (sprint 2)
+-- marca como já aplicada até a última migration (sprint 4)
 INSERT INTO alembic_version (version_num)
-VALUES ('b3c9f2e1a5d8')
+VALUES ('c4d7f8a2e6b1')
 ON CONFLICT DO NOTHING;
 
 -- =============================================================

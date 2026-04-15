@@ -90,25 +90,33 @@ function NavigationSync() {
   const navigate = useNavigate();
   const activeView = useTaskStore((s) => s.activeView);
   const setActiveView = useTaskStore((s) => s.setActiveView);
-  const lastPathRef = useRef(location.pathname);
-  const lastViewRef = useRef(activeView);
+  // flag que impede o efeito de URL disparar navegação de volta
+  const isUpdating = useRef(false);
 
+  // url mudou → sincroniza o store
   useEffect(() => {
+    if ( isUpdating.current ) return;
     const viewFromUrl = ROUTE_MAP[location.pathname];
-    if (viewFromUrl && viewFromUrl !== activeView) {
-      lastViewRef.current = viewFromUrl;
+    if ( viewFromUrl && viewFromUrl !== activeView )
+    {
+      isUpdating.current = true;
       setActiveView(viewFromUrl);
+      // libera o lock no próximo tick
+      requestAnimationFrame(() => { isUpdating.current = false; });
     }
-    lastPathRef.current = location.pathname;
-  }, [location.pathname, activeView, setActiveView]);
+  }, [location.pathname]);
 
+  // store mudou → sincroniza a url
   useEffect(() => {
+    if ( isUpdating.current ) return;
     const pathForView = VIEW_TO_PATH[activeView];
-    if (pathForView && pathForView !== location.pathname && activeView !== lastViewRef.current) {
+    if ( pathForView && pathForView !== location.pathname )
+    {
+      isUpdating.current = true;
       navigate(pathForView, { replace: false });
+      requestAnimationFrame(() => { isUpdating.current = false; });
     }
-    lastViewRef.current = activeView;
-  }, [activeView, location.pathname, navigate]);
+  }, [activeView]);
 
   return null;
 }

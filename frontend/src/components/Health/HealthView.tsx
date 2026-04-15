@@ -6,6 +6,9 @@ import {
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import type { HabitoDiario } from '../../store/useTaskStore';
+import { MoodTracker } from './MoodTracker';
+import { JournalEntry } from './JournalEntry';
+import { WeeklyReviewCard } from './WeeklyReviewCard';
 
 /* -- Icon map for habit types -- */
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -47,9 +50,20 @@ export function HealthView() {
   const [showHabitForm, setShowHabitForm] = useState(false);
   const [habitForm, setHabitForm] = useState({ tipo: 'customizado', nome_exibicao: '', meta_diaria: '5', unidade: 'un' });
 
+  // bem-estar mental fetches
+  const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje);
+  const fetchHumorSemana = useTaskStore((s) => s.fetchHumorSemana);
+  const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje);
+  const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia);
+
   useEffect(() => {
     fetchMedicamentos();
     fetchHabitos();
+    // carrega dados de bem-estar mental
+    fetchHumorHoje();
+    fetchHumorSemana();
+    fetchDiarioHoje();
+    fetchPromptDoDia();
   }, []);
 
   /* -- Vitality score from habits + meds -- */
@@ -152,6 +166,15 @@ export function HealthView() {
           <span>Medicamentos: {tomados}/{totalMeds}</span>
         </div>
       </section>
+
+      {/* === Mood Tracker === */}
+      <MoodTracker />
+
+      {/* === Journaling === */}
+      <JournalEntry />
+
+      {/* === Weekly Review + Correlações === */}
+      <WeeklyReviewCard />
 
       {/* === Habitos Interativos === */}
       <section className="space-y-4">
