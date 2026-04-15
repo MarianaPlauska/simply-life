@@ -172,7 +172,7 @@ def resumo_dashboard(
         for h in habitos
     ]
     habitos_pct = (
-        (sum(min(h.progresso_atual / h.meta_diaria, 1) for h in habitos) / len(habitos) * 100)
+        (sum(min(h.progresso_atual / max(h.meta_diaria, 1), 1) for h in habitos) / len(habitos) * 100)
         if habitos
         else 0.0
     )

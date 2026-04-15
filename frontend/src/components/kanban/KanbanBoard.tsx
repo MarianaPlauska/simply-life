@@ -13,6 +13,7 @@ import { TaskDetailModal } from './TaskDetailModal';
 import { ListView } from './ListView';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
+import { PRIO_LABELS, PRIO_ORDER, ORIGIN_LABELS } from '../../constants/kanbanConfig';
 
 const COLUMNS = [
   { id: 'pendente',      title: 'Pendente',      dotColor: 'bg-red-500',     wipLimit: 5  },
@@ -23,10 +24,6 @@ const COLUMNS = [
 const PRIORIDADES = ['critica', 'alta', 'media', 'baixa'] as const;
 const ORIGENS     = ['manual', 'gmail_triage', 'gmail_mock', 'gmail_api', 'webhook'] as const;
 
-const PRIO_LABELS: Record<string, string> = { critica: 'Crítica', alta: 'Alta', media: 'Média', baixa: 'Baixa' };
-const ORIGIN_LABELS: Record<string, string> = {
-  manual: 'Manual', gmail_triage: 'Gmail', gmail_mock: 'Gmail (mock)', gmail_api: 'Gmail API', webhook: 'Webhook',
-};
 
 type ViewMode = 'board' | 'list';
 type GroupBy  = 'none' | 'prioridade' | 'origem' | 'label';

@@ -2,11 +2,13 @@ import { useState, useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import {
-  Clock, Languages, Code2, Mail, MessageSquare, CheckSquare, Square,
+  Clock, Languages, CheckSquare,
   AlertTriangle, Zap, Sparkles, Calendar, MoreHorizontal, Pencil, Trash2, Copy,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
+import { PRIORITY_STRIP, PRIO_BADGE, getOrigin } from '../../constants/kanbanConfig';
+import { getElapsed, getUrgencyBadge } from '../../utils/kanbanHelpers';
 
 interface KanbanCardProps {
   tarefa: TarefaUnificada;
@@ -15,62 +17,7 @@ interface KanbanCardProps {
   onDuplicate?: (id: number) => void;
 }
 
-/* cor da faixa superior baseada na prioridade */
-const PRIORITY_STRIP: Record<string, string> = {
-  critica: 'from-red-500 to-rose-600',
-  alta:    'from-amber-500 to-orange-500',
-  media:   'from-blue-500 to-indigo-500',
-  baixa:   'from-zinc-600 to-zinc-700',
-};
 
-/* mapeamento de origem → icone e cor */
-const ORIGINS: Record<string, { label: string; Icon: React.ElementType; color: string }> = {
-  manual:       { label: 'Manual',       Icon: Square,         color: 'text-zinc-400' },
-  gmail_triage: { label: 'Gmail',        Icon: Mail,           color: 'text-blue-400' },
-  gmail_mock:   { label: 'Gmail (mock)', Icon: Mail,           color: 'text-violet-400' },
-  gmail_api:    { label: 'Gmail API',    Icon: Mail,           color: 'text-blue-400' },
-  webhook:      { label: 'Webhook',      Icon: Code2,          color: 'text-violet-400' },
-};
-const FALLBACK_ORIGIN = { label: 'Outro', Icon: MessageSquare, color: 'text-zinc-400' };
-
-function getOrigin (origem: string)
-{
-  return ORIGINS[origem] || FALLBACK_ORIGIN;
-}
-
-/* calcula quanto tempo atrás a tarefa foi criada */
-function getElapsed (createdAt: string | null, id: number): string
-{
-  if ( createdAt )
-  {
-    const diff = Date.now() - new Date(createdAt).getTime();
-    const mins = Math.floor(diff / 60000);
-    if ( mins < 60 ) return `${mins}m`;
-    const hrs = Math.floor(mins / 60);
-    if ( hrs < 24 ) return `${hrs}h`;
-    const dias = Math.floor(hrs / 24);
-    return `${dias}d`;
-  }
-  const hours = [1, 2, 4, 6, 12, 24];
-  const h = hours[id % hours.length];
-  return h < 24 ? `${h}h` : '1d';
-}
-
-/* badge de urgencia */
-function getUrgencyBadge (score: number)
-{
-  if ( score > 80 ) return { label: 'Critico', bg: 'bg-red-500/10', text: 'text-red-400', dot: 'bg-red-500' };
-  if ( score > 40 ) return { label: 'Atencao', bg: 'bg-amber-500/10', text: 'text-amber-400', dot: 'bg-amber-500' };
-  return { label: 'Normal', bg: 'bg-emerald-500/10', text: 'text-emerald-400', dot: 'bg-emerald-500' };
-}
-
-/* estilos visuais por prioridade */
-const PRIORIDADE_STYLES: Record<string, { bg: string; text: string }> = {
-  critica: { bg: 'bg-red-500/10',   text: 'text-red-400'   },
-  alta:    { bg: 'bg-amber-500/10', text: 'text-amber-400' },
-  media:   { bg: 'bg-blue-500/10',  text: 'text-blue-400'  },
-  baixa:   { bg: 'bg-zinc-500/10',  text: 'text-zinc-400'  },
-};
 
 /* chip de data de vencimento com cor contextual */
 function DueDateChip ({ date }: { date: string })
@@ -151,7 +98,7 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate }: KanbanCar
   const isCriticalFocus = tarefa.score_urgencia > 100;
   const isIA = tarefa.origem === 'gmail_triage' || tarefa.origem === 'gmail_mock' || tarefa.origem === 'gmail_api';
   const prio = tarefa.prioridade || 'media';
-  const prioStyle = PRIORIDADE_STYLES[prio] || PRIORIDADE_STYLES.media;
+  const prioStyle = PRIO_BADGE[prio] || PRIO_BADGE.media;
   const subs = tarefa.subtarefas || [];
   const subtasks = { done: subs.filter((s) => s.concluida).length, total: subs.length };
   const labels = tarefa.labels || [];

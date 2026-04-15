@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  X, Calendar, Clock, Tag, Hash, Zap, Sparkles, Mail, Code2, MessageSquare, Square,
+  X, Calendar, Clock, Tag, Hash, Zap, Sparkles,
   CheckSquare, Plus, Trash2, Pencil, Check, AlertTriangle, GripVertical,
   FileText, StickyNote, ArrowRight, Loader2, ChevronDown,
 } from 'lucide-react';
@@ -10,6 +10,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import type { TarefaUnificada, Label, Subtarefa } from '../../types';
+import { ORIGINS, PRIORIDADE_CONFIG, STATUS_CONFIG, STATUS_OPTIONS, PRIO_OPTIONS } from '../../constants/kanbanConfig';
+import { formatDate, dueDateInfo } from '../../utils/kanbanHelpers';
+import { formatDate, dueDateInfo } from '../../utils/kanbanHelpers';
 
 interface TaskDetailModalProps {
   tarefa: TarefaUnificada;
@@ -68,54 +71,6 @@ function SortableSubtaskItem ({ sub, onToggle, onDelete }: {
     </div>
   );
 }
-
-/* mapeamento de origem */
-const ORIGINS: Record<string, { label: string; Icon: React.ElementType; color: string }> = {
-  manual:       { label: 'Manual',       Icon: Square,         color: 'text-zinc-400'   },
-  gmail_triage: { label: 'Gmail',        Icon: Mail,           color: 'text-blue-400'   },
-  gmail_mock:   { label: 'Gmail (mock)', Icon: Mail,           color: 'text-violet-400' },
-  gmail_api:    { label: 'Gmail API',    Icon: Mail,           color: 'text-blue-400'   },
-  webhook:      { label: 'Webhook',      Icon: Code2,          color: 'text-violet-400' },
-};
-
-const PRIORIDADE_CONFIG: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  critica: { label: 'Crítica', color: 'text-red-400',    bg: 'bg-red-500/10',    border: 'border-red-500/30'   },
-  alta:    { label: 'Alta',    color: 'text-amber-400',  bg: 'bg-amber-500/10',  border: 'border-amber-500/30' },
-  media:   { label: 'Média',   color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/30'  },
-  baixa:   { label: 'Baixa',   color: 'text-zinc-400',   bg: 'bg-zinc-500/10',   border: 'border-zinc-500/30'  },
-};
-
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pendente:      { label: 'Pendente',      color: 'text-red-400',     bg: 'bg-red-500/10'     },
-  em_progresso:  { label: 'Em Progresso',  color: 'text-amber-400',   bg: 'bg-amber-500/10'   },
-  concluida:     { label: 'Concluída',     color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-};
-
-const STATUS_OPTIONS = ['pendente', 'em_progresso', 'concluida'] as const;
-const PRIO_OPTIONS   = ['critica', 'alta', 'media', 'baixa'] as const;
-
-/* helper para formatar data */
-function formatDate (dateStr: string | null): string
-{
-  if ( !dateStr ) return '—';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-}
-
-/* chip de data de vencimento com cor contextual */
-function dueDateInfo (dateStr: string | null)
-{
-  if ( !dateStr ) return { text: 'Sem prazo', color: 'text-zinc-500', bg: 'bg-zinc-800/50' };
-  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-  const venc = new Date(dateStr); venc.setHours(0, 0, 0, 0);
-  const diff = Math.ceil((venc.getTime() - hoje.getTime()) / 86400000);
-
-  if ( diff < 0 )       return { text: `${Math.abs(diff)}d atrasado`,   color: 'text-red-400',    bg: 'bg-red-500/10'    };
-  if ( diff === 0 )      return { text: 'Vence hoje',                    color: 'text-amber-400',  bg: 'bg-amber-500/10'  };
-  if ( diff <= 2 )       return { text: `Vence em ${diff}d`,             color: 'text-orange-400', bg: 'bg-orange-500/10' };
-  return { text: formatDate(dateStr), color: 'text-zinc-400', bg: 'bg-zinc-800/50' };
-}
-
 
 export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 {

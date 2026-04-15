@@ -1,10 +1,12 @@
 // C1: Vista lista (table view) alternativa ao board
 import { useState } from 'react';
 import {
-  ChevronDown, ChevronUp, CheckSquare, Square, Clock, Zap, Mail, Code2,
-  MessageSquare, Calendar, Tag, Pencil, Trash2, Copy, MoreHorizontal,
+  ChevronDown, ChevronUp, Clock, Zap,
+  Calendar, Tag, Pencil, Trash2, Copy, MoreHorizontal,
 } from 'lucide-react';
 import type { TarefaUnificada } from '../../types';
+import { STATUS_CONFIG as STATUS_BADGE, PRIO_BADGE, getOrigin, PRIO_ORDER, STATUS_ORDER } from '../../constants/kanbanConfig';
+import { compareValue } from '../../utils/kanbanHelpers';
 
 interface ListViewProps {
   tarefas: TarefaUnificada[];
@@ -16,46 +18,8 @@ interface ListViewProps {
   onDuplicate: (id: number) => void;
 }
 
-const STATUS_BADGE: Record<string, { label: string; color: string; bg: string }> = {
-  pendente:     { label: 'Pendente',     color: 'text-red-400',     bg: 'bg-red-500/10'     },
-  em_progresso: { label: 'Em Progresso', color: 'text-amber-400',   bg: 'bg-amber-500/10'   },
-  concluida:    { label: 'Concluída',    color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-};
-
-const PRIO_BADGE: Record<string, { label: string; color: string; bg: string }> = {
-  critica: { label: 'Crítica', color: 'text-red-400',    bg: 'bg-red-500/10'    },
-  alta:    { label: 'Alta',    color: 'text-amber-400',  bg: 'bg-amber-500/10'  },
-  media:   { label: 'Média',   color: 'text-blue-400',   bg: 'bg-blue-500/10'   },
-  baixa:   { label: 'Baixa',   color: 'text-zinc-400',   bg: 'bg-zinc-500/10'   },
-};
-
-const ORIGIN_ICON: Record<string, { Icon: React.ElementType; color: string }> = {
-  manual:       { Icon: Square,         color: 'text-zinc-400'   },
-  gmail_triage: { Icon: Mail,           color: 'text-blue-400'   },
-  gmail_mock:   { Icon: Mail,           color: 'text-violet-400' },
-  gmail_api:    { Icon: Mail,           color: 'text-blue-400'   },
-  webhook:      { Icon: Code2,          color: 'text-violet-400' },
-};
-
 type SortKey = 'titulo' | 'prioridade' | 'status' | 'score_urgencia' | 'created_at';
 type SortDir = 'asc' | 'desc';
-
-const PRIO_ORDER: Record<string, number> = { critica: 0, alta: 1, media: 2, baixa: 3 };
-const STATUS_ORDER: Record<string, number> = { pendente: 0, em_progresso: 1, concluida: 2 };
-
-function compareValue (a: TarefaUnificada, b: TarefaUnificada, key: SortKey): number
-{
-  if ( key === 'prioridade' ) return (PRIO_ORDER[a.prioridade] ?? 9) - (PRIO_ORDER[b.prioridade] ?? 9);
-  if ( key === 'status' )     return (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9);
-  if ( key === 'score_urgencia' ) return b.score_urgencia - a.score_urgencia;
-  if ( key === 'created_at' )
-  {
-    const da = a.created_at ? new Date(a.created_at).getTime() : 0;
-    const db_ = b.created_at ? new Date(b.created_at).getTime() : 0;
-    return db_ - da;
-  }
-  return a.titulo.localeCompare(b.titulo, 'pt-BR');
-}
 
 export function ListView ({ tarefas, selectedIds, onToggleSelect, onSelectAll, onEdit, onDelete, onDuplicate }: ListViewProps)
 {
@@ -124,7 +88,7 @@ export function ListView ({ tarefas, selectedIds, onToggleSelect, onSelectAll, o
         const isSelected = selectedIds.has(t.id);
         const sBadge = STATUS_BADGE[t.status] || STATUS_BADGE.pendente;
         const pBadge = PRIO_BADGE[t.prioridade] || PRIO_BADGE.media;
-        const origin = ORIGIN_ICON[t.origem] || { Icon: MessageSquare, color: 'text-zinc-400' };
+        const origin = getOrigin(t.origem || 'manual');
         const OriginIcon = origin.Icon;
         const subs = t.subtarefas || [];
         const subsDone = subs.filter((s) => s.concluida).length;

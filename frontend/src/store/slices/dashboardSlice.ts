@@ -2,6 +2,7 @@
 import type { StateCreator } from 'zustand';
 import type { DashboardResumo, Notificacao } from '../storeTypes';
 import { apiFetch } from '../api';
+import type { UISlice } from './uiSlice';
 
 export interface DashboardSlice {
   dashboardResumo: DashboardResumo | null;
@@ -26,7 +27,7 @@ function shouldFetch(key: string, interval = 2000): boolean
   return true;
 }
 
-export const createDashboardSlice: StateCreator<DashboardSlice, [], [], DashboardSlice> = (set, get) => ({
+export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], [], DashboardSlice> = (set, get) => ({
   dashboardResumo: null,
   dashboardLoading: false,
   notificacoes: [],
@@ -91,10 +92,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
       if ( !res.ok ) return;
       const data = await res.json();
       const kw = (data.palavras_chave_email || '').split(',').map((s: string) => s.trim()).filter(Boolean);
-      // precisa do set do ui slice, mas aqui usamos cast pra acessar keywords
-      (set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)(
-        () => ({ keywords: kw })
-      );
+      get().setKeywords(kw);
     }
     catch { /* backend offline */ }
   },
@@ -103,9 +101,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
   {
     try
     {
-      (set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)(
-        () => ({ keywords: palavras })
-      );
+      get().setKeywords(palavras);
       const res = await apiFetch('/preferencias', {
         method: 'PATCH',
         body: JSON.stringify({ palavras_chave_email: palavras.join(',') }),
