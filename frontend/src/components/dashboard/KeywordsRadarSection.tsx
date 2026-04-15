@@ -1,6 +1,8 @@
 import { motion } from 'framer-motion';
-import { Radar, Eye, TrendingUp, Zap } from 'lucide-react';
+import { Radar, Eye, TrendingUp, Zap, Mail, CheckCircle2 } from 'lucide-react';
 import { fadeUp } from './DashboardPrimitives';
+import { useTaskStore } from '../../store/useTaskStore';
+import { useState } from 'react';
 
 /* ══════════════════════════════════════════════════════════════
    KeywordsRadarSection
@@ -21,6 +23,30 @@ const KEYWORD_COLORS = [
 ];
 
 export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
+  const sincronizarGmail = useTaskStore((s) => s.sincronizarGmail);
+  const isSyncing = useTaskStore((s) => s.isSyncingGmail);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'info' } | null>(null);
+
+  /* dispara a sync real via gmail api */
+  const handleSync = async () =>
+  {
+    if ( isSyncing ) return;
+    const result = await sincronizarGmail();
+    if ( result )
+    {
+      const msg = result.tarefas_geradas > 0
+        ? `${result.emails_lidos} e-mails varridos, ${result.tarefas_geradas} tarefa${result.tarefas_geradas > 1 ? 's' : ''} urgente${result.tarefas_geradas > 1 ? 's' : ''} criada${result.tarefas_geradas > 1 ? 's' : ''}`
+        : `${result.emails_lidos} e-mails varridos — nenhuma urgência detectada`;
+      setToast({ msg, type: result.tarefas_geradas > 0 ? 'success' : 'info' });
+      setTimeout(() => setToast(null), 4000);
+    }
+    else
+    {
+      setToast({ msg: 'Erro ao sincronizar. Verifique a conexão com o Google.', type: 'info' });
+      setTimeout(() => setToast(null), 4000);
+    }
+  };
+
   if (keywords.length === 0) return <EmptyKeywords />;
 
   return (
@@ -52,6 +78,20 @@ export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Ativo</span>
             </div>
+
+            {/* botão sincronizar gmail */}
+            <button
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-semibold
+                bg-cyan-500/10 border border-cyan-500/15 text-cyan-400
+                hover:bg-cyan-500/20 hover:border-cyan-500/30
+                disabled:opacity-60 disabled:cursor-wait
+                transition-all duration-300"
+            >
+              <Mail className={`w-4 h-4 ${isSyncing ? 'animate-radar-pulse' : ''}`} />
+              <span>{isSyncing ? 'Sincronizando...' : 'Sincronizar Caixa'}</span>
+            </button>
           </div>
 
           {/* Keywords Cloud */}
@@ -89,6 +129,23 @@ export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
             </p>
           </div>
         </div>
+
+        {/* toast de resultado da sync */}
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-5 py-2.5 rounded-xl backdrop-blur-xl border text-[12px] font-medium shadow-lg z-10
+              ${toast.type === 'success'
+                ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
+                : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300'
+              }`}
+          >
+            <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span>{toast.msg}</span>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

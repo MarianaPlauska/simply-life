@@ -7,7 +7,7 @@ import sys
 
 # Garante que JWT_SECRET, FERNET_KEY e DATABASE_URL existam para testes
 os.environ.setdefault("JWT_SECRET", "test-secret-key-for-pytest-only-do-not-use")
-os.environ.setdefault("FERNET_KEY", "tT3BlbkFJ0Ek5GfL7d4j5z8k9m2n4p6r8t0v2x4z6A8C=")
+os.environ.setdefault("FERNET_KEY", "tBCpoHjUPHuKfAMwYmKJxbi8bC96D4JFJatJNI3crkE=")
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test_orquestrador.db")
 
 # Adiciona backend/ ao path para imports funcionarem

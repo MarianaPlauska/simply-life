@@ -10,10 +10,8 @@ jobs:
   backend-tests:
     runs-on: ubuntu-latest
     env:
-      # variáveis necessárias para o backend inicializar sem .env
       JWT_SECRET: ci-test-secret-do-not-use-in-production-1234567890
-      FERNET_KEY: tT3BlbkFJ0Ek5GfL7d4j5z8k9m2n4p6r8t0v2x4z6A8C=
-      # usa sqlite no ci — não precisa de postgres instalado
+      FERNET_KEY: tBCpoHjUPHuKfAMwYmKJxbi8bC96D4JFJatJNI3crkE=
       DATABASE_URL: sqlite:///./test_ci.db
     steps:
       - uses: actions/checkout@v4
@@ -22,15 +20,16 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: instala dependências de teste (sem psycopg2)
+      - name: Install dependencies
         run: |
           cd backend
-          pip install -r requirements-test.txt
+          pip install -r requirements.txt
+          pip install pytest httpx
 
-      - name: roda os testes
+      - name: Run tests
         run: |
           cd backend
-          python -m pytest tests/ -v --tb=short
+          python -m pytest tests/ -v
 
   frontend-tests:
     runs-on: ubuntu-latest
@@ -41,17 +40,22 @@ jobs:
         with:
           node-version: "20"
 
-      - name: instala dependências
+      - name: Install dependencies
         run: |
           cd frontend
           npm ci
 
-      - name: type check
+      - name: Lint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Type check
         run: |
           cd frontend
           npx tsc --noEmit
 
-      - name: roda os testes
+      - name: Run tests
         run: |
           cd frontend
           npx vitest run
@@ -62,17 +66,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: verifica o dockerfile existe
-        run: test -f Dockerfile || echo "Dockerfile não encontrado — pulando build"
+      - name: Build backend image
+        run: docker build --target backend -t simply-life-backend .
 
-      - name: build backend image
-        run: |
-          if [ -f Dockerfile ]; then
-            docker build --target backend -t simply-life-backend . || true
-          fi
-
-      - name: build frontend image
-        run: |
-          if [ -f Dockerfile ]; then
-            docker build --target frontend -t simply-life-frontend . || true
-          fi
+      - name: Build frontend image
+        run: docker build --target frontend -t simply-life-frontend .

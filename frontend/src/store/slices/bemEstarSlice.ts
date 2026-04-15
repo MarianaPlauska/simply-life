@@ -45,6 +45,7 @@ export interface BemEstarSlice
   // estado
   humorHoje: HumorRegistro | null;
   humorSemana: HumorRegistro[];
+  humorMes: HumorRegistro[];
   entradaHoje: EntradaDiario | null;
   entradasRecentes: EntradaDiario[];
   weeklyReview: WeeklyReview | null;
@@ -55,6 +56,7 @@ export interface BemEstarSlice
   registrarHumor: (humor: number, emoji: string, nota: string) => Promise<void>;
   fetchHumorHoje: () => Promise<void>;
   fetchHumorSemana: () => Promise<void>;
+  fetchHumorMes: () => Promise<void>;
   criarEntradaDiario: (conteudo: string, prompt: string) => Promise<void>;
   fetchDiarioHoje: () => Promise<void>;
   fetchEntradasRecentes: (dias?: number) => Promise<void>;
@@ -67,6 +69,7 @@ export interface BemEstarSlice
 export const createBemEstarSlice: StateCreator<BemEstarSlice, [], [], BemEstarSlice> = (set) => ({
   humorHoje: null,
   humorSemana: [],
+  humorMes: [],
   entradaHoje: null,
   entradasRecentes: [],
   weeklyReview: null,
@@ -110,6 +113,17 @@ export const createBemEstarSlice: StateCreator<BemEstarSlice, [], [], BemEstarSl
       const res = await fetch(`${API}/bem-estar/humor/semana`, { headers: authHeaders() });
       if ( !res.ok ) return;
       set({ humorSemana: await res.json() });
+    }
+    catch { /* offline */ }
+  },
+
+  fetchHumorMes: async () =>
+  {
+    try
+    {
+      const res = await fetch(`${API}/bem-estar/humor/historico?dias=30`, { headers: authHeaders() });
+      if ( !res.ok ) return;
+      set({ humorMes: await res.json() });
     }
     catch { /* offline */ }
   },

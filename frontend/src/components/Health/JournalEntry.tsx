@@ -3,7 +3,7 @@ import { BookOpen, Send, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 
-/* ── prompts fallback (caso a API não responda) ──────────── */
+/* prompts de fallback caso a api não responda */
 const FALLBACK_PROMPTS = [
   'Como você está se sentindo agora?',
   'O que te deixou grato hoje?',
@@ -41,11 +41,15 @@ export function JournalEntry()
   };
 
   return (
-    <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-5 space-y-4 shadow-[0_0_30px_rgba(139,92,246,0.03)]">
+    <section className="h-full rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-md p-5 space-y-4
+                        shadow-[0_-1px_0_rgba(251,113,133,0.15),0_0_30px_rgba(244,63,94,0.04)]
+                        hover:border-rose-500/20 transition-colors duration-300">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <BookOpen className="w-4 h-4 text-amber-400" />
-          <h2 className="text-[13px] font-semibold text-white">Diário Pessoal</h2>
+          <BookOpen className="w-4 h-4 text-rose-400" />
+          <h2 className="text-[13px] font-semibold bg-gradient-to-r from-rose-300 to-rose-500 bg-clip-text text-transparent">
+            Diário Pessoal
+          </h2>
         </div>
         {jaEscreveu && (
           <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
@@ -54,9 +58,9 @@ export function JournalEntry()
         )}
       </div>
 
-      {/* prompt do dia */}
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/30 border border-zinc-800/40">
-        <span className="text-[12px] text-zinc-400 italic flex-1">"{promptAtual}"</span>
+      {/* caixa com o prompt do dia */}
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/30 border border-rose-900/20">
+        <span className="text-[12px] text-zinc-400 italic flex-1">“{promptAtual}”</span>
         <button
           onClick={rotatePrompt}
           className="p-1 rounded hover:bg-zinc-700/40 text-zinc-500 hover:text-zinc-300 transition-colors"
@@ -90,7 +94,7 @@ export function JournalEntry()
             rows={4}
             className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2.5
                        text-[13px] text-white placeholder:text-zinc-600 leading-relaxed
-                       outline-none focus:ring-1 focus:ring-amber-500/30 transition-all
+                       outline-none focus:ring-1 focus:ring-rose-500/30 transition-all
                        resize-none"
           />
           <div className="flex items-center justify-between">
@@ -101,8 +105,8 @@ export function JournalEntry()
               onClick={handleSubmit}
               disabled={salvando || !conteudo.trim()}
               className="flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium
-                         bg-amber-600/90 text-white rounded-lg
-                         hover:bg-amber-500 transition-colors
+                         bg-rose-600/90 text-white rounded-lg
+                         hover:bg-rose-500 transition-colors
                          disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Send className="w-3.5 h-3.5" />

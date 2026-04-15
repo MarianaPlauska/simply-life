@@ -53,15 +53,17 @@ export function HealthView() {
   // bem-estar mental fetches
   const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje);
   const fetchHumorSemana = useTaskStore((s) => s.fetchHumorSemana);
+  const fetchHumorMes = useTaskStore((s) => s.fetchHumorMes);
   const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje);
   const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia);
 
   useEffect(() => {
     fetchMedicamentos();
     fetchHabitos();
-    // carrega dados de bem-estar mental
+    /* carrega dados de bem-estar mental — inclui histórico de 30 dias para os pixels */
     fetchHumorHoje();
     fetchHumorSemana();
+    fetchHumorMes();
     fetchDiarioHoje();
     fetchPromptDoDia();
   }, []);
@@ -134,54 +136,87 @@ export function HealthView() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="max-w-5xl mx-auto pb-16 space-y-4">
+      {/* cabeçalho da view */}
+      <div className="flex items-center justify-between pb-2">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Saude & Bem-Estar</h1>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent tracking-tight">
+            Saude & Bem-Estar
+          </h1>
           <p className="text-sm text-zinc-500 mt-1">Habitos, medicamentos e vitalidade diaria</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
           <Zap className={`w-4 h-4 ${battery.text}`} />
           <span className={`text-xl font-bold tabular-nums ${battery.text}`}>{vitalidade}</span>
           <span className="text-[11px] text-zinc-500 font-medium">%</span>
         </div>
       </div>
 
-      {/* === Barra de Vitalidade === */}
-      <section className={`rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-5 ${battery.glow}`}>
-        <div className="flex items-center gap-3 mb-3">
-          <Battery className={`w-4 h-4 ${battery.text}`} />
-          <h2 className="text-[13px] font-semibold text-white">Barra de Vitalidade Diaria</h2>
-          <span className={`ml-auto text-[12px] font-bold tabular-nums ${battery.text}`}>{vitalidade}%</span>
-        </div>
-        <div className="h-3 rounded-full bg-zinc-800/60 overflow-hidden">
-          <div
-            className={`h-full rounded-full ${battery.bar} transition-all duration-700 ease-out`}
-            style={{ width: `${vitalidade}%` }}
-          />
-        </div>
-        <div className="flex items-center gap-4 mt-2 text-[10px] text-zinc-500">
-          <span>Habitos: {Math.round(totalHabitoPct)}%</span>
-          <span>Medicamentos: {tomados}/{totalMeds}</span>
-        </div>
-      </section>
+      {/* bento row 1: vitalidade + journaling empilhados (1/3) | mood tracker (2/3) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      {/* === Mood Tracker === */}
-      <MoodTracker />
+        {/* coluna esquerda — empilha dois cards menores */}
+        <div className="lg:col-span-1 flex flex-col gap-4">
+          {/* vitalidade */}
+          <section className={`flex-1 rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-md p-5 ${battery.glow}
+                              shadow-[0_-1px_0_rgba(16,185,129,0.1)] hover:border-emerald-500/20 transition-colors duration-300`}>
+            <div className="flex items-center gap-2.5 mb-4">
+              <Battery className={`w-4 h-4 ${battery.text}`} />
+              <h2 className={`text-[13px] font-semibold bg-gradient-to-r ${vitalidade >= 80 ? 'from-emerald-300 to-emerald-500' : vitalidade >= 50 ? 'from-amber-300 to-amber-500' : 'from-red-300 to-red-500'} bg-clip-text text-transparent`}>
+                Vitalidade Diaria
+              </h2>
+              <span className={`ml-auto text-[13px] font-bold tabular-nums ${battery.text}`}>{vitalidade}%</span>
+            </div>
+            {/* barra de vitalidade */}
+            <div className="h-3 rounded-full bg-zinc-800/60 overflow-hidden mb-3">
+              <div
+                className={`h-full rounded-full ${battery.bar} transition-all duration-700 ease-out`}
+                style={{ width: `${vitalidade}%` }}
+              />
+            </div>
+            <div className="space-y-2 mt-4">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-zinc-500">Habitos</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
+                    <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${totalHabitoPct}%` }} />
+                  </div>
+                  <span className={battery.text}>{Math.round(totalHabitoPct)}%</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-zinc-500">Medicamentos</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-20 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
+                    <div className="h-full rounded-full bg-teal-500 transition-all duration-500" style={{ width: `${medPct}%` }} />
+                  </div>
+                  <span className="text-teal-400">{tomados}/{totalMeds}</span>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      {/* === Journaling === */}
-      <JournalEntry />
+          {/* journaling — mesmo coluna, sem espaço vazio */}
+          <JournalEntry />
+        </div>
 
-      {/* === Weekly Review + Correlações === */}
+        {/* mood tracker — col-span-2, ocupa a coluna direita inteira */}
+        <div className="lg:col-span-2">
+          <MoodTracker />
+        </div>
+      </div>
+
+      {/* weekly review — full width, não precisa de coluna colada */}
       <WeeklyReviewCard />
 
-      {/* === Habitos Interativos === */}
+      {/* habitos — full width */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Sparkles className="w-4 h-4 text-violet-400" />
-            <h2 className="text-[13px] font-semibold text-white">Habitos Configuraveis</h2>
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <h2 className="text-[13px] font-semibold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent">
+              Habitos Configuraveis
+            </h2>
             <span className="text-[11px] text-zinc-600">{habitos.length} rastreadores</span>
           </div>
           <button onClick={() => setShowHabitForm(true)} className="flex items-center gap-1.5 text-[12px] text-zinc-400 hover:text-white transition-colors">
@@ -189,44 +224,68 @@ export function HealthView() {
           </button>
         </div>
 
-        {/* Habit Cards Grid */}
         {habitos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {habitos.map((h) => {
+            {habitos.map((h) =>
+            {
               const pct = h.meta_diaria > 0 ? Math.min((h.progresso_atual / h.meta_diaria) * 100, 100) : 0;
               const done = h.progresso_atual >= h.meta_diaria;
               const HIcon = ICON_MAP[h.tipo] || Sparkles;
               return (
-                <div key={h.id} className={`group rounded-xl border p-4 transition-all ${done ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-zinc-900/40 border-zinc-800/50'}`}>
+                <div
+                  key={h.id}
+                  className={`group relative rounded-xl border p-4 transition-all duration-300
+                    ${done
+                      ? 'bg-emerald-500/5 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.08)] habit-done'
+                      : 'bg-zinc-900/50 backdrop-blur-md border-zinc-800/50 hover:border-emerald-500/20 hover:shadow-[0_0_20px_rgba(16,185,129,0.06)]'}`}
+                >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <HIcon className={`w-4 h-4 ${done ? 'text-emerald-400' : 'text-zinc-400'}`} />
+                      <HIcon className={`w-4 h-4 transition-colors ${done ? 'text-emerald-400' : 'text-zinc-400 group-hover:text-emerald-400/60'}`} />
                       <span className="text-[13px] font-medium text-zinc-200">{h.nome_exibicao}</span>
                     </div>
-                    <button onClick={() => deleteHabito(h.id)} className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100">
+                    <button
+                      onClick={() => deleteHabito(h.id)}
+                      className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                    >
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
-                  {/* Progress bar */}
+                  {/* barra de progresso */}
                   <div className="h-2 rounded-full bg-zinc-800/60 overflow-hidden mb-3">
-                    <div className={`h-full rounded-full transition-all duration-500 ${done ? 'bg-emerald-500' : 'bg-violet-500'}`} style={{ width: `${pct}%` }} />
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ease-out ${done ? 'bg-emerald-500' : 'bg-emerald-600'}`}
+                      style={{ width: `${pct}%` }}
+                    />
                   </div>
-                  {/* Controls */}
+                  {/* controles de incremento */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <button onClick={() => handleDecrement(h)} disabled={h.progresso_atual <= 0} className="w-8 h-8 rounded-lg border border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                      <button
+                        onClick={() => handleDecrement(h)}
+                        disabled={h.progresso_atual <= 0}
+                        className="w-8 h-8 rounded-lg border border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
                       <span className={`text-lg font-bold tabular-nums min-w-[48px] text-center ${done ? 'text-emerald-400' : 'text-white'}`}>
                         {h.progresso_atual}<span className="text-[11px] text-zinc-500 font-normal">/{h.meta_diaria}</span>
                       </span>
-                      <button onClick={() => handleIncrement(h)} disabled={done} className="w-8 h-8 rounded-lg border border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                      <button
+                        onClick={() => handleIncrement(h)}
+                        disabled={done}
+                        className="w-8 h-8 rounded-lg border border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
                     <span className="text-[10px] text-zinc-500">{h.unidade}</span>
                   </div>
-                  {done && <p className="text-[10px] text-emerald-400 font-medium mt-2 flex items-center gap-1"><Check className="w-3 h-3" />Meta atingida!</p>}
+                  {done && (
+                    <p className="text-[10px] text-emerald-400 font-medium mt-2 flex items-center gap-1">
+                      <Check className="w-3 h-3" />Meta atingida!
+                    </p>
+                  )}
                 </div>
               );
             })}
@@ -239,12 +298,17 @@ export function HealthView() {
           </div>
         )}
 
-        {/* Presets */}
+        {/* presets de habitos disponiveis */}
         <div className="flex flex-wrap gap-2">
-          {PRESET_HABITOS.filter((p) => !habitos.some((h) => h.tipo === p.tipo)).map((preset) => {
+          {PRESET_HABITOS.filter((p) => !habitos.some((h) => h.tipo === p.tipo)).map((preset) =>
+          {
             const PIcon = ICON_MAP[preset.tipo] || Sparkles;
             return (
-              <button key={preset.tipo} onClick={() => handleAddPreset(preset)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800/50 bg-zinc-900/30 text-[11px] text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
+              <button
+                key={preset.tipo}
+                onClick={() => handleAddPreset(preset)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800/50 bg-zinc-900/30 text-[11px] text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+              >
                 <PIcon className="w-3 h-3" />{preset.nome_exibicao}
                 <Plus className="w-2.5 h-2.5 text-zinc-600" />
               </button>
@@ -252,7 +316,7 @@ export function HealthView() {
           })}
         </div>
 
-        {/* Custom habit form */}
+        {/* form de habito customizado */}
         {showHabitForm && (
           <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3">
             <div className="flex items-center justify-between">
@@ -260,23 +324,25 @@ export function HealthView() {
               <button onClick={() => setShowHabitForm(false)}><X className="w-4 h-4 text-zinc-500 hover:text-white transition-colors" /></button>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <input type="text" placeholder="Nome (ex: Meditacao)" value={habitForm.nome_exibicao} onChange={(e) => setHabitForm({ ...habitForm, nome_exibicao: e.target.value })} className="col-span-3 sm:col-span-1 bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-violet-500/40" autoFocus />
-              <input type="number" min="1" placeholder="Meta diaria" value={habitForm.meta_diaria} onChange={(e) => setHabitForm({ ...habitForm, meta_diaria: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-violet-500/40" />
-              <input type="text" placeholder="Unidade (ex: min)" value={habitForm.unidade} onChange={(e) => setHabitForm({ ...habitForm, unidade: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-violet-500/40" />
+              <input type="text" placeholder="Nome (ex: Meditacao)" value={habitForm.nome_exibicao} onChange={(e) => setHabitForm({ ...habitForm, nome_exibicao: e.target.value })} className="col-span-3 sm:col-span-1 bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-emerald-500/40" autoFocus />
+              <input type="number" min="1" placeholder="Meta diaria" value={habitForm.meta_diaria} onChange={(e) => setHabitForm({ ...habitForm, meta_diaria: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-emerald-500/40" />
+              <input type="text" placeholder="Unidade (ex: min)" value={habitForm.unidade} onChange={(e) => setHabitForm({ ...habitForm, unidade: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-emerald-500/40" />
             </div>
-            <button onClick={handleAddCustom} disabled={!habitForm.nome_exibicao.trim()} className="px-4 py-2 text-[12px] font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <button onClick={handleAddCustom} disabled={!habitForm.nome_exibicao.trim()} className="px-4 py-2 text-[12px] font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               Criar Habito
             </button>
           </div>
         )}
       </section>
 
-      {/* === Medicamentos === */}
+      {/* medicamentos — full width */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Pill className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-[13px] font-semibold text-white">Medicamentos Hoje</h2>
+            <Pill className="w-4 h-4 text-teal-400" />
+            <h2 className="text-[13px] font-semibold bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent">
+              Medicamentos Hoje
+            </h2>
             <span className="text-[11px] text-zinc-500 ml-1">{tomados}/{totalMeds}</span>
           </div>
           <button onClick={() => setShowMedForm(true)} className="flex items-center gap-1.5 text-[12px] text-zinc-400 hover:text-white transition-colors">
@@ -284,8 +350,8 @@ export function HealthView() {
           </button>
         </div>
 
-        <div className="h-1 rounded-full bg-zinc-800/60 overflow-hidden">
-          <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${medPct}%` }} />
+        <div className="h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
+          <div className="h-full rounded-full bg-teal-500 transition-all duration-500" style={{ width: `${medPct}%` }} />
         </div>
 
         {showMedForm && (
@@ -295,10 +361,10 @@ export function HealthView() {
               <button onClick={() => setShowMedForm(false)}><X className="w-4 h-4 text-zinc-500 hover:text-white transition-colors" /></button>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <input type="text" placeholder="Nome do medicamento" value={newMed.nome} onChange={(e) => setNewMed({ ...newMed, nome: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-zinc-600" />
-              <input type="text" placeholder="Horario (ex: 08:00)" value={newMed.horario} onChange={(e) => setNewMed({ ...newMed, horario: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-zinc-600" />
+              <input type="text" placeholder="Nome do medicamento" value={newMed.nome} onChange={(e) => setNewMed({ ...newMed, nome: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-teal-500/40" />
+              <input type="text" placeholder="Horario (ex: 08:00)" value={newMed.horario} onChange={(e) => setNewMed({ ...newMed, horario: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-teal-500/40" />
             </div>
-            <button onClick={handleAddMed} disabled={!newMed.nome.trim() || !newMed.horario.trim()} className="px-4 py-2 text-[12px] font-medium bg-white text-zinc-900 rounded-lg hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <button onClick={handleAddMed} disabled={!newMed.nome.trim() || !newMed.horario.trim()} className="px-4 py-2 text-[12px] font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               Salvar
             </button>
           </div>
@@ -307,8 +373,8 @@ export function HealthView() {
         {totalMeds > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {medicamentos.map((med) => (
-              <button key={med.id} onClick={() => handleToggleMed(med.id)} className={`flex items-center gap-3 rounded-xl border p-3.5 transition-all group ${med.tomado ? 'bg-zinc-900/30 border-zinc-800/30' : 'bg-zinc-900/40 border-zinc-800/50 hover:border-zinc-700/60'}`}>
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${med.tomado ? 'bg-emerald-500 border-emerald-500' : 'border-zinc-600 group-hover:border-zinc-400'}`}>
+              <button key={med.id} onClick={() => handleToggleMed(med.id)} className={`flex items-center gap-3 rounded-xl border p-3.5 transition-all group ${med.tomado ? 'bg-zinc-900/30 border-zinc-800/30' : 'bg-zinc-900/40 border-zinc-800/50 hover:border-teal-500/20 hover:shadow-[0_0_16px_rgba(20,184,166,0.06)]'}`}>
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${med.tomado ? 'bg-teal-500 border-teal-500' : 'border-zinc-600 group-hover:border-teal-500/60'}`}>
                   {med.tomado && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <div className="flex-1 text-left min-w-0">
@@ -318,7 +384,7 @@ export function HealthView() {
                     <span className="text-[11px] text-zinc-600">{med.horario}</span>
                   </div>
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${med.tomado ? 'text-emerald-400/60' : 'text-zinc-500'}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${med.tomado ? 'text-teal-400/60' : 'text-zinc-500'}`}>
                   {med.tomado ? 'Tomado' : 'Pendente'}
                 </span>
               </button>

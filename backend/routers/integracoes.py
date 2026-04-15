@@ -36,6 +36,8 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
     "https://www.googleapis.com/auth/calendar.readonly",
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.modify",
 ]
 
 
@@ -320,3 +322,116 @@ def eventos_de_hoje(
                 detail="Permissão negada pelo Google. Reconecte nas Configurações e marque a caixa de acesso à agenda.",
             )
         raise HTTPException(status_code=500, detail=f"Erro ao buscar calendario: {str(e)}")
+
+
+# ══════════════════════════════════════════════════════════════
+# GMAIL SYNC — sincroniza caixa de entrada com motor de triagem
+# ══════════════════════════════════════════════════════════════
+
+@router.post("/gmail/sync")
+def sincronizar_gmail(
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    """
+    busca e-mails não lidos, passa pelo motor de triagem (palavras-chave),
+    cria tarefas críticas e marca e-mails processados como lidos.
+    """
+    import re as _re
+    from services.gmail_sync import buscar_emails_nao_lidos, marcar_como_lido
+
+    # checa integração google ativa
+    integracao = (
+        db.query(models.Integracao)
+        .filter(
+            models.Integracao.usuario_id == current_user.id,
+            models.Integracao.plataforma == "google_calendar",
+            models.Integracao.status == "ativa",
+        )
+        .first()
+    )
+
+    if not integracao:
+        raise HTTPException(
+            status_code=400,
+            detail="Google não conectado. Faça login com o Google nas Configurações primeiro.",
+        )
+
+    # descriptografa credenciais
+    try:
+        creds_data = json.loads(cofre.decrypt(integracao.token_criptografado.encode()))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Erro ao descriptografar credenciais do Google.")
+
+    # busca palavras-chave do usuário
+    palavras = (
+        db.query(models.PalavraChave)
+        .filter(models.PalavraChave.user_id == current_user.id)
+        .all()
+    )
+
+    if not palavras:
+        raise HTTPException(
+            status_code=400,
+            detail="Nenhuma palavra-chave cadastrada. Adicione ao menos uma no Radar de Triagem.",
+        )
+
+    # busca e-mails não lidos
+    try:
+        emails = buscar_emails_nao_lidos(creds_data, max_results=30)
+    except Exception as e:
+        err_str = str(e).lower()
+        if "403" in err_str or "insufficient" in err_str:
+            raise HTTPException(
+                status_code=403,
+                detail="Permissão do Gmail negada. Reconecte sua conta Google e autorize o acesso ao e-mail.",
+            )
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar e-mails: {str(e)}")
+
+    # processa cada e-mail pelo motor de triagem
+    tarefas_criadas = 0
+
+    for email in emails:
+        texto = f"{email['assunto']} {email['snippet']}"
+        texto_lower = texto.lower()
+
+        # mesmo algoritmo de match do motor de triagem
+        match = None
+        for pk in sorted(palavras, key=lambda p: p.peso, reverse=True):
+            pattern = r'\b' + _re.escape(pk.termo.lower()) + r'\b'
+            if _re.search(pattern, texto_lower):
+                match = pk
+                break
+
+        if match:
+            # cria tarefa crítica com origem gmail_api
+            remetente = email["remetente"]
+            titulo = f"Urgente: {remetente}" if remetente and remetente != "desconhecido" else f"Urgente: {email['assunto'][:60]}"
+
+            nova_tarefa = models.TarefaUnificada(
+                usuario_id=current_user.id,
+                titulo=titulo,
+                descricao=f"[Gmail] {email['assunto']}\n\n{email['snippet'][:400]}",
+                snippet_100_char=texto[:100],
+                status="pendente",
+                prioridade="critica",
+                origem="gmail_api",
+                score_urgencia=100 + (match.peso * 10),
+                palavra_chave_id=match.id,
+                created_at=datetime.now(timezone.utc),
+            )
+            db.add(nova_tarefa)
+            tarefas_criadas += 1
+
+        # marca como lido pra não reprocessar (independente de match)
+        try:
+            marcar_como_lido(creds_data, email["id"])
+        except Exception as mark_err:
+            print(f"[gmail_sync] erro ao marcar {email['id']} como lido: {mark_err}")
+
+    db.commit()
+
+    return {
+        "emails_lidos": len(emails),
+        "tarefas_geradas": tarefas_criadas,
+    }

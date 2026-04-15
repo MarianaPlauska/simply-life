@@ -5,11 +5,14 @@ import { API, authHeaders } from '../api';
 
 export interface TriagemSlice {
   palavrasChave: PalavraChave[];
+  isSyncingGmail: boolean;
+  lastSyncResult: { emails_lidos: number; tarefas_geradas: number } | null;
   fetchPalavrasChave: () => Promise<void>;
   addPalavraChave: (termo: string, peso?: number) => Promise<void>;
   removePalavraChave: (id: number) => Promise<void>;
   processarMensagem: (conteudo: string, origem: string, remetente: string) => Promise<ProcessarMensagemResult>;
   simularEmailRecebido: (texto: string, remetente: string) => Promise<void>;
+  sincronizarGmail: () => Promise<{ emails_lidos: number; tarefas_geradas: number } | null>;
 }
 
 // precisa acessar fetchTarefas e fetchDashboard do store global
@@ -20,6 +23,8 @@ type FullGet = () => TriagemSlice & {
 
 export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice> = (set, get) => ({
   palavrasChave: [] as PalavraChave[],
+  isSyncingGmail: false,
+  lastSyncResult: null,
 
   fetchPalavrasChave: async () =>
   {
@@ -106,5 +111,42 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
       }
     }
     catch (e) { console.error('simularEmailRecebido:', e); }
+  },
+
+  // sincroniza caixa de entrada real via gmail api
+  sincronizarGmail: async () =>
+  {
+    if ( get().isSyncingGmail ) return null;
+    set({ isSyncingGmail: true, lastSyncResult: null });
+    try
+    {
+      const res = await fetch(`${API}/integracoes/gmail/sync`, {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      if ( !res.ok )
+      {
+        const err = await res.json().catch(() => ({ detail: 'erro desconhecido' }));
+        console.error('sincronizarGmail:', err.detail);
+        set({ isSyncingGmail: false });
+        return null;
+      }
+      const data = await res.json();
+      set({ isSyncingGmail: false, lastSyncResult: data });
+
+      // recarrega tarefas e dashboard se criou algo
+      if ( data.tarefas_geradas > 0 )
+      {
+        const full = get as unknown as FullGet;
+        await Promise.all([full().fetchTarefas(), full().fetchDashboard()]);
+      }
+      return data;
+    }
+    catch (e)
+    {
+      console.error('sincronizarGmail:', e);
+      set({ isSyncingGmail: false });
+      return null;
+    }
   },
 });

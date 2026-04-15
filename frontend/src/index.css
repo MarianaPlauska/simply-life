@@ -36,3 +36,66 @@ body {
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
+
+/* gradiente animado — usado na borda do insight da ia */
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 3s ease infinite;
+  background-size: 200% 100%;
+}
+
+/* bounce leve — seta de tendência no weekly review */
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* confetti ao completar habito — particulas css puras, sem lib */
+@keyframes confetti-pop {
+  0%   { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--cx, 20px), var(--cy, -30px)) scale(0.3); }
+}
+
+.habit-done::before,
+.habit-done::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  top: 10px;
+  right: 12px;
+  animation: confetti-pop 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+.habit-done::before {
+  background-color: #34d399;
+  --cx: -14px;
+  --cy: -24px;
+}
+
+.habit-done::after {
+  background-color: #22d3ee;
+  --cx: 14px;
+  --cy: -20px;
+  animation-delay: 0.08s;
+}
+
+/* animação radar-pulse — ícone do botão de sync gmail */
+@keyframes radar-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.25); }
+}
+.animate-radar-pulse {
+  animation: radar-pulse 1.2s ease-in-out infinite;
+}
