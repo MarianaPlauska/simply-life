@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float, DateTime, Date, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float, DateTime, Date, UniqueConstraint, Index, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import database
@@ -24,12 +24,21 @@ class Usuario(database.Base):
     tarefas = relationship("TarefaUnificada", back_populates="dono")
     sessoes_foco = relationship("SessaoFoco", back_populates="usuario")
 
+# ── Sprint B: Token Blacklist (B3) ───────────────────────────
+class TokenBlacklist(database.Base):
+    __tablename__ = "token_blacklist"
+    id = Column(Integer, primary_key=True, index=True)
+    jti = Column(String, unique=True, nullable=False, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    expira_em = Column(DateTime, nullable=False)
+    criado_em = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
 # 2. tarefas Unificadas
 class TarefaUnificada(database.Base):
     __tablename__ = "tarefas_unificadas"
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    titulo = Column(String)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)  # B10: idx
+    titulo = Column(String(200))                        # B9: limite 200
     descricao = Column(Text, nullable=True)
     snippet_100_char = Column(String(100))
     score_urgencia = Column(Integer, default=0)
@@ -40,6 +49,8 @@ class TarefaUnificada(database.Base):
     notas_locais = Column(Text, nullable=True)
     hash_seguranca = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    # B11: soft delete
+    deletado_em = Column(DateTime, nullable=True, default=None)
     palavra_chave_id = Column(Integer, ForeignKey("palavras_chave.id"), nullable=True)
     dono = relationship("Usuario", back_populates="tarefas")
     palavra_chave = relationship("PalavraChave", foreign_keys=[palavra_chave_id])
@@ -51,7 +62,7 @@ class TarefaUnificada(database.Base):
 class Integracao(database.Base):
     __tablename__ = "integracoes"
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
     plataforma = Column(String)
     token_criptografado = Column(String)
     status = Column(String, default="ativa")
@@ -62,7 +73,7 @@ class Integracao(database.Base):
 class Anotacao(database.Base):
     __tablename__ = "anotacoes"
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
     titulo = Column(String, nullable=True)
     conteudo = Column(Text)
     fixado = Column(Integer, default=0)
@@ -81,7 +92,7 @@ class PreferenciasUsuario(database.Base):
 class Despesa(database.Base):
     __tablename__ = "despesas"
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
     descricao = Column(String)
     categoria = Column(String)
     valor = Column(Integer) 
@@ -102,7 +113,7 @@ class Medicamento(database.Base):
 class Notificacao(database.Base):
     __tablename__ = "notificacoes"
     id = Column(Integer, primary_key=True, index=True)
-    usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
     tipo = Column(String, default="sistema")  # saude, sistema, tarefa, financeiro
     titulo = Column(String)
     mensagem = Column(Text, nullable=True)
@@ -221,3 +232,16 @@ class EntradaDiario(database.Base):
     prompt_usado = Column(String(200), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     usuario = relationship("Usuario")
+
+# ── Sprint C: Templates de Tarefa (C7) ──────────────────────
+
+# 18. Templates reutilizáveis
+class TarefaTemplate(database.Base):
+    __tablename__ = "tarefa_templates"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    nome = Column(String(200), nullable=False)
+    prioridade = Column(String, default="media")
+    subtarefas_json = Column(Text, nullable=True)   # JSON array de strings: ["item1", "item2"]
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    dono = relationship("Usuario")

@@ -1,7 +1,7 @@
 // slice financeiro — despesas, transações, orçamento
 import type { StateCreator } from 'zustand';
 import type { Despesa, Transaction, BudgetLimit } from '../storeTypes';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface FinanceiroSlice {
   despesas: Despesa[];
@@ -33,7 +33,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   {
     try
     {
-      const res = await fetch(`${API}/despesas`, { headers: authHeaders() });
+      const res = await apiFetch('/despesas');
       if ( !res.ok ) throw new Error('falha');
       const data = await res.json();
       set({ despesas: data.despesas });
@@ -43,8 +43,8 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
   addDespesa: async (dados) =>
   {
-    const res = await fetch(`${API}/despesas`, {
-      method: 'POST', headers: authHeaders(),
+    const res = await apiFetch('/despesas', {
+      method: 'POST',
       body: JSON.stringify(dados),
     });
     if ( !res.ok ) throw new Error('falha');
@@ -56,7 +56,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   {
     try
     {
-      const res = await fetch(`${API}/despesas`, { headers: authHeaders() });
+      const res = await apiFetch('/despesas');
       if ( !res.ok ) throw new Error('falha');
       const data = await res.json();
       set({ transactions: data.despesas.map((d: Record<string, unknown>) => ({ ...d, tipo: (d.tipo as string) || 'despesa' })) });
@@ -68,8 +68,8 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   {
     try
     {
-      const res = await fetch(`${API}/despesas`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/despesas', {
+        method: 'POST',
         body: JSON.stringify({ descricao: t.descricao, categoria: t.categoria, valor: t.valor, data_gasto: t.data }),
       });
       if ( res.ok )

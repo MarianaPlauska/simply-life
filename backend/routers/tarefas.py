@@ -3,10 +3,13 @@ routers/tarefas.py — Kanban, Webhook, Anotações, Notificações, Labels, Sub
 RF-1.04: Todas as queries filtram por usuario_id = current_user.id
 RF-2.01: Motor de scoring via logic/scoring.py
 RF-2.02: Filtro de keywords ativo no webhook
+B5:  Paginação no GET /tarefas (limit/offset, default 50)
+B11: Soft delete (deletado_em em vez de hard delete)
 """
+import logging
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, joinedload
 
@@ -26,8 +29,11 @@ from schemas import (
     SubtarefaCreate,
     SubtarefaUpdate,
     SubtarefaResponse,
+    TemplateCreate,
+    TemplateResponse,
 )
 
+logger = logging.getLogger("simply-life")
 router = APIRouter(tags=["Tarefas & Domínios"])
 
 VALID_STATUS = {"pendente", "em_progresso", "concluida"}
@@ -47,6 +53,7 @@ def _get_tarefa_or_404(
         .filter(
             models.TarefaUnificada.id == tarefa_id,
             models.TarefaUnificada.usuario_id == user_id,
+            models.TarefaUnificada.deletado_em.is_(None),
         )
         .first()
     )
@@ -121,7 +128,7 @@ def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
         db.add(notif)
         db.commit()
 
-    print(f"✅ Tarefa Triada! Score Final: {urgencia} | Keywords: {keywords}")
+    logger.info("tarefa triada: score=%s keywords=%s", urgencia, keywords)
 
 
 # ── CRUD Tarefas ──────────────────────────────────────────────
@@ -130,14 +137,25 @@ def motor_de_score_worker(usuario_id: int, dados: WebhookPayload, db: Session):
 def listar_tarefas(
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
 ):
-    tarefas = (
+    """B5: paginação com limit/offset. B11: exclui soft-deleted."""
+    base_query = (
         db.query(models.TarefaUnificada)
         .options(joinedload(models.TarefaUnificada.subtarefas), joinedload(models.TarefaUnificada.labels))
-        .filter(models.TarefaUnificada.usuario_id == current_user.id)
+        .filter(
+            models.TarefaUnificada.usuario_id == current_user.id,
+            models.TarefaUnificada.deletado_em.is_(None),
+        )
         .order_by(models.TarefaUnificada.score_urgencia.desc())
-        .all()
     )
+    total = db.query(models.TarefaUnificada).filter(
+        models.TarefaUnificada.usuario_id == current_user.id,
+        models.TarefaUnificada.deletado_em.is_(None),
+    ).count()
+    tarefas = base_query.offset(offset).limit(limit).all()
+
     # Deduplicate (joinedload may cause duplicates with multiple relationships)
     seen = set()
     unique = []
@@ -145,7 +163,7 @@ def listar_tarefas(
         if t.id not in seen:
             seen.add(t.id)
             unique.append(t)
-    return {"total": len(unique), "tarefas": [_tarefa_to_response(t) for t in unique]}
+    return {"total": total, "limit": limit, "offset": offset, "tarefas": [_tarefa_to_response(t) for t in unique]}
 
 
 @router.post("/tarefas", status_code=201, response_model=dict)
@@ -246,10 +264,113 @@ def deletar_tarefa(
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
 ):
+    """B11: soft delete — marca deletado_em em vez de remover do banco."""
     tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
-    db.delete(tarefa)
+    tarefa.deletado_em = datetime.now(timezone.utc)
     db.commit()
+    logger.info("tarefa soft-deleted: id=%s user=%s", tarefa_id, current_user.id)
     return {"status": "sucesso", "id": tarefa_id}
+
+
+# C6: listar tarefas arquivadas (soft-deleted)
+@router.get("/tarefas/arquivo")
+def listar_arquivo(
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+):
+    base = (
+        db.query(models.TarefaUnificada)
+        .options(joinedload(models.TarefaUnificada.subtarefas), joinedload(models.TarefaUnificada.labels))
+        .filter(
+            models.TarefaUnificada.usuario_id == current_user.id,
+            models.TarefaUnificada.deletado_em.isnot(None),
+        )
+        .order_by(models.TarefaUnificada.deletado_em.desc())
+    )
+    total = db.query(models.TarefaUnificada).filter(
+        models.TarefaUnificada.usuario_id == current_user.id,
+        models.TarefaUnificada.deletado_em.isnot(None),
+    ).count()
+    tarefas = base.offset(offset).limit(limit).all()
+    seen = set()
+    unique = []
+    for t in tarefas:
+        if t.id not in seen:
+            seen.add(t.id)
+            unique.append(t)
+    return {"total": total, "limit": limit, "offset": offset, "tarefas": [_tarefa_to_response(t) for t in unique]}
+
+
+# C6: restaurar tarefa arquivada
+@router.patch("/tarefas/{tarefa_id}/restaurar")
+def restaurar_tarefa(
+    tarefa_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    tarefa = (
+        db.query(models.TarefaUnificada)
+        .filter(
+            models.TarefaUnificada.id == tarefa_id,
+            models.TarefaUnificada.usuario_id == current_user.id,
+            models.TarefaUnificada.deletado_em.isnot(None),
+        )
+        .first()
+    )
+    if not tarefa:
+        raise HTTPException(status_code=404, detail="Tarefa arquivada não encontrada")
+    tarefa.deletado_em = None
+    db.commit()
+    db.refresh(tarefa)
+    logger.info("tarefa restaurada: id=%s user=%s", tarefa_id, current_user.id)
+    return {"tarefa": _tarefa_to_response(tarefa)}
+
+
+# C4: duplicar tarefa (com subtarefas e labels)
+@router.post("/tarefas/{tarefa_id}/duplicar", status_code=201)
+def duplicar_tarefa(
+    tarefa_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    original = _get_tarefa_or_404(tarefa_id, current_user.id, db)
+    copia = models.TarefaUnificada(
+        usuario_id=current_user.id,
+        titulo=f"{original.titulo} (cópia)",
+        descricao=original.descricao,
+        snippet_100_char=original.snippet_100_char,
+        score_urgencia=original.score_urgencia,
+        status="pendente",
+        prioridade=original.prioridade,
+        origem="manual",
+        notas_locais=original.notas_locais,
+        data_vencimento=original.data_vencimento,
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(copia)
+    db.flush()
+
+    # duplicar subtarefas
+    for sub in (original.subtarefas or []):
+        nova_sub = models.Subtarefa(
+            tarefa_id=copia.id,
+            titulo=sub.titulo,
+            concluida=False,
+            ordem=sub.ordem,
+        )
+        db.add(nova_sub)
+
+    # copiar labels
+    for label in (original.labels or []):
+        tl = models.TarefaLabel(tarefa_id=copia.id, label_id=label.id)
+        db.add(tl)
+
+    db.commit()
+    db.refresh(copia)
+    logger.info("tarefa duplicada: original=%s copia=%s user=%s", tarefa_id, copia.id, current_user.id)
+    return {"tarefa": _tarefa_to_response(copia)}
 
 
 @router.get("/tarefas/busca")
@@ -567,3 +688,116 @@ def marcar_todas_lidas(
     ).update({"lida": 1})
     db.commit()
     return {"status": "sucesso"}
+
+
+# ── C7: Templates de Tarefa ──────────────────────────────────
+
+@router.get("/templates")
+def listar_templates(
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    import json
+    rows = (
+        db.query(models.TarefaTemplate)
+        .filter(models.TarefaTemplate.usuario_id == current_user.id)
+        .order_by(models.TarefaTemplate.nome)
+        .all()
+    )
+    result = []
+    for t in rows:
+        subs = []
+        if t.subtarefas_json:
+            try:
+                subs = json.loads(t.subtarefas_json)
+            except Exception:
+                pass
+        result.append({
+            "id": t.id, "nome": t.nome, "prioridade": t.prioridade,
+            "subtarefas": subs, "created_at": t.created_at,
+        })
+    return result
+
+
+@router.post("/templates", status_code=201)
+def criar_template(
+    dados: TemplateCreate,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    import json
+    novo = models.TarefaTemplate(
+        usuario_id=current_user.id,
+        nome=dados.nome[:200].strip(),
+        prioridade=dados.prioridade if dados.prioridade in VALID_PRIORIDADE else "media",
+        subtarefas_json=json.dumps(dados.subtarefas[:20]) if dados.subtarefas else None,
+    )
+    db.add(novo)
+    db.commit()
+    db.refresh(novo)
+    subs = json.loads(novo.subtarefas_json) if novo.subtarefas_json else []
+    logger.info("template criado: id=%s user=%s", novo.id, current_user.id)
+    return {"id": novo.id, "nome": novo.nome, "prioridade": novo.prioridade, "subtarefas": subs, "created_at": novo.created_at}
+
+
+@router.delete("/templates/{template_id}")
+def deletar_template(
+    template_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    tmpl = (
+        db.query(models.TarefaTemplate)
+        .filter(models.TarefaTemplate.id == template_id, models.TarefaTemplate.usuario_id == current_user.id)
+        .first()
+    )
+    if not tmpl:
+        raise HTTPException(status_code=404, detail="Template não encontrado")
+    db.delete(tmpl)
+    db.commit()
+    return {"status": "sucesso", "id": template_id}
+
+
+@router.post("/templates/{template_id}/aplicar", status_code=201)
+def aplicar_template(
+    template_id: int,
+    current_user: models.Usuario = Depends(get_current_user),
+    db: Session = Depends(database.get_db),
+):
+    import json
+    tmpl = (
+        db.query(models.TarefaTemplate)
+        .filter(models.TarefaTemplate.id == template_id, models.TarefaTemplate.usuario_id == current_user.id)
+        .first()
+    )
+    if not tmpl:
+        raise HTTPException(status_code=404, detail="Template não encontrado")
+
+    tarefa = models.TarefaUnificada(
+        usuario_id=current_user.id,
+        titulo=tmpl.nome,
+        descricao=None,
+        snippet_100_char=tmpl.nome[:100],
+        score_urgencia=0,
+        status="pendente",
+        prioridade=tmpl.prioridade,
+        origem="manual",
+        created_at=datetime.now(timezone.utc),
+    )
+    db.add(tarefa)
+    db.flush()
+
+    subs = []
+    if tmpl.subtarefas_json:
+        try:
+            subs = json.loads(tmpl.subtarefas_json)
+        except Exception:
+            pass
+    for i, titulo_sub in enumerate(subs):
+        sub = models.Subtarefa(tarefa_id=tarefa.id, titulo=str(titulo_sub)[:200], ordem=i)
+        db.add(sub)
+
+    db.commit()
+    db.refresh(tarefa)
+    logger.info("template aplicado: template=%s tarefa=%s user=%s", template_id, tarefa.id, current_user.id)
+    return {"tarefa": _tarefa_to_response(tarefa)}

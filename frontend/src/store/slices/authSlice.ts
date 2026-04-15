@@ -1,7 +1,8 @@
 // slice de auth — login, logout, perfil, token
+// Sprint B: cookies httpOnly — token não fica mais no localStorage
 import type { StateCreator } from 'zustand';
 import type { UserProfile } from '../storeTypes';
-import { setAuthToken } from '../api';
+import { API, setAuthToken } from '../api';
 
 export interface AuthSlice {
   isLoggedIn: boolean;
@@ -30,6 +31,8 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set)
 
   logout: () =>
   {
+    // B3: chama endpoint de logout para invalidar tokens no backend
+    fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
     setAuthToken('');
     set({
       isLoggedIn: false,

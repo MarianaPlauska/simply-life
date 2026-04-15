@@ -1,7 +1,7 @@
 // slice de triagem — motor de ia, palavras-chave, simulação de email
 import type { StateCreator } from 'zustand';
 import type { PalavraChave, ProcessarMensagemResult } from '../storeTypes';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface TriagemSlice {
   palavrasChave: PalavraChave[];
@@ -30,7 +30,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
   {
     try
     {
-      const res = await fetch(`${API}/triagem/palavras-chave`, { headers: authHeaders() });
+      const res = await apiFetch('/triagem/palavras-chave');
       if ( !res.ok ) return;
       const data = await res.json();
       set({ palavrasChave: data });
@@ -42,8 +42,8 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
   {
     try
     {
-      const res = await fetch(`${API}/triagem/palavras-chave`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/triagem/palavras-chave', {
+        method: 'POST',
         body: JSON.stringify({ termo, peso }),
       });
       if ( res.ok )
@@ -59,8 +59,8 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
   {
     try
     {
-      const res = await fetch(`${API}/triagem/palavras-chave/${id}`, {
-        method: 'DELETE', headers: authHeaders(),
+      const res = await apiFetch(`/triagem/palavras-chave/${id}`, {
+        method: 'DELETE',
       });
       if ( res.ok ) set((s) => ({ palavrasChave: s.palavrasChave.filter((p) => p.id !== id) }));
     }
@@ -71,8 +71,8 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
   {
     try
     {
-      const res = await fetch(`${API}/triagem/processar-mensagem`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/triagem/processar-mensagem', {
+        method: 'POST',
         body: JSON.stringify({ conteudo, origem, remetente }),
       });
       if ( res.ok )
@@ -120,9 +120,8 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
     set({ isSyncingGmail: true, lastSyncResult: null });
     try
     {
-      const res = await fetch(`${API}/integracoes/gmail/sync`, {
+      const res = await apiFetch('/integracoes/gmail/sync', {
         method: 'POST',
-        headers: authHeaders(),
       });
       if ( !res.ok )
       {

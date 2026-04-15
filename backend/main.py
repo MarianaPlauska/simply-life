@@ -1,9 +1,10 @@
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 # Carrega .env do diretório backend/ (onde estão as credenciais reais)
 _backend_dir = Path(__file__).resolve().parent
@@ -31,10 +32,19 @@ from routers import triagem as triagem_router
 from routers import busca as busca_router
 from routers import bem_estar as bem_estar_router
 
+# ── B12: Logging Estruturado ─────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger("simply-life")
+
+
 # ── Worker de background (polling) ────────────────────────────
 async def motor_busca_ativa():
     while True:
-        print("🕵️‍♂️ [Worker] Checando novas demandas de serviços externos...")
+        logger.debug("Worker: Checando novas demandas de serviços externos...")
         await asyncio.sleep(60)
 
 
@@ -49,8 +59,21 @@ async def lifespan(app: FastAPI):
 # ── Tabelas criadas via Alembic (não usar create_all em produção) ──
 # models.database.Base.metadata.create_all(bind=database.engine)
 
-# ── Rate Limiter (RNF-1.02) ──────────────────────────────────
-limiter = Limiter(key_func=get_remote_address, default_limits=["60/minute"])
+# ── B4: Rate Limiter por usuário (cookie/IP) ─────────────────
+
+def _rate_limit_key(request: Request) -> str:
+    """Usa usuario_id do cookie JWT quando disponível, senão IP."""
+    from auth import ACCESS_COOKIE, verificar_token
+    token = request.cookies.get(ACCESS_COOKIE)
+    if token:
+        try:
+            payload = verificar_token(token, expected_type="access")
+            return f"user:{payload.get('sub', get_remote_address(request))}"
+        except Exception:
+            pass
+    return get_remote_address(request)
+
+limiter = Limiter(key_func=_rate_limit_key, default_limits=["120/minute"])
 
 app = FastAPI(title="API - Simply-Life OS", lifespan=lifespan)
 app.state.limiter = limiter

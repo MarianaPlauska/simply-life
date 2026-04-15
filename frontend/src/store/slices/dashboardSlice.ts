@@ -1,7 +1,7 @@
 // slice do dashboard — resumo, notificações, preferências, ingestão
 import type { StateCreator } from 'zustand';
 import type { DashboardResumo, Notificacao } from '../storeTypes';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface DashboardSlice {
   dashboardResumo: DashboardResumo | null;
@@ -37,7 +37,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
     set({ dashboardLoading: true });
     try
     {
-      const res = await fetch(`${API}/dashboard/resumo`, { headers: authHeaders() });
+      const res = await apiFetch('/dashboard/resumo');
       if ( !res.ok ) throw new Error('falha');
       const data = await res.json();
       set({ dashboardResumo: data, dashboardLoading: false });
@@ -54,7 +54,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
     if ( !shouldFetch('notificacoes') ) return;
     try
     {
-      const res = await fetch(`${API}/notificacoes`, { headers: authHeaders() });
+      const res = await apiFetch('/notificacoes');
       if ( !res.ok ) throw new Error('falha');
       const data = await res.json();
       set({ notificacoes: data });
@@ -66,7 +66,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
   {
     try
     {
-      await fetch(`${API}/notificacoes/${id}/lida`, { method: 'PATCH', headers: authHeaders() });
+      await apiFetch(`/notificacoes/${id}/lida`, { method: 'PATCH' });
       set({ notificacoes: get().notificacoes.map(n => n.id === id ? { ...n, lida: true } : n) });
     }
     catch (e) { console.error('markNotificacaoRead:', e); }
@@ -76,7 +76,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
   {
     try
     {
-      await fetch(`${API}/notificacoes/marcar-todas-lidas`, { method: 'PATCH', headers: authHeaders() });
+      await apiFetch('/notificacoes/marcar-todas-lidas', { method: 'PATCH' });
       set({ notificacoes: get().notificacoes.map(n => ({ ...n, lida: true })) });
     }
     catch (e) { console.error('markAllNotificacoesRead:', e); }
@@ -87,7 +87,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
     if ( !shouldFetch('preferencias') ) return;
     try
     {
-      const res = await fetch(`${API}/preferencias`, { headers: authHeaders() });
+      const res = await apiFetch('/preferencias');
       if ( !res.ok ) return;
       const data = await res.json();
       const kw = (data.palavras_chave_email || '').split(',').map((s: string) => s.trim()).filter(Boolean);
@@ -106,8 +106,8 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
       (set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)(
         () => ({ keywords: palavras })
       );
-      const res = await fetch(`${API}/preferencias`, {
-        method: 'PATCH', headers: authHeaders(),
+      const res = await apiFetch('/preferencias', {
+        method: 'PATCH',
         body: JSON.stringify({ palavras_chave_email: palavras.join(',') }),
       });
       if ( !res.ok ) throw new Error('falha');
@@ -125,8 +125,8 @@ export const createDashboardSlice: StateCreator<DashboardSlice, [], [], Dashboar
   {
     try
     {
-      const res = await fetch(`${API}/webhook/ingestao`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/webhook/ingestao', {
+        method: 'POST',
         body: JSON.stringify({ plataforma: 'gmail', titulo, conteudo: 'Conteúdo simulado para teste de triagem.' }),
       });
       if ( !res.ok ) throw new Error('falha na ingestão');

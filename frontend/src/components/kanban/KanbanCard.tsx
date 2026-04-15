@@ -3,7 +3,7 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import {
   Clock, Languages, Code2, Mail, MessageSquare, CheckSquare, Square,
-  AlertTriangle, Zap, Sparkles, Calendar, MoreHorizontal, Pencil, Trash2,
+  AlertTriangle, Zap, Sparkles, Calendar, MoreHorizontal, Pencil, Trash2, Copy,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
@@ -12,6 +12,7 @@ interface KanbanCardProps {
   tarefa: TarefaUnificada;
   onEdit?: (tarefa: TarefaUnificada) => void;
   onDelete?: (id: number) => void;
+  onDuplicate?: (id: number) => void;
 }
 
 /* cor da faixa superior baseada na prioridade */
@@ -122,7 +123,7 @@ function SubtaskProgressBar ({ done, total }: { done: number; total: number })
 }
 
 
-export function KanbanCard ({ tarefa, onEdit, onDelete }: KanbanCardProps)
+export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate }: KanbanCardProps)
 {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: tarefa.id });
   const [isTranslated, setIsTranslated] = useState(false);
@@ -216,10 +217,16 @@ export function KanbanCard ({ tarefa, onEdit, onDelete }: KanbanCardProps)
                   <Pencil className="w-3 h-3" /> Editar
                 </button>
                 <button
+                  onClick={(e) => { e.stopPropagation(); setShowActions(false); onDuplicate?.(tarefa.id); }}
+                  className="flex items-center gap-2 w-full px-3 py-1.5 text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors"
+                >
+                  <Copy className="w-3 h-3" /> Duplicar
+                </button>
+                <button
                   onClick={(e) => { e.stopPropagation(); setShowActions(false); onDelete?.(tarefa.id); }}
                   className="flex items-center gap-2 w-full px-3 py-1.5 text-[12px] text-red-400 hover:bg-red-500/10 transition-colors"
                 >
-                  <Trash2 className="w-3 h-3" /> Excluir
+                  <Trash2 className="w-3 h-3" /> Arquivar
                 </button>
               </div>
             )}

@@ -1,11 +1,22 @@
 """
 schemas.py — Pydantic models compartilhados entre routers.
 RF-1.04: usuario_id é extraído do JWT (get_current_user), NÃO do body.
+B9: Limites de tamanho em todos os campos de texto.
 """
+import html
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+
+
+# ── Helpers de sanitização (B8) ──────────────────────────────
+
+def _sanitize(value: str | None, max_len: int = 5000) -> str | None:
+    """Escapa HTML e trunca para evitar stored XSS e payload abuse."""
+    if value is None:
+        return None
+    return html.escape(value[:max_len].strip())
 
 
 # ── Auth ──────────────────────────────────────────────────────
@@ -14,10 +25,37 @@ class RegistroPayload(BaseModel):
     senha: str
     nome_completo: str = ""
 
+    @field_validator("email")
+    @classmethod
+    def email_valido(cls, v: str) -> str:
+        v = v.strip().lower()
+        if len(v) > 254 or "@" not in v:
+            raise ValueError("E-mail inválido.")
+        return v
+
+    @field_validator("senha")
+    @classmethod
+    def senha_minima(cls, v: str) -> str:
+        if len(v) < 6:
+            raise ValueError("A senha deve ter no mínimo 6 caracteres.")
+        if len(v) > 128:
+            raise ValueError("A senha deve ter no máximo 128 caracteres.")
+        return v
+
+    @field_validator("nome_completo")
+    @classmethod
+    def nome_sanitizado(cls, v: str) -> str:
+        return html.escape(v[:100].strip())
+
 
 class LoginPayload(BaseModel):
     email: str
     senha: str
+
+    @field_validator("email")
+    @classmethod
+    def email_lower(cls, v: str) -> str:
+        return v.strip().lower()
 
 
 # ── Tarefas / Webhook ────────────────────────────────────────
@@ -25,6 +63,16 @@ class WebhookPayload(BaseModel):
     plataforma: str
     titulo: str
     conteudo: str
+
+    @field_validator("titulo")
+    @classmethod
+    def titulo_sanitizado(cls, v: str) -> str:
+        return html.escape(v[:200].strip())
+
+    @field_validator("conteudo")
+    @classmethod
+    def conteudo_sanitizado(cls, v: str) -> str:
+        return html.escape(v[:5000].strip())
 
 
 class TarefaCreate(BaseModel):
@@ -36,6 +84,16 @@ class TarefaCreate(BaseModel):
     origem: str = "manual"
     data_vencimento: Optional[datetime] = None
 
+    @field_validator("titulo")
+    @classmethod
+    def titulo_limit(cls, v: str) -> str:
+        return v[:200].strip()
+
+    @field_validator("descricao", "notas_locais")
+    @classmethod
+    def text_limit(cls, v: str | None) -> str | None:
+        return _sanitize(v, 5000)
+
 
 class TarefaUpdate(BaseModel):
     titulo: Optional[str] = None
@@ -44,6 +102,18 @@ class TarefaUpdate(BaseModel):
     prioridade: Optional[str] = None
     notas_locais: Optional[str] = None
     data_vencimento: Optional[datetime] = None
+
+    @field_validator("titulo")
+    @classmethod
+    def titulo_limit(cls, v: str | None) -> str | None:
+        if v is None:
+            return None
+        return v[:200].strip()
+
+    @field_validator("descricao", "notas_locais")
+    @classmethod
+    def text_limit(cls, v: str | None) -> str | None:
+        return _sanitize(v, 5000)
 
 
 # ── Labels (Sprint 1) ────────────────────────────────────────
@@ -281,4 +351,18 @@ class WeeklyReviewResponse(BaseModel):
 class CorrelacaoResponse(BaseModel):
     insights: list[str]
     dados: list[dict]
+
+
+# ── Sprint C: Templates de Tarefa (C7) ───────────────────────
+class TemplateCreate(BaseModel):
+    nome: str
+    prioridade: str = "media"
+    subtarefas: list[str] = []   # lista de títulos
+
+class TemplateResponse(BaseModel):
+    id: int
+    nome: str
+    prioridade: str
+    subtarefas: list[str] = []
+    created_at: Optional[datetime] = None
 

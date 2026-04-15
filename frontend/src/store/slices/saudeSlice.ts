@@ -2,7 +2,7 @@
 import type { StateCreator } from 'zustand';
 import type { Medicamento, HabitoDiario } from '../storeTypes';
 import type { HabitoStreak } from '../../types';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface SaudeSlice {
   medicamentos: Medicamento[];
@@ -28,7 +28,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   {
     try
     {
-      const res = await fetch(`${API}/medicamentos`, { headers: authHeaders() });
+      const res = await apiFetch('/medicamentos');
       if ( !res.ok ) throw new Error('falha');
       const data = await res.json();
       set({ medicamentos: data.medicamentos });
@@ -40,8 +40,8 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   {
     try
     {
-      const res = await fetch(`${API}/medicamentos`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/medicamentos', {
+        method: 'POST',
         body: JSON.stringify({ nome: med.nome, horario: med.horario }),
       });
       if ( res.ok )
@@ -64,7 +64,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     }));
     try
     {
-      await fetch(`${API}/medicamentos/${id}/toggle`, { method: 'PATCH', headers: authHeaders() });
+      await apiFetch(`/medicamentos/${id}/toggle`, { method: 'PATCH' });
     }
     catch
     {
@@ -78,7 +78,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   {
     try
     {
-      const res = await fetch(`${API}/habitos`, { headers: authHeaders() });
+      const res = await apiFetch('/habitos');
       if ( !res.ok ) return;
       const data = await res.json();
       set({ habitos: data.habitos });
@@ -90,8 +90,8 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   {
     try
     {
-      const res = await fetch(`${API}/habitos`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/habitos', {
+        method: 'POST',
         body: JSON.stringify(h),
       });
       if ( res.ok )
@@ -112,7 +112,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         h.id === id ? { ...h, progresso_atual: Math.min(h.progresso_atual + 1, h.meta_diaria) } : h
       ),
     }));
-    try { await fetch(`${API}/habitos/${id}/incrementar`, { method: 'PATCH', headers: authHeaders() }); }
+    try { await apiFetch(`/habitos/${id}/incrementar`, { method: 'PATCH' }); }
     catch { /* offline */ }
   },
 
@@ -123,14 +123,14 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         h.id === id ? { ...h, progresso_atual: Math.max(h.progresso_atual - 1, 0) } : h
       ),
     }));
-    try { await fetch(`${API}/habitos/${id}/decrementar`, { method: 'PATCH', headers: authHeaders() }); }
+    try { await apiFetch(`/habitos/${id}/decrementar`, { method: 'PATCH' }); }
     catch { /* offline */ }
   },
 
   deleteHabito: async (id) =>
   {
     set((s) => ({ habitos: s.habitos.filter((h) => h.id !== id) }));
-    try { await fetch(`${API}/habitos/${id}`, { method: 'DELETE', headers: authHeaders() }); }
+    try { await apiFetch(`/habitos/${id}`, { method: 'DELETE' }); }
     catch { /* offline */ }
   },
 
@@ -138,7 +138,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   {
     try
     {
-      const res = await fetch(`${API}/habitos/streaks`, { headers: authHeaders() });
+      const res = await apiFetch('/habitos/streaks');
       if ( !res.ok ) return;
       const data = await res.json();
       set({ habitosStreaks: data });

@@ -1,7 +1,7 @@
 // slice de anotações — crud do segundo cérebro
 import type { StateCreator } from 'zustand';
 import type { Anotacao } from '../storeTypes';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface AnotacoesSlice {
   anotacoes: Anotacao[];
@@ -16,7 +16,7 @@ export const createAnotacoesSlice: StateCreator<AnotacoesSlice, [], [], Anotacoe
   {
     try
     {
-      const res = await fetch(`${API}/anotacoes`, { headers: authHeaders() });
+      const res = await apiFetch('/anotacoes');
       if ( !res.ok ) throw new Error('falha ao buscar anotações');
       const data = await res.json();
       set({ anotacoes: data.anotacoes });
@@ -26,8 +26,8 @@ export const createAnotacoesSlice: StateCreator<AnotacoesSlice, [], [], Anotacoe
 
   addAnotacao: async (conteudo, titulo) =>
   {
-    const res = await fetch(`${API}/anotacoes`, {
-      method: 'POST', headers: authHeaders(),
+    const res = await apiFetch('/anotacoes', {
+      method: 'POST',
       body: JSON.stringify({ conteudo, titulo: titulo || null }),
     });
     if ( !res.ok ) throw new Error('falha ao salvar anotação');

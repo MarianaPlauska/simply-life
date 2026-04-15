@@ -4,13 +4,69 @@ import {
   CheckSquare, Plus, Trash2, Pencil, Check, AlertTriangle, GripVertical,
   FileText, StickyNote, ArrowRight, Loader2, ChevronDown,
 } from 'lucide-react';
+import { DndContext, closestCenter, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
-import type { TarefaUnificada, Label } from '../../types';
+import type { TarefaUnificada, Label, Subtarefa } from '../../types';
 
 interface TaskDetailModalProps {
   tarefa: TarefaUnificada;
   onClose: () => void;
+}
+
+/* C8: item de subtarefa arrastável */
+function SortableSubtaskItem ({ sub, onToggle, onDelete }: {
+  sub: Subtarefa;
+  onToggle: (id: number, concluida: boolean) => void;
+  onDelete: (id: number) => void;
+})
+{
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: sub.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-3 px-3 py-2 rounded-lg group/sub transition-colors
+                 ${sub.concluida ? 'bg-emerald-500/5' : 'hover:bg-zinc-800/30'}`}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="p-0.5 cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-400 shrink-0"
+      >
+        <GripVertical className="w-3.5 h-3.5" />
+      </button>
+      <button
+        onClick={() => onToggle(sub.id, sub.concluida)}
+        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all
+                   ${sub.concluida
+                     ? 'bg-emerald-500 border-emerald-500 text-white'
+                     : 'border-zinc-600 hover:border-violet-500/50'
+                   }`}
+      >
+        {sub.concluida && <Check className="w-3 h-3" />}
+      </button>
+      <span className={`flex-1 text-[13px] transition-all ${
+        sub.concluida ? 'text-zinc-500 line-through' : 'text-zinc-300'
+      }`}>
+        {sub.titulo}
+      </span>
+      <button
+        onClick={() => onDelete(sub.id)}
+        className="p-1 rounded opacity-0 group-hover/sub:opacity-100 text-zinc-600 hover:text-red-400 transition-all"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
+    </div>
+  );
 }
 
 /* mapeamento de origem */
@@ -68,6 +124,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
   const createSubtarefa = useTaskStore((s) => s.createSubtarefa);
   const updateSubtarefa = useTaskStore((s) => s.updateSubtarefa);
   const deleteSubtarefa = useTaskStore((s) => s.deleteSubtarefa);
+  const reorderSubtarefas = useTaskStore((s) => s.reorderSubtarefas);
   const allLabels = useTaskStore((s) => s.labels);
   const addLabelToTarefa = useTaskStore((s) => s.addLabelToTarefa);
   const removeLabelFromTarefa = useTaskStore((s) => s.removeLabelFromTarefa);
@@ -149,6 +206,20 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
     await deleteSubtarefa(subId, tarefaAtual.id);
   };
 
+  // C8: drag reorder subtarefas
+  const subSensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const handleSubDragEnd = (event: DragEndEvent) =>
+  {
+    const { active, over } = event;
+    if ( !over || active.id === over.id ) return;
+    const oldIndex = subs.findIndex((s) => s.id === Number(active.id));
+    const newIndex = subs.findIndex((s) => s.id === Number(over.id));
+    if ( oldIndex === -1 || newIndex === -1 ) return;
+    const newOrder = arrayMove(subs.map((s) => s.id), oldIndex, newIndex);
+    reorderSubtarefas(tarefaAtual.id, newOrder);
+  };
+
   const changeStatus = async (newStatus: string) =>
   {
     await updateTarefa(tarefaAtual.id, { status: newStatus });
@@ -158,9 +229,9 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 
   const changePriority = async (newPrio: string) =>
   {
-    // usa PATCH com prioridade — precisa backend suportar
-    await updateTarefa(tarefaAtual.id, { status: tarefaAtual.status });
+    await updateTarefa(tarefaAtual.id, { prioridade: newPrio });
     setShowPrioMenu(false);
+    toast.success(`Prioridade → ${PRIORIDADE_CONFIG[newPrio]?.label}`);
   };
 
   const handleDelete = async () =>
@@ -309,38 +380,21 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                 </div>
               )}
 
-              {/* lista de subtarefas */}
-              <div className="space-y-1">
-                {subs.map((sub) => (
-                  <div
-                    key={sub.id}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg group/sub transition-colors
-                               ${sub.concluida ? 'bg-emerald-500/5' : 'hover:bg-zinc-800/30'}`}
-                  >
-                    <button
-                      onClick={() => toggleSubtask(sub.id, sub.concluida)}
-                      className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all
-                                 ${sub.concluida
-                                   ? 'bg-emerald-500 border-emerald-500 text-white'
-                                   : 'border-zinc-600 hover:border-violet-500/50'
-                                 }`}
-                    >
-                      {sub.concluida && <Check className="w-3 h-3" />}
-                    </button>
-                    <span className={`flex-1 text-[13px] transition-all ${
-                      sub.concluida ? 'text-zinc-500 line-through' : 'text-zinc-300'
-                    }`}>
-                      {sub.titulo}
-                    </span>
-                    <button
-                      onClick={() => handleDeleteSubtask(sub.id)}
-                      className="p-1 rounded opacity-0 group-hover/sub:opacity-100 text-zinc-600 hover:text-red-400 transition-all"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
+              {/* lista de subtarefas — C8: drag reorder */}
+              <DndContext sensors={subSensors} collisionDetection={closestCenter} onDragEnd={handleSubDragEnd}>
+                <SortableContext items={subs.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-1">
+                    {subs.map((sub) => (
+                      <SortableSubtaskItem
+                        key={sub.id}
+                        sub={sub}
+                        onToggle={toggleSubtask}
+                        onDelete={handleDeleteSubtask}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
 
               {/* adicionar nova subtarefa */}
               <div className="flex items-center gap-2 mt-2">
@@ -448,11 +502,35 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
             {/* prioridade */}
             <div className="relative">
               <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium block mb-1.5">Prioridade</span>
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-[13px] font-medium
-                              ${prioConfig.bg} ${prioConfig.color} ${prioConfig.border}`}>
-                <Zap className="w-3.5 h-3.5" />
-                {prioConfig.label}
-              </div>
+              <button
+                onClick={() => setShowPrioMenu(!showPrioMenu)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[13px] font-medium transition-colors
+                           ${prioConfig.bg} ${prioConfig.color} ${prioConfig.border} hover:border-zinc-600/60`}
+              >
+                <span className="flex items-center gap-2">
+                  <Zap className="w-3.5 h-3.5" />
+                  {prioConfig.label}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              {showPrioMenu && (
+                <div className="absolute top-full left-0 right-0 mt-1 z-10 bg-zinc-900 border border-zinc-700/60 rounded-lg shadow-xl py-1">
+                  {PRIO_OPTIONS.map((pr) => {
+                    const cfg = PRIORIDADE_CONFIG[pr];
+                    return (
+                      <button
+                        key={pr}
+                        onClick={() => changePriority(pr)}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-zinc-800
+                                   ${tarefaAtual.prioridade === pr ? cfg.color + ' font-semibold' : 'text-zinc-400'}`}
+                      >
+                        <Zap className="w-3 h-3" />
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* urgência / score */}

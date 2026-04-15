@@ -1,7 +1,7 @@
 // slice de calendário — google calendar integration
 import type { StateCreator } from 'zustand';
 import type { CalendarEvent } from '../storeTypes';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface CalendarSlice {
   calendarEvents: CalendarEvent[];
@@ -34,7 +34,7 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
     set({ calendarLoading: true, calendarError: null });
     try
     {
-      const res = await fetch(`${API}/integracoes/calendario/hoje`, { headers: authHeaders() });
+      const res = await apiFetch('/integracoes/calendario/hoje');
       if ( res.status === 401 ) { (get as unknown as FullGet)().logout(); return; }
       if ( !res.ok )
       {
@@ -64,7 +64,7 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
   {
     try
     {
-      const res = await fetch(`${API}/integracoes/google/url`, { headers: authHeaders() });
+      const res = await apiFetch('/integracoes/google/url');
       if ( !res.ok ) throw new Error('falha');
       const data = await res.json();
       window.location.href = data.url;
@@ -76,8 +76,8 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
   {
     try
     {
-      const res = await fetch(`${API}/integracoes/google/desconectar`, {
-        method: 'DELETE', headers: authHeaders(),
+      const res = await apiFetch('/integracoes/google/desconectar', {
+        method: 'DELETE',
       });
       if ( res.ok ) set({ googleCalendarConnected: false, calendarEvents: [] });
     }
@@ -88,7 +88,7 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
   {
     try
     {
-      const res = await fetch(`${API}/integracoes/google/status`, { headers: authHeaders() });
+      const res = await apiFetch('/integracoes/google/status');
       if ( !res.ok ) return;
       const data = await res.json();
       set({ googleCalendarConnected: data.connected });
@@ -100,8 +100,8 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
   {
     try
     {
-      const res = await fetch(`${API}/integracoes/google/callback`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/integracoes/google/callback', {
+        method: 'POST',
         body: JSON.stringify({ code }),
       });
       if ( !res.ok ) return false;

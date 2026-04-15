@@ -1,7 +1,7 @@
 // slice de busca — busca global full-text
 import type { StateCreator } from 'zustand';
 import type { BuscaResult } from '../../types';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface BuscaSlice {
   searchResults: BuscaResult | null;
@@ -23,9 +23,7 @@ export const createBuscaSlice: StateCreator<BuscaSlice, [], [], BuscaSlice> = (s
     set({ searchLoading: true });
     try
     {
-      const res = await fetch(`${API}/busca?q=${encodeURIComponent(query.trim())}&limite=8`, {
-        headers: authHeaders(),
-      });
+      const res = await apiFetch(`/busca?q=${encodeURIComponent(query.trim())}&limite=8`);
       if ( res.ok )
       {
         const data = await res.json();

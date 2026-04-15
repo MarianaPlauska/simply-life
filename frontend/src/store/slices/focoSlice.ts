@@ -1,7 +1,7 @@
 // slice de foco — timer pomodoro, gamificação, sessões
 import type { StateCreator } from 'zustand';
 import type { FocusState, GamificacaoProfile } from '../storeTypes';
-import { API, authHeaders } from '../api';
+import { apiFetch } from '../api';
 
 export interface FocoSlice {
   isFocusModeActive: boolean;
@@ -104,7 +104,7 @@ export const createFocoSlice: StateCreator<FocoSlice, [], [], FocoSlice> = (set,
   {
     try
     {
-      const res = await fetch(`${API}/gamificacao/perfil`, { headers: authHeaders() });
+      const res = await apiFetch('/gamificacao/perfil');
       if ( !res.ok ) return;
       const data = await res.json();
       set({
@@ -124,8 +124,8 @@ export const createFocoSlice: StateCreator<FocoSlice, [], [], FocoSlice> = (set,
   {
     try
     {
-      const res = await fetch(`${API}/gamificacao/finalizar-sessao`, {
-        method: 'POST', headers: authHeaders(),
+      const res = await apiFetch('/gamificacao/finalizar-sessao', {
+        method: 'POST',
         body: JSON.stringify({ minutos, tarefa_id: tarefaId ?? null }),
       });
       if ( res.ok )
