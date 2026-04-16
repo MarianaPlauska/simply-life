@@ -12,6 +12,7 @@ B3       Logout com blacklist de token (tabela token_blacklist)
 """
 
 import os
+import json
 import logging
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -28,6 +29,8 @@ import models
 logger = logging.getLogger("simply-life")
 
 # ── Configuração ──────────────────────────────────────────────
+
+IS_PRODUCTION = os.environ.get("ENVIRONMENT", "development") == "production"
 
 SECRET_KEY: str = os.environ.get("JWT_SECRET", "")
 if not SECRET_KEY:
@@ -117,7 +120,7 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> None:
         key=ACCESS_COOKIE,
         value=access,
         httponly=True,
-        secure=False,          # True em produção (HTTPS)
+        secure=IS_PRODUCTION,
         samesite="lax",
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/",
@@ -126,7 +129,7 @@ def set_auth_cookies(response: Response, access: str, refresh: str) -> None:
         key=REFRESH_COOKIE,
         value=refresh,
         httponly=True,
-        secure=False,
+        secure=IS_PRODUCTION,
         samesite="lax",
         max_age=REFRESH_TOKEN_EXPIRE_DAYS * 86400,
         path="/auth",          # refresh só precisa acesso ao /auth
@@ -137,6 +140,40 @@ def clear_auth_cookies(response: Response) -> None:
     """Remove cookies de autenticação."""
     response.delete_cookie(ACCESS_COOKIE, path="/")
     response.delete_cookie(REFRESH_COOKIE, path="/auth")
+
+
+# ── Audit Log Helper ─────────────────────────────────────────
+
+def registrar_auditoria(
+    db: Session,
+    acao: str,
+    request: Request | None = None,
+    usuario_id: int | None = None,
+    recurso: str | None = None,
+    recurso_id: int | None = None,
+    detalhes: dict | None = None,
+) -> None:
+    """Registra evento no audit_log (LGPD compliance)."""
+    ip = None
+    ua = None
+    if request:
+        ip = request.headers.get("X-Real-IP") or request.client.host if request.client else None
+        ua = request.headers.get("User-Agent", "")[:500]
+    log_entry = models.AuditLog(
+        usuario_id=usuario_id,
+        acao=acao,
+        recurso=recurso,
+        recurso_id=recurso_id,
+        ip_address=ip,
+        user_agent=ua,
+        detalhes=json.dumps(detalhes, default=str) if detalhes else None,
+    )
+    db.add(log_entry)
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.warning("Falha ao registrar auditoria: acao=%s", acao)
 
 
 # ── Dependência FastAPI: usuário autenticado ─────────────────

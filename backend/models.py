@@ -286,3 +286,37 @@ class AtividadeTarefa(database.Base):
     detalhe = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     tarefa = relationship("TarefaUnificada")
+
+
+# ── Sprint Security: Audit Log ───────────────────────────────
+
+# 22. Log de auditoria (LGPD compliance)
+class AuditLog(database.Base):
+    __tablename__ = "audit_log"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    acao = Column(String(100), nullable=False)          # login, logout, login_falhou, dados_exportados, conta_excluida, etc.
+    recurso = Column(String(100), nullable=True)        # tabela ou entidade afetada
+    recurso_id = Column(Integer, nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+    detalhes = Column(Text, nullable=True)              # JSON com metadata extra
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (
+        Index("idx_audit_usuario_acao", "usuario_id", "acao"),
+        Index("idx_audit_created", "created_at"),
+    )
+
+
+# ── Sprint Security: Webhook Secret ─────────────────────────
+
+# 23. Chaves HMAC por usuário para webhooks M2M
+class WebhookSecret(database.Base):
+    __tablename__ = "webhook_secrets"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False, unique=True)
+    secret_hash = Column(String, nullable=False)        # bcrypt do secret
+    ativo = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    dono = relationship("Usuario")

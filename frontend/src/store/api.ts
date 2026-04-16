@@ -24,17 +24,36 @@ export function authHeaders(): HeadersInit
 }
 
 /**
+ * Lê o cookie csrf_token (não httpOnly) para enviar no header X-CSRF-Token.
+ */
+function getCsrfToken(): string
+{
+  const match = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+/**
  * B1: fetch com credentials: 'include' para enviar cookies httpOnly.
  * B2: intercepta 401 e tenta refresh automático antes de falhar.
+ * Security: envia X-CSRF-Token em métodos mutantes (double-submit cookie).
  */
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response>
 {
   const url = `${API}${path}`;
+  const method = (init.method || 'GET').toUpperCase();
+  const csrfHeaders: Record<string, string> = {};
+  if (method !== 'GET' && method !== 'HEAD' && method !== 'OPTIONS')
+  {
+    const csrf = getCsrfToken();
+    if (csrf) csrfHeaders['X-CSRF-Token'] = csrf;
+  }
+
   const opts: RequestInit = {
     ...init,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...csrfHeaders,
       ...(_authToken ? { Authorization: `Bearer ${_authToken}` } : {}),
       ...(init.headers || {}),
     },
@@ -48,6 +67,7 @@ export async function apiFetch(path: string, init: RequestInit = {}): Promise<Re
     const refreshRes = await fetch(`${API}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
+      headers: { ...csrfHeaders },
     });
 
     if ( refreshRes.ok )

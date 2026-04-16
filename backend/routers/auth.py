@@ -19,7 +19,7 @@ from auth import (
     hash_senha, verificar_senha,
     criar_access_token, criar_refresh_token, verificar_token,
     set_auth_cookies, clear_auth_cookies,
-    get_current_user,
+    get_current_user, registrar_auditoria,
     ACCESS_COOKIE, REFRESH_COOKIE,
     REFRESH_TOKEN_EXPIRE_DAYS,
 )
@@ -41,6 +41,7 @@ def _issue_tokens(user_id: int, email: str) -> tuple[str, str]:
 
 @router.post("/registro")
 def registrar_usuario(
+    request: Request,
     dados: RegistroPayload,
     response: Response,
     db: Session = Depends(database.get_db),
@@ -68,6 +69,7 @@ def registrar_usuario(
     set_auth_cookies(response, access, refresh)
 
     logger.info("novo usuario registrado: id=%s email=%s", novo.id, novo.email)
+    registrar_auditoria(db, "registro", request, usuario_id=novo.id)
 
     return {
         "status": "sucesso",
@@ -90,10 +92,13 @@ def login_usuario(
         models.Usuario.email == dados.email
     ).first()
     if not usuario or not usuario.senha_hash:
+        registrar_auditoria(db, "login_falhou", request, detalhes={"email": dados.email, "motivo": "usuario_nao_encontrado"})
         raise HTTPException(status_code=401, detail="Credenciais inválidas.")
     if not verificar_senha(dados.senha, usuario.senha_hash):
+        registrar_auditoria(db, "login_falhou", request, usuario_id=usuario.id, detalhes={"motivo": "senha_invalida"})
         raise HTTPException(status_code=401, detail="Credenciais inválidas.")
     if not usuario.ativo:
+        registrar_auditoria(db, "login_falhou", request, usuario_id=usuario.id, detalhes={"motivo": "conta_desativada"})
         raise HTTPException(status_code=403, detail="Conta desativada.")
 
     usuario.ultimo_login = datetime.now().isoformat()
@@ -103,6 +108,7 @@ def login_usuario(
     set_auth_cookies(response, access, refresh)
 
     logger.info("login: id=%s", usuario.id)
+    registrar_auditoria(db, "login", request, usuario_id=usuario.id)
 
     return {
         "status": "sucesso",
@@ -202,6 +208,7 @@ def logout(
     clear_auth_cookies(response)
 
     logger.info("logout realizado")
+    registrar_auditoria(db, "logout", request)
     return {"status": "desconectado"}
 
 
