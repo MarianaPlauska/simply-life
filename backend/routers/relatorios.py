@@ -9,7 +9,7 @@ Endpoints:
 from datetime import date, datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -151,11 +151,12 @@ def _report_to_response(report) -> AnalyticsReportResponse:
 
 @router.get("/semanal", response_model=AnalyticsReportResponse)
 def relatorio_semanal(
+    semanas: int = Query(default=8, ge=1, le=52, description="Semanas de histórico de tendência (1-52)"),
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
 ):
     """Relatório completo da semana atual com comparação à anterior."""
-    report = gerar_relatorio_semanal(db, current_user.id, current_user.streak_atual or 0)
+    report = gerar_relatorio_semanal(db, current_user.id, current_user.streak_atual or 0, semanas_historico=semanas)
     report.total_xp = current_user.xp_total or 0
     report.membro_desde = current_user.criado_em or ""
     return _report_to_response(report)
@@ -163,11 +164,12 @@ def relatorio_semanal(
 
 @router.get("/mensal", response_model=AnalyticsReportResponse)
 def relatorio_mensal(
+    semanas: int = Query(default=8, ge=1, le=52, description="Semanas de histórico de tendência (1-52)"),
     current_user: models.Usuario = Depends(get_current_user),
     db: Session = Depends(database.get_db),
 ):
     """Relatório completo do mês atual com comparação ao anterior."""
-    report = gerar_relatorio_mensal(db, current_user.id, current_user.streak_atual or 0)
+    report = gerar_relatorio_mensal(db, current_user.id, current_user.streak_atual or 0, semanas_historico=semanas)
     report.total_xp = current_user.xp_total or 0
     report.membro_desde = current_user.criado_em or ""
     return _report_to_response(report)

@@ -9,6 +9,27 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 
+# ── Sentry (observabilidade) ─────────────────────────────────
+_SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+    _SENTRY_AVAILABLE = True
+except ImportError:
+    _SENTRY_AVAILABLE = False
+
+if _SENTRY_DSN and _SENTRY_AVAILABLE:
+    sentry_sdk.init(
+        dsn=_SENTRY_DSN,
+        integrations=[FastApiIntegration(), SqlalchemyIntegration()],
+        # Captura 10% das transações em produção (ajuste via env SENTRY_TRACES_RATE)
+        traces_sample_rate=float(os.environ.get("SENTRY_TRACES_RATE", "0.1")),
+        # Nunca enviar PII como email/IP na payload do evento
+        send_default_pii=False,
+        environment=os.environ.get("ENVIRONMENT", "development"),
+    )
+
 # Carrega .env do diretório backend/ (onde estão as credenciais reais)
 _backend_dir = Path(__file__).resolve().parent
 load_dotenv(_backend_dir / ".env", override=True)
@@ -28,6 +49,11 @@ import models
 
 from routers import auth as auth_router
 from routers import tarefas as tarefas_router
+from routers import webhooks as webhooks_router
+from routers import labels as labels_router
+from routers import anotacoes as anotacoes_router
+from routers import templates as templates_router
+from routers import relacionamentos as relacionamentos_router
 from routers import configuracoes as config_router
 from routers import financas as financas_router
 from routers import saude as saude_router
@@ -51,10 +77,38 @@ logger = logging.getLogger("simply-life")
 
 
 # ── Worker de background (polling) ────────────────────────────
+_WORKER_BASE_DELAY = 60       # segundos entre ciclos normais
+_WORKER_MAX_BACKOFF = 300     # backoff máximo após erros (5 min)
+
 async def motor_busca_ativa():
+    """
+    Worker periódico com retry e backoff exponencial.
+    Em produção cheque integrações externas (Gmail, GitHub, etc.).
+    Em caso de erro, espera progressivamente até _WORKER_MAX_BACKOFF.
+    """
+    backoff = _WORKER_BASE_DELAY
+    consecutive_errors = 0
     while True:
-        logger.debug("Worker: Checando novas demandas de serviços externos...")
-        await asyncio.sleep(60)
+        try:
+            logger.debug("Worker: iniciando ciclo de verificação de integrações...")
+            # TODO: disparar chamadas de sincronização (Gmail, GitHub, etc.)
+            consecutive_errors = 0
+            backoff = _WORKER_BASE_DELAY
+            await asyncio.sleep(backoff)
+        except asyncio.CancelledError:
+            logger.info("Worker: encerrado normalmente.")
+            raise
+        except Exception as exc:
+            consecutive_errors += 1
+            # backoff exponencial: 60s → 120s → 240s → 300s (teto)
+            backoff = min(_WORKER_BASE_DELAY * (2 ** (consecutive_errors - 1)), _WORKER_MAX_BACKOFF)
+            logger.error(
+                "Worker: erro no ciclo #%d — %s — aguardando %ds antes de tentar novamente",
+                consecutive_errors, exc, backoff,
+            )
+            if _SENTRY_DSN and _SENTRY_AVAILABLE:
+                sentry_sdk.capture_exception(exc)
+            await asyncio.sleep(backoff)
 
 
 # ── Lifespan (substitui @app.on_event) ───────────────────────
@@ -170,19 +224,36 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────
-app.include_router(auth_router.router)
-app.include_router(tarefas_router.router)
-app.include_router(config_router.router)
-app.include_router(financas_router.router)
-app.include_router(saude_router.router)
-app.include_router(dashboard_router.router)
-app.include_router(integracoes_router.router)
-app.include_router(gamificacao_router.router)
-app.include_router(triagem_router.router)
-app.include_router(busca_router.router)
-app.include_router(bem_estar_router.router)
-app.include_router(relatorios_router.router)
-app.include_router(lgpd_router.router)
+# Todos os routers são registrados duas vezes:
+#   • /v1/... — canônico (clientes novos e futuras versões)
+#   • /...    — legado (compatibilidade com clientes existentes)
+# Quando a v2 existir, basta adicionar um novo bloco sem remover v1.
+_FEATURE_ROUTERS = [
+    auth_router.router,
+    tarefas_router.router,
+    webhooks_router.router,
+    labels_router.router,
+    anotacoes_router.router,
+    templates_router.router,
+    relacionamentos_router.router,
+    config_router.router,
+    financas_router.router,
+    saude_router.router,
+    dashboard_router.router,
+    integracoes_router.router,
+    gamificacao_router.router,
+    triagem_router.router,
+    busca_router.router,
+    bem_estar_router.router,
+    relatorios_router.router,
+    lgpd_router.router,
+]
+
+for _r in _FEATURE_ROUTERS:
+    app.include_router(_r)                          # legado: /tarefas, /dashboard/resumo …
+    app.include_router(_r, prefix="/v1")            # canônico: /v1/tarefas, /v1/dashboard/resumo …
+
+# WebSocket e infra ficam sem prefixo versionado (protocolo especial / ops)
 app.include_router(ws_router.router)
 
 # ── Health Check (para load balancers / Docker) ──────────────

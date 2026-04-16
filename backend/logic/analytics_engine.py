@@ -448,8 +448,24 @@ def _top_origens_tarefa(db: Session, uid: int, inicio: date, fim: date) -> list[
 
 # ── API pública: gerar relatório ─────────────────────────────
 
-def gerar_relatorio_semanal(db: Session, uid: int, streak_atual: int = 0) -> AnalyticsReport:
-    """Gera relatório semanal completo (estilo Last.fm weekly report)."""
+# Limites de janela histórica para evitar queries ilimitadas com usuários antigos
+_MAX_SEMANAS_HISTORICO = 52   # ~1 ano
+_MAX_MESES_HISTORICO = 24     # 2 anos
+
+
+def gerar_relatorio_semanal(
+    db: Session,
+    uid: int,
+    streak_atual: int = 0,
+    semanas_historico: int = 8,
+) -> AnalyticsReport:
+    """Gera relatório semanal completo (estilo Last.fm weekly report).
+
+    Args:
+        semanas_historico: janela de tendência — padrão 8, máximo 52.
+    """
+    semanas_historico = max(1, min(semanas_historico, _MAX_SEMANAS_HISTORICO))
+
     hoje = date.today()
     sem_ini = _inicio_semana(hoje)
     sem_fim = _fim_semana(hoje)
@@ -468,8 +484,8 @@ def gerar_relatorio_semanal(db: Session, uid: int, streak_atual: int = 0) -> Ana
         "habitos_taxa": _variacao(atual.habitos_taxa_pct, anterior.habitos_taxa_pct),
     }
 
-    # Tendências
-    tarefas_t, foco_t, score_t = _tendencia_semanal(db, uid, 8)
+    # Tendências — limitadas por semanas_historico
+    tarefas_t, foco_t, score_t = _tendencia_semanal(db, uid, semanas_historico)
 
     # Rankings
     ranking_dias = _ranking_dias_semana(db, uid, sem_ini, sem_fim)
@@ -508,8 +524,19 @@ def gerar_relatorio_semanal(db: Session, uid: int, streak_atual: int = 0) -> Ana
     )
 
 
-def gerar_relatorio_mensal(db: Session, uid: int, streak_atual: int = 0) -> AnalyticsReport:
-    """Gera relatório mensal completo."""
+def gerar_relatorio_mensal(
+    db: Session,
+    uid: int,
+    streak_atual: int = 0,
+    semanas_historico: int = 8,
+) -> AnalyticsReport:
+    """Gera relatório mensal completo.
+
+    Args:
+        semanas_historico: semanas de tendência no sparkline — padrão 8, máximo 52.
+    """
+    semanas_historico = max(1, min(semanas_historico, _MAX_SEMANAS_HISTORICO))
+
     hoje = date.today()
     mes_ini = _inicio_mes(hoje)
     mes_fim = _fim_mes(hoje)
@@ -529,8 +556,8 @@ def gerar_relatorio_mensal(db: Session, uid: int, streak_atual: int = 0) -> Anal
         "habitos_taxa": _variacao(atual.habitos_taxa_pct, anterior.habitos_taxa_pct),
     }
 
-    # Tendências — últimas 8 semanas
-    tarefas_t, foco_t, score_t = _tendencia_semanal(db, uid, 8)
+    # Tendências — limitadas por semanas_historico
+    tarefas_t, foco_t, score_t = _tendencia_semanal(db, uid, semanas_historico)
 
     ranking_dias = _ranking_dias_semana(db, uid, mes_ini, mes_fim)
     top_origens = _top_origens_tarefa(db, uid, mes_ini, mes_fim)

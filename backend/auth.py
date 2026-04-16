@@ -1,16 +1,3 @@
-"""
-auth.py — Módulo de Identidade e Segurança (ÉPICO 1 / Sprint B)
-=====================================================
-RF-1.01  Registro e Login com bcrypt + JWT
-RF-1.02  Sessões via JWT (access 15 min + refresh 7 dias, HS256)
-RNF-1.01 Criptografia: bcrypt cost ≥ 12, Fernet AES-256
-RNF-1.02 Rate-limiting já aplicado no main.py (slowapi)
-RNF-1.03 CORS restrito a whitelist no main.py
-B1       httpOnly cookies em vez de Bearer + localStorage
-B2       Refresh token (7 dias) + access token (15 min)
-B3       Logout com blacklist de token (tabela token_blacklist)
-"""
-
 import os
 import json
 import logging
@@ -41,6 +28,10 @@ if not SECRET_KEY:
 ALGORITHM: str = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES: int = 15            # B2: access curto (15 min)
 REFRESH_TOKEN_EXPIRE_DAYS: int = 7               # B2: refresh longo (7 dias)
+
+# Sessão inativa por mais de N horas é invalidada (independente do JWT ainda ser válido)
+# Configurável via env; padrão 8 horas (jornada de trabalho)
+INACTIVE_SESSION_TIMEOUT_HOURS: int = int(os.environ.get("INACTIVE_SESSION_TIMEOUT_HOURS", "8"))
 
 # nomes dos cookies
 ACCESS_COOKIE = "access_token"
@@ -221,4 +212,50 @@ def get_current_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário não encontrado ou desativado.",
         )
+
+    # ── Inactividade de sessão ────────────────────────────────
+    agora = datetime.now(timezone.utc)
+    if usuario.last_active_at is not None:
+        ultimo = usuario.last_active_at
+        # Normaliza para UTC se vier sem timezone
+        if ultimo.tzinfo is None:
+            ultimo = ultimo.replace(tzinfo=timezone.utc)
+        inativo_por = agora - ultimo
+        if inativo_por > timedelta(hours=INACTIVE_SESSION_TIMEOUT_HOURS):
+            logger.warning("Sessão expirada por inatividade: usuario_id=%s (%s h)", usuario.id, inativo_por.seconds // 3600)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Sessão expirada por inatividade. Faça login novamente.",
+            )
+
+    # Atualiza last_active_at a cada request autenticado
+    usuario.last_active_at = agora
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+
+
+    # ── Inactividade de sessão ────────────────────────────────
+    agora = datetime.now(timezone.utc)
+    if usuario.last_active_at is not None:
+        ultimo = usuario.last_active_at
+        # Normaliza para UTC se vier sem timezone
+        if ultimo.tzinfo is None:
+            ultimo = ultimo.replace(tzinfo=timezone.utc)
+        inativo_por = agora - ultimo
+        if inativo_por > timedelta(hours=INACTIVE_SESSION_TIMEOUT_HOURS):
+            logger.warning("Sessão expirada por inatividade: usuario_id=%s (%s h)", usuario.id, inativo_por.seconds // 3600)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Sessão expirada por inatividade. Faça login novamente.",
+            )
+
+    # Atualiza last_active_at a cada request autenticado
+    usuario.last_active_at = agora
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+
     return usuario

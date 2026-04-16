@@ -21,6 +21,8 @@ class Usuario(database.Base):
     xp_total = Column(Integer, default=0)
     streak_atual = Column(Integer, default=0)
     ultima_sessao_data = Column(DateTime, nullable=True)
+    # Sprint Security: rastreamento de inatividade de sessão
+    last_active_at = Column(DateTime, nullable=True)
     tarefas = relationship("TarefaUnificada", back_populates="dono")
     sessoes_foco = relationship("SessaoFoco", back_populates="usuario")
 

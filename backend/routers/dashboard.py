@@ -3,8 +3,11 @@ routers/dashboard.py — Painel de Controle e Agregação de Telemetria
 RF-4.01: Endpoint de agregação GET /dashboard/resumo
 RF-4.02: Motor de resumo contextual (saudacao_ia)
 RNF-4.01: JWT obrigatório, performance otimizada
+Cache: resultado por usuário com TTL de 30 s (evita recalcular em rafagas)
 """
 from datetime import datetime, date
+from time import monotonic
+from typing import Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -16,6 +19,22 @@ import models
 from auth import get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+
+# ── Cache simples por usuário ─────────────────────────────────
+# dict[usuario_id, (timestamp_monotonic, DashboardResumo)]
+_CACHE_TTL_SECONDS = 30
+_dashboard_cache: dict[int, tuple[float, Any]] = {}
+
+
+def _cache_get(uid: int) -> Any | None:
+    entry = _dashboard_cache.get(uid)
+    if entry and (monotonic() - entry[0]) < _CACHE_TTL_SECONDS:
+        return entry[1]
+    return None
+
+
+def _cache_set(uid: int, value: Any) -> None:
+    _dashboard_cache[uid] = (monotonic(), value)
 
 
 # ── Pydantic Response ─────────────────────────────────────────
@@ -103,6 +122,12 @@ def resumo_dashboard(
     db: Session = Depends(database.get_db),
 ):
     uid = current_user.id
+
+    # ── Cache hit ─────────────────────────────────────────────
+    cached = _cache_get(uid)
+    if cached is not None:
+        return cached
+
     hoje = date.today().isoformat()
     mes_prefix = hoje[:7]  # "YYYY-MM"
     nome = (current_user.nome_completo or current_user.email.split("@")[0]).split()[0]
@@ -197,7 +222,7 @@ def resumo_dashboard(
         meds_total=meds_total,
     )
 
-    return DashboardResumo(
+    resultado = DashboardResumo(
         saudacao_ia=saudacao,
         tarefas_total=tarefas_total,
         tarefas_pendentes=tarefas_pendentes,
@@ -213,3 +238,5 @@ def resumo_dashboard(
         habitos_progresso_pct=round(habitos_pct, 1),
         notificacoes_nao_lidas=notif_nao_lidas,
     )
+    _cache_set(uid, resultado)
+    return resultado
