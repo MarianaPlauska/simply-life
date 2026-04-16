@@ -14,7 +14,7 @@ export interface TarefasSlice {
   arquivoLoading: boolean;
   fetchTarefas: () => Promise<void>;
   createTarefa: (titulo: string, notas?: string) => Promise<void>;
-  updateTarefa: (id: number, dados: { titulo?: string; status?: string; notas_locais?: string; prioridade?: string }) => Promise<void>;
+  updateTarefa: (id: number, dados: { titulo?: string; status?: string; notas_locais?: string; prioridade?: string; versao?: number }) => Promise<void>;
   deleteTarefa: (id: number) => Promise<void>;
   moveTask: (taskId: number, newStatus: string) => void;
   simularIngestao: (titulo: string) => Promise<void>;
@@ -87,12 +87,22 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
   updateTarefa: async (id, dados) =>
   {
+    // E2: envia versão atual para optimistic locking
+    const tarefa = get().tarefas.find((t) => t.id === id);
+    const body = { ...dados, versao: tarefa?.versao };
     try
     {
       const res = await apiFetch(`/tarefas/${id}`, {
         method: 'PATCH',
-        body: JSON.stringify(dados),
+        body: JSON.stringify(body),
       });
+      if ( res.status === 409 )
+      {
+        // conflito de versão — recarrega tarefas
+        console.warn('updateTarefa: conflito de versão, recarregando...');
+        await get().fetchTarefas();
+        throw new Error('Tarefa foi alterada por outra sessão');
+      }
       if ( !res.ok ) throw new Error('falha ao atualizar tarefa');
       const data = await res.json();
       set((s) => ({

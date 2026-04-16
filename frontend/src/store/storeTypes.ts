@@ -15,6 +15,7 @@ export type ActiveView =
   | 'drive'
   | 'planner'
   | 'perfil'
+  | 'relatorios'
   | 'login';
 
 export interface Anotacao {

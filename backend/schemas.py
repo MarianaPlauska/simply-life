@@ -102,6 +102,7 @@ class TarefaUpdate(BaseModel):
     prioridade: Optional[str] = None
     notas_locais: Optional[str] = None
     data_vencimento: Optional[datetime] = None
+    versao: Optional[int] = None  # E2: optimistic locking — versão esperada pelo cliente
 
     @field_validator("titulo")
     @classmethod
@@ -162,6 +163,7 @@ class TarefaResponse(BaseModel):
     notas_locais: Optional[str] = None
     data_vencimento: Optional[datetime] = None
     created_at: Optional[datetime] = None
+    versao: int = 1
     subtarefas: list[SubtarefaResponse] = []
     labels: list[LabelResponse] = []
 

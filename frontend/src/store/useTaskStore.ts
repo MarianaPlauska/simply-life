@@ -15,11 +15,13 @@ import { createCalendarSlice, type CalendarSlice } from './slices/calendarSlice'
 import { createTriagemSlice, type TriagemSlice } from './slices/triagemSlice';
 import { createBuscaSlice, type BuscaSlice } from './slices/buscaSlice';
 import { createBemEstarSlice, type BemEstarSlice } from './slices/bemEstarSlice';
+import { createRelatoriosSlice, type RelatoriosSlice } from './slices/relatoriosSlice';
 
 import { setAuthToken } from './api';
 
 // re-exporta types para compatibilidade
 export type { ActiveView, Anotacao, TimerConfig, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, BudgetLimit, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
+export type { AnalyticsReport, DashboardReportCard, TrendPoint, RankingItem, PeriodStats } from './slices/relatoriosSlice';
 
 export type TaskStore =
   UISlice &
@@ -33,7 +35,8 @@ export type TaskStore =
   CalendarSlice &
   TriagemSlice &
   BuscaSlice &
-  BemEstarSlice;
+  BemEstarSlice &
+  RelatoriosSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -50,6 +53,7 @@ export const useTaskStore = create<TaskStore>()(
       ...createTriagemSlice(...a),
       ...createBuscaSlice(...a),
       ...createBemEstarSlice(...a),
+      ...createRelatoriosSlice(...a),
     }),
     {
       name: 'simply-life-store',

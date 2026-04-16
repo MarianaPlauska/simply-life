@@ -31,6 +31,8 @@ from routers import gamificacao as gamificacao_router
 from routers import triagem as triagem_router
 from routers import busca as busca_router
 from routers import bem_estar as bem_estar_router
+from routers import relatorios as relatorios_router
+from routers import ws as ws_router
 
 # ── B12: Logging Estruturado ─────────────────────────────────
 logging.basicConfig(
@@ -108,3 +110,5 @@ app.include_router(gamificacao_router.router)
 app.include_router(triagem_router.router)
 app.include_router(busca_router.router)
 app.include_router(bem_estar_router.router)
+app.include_router(relatorios_router.router)
+app.include_router(ws_router.router)

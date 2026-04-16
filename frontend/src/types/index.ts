@@ -24,6 +24,7 @@ export interface TarefaUnificada {
   notas_locais: string | null;
   data_vencimento: string | null;
   created_at: string | null;
+  versao: number;
   subtarefas: Subtarefa[];
   labels: Label[];
 }

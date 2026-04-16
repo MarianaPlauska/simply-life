@@ -49,6 +49,8 @@ class TarefaUnificada(database.Base):
     notas_locais = Column(Text, nullable=True)
     hash_seguranca = Column(String, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    # E2: optimistic locking — versão incrementada a cada update
+    versao = Column(Integer, default=1, nullable=False, server_default="1")
     # B11: soft delete
     deletado_em = Column(DateTime, nullable=True, default=None)
     palavra_chave_id = Column(Integer, ForeignKey("palavras_chave.id"), nullable=True)

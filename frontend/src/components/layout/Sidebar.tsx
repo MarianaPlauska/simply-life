@@ -4,7 +4,7 @@ import {
   Wallet, PiggyBank,
   Pill, HeartPulse,
   Briefcase, HardDrive,
-  Sparkles, Flame,
+  Sparkles, Flame, BarChart3,
   PanelLeftClose, PanelLeft, Settings, Zap, Pin,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +29,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, moduleKey: 'dashboard' },
       { id: 'kanban', label: 'Kanban', icon: KanbanSquare, moduleKey: 'kanban' },
       { id: 'foco', label: 'Modo Foco', icon: Crosshair, moduleKey: 'foco' },
+      { id: 'relatorios', label: 'Relatórios', icon: BarChart3, moduleKey: 'relatorios' },
       { id: 'calendario', label: 'Calendario', icon: CalendarDays, moduleKey: 'calendario' },
     ],
   },
@@ -67,7 +68,7 @@ const VIEW_TO_PATH: Record<ActiveView, string> = {
   configuracoes: '/configuracoes', financeiro: '/financeiro', saude: '/saude',
   preferencias: '/preferencias', perfil: '/perfil', planner: '/planner',
   calendario: '/calendario', drive: '/drive', superhuman: '/superhuman',
-  inteligencia: '/inteligencia', carreira: '/carreira',
+  inteligencia: '/inteligencia', carreira: '/carreira', relatorios: '/relatorios',
 };
 
 export function Sidebar() {

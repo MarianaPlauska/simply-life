@@ -7,6 +7,7 @@ import { HealthSection } from '../dashboard/HealthSection';
 import { KeywordsRadarSection } from '../dashboard/KeywordsRadarSection';
 import { FocusScoreSection } from '../dashboard/FocusScoreSection';
 import { SmartNudgesSection } from '../dashboard/SmartNudgesSection';
+import { ReportCardSection } from '../dashboard/ReportCardSection';
 import { AgendaSection } from '../dashboard/AgendaSection';
 import { Bug, Loader2 } from 'lucide-react';
 
@@ -122,6 +123,9 @@ export function DashboardHome() {
 
       {/* Camada 2.5 — Gamificação & Score */}
       <FocusScoreSection resumo={resumo} scoreDiario={scoreDiario} />
+
+      {/* Camada 2.7 — Performance Report Card */}
+      <ReportCardSection />
 
       {/* Camada 3 — Radar de Monitoramento */}
       <KeywordsRadarSection keywords={keywords} />

@@ -40,6 +40,18 @@ from schemas import (
 logger = logging.getLogger("simply-life")
 router = APIRouter(tags=["Tarefas & Domínios"])
 
+# E3: broadcast helper para ws
+from routers.ws import broadcast as _ws_broadcast
+import asyncio
+
+def _fire_ws(usuario_id: int, event_type: str, payload: dict) -> None:
+    """dispara broadcast ws sem bloquear (fire-and-forget)."""
+    try:
+        loop = asyncio.get_running_loop()
+        loop.create_task(_ws_broadcast(usuario_id, {"type": event_type, **payload}))
+    except RuntimeError:
+        pass  # sem event loop ativo (testes sync)
+
 VALID_STATUS = {"pendente", "em_progresso", "concluida"}
 VALID_PRIORIDADE = {"baixa", "media", "alta", "critica"}
 
@@ -78,6 +90,7 @@ def _tarefa_to_response(t: models.TarefaUnificada) -> dict:
         notas_locais=t.notas_locais,
         data_vencimento=t.data_vencimento,
         created_at=t.created_at,
+        versao=t.versao or 1,
         subtarefas=[SubtarefaResponse(
             id=s.id, titulo=s.titulo, concluida=bool(s.concluida), ordem=s.ordem
         ) for s in (t.subtarefas or [])],
@@ -211,7 +224,9 @@ def criar_tarefa(
     db.refresh(nova)
     _log_atividade(db, nova.id, current_user.id, "criou", f"Tarefa '{nova.titulo[:60]}' criada")
     db.commit()
-    return {"tarefa": _tarefa_to_response(nova)}
+    resp = _tarefa_to_response(nova)
+    _fire_ws(current_user.id, "tarefa_criada", {"tarefa": resp})
+    return {"tarefa": resp}
 
 
 @router.put("/tarefas/{tarefa_id}")
@@ -252,6 +267,14 @@ def atualizar_tarefa_parcial(
 ):
     """PATCH — atualização parcial (apenas campos enviados)."""
     tarefa = _get_tarefa_or_404(tarefa_id, current_user.id, db)
+
+    # E2: optimistic locking — rejeita se versão do cliente está desatualizada
+    if dados.versao is not None and dados.versao != tarefa.versao:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Tarefa foi alterada por outra sessão. Recarregue e tente novamente.",
+        )
+
     detalhes: list[str] = []
 
     if dados.titulo is not None:
@@ -282,9 +305,14 @@ def atualizar_tarefa_parcial(
         tipo_log = "concluiu" if dados.status == "concluida" else ("moveu" if dados.status else "editou")
         _log_atividade(db, tarefa.id, current_user.id, tipo_log, "; ".join(detalhes))
 
+    # E2: incrementa versão a cada update
+    tarefa.versao = (tarefa.versao or 1) + 1
+
     db.commit()
     db.refresh(tarefa)
-    return {"tarefa": _tarefa_to_response(tarefa)}
+    resp = _tarefa_to_response(tarefa)
+    _fire_ws(current_user.id, "tarefa_atualizada", {"tarefa": resp})
+    return {"tarefa": resp}
 
 
 @router.delete("/tarefas/{tarefa_id}")
@@ -299,6 +327,7 @@ def deletar_tarefa(
     tarefa.deletado_em = datetime.now(timezone.utc)
     db.commit()
     logger.info("tarefa soft-deleted: id=%s user=%s", tarefa_id, current_user.id)
+    _fire_ws(current_user.id, "tarefa_deletada", {"tarefa_id": tarefa_id})
     return {"status": "sucesso", "id": tarefa_id}
 
 

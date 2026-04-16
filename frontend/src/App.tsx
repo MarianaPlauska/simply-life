@@ -10,8 +10,10 @@ import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { GoogleCallbackView } from './components/Auth/GoogleCallbackView';
 import { CommandPalette } from './components/ui/CommandPalette';
 import { AmbientBackground } from './components/ui/AmbientBackground';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
+import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { CalendarDays, Briefcase, Rocket } from 'lucide-react';
 
 // Lazy-loaded views
@@ -29,6 +31,7 @@ const CalendarView     = lazy(() => import('./components/Calendar/CalendarView')
 const DriveVaultView   = lazy(() => import('./components/Drive/DriveVaultView').then((m) => ({ default: m.DriveVaultView })));
 const ProfileView      = lazy(() => import('./components/Auth/ProfileView').then((m) => ({ default: m.ProfileView })));
 const PreferenciasIA   = lazy(() => import('./components/Settings/PreferenciasIA').then((m) => ({ default: m.PreferenciasIA })));
+const RelatoriosView   = lazy(() => import('./components/Relatorios/RelatoriosView').then((m) => ({ default: m.RelatoriosView })));
 
 function PageLoader() {
   return (
@@ -79,6 +82,7 @@ const ROUTE_MAP: Record<string, ActiveView> = {
   '/superhuman':    'superhuman',
   '/inteligencia':  'inteligencia',
   '/carreira':      'carreira',
+  '/relatorios':    'relatorios',
 };
 
 const VIEW_TO_PATH: Record<ActiveView, string> = Object.fromEntries(
@@ -124,6 +128,7 @@ function NavigationSync() {
 /* ── Layout ──────── */
 function AppLayout() {
   const mainRef = useRef<HTMLElement>(null);
+  useRealtimeSync();
   return (
     <div className="flex h-screen w-full bg-zinc-950 text-zinc-200 overflow-hidden">
       <AmbientBackground scrollContainerRef={mainRef} />
@@ -139,22 +144,23 @@ function AppLayout() {
         <main ref={mainRef} className="flex-1 overflow-y-auto px-6 pt-6 pb-8" role="main">
           <Suspense fallback={<PageLoader />}>
             <Routes>
-              <Route index element={<DashboardHome />} />
-              <Route path="kanban" element={<KanbanBoard />} />
-              <Route path="anotacoes" element={<AnotacoesView />} />
-              <Route path="foco" element={<FocusModeView />} />
-              <Route path="configuracoes" element={<SettingsView />} />
-              <Route path="financeiro" element={<FinanceView />} />
-              <Route path="saude" element={<HealthView />} />
-              <Route path="preferencias" element={<PreferencesView />} />
-              <Route path="perfil" element={<ProfileView />} />
-              <Route path="planner" element={<FinancePlannerView />} />
-              <Route path="calendario" element={<CalendarView />} />
-              <Route path="drive" element={<DriveVaultView />} />
+              <Route index element={<ErrorBoundary fallbackTitle="Erro no Dashboard"><DashboardHome /></ErrorBoundary>} />
+              <Route path="kanban" element={<ErrorBoundary fallbackTitle="Erro no Kanban"><KanbanBoard /></ErrorBoundary>} />
+              <Route path="anotacoes" element={<ErrorBoundary fallbackTitle="Erro nas Anotações"><AnotacoesView /></ErrorBoundary>} />
+              <Route path="foco" element={<ErrorBoundary fallbackTitle="Erro no Modo Foco"><FocusModeView /></ErrorBoundary>} />
+              <Route path="configuracoes" element={<ErrorBoundary fallbackTitle="Erro nas Configurações"><SettingsView /></ErrorBoundary>} />
+              <Route path="financeiro" element={<ErrorBoundary fallbackTitle="Erro no Financeiro"><FinanceView /></ErrorBoundary>} />
+              <Route path="saude" element={<ErrorBoundary fallbackTitle="Erro na Saúde"><HealthView /></ErrorBoundary>} />
+              <Route path="preferencias" element={<ErrorBoundary fallbackTitle="Erro nas Preferências"><PreferencesView /></ErrorBoundary>} />
+              <Route path="perfil" element={<ErrorBoundary fallbackTitle="Erro no Perfil"><ProfileView /></ErrorBoundary>} />
+              <Route path="planner" element={<ErrorBoundary fallbackTitle="Erro no Planner"><FinancePlannerView /></ErrorBoundary>} />
+              <Route path="calendario" element={<ErrorBoundary fallbackTitle="Erro no Calendário"><CalendarView /></ErrorBoundary>} />
+              <Route path="drive" element={<ErrorBoundary fallbackTitle="Erro no Drive"><DriveVaultView /></ErrorBoundary>} />
               <Route path="superhuman" element={
                 <PlaceholderView title="Agenda" subtitle="Conecte sua conta Google para sincronizar eventos e compromissos." icon={CalendarDays} />
               } />
               <Route path="inteligencia" element={<PreferenciasIA />} />
+              <Route path="relatorios" element={<ErrorBoundary fallbackTitle="Erro nos Relatórios"><RelatoriosView /></ErrorBoundary>} />
               <Route path="carreira" element={
                 <PlaceholderView title="Radar de Carreira" subtitle="Monitoramento de vagas e oportunidades profissionais será ativado em breve." icon={Briefcase} />
               } />
