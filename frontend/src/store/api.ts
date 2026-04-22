@@ -1,6 +1,6 @@
 // url base e headers de autenticação compartilhados entre todos os slices
 // Sprint B: cookies httpOnly em vez de Bearer header
-export const API = 'http://127.0.0.1:8000';
+export const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 
 // token mantido apenas como fallback para compatibilidade (swagger, testes)
 let _authToken = '';

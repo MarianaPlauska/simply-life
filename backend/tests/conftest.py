@@ -59,16 +59,25 @@ def client():
 
 @pytest.fixture
 def auth_headers(client):
-    """Registra um usuário e retorna headers com Bearer token."""
+    """Registra um usuário e retorna headers com Bearer token + CSRF."""
+    # Faz um GET para receber o cookie CSRF
+    r0 = client.get("/health")
+    csrf_token = r0.cookies.get("csrf_token", "")
+
     # Registra via API (sem rate limit)
     client.post("/auth/registro", json={
         "email": "test@simply.life",
         "senha": "Senha123!",
         "nome_completo": "Testador",
-    })
+    }, cookies={"csrf_token": csrf_token}, headers={"X-CSRF-Token": csrf_token})
     # Cria token diretamente (evita rate limiting do login)
     db = TestSession()
     user = db.query(models.Usuario).filter(models.Usuario.email == "test@simply.life").first()
     db.close()
     token = criar_access_token({"sub": str(user.id), "email": user.email})
-    return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    return {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrf_token,
+    }
+
