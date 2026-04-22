@@ -2,7 +2,7 @@ import {
   LayoutDashboard, KanbanSquare, Crosshair, CalendarDays,
   StickyNote, Filter, SlidersHorizontal,
   Wallet, PiggyBank,
-  Pill, HeartPulse,
+  Pill,
   Briefcase, HardDrive,
   Sparkles, Flame, BarChart3,
   PanelLeftClose, PanelLeft, Settings, Zap, Pin,
@@ -69,6 +69,7 @@ const VIEW_TO_PATH: Record<ActiveView, string> = {
   preferencias: '/preferencias', perfil: '/perfil', planner: '/planner',
   calendario: '/calendario', drive: '/drive', superhuman: '/superhuman',
   inteligencia: '/inteligencia', carreira: '/carreira', relatorios: '/relatorios',
+  login: '/login',
 };
 
 export function Sidebar() {

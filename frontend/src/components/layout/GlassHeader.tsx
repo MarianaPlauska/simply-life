@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Flame, Search, User, SlidersHorizontal, LogOut, Bell, CheckCheck, AlertTriangle, Info, Heart, ListTodo, Wallet2 } from 'lucide-react';
+import { Flame, Search, User, SlidersHorizontal, LogOut, Bell, CheckCheck, Info, Heart, ListTodo, Wallet2 } from 'lucide-react';
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore';
 
 const VIEW_LABELS: Record<string, string> = {

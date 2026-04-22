@@ -751,7 +751,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                 onClick={() =>
                 {
                   useTaskStore.getState().startFocusSession(tarefa.id);
-                  useTaskStore.getState().setActiveView('focus');
+                  useTaskStore.getState().setActiveView('foco');
                   onClose();
                 }}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[12px] font-medium

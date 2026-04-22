@@ -2,7 +2,7 @@
 // Card resumido de performance para o Dashboard Home
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, ArrowUpRight, ArrowDownRight, Trophy, Zap, Clock, Flame } from 'lucide-react';
+import { BarChart3, ArrowUpRight, ArrowDownRight, Trophy, Flame } from 'lucide-react';
 import { fadeUp } from './DashboardPrimitives';
 import { useTaskStore } from '../../store/useTaskStore';
 import { useNavigate } from 'react-router-dom';

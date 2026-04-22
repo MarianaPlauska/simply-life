@@ -4,7 +4,7 @@ import { DndContext, type DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import {
   FlaskConical, X, Send, Loader2, Search, SlidersHorizontal,
   LayoutGrid, List, Archive, RotateCcw, Trash2, ArrowRight,
-  ChevronDown, Zap, Copy, CalendarDays,
+  ChevronDown, Zap, CalendarDays,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { KanbanCard } from './KanbanCard';
@@ -14,7 +14,7 @@ import { ListView } from './ListView';
 import { GanttView } from './GanttView';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
-import { PRIO_LABELS, PRIO_ORDER, ORIGIN_LABELS } from '../../constants/kanbanConfig';
+import { PRIO_LABELS, ORIGIN_LABELS } from '../../constants/kanbanConfig';
 
 const COLUMNS = [
   { id: 'pendente',      title: 'Pendente',      dotColor: 'bg-red-500',     wipLimit: 5  },

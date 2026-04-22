@@ -8,7 +8,7 @@ const RECONNECT_DELAY = 3000;
 export function useRealtimeSync ()
 {
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>();
+  const reconnectTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() =>
   {

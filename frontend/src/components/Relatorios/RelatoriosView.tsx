@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, TrendingDown, Minus,
   Trophy, Zap, Flame, Clock, Target,
   BarChart3, Calendar, ArrowUpRight, ArrowDownRight,
   Star, CheckCircle2, Brain,
@@ -13,55 +12,7 @@ import type { AnalyticsReport, TrendPoint, RankingItem } from '../../store/useTa
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-40px' }, transition: { duration: 0.5 } };
 
-/* ── Mini Spark Chart (SVG) ──────────────────────────────── */
-function SparkLine({ data, color = '#8b5cf6', height = 40, width = 200 }: {
-  data: number[];
-  color?: string;
-  height?: number;
-  width?: number;
-}) {
-  if (data.length < 2) return null;
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * width;
-    const y = height - ((v - min) / range) * (height - 4) - 2;
-    return `${x},${y}`;
-  }).join(' ');
 
-  return (
-    <svg width={width} height={height} className="overflow-visible">
-      <defs>
-        <linearGradient id={`spark-grad-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon
-        points={`0,${height} ${points} ${width},${height}`}
-        fill={`url(#spark-grad-${color.replace('#', '')})`}
-      />
-      <polyline
-        points={points}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* último ponto */}
-      {data.length > 0 && (
-        <circle
-          cx={width}
-          cy={height - ((data[data.length - 1] - min) / range) * (height - 4) - 2}
-          r="3"
-          fill={color}
-        />
-      )}
-    </svg>
-  );
-}
 
 /* ── Bar Chart (SVG) ─────────────────────────────────────── */
 function BarChart({ data, color = '#10b981', height = 120 }: {
@@ -70,7 +21,6 @@ function BarChart({ data, color = '#10b981', height = 120 }: {
   height?: number;
 }) {
   const max = Math.max(...data.map(d => d.valor), 1);
-  const barWidth = Math.min(32, (240 / data.length) - 4);
 
   return (
     <div className="flex items-end gap-1 justify-between" style={{ height }}>

@@ -35,7 +35,7 @@ describe('useTaskStore', () => {
   it('should moveTask optimistically', () => {
     useTaskStore.setState({
       tarefas: [
-        { id: 1, usuario_id: 1, titulo: 'Test', snippet_100_char: 'Test', score_urgencia: 50, status: 'pendente', notas_locais: null, descricao: null, prioridade: 'media', origem: 'manual', data_vencimento: null, created_at: null, subtarefas: [], labels: [] },
+        { id: 1, usuario_id: 1, titulo: 'Test', snippet_100_char: 'Test', score_urgencia: 50, status: 'pendente', notas_locais: null, descricao: null, prioridade: 'media', origem: 'manual', data_vencimento: null, created_at: null, versao: 1, subtarefas: [], labels: [] },
       ],
     });
     useTaskStore.getState().moveTask(1, 'em_progresso');

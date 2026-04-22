@@ -12,7 +12,7 @@ import {
 } from 'recharts';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
-import type { Transaction, BudgetLimit } from '../../store/useTaskStore';
+import type { Transaction } from '../../store/useTaskStore';
 
 /* -- Category config -- */
 const CATEGORIES = [
