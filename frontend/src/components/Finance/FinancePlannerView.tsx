@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import type { Transaction } from '../../store/useTaskStore';
+import { PrintButton } from '../ui/PrintButton';
 
 /* -- Category config -- */
 const CATEGORIES = [
@@ -193,6 +194,7 @@ export function FinancePlannerView() {
           <button onClick={() => setMonthOffset((m) => m + 1)} disabled={monthOffset >= 0} className="p-2 rounded-lg hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors disabled:opacity-30">
             <ChevronRight className="w-4 h-4" />
           </button>
+          <PrintButton />
         </div>
       </div>
 

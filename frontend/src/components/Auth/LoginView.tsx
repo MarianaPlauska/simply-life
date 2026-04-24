@@ -1,7 +1,8 @@
-﻿import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { Zap, Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Zap, Mail, Lock, Eye, EyeOff, UserPlus, Globe } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '../../store/useTaskStore';
 import { AuthInput } from '../ui/AuthInput';
 import { AuthButton } from '../ui/AuthButton';
@@ -32,9 +33,9 @@ function useSpotlight() {
   return { pos, onMouseMove };
 }
 
-const AUTH_TABS = [
-  { value: 'login' as const, label: 'Entrar' },
-  { value: 'register' as const, label: 'Criar Conta' },
+const AUTH_TABS_KEYS = [
+  { value: 'login' as const, key: 'login.tab_login' },
+  { value: 'register' as const, key: 'login.tab_register' },
 ];
 
 /* â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
@@ -43,6 +44,7 @@ export function LoginView() {
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn);
   const navigate = useNavigate();
   const { pos, onMouseMove } = useSpotlight();
+  const { t, i18n } = useTranslation();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -86,10 +88,10 @@ export function LoginView() {
 
       const data = await res.json();
       login(data.nome || email.split('@')[0], data.nome || '', data.access_token);
-      toast.success(mode === 'register' ? 'Conta criada! Bem-vindo ao Simply-Life!' : 'Bem-vindo ao Simply-Life!');
+      toast.success(mode === 'register' ? t('login.success_register') : t('login.success_login'));
       navigate('/', { replace: true });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erro de conexao';
+      const msg = err instanceof Error ? err.message : t('login.error_connection');
       setError(msg);
       toast.error(msg);
     } finally {
@@ -107,13 +109,13 @@ export function LoginView() {
       const data = await res.json();
       window.location.href = data.url;
     } catch {
-      toast.error('Erro ao conectar com Google. Verifique se o servidor esta ativo.');
+      toast.error(t('login.error_google'));
     }
   };
 
   const handleGuest = () => {
     login('convidado@simplylife.app', 'Convidado');
-    toast.success('Entrando como convidado');
+    toast.success(t('login.success_guest'));
     navigate('/', { replace: true });
   };
 
@@ -161,13 +163,13 @@ export function LoginView() {
           <div className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/[0.06] backdrop-blur-sm mb-4 shadow-[0_0_40px_rgba(139,92,246,0.06)]">
             <Zap className="w-8 h-8 text-violet-400" aria-hidden="true" />
           </div>
-          <h1 className="text-[26px] font-bold text-white tracking-tight">Simply-Life</h1>
-          <p className="text-[13px] text-zinc-500 mt-1.5 tracking-wide">Seu sistema operacional pessoal</p>
+          <h1 className="text-[26px] font-bold text-white tracking-tight">{t('login.title')}</h1>
+          <p className="text-[13px] text-zinc-500 mt-1.5 tracking-wide">{t('login.subtitle')}</p>
         </div>
 
         <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-8 shadow-2xl shadow-black/40">
           <TabToggle
-            tabs={AUTH_TABS}
+            tabs={AUTH_TABS_KEYS.map((tab) => ({ value: tab.value, label: t(tab.key) }))}
             active={mode}
             onChange={(v) => { setMode(v); setError(''); }}
           />
@@ -176,12 +178,12 @@ export function LoginView() {
             {mode === 'register' && (
               <AuthInput
                 id="auth-nome"
-                label="Nome"
+                label={t('login.name_label')}
                 type="text"
                 autoFocus
                 required
                 autoComplete="name"
-                placeholder="Seu nome"
+                placeholder={t('login.name_placeholder')}
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 icon={<UserPlus className="w-4 h-4" />}
@@ -190,12 +192,12 @@ export function LoginView() {
 
             <AuthInput
               id="auth-email"
-              label="Email"
+              label={t('login.email_label')}
               type="email"
               autoFocus={mode === 'login'}
               required
               autoComplete="email"
-              placeholder="seu@email.com"
+              placeholder={t('login.email_placeholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               icon={<Mail className="w-4 h-4" />}
@@ -203,11 +205,11 @@ export function LoginView() {
 
             <AuthInput
               id="auth-senha"
-              label="Senha"
+              label={t('login.password_label')}
               type={showPassword ? 'text' : 'password'}
               required
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              placeholder={mode === 'login' ? 'Sua senha' : 'Crie uma senha forte'}
+              placeholder={mode === 'login' ? t('login.password_placeholder_login') : t('login.password_placeholder_register')}
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               icon={<Lock className="w-4 h-4" />}
@@ -216,7 +218,7 @@ export function LoginView() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="text-zinc-600 hover:text-zinc-300 transition-colors"
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-label={showPassword ? t('login.hide_password') : t('login.show_password')}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -230,7 +232,7 @@ export function LoginView() {
             {mode === 'login' && (
               <div className="flex justify-end -mt-1">
                 <button type="button" className="text-[11px] text-zinc-600 hover:text-violet-400 transition-colors">
-                  Esqueceu sua senha?
+                  {t('login.forgot_password')}
                 </button>
               </div>
             )}
@@ -238,14 +240,14 @@ export function LoginView() {
             <AuthButton
               loading={loading}
               disabled={isSubmitDisabled}
-              label={mode === 'login' ? 'Entrar' : 'Criar Conta'}
-              loadingLabel={mode === 'login' ? 'Entrando...' : 'Criando conta...'}
+              label={mode === 'login' ? t('login.submit_login') : t('login.submit_register')}
+              loadingLabel={mode === 'login' ? t('login.loading_login') : t('login.loading_register')}
             />
           </form>
 
           <div className="flex items-center gap-3 my-6">
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.15em]">ou continue com</span>
+            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.15em]">{t('login.or_continue')}</span>
             <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
           </div>
 
@@ -255,7 +257,7 @@ export function LoginView() {
             className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-white text-zinc-800 text-sm font-semibold hover:bg-zinc-100 transition-all duration-200 shadow-md shadow-black/10"
           >
             <GoogleLogo className="w-5 h-5" />
-            Continuar com Google
+            {t('login.google')}
           </button>
 
           <button
@@ -263,16 +265,28 @@ export function LoginView() {
             onClick={handleGuest}
             className="w-full mt-3 py-2.5 rounded-xl border border-white/[0.06] text-[13px] font-medium text-zinc-500 hover:text-white hover:border-white/[0.12] transition-all duration-300"
           >
-            Continuar como convidado
+            {t('login.guest')}
           </button>
         </div>
 
-        <p className="text-center text-[11px] text-zinc-700 mt-8">
-          Ao continuar, voce concorda com os{' '}
-          <span className="text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors">Termos de Uso</span>
-          {' '}e{' '}
-          <span className="text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors">Politica de Privacidade</span>
-        </p>
+        <div className="flex items-center justify-center gap-4 mt-8">
+          <p className="text-[11px] text-zinc-700">
+            {t('login.terms_agree')}{' '}
+            <span className="text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors">{t('login.terms')}</span>
+            {' '}{t('login.and')}{' '}
+            <span className="text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors">{t('login.privacy')}</span>
+          </p>
+
+          {/* seletor de idioma */}
+          <button
+            type="button"
+            onClick={() => i18n.changeLanguage(i18n.language === 'pt-BR' ? 'en' : 'pt-BR')}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-zinc-600 hover:text-zinc-300 border border-zinc-800/40 hover:border-zinc-700 transition-all"
+          >
+            <Globe className="w-3 h-3" />
+            {i18n.language === 'pt-BR' ? '🇧🇷 PT' : '🇺🇸 EN'}
+          </button>
+        </div>
       </div>
     </div>
   );

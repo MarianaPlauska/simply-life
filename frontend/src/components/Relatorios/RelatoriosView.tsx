@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import type { AnalyticsReport, TrendPoint, RankingItem } from '../../store/useTaskStore';
+import { PrintButton } from '../ui/PrintButton';
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-40px' }, transition: { duration: 0.5 } };
 
@@ -218,6 +219,8 @@ export function RelatoriosView() {
             </button>
           ))}
         </div>
+
+        <PrintButton />
       </motion.div>
 
       {/* ── KPI Cards (3) ───────────────────────────────── */}

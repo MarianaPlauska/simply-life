@@ -99,3 +99,70 @@ body {
 .animate-radar-pulse {
   animation: radar-pulse 1.2s ease-in-out infinite;
 }
+
+/* acessibilidade — respeita a config do OS para reduzir animações */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* impressão — layout limpo sem chrome da interface */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* esconde elementos de navegação */
+  aside,
+  nav,
+  header,
+  [role="banner"],
+  button,
+  [data-sonner-toaster] {
+    display: none !important;
+  }
+
+  /* conteúdo principal ocupa 100% */
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* cards legíveis na impressão */
+  .bg-zinc-900\/30,
+  .bg-zinc-900\/40,
+  .bg-zinc-800\/40 {
+    background: white !important;
+    border: 1px solid #e5e5e5 !important;
+    box-shadow: none !important;
+  }
+
+  /* evita quebra de página no meio de cards */
+  .rounded-2xl,
+  .rounded-xl,
+  [class*="rounded-[2rem]"] {
+    break-inside: avoid;
+  }
+
+  /* texto legível */
+  .text-zinc-200,
+  .text-zinc-300,
+  .text-zinc-100,
+  .text-white {
+    color: black !important;
+  }
+  .text-zinc-400,
+  .text-zinc-500,
+  .text-zinc-600 {
+    color: #555 !important;
+  }
+}

@@ -9,6 +9,7 @@ import type { HabitoDiario } from '../../store/useTaskStore';
 import { MoodTracker } from './MoodTracker';
 import { JournalEntry } from './JournalEntry';
 import { WeeklyReviewCard } from './WeeklyReviewCard';
+import { EmptyState } from '../ui/EmptyState';
 
 /* -- Icon map for habit types -- */
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -291,11 +292,13 @@ export function HealthView() {
             })}
           </div>
         ) : (
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-8 text-center">
-            <Sparkles className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
-            <p className="text-[13px] text-zinc-400 mb-1">Nenhum habito configurado ainda</p>
-            <p className="text-[11px] text-zinc-600">Adicione habitos abaixo ou clique em &ldquo;Personalizar Habitos&rdquo;</p>
-          </div>
+          <EmptyState
+            icon={Sparkles}
+            title="Nenhum hábito configurado"
+            description="Comece a rastrear seus hábitos diários para construir uma rotina saudável."
+            actionLabel="Personalizar Hábitos"
+            onAction={() => setShowHabitForm(true)}
+          />
         )}
 
         {/* presets de habitos disponiveis */}

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { RichTextEditor } from '../ui/RichTextEditor';
+import { EmptyState } from '../ui/EmptyState';
 
 /* -- Category system -- */
 const CATEGORIAS = [
@@ -110,7 +111,16 @@ export function AnotacoesView() {
 
           {/* Note List */}
           <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5" aria-label="Notas recentes">
-            {filteredNotes.length === 0 && (
+            {filteredNotes.length === 0 && anotacoes.length === 0 && (
+              <EmptyState
+                icon={FileText}
+                title="Nenhuma anotação"
+                description="Capture ideias, reflexões e insights do seu dia a dia."
+                actionLabel="Nova Anotação"
+                onAction={() => setQuickCaptureOpen(true)}
+              />
+            )}
+            {filteredNotes.length === 0 && anotacoes.length > 0 && (
               <p className="text-[12px] text-zinc-600 text-center py-8">Nenhuma anotação encontrada</p>
             )}
             {filteredNotes.map((nota) => {

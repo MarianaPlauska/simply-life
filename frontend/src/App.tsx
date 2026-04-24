@@ -14,6 +14,7 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
+import { OnboardingChecklist } from './components/Onboarding/OnboardingChecklist';
 import { CalendarDays, Briefcase, Rocket } from 'lucide-react';
 
 // Lazy-loaded views
@@ -139,6 +140,7 @@ function AppLayout() {
         <FocusImmersiveOverlay />
       </Suspense>
       <Sidebar />
+      <OnboardingChecklist />
       <div className="flex-1 flex flex-col min-w-0">
         <GlassHeader />
         <main ref={mainRef} className="flex-1 overflow-y-auto px-6 pt-6 pb-8" role="main">

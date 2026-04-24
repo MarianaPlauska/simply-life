@@ -16,6 +16,7 @@ import { createTriagemSlice, type TriagemSlice } from './slices/triagemSlice';
 import { createBuscaSlice, type BuscaSlice } from './slices/buscaSlice';
 import { createBemEstarSlice, type BemEstarSlice } from './slices/bemEstarSlice';
 import { createRelatoriosSlice, type RelatoriosSlice } from './slices/relatoriosSlice';
+import { createOnboardingSlice, type OnboardingSlice } from './slices/onboardingSlice';
 
 import { setAuthToken } from './api';
 
@@ -36,7 +37,8 @@ export type TaskStore =
   TriagemSlice &
   BuscaSlice &
   BemEstarSlice &
-  RelatoriosSlice;
+  RelatoriosSlice &
+  OnboardingSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -54,6 +56,7 @@ export const useTaskStore = create<TaskStore>()(
       ...createBuscaSlice(...a),
       ...createBemEstarSlice(...a),
       ...createRelatoriosSlice(...a),
+      ...createOnboardingSlice(...a),
     }),
     {
       name: 'simply-life-store',
@@ -71,6 +74,8 @@ export const useTaskStore = create<TaskStore>()(
         budgetLimits: state.budgetLimits,
         habitos: state.habitos,
         authToken: state.authToken,
+        onboardingSteps: state.onboardingSteps,
+        onboardingDismissed: state.onboardingDismissed,
       }),
       onRehydrateStorage: () => (state) =>
       {
