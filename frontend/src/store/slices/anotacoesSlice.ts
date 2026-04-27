@@ -1,36 +1,42 @@
-// slice de anotações — crud do segundo cérebro
-import type { StateCreator } from 'zustand';
-import type { Anotacao } from '../storeTypes';
-import { apiFetch } from '../api';
+// slice de anotações — crud via supabase
+import type { StateCreator } from 'zustand'
+import type { Anotacao } from '../storeTypes'
+import { supabase } from '../../lib/supabase'
 
-export interface AnotacoesSlice {
-  anotacoes: Anotacao[];
-  fetchAnotacoes: () => Promise<void>;
-  addAnotacao: (conteudo: string, titulo?: string) => Promise<void>;
+export interface AnotacoesSlice
+{
+  anotacoes: Anotacao[]
+  fetchAnotacoes: () => Promise<void>
+  addAnotacao: (conteudo: string, titulo?: string) => Promise<void>
 }
 
-export const createAnotacoesSlice: StateCreator<AnotacoesSlice, [], [], AnotacoesSlice> = (set, get) => ({
+export const createAnotacoesSlice: StateCreator<AnotacoesSlice, [], [], AnotacoesSlice> = (set) => ({
   anotacoes: [],
 
   fetchAnotacoes: async () =>
   {
     try
     {
-      const res = await apiFetch('/anotacoes');
-      if ( !res.ok ) throw new Error('falha ao buscar anotações');
-      const data = await res.json();
-      set({ anotacoes: data.anotacoes });
+      const { data, error } = await supabase
+        .from('anotacoes')
+        .select('*')
+        .order('id', { ascending: false })
+      if (error) throw error
+      set({ anotacoes: data || [] })
     }
-    catch (e) { console.error('fetchAnotacoes:', e); }
+    catch (e) { console.error('fetchAnotacoes:', e) }
   },
 
   addAnotacao: async (conteudo, titulo) =>
   {
-    const res = await apiFetch('/anotacoes', {
-      method: 'POST',
-      body: JSON.stringify({ conteudo, titulo: titulo || null }),
-    });
-    if ( !res.ok ) throw new Error('falha ao salvar anotação');
-    await get().fetchAnotacoes();
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return
+    const { data, error } = await supabase
+      .from('anotacoes')
+      .insert({ user_id: uid, conteudo, titulo: titulo || null })
+      .select()
+      .single()
+    if (error) throw error
+    if (data) set((s) => ({ anotacoes: [data, ...s.anotacoes] }))
   },
-});
+})

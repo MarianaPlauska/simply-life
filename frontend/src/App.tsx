@@ -177,6 +177,13 @@ function AppLayout() {
 
 function App() {
   useAccessibilityInit();
+  const checkSession = useTaskStore((s) => s.checkSession);
+
+  // restaura sessão do supabase ao abrir o app
+  useEffect(() =>
+  {
+    checkSession();
+  }, [checkSession]);
 
   return (
     <>

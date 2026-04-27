@@ -1,56 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import { useTaskStore } from '../../store/useTaskStore';
+// callback do google oauth — placeholder até configurar provider no supabase
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
 
-type CallbackStatus = 'processing' | 'success' | 'error';
+type CallbackStatus = 'processing' | 'success' | 'error'
 
-export function GoogleCallbackView() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const processCallback = useTaskStore((s) => s.processGoogleCallback);
-  const authToken = useTaskStore((s) => s.authToken);
-  const [status, setStatus] = useState<CallbackStatus>('processing');
-  const [errorMsg, setErrorMsg] = useState('Erro ao conectar Google Calendar');
+export function GoogleCallbackView()
+{
+  const navigate = useNavigate()
+  const [status, setStatus] = useState<CallbackStatus>('processing')
 
-  useEffect(() => {
-    const code = searchParams.get('code');
-    const error = searchParams.get('error');
-
-    if (error) {
-      setStatus('error');
-      setErrorMsg(error === 'access_denied' ? 'Acesso negado pelo usuario' : `Erro Google: ${error}`);
-      toast.error('Autorizacao cancelada');
-      return;
-    }
-
-    if (!code) {
-      setStatus('error');
-      setErrorMsg('Codigo de autorizacao nao encontrado na URL');
-      toast.error('Callback invalido');
-      return;
-    }
-
-    if (!authToken) {
-      setStatus('error');
-      setErrorMsg('Sessao expirada. Faca login novamente antes de conectar o Google.');
-      toast.error('Sessao expirada');
-      return;
-    }
-
-    processCallback(code).then((ok) => {
-      if (ok) {
-        setStatus('success');
-        toast.success('Google Calendar conectado com sucesso!');
-        setTimeout(() => navigate('/'), 1500);
-      } else {
-        setStatus('error');
-        setErrorMsg('O servidor rejeitou a integracao. Tente novamente.');
-        toast.error('Erro ao conectar Google Calendar');
-      }
-    });
-  }, [searchParams, processCallback, navigate, authToken]);
+  useEffect(() =>
+  {
+    // google oauth será configurado no supabase dashboard futuramente
+    setStatus('error')
+  }, [])
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950">
@@ -70,7 +34,7 @@ export function GoogleCallbackView() {
         {status === 'error' && (
           <>
             <XCircle className="w-10 h-10 text-red-400 mx-auto" />
-            <p className="text-zinc-300 text-sm">{errorMsg}</p>
+            <p className="text-zinc-300 text-sm">Google OAuth será configurado em breve.</p>
             <button
               onClick={() => navigate('/')}
               className="mt-2 px-4 py-2 text-sm rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 transition-colors"
@@ -81,5 +45,5 @@ export function GoogleCallbackView() {
         )}
       </div>
     </div>
-  );
+  )
 }

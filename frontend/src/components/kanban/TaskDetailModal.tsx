@@ -10,7 +10,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } 
 import { CSS } from '@dnd-kit/utilities';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
-import { apiFetch } from '../../store/api';
+import { supabase } from '../../lib/supabase';
 import type { TarefaUnificada, Label, Subtarefa, RecorrenciaTarefa, DependenciaTarefa, AtividadeTarefa, TempoTarefa } from '../../types';
 import { ORIGINS, ORIGINS_FALLBACK, PRIORIDADE_CONFIG, STATUS_CONFIG, STATUS_OPTIONS, PRIO_OPTIONS } from '../../constants/kanbanConfig';
 import { formatDate, dueDateInfo } from '../../utils/kanbanHelpers';
@@ -229,31 +229,44 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
     async function fetchD ()
     {
       setLoadingD(true);
-      const [rTempo, rRec, rDeps, rAtiv] = await Promise.allSettled([
-        apiFetch(`/tarefas/${tarefaAtual.id}/tempo`),
-        apiFetch(`/tarefas/${tarefaAtual.id}/recorrencia`),
-        apiFetch(`/tarefas/${tarefaAtual.id}/dependencias`),
-        apiFetch(`/tarefas/${tarefaAtual.id}/atividades`),
-      ]);
-      if ( cancelled ) return;
-      if ( rTempo.status === 'fulfilled' && rTempo.value.ok )
-        setTempo(await rTempo.value.json());
-      if ( rRec.status === 'fulfilled' && rRec.value.ok )
+      try
       {
-        const j = await rRec.value.json();
-        setRecorrencia(j.recorrencia ?? null);
+        // tempo em foco
+        const { data: sessoes } = await supabase
+          .from('sessoes_foco')
+          .select('id, duracao_minutos, created_at')
+          .eq('tarefa_id', tarefaAtual.id);
+        if (!cancelled && sessoes)
+        {
+          const total = sessoes.reduce((s, x) => s + (x.duracao_minutos || 0), 0);
+          setTempo({ total_minutos: total, sessoes });
+        }
+
+        // recorrência
+        const { data: rec } = await supabase
+          .from('tarefa_recorrencias')
+          .select('*')
+          .eq('tarefa_id', tarefaAtual.id)
+          .maybeSingle();
+        if (!cancelled) setRecorrencia(rec ?? null);
+
+        // dependências
+        const { data: deps } = await supabase
+          .from('tarefa_dependencias')
+          .select('*')
+          .eq('tarefa_id', tarefaAtual.id);
+        if (!cancelled) setDependencias(deps ?? []);
+
+        // atividades
+        const { data: ativ } = await supabase
+          .from('atividades_tarefa')
+          .select('*')
+          .eq('tarefa_id', tarefaAtual.id)
+          .order('created_at', { ascending: false });
+        if (!cancelled) setAtividades(ativ ?? []);
       }
-      if ( rDeps.status === 'fulfilled' && rDeps.value.ok )
-      {
-        const j = await rDeps.value.json();
-        setDependencias(j.dependencias ?? []);
-      }
-      if ( rAtiv.status === 'fulfilled' && rAtiv.value.ok )
-      {
-        const j = await rAtiv.value.json();
-        setAtividades(j.atividades ?? []);
-      }
-      setLoadingD(false);
+      catch (e) { console.error('fetchD:', e); }
+      if (!cancelled) setLoadingD(false);
     }
     fetchD();
     return () => { cancelled = true; };
@@ -262,14 +275,14 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 
   const handleSaveRecorrencia = async (freq: string) =>
   {
-    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/recorrencia`, {
-      method: 'POST',
-      body: JSON.stringify({ frequencia: freq }),
-    });
-    if ( res.ok )
+    const { data, error } = await supabase
+      .from('tarefa_recorrencias')
+      .upsert({ tarefa_id: tarefaAtual.id, frequencia: freq }, { onConflict: 'tarefa_id' })
+      .select()
+      .single();
+    if (!error && data)
     {
-      const j = await res.json();
-      setRecorrencia(j.recorrencia);
+      setRecorrencia(data);
       toast.success(`Recorrência ${freq} ativada`);
     }
     setShowFreqMenu(false);
@@ -277,8 +290,11 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 
   const handleRemoveRecorrencia = async () =>
   {
-    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/recorrencia`, { method: 'DELETE' });
-    if ( res.ok )
+    const { error } = await supabase
+      .from('tarefa_recorrencias')
+      .delete()
+      .eq('tarefa_id', tarefaAtual.id);
+    if (!error)
     {
       setRecorrencia(null);
       toast.success('Recorrência removida');
@@ -287,11 +303,14 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 
   const handleAddDep = async (depId: number) =>
   {
-    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/dependencias?depende_de_id=${depId}`, { method: 'POST' });
-    if ( res.ok )
+    const { data, error } = await supabase
+      .from('tarefa_dependencias')
+      .insert({ tarefa_id: tarefaAtual.id, depende_de_id: depId })
+      .select()
+      .single();
+    if (!error && data)
     {
-      const j = await res.json();
-      if ( j.dependencia ) setDependencias((prev) => [...prev, j.dependencia]);
+      setDependencias((prev) => [...prev, data]);
       toast.success('Dependência adicionada');
     }
     setShowDepPicker(false);
@@ -299,8 +318,11 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 
   const handleRemoveDep = async (depItemId: number) =>
   {
-    const res = await apiFetch(`/tarefas/${tarefaAtual.id}/dependencias/${depItemId}`, { method: 'DELETE' });
-    if ( res.ok )
+    const { error } = await supabase
+      .from('tarefa_dependencias')
+      .delete()
+      .eq('id', depItemId);
+    if (!error)
     {
       setDependencias((prev) => prev.filter((d) => d.id !== depItemId));
       toast.success('Dependência removida');

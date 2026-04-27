@@ -1,24 +1,21 @@
-// slice de calendário — google calendar integration
-import type { StateCreator } from 'zustand';
-import type { CalendarEvent } from '../storeTypes';
-import { apiFetch } from '../api';
+// slice de calendário — placeholder (google calendar adiado)
+import type { StateCreator } from 'zustand'
+import type { CalendarEvent } from '../storeTypes'
 
-export interface CalendarSlice {
-  calendarEvents: CalendarEvent[];
-  calendarLoading: boolean;
-  calendarError: string | null;
-  googleCalendarConnected: boolean;
-  fetchCalendarEvents: () => Promise<void>;
-  connectGoogleCalendar: () => Promise<void>;
-  disconnectGoogleCalendar: () => Promise<void>;
-  checkGoogleStatus: () => Promise<void>;
-  processGoogleCallback: (code: string) => Promise<boolean>;
+export interface CalendarSlice
+{
+  calendarEvents: CalendarEvent[]
+  calendarLoading: boolean
+  calendarError: string | null
+  googleCalendarConnected: boolean
+  fetchCalendarEvents: () => Promise<void>
+  connectGoogleCalendar: () => Promise<void>
+  disconnectGoogleCalendar: () => Promise<void>
+  checkGoogleStatus: () => Promise<void>
+  processGoogleCallback: (code: string) => Promise<boolean>
 }
 
-// precisa do logout do auth slice
-type FullGet = () => CalendarSlice & { logout: () => void };
-
-export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSlice> = (set, get) => ({
+export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSlice> = (set) => ({
   calendarEvents: [],
   calendarLoading: false,
   calendarError: null,
@@ -26,92 +23,30 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
 
   fetchCalendarEvents: async () =>
   {
-    if ( get().googleCalendarConnected === false )
-    {
-      set({ calendarLoading: false, calendarError: null, calendarEvents: [] });
-      return;
-    }
-    set({ calendarLoading: true, calendarError: null });
-    try
-    {
-      const res = await apiFetch('/integracoes/calendario/hoje');
-      if ( res.status === 401 ) { (get as unknown as FullGet)().logout(); return; }
-      if ( !res.ok )
-      {
-        const body = await res.json().catch(() => ({}));
-        const detail = typeof body?.detail === 'string' ? body.detail : '';
-        if ( res.status === 403 || detail.toLowerCase().includes('permission') )
-        {
-          set({ calendarLoading: false, calendarError: '403', googleCalendarConnected: false });
-        }
-        else
-        {
-          set({ calendarLoading: false });
-        }
-        return;
-      }
-      const data = await res.json();
-      set({ calendarEvents: data, calendarLoading: false, calendarError: null, googleCalendarConnected: true });
-    }
-    catch (err)
-    {
-      console.error('[fetchCalendarEvents]:', err);
-      set({ calendarLoading: false });
-    }
+    // google calendar será integrado via supabase oauth futuramente
+    set({ calendarLoading: false, calendarError: null, calendarEvents: [] })
   },
 
   connectGoogleCalendar: async () =>
   {
-    try
-    {
-      const res = await apiFetch('/integracoes/google/url');
-      if ( !res.ok ) throw new Error('falha');
-      const data = await res.json();
-      window.location.href = data.url;
-    }
-    catch (e) { console.error('connectGoogleCalendar:', e); }
+    // placeholder — precisa configurar provider no supabase dashboard
+    const { toast } = await import('sonner')
+    toast.info('Google Calendar será configurado em breve')
   },
 
   disconnectGoogleCalendar: async () =>
   {
-    try
-    {
-      const res = await apiFetch('/integracoes/google/desconectar', {
-        method: 'DELETE',
-      });
-      if ( res.ok ) set({ googleCalendarConnected: false, calendarEvents: [] });
-    }
-    catch (e) { console.error('disconnectGoogleCalendar:', e); }
+    set({ googleCalendarConnected: false, calendarEvents: [] })
   },
 
   checkGoogleStatus: async () =>
   {
-    try
-    {
-      const res = await apiFetch('/integracoes/google/status');
-      if ( !res.ok ) return;
-      const data = await res.json();
-      set({ googleCalendarConnected: data.connected });
-    }
-    catch { /* offline */ }
+    // sempre false até configurar
+    set({ googleCalendarConnected: false })
   },
 
-  processGoogleCallback: async (code) =>
+  processGoogleCallback: async () =>
   {
-    try
-    {
-      const res = await apiFetch('/integracoes/google/callback', {
-        method: 'POST',
-        body: JSON.stringify({ code }),
-      });
-      if ( !res.ok ) return false;
-      set({ googleCalendarConnected: true });
-      return true;
-    }
-    catch (err)
-    {
-      console.error('[processGoogleCallback]:', err);
-      return false;
-    }
+    return false
   },
-});
+})

@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Code2, Mail, MessageSquare, CalendarDays, HardDrive, Globe, Check, ChevronDown, ChevronUp, Key, Link2, Timer, Minus, Plus, Accessibility, Monitor, Palette, Bell, Keyboard, MousePointer, Eye, Database, Shield, Volume2, Brain, Tag, Save, Loader2, ExternalLink, Unlink } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
+import { supabase } from '../../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
 import type { AccessibilitySettings } from '../../store/useTaskStore';
 
@@ -118,26 +119,19 @@ function PlatformCard({ platform }: { platform: Platform }) {
     if (!token.trim()) return;
     setSaving(true);
     try {
-      const authToken = useTaskStore.getState().authToken;
-      const response = await fetch('http://127.0.0.1:8000/integracoes/conectar', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-        },
-        body: JSON.stringify({ plataforma: platform.id, token_secreto: token }),
+      const { error } = await supabase.from('integracoes').insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        plataforma: platform.id,
+        token_criptografado: token,
+        status: 'ativa',
       });
-      const data = await response.json();
-      if (data.status === 'sucesso') {
-        setConnected(true);
-        setExpanded(false);
-        setToken('');
-        toast.success('Conectado e Criptografado');
-      } else {
-        toast.error(data.mensagem || 'Erro ao conectar');
-      }
+      if (error) throw error;
+      setConnected(true);
+      setExpanded(false);
+      setToken('');
+      toast.success('Conectado e Criptografado');
     } catch {
-      toast.error('Erro de conexao com o servidor');
+      toast.error('Erro ao conectar integracao');
     } finally {
       setSaving(false);
     }
@@ -507,8 +501,8 @@ export function SettingsView() {
                   <span className="text-zinc-600 font-mono text-[12px]">v1.0.0-alpha</span>
                 </div>
                 <div className="flex items-center justify-between text-[13px]">
-                  <span className="text-zinc-400">Endpoint da API</span>
-                  <span className="text-zinc-600 font-mono text-[12px]">http://127.0.0.1:8000</span>
+                  <span className="text-zinc-400">Backend</span>
+                  <span className="text-zinc-600 font-mono text-[12px]">Supabase (zuxkqmooxvnulgllduhr)</span>
                 </div>
               </div>
             </div>

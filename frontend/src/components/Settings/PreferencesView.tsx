@@ -8,8 +8,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
-
-const API = 'http://127.0.0.1:8000';
+import { supabase } from '../../lib/supabase';
 
 /* ── Tipos ────────────────────────────────────────────────── */
 type SettingsTab = 'geral' | 'ia' | 'aparencia' | 'notificacoes' | 'seguranca';
@@ -177,22 +176,19 @@ export function PreferencesView() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch(`${API}/preferencias/1`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const uid = (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) { toast.error('Sessão expirada'); return; }
+      const { error } = await supabase
+        .from('preferencias_usuario')
+        .upsert({
+          user_id: uid,
           palavras_chave_email: storeKeywords.join(','),
           modulos_fixados: modulosFixados.join(','),
-        }),
-      });
-      const data = await res.json();
-      if (data.status === 'sucesso') {
-        toast.success('Preferências salvas com sucesso!');
-      } else {
-        toast.error('Erro ao salvar preferências');
-      }
+        }, { onConflict: 'user_id' });
+      if (error) throw error;
+      toast.success('Preferências salvas com sucesso!');
     } catch {
-      toast.error('Erro de conexão com o servidor');
+      toast.error('Erro ao salvar preferências');
     } finally {
       setSaving(false);
     }

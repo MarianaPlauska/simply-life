@@ -1,50 +1,72 @@
-// slice de auth — login, logout, perfil, token
-// Sprint B: cookies httpOnly — token não fica mais no localStorage
-import type { StateCreator } from 'zustand';
-import type { UserProfile } from '../storeTypes';
-import { API, setAuthToken } from '../api';
+// slice de auth — login, logout, perfil via supabase auth
+import type { StateCreator } from 'zustand'
+import type { UserProfile } from '../storeTypes'
+import { supabase } from '../../lib/supabase'
 
-export interface AuthSlice {
-  isLoggedIn: boolean;
-  userProfile: UserProfile;
-  authToken: string;
-  login: (email: string, nome: string, token?: string) => void;
-  logout: () => void;
-  updateProfile: (profile: Partial<UserProfile>) => void;
+export interface AuthSlice
+{
+  isLoggedIn: boolean
+  userProfile: UserProfile
+  userId: string
+  login: (email: string, nome: string, id?: string) => void
+  logout: () => void
+  updateProfile: (profile: Partial<UserProfile>) => void
+  checkSession: () => Promise<void>
 }
 
 export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set) => ({
   isLoggedIn: false,
   userProfile: { nome: '', email: '', avatar: '' },
-  authToken: '',
+  userId: '',
 
-  login: (email, nome, token) =>
+  // chamado após supabase.auth.signIn* para atualizar o store
+  login: (email, nome, id) =>
   {
-    const t = token || '';
-    setAuthToken(t);
     set({
       isLoggedIn: true,
+      userId: id || '',
       userProfile: { nome: nome || email.split('@')[0], email, avatar: '' },
-      authToken: t,
-    });
+    })
   },
 
-  logout: () =>
+  logout: async () =>
   {
-    // B3: chama endpoint de logout para invalidar tokens no backend
-    fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
-    setAuthToken('');
+    await supabase.auth.signOut()
     set({
       isLoggedIn: false,
+      userId: '',
       userProfile: { nome: '', email: '', avatar: '' },
-      authToken: '',
-    });
+    })
   },
 
   updateProfile: (profile) =>
   {
     set((state) => ({
       userProfile: { ...state.userProfile, ...profile },
-    }));
+    }))
   },
-});
+
+  // verifica se já tem sessão ativa (cookie do supabase)
+  checkSession: async () =>
+  {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user)
+    {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nome_completo')
+        .eq('id', session.user.id)
+        .single()
+
+      set({
+        isLoggedIn: true,
+        userId: session.user.id,
+        userProfile: {
+          nome: profile?.nome_completo || session.user.email?.split('@')[0] || '',
+          email: session.user.email || '',
+          avatar: '',
+        },
+      })
+    }
+  },
+})

@@ -18,7 +18,7 @@ import { createBemEstarSlice, type BemEstarSlice } from './slices/bemEstarSlice'
 import { createRelatoriosSlice, type RelatoriosSlice } from './slices/relatoriosSlice';
 import { createOnboardingSlice, type OnboardingSlice } from './slices/onboardingSlice';
 
-import { setAuthToken } from './api';
+
 
 // re-exporta types para compatibilidade
 export type { ActiveView, Anotacao, TimerConfig, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, BudgetLimit, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
@@ -73,14 +73,13 @@ export const useTaskStore = create<TaskStore>()(
         transactions: state.transactions,
         budgetLimits: state.budgetLimits,
         habitos: state.habitos,
-        authToken: state.authToken,
+        userId: state.userId,
         onboardingSteps: state.onboardingSteps,
         onboardingDismissed: state.onboardingDismissed,
       }),
-      onRehydrateStorage: () => (state) =>
+      onRehydrateStorage: () => () =>
       {
-        // sincroniza token com o módulo api ao restaurar do localStorage
-        if ( state?.authToken ) setAuthToken(state.authToken);
+        // supabase auth gerencia sessão automaticamente
       },
     }
   )

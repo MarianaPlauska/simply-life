@@ -1,18 +1,19 @@
-// slice financeiro — despesas, transações, orçamento
-import type { StateCreator } from 'zustand';
-import type { Despesa, Transaction, BudgetLimit } from '../storeTypes';
-import { apiFetch } from '../api';
+// slice financeiro — despesas, transações, orçamento via supabase
+import type { StateCreator } from 'zustand'
+import type { Despesa, Transaction, BudgetLimit } from '../storeTypes'
+import { supabase } from '../../lib/supabase'
 
-export interface FinanceiroSlice {
-  despesas: Despesa[];
-  transactions: Transaction[];
-  budgetLimits: BudgetLimit[];
-  fetchDespesas: () => Promise<void>;
-  addDespesa: (dados: { descricao: string; categoria: string; valor: number }) => Promise<void>;
-  fetchTransactions: () => Promise<void>;
-  addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>;
-  removeTransaction: (id: number) => void;
-  setBudgetLimit: (categoria: string, limite: number) => void;
+export interface FinanceiroSlice
+{
+  despesas: Despesa[]
+  transactions: Transaction[]
+  budgetLimits: BudgetLimit[]
+  fetchDespesas: () => Promise<void>
+  addDespesa: (dados: { descricao: string; categoria: string; valor: number }) => Promise<void>
+  fetchTransactions: () => Promise<void>
+  addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>
+  removeTransaction: (id: number) => void
+  setBudgetLimit: (categoria: string, limite: number) => void
 }
 
 export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], FinanceiroSlice> = (set) => ({
@@ -33,69 +34,101 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   {
     try
     {
-      const res = await apiFetch('/despesas');
-      if ( !res.ok ) throw new Error('falha');
-      const data = await res.json();
-      set({ despesas: data.despesas });
+      const { data, error } = await supabase
+        .from('despesas')
+        .select('*')
+        .order('id', { ascending: false })
+      if (error) throw error
+      set({ despesas: data || [] })
     }
-    catch (e) { console.error('fetchDespesas:', e); }
+    catch (e) { console.error('fetchDespesas:', e) }
   },
 
   addDespesa: async (dados) =>
   {
-    const res = await apiFetch('/despesas', {
-      method: 'POST',
-      body: JSON.stringify(dados),
-    });
-    if ( !res.ok ) throw new Error('falha');
-    const data = await res.json();
-    set((s) => ({ despesas: [data.despesa, ...s.despesas] }));
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return
+    const { data, error } = await supabase
+      .from('despesas')
+      .insert({
+        user_id: uid,
+        descricao: dados.descricao,
+        categoria: dados.categoria,
+        valor: dados.valor,
+        data_gasto: new Date().toISOString().split('T')[0],
+      })
+      .select()
+      .single()
+    if (error) throw error
+    if (data) set((s) => ({ despesas: [data, ...s.despesas] }))
   },
 
   fetchTransactions: async () =>
   {
     try
     {
-      const res = await apiFetch('/despesas');
-      if ( !res.ok ) throw new Error('falha');
-      const data = await res.json();
-      set({ transactions: data.despesas.map((d: Record<string, unknown>) => ({ ...d, tipo: (d.tipo as string) || 'despesa' })) });
+      const { data, error } = await supabase
+        .from('despesas')
+        .select('*')
+        .order('id', { ascending: false })
+      if (error) throw error
+      set({
+        transactions: (data || []).map((d: Record<string, unknown>) => ({
+          ...d,
+          tipo: (d.tipo as string) || 'despesa',
+        })),
+      })
     }
     catch { /* offline */ }
   },
 
   addTransaction: async (t) =>
   {
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid)
+    {
+      // fallback local
+      set((s) => ({ transactions: [{ id: Date.now(), ...t }, ...s.transactions] }))
+      return
+    }
     try
     {
-      const res = await apiFetch('/despesas', {
-        method: 'POST',
-        body: JSON.stringify({ descricao: t.descricao, categoria: t.categoria, valor: t.valor, data_gasto: t.data }),
-      });
-      if ( res.ok )
-      {
-        const data = await res.json();
-        set((s) => ({ transactions: [{ ...data.despesa, tipo: t.tipo }, ...s.transactions] }));
-      }
+      const { data, error } = await supabase
+        .from('despesas')
+        .insert({
+          user_id: uid,
+          descricao: t.descricao,
+          categoria: t.categoria,
+          valor: t.valor,
+          data_gasto: t.data,
+        })
+        .select()
+        .single()
+      if (error) throw error
+      if (data) set((s) => ({ transactions: [{ ...data, tipo: t.tipo }, ...s.transactions] }))
     }
-    catch { /* offline */ }
-    set((s) =>
+    catch
     {
-      const exists = s.transactions.some((tx) => tx.descricao === t.descricao && tx.data === t.data && tx.valor === t.valor);
-      if ( exists ) return s;
-      return { transactions: [{ id: Date.now(), ...t }, ...s.transactions] };
-    });
+      // fallback local
+      set((s) =>
+      {
+        const exists = s.transactions.some((tx) => tx.descricao === t.descricao && tx.data === t.data && tx.valor === t.valor)
+        if (exists) return s
+        return { transactions: [{ id: Date.now(), ...t }, ...s.transactions] }
+      })
+    }
   },
 
   removeTransaction: (id) =>
   {
-    set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) }));
+    set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) }))
+    supabase.from('despesas').delete().eq('id', id).then(() => {})
   },
 
   setBudgetLimit: (categoria, limite) =>
   {
     set((s) => ({
       budgetLimits: s.budgetLimits.map((b) => b.categoria === categoria ? { ...b, limite } : b),
-    }));
+    }))
   },
-});
+})

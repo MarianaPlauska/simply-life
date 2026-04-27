@@ -7,8 +7,7 @@ import { useTaskStore } from '../../store/useTaskStore';
 import { AuthInput } from '../ui/AuthInput';
 import { AuthButton } from '../ui/AuthButton';
 import { TabToggle } from '../ui/TabToggle';
-
-const API = 'http://127.0.0.1:8000';
+import { supabase } from '../../lib/supabase';
 
 /* â”€â”€ Google "G" SVG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function GoogleLogo({ className }: { className?: string }) {
@@ -53,71 +52,117 @@ export function LoginView() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [senhaErro, setSenhaErro] = useState('');
 
   /* Already authenticated â€” redirect to app */
   if (isLoggedIn) {
     return <Navigate to="/" replace />;
   }
 
-  /* â”€â”€ Submit â”€â”€ */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !senha.trim()) return;
-    if (mode === 'register' && !nome.trim()) return;
+  /* ── submit ── */
+  const handleSubmit = async (e: React.FormEvent) =>
+  {
+    e.preventDefault()
+    if (!email.trim() || !senha.trim()) return
+    if (mode === 'register' && !nome.trim()) return
 
-    setLoading(true);
-    setError('');
+    setLoading(true)
+    setError('')
 
-    try {
-      const endpoint = mode === 'register' ? '/auth/registro' : '/auth/login';
-      const body = mode === 'register'
-        ? { email: email.trim(), senha, nome_completo: nome.trim() }
-        : { email: email.trim(), senha };
+    try
+    {
+      if (mode === 'register')
+      {
+        // validação de senha
+        if (senha.length < 6)
+        {
+          setSenhaErro('A senha precisa ter no mínimo 6 caracteres')
+          setLoading(false)
+          return
+        }
+        setSenhaErro('')
 
-      const res = await fetch(`${API}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-      });
+        // registro via supabase auth
+        const { data, error: err } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: senha,
+          options: { data: { nome_completo: nome.trim() } },
+        })
+        if (err) throw new Error(err.message)
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || (mode === 'register' ? 'Erro ao criar conta' : 'Email ou senha incorretos'));
+        // supabase retorna user mas sem session se email confirmation está ativo
+        if (data.user && !data.session)
+        {
+          toast.info('Conta criada! Verifique seu email para confirmar.', { duration: 6000 })
+          setMode('login')
+          setError('')
+          setLoading(false)
+          return
+        }
+
+        if (data.user && data.session)
+        {
+          login(data.user.email || '', nome.trim(), data.user.id)
+          toast.success(t('login.success_register'))
+          navigate('/', { replace: true })
+        }
       }
+      else
+      {
+        // login via supabase auth
+        const { data, error: err } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: senha,
+        })
+        if (err) throw new Error(err.message)
+        if (data.user)
+        {
+          // busca nome do perfil
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('nome_completo')
+            .eq('id', data.user.id)
+            .single()
 
-      const data = await res.json();
-      login(data.nome || email.split('@')[0], data.nome || '', data.access_token);
-      toast.success(mode === 'register' ? t('login.success_register') : t('login.success_login'));
-      navigate('/', { replace: true });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : t('login.error_connection');
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setLoading(false);
+          login(
+            data.user.email || '',
+            profile?.nome_completo || data.user.email?.split('@')[0] || '',
+            data.user.id,
+          )
+          toast.success(t('login.success_login'))
+          navigate('/', { replace: true })
+        }
+      }
     }
-  };
-
-  const handleGoogle = async () => {
-    try {
-      const token = useTaskStore.getState().authToken;
-      const headers: HeadersInit = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const res = await fetch(`${API}/integracoes/google/url`, { headers });
-      if (!res.ok) throw new Error('Falha ao obter URL de autorizacao');
-      const data = await res.json();
-      window.location.href = data.url;
-    } catch {
-      toast.error(t('login.error_google'));
+    catch (err)
+    {
+      let msg = err instanceof Error ? err.message : t('login.error_connection')
+      // traduz mensagens do supabase
+      if (msg.includes('Invalid login credentials')) msg = 'Email ou senha incorretos'
+      if (msg.includes('Email not confirmed')) msg = 'Confirme seu email antes de fazer login'
+      if (msg.includes('already registered')) msg = 'Este email já possui uma conta'
+      if (msg.includes('Password should be')) msg = 'A senha precisa ter no mínimo 6 caracteres'
+      setError(msg)
+      toast.error(msg)
     }
-  };
+    finally
+    {
+      setLoading(false)
+    }
+  }
 
-  const handleGuest = () => {
-    login('convidado@simplylife.app', 'Convidado');
-    toast.success(t('login.success_guest'));
-    navigate('/', { replace: true });
-  };
+  // google oauth — desabilitado por enquanto (precisa configurar no supabase dashboard)
+  const handleGoogle = async () =>
+  {
+    toast.info('Google login será configurado em breve')
+  }
+
+  const handleGuest = () =>
+  {
+    login('convidado@simplylife.app', 'Convidado')
+    toast.success(t('login.success_guest'))
+    navigate('/', { replace: true })
+  }
 
   const isSubmitDisabled = !email.trim() || !senha.trim() || (mode === 'register' && !nome.trim());
 
@@ -224,6 +269,31 @@ export function LoginView() {
                 </button>
               }
             />
+
+            {mode === 'register' && senhaErro && (
+              <p className="text-[11px] text-amber-400/80 -mt-2">⚠️ {senhaErro}</p>
+            )}
+
+            {mode === 'register' && !senhaErro && senha.length > 0 && (
+              <div className="-mt-2 flex items-center gap-2">
+                <div className="flex-1 h-1 rounded-full bg-zinc-800 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      senha.length >= 8 ? 'w-full bg-emerald-500' :
+                      senha.length >= 6 ? 'w-2/3 bg-amber-500' :
+                      'w-1/3 bg-red-500'
+                    }`}
+                  />
+                </div>
+                <span className={`text-[10px] ${
+                  senha.length >= 8 ? 'text-emerald-400' :
+                  senha.length >= 6 ? 'text-amber-400' :
+                  'text-red-400'
+                }`}>
+                  {senha.length >= 8 ? 'Forte' : senha.length >= 6 ? 'Ok' : 'Fraca'}
+                </span>
+              </div>
+            )}
 
             {error && (
               <p role="alert" className="text-[12px] text-red-400/90 text-center py-1">{error}</p>

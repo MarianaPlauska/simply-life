@@ -1,12 +1,13 @@
-// slice de busca — busca global full-text
-import type { StateCreator } from 'zustand';
-import type { BuscaResult } from '../../types';
-import { apiFetch } from '../api';
+// slice de busca — busca global via supabase full-text
+import type { StateCreator } from 'zustand'
+import type { BuscaResult } from '../../types'
+import { supabase } from '../../lib/supabase'
 
-export interface BuscaSlice {
-  searchResults: BuscaResult | null;
-  searchLoading: boolean;
-  buscar: (query: string) => Promise<void>;
+export interface BuscaSlice
+{
+  searchResults: BuscaResult | null
+  searchLoading: boolean
+  buscar: (query: string) => Promise<void>
 }
 
 export const createBuscaSlice: StateCreator<BuscaSlice, [], [], BuscaSlice> = (set) => ({
@@ -15,29 +16,42 @@ export const createBuscaSlice: StateCreator<BuscaSlice, [], [], BuscaSlice> = (s
 
   buscar: async (query) =>
   {
-    if ( !query || query.trim().length < 2 )
+    if (!query || query.trim().length < 2)
     {
-      set({ searchResults: null, searchLoading: false });
-      return;
+      set({ searchResults: null, searchLoading: false })
+      return
     }
-    set({ searchLoading: true });
+    set({ searchLoading: true })
     try
     {
-      const res = await apiFetch(`/busca?q=${encodeURIComponent(query.trim())}&limite=8`);
-      if ( res.ok )
-      {
-        const data = await res.json();
-        set({ searchResults: data, searchLoading: false });
-      }
-      else
-      {
-        set({ searchResults: null, searchLoading: false });
-      }
+      const q = query.trim()
+      // busca tarefas
+      const { data: tarefas } = await supabase
+        .from('tarefas_unificadas')
+        .select('id, titulo, status')
+        .ilike('titulo', `%${q}%`)
+        .is('deletado_em', null)
+        .limit(8)
+      // busca anotações
+      const { data: anotacoes } = await supabase
+        .from('anotacoes')
+        .select('id, titulo, conteudo')
+        .or(`titulo.ilike.%${q}%,conteudo.ilike.%${q}%`)
+        .limit(4)
+
+      set({
+        searchResults: {
+          tarefas: tarefas || [],
+          anotacoes: anotacoes || [],
+          despesas: [],
+        },
+        searchLoading: false,
+      })
     }
     catch (e)
     {
-      console.error('buscar:', e);
-      set({ searchResults: null, searchLoading: false });
+      console.error('buscar:', e)
+      set({ searchResults: null, searchLoading: false })
     }
   },
-});
+})
