@@ -8,6 +8,7 @@ import { QuickCaptureModal } from './components/Anotacoes/QuickCaptureModal';
 import { LoginView } from './components/Auth/LoginView';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { GoogleCallbackView } from './components/Auth/GoogleCallbackView';
+import { ResetPasswordView } from './components/Auth/ResetPasswordView';
 import { CommandPalette } from './components/ui/CommandPalette';
 import { AmbientBackground } from './components/ui/AmbientBackground';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
@@ -190,6 +191,7 @@ function App() {
       <Toaster theme="dark" position="bottom-right" richColors />
       <Routes>
         <Route path="/login" element={<LoginView />} />
+        <Route path="/reset-password" element={<ResetPasswordView />} />
         <Route path="/google-callback" element={<GoogleCallbackView />} />
         <Route
           path="/*"

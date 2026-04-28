@@ -37,7 +37,7 @@ const AUTH_TABS_KEYS = [
   { value: 'register' as const, key: 'login.tab_register' },
 ];
 
-/* â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+
 export function LoginView() {
   const login = useTaskStore((s) => s.login);
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn);
@@ -53,6 +53,9 @@ export function LoginView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [senhaErro, setSenhaErro] = useState('');
+  const [forgotMode, setForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   /* Already authenticated â€” redirect to app */
   if (isLoggedIn) {
@@ -151,17 +154,63 @@ export function LoginView() {
     }
   }
 
-  // google oauth — desabilitado por enquanto (precisa configurar no supabase dashboard)
+  // google oauth — desabilitado por enquanto
   const handleGoogle = async () =>
   {
     toast.info('Google login será configurado em breve')
   }
 
-  const handleGuest = () =>
+  // recuperação de senha via supabase
+  const handleForgotPassword = async () =>
   {
-    login('convidado@simplylife.app', 'Convidado')
-    toast.success(t('login.success_guest'))
-    navigate('/', { replace: true })
+    if (!forgotEmail.trim())
+    {
+      toast.error('Digite seu email')
+      return
+    }
+    setForgotLoading(true)
+    try
+    {
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
+        forgotEmail.trim(),
+        { redirectTo: `${window.location.origin}/reset-password` }
+      )
+      if (err) throw new Error(err.message)
+      toast.success('Email de recuperação enviado! Verifique sua caixa de entrada.', { duration: 6000 })
+      setForgotMode(false)
+      setForgotEmail('')
+    }
+    catch (err)
+    {
+      const msg = err instanceof Error ? err.message : 'Erro ao enviar email'
+      toast.error(msg)
+    }
+    finally { setForgotLoading(false) }
+  }
+
+  // login como convidado — tenta sessão anônima, senão cria local
+  const handleGuest = async () =>
+  {
+    try
+    {
+      const { data, error: err } = await supabase.auth.signInAnonymously()
+      if (err) throw new Error(err.message)
+      if (data.user)
+      {
+        login('convidado@simplylife.app', 'Convidado', data.user.id)
+        toast.success(t('login.success_guest'))
+        navigate('/', { replace: true })
+        return
+      }
+    }
+    catch
+    {
+      // fallback: sessão local sem supabase auth (modo exploração)
+      const guestId = `guest_${Date.now()}`
+      login('convidado@simplylife.app', 'Convidado', guestId)
+      toast.success('Entrando como convidado — seus dados ficam apenas neste dispositivo')
+      navigate('/', { replace: true })
+    }
   }
 
   const isSubmitDisabled = !email.trim() || !senha.trim() || (mode === 'register' && !nome.trim());
@@ -301,7 +350,11 @@ export function LoginView() {
 
             {mode === 'login' && (
               <div className="flex justify-end -mt-1">
-                <button type="button" className="text-[11px] text-zinc-600 hover:text-violet-400 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => { setForgotMode(true); setForgotEmail(email); }}
+                  className="text-[11px] text-zinc-600 hover:text-violet-400 transition-colors"
+                >
                   {t('login.forgot_password')}
                 </button>
               </div>
@@ -338,6 +391,43 @@ export function LoginView() {
             {t('login.guest')}
           </button>
         </div>
+
+        {/* ── Modal de recuperação de senha ── */}
+        {forgotMode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="bg-zinc-900 border border-white/[0.08] rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl">
+              <h2 className="text-lg font-semibold text-white mb-1">Recuperar senha</h2>
+              <p className="text-[13px] text-zinc-500 mb-5">
+                Digite seu email e enviaremos um link para redefinir sua senha.
+              </p>
+              <input
+                type="email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full px-4 py-3 rounded-xl bg-zinc-800/60 border border-white/[0.06] text-white text-sm placeholder-zinc-600 focus:border-violet-500/40 focus:outline-none transition-colors"
+                autoFocus
+              />
+              <div className="flex gap-3 mt-5">
+                <button
+                  type="button"
+                  onClick={() => setForgotMode(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-white/[0.06] text-sm text-zinc-500 hover:text-white transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={forgotLoading || !forgotEmail.trim()}
+                  className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                >
+                  {forgotLoading ? 'Enviando...' : 'Enviar link'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="flex items-center justify-center gap-4 mt-8">
           <p className="text-[11px] text-zinc-700">

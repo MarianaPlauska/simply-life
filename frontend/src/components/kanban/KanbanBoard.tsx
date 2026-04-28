@@ -1,10 +1,10 @@
-// KanbanBoard — Sprint C: power features (C1-C8) | Sprint D: Gantt view
+// KanbanBoard — Sprint C: power features | Sprint D: Gantt | Sprint E: Week/Month views
 import { useEffect, useState, useMemo, useCallback } from 'react';
 import { DndContext, type DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import {
   FlaskConical, X, Send, Loader2, Search, SlidersHorizontal,
   LayoutGrid, List, Archive, RotateCcw, Trash2, ArrowRight,
-  ChevronDown, Zap, CalendarDays,
+  ChevronDown, Zap, CalendarDays, CalendarRange, Calendar,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { KanbanCard } from './KanbanCard';
@@ -12,6 +12,8 @@ import { KanbanColumn } from './KanbanColumn';
 import { TaskDetailModal } from './TaskDetailModal';
 import { ListView } from './ListView';
 import { GanttView } from './GanttView';
+import { WeekView } from './WeekView';
+import { MonthView } from './MonthView';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
 import { PRIO_LABELS, ORIGIN_LABELS } from '../../constants/kanbanConfig';
@@ -26,7 +28,7 @@ const PRIORIDADES = ['critica', 'alta', 'media', 'baixa'] as const;
 const ORIGENS     = ['manual', 'gmail_triage', 'gmail_mock', 'gmail_api', 'webhook'] as const;
 
 
-type ViewMode = 'board' | 'list' | 'gantt';
+type ViewMode = 'board' | 'list' | 'week' | 'month' | 'gantt';
 type GroupBy  = 'none' | 'prioridade' | 'origem' | 'label';
 type Tab      = 'active' | 'arquivo';
 
@@ -490,27 +492,41 @@ export function KanbanBoard ()
                 </button>
               </div>
 
-              {/* C1: view toggle */}
+              {/* view toggle — board, list, week, month, gantt */}
               {tab === 'active' && (
                 <div className="flex items-center bg-zinc-900/60 border border-zinc-800/50 rounded-lg p-0.5">
                   <button
                     onClick={() => setViewMode('board')}
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'board' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                    title="Board view"
+                    title="Board"
                   >
                     <LayoutGrid className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                    title="List view"
+                    title="Lista"
                   >
                     <List className="w-4 h-4" />
                   </button>
                   <button
+                    onClick={() => setViewMode('week')}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'week' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    title="Semana"
+                  >
+                    <CalendarRange className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('month')}
+                    className={`p-1.5 rounded-md transition-all ${viewMode === 'month' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                    title="Mês"
+                  >
+                    <Calendar className="w-4 h-4" />
+                  </button>
+                  <button
                     onClick={() => setViewMode('gantt')}
                     className={`p-1.5 rounded-md transition-all ${viewMode === 'gantt' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                    title="Timeline / Gantt"
+                    title="Timeline"
                   >
                     <CalendarDays className="w-4 h-4" />
                   </button>
@@ -648,6 +664,16 @@ export function KanbanBoard ()
             onEdit={handleEditCard}
             onDelete={handleDeleteCard}
             onDuplicate={handleDuplicate}
+          />
+        ) : viewMode === 'week' ? (
+          <WeekView
+            tarefas={filtered}
+            onSelectTarefa={(t) => setSelectedTarefa(t)}
+          />
+        ) : viewMode === 'month' ? (
+          <MonthView
+            tarefas={filtered}
+            onSelectTarefa={(t) => setSelectedTarefa(t)}
           />
         ) : viewMode === 'gantt' ? (
           <GanttView
