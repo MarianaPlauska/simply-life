@@ -80,19 +80,61 @@ CREATE TABLE IF NOT EXISTS preferencias_usuario (
     modulos_fixados      VARCHAR DEFAULT 'dashboard,kanban'
 );
 
--- 7. despesas
+-- 7. categorias financeiras
+CREATE TABLE IF NOT EXISTS fin_categorias (
+    id          SERIAL PRIMARY KEY,
+    usuario_id  INTEGER NOT NULL REFERENCES usuarios(id),
+    nome        VARCHAR(50) NOT NULL,
+    cor         VARCHAR(7) DEFAULT '#8b5cf6',
+    icone       VARCHAR(50) DEFAULT 'Wallet',
+    tipo        VARCHAR(20) DEFAULT 'despesa', -- receita, despesa
+    created_at  TIMESTAMP DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ix_fin_categorias_usuario_id ON fin_categorias (usuario_id);
+
+-- 8. transações (expansão da antiga despesas)
 CREATE TABLE IF NOT EXISTS despesas (
     id               SERIAL PRIMARY KEY,
     usuario_id       INTEGER REFERENCES usuarios(id),
     descricao        VARCHAR,
-    categoria        VARCHAR,
-    valor            INTEGER,
-    data_gasto       VARCHAR,
+    categoria        VARCHAR, -- Legado
+    categoria_id     INTEGER REFERENCES fin_categorias(id),
+    valor            NUMERIC(12,2), -- Mudado para NUMERIC para precisão
+    data_gasto       VARCHAR, -- YYYY-MM-DD
+    tipo             VARCHAR DEFAULT 'despesa', -- receita, despesa
     status_pagamento VARCHAR DEFAULT 'pendente',
-    hash_seguranca   VARCHAR
+    hash_seguranca   VARCHAR,
+    created_at       TIMESTAMP DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS ix_despesas_usuario_id ON despesas (usuario_id);
+CREATE INDEX IF NOT EXISTS ix_despesas_data_gasto ON despesas (data_gasto);
+
+-- 9. orçamentos
+CREATE TABLE IF NOT EXISTS fin_orcamentos (
+    id           SERIAL PRIMARY KEY,
+    usuario_id   INTEGER NOT NULL REFERENCES usuarios(id),
+    categoria_id INTEGER REFERENCES fin_categorias(id),
+    limite       NUMERIC(12,2) NOT NULL,
+    mes          INTEGER,
+    ano          INTEGER,
+    created_at   TIMESTAMP DEFAULT now()
 );
 
--- 8. medicamentos
+-- 10. metas financeiras
+CREATE TABLE IF NOT EXISTS fin_metas (
+    id          SERIAL PRIMARY KEY,
+    usuario_id  INTEGER NOT NULL REFERENCES usuarios(id),
+    titulo      VARCHAR(100) NOT NULL,
+    valor_alvo  NUMERIC(12,2) NOT NULL,
+    valor_atual NUMERIC(12,2) DEFAULT 0.0,
+    prazo       DATE,
+    icone       VARCHAR(50) DEFAULT 'Target',
+    cor         VARCHAR(7) DEFAULT '#8b5cf6',
+    concluida   BOOLEAN DEFAULT FALSE,
+    created_at  TIMESTAMP DEFAULT now()
+);
+
+-- 11. medicamentos
 CREATE TABLE IF NOT EXISTS medicamentos (
     id         SERIAL PRIMARY KEY,
     usuario_id INTEGER REFERENCES usuarios(id),
@@ -101,7 +143,7 @@ CREATE TABLE IF NOT EXISTS medicamentos (
     tomado_hoje INTEGER DEFAULT 0
 );
 
--- 9. notificações do sistema
+-- 12. notificações do sistema
 CREATE TABLE IF NOT EXISTS notificacoes (
     id             SERIAL PRIMARY KEY,
     usuario_id     INTEGER REFERENCES usuarios(id),
@@ -114,7 +156,7 @@ CREATE TABLE IF NOT EXISTS notificacoes (
     criado_em      VARCHAR
 );
 
--- 10. hábitos diários
+-- 13. hábitos diários
 CREATE TABLE IF NOT EXISTS habitos_diarios (
     id              SERIAL PRIMARY KEY,
     usuario_id      INTEGER REFERENCES usuarios(id),
@@ -125,7 +167,7 @@ CREATE TABLE IF NOT EXISTS habitos_diarios (
     unidade         VARCHAR
 );
 
--- 11. sessões de foco (gamificação)
+-- 14. sessões de foco (gamificação)
 CREATE TABLE IF NOT EXISTS sessoes_foco (
     id               SERIAL PRIMARY KEY,
     user_id          INTEGER NOT NULL REFERENCES usuarios(id),
@@ -135,7 +177,7 @@ CREATE TABLE IF NOT EXISTS sessoes_foco (
     created_at       TIMESTAMP NOT NULL DEFAULT now()
 );
 
--- 12. labels (sprint 1)
+-- 15. labels (sprint 1)
 CREATE TABLE IF NOT EXISTS labels (
     id         SERIAL PRIMARY KEY,
     usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
@@ -145,7 +187,7 @@ CREATE TABLE IF NOT EXISTS labels (
 );
 CREATE INDEX IF NOT EXISTS ix_labels_usuario_id ON labels (usuario_id);
 
--- 13. associação tarefa <-> label (N:N) (sprint 1)
+-- 16. associação tarefa <-> label (N:N) (sprint 1)
 CREATE TABLE IF NOT EXISTS tarefa_labels (
     id        SERIAL PRIMARY KEY,
     tarefa_id INTEGER NOT NULL REFERENCES tarefas_unificadas(id) ON DELETE CASCADE,
@@ -155,7 +197,7 @@ CREATE TABLE IF NOT EXISTS tarefa_labels (
 CREATE INDEX IF NOT EXISTS ix_tarefa_labels_tarefa_id ON tarefa_labels (tarefa_id);
 CREATE INDEX IF NOT EXISTS ix_tarefa_labels_label_id  ON tarefa_labels (label_id);
 
--- 14. subtarefas (sprint 1)
+-- 17. subtarefas (sprint 1)
 CREATE TABLE IF NOT EXISTS subtarefas (
     id        SERIAL PRIMARY KEY,
     tarefa_id INTEGER NOT NULL REFERENCES tarefas_unificadas(id) ON DELETE CASCADE,
@@ -166,7 +208,7 @@ CREATE TABLE IF NOT EXISTS subtarefas (
 );
 CREATE INDEX IF NOT EXISTS ix_subtarefas_tarefa_id ON subtarefas (tarefa_id);
 
--- 15. histórico de hábitos / streaks (sprint 1)
+-- 18. histórico de hábitos / streaks (sprint 1)
 CREATE TABLE IF NOT EXISTS historico_habitos (
     id         SERIAL PRIMARY KEY,
     usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
@@ -183,7 +225,7 @@ CREATE INDEX IF NOT EXISTS ix_historico_habitos_habito_id  ON historico_habitos 
 -- SPRINT 4: Bem-Estar Mental (Mood Tracker + Journaling)
 -- =============================================================
 
--- 16. Diário de Humor (mood tracker — 1 registro por dia)
+-- 19. Diário de Humor (mood tracker — 1 registro por dia)
 CREATE TABLE IF NOT EXISTS diario_humor (
     id         SERIAL PRIMARY KEY,
     usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
@@ -197,7 +239,7 @@ CREATE TABLE IF NOT EXISTS diario_humor (
 CREATE INDEX IF NOT EXISTS ix_diario_humor_usuario_id ON diario_humor (usuario_id);
 CREATE INDEX IF NOT EXISTS ix_diario_humor_data       ON diario_humor (data);
 
--- 17. Entradas de Diário (journaling livre)
+-- 20. Entradas de Diário (journaling livre)
 CREATE TABLE IF NOT EXISTS entradas_diario (
     id           SERIAL PRIMARY KEY,
     usuario_id   INTEGER NOT NULL REFERENCES usuarios(id),
@@ -209,7 +251,7 @@ CREATE TABLE IF NOT EXISTS entradas_diario (
 CREATE INDEX IF NOT EXISTS ix_entradas_diario_usuario_id ON entradas_diario (usuario_id);
 CREATE INDEX IF NOT EXISTS ix_entradas_diario_data       ON entradas_diario (data);
 
--- 18. alembic version tracking (para o alembic saber onde parar)
+-- 21. alembic version tracking (para o alembic saber onde parar)
 CREATE TABLE IF NOT EXISTS alembic_version (
     version_num VARCHAR(32) NOT NULL,
     CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)

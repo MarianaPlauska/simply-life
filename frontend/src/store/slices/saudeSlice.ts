@@ -178,11 +178,16 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
           }
         }
       }
-      const streaks: HabitoStreak[] = Array.from(streakMap.entries()).map(([habito_id, streak_atual]) => ({
-        habito_id,
-        streak_atual,
-        melhor_streak: streak_atual,
-      }))
+      const habitos = get().habitos;
+      const streaks: HabitoStreak[] = Array.from(streakMap.entries()).map(([habito_id, streak_dias]) => {
+        const habito = habitos.find(h => h.id === habito_id);
+        return {
+          habito_id,
+          nome_exibicao: habito ? habito.nome_exibicao : `Hábito ${habito_id}`,
+          streak_dias,
+          ultima_data: null, // Pode ser aprimorado com a última data real do histórico
+        };
+      })
       set({ habitosStreaks: streaks })
     }
     catch (e) { console.error('fetchHabitosStreaks:', e) }

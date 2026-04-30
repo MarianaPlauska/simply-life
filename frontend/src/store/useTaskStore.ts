@@ -21,7 +21,7 @@ import { createOnboardingSlice, type OnboardingSlice } from './slices/onboarding
 
 
 // re-exporta types para compatibilidade
-export type { ActiveView, Anotacao, TimerConfig, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, BudgetLimit, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
+export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, BudgetLimit, FinancialGoal, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
 export type { AnalyticsReport, DashboardReportCard, TrendPoint, RankingItem, PeriodStats } from './slices/relatoriosSlice';
 
 export type TaskStore =

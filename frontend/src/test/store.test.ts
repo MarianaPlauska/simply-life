@@ -79,21 +79,19 @@ describe('useTaskStore', () => {
   });
 
   it('should login and set user state', () => {
-    useTaskStore.getState().login('test@test.com', 'Testador', 'fake-token-123');
+    useTaskStore.getState().login('test@test.com', 'Testador');
     const state = useTaskStore.getState();
     expect(state.isLoggedIn).toBe(true);
     expect(state.userProfile.email).toBe('test@test.com');
     expect(state.userProfile.nome).toBe('Testador');
-    expect(state.authToken).toBe('fake-token-123');
     expect(state.activeView).toBe('dashboard');
   });
 
   it('should logout and clear user state', () => {
-    useTaskStore.getState().login('test@test.com', 'Testador', 'token');
+    useTaskStore.getState().login('test@test.com', 'Testador');
     useTaskStore.getState().logout();
     const state = useTaskStore.getState();
     expect(state.isLoggedIn).toBe(false);
-    expect(state.authToken).toBe('');
     expect(state.userProfile.email).toBe('');
   });
 

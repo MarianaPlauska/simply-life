@@ -33,6 +33,14 @@ export interface TimerConfig {
   longBreak: number;
 }
 
+export interface Category {
+  id: number;
+  nome: string;
+  cor: string;
+  icone: string;
+  tipo: 'receita' | 'despesa';
+}
+
 export interface Despesa {
   id: number;
   categoria: string;
@@ -66,15 +74,32 @@ export interface AccessibilitySettings {
 export interface Transaction {
   id: number;
   descricao: string;
-  categoria: string;
+  categoria: string; // Legado
+  categoria_id?: number;
   valor: number;
   tipo: 'receita' | 'despesa';
   data: string;
+  status_pagamento?: 'pago' | 'pendente' | 'agendado';
 }
 
 export interface BudgetLimit {
-  categoria: string;
+  id?: number;
+  categoria_id?: number;
+  categoria: string; // Legado: id da categoria em string no Planner atual
   limite: number;
+  mes?: number;
+  ano?: number;
+}
+
+export interface FinancialGoal {
+  id: number;
+  titulo: string;
+  valor_alvo: number;
+  valor_atual: number;
+  prazo?: string;
+  icone: string;
+  cor: string;
+  concluida: boolean;
 }
 
 export interface HabitoDiario {

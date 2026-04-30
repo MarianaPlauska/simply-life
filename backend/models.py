@@ -93,16 +93,55 @@ class PreferenciasUsuario(database.Base):
     modulos_fixados = Column(String, default="dashboard,kanban") 
 
 # 6. finanças
+class CategoriaFinanceira(database.Base):
+    __tablename__ = "fin_categorias"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
+    nome = Column(String(50), nullable=False)
+    cor = Column(String(7), default="#8b5cf6")
+    icone = Column(String(50), default="Wallet")
+    tipo = Column(String(20), default="despesa") # receita, despesa
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
 class Despesa(database.Base):
+    """
+    Mantido o nome da classe por compatibilidade, mas agora representa uma Transação Completa.
+    """
     __tablename__ = "despesas"
     id = Column(Integer, primary_key=True, index=True)
     usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
     descricao = Column(String)
-    categoria = Column(String)
-    valor = Column(Integer) 
-    data_gasto = Column(String)
-    status_pagamento = Column(String, default="pendente")
+    categoria = Column(String) # Legado: nome da categoria
+    categoria_id = Column(Integer, ForeignKey("fin_categorias.id"), nullable=True)
+    valor = Column(Float) # Mudado para Float para precisão decimal
+    data_gasto = Column(String) # Formato YYYY-MM-DD
+    tipo = Column(String, default="despesa") # receita, despesa
+    status_pagamento = Column(String, default="pendente") # pago, pendente, agendado
     hash_seguranca = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class OrcamentoFinanceiro(database.Base):
+    __tablename__ = "fin_orcamentos"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
+    categoria_id = Column(Integer, ForeignKey("fin_categorias.id"))
+    limite = Column(Float, nullable=False)
+    mes = Column(Integer)
+    ano = Column(Integer)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class MetaFinanceira(database.Base):
+    __tablename__ = "fin_metas"
+    id = Column(Integer, primary_key=True, index=True)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), index=True)
+    titulo = Column(String(100), nullable=False)
+    valor_alvo = Column(Float, nullable=False)
+    valor_atual = Column(Float, default=0.0)
+    prazo = Column(Date, nullable=True)
+    icone = Column(String(50), default="Target")
+    cor = Column(String(7), default="#8b5cf6")
+    concluida = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 # 7. saúde e Hábitos
 class Medicamento(database.Base):
