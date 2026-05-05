@@ -17,6 +17,8 @@ import { createBuscaSlice, type BuscaSlice } from './slices/buscaSlice';
 import { createBemEstarSlice, type BemEstarSlice } from './slices/bemEstarSlice';
 import { createRelatoriosSlice, type RelatoriosSlice } from './slices/relatoriosSlice';
 import { createOnboardingSlice, type OnboardingSlice } from './slices/onboardingSlice';
+import { createInboxSlice, type InboxSlice } from './slices/inboxSlice';
+import { createNewsSlice, type NewsSlice } from './slices/newsSlice';
 
 
 
@@ -38,7 +40,9 @@ export type TaskStore =
   BuscaSlice &
   BemEstarSlice &
   RelatoriosSlice &
-  OnboardingSlice;
+  OnboardingSlice &
+  InboxSlice &
+  NewsSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -57,6 +61,8 @@ export const useTaskStore = create<TaskStore>()(
       ...createBemEstarSlice(...a),
       ...createRelatoriosSlice(...a),
       ...createOnboardingSlice(...a),
+      ...createInboxSlice(...a),
+      ...createNewsSlice(...a),
     }),
     {
       name: 'simply-life-store',

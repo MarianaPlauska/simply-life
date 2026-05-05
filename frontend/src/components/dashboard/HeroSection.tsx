@@ -1,7 +1,13 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Sunset, Bell } from 'lucide-react';
+import { Sun, Moon, Sunset, Bell, CloudRain, Cloud, Thermometer } from 'lucide-react';
 import { fadeUp } from './DashboardPrimitives';
 import type { DashboardResumo } from '../../store/useTaskStore';
+import { useTaskStore } from '../../store/useTaskStore';
+import {
+  fetchWeather, getUserLocation, generateLocalGreeting,
+  type WeatherData,
+} from '../../services/weatherService';
 
 function getGreetIcon(): React.ElementType {
   const h = new Date().getHours();
@@ -17,6 +23,13 @@ function getGreeting(): string {
   return 'Boa noite';
 }
 
+function getWeatherIcon(weather: WeatherData | null): React.ElementType {
+  if (!weather) return Thermometer;
+  if (weather.isRaining) return CloudRain;
+  if (weather.description.includes('ublado')) return Cloud;
+  return Sun;
+}
+
 export function HeroSection({
   resumo,
   naoLidas,
@@ -25,6 +38,55 @@ export function HeroSection({
   naoLidas: number;
 }) {
   const GreetIcon = getGreetIcon();
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [smartGreeting, setSmartGreeting] = useState<string>('');
+
+  // pega dados do store pra contexto da saudação
+  const medicamentos = useTaskStore((s) => s.medicamentos);
+  const tarefas = useTaskStore((s) => s.tarefas);
+  const streakAtual = 0; // será alimentado pelo profiles.streak_atual
+
+  // busca clima real na montagem
+  useEffect(() =>
+  {
+    let cancelled = false;
+    
+    const loadWeather = async () =>
+    {
+      try
+      {
+        const pos = await getUserLocation();
+        const data = await fetchWeather(pos.lat, pos.lon);
+        if (!cancelled) setWeather(data);
+      }
+      catch (err)
+      {
+        console.warn('[Weather] Geoloc indisponível, usando fallback:', err);
+        // fallback sem clima — saudação funciona sem
+      }
+    };
+    
+    loadWeather();
+    return () => { cancelled = true; };
+  }, []);
+
+  // gera saudação contextual quando dados chegam
+  useEffect(() =>
+  {
+    const medsPendentes = (medicamentos ?? []).filter((m) => !m.tomado).length;
+    const criticas = tarefas.filter((t) => t.prioridade === 'critica' && t.status !== 'concluida').length;
+
+    const greeting = generateLocalGreeting(weather, {
+      emailsUrgentes: 0, // será alimentado pelo inbox real
+      medsPendentes,
+      tarefasCriticas: criticas,
+      streak: streakAtual,
+    });
+
+    setSmartGreeting(greeting);
+  }, [weather, medicamentos, tarefas, streakAtual]);
+
+  const WeatherIcon = getWeatherIcon(weather);
 
   return (
     <motion.div {...fadeUp}>
@@ -35,32 +97,61 @@ export function HeroSection({
 
         <div className="relative flex items-start justify-between gap-6">
           <div className="flex-1 min-w-0">
-            {/* Greeting chip */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/10 mb-4">
-              <GreetIcon className="w-4 h-4 text-amber-400" />
-              <span className="text-[11px] font-medium text-violet-300 tracking-wide uppercase">
-                {getGreeting()}
-              </span>
+            {/* Greeting + Weather chip */}
+            <div className="flex items-center gap-3 mb-4 flex-wrap">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/10">
+                <GreetIcon className="w-4 h-4 text-amber-400" />
+                <span className="text-[11px] font-medium text-violet-300 tracking-wide uppercase">
+                  {getGreeting()}
+                </span>
+              </div>
+
+              {/* weather badge — só aparece se tiver dados reais */}
+              {weather && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/10"
+                >
+                  <WeatherIcon className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-[11px] font-medium text-cyan-300">
+                    {weather.temperature}°C {weather.description.toLowerCase()}
+                  </span>
+                  {weather.city && (
+                    <span className="text-[10px] text-zinc-500">
+                      · {weather.city}
+                    </span>
+                  )}
+                </motion.div>
+              )}
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tighter leading-[1.1]">
-              {(resumo?.saudacao_ia ?? '').split('.')[0] || getGreeting()}
+            {/* saudação inteligente JARVIS */}
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter leading-[1.15]">
+              {smartGreeting.split('!')[0] || getGreeting()}!
             </h1>
 
-            {resumo?.saudacao_ia && (
+            {smartGreeting.includes('!') && (
               <p className="text-[14px] text-zinc-400 mt-3 leading-relaxed max-w-2xl">
-                {resumo.saudacao_ia.split('.').slice(1).join('.').trim()}
+                {smartGreeting.split('!').slice(1).join('!').trim()}
               </p>
             )}
 
             {/* Quick stats row */}
             {resumo && (
               <div className="flex items-center gap-6 mt-6">
-                <QuickStat value={resumo.tarefas_criticas} label="Criticas" accent={resumo.tarefas_criticas > 0 ? 'text-red-400' : 'text-emerald-400'} />
+                <QuickStat value={resumo.tarefas_criticas} label="Críticas" accent={resumo.tarefas_criticas > 0 ? 'text-red-400' : 'text-emerald-400'} />
                 <div className="w-px h-6 bg-white/5" />
                 <QuickStat value={resumo.tarefas_pendentes} label="Pendentes" accent="text-violet-400" />
                 <div className="w-px h-6 bg-white/5" />
-                <QuickStat value={resumo.tarefas_concluidas} label="Concluidas" accent="text-emerald-400" />
+                <QuickStat value={resumo.tarefas_concluidas} label="Concluídas" accent="text-emerald-400" />
+                {weather && (
+                  <>
+                    <div className="w-px h-6 bg-white/5" />
+                    <QuickStat value={weather.temperature} label={weather.icon} accent="text-cyan-400" />
+                  </>
+                )}
               </div>
             )}
           </div>
