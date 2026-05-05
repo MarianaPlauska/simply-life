@@ -44,10 +44,10 @@ export function HeroSection({
             </div>
 
             <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tighter leading-[1.1]">
-              {resumo?.saudacao_ia.split('.')[0] || 'Carregando...'}
+              {(resumo?.saudacao_ia ?? '').split('.')[0] || getGreeting()}
             </h1>
 
-            {resumo && (
+            {resumo?.saudacao_ia && (
               <p className="text-[14px] text-zinc-400 mt-3 leading-relaxed max-w-2xl">
                 {resumo.saudacao_ia.split('.').slice(1).join('.').trim()}
               </p>
