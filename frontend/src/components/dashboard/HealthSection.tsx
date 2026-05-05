@@ -99,7 +99,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
               </span>
             </CircularProgress>
           </div>
-          {(resumo?.habitos.length ?? 0) > 0 ? (
+          {((resumo?.habitos ?? []).length) > 0 ? (
             <>
               <p className={`text-5xl font-extrabold tabular-nums tracking-tighter ${
                 habitosPct >= 100 ? 'text-emerald-400' : habitosPct >= 50 ? 'text-white' : 'text-zinc-500'
@@ -108,7 +108,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
               </p>
               <ProgressBar
                 pct={habitosPct}
-                label={`${resumo?.habitos.length} rastreador${(resumo?.habitos.length ?? 0) > 1 ? 'es' : ''}`}
+                label={`${(resumo?.habitos ?? []).length} rastreador${((resumo?.habitos ?? []).length) > 1 ? 'es' : ''}`}
                 color={habitosPct >= 100
                   ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
                   : habitosPct >= 50
@@ -154,14 +154,14 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
             <StatusRow
               label="Habitos"
               ok={habitosPct >= 100}
-              detail={(resumo?.habitos.length ?? 0) > 0 ? `${habitosPct.toFixed(0)}%` : 'N/A'}
+              detail={((resumo?.habitos ?? []).length) > 0 ? `${habitosPct.toFixed(0)}%` : 'N/A'}
             />
           </div>
         </GlassCard>
       </motion.div>
 
       {/* ── Detalhamento de Habitos ───────────────────────────── */}
-      {resumo && resumo.habitos.length > 0 && (
+      {resumo && (resumo.habitos ?? []).length > 0 && (
         <motion.div {...fadeUp}>
           <div className="relative overflow-hidden bg-zinc-950/50 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-8 shadow-2xl transition-all duration-300 hover:border-violet-500/20">
             <h3 className="text-[14px] font-semibold text-white mb-5">Progresso dos Habitos</h3>

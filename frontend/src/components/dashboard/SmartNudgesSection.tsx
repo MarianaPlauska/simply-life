@@ -71,7 +71,7 @@ function generateNudges({
   }
 
   // 3. Habits below 50%
-  if (resumo.habitos.length > 0 && resumo.habitos_progresso_pct < 50) {
+  if ((resumo.habitos ?? []).length > 0 && resumo.habitos_progresso_pct < 50) {
     nudges.push({
       id: 'habits-low',
       icon: Activity,
