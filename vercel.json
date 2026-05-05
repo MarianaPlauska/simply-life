@@ -3,6 +3,12 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "cd frontend && npm ci",
   "framework": "vite",
+  "build": {
+    "env": {
+      "VITE_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
+      "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8"
+    }
+  },
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
