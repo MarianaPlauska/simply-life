@@ -10,6 +10,8 @@ import { FocusScoreSection } from '../dashboard/FocusScoreSection';
 import { SmartNudgesSection } from '../dashboard/SmartNudgesSection';
 import { ReportCardSection } from '../dashboard/ReportCardSection';
 import { AgendaSection } from '../dashboard/AgendaSection';
+import { TriagemInboxWidget } from '../dashboard/TriagemInboxWidget';
+import { NewsRadarSection } from '../dashboard/NewsRadarSection';
 import { Bug, Loader2 } from 'lucide-react';
 
 
@@ -123,6 +125,9 @@ export function DashboardHome() {
 
       <KPISection resumo={resumo} tarefasIA={tarefasIA} />
 
+      {/* Camada 1.5 — Inbox IA (e-mails/Teams processados) */}
+      <TriagemInboxWidget setActiveView={setActiveView} />
+
       {/* Camada 2 — Fluxo Tático */}
       <HealthSection resumo={resumo} />
 
@@ -134,6 +139,9 @@ export function DashboardHome() {
 
       {/* Camada 3 — Radar de Monitoramento */}
       <KeywordsRadarSection keywords={keywords} />
+
+      {/* Camada 3.2 — Radar de Notícias (IA curada) */}
+      <NewsRadarSection />
 
       {/* Camada 3.5 — Insights Proativos (JARVIS) */}
       <SmartNudgesSection
