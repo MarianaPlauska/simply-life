@@ -101,8 +101,8 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
       const { data, error } = await supabase
         .from('preferencias_usuario')
         .select('*')
-        .single()
-      if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
+        .maybeSingle()
+      if (error) throw error
       if (data)
       {
         const kw = (data.palavras_chave_email || '').split(',').map((s: string) => s.trim()).filter(Boolean)

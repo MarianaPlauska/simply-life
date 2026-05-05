@@ -56,7 +56,7 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set)
         .from('profiles')
         .select('nome_completo')
         .eq('id', session.user.id)
-        .single()
+        .maybeSingle()
 
       set({
         isLoggedIn: true,
