@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { Skeleton, CardSkeleton } from '../dashboard/DashboardPrimitives';
 import { HeroSection } from '../dashboard/HeroSection';
+import { SetupQuestsSection } from '../dashboard/SetupQuestsSection';
 import { KPISection } from '../dashboard/KPISection';
 import { HealthSection } from '../dashboard/HealthSection';
 import { KeywordsRadarSection } from '../dashboard/KeywordsRadarSection';
@@ -116,6 +117,10 @@ export function DashboardHome() {
           <span>Simular E-mail</span>
         </button>
       </div>
+
+      {/* Camada 0.5 — Onboarding gamificado (some quando completo) */}
+      <SetupQuestsSection />
+
       <KPISection resumo={resumo} tarefasIA={tarefasIA} />
 
       {/* Camada 2 — Fluxo Tático */}
