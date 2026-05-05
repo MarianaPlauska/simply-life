@@ -62,7 +62,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     const { data, error } = await supabase
       .from('despesas')
       .insert({
-        usuario_id: uid, // Mudado de user_id para usuario_id para alinhar com o novo schema
+        user_id: uid,
         descricao: dados.descricao,
         categoria: dados.categoria,
         valor: dados.valor,
@@ -107,7 +107,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       const { data, error } = await supabase
         .from('despesas')
         .insert({
-          usuario_id: uid,
+          user_id: uid,
           descricao: t.descricao,
           categoria: t.categoria,
           categoria_id: t.categoria_id,
@@ -149,7 +149,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   {
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid) return
-    const { data, error } = await supabase.from('fin_categorias').insert({ ...c, usuario_id: uid }).select().single()
+    const { data, error } = await supabase.from('fin_categorias').insert({ ...c, user_id: uid }).select().single()
     if (error) throw error
     if (data) set((s) => ({ categories: [...s.categories, data] }))
   },
@@ -187,10 +187,10 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     if (uid && categoria_id)
     {
       const { error } = await supabase.from('fin_orcamentos').upsert({
-        usuario_id: uid,
+        user_id: uid,
         categoria_id,
         limite,
-      }, { onConflict: 'usuario_id,categoria_id' })
+      }, { onConflict: 'user_id,categoria_id' })
       if (error) console.error('setBudgetLimit db error:', error)
     }
 
@@ -216,7 +216,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   {
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid) return
-    const { data, error } = await supabase.from('fin_metas').insert({ ...g, usuario_id: uid }).select().single()
+    const { data, error } = await supabase.from('fin_metas').insert({ ...g, user_id: uid }).select().single()
     if (error) throw error
     if (data) set((s) => ({ financialGoals: [...s.financialGoals, data] }))
   },

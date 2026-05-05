@@ -13,7 +13,7 @@ export interface Subtarefa {
 
 export interface TarefaUnificada {
   id: number;
-  usuario_id: number;
+  user_id: string;
   titulo: string;
   descricao: string | null;
   snippet_100_char: string;

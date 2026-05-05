@@ -28,7 +28,7 @@ export const createBuscaSlice: StateCreator<BuscaSlice, [], [], BuscaSlice> = (s
       // busca tarefas
       const { data: tarefas } = await supabase
         .from('tarefas_unificadas')
-        .select('id, titulo, status')
+        .select('id, titulo, status, prioridade, origem')
         .ilike('titulo', `%${q}%`)
         .is('deletado_em', null)
         .limit(8)
@@ -39,11 +39,17 @@ export const createBuscaSlice: StateCreator<BuscaSlice, [], [], BuscaSlice> = (s
         .or(`titulo.ilike.%${q}%,conteudo.ilike.%${q}%`)
         .limit(4)
 
+      const anotacoesFormatadas = (anotacoes || []).map(a => ({
+        id: a.id,
+        titulo: a.titulo,
+        preview: a.conteudo ? a.conteudo.substring(0, 100) : ''
+      }));
+
       set({
         searchResults: {
           tarefas: tarefas || [],
-          anotacoes: anotacoes || [],
-          despesas: [],
+          anotacoes: anotacoesFormatadas,
+          total: (tarefas?.length || 0) + (anotacoesFormatadas.length || 0),
         },
         searchLoading: false,
       })

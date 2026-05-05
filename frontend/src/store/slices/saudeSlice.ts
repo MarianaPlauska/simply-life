@@ -20,7 +20,7 @@ export interface SaudeSlice
   fetchHabitosStreaks: () => Promise<void>
 }
 
-export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (set) => ({
+export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (set, get) => ({
   medicamentos: [],
   habitos: [],
   habitosStreaks: [] as HabitoStreak[],

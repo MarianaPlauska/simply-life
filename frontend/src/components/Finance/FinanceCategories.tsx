@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   X, Plus, Wallet, ShoppingCart, Utensils, 
   Home, Heart, GraduationCap, Gamepad2, Wifi, Plane, Briefcase, 

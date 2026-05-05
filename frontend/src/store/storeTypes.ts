@@ -20,7 +20,7 @@ export type ActiveView =
 
 export interface Anotacao {
   id: number;
-  usuario_id: number;
+  user_id: string;
   titulo: string | null;
   conteudo: string;
   fixado: number;
@@ -140,7 +140,7 @@ export interface CalendarEvent {
 
 export interface PalavraChave {
   id: number;
-  user_id: number;
+  user_id: string;
   termo: string;
   peso: number;
   created_at?: string;
