@@ -64,16 +64,36 @@ export function VirtualCardsTab()
   {
     const data = [];
     const now = new Date();
-    
-    // Calcular médias dos últimos 3 meses para servir de base
-    const pastIncomes = transactions.filter((t) => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
-    const pastExpenses = transactions.filter((t) => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
-    
-    // Estimativas de receitas e despesas mensais baseadas no histórico ou padrões razoáveis
-    const monthlyIncomeEstimate = pastIncomes > 0 ? pastIncomes : 7500;
-    const monthlyExpenseEstimate = pastExpenses > 0 ? pastExpenses : 4200;
 
-    let currentBalance = pastIncomes - pastExpenses;
+    const uniqueMonths = new Set<string>();
+    transactions.forEach((t) =>
+    {
+      if (t.data)
+      {
+        const monthKey = t.data.substring(0, 7); // extrai YYYY-MM
+        uniqueMonths.add(monthKey);
+      }
+    });
+
+    const monthCount = uniqueMonths.size;
+    const totalIncome = transactions.filter((t) => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
+    const totalExpense = transactions.filter((t) => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
+
+    let monthlyIncomeEstimate = 7500;
+    let monthlyExpenseEstimate = 4200;
+
+    if (monthCount >= 2)
+    {
+      monthlyIncomeEstimate = totalIncome / monthCount;
+      monthlyExpenseEstimate = totalExpense / monthCount;
+    }
+    else if (monthCount === 1)
+    {
+      monthlyIncomeEstimate = totalIncome > 0 ? totalIncome : 7500;
+      monthlyExpenseEstimate = totalExpense > 0 ? totalExpense : 4200;
+    }
+
+    let currentBalance = totalIncome - totalExpense;
     if (currentBalance <= 0)
     {
       currentBalance = 3500; // saldo inicial mínimo simulado caso o banco esteja limpo
@@ -356,6 +376,20 @@ export function VirtualCardsTab()
                   {/* Parte Inferior: Número do Cartão */}
                   <div className="relative z-10">
                     <p className="text-[15px] font-mono tracking-[0.2em] text-white text-center select-all">{card.numero}</p>
+                  </div>
+
+                  {/* Barra de Progresso do Limite (Glassmorphic) */}
+                  <div className="relative z-10 w-full space-y-0.5 my-0.5">
+                    <div className="flex justify-between text-[7px] text-white/50 font-bold tracking-wider uppercase">
+                      <span>Uso do Limite</span>
+                      <span>{limitPct.toFixed(0)}% ({fmt(spent)} / {fmt(card.limite)})</span>
+                    </div>
+                    <div className="h-0.5 w-full bg-white/10 backdrop-blur-md rounded-full overflow-hidden border border-white/5">
+                      <div
+                        className={`h-full rounded-full transition-all duration-700 ${limitPct > 90 ? 'bg-red-400' : limitPct > 70 ? 'bg-amber-400' : 'bg-white/85'}`}
+                        style={{ width: `${Math.min(limitPct, 100)}%` }}
+                      />
+                    </div>
                   </div>
 
                   {/* Rodapé: Titular, Exp e CVV */}

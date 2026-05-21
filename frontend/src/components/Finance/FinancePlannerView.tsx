@@ -200,8 +200,23 @@ export function FinancePlannerView() {
     return { ...cat, gasto, limite, pct };
   });
 
-  const handleAdd = async () => {
-    if (!form.descricao.trim() || !form.valor) return;
+  const handleAdd = async () =>
+  {
+    if (!form.descricao.trim() || !form.valor)
+    {
+      return;
+    }
+
+    if (form.tipo === 'despesa' && form.card_id)
+    {
+      const selectedCard = cards.find((c) => c.id === form.card_id);
+      if (selectedCard && selectedCard.status === 'bloqueado')
+      {
+        toast.error('Não é possível registrar despesas em cartões virtuais bloqueados');
+        return;
+      }
+    }
+
     await addTransaction({
       descricao: form.descricao.trim(),
       valor: parseFloat(form.valor),
@@ -310,6 +325,7 @@ export function FinancePlannerView() {
           setEditVal={setEditVal}
           handleSaveBudget={handleSaveBudget}
           setTab={setTab}
+          transactions={transactions}
         />
       )}
 
