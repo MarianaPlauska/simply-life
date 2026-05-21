@@ -15,7 +15,7 @@ export interface DashboardSlice
   markAllNotificacoesRead: () => Promise<void>
   fetchPreferencias: () => Promise<void>
   saveKeywords: (palavras: string[]) => Promise<void>
-  simularIngestao: (titulo: string) => Promise<void>
+  simularIngestao: (params: { sender?: string; subject: string; body?: string; origem?: string }) => Promise<void>
 }
 
 // anti-flood
@@ -135,31 +135,37 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
     }
   },
 
-  simularIngestao: async (titulo) =>
+  simularIngestao: async (params) =>
   {
     try
     {
-      // cria tarefa diretamente no supabase com origem 'webhook'
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
-      const { error } = await supabase
-        .from('tarefas_unificadas')
-        .insert({
-          user_id: uid,
-          titulo,
-          descricao: 'Conteúdo simulado para teste de triagem.',
-          origem: 'gmail',
-          status: 'pendente',
-          score_urgencia: 50,
-        })
-      if (error) throw error
+      const { ingestTasksIA } = await import('../../services/jarvisApi')
+      const response = await ingestTasksIA({
+        user_id: uid,
+        items: [{
+          sender: params.sender || 'Desconhecido',
+          subject: params.subject,
+          body: params.body || '',
+          origem: params.origem || 'email',
+        }],
+      })
       const { toast } = await import('sonner')
-      toast.success('E-mail simulado ingerido com sucesso!')
+      const result = response.results?.[0]
+      if (result?.success)
+      {
+        toast.success(`Triagem concluída — Score: ${result.score_urgencia} (${result.prioridade})`)
+      }
+      else
+      {
+        toast.error('Erro na triagem: ' + (result?.error || 'desconhecido'))
+      }
     }
     catch
     {
       const { toast } = await import('sonner')
-      toast.error('Erro ao simular ingestão')
+      toast.error('Erro ao conectar com o motor de triagem')
     }
   },
 })

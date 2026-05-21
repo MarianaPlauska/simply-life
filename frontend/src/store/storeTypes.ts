@@ -71,7 +71,22 @@ export interface AccessibilitySettings {
   keyboardShortcuts: boolean;
 }
 
-export interface Transaction {
+export interface VirtualCard
+{
+  id: string;
+  nome: string;
+  titular: string;
+  numero: string;
+  validade: string;
+  cvv: string;
+  limite: number;
+  tipo_gradiente: 'purple' | 'obsidian' | 'sunset' | 'ocean' | 'mint';
+  bandeira: 'visa' | 'mastercard';
+  status: 'ativo' | 'bloqueado';
+}
+
+export interface Transaction
+{
   id: number;
   descricao: string;
   categoria: string; // Legado
@@ -80,6 +95,7 @@ export interface Transaction {
   tipo: 'receita' | 'despesa';
   data: string;
   status_pagamento?: 'pago' | 'pendente' | 'agendado';
+  card_id?: string;
 }
 
 export interface BudgetLimit {

@@ -34,7 +34,7 @@ export function KanbanBoard() {
   const {
     tarefas, isLoading, error, fetchTarefas, moveTask, deleteTarefa,
     labels, fetchLabels, duplicateTarefa,
-    batchMove, batchDelete, batchPriority,
+    batchMove, batchDelete, batchPriority, updateTarefa,
   } = useTaskStore();
 
   const [devModalOpen, setDevModalOpen] = useState(false);
@@ -43,6 +43,7 @@ export function KanbanBoard() {
   const [viewMode, setViewMode] = useState<ViewMode>('board');
   const [tab, setTab] = useState<Tab>('active');
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
+  const [boardStyle, setBoardStyle] = useState<'classico' | 'temporal'>('classico');
 
   // filtros
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,6 +97,65 @@ export function KanbanBoard() {
     }
     return result;
   }, [tarefas, searchQuery, filterPrio, filterOrigem, filterLabel]);
+
+  const TEMPORAL_COLUMNS = useMemo(() =>
+  {
+    return [
+      { id: 'fazer_1h',     title: 'Fazer em 1h',   dotColor: 'bg-rose-500',    wipLimit: 3  },
+      { id: 'fazer_hoje',   title: 'Fazer Hoje',    dotColor: 'bg-amber-500',   wipLimit: 8  },
+      { id: 'nesta_semana', title: 'Nesta Semana',  dotColor: 'bg-blue-500',    wipLimit: 15 },
+    ] as const;
+  }, []);
+
+  const boardColumns = boardStyle === 'temporal' ? TEMPORAL_COLUMNS : COLUMNS;
+
+  const getColumnTasks = useCallback((colId: string) =>
+  {
+    if (boardStyle === 'temporal')
+    {
+      if (colId === 'fazer_1h')
+      {
+        return filtered.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) >= 60);
+      }
+      if (colId === 'fazer_hoje')
+      {
+        return filtered.filter((t) => t.status === 'em_progresso');
+      }
+      if (colId === 'nesta_semana')
+      {
+        return filtered.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) < 60);
+      }
+      return [];
+    }
+    else
+    {
+      return filtered.filter((t) => t.status === colId);
+    }
+  }, [filtered, boardStyle]);
+
+  const getGroupColumnTasks = useCallback((tasks: TarefaUnificada[], colId: string) =>
+  {
+    if (boardStyle === 'temporal')
+    {
+      if (colId === 'fazer_1h')
+      {
+        return tasks.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) >= 60);
+      }
+      if (colId === 'fazer_hoje')
+      {
+        return tasks.filter((t) => t.status === 'em_progresso');
+      }
+      if (colId === 'nesta_semana')
+      {
+        return tasks.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) < 60);
+      }
+      return [];
+    }
+    else
+    {
+      return tasks.filter((t) => t.status === colId);
+    }
+  }, [boardStyle]);
 
   // agrupa tarefas se houver seleção de agrupamento
   const groups = useMemo(() => {
@@ -190,7 +250,8 @@ export function KanbanBoard() {
     setActiveId(event.active.id as number);
   }
 
-  function handleDragEnd(event: DragEndEvent) {
+  function handleDragEnd(event: DragEndEvent)
+  {
     setActiveId(null);
     const { active, over } = event;
     if (!over)
@@ -199,12 +260,36 @@ export function KanbanBoard() {
     }
     const taskId = active.id as number;
     const newStatus = over.id as string;
-    const task = tarefas.find((t) => {
-      return t.id === taskId;
-    });
-    if (task && task.status !== newStatus)
+    
+    if (boardStyle === 'temporal')
     {
-      moveTask(taskId, newStatus);
+      const task = tarefas.find((t) => t.id === taskId);
+      if (task)
+      {
+        if (newStatus === 'fazer_1h')
+        {
+          updateTarefa(taskId, { status: 'pendente', score_urgencia: 85, prioridade: 'critica' });
+        }
+        else if (newStatus === 'fazer_hoje')
+        {
+          updateTarefa(taskId, { status: 'em_progresso', prioridade: 'alta' });
+        }
+        else if (newStatus === 'nesta_semana')
+        {
+          updateTarefa(taskId, { status: 'pendente', score_urgencia: 30, prioridade: 'media' });
+        }
+      }
+    }
+    else
+    {
+      const task = tarefas.find((t) =>
+      {
+        return t.id === taskId;
+      });
+      if (task && task.status !== newStatus)
+      {
+        moveTask(taskId, newStatus);
+      }
     }
   }
 
@@ -251,12 +336,14 @@ export function KanbanBoard() {
   }) : null;
 
   // renderiza as colunas do board organizadas com swimlanes (se agrupado) ou padrão
-  function renderBoard() {
+  function renderBoard()
+  {
     if (groups)
     {
       return (
         <div className="space-y-10">
-          {groups.map((g) => {
+          {groups.map((g) =>
+          {
             return (
               <div key={g.key} className="space-y-4">
                 <h2 className="text-[13px] font-semibold text-zinc-400 flex items-center gap-2 tracking-wider uppercase">
@@ -265,10 +352,9 @@ export function KanbanBoard() {
                   <span className="text-[10px] text-zinc-650 font-medium normal-case">({g.tasks.length})</span>
                 </h2>
                 <div className="flex items-start gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent">
-                  {COLUMNS.map((col) => {
-                    const columnTasks = g.tasks.filter((t) => {
-                      return t.status === col.id;
-                    });
+                  {boardColumns.map((col) =>
+                  {
+                    const columnTasks = getGroupColumnTasks(g.tasks, col.id);
                     return (
                       <KanbanColumn
                         key={col.id}
@@ -277,17 +363,21 @@ export function KanbanBoard() {
                         count={columnTasks.length}
                         wipLimit={col.wipLimit}
                         dotColor={col.dotColor}
+                        flat={boardStyle === 'temporal'}
                       >
-                        {columnTasks.map((tarefa) => {
+                        {columnTasks.map((tarefa) =>
+                        {
                           return (
                             <KanbanCard
                               key={tarefa.id}
                               tarefa={tarefa}
-                              onEdit={() => {
+                              onEdit={() =>
+                              {
                                 return handleEditCard(tarefa);
                               }}
                               onDelete={handleDeleteCard}
                               onDuplicate={handleDuplicate}
+                              flat={boardStyle === 'temporal'}
                             />
                           );
                         })}
@@ -309,10 +399,9 @@ export function KanbanBoard() {
         role="region" 
         aria-label="Quadro Kanban"
       >
-        {COLUMNS.map((col) => {
-          const columnTasks = filtered.filter((t) => {
-            return t.status === col.id;
-          });
+        {boardColumns.map((col) =>
+        {
+          const columnTasks = getColumnTasks(col.id);
           return (
             <KanbanColumn
               key={col.id}
@@ -321,6 +410,7 @@ export function KanbanBoard() {
               count={columnTasks.length}
               wipLimit={col.wipLimit}
               dotColor={col.dotColor}
+              flat={boardStyle === 'temporal'}
             >
               {isLoading && columnTasks.length === 0 && (
                 <div className="flex flex-col items-center gap-2.5 py-12 text-center">
@@ -340,16 +430,19 @@ export function KanbanBoard() {
                   </span>
                 </div>
               )}
-              {columnTasks.map((tarefa) => {
+              {columnTasks.map((tarefa) =>
+              {
                 return (
                   <KanbanCard
                     key={tarefa.id}
                     tarefa={tarefa}
-                    onEdit={() => {
+                    onEdit={() =>
+                    {
                       return handleEditCard(tarefa);
                     }}
                     onDelete={handleDeleteCard}
                     onDuplicate={handleDuplicate}
+                    flat={boardStyle === 'temporal'}
                   />
                 );
               })}
@@ -463,6 +556,38 @@ export function KanbanBoard() {
                     title="Cronograma Gantt"
                   >
                     <CalendarDays className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* seletor de estilo do quadro (clássico / temporal) */}
+              {viewMode === 'board' && tab === 'active' && (
+                <div className="flex items-center gap-0.5 bg-zinc-900/40 p-0.5 rounded-lg border border-zinc-900">
+                  <button
+                    onClick={() =>
+                    {
+                      return setBoardStyle('classico');
+                    }}
+                    className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
+                      boardStyle === 'classico'
+                        ? 'bg-zinc-900 text-zinc-200'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    Clássico
+                  </button>
+                  <button
+                    onClick={() =>
+                    {
+                      return setBoardStyle('temporal');
+                    }}
+                    className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
+                      boardStyle === 'temporal'
+                        ? 'bg-zinc-900 text-zinc-200'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    Temporal
                   </button>
                 </div>
               )}

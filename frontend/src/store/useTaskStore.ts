@@ -23,7 +23,7 @@ import { createNewsSlice, type NewsSlice } from './slices/newsSlice';
 
 
 // re-exporta types para compatibilidade
-export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, BudgetLimit, FinancialGoal, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
+export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, BudgetLimit, FinancialGoal, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
 export type { AnalyticsReport, DashboardReportCard, TrendPoint, RankingItem, PeriodStats } from './slices/relatoriosSlice';
 
 export type TaskStore =
@@ -82,6 +82,7 @@ export const useTaskStore = create<TaskStore>()(
         userId: state.userId,
         onboardingSteps: state.onboardingSteps,
         onboardingDismissed: state.onboardingDismissed,
+        cards: state.cards,
       }),
       onRehydrateStorage: () => () =>
       {

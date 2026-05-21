@@ -12,9 +12,10 @@ interface KanbanColumnProps
   wipLimit: number;
   dotColor: string;
   children: ReactNode;
+  flat?: boolean;
 }
 
-export function KanbanColumn({ id, title, count, wipLimit, dotColor, children }: KanbanColumnProps)
+export function KanbanColumn({ id, title, count, wipLimit, dotColor, children, flat }: KanbanColumnProps)
 {
   const { setNodeRef, isOver } = useDroppable({ id });
   const overLimit = count > wipLimit;
@@ -42,15 +43,15 @@ export function KanbanColumn({ id, title, count, wipLimit, dotColor, children }:
       aria-label={`Coluna ${title}, ${count} de ${wipLimit} tarefas`}
       className={[
         'w-80 shrink-0 flex flex-col transition-all duration-200',
-        isOver ? 'bg-violet-500/[0.02] rounded-xl' : 'bg-transparent',
+        flat ? 'border-none bg-transparent' : isOver ? 'bg-violet-500/[0.02] rounded-xl' : 'bg-transparent',
       ].join(' ')}
     >
       {/* cabeçalho da coluna */}
-      <div className="sticky top-0 z-10 bg-zinc-950/90 backdrop-blur-md py-3.5 px-1">
+      <div className={`sticky top-0 z-10 backdrop-blur-md py-3.5 px-1 ${flat ? 'bg-transparent' : 'bg-zinc-950/90'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-            <h3 className="text-[13px] font-semibold text-zinc-200">{title}</h3>
+            <h3 className={`text-[13px] font-semibold ${flat ? 'text-zinc-400 font-medium' : 'text-zinc-200'}`}>{title}</h3>
           </div>
           <div className="flex items-center gap-2">
             <span
@@ -71,14 +72,16 @@ export function KanbanColumn({ id, title, count, wipLimit, dotColor, children }:
         </div>
 
         {/* indicador de progresso do wip limit (linha ultra fina de 2px) */}
-        <div className="mt-2.5 h-[2px] rounded-full bg-zinc-900 overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-500 ease-out ${
-              overLimit ? 'bg-red-500' : 'bg-violet-500/60'
-            }`}
-            style={{ width: `${Math.min((count / wipLimit) * 100, 100)}%` }}
-          />
-        </div>
+        {!flat && (
+          <div className="mt-2.5 h-[2px] rounded-full bg-zinc-900 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ease-out ${
+                overLimit ? 'bg-red-500' : 'bg-violet-500/60'
+              }`}
+              style={{ width: `${Math.min((count / wipLimit) * 100, 100)}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* área para rolagem de tarefas */}

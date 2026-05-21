@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import {
-  Settings2, ChevronLeft, ChevronRight, Eye, List, Target, X, Plus, Wallet, CheckCircle2, AlertCircle, CalendarClock
+  Settings2, ChevronLeft, ChevronRight, Eye, List, Target, X, Plus, Wallet, CheckCircle2, AlertCircle, CalendarClock, CreditCard
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
@@ -10,12 +10,13 @@ import { FinanceCategories } from './FinanceCategories';
 import { FinanceOverviewTab } from './FinanceOverviewTab';
 import { FinanceTransactionsTab } from './FinanceTransactionsTab';
 import { FinanceGoalsTab } from './FinanceGoalsTab';
+import { VirtualCardsTab } from './VirtualCardsTab';
 
 const ICON_MAP: Record<string, any> = {
   Wallet, Target
 };
 
-type PlannerTab = 'visao-geral' | 'tabela' | 'metas';
+type PlannerTab = 'visao-geral' | 'tabela' | 'cartoes' | 'metas';
 
 const STATUS_CONFIG = {
   pago: { label: 'Pago', icon: CheckCircle2, text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
@@ -40,6 +41,7 @@ export function FinancePlannerView() {
   const budgetLimits = useTaskStore((s) => s.budgetLimits);
   const setBudgetLimit = useTaskStore((s) => s.setBudgetLimit);
   const fetchTransactions = useTaskStore((s) => s.fetchTransactions);
+  const cards = useTaskStore((s) => s.cards) || [];
 
   const categories = useTaskStore((s) => s.categories);
   const fetchCategories = useTaskStore((s) => s.fetchCategories);
@@ -59,7 +61,8 @@ export function FinancePlannerView() {
     categoria: '', 
     categoria_id: undefined as number | undefined,
     data: '', 
-    status_pagamento: 'pendente' 
+    status_pagamento: 'pendente',
+    card_id: undefined as string | undefined
   });
   const [goalForm, setGoalForm] = useState({ titulo: '', valor_alvo: '', icone: 'Target', cor: '#8b5cf6' });
   const [monthOffset, setMonthOffset] = useState(0);
@@ -191,8 +194,9 @@ export function FinancePlannerView() {
       categoria_id: form.categoria_id,
       data: form.data || new Date().toISOString().split('T')[0],
       status_pagamento: form.status_pagamento as any,
+      card_id: form.tipo === 'despesa' ? form.card_id : undefined,
     });
-    setForm({ descricao: '', valor: '', tipo: 'despesa', categoria: '', categoria_id: undefined, data: '', status_pagamento: 'pendente' });
+    setForm({ descricao: '', valor: '', tipo: 'despesa', categoria: '', categoria_id: undefined, data: '', status_pagamento: 'pendente', card_id: undefined });
     setShowModal(false);
     registerInteraction('financeiro');
     toast.success(form.tipo === 'receita' ? 'Receita adicionada' : 'Despesa registrada');
@@ -246,6 +250,7 @@ export function FinancePlannerView() {
           {([
             { id: 'visao-geral' as PlannerTab, label: 'Visão Geral', icon: Eye },
             { id: 'tabela' as PlannerTab, label: 'Lançamentos', icon: List },
+            { id: 'cartoes' as PlannerTab, label: 'Cartões & Caixa', icon: CreditCard },
             { id: 'metas' as PlannerTab, label: 'Metas', icon: Target },
           ]).map(({ id, label, icon: TIcon }) => (
             <button
@@ -319,77 +324,177 @@ export function FinancePlannerView() {
         />
       )}
 
+      {/* ═══════ CARTÕES & CAIXA ═══════ */}
+      {tab === 'cartoes' && (
+        <VirtualCardsTab />
+      )}
+
       {/* FAB */}
       <button onClick={() => setShowModal(true)} className="fixed bottom-8 right-8 flex items-center gap-2 px-5 py-3 rounded-full bg-white text-zinc-900 text-[13px] font-semibold shadow-lg shadow-black/30 hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 z-50">
         <Plus className="w-[18px] h-[18px]" />Novo Lançamento
       </button>
 
-      {/* Modal */}
+      {/* Panel Lateral deslizante (Side Panel) de Novo Lançamento */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4" onClick={() => setShowModal(false)}>
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-800/50 rounded-2xl p-6 space-y-5" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-white">Novo Lançamento</h3>
-              <button onClick={() => setShowModal(false)} className="p-1 hover:bg-zinc-800 rounded-lg transition-colors"><X className="w-4 h-4 text-zinc-500" /></button>
-            </div>
-            <div className="flex gap-2">
-              <button type="button" onClick={() => setForm({ ...form, tipo: 'despesa' })} className={`flex-1 py-2 rounded-xl text-[12px] font-medium transition-colors ${form.tipo === 'despesa' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-zinc-800/40 text-zinc-500 border border-zinc-700/30'}`}>Despesa</button>
-              <button type="button" onClick={() => setForm({ ...form, tipo: 'receita' })} className={`flex-1 py-2 rounded-xl text-[12px] font-medium transition-colors ${form.tipo === 'receita' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-zinc-800/40 text-zinc-500 border border-zinc-700/30'}`}>Receita</button>
-            </div>
-            <div>
-              <label className="block text-[11px] font-medium text-zinc-500 mb-1.5">Descrição</label>
-              <input type="text" placeholder="Ex: Aluguel, Salário..." value={form.descricao} onChange={(e) => setForm({ ...form, descricao: e.target.value })} className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-xl px-4 py-2.5 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/40 transition" autoFocus />
-            </div>
-            <div>
-              <label className="block text-[11px] font-medium text-zinc-500 mb-1.5">Valor (R$)</label>
-              <input type="number" min="0.01" step="0.01" placeholder="0,00" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-xl px-4 py-2.5 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/40 transition font-mono" />
-            </div>
-            {form.tipo === 'despesa' && (
-              <>
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowModal(false)} />
+          <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-zinc-950/95 border-l border-white/[0.04] shadow-2xl backdrop-blur-xl p-6 flex flex-col justify-between transform transition-all duration-300" onClick={(e) => e.stopPropagation()}>
+            <div className="space-y-6 overflow-y-auto pr-1 scrollbar-none flex-1 pb-6">
+              <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
                 <div>
-                  <label className="block text-[11px] font-medium text-zinc-500 mb-1.5">Categoria</label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {activeCategories.filter(c => c.tipo === 'despesa').map((cat) => {
-                      const CatIcon = ICON_MAP[cat.icone] || Wallet;
-                      const selected = form.categoria_id === cat.id;
-                      return (
-                        <button key={cat.id} type="button" onClick={() => setForm({ ...form, categoria: cat.nome, categoria_id: cat.id })} className={`flex flex-col items-center gap-1 py-2.5 rounded-xl text-[10px] transition-colors ${selected ? 'bg-zinc-700/40 border border-zinc-600 shadow-lg' : 'bg-zinc-800/30 border border-zinc-800/30 hover:bg-zinc-800/60'}`}>
-                          <CatIcon className={`w-4 h-4 ${selected ? 'text-white' : 'text-zinc-500'}`} style={{ color: selected ? cat.cor : undefined }} />
-                          <span className={selected ? 'text-zinc-200 font-bold' : 'text-zinc-500'}>{cat.nome.split(' ')[0]}</span>
-                        </button>
-                      );
-                    })}
-                    <button type="button" onClick={() => setShowCatModal(true)} className="flex flex-col items-center justify-center gap-1 py-2.5 rounded-xl text-[10px] bg-zinc-800/30 border border-dashed border-zinc-700 text-zinc-500 hover:text-zinc-300 transition-colors">
-                      <Plus className="w-4 h-4" />
-                      <span>Nova</span>
-                    </button>
-                  </div>
+                  <h3 className="text-[14px] font-bold text-white tracking-wide uppercase">Novo Lançamento</h3>
+                  <p className="text-[10px] text-zinc-500 font-medium">Insira despesas ou receitas no Simply-Life</p>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-medium text-zinc-500 mb-1.5">Status</label>
-                  <div className="flex gap-2">
-                    {(['pendente', 'pago', 'agendado'] as const).map((st) => {
-                      const cfg = STATUS_CONFIG[st];
-                      const StIcon = cfg.icon;
-                      return (
-                        <button key={st} type="button" onClick={() => setForm({ ...form, status_pagamento: st })} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[11px] font-medium transition-colors ${form.status_pagamento === st ? `${cfg.bg} ${cfg.text} border ${cfg.border}` : 'bg-zinc-800/40 text-zinc-500 border border-zinc-700/30'}`}>
-                          <StIcon className="w-3 h-3" />{cfg.label}
-                        </button>
-                      );
-                    })}
+                <button onClick={() => setShowModal(false)} className="p-1 hover:bg-zinc-800 rounded-lg transition-colors">
+                  <X className="w-4 h-4 text-zinc-500" />
+                </button>
+              </div>
+
+              {/* Tipo: Despesa / Receita */}
+              <div className="flex gap-2 p-1 bg-zinc-900/60 border border-white/[0.04] rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, tipo: 'despesa' })}
+                  className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${form.tipo === 'despesa' ? 'bg-red-500/10 text-red-400 border border-red-500/20 shadow-md' : 'text-zinc-500 hover:text-zinc-400'}`}
+                >
+                  Despesa
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, tipo: 'receita' })}
+                  className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${form.tipo === 'receita' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-md' : 'text-zinc-500 hover:text-zinc-400'}`}
+                >
+                  Receita
+                </button>
+              </div>
+
+              {/* Descrição */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Descrição</label>
+                <input
+                  type="text"
+                  placeholder="Ex: Assinatura OpenAI, Freelance..."
+                  value={form.descricao}
+                  onChange={(e) => setForm({ ...form, descricao: e.target.value })}
+                  className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white placeholder:text-zinc-650 outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/40 transition"
+                  autoFocus
+                />
+              </div>
+
+              {/* Valor */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Valor (R$)</label>
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0,00"
+                  value={form.valor}
+                  onChange={(e) => setForm({ ...form, valor: e.target.value })}
+                  className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white placeholder:text-zinc-650 outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/40 transition font-mono"
+                />
+              </div>
+
+              {form.tipo === 'despesa' && (
+                <>
+                  {/* Categoria */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Categoria</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {activeCategories.filter(c => c.tipo === 'despesa').map((cat) =>
+                      {
+                        const CatIcon = ICON_MAP[cat.icone] || Wallet;
+                        const selected = form.categoria_id === cat.id;
+                        return (
+                          <button
+                            key={cat.id}
+                            type="button"
+                            onClick={() => setForm({ ...form, categoria: cat.nome, categoria_id: cat.id })}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-medium transition-all ${selected ? 'bg-white/[0.04] border border-white/[0.12] shadow-lg' : 'bg-zinc-900/30 border border-transparent hover:bg-zinc-900/60'}`}
+                          >
+                            <CatIcon className="w-3.5 h-3.5" style={{ color: cat.cor }} />
+                            <span className={selected ? 'text-zinc-200 font-bold' : 'text-zinc-500'}>{cat.nome.split(' ')[0]}</span>
+                          </button>
+                        );
+                      })}
+                      <button
+                        type="button"
+                        onClick={() => setShowCatModal(true)}
+                        className="flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] bg-zinc-900/30 border border-dashed border-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Nova</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
-            <div>
-              <label className="block text-[11px] font-medium text-zinc-500 mb-1.5">Data</label>
-              <input type="date" value={form.data} onChange={(e) => setForm({ ...form, data: e.target.value })} className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-xl px-4 py-2.5 text-[13px] text-white outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/40 transition" />
+
+                  {/* Cartão Virtual */}
+                  <div className="space-y-2">
+                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Pagar com Cartão Virtual</label>
+                    <select
+                      value={form.card_id || ''}
+                      onChange={(e) => setForm({ ...form, card_id: e.target.value || undefined })}
+                      className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/40 transition"
+                    >
+                      <option value="" className="bg-zinc-950 text-zinc-400">Nenhum (Dinheiro/PIX)</option>
+                      {cards.map((c) =>
+                      {
+                        return (
+                          <option key={c.id} value={c.id} className="bg-zinc-950 text-white">
+                            {c.nome} ({c.numero.slice(-4)})
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  {/* Status */}
+                  <div className="space-y-1.5">
+                    <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Status de Pagamento</label>
+                    <div className="flex gap-2">
+                      {(['pendente', 'pago', 'agendado'] as const).map((st) =>
+                      {
+                        const cfg = STATUS_CONFIG[st];
+                        const StIcon = cfg.icon;
+                        return (
+                          <button
+                            key={st}
+                            type="button"
+                            onClick={() => setForm({ ...form, status_pagamento: st })}
+                            className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold transition-colors ${form.status_pagamento === st ? `${cfg.bg} ${cfg.text} border ${cfg.border}` : 'bg-zinc-900/40 text-zinc-500 border border-white/[0.02]'}`}
+                          >
+                            <StIcon className="w-3 h-3" />{cfg.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Data */}
+              <div className="space-y-1.5">
+                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Data do Lançamento</label>
+                <input
+                  type="date"
+                  value={form.data}
+                  onChange={(e) => setForm({ ...form, data: e.target.value })}
+                  className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white outline-none focus:ring-1 focus:ring-violet-500/40 transition"
+                />
+              </div>
             </div>
-            <button onClick={handleAdd} disabled={!form.descricao.trim() || !form.valor} className="w-full py-2.5 rounded-xl bg-white text-zinc-900 text-[13px] font-semibold hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-              Adicionar {form.tipo === 'receita' ? 'Receita' : 'Despesa'}
-            </button>
+
+            <div className="border-t border-white/[0.04] pt-4 mt-auto">
+              <button
+                onClick={handleAdd}
+                disabled={!form.descricao.trim() || !form.valor}
+                className="w-full py-2.5 rounded-xl bg-white text-zinc-950 text-[12px] font-bold hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+              >
+                Salvar {form.tipo === 'receita' ? 'Receita' : 'Despesa'}
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Goal Modal */}

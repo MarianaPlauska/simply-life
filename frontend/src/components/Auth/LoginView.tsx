@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { Zap, Mail, Lock, Eye, EyeOff, UserPlus, Globe } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,21 +22,7 @@ function GoogleLogo({ className }: { className?: string })
   );
 }
 
-/* ── Spotlight hook ─────────────────────────────────────────── */
-function useSpotlight()
-{
-  const [pos, setPos] = useState({ x: -1000, y: -1000 });
-  const raf = useRef(0);
-  const onMouseMove = useCallback((e: React.MouseEvent) =>
-  {
-    cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() =>
-    {
-      setPos({ x: e.clientX, y: e.clientY });
-    });
-  }, []);
-  return { pos, onMouseMove };
-}
+
 
 const AUTH_TABS_KEYS = [
   { value: 'login' as const, key: 'login.tab_login' },
@@ -48,7 +34,6 @@ export function LoginView() {
   const login = useTaskStore((s) => s.login);
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn);
   const navigate = useNavigate();
-  const { pos, onMouseMove } = useSpotlight();
   const { t, i18n } = useTranslation();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -223,27 +208,40 @@ export function LoginView() {
 
   return (
     <div
-      onMouseMove={onMouseMove}
       className="relative h-screen w-screen bg-zinc-900 overflow-hidden flex items-center justify-center"
     >
-      {/* Spotlight */}
-      <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+      {/* Spotlight com animação flutuante e sutil */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <style>{`
+          @keyframes float-ambient-1
+          {
+            0% { transform: translate(-10%, -10%) scale(1); }
+            50% { transform: translate(10%, 10%) scale(1.1); }
+            100% { transform: translate(-10%, -10%) scale(1); }
+          }
+          @keyframes float-ambient-2
+          {
+            0% { transform: translate(10%, 10%) scale(1.05); }
+            50% { transform: translate(-10%, -10%) scale(0.95); }
+            100% { transform: translate(10%, 10%) scale(1.05); }
+          }
+        `}</style>
         <div
-          className="absolute w-[800px] h-[800px] rounded-full blur-[140px] will-change-transform"
+          className="absolute w-[800px] h-[800px] rounded-full blur-[140px] will-change-transform opacity-70"
           style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(109,40,217,0.07) 45%, transparent 75%)',
-            left: pos.x - 400,
-            top: pos.y - 400,
-            transition: 'left 0.15s ease-out, top 0.15s ease-out',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.14) 0%, rgba(109,40,217,0.05) 50%, transparent 80%)',
+            left: 'calc(50% - 400px)',
+            top: 'calc(50% - 450px)',
+            animation: 'float-ambient-1 25s ease-in-out infinite',
           }}
         />
         <div
-          className="absolute w-[550px] h-[550px] rounded-full blur-[140px] will-change-transform"
+          className="absolute w-[600px] h-[600px] rounded-full blur-[140px] will-change-transform opacity-60"
           style={{
-            background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 65%)',
-            left: pos.x - 200,
-            top: pos.y - 350,
-            transition: 'left 0.25s ease-out, top 0.25s ease-out',
+            background: 'radial-gradient(circle, rgba(236,72,153,0.07) 0%, transparent 65%)',
+            left: 'calc(50% - 300px)',
+            top: 'calc(50% - 250px)',
+            animation: 'float-ambient-2 30s ease-in-out infinite',
           }}
         />
       </div>

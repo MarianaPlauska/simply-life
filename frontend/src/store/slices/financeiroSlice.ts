@@ -1,6 +1,6 @@
 // slice financeiro — despesas, transações, orçamento via supabase
 import type { StateCreator } from 'zustand'
-import type { Despesa, Transaction, BudgetLimit, Category, FinancialGoal } from '../storeTypes'
+import type { Despesa, Transaction, BudgetLimit, Category, FinancialGoal, VirtualCard } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
 
 export interface FinanceiroSlice
@@ -10,6 +10,7 @@ export interface FinanceiroSlice
   categories: Category[]
   budgetLimits: BudgetLimit[]
   financialGoals: FinancialGoal[]
+  cards: VirtualCard[]
   fetchDespesas: () => Promise<void>
   addDespesa: (dados: { descricao: string; categoria: string; valor: number }) => Promise<void>
   fetchTransactions: () => Promise<void>
@@ -23,6 +24,10 @@ export interface FinanceiroSlice
   fetchGoals: () => Promise<void>
   addGoal: (g: Omit<FinancialGoal, 'id'>) => Promise<void>
   updateGoalProgress: (id: number, valor: number) => Promise<void>
+  addCard: (card: Omit<VirtualCard, 'id'>) => void
+  removeCard: (id: string) => void
+  toggleCardStatus: (id: string) => void
+  updateCardLimit: (id: string, limite: number) => void
 }
 
 export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], FinanceiroSlice> = (set) => ({
@@ -39,6 +44,32 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     { categoria: 'saude', limite: 500 },
     { categoria: 'educacao', limite: 400 },
     { categoria: 'compras', limite: 500 },
+  ],
+  cards: [
+    {
+      id: 'card_1',
+      nome: 'Assinaturas Dev',
+      titular: 'MARIANA PLAUSKA',
+      numero: '•••• •••• •••• 8432',
+      validade: '12/31',
+      cvv: '123',
+      limite: 2500,
+      tipo_gradiente: 'purple',
+      bandeira: 'mastercard',
+      status: 'ativo'
+    },
+    {
+      id: 'card_2',
+      nome: 'AWS & GCP Cloud',
+      titular: 'MARIANA PLAUSKA',
+      numero: '•••• •••• •••• 9015',
+      validade: '06/30',
+      cvv: '456',
+      limite: 8000,
+      tipo_gradiente: 'obsidian',
+      bandeira: 'visa',
+      status: 'ativo'
+    }
   ],
 
   fetchDespesas: async () =>
@@ -84,11 +115,19 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         .order('data_gasto', { ascending: false })
       if (error) throw error
       set({
-        transactions: (data || []).map((d: any) => ({
-          ...d,
-          data: d.data_gasto,
-          tipo: d.tipo || 'despesa',
-        })),
+        transactions: (data || []).map((d: any) =>
+        {
+          const cardMatch = d.descricao?.match(/\[card:(card_\d+)\]/)
+          const card_id = cardMatch ? cardMatch[1] : undefined
+          const cleanDesc = cardMatch ? d.descricao.replace(/\s*\[card:card_\d+\]/, '').trim() : d.descricao
+          return {
+            ...d,
+            descricao: cleanDesc,
+            data: d.data_gasto,
+            tipo: d.tipo || 'despesa',
+            card_id,
+          }
+        }),
       })
     }
     catch { /* offline */ }
@@ -104,11 +143,12 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     }
     try
     {
+      const descFinal = t.card_id ? `${t.descricao} [card:${t.card_id}]` : t.descricao
       const { data, error } = await supabase
         .from('despesas')
         .insert({
           user_id: uid,
-          descricao: t.descricao,
+          descricao: descFinal,
           categoria: t.categoria,
           categoria_id: t.categoria_id,
           valor: t.valor,
@@ -119,7 +159,21 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         .select()
         .single()
       if (error) throw error
-      if (data) set((s) => ({ transactions: [{ ...data, data: data.data_gasto, tipo: t.tipo }, ...s.transactions] }))
+      if (data)
+      {
+        set((s) => ({
+          transactions: [
+            {
+              ...data,
+              descricao: t.descricao,
+              data: data.data_gasto,
+              tipo: t.tipo,
+              card_id: t.card_id,
+            },
+            ...s.transactions,
+          ]
+        }))
+      }
     }
     catch (e)
     {
@@ -228,5 +282,49 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     set((s) => ({
       financialGoals: s.financialGoals.map((g) => g.id === id ? { ...g, valor_atual: valor, concluida: valor >= g.valor_alvo } : g)
     }))
+  },
+
+  addCard: (card) =>
+  {
+    set((s) =>
+    {
+      const newCard = {
+        ...card,
+        id: 'card_' + Date.now(),
+      }
+      return {
+        cards: [...s.cards, newCard]
+      }
+    })
+  },
+
+  removeCard: (id) =>
+  {
+    set((s) =>
+    {
+      return {
+        cards: s.cards.filter((c) => c.id !== id)
+      }
+    })
+  },
+
+  toggleCardStatus: (id) =>
+  {
+    set((s) =>
+    {
+      return {
+        cards: s.cards.map((c) => c.id === id ? { ...c, status: (c.status === 'ativo' ? 'bloqueado' : 'ativo') } : c)
+      }
+    })
+  },
+
+  updateCardLimit: (id, limite) =>
+  {
+    set((s) =>
+    {
+      return {
+        cards: s.cards.map((c) => c.id === id ? { ...c, limite } : c)
+      }
+    })
   },
 })

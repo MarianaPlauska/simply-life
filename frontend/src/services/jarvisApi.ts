@@ -73,3 +73,55 @@ export async function fetchNewsIA(topics: string[]): Promise<{
   if (!res.ok) throw new Error(`fetch-news: ${res.status}`);
   return res.json();
 }
+
+// ── Motor de Triagem Ativa ──
+// envia itens brutos para o backend processar via Gemini IA + Score Matemático
+export interface IngestItem
+{
+  sender?: string;
+  subject?: string;
+  body?: string;
+  origem?: string;
+  created_at?: string;
+}
+
+export interface IngestResult
+{
+  success: boolean;
+  id?: number;
+  titulo?: string;
+  score_urgencia?: number;
+  prioridade?: string;
+  breakdown?: {
+    base: number;
+    context: number;
+    temporal: number;
+    origem: string;
+  };
+  ai_flags?: {
+    is_urgent: boolean;
+    is_vip: boolean;
+    is_bug: boolean;
+    is_noise: boolean;
+    acao: string;
+  };
+  error?: string;
+}
+
+export async function ingestTasksIA(params: {
+  items: IngestItem[];
+  user_id: string;
+}): Promise<{
+  processed: number;
+  results: IngestResult[];
+}>
+{
+  const res = await fetch(`${API_BASE}/ingest-tasks`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) throw new Error(`ingest-tasks: ${res.status}`);
+  return res.json();
+}

@@ -20,8 +20,16 @@ export function OnboardingChecklist ()
   const totalSteps     = ONBOARDING_STEPS.length;
   const progressPct    = (completedCount / totalSteps) * 100;
 
-  // esconde se dismissido, completo, ou se o usuário já tem sessão ativa (não é novo)
-  if ( dismissed || completedCount >= totalSteps || (userId && userId.length > 0) )
+  const tarefas        = useTaskStore((s) => s.tarefas);
+  const transactions   = useTaskStore((s) => s.transactions);
+  const habitos        = useTaskStore((s) => s.habitos);
+
+  const isReturningUser = (tarefas && tarefas.length > 0) ||
+                          (transactions && transactions.length > 0) ||
+                          (habitos && habitos.length > 0);
+
+  // esconde se dispensado, completo, se já tem sessão ativa ou se já possui dados existentes (não é novo usuário)
+  if ( dismissed || completedCount >= totalSteps || (userId && userId.length > 0) || isReturningUser )
   {
     return null;
   }

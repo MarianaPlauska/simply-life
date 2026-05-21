@@ -13,10 +13,10 @@ export interface TarefasSlice
   arquivoLoading: boolean
   fetchTarefas: () => Promise<void>
   createTarefa: (titulo: string, notas?: string) => Promise<void>
-  updateTarefa: (id: number, dados: { titulo?: string; status?: string; notas_locais?: string; prioridade?: string; versao?: number }) => Promise<void>
+  updateTarefa: (id: number, dados: { titulo?: string; status?: string; notas_locais?: string; prioridade?: string; versao?: number; score_urgencia?: number }) => Promise<void>
   deleteTarefa: (id: number) => Promise<void>
   moveTask: (taskId: number, newStatus: string) => void
-  simularIngestao: (titulo: string) => Promise<void>
+  simularIngestao: (params: { sender?: string; subject: string; body?: string; origem?: string }) => Promise<void>
   duplicateTarefa: (id: number) => Promise<void>
   fetchArquivo: () => Promise<void>
   restaurarTarefa: (id: number) => Promise<void>
@@ -128,16 +128,23 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     supabase.from('tarefas_unificadas').update({ status: newStatus }).eq('id', taskId).then(() => {})
   },
 
-  simularIngestao: async (titulo) =>
+  simularIngestao: async (params) =>
   {
     try
     {
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
-      await supabase.from('tarefas_unificadas').insert({
-        user_id: uid, titulo, descricao: titulo,
-        origem: 'gmail_mock', status: 'pendente', score_urgencia: 50,
+      const { ingestTasksIA } = await import('../../services/jarvisApi')
+      await ingestTasksIA({
+        user_id: uid,
+        items: [{
+          sender: params.sender || 'Desconhecido',
+          subject: params.subject,
+          body: params.body || '',
+          origem: params.origem || 'email',
+        }],
       })
+      // recarrega tarefas do banco para pegar a nova com score calculado
       get().fetchTarefas()
     }
     catch (e) { console.error('simularIngestao:', e) }

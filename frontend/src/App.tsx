@@ -16,7 +16,7 @@ import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { OnboardingChecklist } from './components/Onboarding/OnboardingChecklist';
-import { CalendarDays, Briefcase, Rocket } from 'lucide-react';
+import { Briefcase, Rocket } from 'lucide-react';
 
 // Lazy-loaded views
 const DashboardHome    = lazy(() => import('./components/layout/DashboardHome').then((m) => ({ default: m.DashboardHome })));
@@ -34,6 +34,7 @@ const DriveVaultView   = lazy(() => import('./components/Drive/DriveVaultView').
 const ProfileView      = lazy(() => import('./components/Auth/ProfileView').then((m) => ({ default: m.ProfileView })));
 const PreferenciasIA   = lazy(() => import('./components/Settings/PreferenciasIA').then((m) => ({ default: m.PreferenciasIA })));
 const RelatoriosView   = lazy(() => import('./components/Relatorios/RelatoriosView').then((m) => ({ default: m.RelatoriosView })));
+const SuperhumanView   = lazy(() => import('./components/kanban/SuperhumanView').then((m) => ({ default: m.SuperhumanView })));
 
 function PageLoader() {
   return (
@@ -159,9 +160,7 @@ function AppLayout() {
               <Route path="planner" element={<ErrorBoundary fallbackTitle="Erro no Planner"><FinancePlannerView /></ErrorBoundary>} />
               <Route path="calendario" element={<ErrorBoundary fallbackTitle="Erro no Calendário"><CalendarView /></ErrorBoundary>} />
               <Route path="drive" element={<ErrorBoundary fallbackTitle="Erro no Drive"><DriveVaultView /></ErrorBoundary>} />
-              <Route path="superhuman" element={
-                <PlaceholderView title="Agenda" subtitle="Conecte sua conta Google para sincronizar eventos e compromissos." icon={CalendarDays} />
-              } />
+              <Route path="superhuman" element={<ErrorBoundary fallbackTitle="Erro no Superhuman"><SuperhumanView /></ErrorBoundary>} />
               <Route path="inteligencia" element={<PreferenciasIA />} />
               <Route path="relatorios" element={<ErrorBoundary fallbackTitle="Erro nos Relatórios"><RelatoriosView /></ErrorBoundary>} />
               <Route path="carreira" element={

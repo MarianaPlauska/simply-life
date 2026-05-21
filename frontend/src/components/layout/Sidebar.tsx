@@ -28,6 +28,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, moduleKey: 'dashboard' },
       { id: 'kanban', label: 'Kanban', icon: KanbanSquare, moduleKey: 'kanban' },
+      { id: 'superhuman', label: 'Foco Superhuman', icon: Zap, moduleKey: 'superhuman' },
       { id: 'foco', label: 'Modo Foco', icon: Crosshair, moduleKey: 'foco' },
       { id: 'relatorios', label: 'Relatórios', icon: BarChart3, moduleKey: 'relatorios' },
       { id: 'calendario', label: 'Calendario', icon: CalendarDays, moduleKey: 'calendario' },
