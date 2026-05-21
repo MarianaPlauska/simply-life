@@ -14,75 +14,8 @@ import { fadeUp, staggerContainer, staggerChild } from './DashboardPrimitives';
    pelo JARVIS baseado nas preferências do usuário.
    ══════════════════════════════════════════════════════════════ */
 
-interface NewsItem
-{
-  id: string;
-  titulo: string;
-  resumo: string;
-  fonte: string;
-  url: string;
-  topico: string;
-  timestamp: Date;
-  relevancia: number; // 0-100
-  imagem?: string;
-}
-
-// dados mock — depois será populado por Edge Function
-const MOCK_NEWS: NewsItem[] = [
-  {
-    id: '1',
-    titulo: 'React 19 ganha suporte nativo a Server Components no Vite',
-    resumo: 'A equipe do React anunciou integração oficial de RSC com Vite, eliminando a necessidade de frameworks como Next.js para SSR.',
-    fonte: 'Dev.to',
-    url: '#',
-    topico: 'React',
-    timestamp: new Date(Date.now() - 2 * 3600000),
-    relevancia: 95,
-  },
-  {
-    id: '2',
-    titulo: 'Supabase lança Edge Functions v3 com suporte a WebSockets',
-    resumo: 'Nova versão permite conexões persistentes, ideal para real-time features sem Realtime channels.',
-    fonte: 'Supabase Blog',
-    url: '#',
-    topico: 'Supabase',
-    timestamp: new Date(Date.now() - 5 * 3600000),
-    relevancia: 90,
-  },
-  {
-    id: '3',
-    titulo: 'Groq ultrapassa 1 trilhão de tokens/dia com Llama 3.1',
-    resumo: 'Infraestrutura LPU da Groq processa inferência 10x mais rápido que GPUs tradicionais, com tier gratuito expandido.',
-    fonte: 'TechCrunch',
-    url: '#',
-    topico: 'IA',
-    timestamp: new Date(Date.now() - 8 * 3600000),
-    relevancia: 85,
-  },
-  {
-    id: '4',
-    titulo: 'Novo estudo liga produtividade a rotinas de sono consistentes',
-    resumo: 'Pesquisa com 10.000 profissionais mostra que regularidade do sono importa mais que quantidade total de horas.',
-    fonte: 'Nature',
-    url: '#',
-    topico: 'Produtividade',
-    timestamp: new Date(Date.now() - 12 * 3600000),
-    relevancia: 75,
-  },
-  {
-    id: '5',
-    titulo: 'TypeScript 6.0 traz inferência de tipos 3x mais rápida',
-    resumo: 'Compilador reescrito em Rust promete tempos de build drasticamente menores em projetos grandes.',
-    fonte: 'Microsoft Blog',
-    url: '#',
-    topico: 'TypeScript',
-    timestamp: new Date(Date.now() - 18 * 3600000),
-    relevancia: 80,
-  },
-];
-
-// tópicos mock do usuário — depois vem de preferencias_ia
-const MOCK_TOPICS = ['React', 'Supabase', 'IA', 'Produtividade', 'TypeScript'];
+import { useEffect } from 'react';
+import { useTaskStore } from '../../store/useTaskStore';
 
 function timeAgo(date: Date): string
 {
@@ -108,9 +41,21 @@ export function NewsRadarSection()
 {
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
+  const newsItems = useTaskStore((s) => s.newsItems);
+  const userInterests = useTaskStore((s) => s.userInterests);
+  const fetchNews = useTaskStore((s) => s.fetchNews);
+  const fetchInterests = useTaskStore((s) => s.fetchInterests);
+
+  useEffect(() => {
+    fetchNews();
+    fetchInterests();
+  }, [fetchNews, fetchInterests]);
+
+  const topics = userInterests.filter(i => i.ativo).map(i => i.topico);
+
   const filteredNews = activeFilter
-    ? MOCK_NEWS.filter((n) => n.topico === activeFilter)
-    : MOCK_NEWS;
+    ? newsItems.filter((n) => n.topico === activeFilter)
+    : newsItems;
 
   return (
     <motion.div {...fadeUp}>
@@ -130,7 +75,7 @@ export function NewsRadarSection()
                 <h3 className="text-[14px] font-semibold text-white flex items-center gap-2">
                   Radar de Notícias
                   <span className="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full">
-                    {MOCK_NEWS.length} novas
+                    {newsItems.length} novas
                   </span>
                 </h3>
                 <p className="text-[11px] text-zinc-600">
@@ -158,7 +103,7 @@ export function NewsRadarSection()
             >
               Todos
             </button>
-            {MOCK_TOPICS.map((topic) =>
+            {topics.map((topic) =>
             {
               const colors = getTopicColor(topic);
               const isActive = activeFilter === topic;
@@ -222,11 +167,11 @@ export function NewsRadarSection()
                         </span>
                         <span className="text-[9px] text-zinc-600 flex items-center gap-0.5">
                           <Globe className="w-3 h-3" />
-                          {news.fonte}
+                          {news.fonte || 'Notícia'}
                         </span>
                         <span className="text-[9px] text-zinc-700 flex items-center gap-0.5 ml-auto">
                           <Clock className="w-3 h-3" />
-                          {timeAgo(news.timestamp)}
+                          {timeAgo(new Date(news.created_at))}
                         </span>
                       </div>
 
@@ -254,7 +199,7 @@ export function NewsRadarSection()
             <div className="flex items-center gap-2">
               <TrendingUp className="w-3.5 h-3.5 text-cyan-500" />
               <span className="text-[10px] text-zinc-600">
-                Relevância média: {Math.round(MOCK_NEWS.reduce((s, n) => s + n.relevancia, 0) / MOCK_NEWS.length)}%
+                Relevância média: {newsItems.length ? Math.round(newsItems.reduce((s, n) => s + n.relevancia, 0) / newsItems.length) : 0}%
               </span>
             </div>
             <span className="text-[10px] text-zinc-700">

@@ -139,14 +139,25 @@ interface TriagemInboxWidgetProps
   setActiveView?: (v: ActiveView) => void;
 }
 
+import { useEffect } from 'react';
+import { useTaskStore } from '../../store/useTaskStore';
+
 export function TriagemInboxWidget({ setActiveView: _setActiveView }: TriagemInboxWidgetProps)
 {
-  // por enquanto usa mock — depois vai ler do Supabase
-  const events = MOCK_EVENTS
-    .filter((e) => !e.dismissed)
-    .sort((a, b) => b.scoreUrgencia - a.scoreUrgencia);
+  const inboxEvents = useTaskStore((s) => s.inboxEvents);
+  const fetchInbox = useTaskStore((s) => s.fetchInbox);
+  const dismissEvent = useTaskStore((s) => s.dismissEvent);
+  const createTaskFromEvent = useTaskStore((s) => s.createTaskFromEvent);
 
-  const urgentCount = events.filter((e) => e.scoreUrgencia >= 80).length;
+  useEffect(() => {
+    fetchInbox();
+  }, [fetchInbox]);
+
+  const events = inboxEvents
+    .filter((e) => !e.dismissed && !e.processed)
+    .sort((a, b) => b.score_urgencia - a.score_urgencia);
+
+  const urgentCount = events.filter((e) => e.score_urgencia >= 80).length;
 
   return (
     <motion.div {...fadeUp}>
@@ -195,7 +206,7 @@ export function TriagemInboxWidget({ setActiveView: _setActiveView }: TriagemInb
               {events.slice(0, 4).map((event) =>
               {
                 const SourceIcon = getSourceIcon(event.source);
-                const urgency = getUrgencyColor(event.scoreUrgencia);
+                const urgency = getUrgencyColor(event.score_urgencia);
 
                 return (
                   <motion.div
@@ -220,18 +231,18 @@ export function TriagemInboxWidget({ setActiveView: _setActiveView }: TriagemInb
                         <span className="text-[9px] text-zinc-600">via {getSourceLabel(event.source)}</span>
                         <span className="text-[9px] text-zinc-700 flex items-center gap-0.5 ml-auto shrink-0">
                           <Clock className="w-3 h-3" />
-                          {timeAgo(event.timestamp)}
+                          {timeAgo(new Date(event.created_at))}
                         </span>
                       </div>
 
                       {/* resumo da IA */}
                       <p className="text-[12px] text-zinc-400 leading-relaxed mb-2">
-                        {event.resumo}
+                        {event.resumo || event.raw_subject}
                       </p>
 
                       {/* keywords + ações */}
                       <div className="flex items-center gap-2 flex-wrap">
-                        {event.keywordsDetectadas.slice(0, 3).map((kw) => (
+                        {(event.keywords_detectadas || []).slice(0, 3).map((kw) => (
                           <span key={kw} className="text-[9px] text-violet-400 bg-violet-500/10 px-1.5 py-0.5 rounded-md">
                             {kw}
                           </span>
@@ -239,7 +250,7 @@ export function TriagemInboxWidget({ setActiveView: _setActiveView }: TriagemInb
 
                         {/* score badge */}
                         <span className={`text-[9px] font-bold ${urgency.text} ${urgency.bg} px-1.5 py-0.5 rounded-md ml-auto`}>
-                          ⚡ {event.scoreUrgencia}
+                          ⚡ {event.score_urgencia}
                         </span>
                       </div>
                     </div>
@@ -247,12 +258,16 @@ export function TriagemInboxWidget({ setActiveView: _setActiveView }: TriagemInb
                     {/* ações hover */}
                     <div className="shrink-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
+                        onClick={() => {
+                          if (event.acao_sugerida === 'fazer') createTaskFromEvent(event.id);
+                        }}
                         className="px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition-colors"
-                        title={getActionLabel(event.acaoSugerida)}
+                        title={getActionLabel(event.acao_sugerida || '')}
                       >
-                        {event.acaoSugerida === 'fazer' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
+                        {event.acao_sugerida === 'fazer' ? <CheckCircle2 className="w-3.5 h-3.5" /> : <ExternalLink className="w-3.5 h-3.5" />}
                       </button>
                       <button
+                        onClick={() => dismissEvent(event.id)}
                         className="px-2.5 py-1 rounded-lg text-[10px] bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50 transition-colors"
                         title="Descartar"
                       >
