@@ -38,36 +38,38 @@ function SortableSubtaskItem ({ sub, onToggle, onDelete }: {
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg group/sub transition-colors
-                 ${sub.concluida ? 'bg-emerald-500/5' : 'hover:bg-zinc-800/30'}`}
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl group/sub transition-all duration-200 border border-transparent
+                 ${sub.concluida 
+                   ? 'bg-emerald-500/5 hover:bg-emerald-500/10 hover:border-emerald-500/10' 
+                   : 'hover:bg-zinc-900/60 hover:border-zinc-800/40'}`}
     >
       <button
         {...attributes}
         {...listeners}
-        className="p-0.5 cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-400 shrink-0"
+        className="p-0.5 cursor-grab active:cursor-grabbing text-zinc-700 hover:text-zinc-400 shrink-0 transition-colors duration-200"
       >
         <GripVertical className="w-3.5 h-3.5" />
       </button>
       <button
         onClick={() => onToggle(sub.id, sub.concluida)}
-        className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all
+        className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all duration-200
                    ${sub.concluida
-                     ? 'bg-emerald-500 border-emerald-500 text-white'
-                     : 'border-zinc-600 hover:border-violet-500/50'
+                     ? 'bg-emerald-500 border-emerald-500 text-white shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                     : 'border-zinc-650 hover:border-violet-500/50 hover:bg-zinc-800/50'
                    }`}
       >
-        {sub.concluida && <Check className="w-3 h-3" />}
+        {sub.concluida && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
       </button>
-      <span className={`flex-1 text-[13px] transition-all ${
-        sub.concluida ? 'text-zinc-500 line-through' : 'text-zinc-300'
+      <span className={`flex-1 text-[13px] transition-all duration-200 ${
+        sub.concluida ? 'text-zinc-550 line-through' : 'text-zinc-300 font-medium'
       }`}>
         {sub.titulo}
       </span>
       <button
         onClick={() => onDelete(sub.id)}
-        className="p-1 rounded opacity-0 group-hover/sub:opacity-100 text-zinc-600 hover:text-red-400 transition-all"
+        className="p-1 rounded-md opacity-0 group-hover/sub:opacity-100 text-zinc-550 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200"
       >
-        <Trash2 className="w-3 h-3" />
+        <Trash2 className="w-3.5 h-3.5" />
       </button>
     </div>
   );
@@ -336,560 +338,657 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/70 backdrop-blur-sm overflow-y-auto py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md overflow-hidden p-4 md:p-6 transition-all duration-300 animate-in fade-in"
       onClick={onClose}
     >
       <div
         ref={modalRef}
-        className="bg-zinc-950 border border-zinc-800/60 rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden
-                   animate-in fade-in slide-in-from-bottom-4 duration-200"
+        className="relative bg-zinc-950/95 border border-zinc-800/80 rounded-2xl shadow-[0_0_80px_-15px_rgba(139,92,246,0.18)] 
+                   w-full max-w-5xl h-[85vh] max-h-[800px] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* faixa de cor da prioridade no topo */}
-        <div className={`h-1.5 w-full bg-gradient-to-r ${
-          tarefaAtual.prioridade === 'critica' ? 'from-red-500 to-rose-600' :
+        <div className={`h-1 w-full shrink-0 bg-gradient-to-r ${
+          tarefaAtual.prioridade === 'critica' ? 'from-rose-500 to-red-650' :
           tarefaAtual.prioridade === 'alta' ? 'from-amber-500 to-orange-500' :
-          tarefaAtual.prioridade === 'media' ? 'from-blue-500 to-indigo-500' :
+          tarefaAtual.prioridade === 'media' ? 'from-sky-500 to-indigo-500' :
           'from-zinc-600 to-zinc-700'
         }`} />
 
         {/* header */}
-        <div className="px-6 pt-5 pb-4 border-b border-zinc-800/40">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              {/* badge ia */}
-              {isIA && (
-                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-500/10 border border-violet-500/20 mb-2">
-                  <Sparkles className="w-3 h-3 text-violet-400" />
-                  <span className="text-[9px] font-semibold uppercase tracking-wider text-violet-400">capturada por ia</span>
-                </div>
-              )}
+        <div className="px-8 py-5 border-b border-zinc-800/30 flex items-center justify-between shrink-0 bg-zinc-950/50 z-20">
+          <div className="flex items-center gap-3">
+            {/* badge ia */}
+            {isIA && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-violet-500/10 border border-violet-500/20 shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+                <Sparkles className="w-3.5 h-3.5 text-violet-400 animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-violet-400">JARVIS Triage</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 text-zinc-500 text-[12px] font-semibold tracking-wider">
+              <Hash className="w-3.5 h-3.5" />
+              <span>TASK-{tarefaAtual.id}</span>
+            </div>
+          </div>
 
-              {/* titulo editável */}
+          {/* botão fechar */}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-zinc-850 text-zinc-400 hover:text-zinc-200 transition-all duration-200 hover:scale-105 active:scale-95 shrink-0"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* corpo: 2 colunas no desktop */}
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+          
+          {/* coluna principal — conteúdo */}
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-thin scrollbar-thumb-zinc-850 scrollbar-track-transparent">
+            
+            {/* titulo editável */}
+            <div className="space-y-3">
               {editingTitle ? (
                 <input
                   ref={titleInputRef}
                   value={titleDraft}
                   onChange={(e) => setTitleDraft(e.target.value)}
                   onBlur={saveTitle}
-                  onKeyDown={(e) => { if ( e.key === 'Enter' ) saveTitle(); if ( e.key === 'Escape' ) setEditingTitle(false); }}
-                  className="w-full bg-transparent text-xl font-bold text-white outline-none border-b-2 border-violet-500/50 pb-1"
+                  onKeyDown={(e) => { 
+                    if ( e.key === 'Enter' ) saveTitle(); 
+                    if ( e.key === 'Escape' ) setEditingTitle(false); 
+                  }}
+                  className="w-full bg-zinc-900/50 border border-violet-500/30 rounded-xl px-4 py-2 text-2xl font-bold text-white outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
                 />
               ) : (
-                <h2
-                  className="text-xl font-bold text-white leading-tight cursor-pointer hover:text-violet-300 transition-colors group/title"
+                <h1
                   onClick={() => { setTitleDraft(tarefaAtual.titulo); setEditingTitle(true); }}
+                  className="text-2xl font-bold text-white tracking-tight cursor-pointer hover:bg-zinc-900/30 rounded-xl px-4 py-2 -mx-4 transition-all duration-200 flex items-center gap-2 group/title"
                 >
-                  {tarefaAtual.titulo}
-                  <Pencil className="inline w-3.5 h-3.5 ml-2 opacity-0 group-hover/title:opacity-50 transition-opacity" />
-                </h2>
+                  <span>{tarefaAtual.titulo}</span>
+                  <Pencil className="w-4 h-4 text-zinc-500 opacity-0 group-hover/title:opacity-100 transition-opacity duration-200 shrink-0" />
+                </h1>
               )}
 
               {/* meta info linha */}
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <span className="flex items-center gap-1 text-[11px] text-zinc-500">
-                  <Hash className="w-3 h-3" />{tarefaAtual.id}
-                </span>
-                <span className={`flex items-center gap-1 text-[11px] ${origin.color}`}>
-                  <OriginIcon className="w-3 h-3" />{origin.label}
-                </span>
+              <div className="flex items-center gap-4 text-[12px] text-zinc-500 px-1 border-b border-zinc-800/20 pb-4">
+                <div className={`flex items-center gap-1.5 ${origin.color} font-semibold`}>
+                  <OriginIcon className="w-4 h-4" />
+                  <span>{origin.label}</span>
+                </div>
                 {tarefaAtual.created_at && (
-                  <span className="flex items-center gap-1 text-[11px] text-zinc-500">
-                    <Clock className="w-3 h-3" />{formatDate(tarefaAtual.created_at)}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    <span>Criada em {formatDate(tarefaAtual.created_at)}</span>
+                  </div>
                 )}
               </div>
             </div>
 
-            {/* botão fechar */}
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-zinc-800/60 text-zinc-500 hover:text-zinc-300 transition-colors shrink-0"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* tabs: detalhes / atividade */}
-        <div className="flex border-b border-zinc-800/40">
-          <button
-            onClick={() => setActiveTab('detalhes')}
-            className={`flex items-center gap-1.5 px-5 py-2.5 text-[12px] font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'detalhes'
-                ? 'border-violet-500 text-violet-300'
-                : 'border-transparent text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <FileText className="w-3.5 h-3.5" /> Detalhes
-          </button>
-          <button
-            onClick={() => setActiveTab('atividade')}
-            className={`flex items-center gap-1.5 px-5 py-2.5 text-[12px] font-medium transition-colors border-b-2 -mb-px ${
-              activeTab === 'atividade'
-                ? 'border-violet-500 text-violet-300'
-                : 'border-transparent text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
-            <Activity className="w-3.5 h-3.5" /> Atividade
-            {atividades.length > 0 && (
-              <span className="ml-1 text-[10px] bg-zinc-800 text-zinc-400 rounded-full px-1.5 py-0.5">{atividades.length}</span>
-            )}
-          </button>
-        </div>
-
-        {/* tab atividade */}
-        {activeTab === 'atividade' && (
-          <div className="p-6 space-y-3 min-h-[200px]">
-            {loadingD && <p className="text-[12px] text-zinc-500">Carregando...</p>}
-            {!loadingD && atividades.length === 0 && (
-              <p className="text-[12px] text-zinc-600">Nenhum evento registrado ainda.</p>
-            )}
-            {atividades.map((ativ) => (
-              <div key={ativ.id} className="flex items-start gap-3">
-                <span className="text-base leading-none mt-0.5">{TIPO_ICON[ativ.tipo] ?? '🔹'}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] text-zinc-300">{ativ.detalhe || ativ.tipo}</p>
-                  {ativ.created_at && (
-                    <p className="text-[11px] text-zinc-600 mt-0.5">{formatDate(ativ.created_at)}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* tab detalhes (original) */}
-        {activeTab === 'detalhes' && (
-        /* corpo: 2 colunas no desktop */
-        <div className="flex flex-col lg:flex-row">
-          {/* coluna principal — conteúdo */}
-          <div className="flex-1 p-6 space-y-6 border-b lg:border-b-0 lg:border-r border-zinc-800/30">
-
-            {/* snippet / descrição */}
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FileText className="w-4 h-4 text-zinc-500" />
-                <h3 className="text-[13px] font-semibold text-zinc-300">Descrição</h3>
-              </div>
-              <p className="text-[13px] text-zinc-400 leading-relaxed bg-zinc-900/40 rounded-lg p-3 border border-zinc-800/30">
-                {tarefaAtual.descricao || tarefaAtual.snippet_100_char || 'Sem descrição'}
-              </p>
-            </div>
-
-            {/* subtarefas / checklist */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-zinc-500" />
-                  <h3 className="text-[13px] font-semibold text-zinc-300">
-                    Lista de Verificação
-                  </h3>
-                  {subs.length > 0 && (
-                    <span className="text-[11px] text-zinc-500 font-medium ml-1">
-                      {subsDone} de {subs.length}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* barra de progresso da checklist */}
-              {subs.length > 0 && (
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex-1 h-2 rounded-full bg-zinc-800/60 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ease-out ${
-                        subsPct === 100 ? 'bg-emerald-500' : 'bg-violet-500'
-                      }`}
-                      style={{ width: `${subsPct}%` }}
-                    />
-                  </div>
-                  <span className={`text-[12px] font-bold tabular-nums ${subsPct === 100 ? 'text-emerald-400' : 'text-zinc-400'}`}>
-                    {subsPct}%
-                  </span>
-                </div>
-              )}
-
-              {/* lista de subtarefas — C8: drag reorder */}
-              <DndContext sensors={subSensors} collisionDetection={closestCenter} onDragEnd={handleSubDragEnd}>
-                <SortableContext items={subs.map((s) => s.id)} strategy={verticalListSortingStrategy}>
-                  <div className="space-y-1">
-                    {subs.map((sub) => (
-                      <SortableSubtaskItem
-                        key={sub.id}
-                        sub={sub}
-                        onToggle={toggleSubtask}
-                        onDelete={handleDeleteSubtask}
-                      />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
-
-              {/* adicionar nova subtarefa */}
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="text"
-                  value={newSubtask}
-                  onChange={(e) => setNewSubtask(e.target.value)}
-                  onKeyDown={(e) => { if ( e.key === 'Enter' ) handleAddSubtask(); }}
-                  placeholder="Adicionar item..."
-                  className="flex-1 bg-zinc-800/30 border border-zinc-800/40 rounded-lg px-3 py-2
-                             text-[13px] text-white placeholder:text-zinc-600
-                             outline-none focus:ring-1 focus:ring-violet-500/40 transition-all"
-                />
-                <button
-                  onClick={handleAddSubtask}
-                  disabled={!newSubtask.trim() || addingSubtask}
-                  className="p-2 rounded-lg bg-violet-600 text-white hover:bg-violet-500 transition-colors
-                             disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  {addingSubtask ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* notas locais */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <StickyNote className="w-4 h-4 text-zinc-500" />
-                  <h3 className="text-[13px] font-semibold text-zinc-300">Notas</h3>
-                </div>
-                {!editingNotes && (
-                  <button
-                    onClick={() => { setNotesDraft(tarefaAtual.notas_locais || ''); setEditingNotes(true); }}
-                    className="text-[11px] text-zinc-500 hover:text-violet-400 transition-colors"
-                  >
-                    Editar
-                  </button>
+            {/* tabs: detalhes / atividade */}
+            <div className="flex border-b border-zinc-800/30 -mx-8 px-8 shrink-0">
+              <button
+                onClick={() => setActiveTab('detalhes')}
+                className={`flex items-center gap-2 px-5 py-3 text-[13px] font-bold transition-all duration-200 border-b-2 -mb-px ${
+                  activeTab === 'detalhes'
+                    ? 'border-violet-500 text-violet-400 shadow-[0_4px_12px_rgba(139,92,246,0.1)]'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                <FileText className="w-4 h-4" /> Detalhes
+              </button>
+              <button
+                onClick={() => setActiveTab('atividade')}
+                className={`flex items-center gap-2 px-5 py-3 text-[13px] font-bold transition-all duration-200 border-b-2 -mb-px ${
+                  activeTab === 'atividade'
+                    ? 'border-violet-500 text-violet-400 shadow-[0_4px_12px_rgba(139,92,246,0.1)]'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                <Activity className="w-4 h-4" /> Linha do Tempo
+                {atividades.length > 0 && (
+                  <span className="text-[10px] bg-zinc-800/80 text-zinc-400 rounded-full px-2 py-0.5 font-extrabold">{atividades.length}</span>
                 )}
+              </button>
+            </div>
+
+            {/* tab atividade */}
+            {activeTab === 'atividade' && (
+              <div className="space-y-6 max-h-[450px] overflow-y-auto pr-2">
+                {loadingD && (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-violet-500" />
+                  </div>
+                )}
+                {!loadingD && atividades.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-[13px] text-zinc-500">Nenhum evento registrado nesta tarefa.</p>
+                  </div>
+                )}
+                <div className="relative border-l border-zinc-800/60 ml-3.5 pl-6 space-y-6">
+                  {atividades.map((ativ) => (
+                    <div key={ativ.id} className="relative group">
+                      {/* Timeline bullet dot */}
+                      <div className="absolute -left-[31px] top-0 w-3.5 h-3.5 rounded-full bg-zinc-950 border-2 border-violet-500 flex items-center justify-center shadow-[0_0_8px_rgba(139,92,246,0.3)]" />
+                      
+                      <div className="bg-zinc-900/20 border border-zinc-800/40 rounded-xl p-3.5 hover:border-zinc-800/60 transition-all duration-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm leading-none">{TIPO_ICON[ativ.tipo] ?? '🔹'}</span>
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
+                            {ativ.tipo}
+                          </span>
+                          {ativ.created_at && (
+                            <span className="text-[10px] text-zinc-650 ml-auto font-medium">
+                              {formatDate(ativ.created_at)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[13px] text-zinc-300 font-medium">
+                          {ativ.detalhe || ativ.tipo}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-              {editingNotes ? (
+            )}
+
+            {/* tab detalhes */}
+            {activeTab === 'detalhes' && (
+              <div className="space-y-8">
+                
+                {/* snippet / descrição */}
                 <div className="space-y-2">
-                  <textarea
-                    value={notesDraft}
-                    onChange={(e) => setNotesDraft(e.target.value)}
-                    rows={4}
-                    className="w-full bg-zinc-800/30 border border-zinc-700/40 rounded-lg px-3 py-2
-                               text-[13px] text-white placeholder:text-zinc-600
-                               outline-none focus:ring-1 focus:ring-violet-500/40 transition-all resize-none"
-                    placeholder="Escreva suas notas aqui..."
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <button onClick={saveNotes} className="px-3 py-1.5 text-[12px] font-medium bg-violet-600 text-white rounded-lg hover:bg-violet-500 transition-colors">
-                      Salvar
-                    </button>
-                    <button onClick={() => setEditingNotes(false)} className="px-3 py-1.5 text-[12px] text-zinc-400 hover:text-zinc-200 transition-colors">
-                      Cancelar
-                    </button>
+                  <div className="flex items-center gap-2 text-zinc-400">
+                    <FileText className="w-4 h-4 text-violet-400/80" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Descrição</span>
+                  </div>
+                  <div className="text-[13px] text-zinc-300 leading-relaxed bg-zinc-900/25 border border-zinc-850 rounded-xl p-4 shadow-inner hover:border-zinc-800/60 transition-all duration-200">
+                    {tarefaAtual.descricao || tarefaAtual.snippet_100_char || (
+                      <span className="text-zinc-600 italic">Sem descrição registrada</span>
+                    )}
                   </div>
                 </div>
-              ) : (
-                <p className="text-[13px] text-zinc-500 bg-zinc-900/30 rounded-lg p-3 border border-zinc-800/20 min-h-[60px]">
-                  {tarefaAtual.notas_locais || 'Nenhuma nota adicionada.'}
-                </p>
-              )}
-            </div>
-          </div>
 
-          {/* sidebar direita — propriedades */}
-          <div className="w-full lg:w-64 p-5 space-y-5 bg-zinc-900/30">
-            {/* status */}
-            <div className="relative">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium block mb-1.5">Status</span>
-              <button
-                onClick={() => setShowStatusMenu(!showStatusMenu)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[13px] font-medium transition-colors
-                           ${statusConfig.bg} ${statusConfig.color} border-zinc-800/40 hover:border-zinc-700/60`}
-              >
-                {statusConfig.label}
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {showStatusMenu && (
-                <div className="absolute top-full left-0 right-0 mt-1 z-10 bg-zinc-900 border border-zinc-700/60 rounded-lg shadow-xl py-1">
-                  {STATUS_OPTIONS.map((st) => {
-                    const cfg = STATUS_CONFIG[st];
-                    return (
-                      <button
-                        key={st}
-                        onClick={() => changeStatus(st)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-zinc-800
-                                   ${tarefaAtual.status === st ? cfg.color + ' font-semibold' : 'text-zinc-400'}`}
-                      >
-                        <span className={`w-2 h-2 rounded-full ${
-                          st === 'pendente' ? 'bg-red-500' : st === 'em_progresso' ? 'bg-amber-500' : 'bg-emerald-500'
-                        }`} />
-                        {cfg.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* prioridade */}
-            <div className="relative">
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium block mb-1.5">Prioridade</span>
-              <button
-                onClick={() => setShowPrioMenu(!showPrioMenu)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[13px] font-medium transition-colors
-                           ${prioConfig.bg} ${prioConfig.color} ${prioConfig.border} hover:border-zinc-600/60`}
-              >
-                <span className="flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5" />
-                  {prioConfig.label}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
-              {showPrioMenu && (
-                <div className="absolute top-full left-0 right-0 mt-1 z-10 bg-zinc-900 border border-zinc-700/60 rounded-lg shadow-xl py-1">
-                  {PRIO_OPTIONS.map((pr) => {
-                    const cfg = PRIORIDADE_CONFIG[pr];
-                    return (
-                      <button
-                        key={pr}
-                        onClick={() => changePriority(pr)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-zinc-800
-                                   ${tarefaAtual.prioridade === pr ? cfg.color + ' font-semibold' : 'text-zinc-400'}`}
-                      >
-                        <Zap className="w-3 h-3" />
-                        {cfg.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* urgência / score */}
-            <div>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium block mb-1.5">Score de Urgência</span>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-2 rounded-full bg-zinc-800/60 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      tarefaAtual.score_urgencia > 80 ? 'bg-red-500' :
-                      tarefaAtual.score_urgencia > 40 ? 'bg-amber-500' : 'bg-emerald-500'
-                    }`}
-                    style={{ width: `${Math.min(tarefaAtual.score_urgencia, 100)}%` }}
-                  />
-                </div>
-                <span className="text-[13px] font-bold tabular-nums text-zinc-300">{tarefaAtual.score_urgencia}</span>
-              </div>
-              {tarefaAtual.score_urgencia > 100 && (
-                <div className="flex items-center gap-1 mt-1.5 text-[10px] text-red-400 font-semibold">
-                  <AlertTriangle className="w-3 h-3" /> Foco Crítico
-                </div>
-              )}
-            </div>
-
-            {/* data de vencimento */}
-            <div>
-              <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium block mb-1.5">Prazo</span>
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${due.bg}`}>
-                <Calendar className={`w-4 h-4 ${due.color}`} />
-                <span className={`text-[13px] font-medium ${due.color}`}>{due.text}</span>
-              </div>
-            </div>
-
-            {/* labels */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Marcadores</span>
-                <button
-                  onClick={() => setShowLabelPicker(!showLabelPicker)}
-                  className="p-0.5 rounded text-zinc-500 hover:text-violet-400 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-              {/* labels atuais */}
-              <div className="flex flex-wrap gap-1.5">
-                {(tarefaAtual.labels || []).map((lb) => (
-                  <span
-                    key={lb.id}
-                    className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md border cursor-pointer
-                               hover:opacity-70 transition-opacity"
-                    style={{ color: lb.cor, backgroundColor: `${lb.cor}15`, borderColor: `${lb.cor}30` }}
-                    onClick={() => toggleLabel(lb)}
-                    title="Clique para remover"
-                  >
-                    <Tag className="w-3 h-3" />
-                    {lb.nome}
-                  </span>
-                ))}
-                {(tarefaAtual.labels || []).length === 0 && !showLabelPicker && (
-                  <span className="text-[11px] text-zinc-600">Nenhum marcador</span>
-                )}
-              </div>
-              {/* picker de labels */}
-              {showLabelPicker && allLabels.length > 0 && (
-                <div className="mt-2 p-2 bg-zinc-900/60 border border-zinc-800/40 rounded-lg space-y-1">
-                  {allLabels.map((lb) => {
-                    const isActive = tarefaAtual.labels?.some((l) => l.id === lb.id);
-                    return (
-                      <button
-                        key={lb.id}
-                        onClick={() => toggleLabel(lb)}
-                        className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px] transition-colors
-                                   ${isActive ? 'bg-violet-500/10 text-violet-300' : 'text-zinc-400 hover:bg-zinc-800/40'}`}
-                      >
-                        <span className="w-3 h-3 rounded-full border" style={{ backgroundColor: isActive ? lb.cor : 'transparent', borderColor: lb.cor }} />
-                        {lb.nome}
-                        {isActive && <Check className="w-3 h-3 ml-auto" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* ações */}
-            <div className="pt-3 border-t border-zinc-800/30 space-y-2">
-              {tarefaAtual.status !== 'concluida' && (
-                <button
-                  onClick={() => changeStatus('concluida')}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-[13px] font-semibold
-                             bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors"
-                >
-                  <Check className="w-4 h-4" />
-                  Concluir
-                </button>
-              )}
-              <button
-                onClick={handleDelete}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[12px] font-medium
-                           text-red-400 bg-red-500/5 border border-red-500/20 rounded-lg
-                           hover:bg-red-500/10 transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                Excluir Tarefa
-              </button>
-
-              {/* D1: iniciar foco nesta tarefa */}
-              <button
-                onClick={() =>
-                {
-                  useTaskStore.getState().startFocusSession(tarefa.id);
-                  useTaskStore.getState().setActiveView('foco');
-                  onClose();
-                }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[12px] font-medium
-                           text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 rounded-lg
-                           hover:bg-emerald-500/10 transition-colors"
-              >
-                <Play className="w-3.5 h-3.5" />
-                Iniciar Foco
-              </button>
-
-              {/* D2: tempo registrado em foco */}
-              <div className="pt-3 border-t border-zinc-800/30">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <Timer className="w-3.5 h-3.5 text-zinc-500" />
-                  <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Tempo em Foco</span>
-                </div>
-                {tempo ? (
-                  <p className="text-[13px] font-semibold text-white">
-                    {tempo.total_minutos >= 60
-                      ? `${Math.floor(tempo.total_minutos / 60)}h ${tempo.total_minutos % 60}m`
-                      : `${tempo.total_minutos}m`}
-                    <span className="text-[11px] font-normal text-zinc-500 ml-1">
-                      em {tempo.sessoes.length} sessão{tempo.sessoes.length !== 1 ? 'ões' : ''}
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-[12px] text-zinc-600">Nenhuma sessão registrada</p>
-                )}
-              </div>
-
-              {/* D3: recorrência */}
-              <div className="pt-3 border-t border-zinc-800/30">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <RefreshCw className="w-3.5 h-3.5 text-zinc-500" />
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Recorrência</span>
+                {/* subtarefas / checklist */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4 text-violet-400/80" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Subtarefas</span>
+                      {subs.length > 0 && (
+                        <span className="text-[11px] bg-zinc-900 text-zinc-500 font-bold px-2 py-0.5 rounded-full border border-zinc-800/50">
+                          {subsDone} / {subs.length}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  {recorrencia && (
-                    <button onClick={handleRemoveRecorrencia} className="text-[10px] text-red-400 hover:text-red-300 transition-colors">
-                      Remover
-                    </button>
+
+                  {/* barra de progresso da checklist */}
+                  {subs.length > 0 && (
+                    <div className="flex items-center gap-3 bg-zinc-900/35 border border-zinc-850 rounded-xl px-4 py-2.5">
+                      <div className="flex-1 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden relative">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ease-out relative ${
+                            subsPct === 100 
+                              ? 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]' 
+                              : 'bg-gradient-to-r from-violet-500 to-indigo-500 shadow-[0_0_8px_rgba(139,92,246,0.3)]'
+                          }`}
+                          style={{ width: `${subsPct}%` }}
+                        />
+                      </div>
+                      <span className={`text-[12px] font-bold tabular-nums min-w-[36px] text-right ${subsPct === 100 ? 'text-emerald-400' : 'text-zinc-400'}`}>
+                        {subsPct}%
+                      </span>
+                    </div>
                   )}
+
+                  {/* lista de subtarefas — C8: drag reorder */}
+                  <DndContext sensors={subSensors} collisionDetection={closestCenter} onDragEnd={handleSubDragEnd}>
+                    <SortableContext items={subs.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                      <div className="space-y-1.5 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin">
+                        {subs.map((sub) => (
+                          <SortableSubtaskItem
+                            key={sub.id}
+                            sub={sub}
+                            onToggle={toggleSubtask}
+                            onDelete={handleDeleteSubtask}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+
+                  {/* adicionar nova subtarefa */}
+                  <div className="flex items-center gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={newSubtask}
+                      onChange={(e) => setNewSubtask(e.target.value)}
+                      onKeyDown={(e) => { if ( e.key === 'Enter' ) handleAddSubtask(); }}
+                      placeholder="Adicionar nova subtarefa..."
+                      className="flex-1 bg-zinc-900/30 border border-zinc-800/60 rounded-xl px-4 py-2
+                                 text-[13px] text-white placeholder:text-zinc-650
+                                 outline-none focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200"
+                    />
+                    <button
+                      onClick={handleAddSubtask}
+                      disabled={!newSubtask.trim() || addingSubtask}
+                      className="p-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white transition-all duration-200
+                                 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+                    >
+                      {addingSubtask ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowFreqMenu(!showFreqMenu)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border text-[12px] transition-colors ${
-                      recorrencia
-                        ? 'border-violet-500/30 bg-violet-500/5 text-violet-300'
-                        : 'border-zinc-800/40 text-zinc-500 hover:border-zinc-700'
-                    }`}
-                  >
-                    {recorrencia ? `${FREQ_LABELS[recorrencia.frequencia] ?? recorrencia.frequencia}` : 'Não se repete'}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  {showFreqMenu && (
-                    <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-zinc-900 border border-zinc-700/60 rounded-lg shadow-xl py-1">
-                      {['diaria', 'semanal', 'mensal'].map((f) => (
-                        <button key={f} onClick={() => handleSaveRecorrencia(f)}
-                          className="w-full text-left px-3 py-2 text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors">
-                          {FREQ_LABELS[f]}
+
+                {/* notas locais */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <StickyNote className="w-4 h-4 text-violet-400/80" />
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">Notas Pessoais</span>
+                    </div>
+                    {!editingNotes && (
+                      <button
+                        onClick={() => { setNotesDraft(tarefaAtual.notes_locais || tarefaAtual.notas_locais || ''); setEditingNotes(true); }}
+                        className="text-[11px] text-zinc-500 hover:text-violet-400 transition-colors font-semibold"
+                      >
+                        Editar notas
+                      </button>
+                    )}
+                  </div>
+                  {editingNotes ? (
+                    <div className="space-y-2.5">
+                      <textarea
+                        value={notesDraft}
+                        onChange={(e) => setNotesDraft(e.target.value)}
+                        rows={4}
+                        className="w-full bg-zinc-900/30 border border-zinc-800/60 rounded-xl px-4 py-3
+                                   text-[13px] text-white placeholder:text-zinc-650
+                                   outline-none focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200 resize-none"
+                        placeholder="Digite anotações ou observações específicas sobre esta tarefa..."
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button onClick={saveNotes} className="px-4 py-2 text-[12px] font-bold bg-violet-600 text-white rounded-lg hover:bg-violet-500 transition-all duration-200">
+                          Salvar
                         </button>
-                      ))}
+                        <button onClick={() => setEditingNotes(false)} className="px-4 py-2 text-[12px] font-bold text-zinc-400 hover:text-zinc-200 transition-all duration-200">
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      onClick={() => { setNotesDraft(tarefaAtual.notas_locais || ''); setEditingNotes(true); }}
+                      className="text-[13px] text-zinc-450 bg-zinc-900/15 border border-zinc-850 rounded-xl p-4 min-h-[80px] cursor-pointer hover:border-zinc-800/50 hover:bg-zinc-900/25 transition-all duration-200"
+                    >
+                      {tarefaAtual.notas_locais || (
+                        <span className="text-zinc-600 italic">Clique para adicionar notas...</span>
+                      )}
                     </div>
                   )}
                 </div>
               </div>
+            )}
+          </div>
 
-              {/* D4: dependências */}
-              <div className="pt-3 border-t border-zinc-800/30">
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <Link className="w-3.5 h-3.5 text-zinc-500" />
-                    <span className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">Bloqueada por</span>
+          {/* sidebar direita — propriedades */}
+          <div className="w-full lg:w-[340px] shrink-0 border-t lg:border-t-0 lg:border-l border-zinc-800/30 bg-zinc-900/15 overflow-y-auto p-6 space-y-6 flex flex-col justify-between scrollbar-thin scrollbar-thumb-zinc-850 scrollbar-track-transparent">
+            
+            <div className="space-y-6">
+              
+              {/* status */}
+              <div className="space-y-1.5 relative">
+                <label className="text-[10px] text-zinc-550 uppercase tracking-widest font-bold block">Status</label>
+                <button
+                  onClick={() => setShowStatusMenu(!showStatusMenu)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-[13px] font-semibold transition-all duration-200
+                             bg-zinc-900/35 border-zinc-800/60 hover:bg-zinc-900/60 hover:border-zinc-700/60`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span className={`w-2.5 h-2.5 rounded-full ${
+                      tarefaAtual.status === 'pendente' ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 
+                      tarefaAtual.status === 'em_progresso' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]' : 
+                      'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                    }`} />
+                    <span className={statusConfig.color}>{statusConfig.label}</span>
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-zinc-500" />
+                </button>
+                {showStatusMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowStatusMenu(false)} />
+                    <div className="absolute top-full left-0 right-0 mt-1.5 z-20 bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-xl py-1.5 animate-in fade-in zoom-in-95 duration-150">
+                      {STATUS_OPTIONS.map((st) => {
+                        const cfg = STATUS_CONFIG[st];
+                        const isSelected = tarefaAtual.status === st;
+                        return (
+                          <button
+                            key={st}
+                            onClick={() => changeStatus(st)}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-left transition-colors hover:bg-zinc-900
+                                       ${isSelected ? cfg.color + ' font-semibold bg-zinc-900/40' : 'text-zinc-400'}`}
+                          >
+                            <span className={`w-2 h-2 rounded-full ${
+                              st === 'pendente' ? 'bg-red-500' : st === 'em_progresso' ? 'bg-amber-500' : 'bg-emerald-500'
+                            }`} />
+                            <span className="flex-1">{cfg.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-violet-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* prioridade */}
+              <div className="space-y-1.5 relative">
+                <label className="text-[10px] text-zinc-555 uppercase tracking-widest font-bold block">Prioridade</label>
+                <button
+                  onClick={() => setShowPrioMenu(!showPrioMenu)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-[13px] font-semibold transition-all duration-200
+                             bg-zinc-900/35 border-zinc-800/60 hover:bg-zinc-900/60 hover:border-zinc-700/60`}
+                >
+                  <span className="flex items-center gap-2.5">
+                    <Zap className={`w-4 h-4 ${
+                      tarefaAtual.prioridade === 'critica' ? 'text-red-500' : 
+                      tarefaAtual.prioridade === 'alta' ? 'text-amber-500' : 
+                      tarefaAtual.prioridade === 'media' ? 'text-sky-500' : 
+                      'text-zinc-500'
+                    }`} />
+                    <span className={prioConfig.color}>{prioConfig.label}</span>
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-zinc-500" />
+                </button>
+                {showPrioMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowPrioMenu(false)} />
+                    <div className="absolute top-full left-0 right-0 mt-1.5 z-20 bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-xl py-1.5 animate-in fade-in zoom-in-95 duration-150">
+                      {PRIO_OPTIONS.map((pr) => {
+                        const cfg = PRIORIDADE_CONFIG[pr];
+                        const isSelected = tarefaAtual.prioridade === pr;
+                        return (
+                          <button
+                            key={pr}
+                            onClick={() => changePriority(pr)}
+                            className={`w-full flex items-center gap-2.5 px-3 py-2 text-[12px] text-left transition-colors hover:bg-zinc-900
+                                       ${isSelected ? cfg.color + ' font-semibold bg-zinc-900/40' : 'text-zinc-400'}`}
+                          >
+                            <Zap className={`w-3.5 h-3.5 ${
+                              pr === 'critica' ? 'text-red-500' : 
+                              pr === 'alta' ? 'text-amber-500' : 
+                              pr === 'media' ? 'text-sky-500' : 
+                              'text-zinc-500'
+                            }`} />
+                            <span className="flex-1">{cfg.label}</span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-violet-400" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* urgência / score */}
+              <div className="space-y-2.5 bg-zinc-900/20 border border-zinc-850 rounded-xl p-3.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Score de Urgência</span>
+                  <span className="text-[13px] font-extrabold tabular-nums text-zinc-350">{tarefaAtual.score_urgencia}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-1.5 rounded-full bg-zinc-800 overflow-hidden relative">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        tarefaAtual.score_urgencia > 80 ? 'bg-gradient-to-r from-red-500 to-rose-500 shadow-[0_0_8px_rgba(239,68,68,0.3)]' :
+                        tarefaAtual.score_urgencia > 40 ? 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]' : 
+                        'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                      }`}
+                      style={{ width: `${Math.min(tarefaAtual.score_urgencia, 100)}%` }}
+                    />
                   </div>
+                </div>
+                {tarefaAtual.score_urgencia > 100 && (
+                  <div className="flex items-center gap-1.5 text-[10px] text-red-400 font-bold mt-1">
+                    <AlertTriangle className="w-3.5 h-3.5 animate-bounce" /> 
+                    <span>Foco Crítico Excedido</span>
+                  </div>
+                )}
+              </div>
+
+              {/* data de vencimento */}
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-zinc-550 uppercase tracking-widest font-bold block">Prazo final</span>
+                <div className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border text-[13px] font-semibold ${due.bg} ${due.color} border-transparent shadow-sm`}>
+                  <Calendar className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{due.text}</span>
+                </div>
+              </div>
+
+              {/* labels */}
+              <div className="space-y-2 relative">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Marcadores</span>
                   <button
-                    onClick={() => setShowDepPicker(!showDepPicker)}
-                    className="p-0.5 rounded text-zinc-500 hover:text-violet-400 transition-colors"
+                    onClick={() => setShowLabelPicker(!showLabelPicker)}
+                    className="p-1 rounded-lg bg-zinc-900/40 border border-zinc-800/50 text-zinc-400 hover:text-violet-400 hover:border-violet-500/30 transition-all duration-200"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
-                <div className="space-y-1">
+                
+                {/* picker de labels */}
+                {showLabelPicker && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowLabelPicker(false)} />
+                    <div className="absolute top-full left-0 right-0 mt-1.5 z-20 p-2 bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-xl space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                      {allLabels.length > 0 ? (
+                        allLabels.map((lb) => {
+                          const isActive = tarefaAtual.labels?.some((l) => l.id === lb.id);
+                          return (
+                            <button
+                              key={lb.id}
+                              onClick={() => toggleLabel(lb)}
+                              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-[12px] text-left transition-colors
+                                         ${isActive ? 'bg-violet-500/10 text-violet-300' : 'text-zinc-400 hover:bg-zinc-900'}`}
+                            >
+                              <span className="w-3 h-3 rounded-full border shrink-0" style={{ backgroundColor: isActive ? lb.cor : 'transparent', borderColor: lb.cor }} />
+                              <span className="flex-1 truncate">{lb.nome}</span>
+                              {isActive && <Check className="w-3.5 h-3.5 text-violet-400 shrink-0" />}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <div className="text-center py-2 text-[11px] text-zinc-650">Nenhum marcador disponível</div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {/* labels atuais */}
+                <div className="flex flex-wrap gap-1.5">
+                  {(tarefaAtual.labels || []).map((lb) => (
+                    <span
+                      key={lb.id}
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-lg border cursor-pointer
+                                 hover:opacity-75 active:scale-95 transition-all duration-200"
+                      style={{ color: lb.cor, backgroundColor: `${lb.cor}10`, borderColor: `${lb.cor}30` }}
+                      onClick={() => toggleLabel(lb)}
+                      title="Clique para remover"
+                    >
+                      <Tag className="w-3 h-3" />
+                      <span>{lb.nome}</span>
+                      <X className="w-2.5 h-2.5 ml-0.5 opacity-60 hover:opacity-100" />
+                    </span>
+                  ))}
+                  {(tarefaAtual.labels || []).length === 0 && !showLabelPicker && (
+                    <span className="text-[11px] text-zinc-600 italic">Sem marcadores atribuídos</span>
+                  )}
+                </div>
+              </div>
+
+              {/* D2: tempo registrado em foco */}
+              <div className="border-t border-zinc-800/40 pt-4 space-y-2">
+                <div className="flex items-center gap-2 text-zinc-400">
+                  <Timer className="w-4 h-4 text-violet-400/80" />
+                  <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Tempo em Foco</span>
+                </div>
+                {tempo ? (
+                  <div className="bg-zinc-900/20 border border-zinc-850 rounded-xl p-3">
+                    <p className="text-[13px] font-extrabold text-white">
+                      {tempo.total_minutos >= 60
+                        ? `${Math.floor(tempo.total_minutos / 60)}h ${tempo.total_minutos % 60}m`
+                        : `${tempo.total_minutos}m`}
+                      <span className="text-[11px] font-normal text-zinc-550 ml-1.5">
+                        em {tempo.sessoes.length} sessão{tempo.sessoes.length !== 1 ? 'ões' : ''}
+                      </span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-zinc-650 italic pl-1">Nenhuma sessão registrada</p>
+                )}
+              </div>
+
+              {/* D3: recorrência */}
+              <div className="border-t border-zinc-800/40 pt-4 space-y-2 relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-zinc-400">
+                    <RefreshCw className="w-4 h-4 text-violet-400/80" />
+                    <span className="text-[10px] text-zinc-550 uppercase tracking-widest font-bold">Recorrência</span>
+                  </div>
+                  {recorrencia && (
+                    <button onClick={handleRemoveRecorrencia} className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors">
+                      Remover
+                    </button>
+                  )}
+                </div>
+                
+                <button
+                  onClick={() => setShowFreqMenu(!showFreqMenu)}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-[12px] font-semibold transition-all duration-200 ${
+                    recorrencia
+                      ? 'border-violet-500/30 bg-violet-500/5 text-violet-400 hover:border-violet-500/50'
+                      : 'border-zinc-800/50 text-zinc-500 hover:border-zinc-700/60 hover:text-zinc-400'
+                  }`}
+                >
+                  <span>{recorrencia ? `${FREQ_LABELS[recorrencia.frequencia] ?? recorrencia.frequencia}` : 'Não se repete'}</span>
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </button>
+                {showFreqMenu && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowFreqMenu(false)} />
+                    <div className="absolute bottom-full left-0 right-0 mb-1.5 z-20 bg-zinc-950 border border-zinc-800/80 rounded-xl shadow-xl py-1 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                      {['diaria', 'semanal', 'mensal'].map((f) => (
+                        <button key={f} onClick={() => handleSaveRecorrencia(f)}
+                          className="w-full text-left px-3.5 py-2.5 text-[12px] text-zinc-300 hover:bg-zinc-900 transition-colors font-semibold">
+                          {FREQ_LABELS[f]}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* D4: dependências */}
+              <div className="border-t border-zinc-800/40 pt-4 space-y-2 relative">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-zinc-400">
+                    <Link className="w-3.5 h-3.5 text-violet-400/80" />
+                    <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Bloqueada por</span>
+                  </div>
+                  <button
+                    onClick={() => setShowDepPicker(!showDepPicker)}
+                    className="p-1 rounded-lg bg-zinc-900/40 border border-zinc-800/50 text-zinc-400 hover:text-violet-400 hover:border-violet-500/30 transition-all duration-200"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+                
+                {showDepPicker && (
+                  <>
+                    <div className="fixed inset-0 z-10" onClick={() => setShowDepPicker(false)} />
+                    <div className="absolute bottom-full left-0 right-0 mb-1.5 z-20 max-h-40 overflow-y-auto space-y-0.5 bg-zinc-950 border border-zinc-800/80 rounded-xl p-1.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-150 scrollbar-thin">
+                      {tarefas
+                        .filter((t) => t.id !== tarefaAtual.id && t.status !== 'concluida' && !dependencias.some((d) => d.depende_de_id === t.id))
+                        .slice(0, 8)
+                        .map((t) => (
+                          <button key={t.id} onClick={() => handleAddDep(t.id)}
+                            className="w-full text-left px-2.5 py-1.5 rounded-lg text-[12px] text-zinc-300 hover:bg-zinc-900 transition-colors truncate font-semibold">
+                            {t.titulo}
+                          </button>
+                        ))}
+                      {tarefas.filter((t) => t.id !== tarefaAtual.id && t.status !== 'concluida' && !dependencias.some((d) => d.depende_de_id === t.id)).length === 0 && (
+                        <div className="text-center py-2 text-[11px] text-zinc-600">Nenhuma tarefa disponível</div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                <div className="space-y-1.5">
                   {dependencias.map((dep) => (
-                    <div key={dep.id} className="flex items-center gap-2 text-[12px]">
-                      <ArrowRight className="w-3 h-3 text-zinc-600 shrink-0" />
-                      <span className={`flex-1 truncate ${dep.depende_de_status === 'concluida' ? 'line-through text-zinc-600' : 'text-zinc-300'}`}>
+                    <div key={dep.id} className="flex items-center gap-2.5 bg-zinc-900/20 border border-zinc-850 px-3 py-1.5 rounded-xl text-[12px]">
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                      <span className={`flex-1 truncate font-semibold ${dep.depende_de_status === 'concluida' ? 'line-through text-zinc-650' : 'text-zinc-350'}`}>
                         {dep.depende_de_titulo}
                       </span>
-                      <button onClick={() => handleRemoveDep(dep.id)} className="text-zinc-600 hover:text-red-400 transition-colors">
-                        <X className="w-3 h-3" />
+                      <button onClick={() => handleRemoveDep(dep.id)} className="text-zinc-500 hover:text-red-400 transition-colors">
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   ))}
                   {dependencias.length === 0 && !showDepPicker && (
-                    <p className="text-[11px] text-zinc-600">Sem dependências</p>
+                    <p className="text-[11px] text-zinc-650 italic pl-1">Sem dependências ativas</p>
                   )}
                 </div>
-                {showDepPicker && (
-                  <div className="mt-2 max-h-40 overflow-y-auto space-y-0.5 bg-zinc-900/60 border border-zinc-800/40 rounded-lg p-1.5">
-                    {tarefas
-                      .filter((t) => t.id !== tarefaAtual.id && t.status !== 'concluida' && !dependencias.some((d) => d.depende_de_id === t.id))
-                      .slice(0, 8)
-                      .map((t) => (
-                        <button key={t.id} onClick={() => handleAddDep(t.id)}
-                          className="w-full text-left px-2 py-1.5 rounded text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors truncate">
-                          {t.titulo}
-                        </button>
-                      ))}
-                  </div>
-                )}
               </div>
             </div>
+
+            {/* ações */}
+            <div className="border-t border-zinc-800/40 pt-4 space-y-2 mt-auto shrink-0">
+              {tarefaAtual.status !== 'concluida' && (
+                <button
+                  onClick={() => changeStatus('concluida')}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-extrabold
+                             bg-gradient-to-r from-emerald-600 to-teal-650 text-white rounded-xl hover:from-emerald-500 hover:to-teal-500 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-emerald-950/20"
+                >
+                  <Check className="w-4 h-4 stroke-[2.5px]" />
+                  <span>Concluir Tarefa</span>
+                </button>
+              )}
+              
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() =>
+                  {
+                    useTaskStore.getState().startFocusSession(tarefa.id);
+                    useTaskStore.getState().setActiveView('foco');
+                    onClose();
+                  }}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-bold
+                             text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl
+                             hover:bg-emerald-500/25 hover:border-emerald-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Play className="w-3.5 h-3.5 fill-emerald-400" />
+                  <span>Focar</span>
+                </button>
+                
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-bold
+                             text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl
+                             hover:bg-red-500/25 hover:border-red-500/40 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Excluir</span>
+                </button>
+              </div>
+            </div>
+
           </div>
         </div>
-        )}
       </div>
     </div>
   );

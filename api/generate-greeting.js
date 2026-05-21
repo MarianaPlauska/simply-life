@@ -1,7 +1,5 @@
-import Groq from 'groq-sdk';
-
 // GET /api/generate-greeting?lat=X&lon=Y
-// Gera saudação contextual JARVIS cruzando clima + dados do user
+// Gera saudação contextual JARVIS cruzando clima + dados do user via Google Gemini
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -43,46 +41,68 @@ export default async function handler(req, res) {
     const hora = new Date().getHours();
     const periodo = hora < 12 ? 'manhã' : hora < 18 ? 'tarde' : 'noite';
 
-    // 3. gerar saudação via Groq
-    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+    // 3. gerar saudação via Gemini
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      throw new Error('Chave de API do Gemini não configurada. Configure GEMINI_API_KEY.');
+    }
 
-    const completion = await groq.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      messages: [
-        {
-          role: 'system',
-          content: `Você é o JARVIS, o assistente pessoal proativo do Simply-Life OS.
-Gere uma saudação de EXATAMENTE 2 frases em PT-BR informal.
+    const systemInstruction = `Você é o JARVIS, o assistente pessoal proativo, ultra tecnológico e empático do Simply-Life OS.
+Gere uma saudação curta e marcante de EXATAMENTE 2 frases em PT-BR informal e natural.
 
-Regras:
-- Seja caloroso e empático, como um melhor amigo
-- Priorize a informação mais urgente ou relevante
-- Use no máximo 1 emoji
-- Nunca mais de 2 frases
-- Se está chovendo, sugira guarda-chuva ou vitamina C
-- Se tem e-mails urgentes, mencione que traduziu/processou
-- Se o saldo está negativo, avise com empatia
-- Se tem streak alto, motive a continuar
-- Comece com "Bom dia!", "Boa tarde!" ou "Boa noite!" conforme o período`
-        },
-        {
-          role: 'user',
-          content: `Contexto agora:
+Regras absolutas:
+- Seja caloroso, empático e inteligente, como um assistente de ficção científica (Jarvis real)
+- Priorize a informação mais urgente ou relevante no contexto fornecido
+- Use no máximo 1 emoji temático
+- Nunca ultrapasse 2 frases (curtas e diretas)
+- Se está chovendo, mencione sutilmente para levar guarda-chuva ou ter cuidado
+- Se há e-mails urgentes, mencione com tom de eficiência que você já filtrou/organizou a triagem
+- Se o saldo financeiro mensal está negativo, avise de forma discreta, amigável e empática
+- Se o streak de hábitos do usuário está alto, dê um breve incentivo energético para continuar
+- Comece com "Bom dia!", "Boa tarde!" ou "Boa noite!" de acordo com o período indicado`;
+
+    const userPrompt = `Contexto atual do usuário:
 - Período: ${periodo}
-- Clima: ${clima ? `${clima.temperatura}°C, ${clima.chovendo ? 'chovendo' : 'sem chuva'}` : 'indisponível'}
-- E-mails urgentes: ${emailsUrgentes}
-- Medicamentos pendentes: ${medsPendentes}
-- Tarefas críticas: ${tarefasCriticas}
-- Streak de hábitos: ${streak} dias
-- Saldo mensal: R$ ${saldoMes}
-- Próximo compromisso: ${proximoEvento || 'nenhum'}`
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 150,
-    });
+- Clima atual: ${clima ? `${clima.temperatura}°C, ${clima.chovendo ? 'chovendo' : 'sem chuva'}` : 'indisponível'}
+- E-mails urgentes a serem respondidos: ${emailsUrgentes}
+- Medicamentos pendentes hoje: ${medsPendentes}
+- Tarefas de prioridade crítica ativas: ${tarefasCriticas}
+- Streak de hábitos saudáveis: ${streak} dias consecutivos
+- Saldo financeiro do mês: R$ ${saldoMes}
+- Próximo compromisso na agenda: ${proximoEvento || 'nenhum compromisso agendado'}`;
 
-    const greeting = completion.choices[0]?.message?.content || '';
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: userPrompt }]
+            }
+          ],
+          systemInstruction: {
+            parts: [{ text: systemInstruction }]
+          },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 200
+          }
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Erro na API do Gemini (${response.status}): ${errText}`);
+    }
+
+    const dataRes = await response.json();
+    const greeting = dataRes.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
     return res.status(200).json({
       greeting: greeting.trim(),
@@ -90,10 +110,14 @@ Regras:
       periodo,
     });
   } catch (err) {
-    console.error('Greeting error:', err);
+    console.error('Greeting error with Gemini:', err);
     // fallback local sem IA
     const h = new Date().getHours();
-    const fallback = h < 12 ? 'Bom dia! Bora produzir? 💪' : h < 18 ? 'Boa tarde! Vamos manter o ritmo.' : 'Boa noite! Hora de revisar o dia.';
-    return res.status(200).json({ greeting: fallback, weather: null, periodo: h < 12 ? 'manhã' : h < 18 ? 'tarde' : 'noite' });
+    const fallback = h < 12 ? 'Bom dia! O Simply-Life OS está online. Bora produzir? 💪' : h < 18 ? 'Boa tarde! Vamos manter o foco e a produtividade.' : 'Boa noite! Pronto para revisar o dia e relaxar?';
+    return res.status(200).json({ 
+      greeting: fallback, 
+      weather: null, 
+      periodo: h < 12 ? 'manhã' : h < 18 ? 'tarde' : 'noite' 
+    });
   }
 }
