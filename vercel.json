@@ -3,11 +3,6 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "npm ci && cd frontend && npm ci",
   "framework": "vite",
-  "functions": {
-    "api/*.js": {
-      "runtime": "@vercel/node"
-    }
-  },
   "build": {
     "env": {
       "VITE_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
