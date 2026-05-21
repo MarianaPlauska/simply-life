@@ -46,8 +46,16 @@ function useAmbientSound() {
     setPlaying(false);
   }, []);
 
-  const toggle = useCallback(() => {
-    playing ? stop() : start();
+  const toggle = useCallback(() =>
+  {
+    if (playing)
+    {
+      stop();
+    }
+    else
+    {
+      start();
+    }
   }, [playing, start, stop]);
 
   useEffect(() => () => { nodesRef.current?.source.stop(); }, []);
@@ -116,7 +124,7 @@ function XpPopup({ xp }: { xp: number }) {
   );
 }
 
-export function useFocusTimer() {
+function useFocusTimer() {
   const isFocusModeActive = useTaskStore((s) => s.isFocusModeActive);
   const focusState = useTaskStore((s) => s.focusState);
   const gamificacao = useTaskStore((s) => s.gamificacao);
@@ -134,14 +142,18 @@ export function useFocusTimer() {
   const prevPhaseRef = useRef(phase);
   const sound = useAmbientSound();
 
-  useEffect(() => {
-    if (isFocusModeActive && (phase === 'focus' || phase === 'break') && secondsLeft > 0) {
+  const hasTimeLeft = secondsLeft > 0;
+
+  useEffect(() =>
+  {
+    if (isFocusModeActive && (phase === 'focus' || phase === 'break') && hasTimeLeft)
+    {
       intervalRef.current = setInterval(() => tickFocus(), 1000);
       return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
     }
     if (intervalRef.current) clearInterval(intervalRef.current);
     return undefined;
-  }, [isFocusModeActive, phase, secondsLeft > 0, tickFocus]);
+  }, [isFocusModeActive, phase, hasTimeLeft, tickFocus]);
 
   useEffect(() => {
     function onVisibilityChange() {
@@ -154,21 +166,26 @@ export function useFocusTimer() {
   }, [syncFocusFromClock]);
 
 
-  useEffect(() => {
-    if ((phase === 'focus' || phase === 'break') && secondsLeft === 0 && totalSeconds > 0) {
+  useEffect(() =>
+  {
+    if ((phase === 'focus' || phase === 'break') && secondsLeft === 0 && totalSeconds > 0)
+    {
       const prevXp = gamificacao.xp;
-      completeFocusPhase().then(() => {
+      completeFocusPhase().then(() =>
+      {
         const newXp = useTaskStore.getState().gamificacao.xp;
-        if (newXp > prevXp) {
+        if (newXp > prevXp)
+        {
           setLastXpGain(newXp - prevXp);
           setTimeout(() => setLastXpGain(0), 2000);
         }
       });
-      if (phase === 'focus' && canvasRef.current) {
+      if (phase === 'focus' && canvasRef.current)
+      {
         fireConfetti(canvasRef.current);
       }
     }
-  }, [secondsLeft, phase, totalSeconds]);
+  }, [secondsLeft, phase, totalSeconds, completeFocusPhase, gamificacao.xp]);
 
   useEffect(() => {
     if (phase === 'focus' && prevPhaseRef.current !== 'focus') sound.start();

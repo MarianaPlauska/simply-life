@@ -101,7 +101,8 @@ function NavigationSync() {
   const isUpdating = useRef(false);
 
   // url mudou → sincroniza o store
-  useEffect(() => {
+  useEffect(() =>
+  {
     if ( isUpdating.current ) return;
     const viewFromUrl = ROUTE_MAP[location.pathname];
     if ( viewFromUrl && viewFromUrl !== activeView )
@@ -111,10 +112,11 @@ function NavigationSync() {
       // libera o lock no próximo tick
       requestAnimationFrame(() => { isUpdating.current = false; });
     }
-  }, [location.pathname]);
+  }, [location.pathname, activeView, setActiveView]);
 
   // store mudou → sincroniza a url
-  useEffect(() => {
+  useEffect(() =>
+  {
     if ( isUpdating.current ) return;
     const pathForView = VIEW_TO_PATH[activeView];
     if ( pathForView && pathForView !== location.pathname )
@@ -123,7 +125,7 @@ function NavigationSync() {
       navigate(pathForView, { replace: false });
       requestAnimationFrame(() => { isUpdating.current = false; });
     }
-  }, [activeView]);
+  }, [activeView, location.pathname, navigate]);
 
   return null;
 }

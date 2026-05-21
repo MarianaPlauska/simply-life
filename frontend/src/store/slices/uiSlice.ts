@@ -25,7 +25,7 @@ export interface UISlice {
   setKeywords: (keywords: string[]) => void;
 }
 
-export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, _get) => ({
+export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
   activeView: 'dashboard',
   isQuickCaptureOpen: false,
   isCommandPaletteOpen: false,

@@ -20,6 +20,33 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
+interface ToolbarBtnProps
+{
+  active?: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  title: string;
+}
+
+const ToolbarBtn = ({ active, onClick, children, title }: ToolbarBtnProps) =>
+{
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className={[
+        'p-1.5 rounded-md transition-colors',
+        active
+          ? 'bg-violet-500/20 text-violet-300'
+          : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50',
+      ].join(' ')}
+    >
+      {children}
+    </button>
+  );
+};
+
 export function RichTextEditor ({ content, onChange, placeholder = 'Comece a escrever...' }: RichTextEditorProps)
 {
   const editor = useEditor({
@@ -42,28 +69,6 @@ export function RichTextEditor ({ content, onChange, placeholder = 'Comece a esc
   });
 
   if ( !editor ) return null;
-
-  // botão da toolbar com estado ativo
-  const ToolbarBtn = ({ active, onClick, children, title }: {
-    active?: boolean;
-    onClick: () => void;
-    children: React.ReactNode;
-    title: string;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      className={[
-        'p-1.5 rounded-md transition-colors',
-        active
-          ? 'bg-violet-500/20 text-violet-300'
-          : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-700/50',
-      ].join(' ')}
-    >
-      {children}
-    </button>
-  );
 
   return (
     <div className="border border-white/10 rounded-xl bg-zinc-900/60 overflow-hidden">

@@ -12,7 +12,8 @@ import { FinanceTransactionsTab } from './FinanceTransactionsTab';
 import { FinanceGoalsTab } from './FinanceGoalsTab';
 import { VirtualCardsTab } from './VirtualCardsTab';
 
-const ICON_MAP: Record<string, any> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> =
+{
   Wallet, Target
 };
 
@@ -79,8 +80,10 @@ export function FinancePlannerView() {
     fetchGoals();
   }, [fetchTransactions, fetchCategories, fetchGoals]);
 
-  // Fallback para categorias caso esteja vazio
-  const activeCategories = categories.length > 0 ? categories : [];
+  const activeCategories = useMemo(() =>
+  {
+    return categories.length > 0 ? categories : [];
+  }, [categories]);
 
   const now = new Date();
   const viewDate = new Date(now.getFullYear(), now.getMonth() + monthOffset, 1);
@@ -88,18 +91,27 @@ export function FinancePlannerView() {
   const viewYear = viewDate.getFullYear();
   const monthLabel = `${MONTHS[viewMonth]} ${viewYear}`;
 
-  const monthTx = useMemo(() => {
-    return transactions.filter((t) => {
+  const monthTx = useMemo(() =>
+  {
+    const currentDate = new Date();
+    const targetDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + monthOffset, 1);
+    const m = targetDate.getMonth();
+    const y = targetDate.getFullYear();
+    return transactions.filter((t) =>
+    {
       const d = new Date(t.data + 'T12:00:00');
-      return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
+      return d.getMonth() === m && d.getFullYear() === y;
     });
-  }, [transactions, viewMonth, viewYear]);
+  }, [transactions, monthOffset]);
 
-  const prevMonthTx = useMemo(() => {
-    const prevDate = new Date(now.getFullYear(), now.getMonth() + monthOffset - 1, 1);
+  const prevMonthTx = useMemo(() =>
+  {
+    const currentDate = new Date();
+    const prevDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + monthOffset - 1, 1);
     const pm = prevDate.getMonth();
     const py = prevDate.getFullYear();
-    return transactions.filter((t) => {
+    return transactions.filter((t) =>
+    {
       const d = new Date(t.data + 'T12:00:00');
       return d.getMonth() === pm && d.getFullYear() === py;
     });
@@ -146,15 +158,19 @@ export function FinancePlannerView() {
       .sort((a, b) => b.total - a.total);
   }, [monthTx]);
 
-  const biggestCategory = categoryTotals[0] ? activeCategories.find(c => c.id === categoryTotals[0].id) : null;
+  const biggestCategory = categoryTotals[0] ? (activeCategories.find(c => c.id === categoryTotals[0].id) ?? null) : null;
 
-  const areaChartData = useMemo(() => {
+  const areaChartData = useMemo(() =>
+  {
+    const currentDate = new Date();
     const data = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() + monthOffset - i, 1);
+    for (let i = 5; i >= 0; i--)
+    {
+      const d = new Date(currentDate.getFullYear(), currentDate.getMonth() + monthOffset - i, 1);
       const m = d.getMonth();
       const y = d.getFullYear();
-      const mTx = transactions.filter((t) => {
+      const mTx = transactions.filter((t) =>
+      {
         const td = new Date(t.data + 'T12:00:00');
         return td.getMonth() === m && td.getFullYear() === y;
       });
@@ -193,7 +209,7 @@ export function FinancePlannerView() {
       categoria: form.tipo === 'receita' ? '-' : form.categoria,
       categoria_id: form.categoria_id,
       data: form.data || new Date().toISOString().split('T')[0],
-      status_pagamento: form.status_pagamento as any,
+      status_pagamento: form.status_pagamento as 'pago' | 'pendente' | 'agendado',
       card_id: form.tipo === 'despesa' ? form.card_id : undefined,
     });
     setForm({ descricao: '', valor: '', tipo: 'despesa', categoria: '', categoria_id: undefined, data: '', status_pagamento: 'pendente', card_id: undefined });

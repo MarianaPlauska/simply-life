@@ -15,8 +15,8 @@ function fmt(value: number)
 
 export function VirtualCardsTab()
 {
-  const cards = useTaskStore((s) => s.cards) || [];
-  const transactions = useTaskStore((s) => s.transactions) || [];
+  const cards = useTaskStore((s) => s.cards);
+  const transactions = useTaskStore((s) => s.transactions);
   const addCard = useTaskStore((s) => s.addCard);
   const removeCard = useTaskStore((s) => s.removeCard);
   const toggleCardStatus = useTaskStore((s) => s.toggleCardStatus);

@@ -3,6 +3,40 @@ import type { StateCreator } from 'zustand'
 import type { TarefaUnificada, Label, Subtarefa } from '../../types'
 import { supabase } from '../../lib/supabase'
 
+interface DBTarefaLabel
+{
+  label_id: number;
+  labels: Label | null;
+}
+
+interface DBTarefaRow
+{
+  id: number;
+  user_id: string;
+  titulo: string;
+  descricao: string | null;
+  snippet_100_char: string;
+  score_urgencia: number;
+  status: 'pendente' | 'em_progresso' | 'concluida';
+  prioridade: 'baixa' | 'media' | 'alta' | 'critica';
+  origem: string;
+  notas_locais: string | null;
+  data_vencimento: string | null;
+  created_at: string | null;
+  versao: number;
+  subtarefas: Subtarefa[];
+  tarefa_labels: DBTarefaLabel[];
+}
+
+interface DBTemplateRow
+{
+  id: number;
+  user_id: string;
+  nome: string;
+  prioridade: string;
+  subtarefas_json: string | null;
+}
+
 export interface TarefasSlice
 {
   tarefas: TarefaUnificada[]
@@ -62,9 +96,9 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
         .order('created_at', { ascending: false })
       if (error) throw error
       // mapeia labels do formato join para array plano
-      const tarefas = (data || []).map((t: any) => ({
+      const tarefas = (data || []).map((t: DBTarefaRow) => ({
         ...t,
-        labels: (t.tarefa_labels || []).map((tl: any) => tl.labels).filter(Boolean),
+        labels: (t.tarefa_labels || []).map((tl: DBTarefaLabel) => tl.labels).filter(Boolean) as Label[],
       }))
       set({ tarefas, isLoading: false })
     }
@@ -401,7 +435,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       const { data, error } = await supabase.from('tarefa_templates').select('*')
       if (error) throw error
       set({
-        templates: (data || []).map((t: any) => ({
+        templates: (data || []).map((t: DBTemplateRow) => ({
           ...t,
           subtarefas: t.subtarefas_json ? JSON.parse(t.subtarefas_json) : [],
         })),

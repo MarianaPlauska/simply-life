@@ -58,7 +58,8 @@ export function HealthView() {
   const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje);
   const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     fetchMedicamentos();
     fetchHabitos();
     /* carrega dados de bem-estar mental — inclui histórico de 30 dias para os pixels */
@@ -67,7 +68,15 @@ export function HealthView() {
     fetchHumorMes();
     fetchDiarioHoje();
     fetchPromptDoDia();
-  }, []);
+  }, [
+    fetchMedicamentos,
+    fetchHabitos,
+    fetchHumorHoje,
+    fetchHumorSemana,
+    fetchHumorMes,
+    fetchDiarioHoje,
+    fetchPromptDoDia,
+  ]);
 
   /* -- Vitality score from habits + meds -- */
   const totalHabitoPct = habitos.length > 0

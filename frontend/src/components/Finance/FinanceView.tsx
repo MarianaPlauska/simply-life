@@ -51,10 +51,11 @@ export function FinanceView() {
   const [form, setForm] = useState({ categoria: 'Mercado', descricao: '', valor: '' });
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     registerInteraction('financeiro');
     fetchDespesas();
-  }, []);
+  }, [fetchDespesas, registerInteraction]);
 
   const totalMes = despesas.reduce((sum, d) => sum + d.valor, 0);
   const orcamento = 4500;

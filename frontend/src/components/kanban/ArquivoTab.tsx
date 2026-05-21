@@ -1,19 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Archive, Loader2, RotateCcw } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { toast } from 'sonner';
 
-export function ArquivoTab() {
+export function ArquivoTab()
+{
   const { arquivo, arquivoLoading, fetchArquivo, restaurarTarefa } = useTaskStore();
-  const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    if (!loaded)
-    {
-      fetchArquivo();
-      setLoaded(true);
-    }
-  }, [loaded, fetchArquivo]);
+  useEffect(() =>
+  {
+    fetchArquivo();
+  }, [fetchArquivo]);
 
   if (arquivoLoading)
   {

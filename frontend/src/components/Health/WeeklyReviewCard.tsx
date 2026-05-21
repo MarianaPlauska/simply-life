@@ -36,7 +36,7 @@ export function WeeklyReviewCard ()
   {
     fetchWeeklyReview();
     fetchCorrelacao();
-  }, []);
+  }, [fetchWeeklyReview, fetchCorrelacao]);
 
   if ( !weeklyReview ) return null;
 

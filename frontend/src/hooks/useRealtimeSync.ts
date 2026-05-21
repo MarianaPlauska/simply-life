@@ -1,6 +1,7 @@
 // hook de realtime via supabase — substitui websocket do backend
 import { useEffect } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
+import type { TarefaUnificada } from '../types'
 import { supabase } from '../lib/supabase'
 
 export function useRealtimeSync()
@@ -23,7 +24,7 @@ export function useRealtimeSync()
           {
             const exists = s.tarefas.some((t) => t.id === payload.new.id)
             if (exists) return s
-            return { tarefas: [payload.new as any, ...s.tarefas] }
+            return { tarefas: [{ ...payload.new, subtarefas: [], labels: [] } as unknown as TarefaUnificada, ...s.tarefas] }
           })
         },
       )

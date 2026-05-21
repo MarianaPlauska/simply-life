@@ -8,7 +8,10 @@ import {
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Briefcase, Shield, Target
 } from 'lucide-react';
 
-const ICON_MAP: Record<string, any> = {
+import type { Category, Transaction } from '../../store/storeTypes';
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> =
+{
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Wallet, Shield, Target, Briefcase
 };
 
@@ -18,23 +21,26 @@ const STATUS_CONFIG = {
   agendado: { label: 'Agendado', icon: CalendarClock, text: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
 } as const;
 
-function fmt(value: number) {
+function fmt(value: number)
+{
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function fmtDate(iso: string) {
+function fmtDate(iso: string)
+{
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
-interface FinanceTransactionsTabProps {
+interface FinanceTransactionsTabProps
+{
   filterCat: string;
   setFilterCat: (cat: string) => void;
-  activeCategories: any[];
+  activeCategories: Category[];
   filterStatus: string;
   setFilterStatus: (status: string) => void;
-  sorted: any[];
+  sorted: Transaction[];
   removeTransaction: (id: number) => void;
-  filteredTx: any[];
+  filteredTx: Transaction[];
 }
 
 export function FinanceTransactionsTab({

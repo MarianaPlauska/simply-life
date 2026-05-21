@@ -272,7 +272,6 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
     }
     fetchD();
     return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tarefaAtual.id]);
 
   const handleSaveRecorrencia = async (freq: string) =>

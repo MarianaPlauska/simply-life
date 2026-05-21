@@ -1,5 +1,5 @@
 // callback do google oauth — placeholder até configurar provider no supabase
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
 
@@ -8,13 +8,7 @@ type CallbackStatus = 'processing' | 'success' | 'error'
 export function GoogleCallbackView()
 {
   const navigate = useNavigate()
-  const [status, setStatus] = useState<CallbackStatus>('processing')
-
-  useEffect(() =>
-  {
-    // google oauth será configurado no supabase dashboard futuramente
-    setStatus('error')
-  }, [])
+  const [status] = useState<CallbackStatus>('error')
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950">

@@ -50,18 +50,21 @@ function BarChart({ data, color = '#10b981', height = 120 }: {
 }
 
 /* ── Donut Chart (SVG) ───────────────────────────────────── */
-function DonutChart({ items, size = 120 }: { items: RankingItem[]; size?: number }) {
+function DonutChart({ items, size = 120 }: { items: RankingItem[]; size?: number })
+{
   const total = items.reduce((s, i) => s + i.valor, 0) || 1;
   const r = size / 2 - 8;
   const circumference = 2 * Math.PI * r;
-  let offset = 0;
 
   return (
     <svg width={size} height={size} className="transform -rotate-90">
-      {items.map((item) => {
+      {items.map((item, idx) =>
+      {
         const pct = item.valor / total;
         const dashLen = pct * circumference;
-        const segment = (
+        const prevSum = items.slice(0, idx).reduce((s, i) => s + i.valor, 0);
+        const currentOffset = (prevSum / total) * circumference;
+        return (
           <circle
             key={item.nome}
             cx={size / 2}
@@ -71,12 +74,10 @@ function DonutChart({ items, size = 120 }: { items: RankingItem[]; size?: number
             stroke={item.cor}
             strokeWidth="16"
             strokeDasharray={`${dashLen} ${circumference - dashLen}`}
-            strokeDashoffset={-offset}
+            strokeDashoffset={-currentOffset}
             strokeLinecap="round"
           />
         );
-        offset += dashLen;
-        return segment;
       })}
     </svg>
   );
@@ -166,12 +167,13 @@ export function RelatoriosView() {
   const fetchMensal = useTaskStore((s) => s.fetchRelatorioMensal);
   const hasFetched = useRef(false);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (hasFetched.current) return;
     hasFetched.current = true;
     fetchSemanal();
     fetchMensal();
-  }, []);
+  }, [fetchSemanal, fetchMensal]);
 
   const report: AnalyticsReport | null = periodo === 'semanal' ? semanal : mensal;
   const p = report?.periodo_atual;

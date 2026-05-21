@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { useRef, useCallback, type ReactNode } from 'react';
 import { motion, type HTMLMotionProps, type Variants } from 'framer-motion';
 

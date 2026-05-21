@@ -36,7 +36,10 @@ export function GlassHeader() {
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { fetchNotificacoes(); }, []);
+  useEffect(() =>
+  {
+    fetchNotificacoes();
+  }, [fetchNotificacoes]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

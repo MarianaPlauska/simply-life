@@ -34,11 +34,13 @@ export function GanttView ({ tarefas, onSelectTarefa }: GanttViewProps)
 
   const maxDate = useMemo(() =>
   {
-    if ( comPrazo.length === 0 ) return new Date(today.getTime() + 30 * 86400000);
+    const memoToday = new Date();
+    memoToday.setHours(0, 0, 0, 0);
+    if ( comPrazo.length === 0 ) return new Date(memoToday.getTime() + 30 * 86400000);
     const dates = comPrazo.map((t) => new Date(t.data_vencimento!));
     const max = new Date(Math.max(...dates.map((d) => d.getTime())));
     // mínimo de 14 dias de janela
-    const min14 = new Date(today.getTime() + 14 * 86400000);
+    const min14 = new Date(memoToday.getTime() + 14 * 86400000);
     return max > min14 ? max : min14;
   }, [comPrazo]);
 

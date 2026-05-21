@@ -3,6 +3,25 @@ import type { StateCreator } from 'zustand'
 import type { Despesa, Transaction, BudgetLimit, Category, FinancialGoal, VirtualCard } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
 
+interface DatabaseDespesa
+{
+  id: number;
+  descricao: string;
+  categoria: string;
+  categoria_id?: number;
+  valor: number;
+  data_gasto: string;
+  tipo?: 'receita' | 'despesa';
+  status_pagamento?: 'pago' | 'pendente' | 'agendado';
+}
+
+interface DatabaseOrcamento
+{
+  id: number;
+  categoria_id: number;
+  limite: number;
+}
+
 export interface FinanceiroSlice
 {
   despesas: Despesa[]
@@ -115,7 +134,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         .order('data_gasto', { ascending: false })
       if (error) throw error
       set({
-        transactions: (data || []).map((d: any) =>
+        transactions: (data || []).map((d: DatabaseDespesa) =>
         {
           const cardMatch = d.descricao?.match(/\[card:(card_\d+)\]/)
           const card_id = cardMatch ? cardMatch[1] : undefined
@@ -223,7 +242,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       if (error) throw error
       if (data && data.length > 0)
       {
-        const mapped = data.map((b: any) => ({
+        const mapped = data.map((b: DatabaseOrcamento) => ({
           id: b.id,
           categoria_id: b.categoria_id,
           limite: b.limite,

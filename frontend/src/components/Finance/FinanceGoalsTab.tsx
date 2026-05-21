@@ -8,16 +8,21 @@ import {
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Plane, Briefcase, Shield, Wallet
 } from 'lucide-react';
 
-const ICON_MAP: Record<string, any> = {
+import type { FinancialGoal } from '../../store/storeTypes';
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> =
+{
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Wallet, Shield, Target, Plane, Briefcase
 };
 
-function fmt(value: number) {
+function fmt(value: number)
+{
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-interface FinanceGoalsTabProps {
-  financialGoals: any[];
+interface FinanceGoalsTabProps
+{
+  financialGoals: FinancialGoal[];
   editingMeta: number | null;
   setEditingMeta: (id: number | null) => void;
   metaEditVal: string;

@@ -126,10 +126,11 @@ export function PreferencesView() {
   const [notifSistema, setNotifSistema] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     registerInteraction('inteligencia');
     fetchPreferencias().finally(() => setLoaded(true));
-  }, []);
+  }, [fetchPreferencias, registerInteraction]);
 
   /* ── Keyword actions ────────────────────────────────────── */
   const removeKeyword = (word: string) => {
@@ -147,15 +148,18 @@ export function PreferencesView() {
     if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); handleAddClick(); }
   };
 
-  const handleAddClick = () => {
+  const handleAddClick = () =>
+  {
     if (!inputValue.trim()) return;
     let count = 0;
-    let updated = [...storeKeywords];
-    inputValue.split(',').forEach((p) => {
+    const updated = [...storeKeywords];
+    inputValue.split(',').forEach((p) =>
+    {
       const word = p.trim().toLowerCase();
       if (word && !updated.includes(word)) { updated.push(word); count++; }
     });
-    if (count > 0) {
+    if (count > 0)
+    {
       saveKeywords(updated);
       toast.success(`${count} palavra${count > 1 ? 's' : ''} adicionada${count > 1 ? 's' : ''}`, {
         description: 'A IA agora priorizará esses termos.',

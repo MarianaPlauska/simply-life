@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * DashboardPrimitives.tsx — Barrel re-exports from ui/ and utils/.
  * Keeps existing import paths working across dashboard sections.

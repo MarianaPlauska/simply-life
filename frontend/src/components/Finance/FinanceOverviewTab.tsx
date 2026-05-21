@@ -13,7 +13,9 @@ import {
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Briefcase, Shield, Target
 } from 'lucide-react';
 
-const ICON_MAP: Record<string, any> = {
+import type { Category, Transaction } from '../../store/storeTypes';
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Wallet, Shield, Target, Briefcase
 };
 
@@ -44,20 +46,47 @@ const ChartTooltip = ({ active, payload, label }: { active?: boolean; payload?: 
   return null;
 };
 
+interface CategoryTotal {
+  id: number;
+  total: number;
+}
+
+interface PieChartItem {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface AreaChartItem {
+  mes: string;
+  receita: number;
+  gastos: number;
+}
+
+interface BudgetItem {
+  id: number;
+  nome: string;
+  icone: string;
+  cor: string;
+  gasto: number;
+  limite: number;
+  pct: number;
+}
+
 interface FinanceOverviewTabProps {
   receita: number;
   despesas: number;
   saldo: number;
   diffDespesas: number;
   diffDespesasPct: number;
-  biggestCategory: any;
-  categoryTotals: any[];
-  pieChartData: any[];
-  areaChartData: any[];
+  biggestCategory: Category | null;
+  categoryTotals: CategoryTotal[];
+  pieChartData: PieChartItem[];
+  areaChartData: AreaChartItem[];
   budgetUsedPct: number;
-  budgetData: any[];
-  monthTx: any[];
-  activeCategories: any[];
+  budgetData: BudgetItem[];
+  monthTx: Transaction[];
+  activeCategories: Category[];
   editingBudget: number | null;
   setEditingBudget: (id: number | null) => void;
   editVal: string;

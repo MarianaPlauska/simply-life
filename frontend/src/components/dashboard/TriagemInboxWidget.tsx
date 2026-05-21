@@ -135,7 +135,13 @@ export function TriagemInboxWidget({ setActiveView: _setActiveView }: TriagemInb
               </div>
             </div>
 
-            <button className="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors flex items-center gap-1">
+            <button
+              onClick={() =>
+              {
+                _setActiveView?.('kanban');
+              }}
+              className="text-[10px] text-zinc-600 hover:text-violet-400 transition-colors flex items-center gap-1"
+            >
               Ver todos <ChevronRight className="w-3 h-3" />
             </button>
           </div>

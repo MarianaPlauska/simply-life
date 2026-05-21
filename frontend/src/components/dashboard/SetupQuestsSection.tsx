@@ -156,15 +156,15 @@ export function SetupQuestsSection()
   const totalCount = quests.length;
   const progressPct = Math.round((completedCount / totalCount) * 100);
 
-  if (dismissed || completedCount === totalCount)
-  {
-    return null;
-  }
-
   const handleNavigate = useCallback((view: ActiveView) =>
   {
     setActiveView(view);
   }, [setActiveView]);
+
+  if (dismissed || completedCount === totalCount)
+  {
+    return null;
+  }
 
   // mapa de cores
   const accentMap: Record<string, { bg: string; text: string; border: string }> = {

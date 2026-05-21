@@ -21,6 +21,17 @@ interface ListViewProps {
 type SortKey = 'titulo' | 'prioridade' | 'status' | 'score_urgencia' | 'created_at';
 type SortDir = 'asc' | 'desc';
 
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir })
+{
+  if (sortKey !== col)
+  {
+    return <ChevronDown className="w-3 h-3 text-zinc-700" />;
+  }
+  return sortDir === 'asc'
+    ? <ChevronUp className="w-3 h-3 text-violet-400" />
+    : <ChevronDown className="w-3 h-3 text-violet-400" />;
+}
+
 export function ListView ({ tarefas, selectedIds, onToggleSelect, onSelectAll, onEdit, onDelete, onDuplicate }: ListViewProps)
 {
   const [sortKey, setSortKey] = useState<SortKey>('score_urgencia');
@@ -41,14 +52,6 @@ export function ListView ({ tarefas, selectedIds, onToggleSelect, onSelectAll, o
     else { setSortKey(key); setSortDir('desc'); }
   }
 
-  function SortIcon ({ col }: { col: SortKey })
-  {
-    if ( sortKey !== col ) return <ChevronDown className="w-3 h-3 text-zinc-700" />;
-    return sortDir === 'asc'
-      ? <ChevronUp className="w-3 h-3 text-violet-400" />
-      : <ChevronDown className="w-3 h-3 text-violet-400" />;
-  }
-
   return (
     <div className="bg-zinc-900/30 border border-zinc-800/40 rounded-xl overflow-hidden">
       {/* header row */}
@@ -62,19 +65,19 @@ export function ListView ({ tarefas, selectedIds, onToggleSelect, onSelectAll, o
           </button>
         </div>
         <button className="flex items-center gap-1 text-left" onClick={() => toggleSort('titulo')}>
-          Título <SortIcon col="titulo" />
+          Título <SortIcon col="titulo" sortKey={sortKey} sortDir={sortDir} />
         </button>
         <button className="flex items-center gap-1" onClick={() => toggleSort('status')}>
-          Status <SortIcon col="status" />
+          Status <SortIcon col="status" sortKey={sortKey} sortDir={sortDir} />
         </button>
         <button className="flex items-center gap-1" onClick={() => toggleSort('prioridade')}>
-          Prioridade <SortIcon col="prioridade" />
+          Prioridade <SortIcon col="prioridade" sortKey={sortKey} sortDir={sortDir} />
         </button>
         <button className="flex items-center gap-1" onClick={() => toggleSort('score_urgencia')}>
-          Score <SortIcon col="score_urgencia" />
+          Score <SortIcon col="score_urgencia" sortKey={sortKey} sortDir={sortDir} />
         </button>
         <button className="flex items-center gap-1" onClick={() => toggleSort('created_at')}>
-          Data <SortIcon col="created_at" />
+          Data <SortIcon col="created_at" sortKey={sortKey} sortDir={sortDir} />
         </button>
         <span />
       </div>

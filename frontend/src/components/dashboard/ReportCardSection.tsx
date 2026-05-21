@@ -7,17 +7,19 @@ import { fadeUp } from './DashboardPrimitives';
 import { useTaskStore } from '../../store/useTaskStore';
 import { useNavigate } from 'react-router-dom';
 
-export function ReportCardSection() {
+export function ReportCardSection()
+{
   const resumo = useTaskStore((s) => s.relatorioResumo);
   const fetchResumo = useTaskStore((s) => s.fetchRelatorioResumo);
   const navigate = useNavigate();
   const fetched = useRef(false);
 
-  useEffect(() => {
+  useEffect(() =>
+  {
     if (fetched.current) return;
     fetched.current = true;
     fetchResumo();
-  }, []);
+  }, [fetchResumo]);
 
   if (!resumo) return null;
 
