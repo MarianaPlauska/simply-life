@@ -13,6 +13,8 @@ export function OnboardingChecklist ()
   const tarefas     = useTaskStore((s) => s.tarefas);
   const transactions = useTaskStore((s) => s.transactions);
   const habitos     = useTaskStore((s) => s.habitos);
+  const gamificacao   = useTaskStore((s) => s.gamificacao);
+  const pinnedModules = useTaskStore((s) => s.pinnedModules);
   const completeStep = useTaskStore((s) => s.completeOnboardingStep);
   const navigate    = useNavigate();
 
@@ -20,16 +22,37 @@ export function OnboardingChecklist ()
 
   // auto-detecta passos já completados com base nos dados do store
   const completedSet = new Set(steps);
-  if ( tarefas.length > 0 )      completedSet.add('create_task');
-  if ( transactions.length > 0 ) completedSet.add('add_expense');
-  if ( habitos.length > 0 )      completedSet.add('add_habit');
+  if ( tarefas.length > 0 )
+  {
+    completedSet.add('create_task');
+  }
+  if ( transactions.length > 0 )
+  {
+    completedSet.add('add_expense');
+  }
+  if ( habitos.length > 0 )
+  {
+    completedSet.add('add_habit');
+  }
+  if ( gamificacao?.xp_total > 0 || gamificacao?.ultima_sessao_foco )
+  {
+    completedSet.add('activate_focus');
+  }
+  if ( pinnedModules && pinnedModules.length !== 2 )
+  {
+    completedSet.add('customize_sidebar');
+  }
 
   const completedCount = completedSet.size;
   const totalSteps     = ONBOARDING_STEPS.length;
   const progressPct    = (completedCount / totalSteps) * 100;
 
-  // esconde se dismissido ou 100% completo
-  if ( dismissed || completedCount >= totalSteps ) return null;
+  // esconde se dismissido, completo ou se já tiver dados cadastrados (usuário ativo)
+  const isAlreadyActive = tarefas.length > 0 || transactions.length > 0 || habitos.length > 0;
+  if ( dismissed || completedCount >= totalSteps || isAlreadyActive )
+  {
+    return null;
+  }
 
   const handleStepClick = (step: typeof ONBOARDING_STEPS[number]) =>
   {

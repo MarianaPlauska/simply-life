@@ -9,8 +9,9 @@ import { AuthButton } from '../ui/AuthButton';
 import { TabToggle } from '../ui/TabToggle';
 import { supabase } from '../../lib/supabase';
 
-/* â”€â”€ Google "G" SVG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-function GoogleLogo({ className }: { className?: string }) {
+/* ── Google "G" SVG ─────────────────────────────────────────── */
+function GoogleLogo({ className }: { className?: string })
+{
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none">
       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4" />
@@ -21,13 +22,18 @@ function GoogleLogo({ className }: { className?: string }) {
   );
 }
 
-/* â”€â”€ Spotlight hook â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-function useSpotlight() {
+/* ── Spotlight hook ─────────────────────────────────────────── */
+function useSpotlight()
+{
   const [pos, setPos] = useState({ x: -1000, y: -1000 });
   const raf = useRef(0);
-  const onMouseMove = useCallback((e: React.MouseEvent) => {
+  const onMouseMove = useCallback((e: React.MouseEvent) =>
+  {
     cancelAnimationFrame(raf.current);
-    raf.current = requestAnimationFrame(() => setPos({ x: e.clientX, y: e.clientY }));
+    raf.current = requestAnimationFrame(() =>
+    {
+      setPos({ x: e.clientX, y: e.clientY });
+    });
   }, []);
   return { pos, onMouseMove };
 }
@@ -223,19 +229,19 @@ export function LoginView() {
       {/* Spotlight */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         <div
-          className="absolute w-[900px] h-[900px] rounded-full blur-[160px] will-change-transform"
+          className="absolute w-[800px] h-[800px] rounded-full blur-[145px] will-change-transform"
           style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.30) 0%, rgba(109,40,217,0.14) 40%, transparent 70%)',
-            left: pos.x - 450, top: pos.y - 450,
-            transition: 'left 0.35s cubic-bezier(.22,1,.36,1), top 0.35s cubic-bezier(.22,1,.36,1)',
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(99, 102, 241, 0.04) 50%, transparent 80%)',
+            left: pos.x - 400,
+            top: pos.y - 400,
           }}
         />
         <div
-          className="absolute w-[600px] h-[600px] rounded-full blur-[200px] will-change-transform"
+          className="absolute w-[500px] h-[500px] rounded-full blur-[145px] will-change-transform"
           style={{
-            background: 'radial-gradient(circle, rgba(236,72,153,0.18) 0%, transparent 60%)',
-            left: pos.x - 180, top: pos.y - 380,
-            transition: 'left 0.5s cubic-bezier(.22,1,.36,1), top 0.5s cubic-bezier(.22,1,.36,1)',
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.06) 0%, transparent 70%)',
+            left: pos.x - 250,
+            top: pos.y - 250,
           }}
         />
       </div>

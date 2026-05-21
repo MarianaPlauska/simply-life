@@ -591,7 +591,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                     </div>
                     {!editingNotes && (
                       <button
-                        onClick={() => { setNotesDraft(tarefaAtual.notes_locais || tarefaAtual.notas_locais || ''); setEditingNotes(true); }}
+                        onClick={() => { setNotesDraft(tarefaAtual.notas_locais || ''); setEditingNotes(true); }}
                         className="text-[11px] text-zinc-500 hover:text-violet-400 transition-colors font-semibold"
                       >
                         Editar notas

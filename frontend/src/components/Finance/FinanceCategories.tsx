@@ -167,24 +167,24 @@ export function FinanceCategories({ onClose }: Props) {
             </button>
           )}
 
-          {/* Lista */}
+          {/* Lista de Categorias - Estilo Notion/Slack com divisorias simples e hover suave */}
           <div className="space-y-4">
-            <h4 className="text-[12px] font-bold text-zinc-500 uppercase tracking-wider">Suas Categorias</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <h4 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Suas Categorias</h4>
+            <div className="divide-y divide-zinc-900/40">
               {categories.map(cat => {
                 const Icon = PRESET_ICONS.find(i => i.id === cat.icone)?.icon || Wallet;
                 return (
-                  <div key={cat.id} className="flex items-center gap-3 p-3 bg-zinc-800/20 border border-zinc-800 rounded-xl group">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: `${cat.cor}15`, color: cat.cor }}>
-                      <Icon className="w-5 h-5" />
+                  <div key={cat.id} className="flex items-center gap-3 py-3.5 hover:bg-white/[0.01] hover:px-3 -mx-3 rounded-lg transition-all duration-200 group">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-zinc-800/60 bg-zinc-900 group-hover:border-violet-500/30 group-hover:bg-violet-950/20 transition-colors" style={{ color: cat.cor }}>
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-white truncate">{cat.nome}</p>
-                      <p className="text-[10px] text-zinc-500 capitalize">{cat.tipo}</p>
+                      <p className="text-[13px] font-medium text-zinc-200 group-hover:text-white transition-colors truncate">{cat.nome}</p>
+                      <p className="text-[10px] text-zinc-500 capitalize font-medium">{cat.tipo}</p>
                     </div>
                     <button 
                       onClick={() => handleDelete(cat.id)}
-                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 rounded-lg text-zinc-600 hover:text-red-400 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-600 hover:text-red-400 transition-all"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -192,8 +192,8 @@ export function FinanceCategories({ onClose }: Props) {
                 );
               })}
               {categories.length === 0 && (
-                <div className="col-span-full py-12 text-center">
-                  <p className="text-sm text-zinc-600">Nenhuma categoria customizada ainda.</p>
+                <div className="py-12 text-center">
+                  <p className="text-[12px] text-zinc-600">Nenhuma categoria customizada ainda.</p>
                 </div>
               )}
             </div>

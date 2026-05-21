@@ -13,8 +13,7 @@ interface KanbanColumnProps {
   children: ReactNode;
 }
 
-export function KanbanColumn ({ id, title, count, wipLimit, dotColor, children }: KanbanColumnProps)
-{
+export function KanbanColumn({ id, title, count, wipLimit, dotColor, children }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id });
   const overLimit = count > wipLimit;
   const [collapsed, setCollapsed] = useState(false);
@@ -23,9 +22,11 @@ export function KanbanColumn ({ id, title, count, wipLimit, dotColor, children }
   const [adding, setAdding] = useState(false);
   const createTarefa = useTaskStore((s) => s.createTarefa);
 
-  const handleAddCard = async () =>
-  {
-    if ( !newTitle.trim() ) return;
+  const handleAddCard = async () => {
+    if (!newTitle.trim())
+    {
+      return;
+    }
     setAdding(true);
     await createTarefa(newTitle.trim());
     setNewTitle('');
@@ -38,29 +39,28 @@ export function KanbanColumn ({ id, title, count, wipLimit, dotColor, children }
       ref={setNodeRef}
       aria-label={`Coluna ${title}, ${count} de ${wipLimit} tarefas`}
       className={[
-        'w-80 shrink-0 flex flex-col rounded-xl border transition-all duration-200',
-        isOver
-          ? 'border-violet-500/40 bg-violet-500/[0.03] shadow-lg shadow-violet-500/5'
-          : 'border-zinc-800/40 bg-zinc-900/20',
-        collapsed ? 'w-14' : '',
+        'w-80 shrink-0 flex flex-col transition-all duration-200',
+        isOver ? 'bg-violet-500/[0.02] rounded-xl' : 'bg-transparent',
+        collapsed ? 'w-12' : '',
       ].join(' ')}
     >
-      {/* cabeçalho fixo da coluna */}
-      <div className="sticky top-0 z-10 bg-zinc-950/90 backdrop-blur-md px-4 py-3 border-b border-zinc-800/30 rounded-t-xl">
+      {/* cabeçalho da coluna - limpo e sem bordas pesadas */}
+      <div className="sticky top-0 z-10 bg-zinc-950/90 backdrop-blur-md py-3.5 px-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* botão collapse */}
+            {/* botão de colapsar coluna */}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="p-0.5 rounded hover:bg-zinc-800/60 transition-colors text-zinc-500 hover:text-zinc-300"
+              className="p-0.5 rounded hover:bg-zinc-900 transition-colors text-zinc-500 hover:text-zinc-400"
               title={collapsed ? 'Expandir coluna' : 'Recolher coluna'}
             >
-              {collapsed
-                ? <ChevronRight className="w-3.5 h-3.5" />
-                : <ChevronDown className="w-3.5 h-3.5" />
-              }
+              {collapsed ? (
+                <ChevronRight className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
             </button>
-            <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+            <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
             {!collapsed && (
               <h3 className="text-[13px] font-semibold text-zinc-200">{title}</h3>
             )}
@@ -68,16 +68,16 @@ export function KanbanColumn ({ id, title, count, wipLimit, dotColor, children }
           {!collapsed && (
             <div className="flex items-center gap-2">
               <span
-                className={`text-[11px] font-medium tabular-nums px-2 py-0.5 rounded-md ${
-                  overLimit ? 'text-red-400 bg-red-500/10' : 'text-zinc-500 bg-zinc-800/50'
+                className={`text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded-md ${
+                  overLimit ? 'text-red-400 bg-red-500/10' : 'text-zinc-500'
                 }`}
               >
                 {count}/{wipLimit}
               </span>
-              {/* botão adicionar card */}
+              {/* botão de criar tarefa rápida */}
               <button
                 onClick={() => setShowAddCard(!showAddCard)}
-                className="p-1 rounded-md text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
+                className="p-1 rounded-md text-zinc-500 hover:text-violet-400 hover:bg-violet-500/10 transition-all"
                 title="Adicionar tarefa"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -86,64 +86,79 @@ export function KanbanColumn ({ id, title, count, wipLimit, dotColor, children }
           )}
         </div>
 
-        {/* barra de progresso do wip limit */}
+        {/* indicador de progresso do wip limit (linha ultra fina de 2px) */}
         {!collapsed && (
-          <div className="mt-2 h-1 rounded-full bg-zinc-800/40 overflow-hidden">
+          <div className="mt-2.5 h-[2px] rounded-full bg-zinc-900 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ease-out ${overLimit ? 'bg-red-500' : dotColor}`}
+              className={`h-full rounded-full transition-all duration-500 ease-out ${
+                overLimit ? 'bg-red-500' : 'bg-violet-500/60'
+              }`}
               style={{ width: `${Math.min((count / wipLimit) * 100, 100)}%` }}
             />
           </div>
         )}
       </div>
 
-      {/* coluna recolhida: mostra titulo vertical */}
+      {/* visualização colapsada da coluna */}
       {collapsed && (
-        <div className="flex-1 flex items-center justify-center py-4">
-          <span className="text-[11px] text-zinc-500 font-medium [writing-mode:vertical-lr] rotate-180">
-            {title} ({count})
+        <div className="flex-1 flex items-center justify-center py-4 bg-zinc-950/20 border-r border-zinc-900/30">
+          <span className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold [writing-mode:vertical-lr] rotate-180">
+            {title} &middot; <span className="tabular-nums">{count}</span>
           </span>
         </div>
       )}
 
-      {/* area de cards rolável */}
+      {/* área para rolagem de tarefas */}
       {!collapsed && (
         <div
-          className="flex-1 p-3 flex flex-col gap-3 overflow-y-auto min-h-[120px] max-h-[calc(100vh-260px)]
-                     scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent"
+          className="flex-1 py-2 px-1 flex flex-col gap-2 overflow-y-auto min-h-[120px] max-h-[calc(100vh-260px)]
+                     scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent"
           role="list"
         >
-          {/* formulario inline para adicionar card */}
+          {/* formulário inline de criação rápida de card */}
           {showAddCard && (
-            <div className="bg-zinc-900/80 border border-zinc-700/50 rounded-xl p-3 space-y-2 backdrop-blur-sm">
+            <div className="bg-zinc-900/35 border border-zinc-800/80 rounded-xl p-3 space-y-2.5 backdrop-blur-sm">
               <input
                 type="text"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => {
-                  if ( e.key === 'Enter' ) handleAddCard();
-                  if ( e.key === 'Escape' ) { setShowAddCard(false); setNewTitle(''); }
+                  if (e.key === 'Enter')
+                  {
+                    handleAddCard();
+                  } else if (e.key === 'Escape')
+                  {
+                    setShowAddCard(false);
+                    setNewTitle('');
+                  }
                 }}
                 placeholder="Título da nova tarefa..."
-                className="w-full bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-2
-                           text-[13px] text-white placeholder:text-zinc-600
-                           outline-none focus:ring-1 focus:ring-violet-500/40 transition-shadow"
+                className="w-full bg-zinc-950/45 border border-zinc-800/80 rounded-lg px-3 py-1.5
+                           text-[13px] text-zinc-200 placeholder:text-zinc-650
+                           outline-none focus:border-violet-500/30 focus:ring-1 focus:ring-violet-500/20 transition-all"
                 autoFocus
               />
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleAddCard}
                   disabled={!newTitle.trim() || adding}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium
-                             bg-violet-600 text-white rounded-lg hover:bg-violet-500
+                  className="flex items-center gap-1 px-3 py-1 text-[11px] font-semibold
+                             bg-violet-650 text-white rounded-lg hover:bg-violet-550
                              transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {adding ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
-                  Criar
+                  {adding ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Plus className="w-3.5 h-3.5" />
+                  )}
+                  <span>Criar</span>
                 </button>
                 <button
-                  onClick={() => { setShowAddCard(false); setNewTitle(''); }}
-                  className="px-3 py-1.5 text-[12px] text-zinc-400 hover:text-zinc-200 transition-colors"
+                  onClick={() => {
+                    setShowAddCard(false);
+                    setNewTitle('');
+                  }}
+                  className="px-2.5 py-1 text-[11px] font-medium text-zinc-500 hover:text-zinc-350 transition-colors"
                 >
                   Cancelar
                 </button>
@@ -153,10 +168,10 @@ export function KanbanColumn ({ id, title, count, wipLimit, dotColor, children }
 
           {children}
 
-          {/* indicador de drop zone quando está arrastando */}
+          {/* indicador visual durante drag & drop se a coluna estiver vazia */}
           {isOver && count === 0 && (
-            <div className="flex-1 flex items-center justify-center rounded-lg border-2 border-dashed border-violet-500/30 min-h-[80px]">
-              <span className="text-[11px] text-violet-400/60">Solte aqui</span>
+            <div className="flex-1 flex items-center justify-center rounded-xl border border-dashed border-violet-500/20 min-h-[90px] bg-violet-500/[0.005]">
+              <span className="text-[10px] text-violet-400/50 uppercase tracking-widest font-semibold">Soltar aqui</span>
             </div>
           )}
         </div>

@@ -28,18 +28,15 @@ function formatDate(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
 
-/* ── Glass Card ── */
-function GlassCard({ label, value, icon: Icon, accent }: { label: string; value: string; icon: React.ElementType; accent: string }) {
+/* ── Flat Metric ── */
+function FlatMetric({ label, value, icon: Icon, accent }: { label: string; value: string; icon: React.ElementType; accent: string }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-zinc-800/60 bg-zinc-900/50 backdrop-blur-sm p-6 flex flex-col gap-3">
-      <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-[0.07]" style={{ background: accent }} />
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${accent}15` }}>
-          <Icon className="w-5 h-5" style={{ color: accent }} />
-        </div>
-        <span className="text-[13px] text-zinc-400 font-medium">{label}</span>
+    <div className="flex flex-col gap-1.5 py-2">
+      <div className="flex items-center gap-2 text-zinc-500">
+        <Icon className="w-4 h-4 shrink-0" style={{ color: accent }} />
+        <span className="text-[11px] font-semibold uppercase tracking-wider">{label}</span>
       </div>
-      <span className="text-2xl font-bold text-white tracking-tight">{value}</span>
+      <span className="text-3xl font-bold text-zinc-100 tracking-tight font-mono">{value}</span>
     </div>
   );
 }
@@ -85,53 +82,53 @@ export function FinanceView() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto space-y-12 pb-16">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between border-b border-zinc-900/50 pb-6">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Financeiro</h1>
-          <p className="text-sm text-zinc-500 mt-1">Controle inteligente dos seus gastos</p>
+          <p className="text-xs text-zinc-500 mt-1 font-medium">Controle de gastos com inteligência e simplicidade</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-xl px-5 py-2.5 text-[13px] font-semibold transition-colors"
+          className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg px-4 py-2 text-[12px] font-semibold transition-all shadow-md shadow-violet-950/20 hover:shadow-lg active:scale-95"
         >
           <Plus className="w-4 h-4" />
           Novo Gasto
         </button>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <GlassCard label="Gastos do Mês" value={formatCurrency(totalMes)} icon={Wallet} accent="#ef4444" />
-        <GlassCard label="Orçamento Total" value={formatCurrency(orcamento)} icon={TrendingUp} accent="#8b5cf6" />
-        <GlassCard label="Orçamento Livre" value={formatCurrency(livre)} icon={PiggyBank} accent={livre >= 0 ? '#10b981' : '#ef4444'} />
+      {/* Summary Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 py-2 border-b border-zinc-900/50">
+        <FlatMetric label="Gastos do Mês" value={formatCurrency(totalMes)} icon={Wallet} accent="#f43f5e" />
+        <FlatMetric label="Orçamento Total" value={formatCurrency(orcamento)} icon={TrendingUp} accent="#a78bfa" />
+        <FlatMetric label="Orçamento Livre" value={formatCurrency(livre)} icon={PiggyBank} accent={livre >= 0 ? '#34d399' : '#f43f5e'} />
       </div>
 
       {/* Despesas Recentes */}
-      <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-zinc-800/40">
-          <h2 className="text-[15px] font-semibold text-white">Despesas Recentes</h2>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-zinc-900/50">
+          <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Despesas Recentes</h2>
         </div>
-        <div className="divide-y divide-zinc-800/30">
+        <div className="divide-y divide-zinc-900/40">
           {despesas.map((d) => {
             const CatIcon = CATEGORIAS_ICON[d.categoria] || MoreHorizontal;
             return (
-              <div key={d.id} className="flex items-center gap-4 px-6 py-4 hover:bg-zinc-800/20 transition-colors">
-                <div className="w-9 h-9 rounded-lg bg-zinc-800/60 flex items-center justify-center shrink-0">
-                  <CatIcon className="w-4 h-4 text-zinc-400" />
+              <div key={d.id} className="flex items-center gap-4 py-3.5 hover:bg-white/[0.01] hover:px-3 -mx-3 rounded-lg transition-all duration-200 group">
+                <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800/60 flex items-center justify-center shrink-0 group-hover:border-violet-500/30 group-hover:bg-violet-950/20 transition-colors">
+                  <CatIcon className="w-4 h-4 text-zinc-400 group-hover:text-violet-400 transition-colors" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-medium text-white truncate">{d.descricao}</p>
-                  <p className="text-[11px] text-zinc-500">{d.categoria}</p>
+                  <p className="text-[13px] font-medium text-zinc-200 group-hover:text-white transition-colors truncate">{d.descricao}</p>
+                  <p className="text-[11px] text-zinc-500 group-hover:text-zinc-400 transition-colors">{d.categoria}</p>
                 </div>
-                <span className="text-[13px] font-semibold text-red-400 tabular-nums">{formatCurrency(d.valor)}</span>
-                <span className="text-[12px] text-zinc-500 w-16 text-right">{formatDate(d.data)}</span>
+                <span className="text-[13px] font-semibold text-rose-400 tabular-nums">{formatCurrency(d.valor)}</span>
+                <span className="text-[11px] text-zinc-500 w-16 text-right font-medium">{formatDate(d.data)}</span>
               </div>
             );
           })}
           {despesas.length === 0 && (
-            <div className="px-6 py-12 text-center text-zinc-500 text-sm">
+            <div className="py-12 text-center text-zinc-600 text-[13px]">
               Nenhuma despesa registrada ainda.
             </div>
           )}

@@ -45,6 +45,10 @@ export function SetupQuestsSection()
   const medicamentos = useTaskStore((s) => s.medicamentos);
   const keywords = useTaskStore((s) => s.keywords);
   const setActiveView = useTaskStore((s) => s.setActiveView);
+  const transactions = useTaskStore((s) => s.transactions);
+  const habitos = useTaskStore((s) => s.habitos);
+  const dismissed = useTaskStore((s) => s.onboardingDismissed);
+  const dismiss = useTaskStore((s) => s.dismissOnboarding);
 
   // lista de quests com verificação dinâmica
   const quests: Quest[] = [
@@ -56,7 +60,10 @@ export function SetupQuestsSection()
       xp: 50,
       accent: 'violet',
       view: 'kanban',
-      checkFn: () => tarefas.length > 0,
+      checkFn: () =>
+      {
+        return tarefas.length > 0;
+      },
     },
     {
       id: 'first-med',
@@ -66,7 +73,10 @@ export function SetupQuestsSection()
       xp: 30,
       accent: 'emerald',
       view: 'saude',
-      checkFn: () => (medicamentos ?? []).length > 0,
+      checkFn: () =>
+      {
+        return (medicamentos ?? []).length > 0;
+      },
     },
     {
       id: 'first-expense',
@@ -76,7 +86,10 @@ export function SetupQuestsSection()
       xp: 40,
       accent: 'cyan',
       view: 'planner',
-      checkFn: () => false, // verificado separadamente via despesas
+      checkFn: () =>
+      {
+        return transactions.length > 0;
+      },
     },
     {
       id: 'setup-keywords',
@@ -86,7 +99,10 @@ export function SetupQuestsSection()
       xp: 25,
       accent: 'amber',
       view: 'configuracoes',
-      checkFn: () => keywords.length > 0,
+      checkFn: () =>
+      {
+        return keywords.length > 0;
+      },
     },
     {
       id: 'first-habit',
@@ -96,7 +112,10 @@ export function SetupQuestsSection()
       xp: 35,
       accent: 'emerald',
       view: 'saude',
-      checkFn: () => false, // verificado separadamente via habitos
+      checkFn: () =>
+      {
+        return habitos.length > 0;
+      },
     },
   ];
 
@@ -109,7 +128,10 @@ export function SetupQuestsSection()
     const newCompleted = new Set<string>();
     quests.forEach((q) =>
     {
-      if (q.checkFn()) newCompleted.add(q.id);
+      if (q.checkFn())
+      {
+        newCompleted.add(q.id);
+      }
     });
 
     // detecta se alguma nova quest foi completada (para disparar confetti)
@@ -119,22 +141,25 @@ export function SetupQuestsSection()
       {
         setJustCompleted(id);
         fireConfetti();
-        setTimeout(() => setJustCompleted(null), 2000);
+        setTimeout(() =>
+        {
+          setJustCompleted(null);
+        }, 2000);
       }
     });
 
     setCompletedIds(newCompleted);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tarefas.length, (medicamentos ?? []).length, keywords.length]);
+  }, [tarefas.length, (medicamentos ?? []).length, keywords.length, transactions.length, habitos.length]);
 
   const completedCount = completedIds.size;
   const totalCount = quests.length;
   const progressPct = Math.round((completedCount / totalCount) * 100);
 
-  // se todas completas e não tiver nenhuma recém-completa, desaparece
-  const [dismissed, setDismissed] = useState(false);
-
-  if (dismissed || completedCount === totalCount) return null;
+  if (dismissed || completedCount === totalCount)
+  {
+    return null;
+  }
 
   const handleNavigate = useCallback((view: ActiveView) =>
   {
@@ -172,7 +197,10 @@ export function SetupQuestsSection()
                 <h3 className="text-[14px] font-semibold text-white flex items-center gap-2">
                   Setup do Simply-Life
                   <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
-                    +{quests.reduce((sum, q) => sum + q.xp, 0)} XP
+                    +{quests.reduce((sum, q) =>
+                    {
+                      return sum + q.xp;
+                    }, 0)} XP
                   </span>
                 </h3>
                 <p className="text-[11px] text-zinc-600">
@@ -182,7 +210,7 @@ export function SetupQuestsSection()
             </div>
 
             <button
-              onClick={() => setDismissed(true)}
+              onClick={dismiss}
               className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors"
             >
               Pular

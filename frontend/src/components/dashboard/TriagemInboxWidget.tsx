@@ -29,61 +29,7 @@ export interface UnifiedEvent
   dismissed: boolean;
 }
 
-// dados mock para visualização inicial
-const MOCK_EVENTS: UnifiedEvent[] = [
-  {
-    id: '1',
-    source: 'gmail',
-    sender: 'Carlos Mendes',
-    rawSubject: 'RE: Q2 Budget Review — URGENT action needed',
-    resumo: 'Carlos pede revisão urgente do orçamento Q2. Prazo: sexta-feira.',
-    acaoSugerida: 'fazer',
-    scoreUrgencia: 92,
-    keywordsDetectadas: ['orçamento', 'urgente'],
-    timestamp: new Date(Date.now() - 15 * 60000), // 15 min atrás
-    processed: false,
-    dismissed: false,
-  },
-  {
-    id: '2',
-    source: 'teams',
-    sender: 'Ana Beatriz',
-    rawSubject: 'Meeting notes from design sync',
-    resumo: 'Ana compartilhou notas da sync de design. Tem 2 action items pra você.',
-    acaoSugerida: 'responder',
-    scoreUrgencia: 65,
-    keywordsDetectadas: ['design'],
-    timestamp: new Date(Date.now() - 45 * 60000),
-    processed: false,
-    dismissed: false,
-  },
-  {
-    id: '3',
-    source: 'gmail',
-    sender: 'Newsletter Tech',
-    rawSubject: 'Weekly Digest: AI in Production',
-    resumo: 'Newsletter semanal sobre IA em produção. Sem ação necessária.',
-    acaoSugerida: 'ignorar',
-    scoreUrgencia: 10,
-    keywordsDetectadas: [],
-    timestamp: new Date(Date.now() - 120 * 60000),
-    processed: false,
-    dismissed: false,
-  },
-  {
-    id: '4',
-    source: 'teams',
-    sender: 'Pedro Lima',
-    rawSubject: 'Deployment blocked — need approval ASAP',
-    resumo: 'Deploy bloqueado aguardando sua aprovação. Pipeline parada.',
-    acaoSugerida: 'fazer',
-    scoreUrgencia: 98,
-    keywordsDetectadas: ['deploy', 'aprovação', 'bloqueado'],
-    timestamp: new Date(Date.now() - 5 * 60000),
-    processed: false,
-    dismissed: false,
-  },
-];
+
 
 function getSourceIcon(source: string)
 {
