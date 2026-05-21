@@ -3,30 +3,6 @@ import type { StateCreator } from 'zustand'
 import type { TarefaUnificada, Label, Subtarefa } from '../../types'
 import { supabase } from '../../lib/supabase'
 
-interface DBTarefaLabel
-{
-  label_id: number;
-  labels: Label | null;
-}
-
-interface DBTarefaRow
-{
-  id: number;
-  user_id: string;
-  titulo: string;
-  descricao: string | null;
-  snippet_100_char: string;
-  score_urgencia: number;
-  status: 'pendente' | 'em_progresso' | 'concluida';
-  prioridade: 'baixa' | 'media' | 'alta' | 'critica';
-  origem: string;
-  notas_locais: string | null;
-  data_vencimento: string | null;
-  created_at: string | null;
-  versao: number;
-  subtarefas: Subtarefa[];
-  tarefa_labels: DBTarefaLabel[];
-}
 
 interface DBTemplateRow
 {
@@ -91,15 +67,20 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     {
       const { data, error } = await supabase
         .from('tarefas_unificadas')
-        .select('*, subtarefas(*), tarefa_labels(label_id, labels(*))')
+        .select('*, subtarefas(*), tarefa_labels(label_id, labels(*)), contexto_itens(tipo_item, contextos(titulo, cor))')
         .is('deletado_em', null)
         .order('created_at', { ascending: false })
       if (error) throw error
-      // mapeia labels do formato join para array plano
-      const tarefas = (data || []).map((t: DBTarefaRow) => ({
-        ...t,
-        labels: (t.tarefa_labels || []).map((tl: DBTarefaLabel) => tl.labels).filter(Boolean) as Label[],
-      }))
+      // mapeia labels do formato join para array plano e adiciona info de contexto
+      const tarefas = (data || []).map((t: any) => {
+        const cItem = t.contexto_itens?.[0];
+        const contexto = cItem?.contextos ? { titulo: cItem.contextos.titulo, cor: cItem.contextos.cor } : undefined;
+        return {
+          ...t,
+          labels: (t.tarefa_labels || []).map((tl: any) => tl.labels).filter(Boolean) as Label[],
+          contexto,
+        };
+      })
       set({ tarefas, isLoading: false })
     }
     catch (e)
@@ -129,6 +110,11 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
   {
     try
     {
+      const oldTarefa = get().tarefas.find((t) => t.id === id)
+      const wasCompleted = oldTarefa?.status === 'concluida'
+      const isCompletedNow = dados.status === 'concluida'
+      const isCompleting = isCompletedNow && !wasCompleted
+
       const { data, error } = await supabase
         .from('tarefas_unificadas')
         .update(dados)
@@ -136,7 +122,44 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
         .select()
         .single()
       if (error) throw error
-      if (data) set((s) => ({ tarefas: s.tarefas.map((t) => t.id === id ? { ...t, ...data } : t) }))
+      if (data)
+      {
+        set((s) => ({ tarefas: s.tarefas.map((t) => t.id === id ? { ...t, ...data } : t) }))
+
+        if (isCompleting)
+        {
+          const isUrgente = oldTarefa?.prioridade === 'alta' || oldTarefa?.prioridade === 'critica' || (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
+          const xpAmount = isUrgente ? 25 : 15
+
+          const anyGet = get() as any
+          if (anyGet.addXP) await anyGet.addXP('foco', xpAmount)
+          if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Concluir 1 tarefa do Kanban', 1)
+
+          if (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
+          {
+            const stats = anyGet.userStats
+            if (stats)
+            {
+              const newStreakFoco = stats.streak_foco + 1
+              if (newStreakFoco === 3)
+              {
+                if (anyGet.addXP) await anyGet.addXP('foco', 50)
+                const { toast } = await import('sonner')
+                toast.success('🔥 Bônus Foco Absoluto! (+50 XP)', {
+                  description: 'Você concluiu 3 tarefas de alta urgência em sequência!',
+                })
+                await supabase.from('user_stats').update({ streak_foco: 0 }).eq('id', stats.id);
+                (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: 0 } : null }))
+              }
+              else
+              {
+                await supabase.from('user_stats').update({ streak_foco: newStreakFoco }).eq('id', stats.id);
+                (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: newStreakFoco } : null }))
+              }
+            }
+          }
+        }
+      }
     }
     catch (e) { console.error('updateTarefa:', e) }
   },
@@ -154,12 +177,52 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
   moveTask: (taskId, newStatus) =>
   {
+    const oldTarefa = get().tarefas.find((t) => t.id === taskId)
+    const wasCompleted = oldTarefa?.status === 'concluida'
+    const isCompletedNow = newStatus === 'concluida'
+    const isCompleting = isCompletedNow && !wasCompleted
+
     set((s) => ({
       tarefas: s.tarefas.map((t) =>
         t.id === taskId ? { ...t, status: newStatus as TarefaUnificada['status'] } : t
       ),
     }))
-    supabase.from('tarefas_unificadas').update({ status: newStatus }).eq('id', taskId).then(() => {})
+    supabase.from('tarefas_unificadas').update({ status: newStatus }).eq('id', taskId).then(async () =>
+    {
+      if (isCompleting)
+      {
+        const isUrgente = oldTarefa?.prioridade === 'alta' || oldTarefa?.prioridade === 'critica' || (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
+        const xpAmount = isUrgente ? 25 : 15
+
+        const anyGet = get() as any
+        if (anyGet.addXP) await anyGet.addXP('foco', xpAmount)
+        if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Concluir 1 tarefa do Kanban', 1)
+
+        if (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
+        {
+          const stats = anyGet.userStats
+          if (stats)
+          {
+            const newStreakFoco = stats.streak_foco + 1
+            if (newStreakFoco === 3)
+            {
+              if (anyGet.addXP) await anyGet.addXP('foco', 50)
+              const { toast } = await import('sonner')
+              toast.success('🔥 Bônus Foco Absoluto! (+50 XP)', {
+                description: 'Você concluiu 3 tarefas de alta urgência em sequência!',
+              })
+              await supabase.from('user_stats').update({ streak_foco: 0 }).eq('id', stats.id);
+              (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: 0 } : null }))
+            }
+            else
+            {
+              await supabase.from('user_stats').update({ streak_foco: newStreakFoco }).eq('id', stats.id);
+              (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: newStreakFoco } : null }))
+            }
+          }
+        }
+      }
+    })
   },
 
   simularIngestao: async (params) =>

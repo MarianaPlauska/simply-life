@@ -59,17 +59,17 @@ export function getUserLocation(): Promise<{ lat: number; lon: number }>
   });
 }
 
-// reverse geocoding gratuito via Open-Meteo
+// reverse geocoding gratuito via BigDataCloud
 async function reverseGeocode(lat: number, lon: number): Promise<string>
 {
   try
   {
     const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=&latitude=${lat}&longitude=${lon}&count=1&language=pt`
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`
     );
     if (!res.ok) return '';
     const data = await res.json();
-    return data?.results?.[0]?.name || '';
+    return data.city || data.locality || data.principalSubdivision || '';
   }
   catch
   {

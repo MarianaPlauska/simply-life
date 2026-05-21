@@ -80,9 +80,20 @@ export interface VirtualCard
   validade: string;
   cvv: string;
   limite: number;
+  dia_vencimento?: number;
   tipo_gradiente: 'purple' | 'obsidian' | 'sunset' | 'ocean' | 'mint';
   bandeira: 'visa' | 'mastercard';
   status: 'ativo' | 'bloqueado';
+}
+
+export interface ContaFixa
+{
+  id: number;
+  nome: string;
+  valor: number;
+  dia_vencimento: number;
+  categoria: string;
+  ativa: boolean;
 }
 
 export interface Transaction

@@ -25,7 +25,6 @@ const AnotacoesView    = lazy(() => import('./components/Anotacoes/AnotacoesView
 const FocusModeView    = lazy(() => import('./components/FocusModeView').then((m) => ({ default: m.FocusModeView })));
 const FocusImmersiveOverlay = lazy(() => import('./components/FocusModeView').then((m) => ({ default: m.FocusImmersiveOverlay })));
 const SettingsView     = lazy(() => import('./components/Settings/SettingsView').then((m) => ({ default: m.SettingsView })));
-const FinanceView      = lazy(() => import('./components/Finance/FinanceView').then((m) => ({ default: m.FinanceView })));
 const HealthView       = lazy(() => import('./components/Health/HealthView').then((m) => ({ default: m.HealthView })));
 const PreferencesView  = lazy(() => import('./components/Settings/PreferencesView').then((m) => ({ default: m.PreferencesView })));
 const FinancePlannerView = lazy(() => import('./components/Finance/FinancePlannerView').then((m) => ({ default: m.FinancePlannerView })));
@@ -155,11 +154,11 @@ function AppLayout() {
               <Route path="anotacoes" element={<ErrorBoundary fallbackTitle="Erro nas Anotações"><AnotacoesView /></ErrorBoundary>} />
               <Route path="foco" element={<ErrorBoundary fallbackTitle="Erro no Modo Foco"><FocusModeView /></ErrorBoundary>} />
               <Route path="configuracoes" element={<ErrorBoundary fallbackTitle="Erro nas Configurações"><SettingsView /></ErrorBoundary>} />
-              <Route path="financeiro" element={<ErrorBoundary fallbackTitle="Erro no Financeiro"><FinanceView /></ErrorBoundary>} />
+              <Route path="financeiro" element={<ErrorBoundary fallbackTitle="Erro no Financeiro"><FinancePlannerView /></ErrorBoundary>} />
               <Route path="saude" element={<ErrorBoundary fallbackTitle="Erro na Saúde"><HealthView /></ErrorBoundary>} />
               <Route path="preferencias" element={<ErrorBoundary fallbackTitle="Erro nas Preferências"><PreferencesView /></ErrorBoundary>} />
               <Route path="perfil" element={<ErrorBoundary fallbackTitle="Erro no Perfil"><ProfileView /></ErrorBoundary>} />
-              <Route path="planner" element={<ErrorBoundary fallbackTitle="Erro no Planner"><FinancePlannerView /></ErrorBoundary>} />
+              <Route path="planner" element={<Navigate to="/financeiro" replace />} />
               <Route path="calendario" element={<ErrorBoundary fallbackTitle="Erro no Calendário"><CalendarView /></ErrorBoundary>} />
               <Route path="drive" element={<ErrorBoundary fallbackTitle="Erro no Drive"><DriveVaultView /></ErrorBoundary>} />
               <Route path="superhuman" element={<ErrorBoundary fallbackTitle="Erro no Superhuman"><SuperhumanView /></ErrorBoundary>} />

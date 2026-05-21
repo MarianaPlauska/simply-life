@@ -3,7 +3,8 @@ import { useTaskStore } from '../../store/useTaskStore';
 import type { TarefaUnificada } from '../../types';
 import { 
   Zap, Circle, Inbox, GitBranch, Calendar, Mail, 
-  Search, ArrowUpDown, Loader2, Sparkles
+  Search, ArrowUpDown, Loader2, Sparkles,
+  Wallet, Pill
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,6 +21,10 @@ function getOriginIcon (origem: string)
     case 'agenda':
     case 'calendar':
       return { Icon: Calendar, color: 'text-emerald-400', label: 'Agenda' };
+    case 'financeiro':
+      return { Icon: Wallet, color: 'text-amber-400', label: 'Financeiro' };
+    case 'saude':
+      return { Icon: Pill, color: 'text-emerald-400', label: 'Saúde' };
     default:
       return { Icon: Inbox, color: 'text-zinc-400', label: 'Manual' };
   }
@@ -187,7 +192,7 @@ export function SuperhumanView ()
               return (
                 <div
                   key={t.id}
-                  className="grid grid-cols-[50px_70px_80px_1fr_250px_120px_100px] gap-4 px-5 py-2.5 items-center hover:bg-white/[0.01] transition-colors group"
+                  className={`grid grid-cols-[50px_70px_80px_1fr_250px_120px_100px] gap-4 px-5 py-2.5 items-center hover:bg-white/[0.01] transition-colors group ${t.origem === 'financeiro' ? 'bg-amber-500/[0.02]' : t.origem === 'saude' ? 'bg-emerald-500/[0.02]' : ''}`}
                 >
                   {/* Checkbox de Conclusão */}
                   <div className="flex items-center justify-center">

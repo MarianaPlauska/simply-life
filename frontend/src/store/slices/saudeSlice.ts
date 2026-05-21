@@ -18,6 +18,7 @@ export interface SaudeSlice
   decrementHabito: (id: number) => Promise<void>
   deleteHabito: (id: number) => Promise<void>
   fetchHabitosStreaks: () => Promise<void>
+  runHealthCheck: () => Promise<void>
 }
 
 export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (set, get) => ({
@@ -73,9 +74,58 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       // busca valor atual e inverte
       const { data: current } = await supabase.from('medicamentos').select('tomado_hoje').eq('id', id).single()
       await supabase.from('medicamentos').update({ tomado_hoje: current?.tomado_hoje === 1 ? 0 : 1 }).eq('id', id)
+
+      // Se marcou como tomado, remove tarefa fantasma e ganha XP
+      const med = get().medicamentos.find((m) => m.id === id)
+      if (med && med.tomado)
+      {
+        const uid = (await supabase.auth.getUser()).data.user?.id
+        if (uid)
+        {
+          const { cleanupResolvedPhantoms } = await import('../../services/activeOrchestratorService')
+          await cleanupResolvedPhantoms(uid, 'saude', id)
+
+          // Gamificação
+          const anyGet = get() as any
+          if (anyGet.addXP)
+          {
+            const stats = anyGet.userStats
+            let multiplier = 1
+            let newStreak = (stats?.streak_saude || 0) + 1
+            let isStreakBonus = false
+
+            if (newStreak >= 3)
+            {
+              multiplier = 2
+              isStreakBonus = true
+              newStreak = 0 // reseta
+            }
+
+            const xpToGrant = 20 * multiplier
+            await anyGet.addXP('saude', xpToGrant)
+
+            if (isStreakBonus)
+            {
+              const { toast } = await import('sonner')
+              toast.success('💊 Combo Vitalidade Renovada! (+40 XP)', {
+                description: 'Você tomou seus medicamentos no horário por 3 dias seguidos!',
+              })
+            }
+
+            // atualiza streak_saude no Supabase
+            await supabase.from('user_stats').update({ streak_saude: newStreak }).eq('id', uid);
+            (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_saude: newStreak } : null }))
+          }
+
+          // Progresso de Quests
+          const incrementQuestProgress = anyGet.incrementQuestProgress
+          if (incrementQuestProgress) await incrementQuestProgress('Tomar um medicamento', 1)
+        }
+      }
     }
-    catch
+    catch (e)
     {
+      console.error('toggleMedicamento error:', e)
       // reverte optimistic
       set((s) => ({
         medicamentos: s.medicamentos.map((m) => m.id === id ? { ...m, tomado: !m.tomado } : m),
@@ -191,5 +241,29 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       set({ habitosStreaks: streaks })
     }
     catch (e) { console.error('fetchHabitosStreaks:', e) }
+  },
+
+  runHealthCheck: async () =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      const meds = get().medicamentos
+      if (meds.length === 0) return
+
+      const { checkMedicamentosPendentes } = await import('../../services/activeOrchestratorService')
+      const created = await checkMedicamentosPendentes(uid, meds)
+
+      if (created > 0)
+      {
+        const { toast } = await import('sonner')
+        toast.info(`💊 ${created} medicamento${created > 1 ? 's' : ''} pendente${created > 1 ? 's' : ''} detectado${created > 1 ? 's' : ''}`, {
+          description: 'Tarefas criadas automaticamente no seu Kanban.',
+        })
+      }
+    }
+    catch (e) { console.error('runHealthCheck:', e) }
   },
 })

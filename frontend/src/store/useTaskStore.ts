@@ -19,11 +19,11 @@ import { createRelatoriosSlice, type RelatoriosSlice } from './slices/relatorios
 import { createOnboardingSlice, type OnboardingSlice } from './slices/onboardingSlice';
 import { createInboxSlice, type InboxSlice } from './slices/inboxSlice';
 import { createNewsSlice, type NewsSlice } from './slices/newsSlice';
-
-
+import { createContasFixasSlice, type ContasFixasSlice } from './slices/contasFixasSlice';
+import { createGamificacaoSlice, type GamificacaoSlice } from './slices/gamificacaoSlice';
 
 // re-exporta types para compatibilidade
-export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, BudgetLimit, FinancialGoal, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
+export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, ContaFixa, BudgetLimit, FinancialGoal, HabitoDiario, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
 export type { AnalyticsReport, DashboardReportCard, TrendPoint, RankingItem, PeriodStats } from './slices/relatoriosSlice';
 
 export type TaskStore =
@@ -42,7 +42,9 @@ export type TaskStore =
   RelatoriosSlice &
   OnboardingSlice &
   InboxSlice &
-  NewsSlice;
+  NewsSlice &
+  ContasFixasSlice &
+  GamificacaoSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -63,6 +65,8 @@ export const useTaskStore = create<TaskStore>()(
       ...createOnboardingSlice(...a),
       ...createInboxSlice(...a),
       ...createNewsSlice(...a),
+      ...createContasFixasSlice(...a),
+      ...createGamificacaoSlice(...a),
     }),
     {
       name: 'simply-life-store',
@@ -83,6 +87,7 @@ export const useTaskStore = create<TaskStore>()(
         onboardingSteps: state.onboardingSteps,
         onboardingDismissed: state.onboardingDismissed,
         cards: state.cards,
+        contasFixas: state.contasFixas,
       }),
       onRehydrateStorage: () => () =>
       {

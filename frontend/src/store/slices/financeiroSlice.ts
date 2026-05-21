@@ -43,13 +43,15 @@ export interface FinanceiroSlice
   fetchGoals: () => Promise<void>
   addGoal: (g: Omit<FinancialGoal, 'id'>) => Promise<void>
   updateGoalProgress: (id: number, valor: number) => Promise<void>
-  addCard: (card: Omit<VirtualCard, 'id'>) => void
-  removeCard: (id: string) => void
-  toggleCardStatus: (id: string) => void
-  updateCardLimit: (id: string, limite: number) => void
+  fetchCards: () => Promise<void>
+  addCard: (card: Omit<VirtualCard, 'id'>) => Promise<void>
+  removeCard: (id: string) => Promise<void>
+  toggleCardStatus: (id: string) => Promise<void>
+  updateCardLimit: (id: string, limite: number) => Promise<void>
+  runFinanceCheck: () => Promise<void>
 }
 
-export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], FinanceiroSlice> = (set) => ({
+export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], FinanceiroSlice> = (set, get) => ({
   despesas: [],
   transactions: [],
   categories: [],
@@ -64,32 +66,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     { categoria: 'educacao', limite: 400 },
     { categoria: 'compras', limite: 500 },
   ],
-  cards: [
-    {
-      id: 'card_1',
-      nome: 'Assinaturas Dev',
-      titular: 'MARIANA PLAUSKA',
-      numero: '•••• •••• •••• 8432',
-      validade: '12/31',
-      cvv: '123',
-      limite: 2500,
-      tipo_gradiente: 'purple',
-      bandeira: 'mastercard',
-      status: 'ativo'
-    },
-    {
-      id: 'card_2',
-      nome: 'AWS & GCP Cloud',
-      titular: 'MARIANA PLAUSKA',
-      numero: '•••• •••• •••• 9015',
-      validade: '06/30',
-      cvv: '456',
-      limite: 8000,
-      tipo_gradiente: 'obsidian',
-      bandeira: 'visa',
-      status: 'ativo'
-    }
-  ],
+  cards: [],
 
   fetchDespesas: async () =>
   {
@@ -180,8 +157,12 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       if (error) throw error
       if (data)
       {
-        set((s) => ({
-          transactions: [
+        const anyGet = get() as any
+        if (anyGet.addXP) await anyGet.addXP('financeiro', 10)
+        if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Registrar 1 movimentação', 1)
+
+        set((s) => {
+          const newTransactions = [
             {
               ...data,
               descricao: t.descricao,
@@ -191,7 +172,40 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             },
             ...s.transactions,
           ]
-        }))
+
+          // Check card limit usage if card_id is set
+          if (t.card_id && t.tipo === 'despesa') {
+            const card = s.cards.find(c => c.id === t.card_id)
+            if (card) {
+              const currentSpent = newTransactions
+                .filter(trans => trans.card_id === t.card_id && trans.tipo === 'despesa')
+                .reduce((sum, trans) => sum + trans.valor, 0)
+
+              const usagePct = (currentSpent / card.limite) * 100
+              if (usagePct >= 80) {
+                const urgency = usagePct >= 95 ? 'critica' : 'normal'
+                const title = usagePct >= 95 ? 'Limite de Cartão Crítico' : 'Uso de Cartão Elevado'
+                const msg = usagePct >= 95 
+                  ? `Alerta crítico: O cartão "${card.nome}" atingiu ${usagePct.toFixed(0)}% do limite (${currentSpent.toFixed(2)} de ${card.limite.toFixed(2)}).`
+                  : `Aviso: O cartão "${card.nome}" atingiu ${usagePct.toFixed(0)}% do limite (${currentSpent.toFixed(2)} de ${card.limite.toFixed(2)}).`
+
+                supabase.from('notificacoes').insert({
+                  user_id: uid,
+                  tipo: 'financeiro',
+                  titulo: title,
+                  mensagem: msg,
+                  urgencia: urgency,
+                  score_urgencia: usagePct >= 95 ? 95 : 80,
+                  lida: 0,
+                }).then(({ error: notifError }) => {
+                  if (notifError) console.error('Limit notification insert error:', notifError)
+                })
+              }
+            }
+          }
+
+          return { transactions: newTransactions }
+        })
       }
     }
     catch (e)
@@ -296,54 +310,220 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
   updateGoalProgress: async (id, valor) =>
   {
-    const { error } = await supabase.from('fin_metas').update({ valor_atual: valor }).eq('id', id)
+    const oldGoal = get().financialGoals.find((g) => g.id === id)
+    const wasCompleted = oldGoal?.concluida
+    const isCompletedNow = oldGoal ? valor >= oldGoal.valor_alvo : false
+    const isCompleting = isCompletedNow && !wasCompleted
+
+    const { error } = await supabase.from('fin_metas').update({ valor_atual: valor, concluida: isCompletedNow }).eq('id', id)
     if (error) throw error
     set((s) => ({
-      financialGoals: s.financialGoals.map((g) => g.id === id ? { ...g, valor_atual: valor, concluida: valor >= g.valor_alvo } : g)
+      financialGoals: s.financialGoals.map((g) => g.id === id ? { ...g, valor_atual: valor, concluida: isCompletedNow } : g)
     }))
+
+    if (isCompleting)
+    {
+      const anyGet = get() as any
+      if (anyGet.addXP) await anyGet.addXP('financeiro', 50)
+      if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Bater a meta da Regra 50/30/20', 1)
+    }
   },
 
-  addCard: (card) =>
+  fetchCards: async () =>
   {
-    set((s) =>
+    try
     {
-      const newCard = {
-        ...card,
-        id: 'card_' + Date.now(),
+      const { data, error } = await supabase
+        .from('fin_cartoes')
+        .select('*')
+        .order('created_at', { ascending: true })
+      if (error) throw error
+      
+      if (data && data.length > 0)
+      {
+        set({ cards: data as VirtualCard[] })
       }
-      return {
-        cards: [...s.cards, newCard]
+      else
+      {
+        // If empty, let's insert default cards so they exist in database for this user
+        const uid = (await supabase.auth.getUser()).data.user?.id
+        if (uid)
+        {
+          const defaultCards: Omit<VirtualCard, 'id'>[] = [
+            {
+              nome: 'Assinaturas Dev',
+              titular: 'MARIANA PLAUSKA',
+              numero: '•••• •••• •••• 8432',
+              validade: '12/31',
+              cvv: '123',
+              limite: 2500,
+              tipo_gradiente: 'purple',
+              bandeira: 'mastercard',
+              status: 'ativo'
+            },
+            {
+              nome: 'AWS & GCP Cloud',
+              titular: 'MARIANA PLAUSKA',
+              numero: '•••• •••• •••• 9015',
+              validade: '06/30',
+              cvv: '456',
+              limite: 8000,
+              tipo_gradiente: 'obsidian',
+              bandeira: 'visa',
+              status: 'ativo'
+            }
+          ]
+          
+          const insertData = defaultCards.map((c, i) => ({
+            ...c,
+            id: `card_${Date.now()}_${i}`,
+            user_id: uid
+          }))
+          
+          const { data: inserted, error: insertError } = await supabase
+            .from('fin_cartoes')
+            .insert(insertData)
+            .select()
+          
+          if (!insertError && inserted)
+          {
+            set({ cards: inserted as VirtualCard[] })
+          }
+          else
+          {
+            // Fallback locally
+            set({ cards: insertData as VirtualCard[] })
+          }
+        }
       }
-    })
+    }
+    catch (e) { console.error('fetchCards error:', e) }
   },
 
-  removeCard: (id) =>
+  addCard: async (card) =>
   {
-    set((s) =>
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return
+    const newId = 'card_' + Date.now()
+    const newCard = {
+      id: newId,
+      user_id: uid,
+      nome: card.nome,
+      titular: card.titular,
+      numero: card.numero,
+      validade: card.validade,
+      cvv: card.cvv,
+      limite: card.limite,
+      dia_vencimento: card.dia_vencimento,
+      tipo_gradiente: card.tipo_gradiente,
+      bandeira: card.bandeira,
+      status: card.status,
+    }
+    try
     {
-      return {
-        cards: s.cards.filter((c) => c.id !== id)
+      const { data, error } = await supabase
+        .from('fin_cartoes')
+        .insert(newCard)
+        .select()
+        .single()
+      if (error) throw error
+      if (data)
+      {
+        set((s) => ({ cards: [...s.cards, data as VirtualCard] }))
       }
-    })
+    }
+    catch (e) { console.error('addCard db error:', e) }
   },
 
-  toggleCardStatus: (id) =>
+  removeCard: async (id) =>
   {
-    set((s) =>
+    try
     {
-      return {
-        cards: s.cards.map((c) => c.id === id ? { ...c, status: (c.status === 'ativo' ? 'bloqueado' : 'ativo') } : c)
-      }
-    })
+      const { error } = await supabase.from('fin_cartoes').delete().eq('id', id)
+      if (error) throw error
+      set((s) => ({ cards: s.cards.filter((c) => c.id !== id) }))
+    }
+    catch (e) { console.error('removeCard db error:', e) }
   },
 
-  updateCardLimit: (id, limite) =>
+  toggleCardStatus: async (id) =>
   {
+    let targetCard: VirtualCard | undefined
     set((s) =>
     {
-      return {
-        cards: s.cards.map((c) => c.id === id ? { ...c, limite } : c)
+      const card = s.cards.find((c) => c.id === id)
+      if (card)
+      {
+        targetCard = { ...card, status: card.status === 'ativo' ? 'bloqueado' : 'ativo' }
+        return {
+          cards: s.cards.map((c) => c.id === id ? targetCard! : c)
+        }
       }
+      return {}
     })
+
+    if (targetCard)
+    {
+      try
+      {
+        const { error } = await supabase
+          .from('fin_cartoes')
+          .update({ status: targetCard.status })
+          .eq('id', id)
+        if (error) throw error
+      }
+      catch (e) { console.error('toggleCardStatus db error:', e) }
+    }
+  },
+
+  updateCardLimit: async (id, limite) =>
+  {
+    set((s) => ({
+      cards: s.cards.map((c) => c.id === id ? { ...c, limite } : c)
+    }))
+
+    try
+    {
+      const { error } = await supabase
+        .from('fin_cartoes')
+        .update({ limite })
+        .eq('id', id)
+      if (error) throw error
+    }
+    catch (e) { console.error('updateCardLimit db error:', e) }
+  },
+
+  runFinanceCheck: async () =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      const { checkVencimentosFinanceiros } = await import('../../services/activeOrchestratorService')
+
+      // Use current cards and contasFixas from localStorage/state
+      // ContasFixas are in a separate slice, so we read from Supabase directly
+      const { data: contasFixas } = await supabase
+        .from('fin_contas_fixas')
+        .select('id, nome, valor, dia_vencimento, ativa')
+        .eq('ativa', true)
+
+      const storeCards = (await supabase
+        .from('fin_cartoes')
+        .select('id, nome, dia_vencimento, limite')
+        .eq('status', 'ativo')).data ?? []
+
+      const created = await checkVencimentosFinanceiros(uid, storeCards, contasFixas ?? [])
+
+      if (created > 0)
+      {
+        const { toast } = await import('sonner')
+        toast.info(`🔔 ${created} vencimento${created > 1 ? 's' : ''} financeiro${created > 1 ? 's' : ''} detectado${created > 1 ? 's' : ''}`, {
+          description: 'Tarefas criadas automaticamente no seu Kanban.',
+        })
+      }
+    }
+    catch (e) { console.error('runFinanceCheck:', e) }
   },
 })

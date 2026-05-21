@@ -85,7 +85,7 @@ export function SetupQuestsSection()
       description: 'Comece a rastrear suas finanças',
       xp: 40,
       accent: 'cyan',
-      view: 'planner',
+      view: 'financeiro',
       checkFn: () =>
       {
         return transactions.length > 0;

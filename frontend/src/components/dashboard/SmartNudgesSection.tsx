@@ -2,10 +2,11 @@ import { motion } from 'framer-motion';
 import {
   Lightbulb, AlertTriangle, Pill, TrendingDown,
   CalendarClock, DollarSign, Sparkles, ArrowRight,
-  Activity, Target,
+  Activity, Target, CreditCard, Receipt, Clock,
 } from 'lucide-react';
 import { fadeUp, staggerContainer, staggerChild } from './DashboardPrimitives';
 import type { DashboardResumo, CalendarEvent, ActiveView } from '../../store/useTaskStore';
+import type { VirtualCard, ContaFixa, Medicamento } from '../../store/storeTypes';
 
 /* ══════════════════════════════════════════════════════════════
    SmartNudgesSection — Proactive AI Insights
@@ -30,7 +31,21 @@ interface SmartNudgesProps {
   calendarEvents: CalendarEvent[];
   saldoMes: number;
   keywords: string[];
+  cards: VirtualCard[];
+  contasFixas: ContaFixa[];
+  medicamentos: Medicamento[];
   setActiveView: (v: ActiveView) => void;
+}
+
+/* ── Day proximity helper ────────────────────────────────────── */
+function getDaysUntilDue(diaVencimento: number): number
+{
+  const today = new Date();
+  const currentDay = today.getDate();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  let diff = diaVencimento - currentDay;
+  if (diff < 0) diff += daysInMonth;
+  return diff;
 }
 
 /* ── Nudge generation engine ─────────────────────────────────── */
@@ -39,6 +54,9 @@ function generateNudges({
   calendarEvents,
   saldoMes,
   keywords,
+  cards,
+  contasFixas,
+  medicamentos,
 }: Omit<SmartNudgesProps, 'setActiveView'>): Nudge[] {
   const nudges: Nudge[] = [];
   if (!resumo) return nudges;
@@ -113,7 +131,7 @@ function generateNudges({
       body: `Voce esta ${Math.abs(saldoMes).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} acima do orcamento. Revise seus gastos.`,
       accent: 'from-rose-500/20 to-red-500/10',
       accentBorder: 'hover:border-rose-500/20',
-      action: { label: 'Ver Financas', view: 'planner' },
+      action: { label: 'Ver Financas', view: 'financeiro' },
     });
   }
 
@@ -128,7 +146,7 @@ function generateNudges({
         body: `Voce gastou ${(dayRatio * 100).toFixed(0)}% do saldo restante do mes em um unico dia. Considere conter gastos.`,
         accent: 'from-amber-500/20 to-orange-500/10',
         accentBorder: 'hover:border-amber-500/20',
-        action: { label: 'Ver Financas', view: 'planner' },
+        action: { label: 'Ver Financas', view: 'financeiro' },
       });
     }
   }
@@ -160,6 +178,64 @@ function generateNudges({
       accent: 'from-amber-500/20 to-yellow-500/10',
       accentBorder: 'hover:border-amber-500/20',
     });
+  }
+
+  // 9. Vencimento de Cartão Próximo
+  for (const card of cards)
+  {
+    if (card.dia_vencimento != null)
+    {
+      const dias = getDaysUntilDue(card.dia_vencimento);
+      if (dias <= 3)
+      {
+        nudges.push({
+          id: `card-due-${card.id}`,
+          icon: CreditCard,
+          title: `Fatura ${card.nome} vence em ${dias} dia${dias !== 1 ? 's' : ''}`,
+          body: `O cartão ${card.nome} com limite de ${card.limite.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} está próximo do vencimento.`,
+          accent: 'from-amber-500/20 to-orange-500/10',
+          accentBorder: 'hover:border-amber-500/20',
+          action: { label: 'Ver Financeiro', view: 'financeiro' },
+        });
+      }
+    }
+  }
+
+  // 10. Conta Fixa Próxima
+  for (const conta of contasFixas)
+  {
+    const dias = getDaysUntilDue(conta.dia_vencimento);
+    if (dias <= 3)
+    {
+      nudges.push({
+        id: `conta-fixa-${conta.id}`,
+        icon: Receipt,
+        title: `Conta ${conta.nome} vence em ${dias} dia${dias !== 1 ? 's' : ''} — ${conta.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+        body: `A conta fixa ${conta.nome} está próxima do vencimento. Verifique o pagamento.`,
+        accent: 'from-rose-500/20 to-red-500/10',
+        accentBorder: 'hover:border-rose-500/20',
+        action: { label: 'Ver Financeiro', view: 'financeiro' },
+      });
+    }
+  }
+
+  // 11. Medicamento Atrasado
+  const agora = new Date();
+  const horaAtual = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+  for (const med of medicamentos)
+  {
+    if (!med.tomado && med.horario < horaAtual)
+    {
+      nudges.push({
+        id: `med-atrasado-${med.id}`,
+        icon: Clock,
+        title: `${med.nome} — atrasado (era às ${med.horario})`,
+        body: `O medicamento ${med.nome} deveria ter sido tomado às ${med.horario}. Registre assim que possível.`,
+        accent: 'from-red-500/20 to-rose-500/10',
+        accentBorder: 'hover:border-red-500/20',
+        action: { label: 'Ir para Saude', view: 'saude' },
+      });
+    }
   }
 
   return nudges;

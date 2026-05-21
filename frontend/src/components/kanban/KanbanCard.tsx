@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import {
   Clock, Languages, CheckSquare, Square,
   AlertTriangle, Sparkles, Calendar, MoreHorizontal, Pencil, Trash2, Copy, Timer,
+  Wallet, Pill,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
@@ -134,13 +135,17 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kan
         'transition-all duration-200 cursor-grab active:cursor-grabbing group',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50',
         isDragging ? 'shadow-2xl shadow-violet-500/10 scale-[1.02] rotate-1' : '',
-        !flat && isIA
-          ? 'border-violet-500/20 shadow-[0_0_24px_rgba(139,92,246,0.04)]'
-          : !flat && isInFocus
-            ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.06)]'
-            : !flat && isCriticalFocus
-              ? 'border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.05)]'
-              : flat ? '' : 'border-zinc-800/40',
+        !flat && tarefa.origem === 'financeiro'
+          ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.04)] animate-[pulse_3s_ease-in-out_infinite]'
+          : !flat && tarefa.origem === 'saude'
+            ? 'border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.04)] animate-[pulse_3s_ease-in-out_infinite]'
+            : !flat && isIA
+              ? 'border-violet-500/20 shadow-[0_0_24px_rgba(139,92,246,0.04)]'
+              : !flat && isInFocus
+                ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.06)]'
+                : !flat && isCriticalFocus
+                  ? 'border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.05)]'
+                  : flat ? '' : 'border-zinc-800/40',
       ].join(' ')}
       tabIndex={0}
     >
@@ -201,6 +206,24 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kan
           <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-violet-500/5 border border-violet-500/10">
             <Sparkles className="w-3 h-3 text-violet-400" />
             <span className="text-[9px] font-bold uppercase tracking-wider text-violet-400">Capturado por IA</span>
+          </div>
+        </div>
+      )}
+
+      {/* Phantom task badges for active orchestrator origins */}
+      {tarefa.origem === 'financeiro' && (
+        <div className="flex items-center gap-1 px-3.5 pt-1.5">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/5 border border-amber-500/10">
+            <Wallet className="w-3 h-3 text-amber-400" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-amber-400">Vencimento Financeiro</span>
+          </div>
+        </div>
+      )}
+      {tarefa.origem === 'saude' && (
+        <div className="flex items-center gap-1 px-3.5 pt-1.5">
+          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-500/5 border border-emerald-500/10">
+            <Pill className="w-3 h-3 text-emerald-400" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400">Medicamento Pendente</span>
           </div>
         </div>
       )}

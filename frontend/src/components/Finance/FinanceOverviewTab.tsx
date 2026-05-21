@@ -1,16 +1,14 @@
 import React from 'react';
 import { 
-  Wallet, Zap, ArrowRight, Edit3, Check, BarChart3, 
-  DollarSign, TrendingUp, TrendingDown, Info
+  Wallet, Check, Edit3, DollarSign
 } from 'lucide-react';
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
-  PieChart, Pie, Cell
-} from 'recharts';
+import { FinanceOverviewCharts } from './FinanceOverviewCharts';
+import { Rule503020Section } from './Rule503020Section';
+import { CashflowForecast } from './CashflowForecast';
 
 // Mapa de ícones para exibição dinâmica
 import {
-  Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Briefcase, Shield, Target
+  Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Shield, Target, Briefcase
 } from 'lucide-react';
 
 import type { Category, Transaction } from '../../store/storeTypes';
@@ -28,23 +26,6 @@ function fmt(value: number) {
 function fmtDate(iso: string) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
 }
-
-// Tooltip personalizado para o gráfico de evolução financeira
-const ChartTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string }>; label?: string }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-zinc-950/90 border border-zinc-900 rounded-xl px-4 py-3 shadow-2xl backdrop-blur-md">
-        <p className="text-[11px] text-zinc-500 mb-1.5 font-medium">{label}</p>
-        {payload.map((p) => (
-          <p key={p.dataKey} className={`text-[13px] font-semibold font-mono ${p.dataKey === 'receita' ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {p.dataKey === 'receita' ? 'Receita' : 'Gastos'}: {fmt(p.value)}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 interface CategoryTotal {
   id: number;
@@ -96,44 +77,6 @@ interface FinanceOverviewTabProps {
   transactions: Transaction[];
 }
 
-// Helper para classificar categorias na regra 50-30-20
-function getCategoryBudgetGroup(categoryName: string): 'necessidades' | 'desejos' | 'poupanca'
-{
-  const name = categoryName.toLowerCase();
-  if (
-    name.includes('moradia') ||
-    name.includes('habita') ||
-    name.includes('casa') ||
-    name.includes('saude') ||
-    name.includes('educa') ||
-    name.includes('internet') ||
-    name.includes('alimenta') ||
-    name.includes('mercado') ||
-    name.includes('energia') ||
-    name.includes('transporte') ||
-    name.includes('luz') ||
-    name.includes('agua') ||
-    name.includes('contas')
-  )
-  {
-    return 'necessidades';
-  }
-
-  if (
-    name.includes('poupan') ||
-    name.includes('invest') ||
-    name.includes('reserva') ||
-    name.includes('poupar') ||
-    name.includes('acoes') ||
-    name.includes('fundos')
-  )
-  {
-    return 'poupanca';
-  }
-
-  return 'desejos';
-}
-
 export function FinanceOverviewTab({
   receita,
   despesas,
@@ -155,140 +98,7 @@ export function FinanceOverviewTab({
   handleSaveBudget,
   setTab,
   transactions,
-}: FinanceOverviewTabProps)
-{
-  // Cálculo matemático para a regra 50-30-20
-  const realNecessidades = React.useMemo(() =>
-  {
-    return monthTx
-      .filter((t) => t.tipo === 'despesa')
-      .filter((t) =>
-      {
-        const cat = activeCategories.find((c) => c.id === t.categoria_id);
-        const catName = cat ? cat.nome : (t.categoria || '');
-        return getCategoryBudgetGroup(catName) === 'necessidades';
-      })
-      .reduce((sum, t) => sum + t.valor, 0);
-  }, [monthTx, activeCategories]);
-
-  const realDesejos = React.useMemo(() =>
-  {
-    return monthTx
-      .filter((t) => t.tipo === 'despesa')
-      .filter((t) =>
-      {
-        const cat = activeCategories.find((c) => c.id === t.categoria_id);
-        const catName = cat ? cat.nome : (t.categoria || '');
-        return getCategoryBudgetGroup(catName) === 'desejos';
-      })
-      .reduce((sum, t) => sum + t.valor, 0);
-  }, [monthTx, activeCategories]);
-
-  const realPoupancaExplicito = React.useMemo(() =>
-  {
-    return monthTx
-      .filter((t) => t.tipo === 'despesa')
-      .filter((t) =>
-      {
-        const cat = activeCategories.find((c) => c.id === t.categoria_id);
-        const catName = cat ? cat.nome : (t.categoria || '');
-        return getCategoryBudgetGroup(catName) === 'poupanca';
-      })
-      .reduce((sum, t) => sum + t.valor, 0);
-  }, [monthTx, activeCategories]);
-
-  const realPoupanca = React.useMemo(() =>
-  {
-    const leftOver = receita - despesas;
-    return realPoupancaExplicito + (leftOver > 0 ? leftOver : 0);
-  }, [receita, despesas, realPoupancaExplicito]);
-
-  const pctNecessidades = React.useMemo(() =>
-  {
-    const pctDenom = receita > 0 ? receita : (despesas > 0 ? despesas : 1);
-    return (realNecessidades / pctDenom) * 100;
-  }, [realNecessidades, receita, despesas]);
-
-  const pctDesejos = React.useMemo(() =>
-  {
-    const pctDenom = receita > 0 ? receita : (despesas > 0 ? despesas : 1);
-    return (realDesejos / pctDenom) * 100;
-  }, [realDesejos, receita, despesas]);
-
-  const pctPoupanca = React.useMemo(() =>
-  {
-    const pctDenom = receita > 0 ? receita : (despesas > 0 ? despesas : 1);
-    return (realPoupanca / pctDenom) * 100;
-  }, [realPoupanca, receita, despesas]);
-
-  // Engine de Projeção baseada em histórico de meses reais
-  const projectionData = React.useMemo(() =>
-  {
-    const data = [];
-    const now = new Date();
-
-    const uniqueMonths = new Set<string>();
-    transactions.forEach((t) =>
-    {
-      if (t.data)
-      {
-        const monthKey = t.data.substring(0, 7); // extrai YYYY-MM
-        uniqueMonths.add(monthKey);
-      }
-    });
-
-    const monthCount = uniqueMonths.size;
-    const totalIncome = transactions.filter((t) => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
-    const totalExpense = transactions.filter((t) => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
-
-    let monthlyIncomeEstimate = 7500;
-    let monthlyExpenseEstimate = 4200;
-
-    if (monthCount >= 2)
-    {
-      monthlyIncomeEstimate = totalIncome / monthCount;
-      monthlyExpenseEstimate = totalExpense / monthCount;
-    }
-    else if (monthCount === 1)
-    {
-      monthlyIncomeEstimate = totalIncome > 0 ? totalIncome : 7500;
-      monthlyExpenseEstimate = totalExpense > 0 ? totalExpense : 4200;
-    }
-
-    let currentBalance = totalIncome - totalExpense;
-    if (currentBalance <= 0)
-    {
-      currentBalance = 3500;
-    }
-
-    const MONTH_NAMES = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
-
-    for (let i = 1; i <= 6; i++)
-    {
-      const targetDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const mName = MONTH_NAMES[targetDate.getMonth()];
-      const year = targetDate.getFullYear();
-
-      const seasonalityFactor = 1 + Math.sin(i * 0.5) * 0.05;
-      const projectedIncome = monthlyIncomeEstimate * seasonalityFactor;
-      const projectedExpense = monthlyExpenseEstimate * (1 + (i * 0.02));
-
-      currentBalance = currentBalance + projectedIncome - projectedExpense;
-
-      data.push({
-        mes: `${mName} ${year}`,
-        receita: projectedIncome,
-        despesa: projectedExpense,
-        saldo: currentBalance
-      });
-    }
-
-    return data;
-  }, [transactions]);
-
+}: FinanceOverviewTabProps) {
   return (
     <>
       {/* Indicadores de Sumário Flat - Sem cards, separados por espaçamento e alinhamento */}
@@ -317,204 +127,24 @@ export function FinanceOverviewTab({
       </div>
 
       {/* Resumo do Mês & Insight do JARVIS */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-        <div className="lg:col-span-3 space-y-6">
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-900/40">
-            <div>
-              <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Resumo do Mês</h2>
-              <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Análise rápida do seu desempenho financeiro</p>
-            </div>
-            <BarChart3 className="w-4 h-4 text-zinc-600" />
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Gasto vs Mês Anterior</p>
-                <div className="flex items-baseline gap-2.5 pt-1">
-                  <p className={`text-2xl font-bold font-mono ${diffDespesas <= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                    {diffDespesas > 0 ? '+' : ''}{fmt(diffDespesas)}
-                  </p>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${diffDespesas <= 0 ? 'bg-emerald-500/10 text-emerald-500' : 'bg-rose-500/10 text-rose-500'}`}>
-                    {diffDespesasPct > 0 ? '+' : ''}{diffDespesasPct.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Maior Categoria</p>
-                {biggestCategory ? (
-                  <div className="flex items-center gap-2.5 mt-1">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-zinc-900 bg-zinc-900" style={{ color: biggestCategory.cor }}>
-                      {React.createElement(ICON_MAP[biggestCategory.icone] || Wallet, { className: 'w-4 h-4' })}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-bold text-zinc-200 truncate">{biggestCategory.nome}</p>
-                      <p className="text-[11px] text-zinc-500 font-mono font-medium">{fmt(categoryTotals[0].total)}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-[12px] text-zinc-600 mt-1">Nenhum gasto registrado</p>
-                )}
-              </div>
-            </div>
-
-            <div className="md:col-span-2 flex flex-col items-center justify-center py-2">
-              <div className="w-full h-40">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      innerRadius={50}
-                      outerRadius={70}
-                      paddingAngle={4}
-                      dataKey="value"
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#09090b', border: '1px solid #1f1f23', borderRadius: '8px', fontSize: '11px' }}
-                      itemStyle={{ color: '#fff' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="flex flex-wrap justify-center gap-3 mt-2">
-                {pieChartData.slice(0, 4).map((entry, index) => (
-                  <div key={index} className="flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span className="text-[10px] text-zinc-500 font-semibold">{entry.name}</span>
-                  </div>
-                ))}
-                {pieChartData.length > 4 && <span className="text-[10px] text-zinc-600">+{pieChartData.length - 4} mais</span>}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Insight do JARVIS - Glassmorphism Escuro e Roxo Violeta Premium */}
-        <div className="border border-violet-900/20 bg-gradient-to-br from-violet-950/20 to-zinc-950/20 p-6 rounded-xl flex flex-col justify-between relative overflow-hidden group shadow-lg shadow-black/10">
-          <div className="absolute -right-6 -bottom-6 w-32 h-32 bg-violet-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-          <div className="relative z-10 space-y-5 h-full flex flex-col justify-between">
-            <div>
-              <div className="w-8 h-8 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center mb-4">
-                <Zap className="w-4 h-4 text-violet-400" />
-              </div>
-              <h3 className="text-[13px] font-bold text-zinc-200 uppercase tracking-wider">Insight do JARVIS</h3>
-              <p className="text-[11px] text-zinc-400 mt-2.5 leading-relaxed font-medium">
-                {saldo > 0 ? (
-                  "Seu saldo está positivo! Considere investir esse excedente em sua Reserva de Emergência para acelerar sua independência financeira."
-                ) : (
-                  "Seu saldo está negativo. Tente reduzir gastos em categorias não essenciais no próximo mês para restabelecer o equilíbrio."
-                )}
-              </p>
-            </div>
-            <button 
-              onClick={() => setTab('metas')}
-              className="flex items-center justify-center gap-1.5 w-full py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-[11px] font-semibold transition-all active:scale-95 shadow-md shadow-violet-950/20"
-            >
-              Ver Metas <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      </div>
+      <FinanceOverviewCharts
+        saldo={saldo}
+        diffDespesas={diffDespesas}
+        diffDespesasPct={diffDespesasPct}
+        biggestCategory={biggestCategory}
+        categoryTotals={categoryTotals}
+        pieChartData={pieChartData}
+        areaChartData={areaChartData}
+        onViewGoals={() => setTab('metas')}
+      />
 
       {/* Distribuição 50-30-20 (Sua Meta vs Real) */}
-      <div className="space-y-4 py-6 border-t border-zinc-900/50">
-        <div>
-          <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Distribuição 50-30-20 (Sua Meta vs Real)</h2>
-          <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Análise de conformidade com a regra de ouro das finanças pessoais</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Necessidades */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[11px]">
-              <span className="font-semibold text-zinc-300">Necessidades (Meta: 50%)</span>
-              <span className="font-mono text-zinc-400 font-bold">{pctNecessidades.toFixed(1)}% <span className="text-[9px] text-zinc-500">({fmt(realNecessidades)})</span></span>
-            </div>
-            <div className="relative h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-              <div className="absolute top-0 left-0 h-full w-[50%] bg-white/5 border-r border-white/20" />
-              <div
-                className={`h-full rounded-full transition-all duration-700 ${pctNecessidades > 55 ? 'bg-amber-500' : 'bg-violet-500'}`}
-                style={{ width: `${Math.min(pctNecessidades, 100)}%` }}
-              />
-            </div>
-            <p className="text-[9px] text-zinc-500">Moradia, Saúde, Educação, Alimentação e Contas Essenciais.</p>
-          </div>
-
-          {/* Desejos */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[11px]">
-              <span className="font-semibold text-zinc-300">Desejos (Meta: 30%)</span>
-              <span className="font-mono text-zinc-400 font-bold">{pctDesejos.toFixed(1)}% <span className="text-[9px] text-zinc-500">({fmt(realDesejos)})</span></span>
-            </div>
-            <div className="relative h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-              <div className="absolute top-0 left-0 h-full w-[30%] bg-white/5 border-r border-white/20" />
-              <div
-                className={`h-full rounded-full transition-all duration-700 ${pctDesejos > 35 ? 'bg-amber-500' : 'bg-violet-500'}`}
-                style={{ width: `${Math.min(pctDesejos, 100)}%` }}
-              />
-            </div>
-            <p className="text-[9px] text-zinc-500">Lazer, Compras, Viagens, Restaurantes e Estilo de Vida.</p>
-          </div>
-
-          {/* Poupança / Reservas */}
-          <div className="space-y-2">
-            <div className="flex justify-between text-[11px]">
-              <span className="font-semibold text-zinc-300">Poupança & Reservas (Meta: 20%)</span>
-              <span className="font-mono text-zinc-400 font-bold">{pctPoupanca.toFixed(1)}% <span className="text-[9px] text-zinc-500">({fmt(realPoupanca)})</span></span>
-            </div>
-            <div className="relative h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden">
-              <div className="absolute top-0 left-0 h-full w-[20%] bg-white/5 border-r border-white/20" />
-              <div
-                className={`h-full rounded-full transition-all duration-700 ${pctPoupanca >= 20 ? 'bg-emerald-500' : 'bg-violet-400'}`}
-                style={{ width: `${Math.min(pctPoupanca, 100)}%` }}
-              />
-            </div>
-            <p className="text-[9px] text-zinc-500">Investimentos, Metas de Longo Prazo e Saldo Livre Restante.</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Evolução Financeira - Sem cards, separada por espaçamento */}
-      <div className="space-y-4 py-6 border-t border-zinc-900/50">
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Evolução Financeira</h2>
-            <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Receita vs. gastos nos últimos 6 meses</p>
-          </div>
-          <div className="flex items-center gap-5">
-            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />Receita
-            </span>
-            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-zinc-500">
-              <span className="w-2 h-2 rounded-full bg-rose-400" />Gastos
-            </span>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={240}>
-          <AreaChart data={areaChartData}>
-            <defs>
-              <linearGradient id="gradReceita" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10b981" stopOpacity={0.08} />
-                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="gradGastos" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.06} />
-                <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#121214" vertical={false} />
-            <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fill: '#52525b', fontSize: 11, fontWeight: 500 }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#3f3f46', fontSize: 10, fontWeight: 500 }} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} width={30} />
-            <Tooltip content={<ChartTooltip />} />
-            <Area type="monotone" dataKey="receita" stroke="#10b981" strokeWidth={1.5} fill="url(#gradReceita)" />
-            <Area type="monotone" dataKey="gastos" stroke="#f43f5e" strokeWidth={1.5} fill="url(#gradGastos)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      <Rule503020Section
+        receita={receita}
+        despesas={despesas}
+        monthTx={monthTx}
+        activeCategories={activeCategories}
+      />
 
       {/* Orçamento por Categoria & Últimos Lançamentos - Sem cards, grid invisível */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 py-6 border-t border-zinc-900/50">
@@ -608,54 +238,7 @@ export function FinanceOverviewTab({
 
       {/* SEÇÃO: PROJEÇÃO DE FLUXO DE CAIXA (CASHFLOW FORECAST) */}
       <div className="space-y-6 py-6 border-t border-zinc-900/50">
-        <div className="pb-3 border-b border-zinc-900/40 flex items-center justify-between">
-          <div>
-            <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Previsão de Caixa (Fluxo de Caixa)</h2>
-            <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Projeções matemáticas estimadas para os próximos 6 meses</p>
-          </div>
-          <div className="flex items-center gap-1.5 bg-zinc-950 px-2.5 py-1 rounded-md border border-zinc-900">
-            <Info className="w-3.5 h-3.5 text-zinc-600" />
-            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Cálculo Base Histórico</span>
-          </div>
-        </div>
-
-        {/* Painel de Projeção de Caixa - Alta Densidade */}
-        <div className="space-y-1">
-          {/* Cabeçalho */}
-          <div className="grid grid-cols-[1fr_120px_120px_140px] gap-4 py-2 border-b border-zinc-900/50 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-            <span>Período Previsto</span>
-            <span className="text-right">Receitas Est.</span>
-            <span className="text-right">Despesas Est.</span>
-            <span className="text-right">Saldo Projetado</span>
-          </div>
-
-          {/* Linhas de Projeção */}
-          <div className="divide-y divide-zinc-900/40">
-            {projectionData.map((proj, idx) =>
-            {
-              const isBalancePositive = proj.saldo >= 0;
-              return (
-                <div
-                  key={idx}
-                  className="grid grid-cols-[1fr_120px_120px_140px] gap-4 items-center py-3.5 hover:bg-white/[0.01] hover:px-3 -mx-3 rounded-lg transition-all duration-200"
-                >
-                  <span className="text-[12px] font-semibold text-zinc-300">{proj.mes}</span>
-                  <span className="text-[12px] text-emerald-400 font-mono font-medium text-right flex items-center justify-end gap-1">
-                    <TrendingUp className="w-3 h-3 text-emerald-500/80" />
-                    +{fmt(proj.receita)}
-                  </span>
-                  <span className="text-[12px] text-zinc-400 font-mono font-medium text-right flex items-center justify-end gap-1">
-                    <TrendingDown className="w-3 h-3 text-zinc-600" />
-                    -{fmt(proj.despesa)}
-                  </span>
-                  <span className={`text-[13px] font-bold font-mono text-right ${isBalancePositive ? 'text-violet-400' : 'text-rose-400'}`}>
-                    {fmt(proj.saldo)}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <CashflowForecast transactions={transactions} />
       </div>
     </>
   );

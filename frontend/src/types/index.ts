@@ -27,6 +27,7 @@ export interface TarefaUnificada {
   versao: number;
   subtarefas: Subtarefa[];
   labels: Label[];
+  contexto?: { titulo: string; cor: string };
 }
 
 // sprint D — recorrência, dependências, atividade

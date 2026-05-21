@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, KanbanSquare, Crosshair, CalendarDays,
   StickyNote, Filter, SlidersHorizontal,
-  Wallet, PiggyBank,
+  Wallet,
   Pill,
   Briefcase, HardDrive,
   Sparkles, Flame, BarChart3,
@@ -46,7 +46,6 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Financeiro',
     items: [
       { id: 'financeiro', label: 'Controle de Gastos', icon: Wallet, moduleKey: 'financeiro' },
-      { id: 'planner', label: 'Planejador 50-30-20', icon: PiggyBank, moduleKey: 'financeiro' },
     ],
   },
   {
@@ -82,6 +81,9 @@ export function Sidebar() {
   const setQuickCaptureOpen = useTaskStore((s) => s.setQuickCaptureOpen);
   const pinnedModules = useTaskStore((s) => s.pinnedModules);
   const togglePin = useTaskStore((s) => s.togglePin);
+  const tarefas = useTaskStore((s) => s.tarefas);
+  const hasFinanceAlerts = tarefas.some((t) => t.origem === 'financeiro' && t.status !== 'concluida');
+  const hasHealthAlerts = tarefas.some((t) => t.origem === 'saude' && t.status !== 'concluida');
 
   const handleNav = (item: NavItem) => {
     navigate(VIEW_TO_PATH[item.id] || '/');
@@ -168,6 +170,12 @@ export function Sidebar() {
                     >
                       <Icon className="w-4 h-4 shrink-0" />
                       <span className="truncate">{label}</span>
+                      {id === 'financeiro' && hasFinanceAlerts && (
+                        <span className="ml-auto w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                      )}
+                      {id === 'saude' && hasHealthAlerts && (
+                        <span className="ml-auto w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      )}
                     </button>
                     {/* Pin action on hover */}
                     <button
@@ -194,6 +202,10 @@ export function Sidebar() {
         <div className="flex items-center gap-2 px-3 py-2">
           <Flame className="w-4 h-4 text-amber-500" />
           <span className="text-[12px] font-medium text-zinc-400">5 dias seguidos</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 text-[10px] text-zinc-600">
+          <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 font-mono text-[9px]">⌘K</kbd>
+          <span>Busca rápida</span>
         </div>
         <button
           onClick={() => navigate('/configuracoes')}
