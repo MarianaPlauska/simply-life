@@ -229,19 +229,21 @@ export function LoginView() {
       {/* Spotlight */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
         <div
-          className="absolute w-[800px] h-[800px] rounded-full blur-[145px] will-change-transform"
+          className="absolute w-[800px] h-[800px] rounded-full blur-[140px] will-change-transform"
           style={{
-            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(99, 102, 241, 0.04) 50%, transparent 80%)',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, rgba(109,40,217,0.07) 45%, transparent 75%)',
             left: pos.x - 400,
             top: pos.y - 400,
+            transition: 'left 0.15s ease-out, top 0.15s ease-out',
           }}
         />
         <div
-          className="absolute w-[500px] h-[500px] rounded-full blur-[145px] will-change-transform"
+          className="absolute w-[550px] h-[550px] rounded-full blur-[140px] will-change-transform"
           style={{
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.06) 0%, transparent 70%)',
-            left: pos.x - 250,
-            top: pos.y - 250,
+            background: 'radial-gradient(circle, rgba(236,72,153,0.10) 0%, transparent 65%)',
+            left: pos.x - 200,
+            top: pos.y - 350,
+            transition: 'left 0.25s ease-out, top 0.25s ease-out',
           }}
         />
       </div>

@@ -10,46 +10,18 @@ export function OnboardingChecklist ()
   const steps       = useTaskStore((s) => s.onboardingSteps);
   const dismissed   = useTaskStore((s) => s.onboardingDismissed);
   const dismiss     = useTaskStore((s) => s.dismissOnboarding);
-  const tarefas     = useTaskStore((s) => s.tarefas);
-  const transactions = useTaskStore((s) => s.transactions);
-  const habitos     = useTaskStore((s) => s.habitos);
-  const gamificacao   = useTaskStore((s) => s.gamificacao);
-  const pinnedModules = useTaskStore((s) => s.pinnedModules);
+  const userId      = useTaskStore((s) => s.userId);
   const completeStep = useTaskStore((s) => s.completeOnboardingStep);
   const navigate    = useNavigate();
 
   const [collapsed, setCollapsed] = useState(false);
 
-  // auto-detecta passos já completados com base nos dados do store
-  const completedSet = new Set(steps);
-  if ( tarefas.length > 0 )
-  {
-    completedSet.add('create_task');
-  }
-  if ( transactions.length > 0 )
-  {
-    completedSet.add('add_expense');
-  }
-  if ( habitos.length > 0 )
-  {
-    completedSet.add('add_habit');
-  }
-  if ( gamificacao?.xp_total > 0 || gamificacao?.ultima_sessao_foco )
-  {
-    completedSet.add('activate_focus');
-  }
-  if ( pinnedModules && pinnedModules.length !== 2 )
-  {
-    completedSet.add('customize_sidebar');
-  }
-
-  const completedCount = completedSet.size;
+  const completedCount = steps.length;
   const totalSteps     = ONBOARDING_STEPS.length;
   const progressPct    = (completedCount / totalSteps) * 100;
 
-  // esconde se dismissido, completo ou se já tiver dados cadastrados (usuário ativo)
-  const isAlreadyActive = tarefas.length > 0 || transactions.length > 0 || habitos.length > 0;
-  if ( dismissed || completedCount >= totalSteps || isAlreadyActive )
+  // esconde se dismissido, completo, ou se o usuário já tem sessão ativa (não é novo)
+  if ( dismissed || completedCount >= totalSteps || (userId && userId.length > 0) )
   {
     return null;
   }
@@ -88,7 +60,7 @@ export function OnboardingChecklist ()
               <OnboardingStepItem
                 key={step.id}
                 step={step}
-                done={completedSet.has(step.id)}
+                done={steps.includes(step.id)}
                 onClick={() => handleStepClick(step)}
               />
             ))}
