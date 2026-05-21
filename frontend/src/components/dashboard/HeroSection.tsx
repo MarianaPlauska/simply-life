@@ -62,7 +62,6 @@ export function HeroSection({
       catch (err)
       {
         console.warn('[Weather] Geoloc indisponível, usando fallback:', err);
-        // fallback sem clima — saudação funciona sem
       }
     };
     
@@ -70,21 +69,59 @@ export function HeroSection({
     return () => { cancelled = true; };
   }, []);
 
-  // gera saudação contextual quando dados chegam
+  // gera saudação — tenta Groq (JARVIS), fallback local
   useEffect(() =>
   {
+    let cancelled = false;
     const medsPendentes = (medicamentos ?? []).filter((m) => !m.tomado).length;
     const criticas = tarefas.filter((t) => t.prioridade === 'critica' && t.status !== 'concluida').length;
 
-    const greeting = generateLocalGreeting(weather, {
-      emailsUrgentes: 0, // será alimentado pelo inbox real
+    // saudação local imediata (não espera a IA)
+    const localGreeting = generateLocalGreeting(weather, {
+      emailsUrgentes: 0,
       medsPendentes,
       tarefasCriticas: criticas,
       streak: streakAtual,
     });
+    setSmartGreeting(localGreeting);
 
-    setSmartGreeting(greeting);
-  }, [weather, medicamentos, tarefas, streakAtual]);
+    // tenta Groq em background (upgrade da saudação)
+    const tryGroq = async () =>
+    {
+      try
+      {
+        let lat: number | undefined;
+        let lon: number | undefined;
+        try {
+          const pos = await getUserLocation();
+          lat = pos.lat;
+          lon = pos.lon;
+        } catch { /* sem geoloc, segue sem */ }
+
+        const { generateGreetingIA } = await import('../../services/jarvisApi');
+        const result = await generateGreetingIA({
+          lat, lon,
+          emailsUrgentes: 0,
+          medsPendentes,
+          tarefasCriticas: criticas,
+          streak: streakAtual,
+          saldoMes: resumo?.saldo_mes ?? 0,
+        });
+
+        if (!cancelled && result.greeting)
+        {
+          setSmartGreeting(result.greeting);
+        }
+      }
+      catch (err)
+      {
+        console.warn('[JARVIS] Groq indisponível, usando saudação local:', err);
+      }
+    };
+
+    tryGroq();
+    return () => { cancelled = true; };
+  }, [weather, medicamentos, tarefas, streakAtual, resumo]);
 
   const WeatherIcon = getWeatherIcon(weather);
 

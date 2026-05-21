@@ -199,3 +199,7 @@ BEGIN
     END LOOP;
 END;
 $$;
+
+-- Força o recarregamento do cache do PostgREST (API do Supabase)
+-- Isso garante que as permissões (grants) e RLS tenham efeito imediato
+NOTIFY pgrst, 'reload schema';

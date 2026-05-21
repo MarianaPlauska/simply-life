@@ -1,8 +1,13 @@
 {
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
-  "installCommand": "cd frontend && npm ci",
+  "installCommand": "npm ci && cd frontend && npm ci",
   "framework": "vite",
+  "functions": {
+    "api/*.js": {
+      "runtime": "@vercel/node@3"
+    }
+  },
   "build": {
     "env": {
       "VITE_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
@@ -10,6 +15,7 @@
     }
   },
   "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
