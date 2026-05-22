@@ -182,7 +182,7 @@ function useFocusTimer() {
       });
       if (phase === 'focus' && canvasRef.current)
       {
-        fireConfetti(canvasRef.current);
+        // confetti desativado — toast e ganho de XP ja sao feedback suficiente
       }
     }
   }, [secondsLeft, phase, totalSeconds, completeFocusPhase, gamificacao.xp]);

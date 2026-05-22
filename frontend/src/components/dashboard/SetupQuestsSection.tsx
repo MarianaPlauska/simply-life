@@ -4,7 +4,6 @@ import {
   ListChecks, Pill, DollarSign, Brain, Activity,
   CheckCircle2, Sparkles, ChevronRight, Rocket,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 import { GlassCard } from '../ui/GlassCard';
 import { useTaskStore } from '../../store/useTaskStore';
 import type { ActiveView } from '../../store/useTaskStore';
@@ -27,17 +26,7 @@ interface Quest
   checkFn: () => boolean; // retorna true se já completou
 }
 
-// dispara confetti a partir de um ponto
-function fireConfetti()
-{
-  confetti({
-    particleCount: 80,
-    spread: 60,
-    origin: { x: 0.5, y: 0.7 },
-    colors: ['#8b5cf6', '#6366f1', '#a78bfa', '#fbbf24', '#34d399'],
-    disableForReducedMotion: true,
-  });
-}
+// confetti removido — visual minimalista, sem efeitos exagerados
 
 export function SetupQuestsSection()
 {
@@ -134,13 +123,12 @@ export function SetupQuestsSection()
       }
     });
 
-    // detecta se alguma nova quest foi completada (para disparar confetti)
+    // detecta se alguma nova quest foi completada (sem confetti)
     newCompleted.forEach((id) =>
     {
       if (!completedIds.has(id))
       {
         setJustCompleted(id);
-        fireConfetti();
         setTimeout(() =>
         {
           setJustCompleted(null);
