@@ -14,6 +14,7 @@ import { TriagemInboxWidget } from '../dashboard/TriagemInboxWidget';
 import { NewsRadarSection } from '../dashboard/NewsRadarSection';
 import { AvatarStatusWidget } from '../dashboard/AvatarStatusWidget';
 import { ActiveQuestsList } from '../dashboard/ActiveQuestsList';
+import { ExecutionLineSection } from '../dashboard/ExecutionLineSection';
 import { Bug, Loader2 } from 'lucide-react';
 
 
@@ -105,23 +106,22 @@ export function DashboardHome() {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto p-6 space-y-8 pb-16 text-zinc-50">
-        {/* Camada 1 — Contexto Imediato */}
+      <div className="max-w-6xl mx-auto p-4 space-y-4 pb-16 text-zinc-50">
+        {/* Camada 1 — Hero (saudacao + status) */}
         <div className="relative">
           <HeroSection resumo={resumo} naoLidas={naoLidas} />
 
-          {/* botão de debug — simula email recebido pelo motor de triagem */}
           <button
             id="debug-mock-email"
             onClick={handleMockEmail}
             disabled={mockLoading}
             title="Simular E-mail (debug)"
-            className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5
-              rounded-xl text-[10px] font-medium tracking-wide uppercase
-              bg-zinc-900/60 backdrop-blur-sm border border-white/5
+            className="absolute bottom-3 right-3 flex items-center gap-1.5 px-2 py-1
+              rounded text-[10px] font-medium tracking-wide uppercase
+              bg-card border border-zinc-900
               text-zinc-600 opacity-30 hover:opacity-100
               hover:border-violet-500/30 hover:text-violet-400
-              transition-all duration-300 disabled:cursor-wait"
+              transition-colors disabled:cursor-wait"
           >
             {mockLoading
               ? <Loader2 className="w-3 h-3 animate-spin" />
@@ -131,36 +131,35 @@ export function DashboardHome() {
           </button>
         </div>
 
-        {/* Camada 0.5 — Onboarding gamificado (some quando completo) */}
+        {/* Onboarding — some quando completo */}
         <SetupQuestsSection />
 
-        <KPISection resumo={resumo} tarefasIA={tarefasIA} />
+        {/* LAYOUT ORION — 2 colunas no topo: execucao ativa + avatar status */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 items-start">
+          <div className="space-y-4 min-w-0">
+            <ExecutionLineSection />
+            <KPISection resumo={resumo} tarefasIA={tarefasIA} />
+            <TriagemInboxWidget setActiveView={setActiveView} />
+          </div>
 
-        {/* Camada 1.5 — Inbox IA (e-mails/Teams processados) */}
-        <TriagemInboxWidget setActiveView={setActiveView} />
-
-        {/* Camada 2 — Fluxo Tático */}
-        <HealthSection resumo={resumo} />
-
-        {/* Camada 2.5 — RPG de Gamificação */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <AvatarStatusWidget />
-          <ActiveQuestsList />
+          <div className="space-y-4">
+            <AvatarStatusWidget />
+            <ActiveQuestsList />
+          </div>
         </div>
 
-        {/* Camada 2.6 — Foco & Score */}
+        {/* Camada 2 — Saude + Foco */}
+        <HealthSection resumo={resumo} />
+
         <FocusScoreSection resumo={resumo} scoreDiario={scoreDiario} />
 
-        {/* Camada 2.7 — Performance Report Card */}
         <ReportCardSection />
 
-        {/* Camada 3 — Radar de Monitoramento */}
+        {/* Camada 3 — Radares */}
         <KeywordsRadarSection keywords={keywords} />
 
-        {/* Camada 3.2 — Radar de Notícias (IA curada) */}
         <NewsRadarSection />
 
-        {/* Camada 3.5 — Insights Proativos (JARVIS) */}
         <SmartNudgesSection
           resumo={resumo}
           calendarEvents={calendarEvents}
@@ -172,7 +171,6 @@ export function DashboardHome() {
           setActiveView={setActiveView}
         />
 
-        {/* Camada 4 — Agenda */}
         <AgendaSection
           calendarEvents={calendarEvents}
           calendarLoading={calendarLoading}
