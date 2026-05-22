@@ -1,5 +1,8 @@
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import { DndContext, type DragEndEvent, DragOverlay } from '@dnd-kit/core';
+import {
+  DndContext, type DragEndEvent, DragOverlay,
+  PointerSensor, useSensor, useSensors,
+} from '@dnd-kit/core';
 import {
   FlaskConical, LayoutGrid, List, Archive,
   CalendarDays, CalendarRange, Calendar, Loader2, Radio,
@@ -79,6 +82,13 @@ export function KanbanBoard() {
   // modais e seleção
   const [selectedTarefa, setSelectedTarefa] = useState<TarefaUnificada | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+
+  // sensors com tolerancia de 6px — sem isso o click vira drag e bloqueia onClick
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    }),
+  );
 
   useEffect(() => {
     fetchTarefas();
@@ -474,7 +484,7 @@ export function KanbanBoard() {
   }
 
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="max-w-7xl mx-auto w-full pb-16 relative px-1">
         {/* cabeçalho principal — espaçamento reduzido para densidade */}
         <div className="mb-4 space-y-3">

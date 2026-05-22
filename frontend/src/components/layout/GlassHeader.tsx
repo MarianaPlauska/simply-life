@@ -1,6 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Flame, Search, User, SlidersHorizontal, LogOut, Bell, CheckCheck, Info, Heart, ListTodo, Wallet2 } from 'lucide-react';
-import { useTaskStore, type ActiveView } from '../../store/useTaskStore';
+import { useTaskStore } from '../../store/useTaskStore';
+
+// Mapa view -> rota — header precisa navegar de verdade (nao so setActiveView)
+const VIEW_TO_PATH: Record<string, string> = {
+  dashboard: '/', kanban: '/kanban', anotacoes: '/anotacoes', foco: '/foco',
+  configuracoes: '/configuracoes', superhuman: '/superhuman', financeiro: '/financeiro',
+  saude: '/saude', inteligencia: '/inteligencia', carreira: '/carreira',
+  preferencias: '/preferencias', planner: '/planner', calendario: '/calendario',
+  drive: '/drive', perfil: '/perfil', relatorios: '/relatorios',
+};
 
 const VIEW_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -22,8 +32,8 @@ const VIEW_LABELS: Record<string, string> = {
 };
 
 export function GlassHeader() {
+  const navigate = useNavigate();
   const activeView = useTaskStore((s) => s.activeView);
-  const setActiveView = useTaskStore((s) => s.setActiveView);
   const pinnedModules = useTaskStore((s) => s.pinnedModules);
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -69,11 +79,11 @@ export function GlassHeader() {
               return (
                 <button
                   key={moduleId}
-                  onClick={() => setActiveView(moduleId as ActiveView)}
+                  onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
                   className={`relative px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
                     isActive
-                      ? 'text-white bg-zinc-800/80'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
+                      ? 'text-white bg-card border border-zinc-900'
+                      : 'text-zinc-400 hover:text-white hover:bg-card'
                   }`}
                 >
                   {VIEW_LABELS[moduleId] || moduleId}
@@ -183,14 +193,14 @@ export function GlassHeader() {
               <div className="absolute right-0 top-9 w-44 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl overflow-hidden z-[100]">
                 <button
                   className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors"
-                  onClick={() => { setActiveView('perfil' as ActiveView); setIsProfileOpen(false); }}
+                  onClick={() => { navigate('/perfil'); setIsProfileOpen(false); }}
                 >
                   <User className="w-3.5 h-3.5 text-zinc-500" />
                   Meu Perfil
                 </button>
                 <button
                   className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] text-zinc-300 hover:bg-zinc-800 transition-colors"
-                  onClick={() => { setActiveView('configuracoes' as ActiveView); setIsProfileOpen(false); }}
+                  onClick={() => { navigate('/configuracoes'); setIsProfileOpen(false); }}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-500" />
                   Preferencias
