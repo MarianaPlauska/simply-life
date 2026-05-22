@@ -56,5 +56,8 @@
     "vite": "^8.0.4",
     "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.1.4"
+  },
+  "optionalDependencies": {
+    "fsevents": "2.3.3"
   }
 }
