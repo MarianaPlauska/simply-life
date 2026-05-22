@@ -2,7 +2,11 @@
 import type { StateCreator } from 'zustand';
 import type { ActiveView, TimerConfig, AccessibilitySettings } from '../storeTypes';
 
+export type RealtimeStatus = 'offline' | 'connecting' | 'live' | 'error';
+
 export interface UISlice {
+  realtimeStatus: RealtimeStatus;
+  setRealtimeStatus: (status: RealtimeStatus) => void;
   activeView: ActiveView;
   isQuickCaptureOpen: boolean;
   isCommandPaletteOpen: boolean;
@@ -26,6 +30,8 @@ export interface UISlice {
 }
 
 export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
+  realtimeStatus: 'offline',
+  setRealtimeStatus: (status) => set({ realtimeStatus: status }),
   activeView: 'dashboard',
   isQuickCaptureOpen: false,
   isCommandPaletteOpen: false,

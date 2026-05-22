@@ -129,6 +129,11 @@ export interface FinancialGoal {
   concluida: boolean;
 }
 
+export interface HabitoDiarioConfig {
+  incremento?: number;
+  meta_minutos?: number;
+}
+
 export interface HabitoDiario {
   id: number;
   tipo: string;
@@ -136,6 +141,18 @@ export interface HabitoDiario {
   meta_diaria: number;
   progresso_atual: number;
   unidade: string;
+  config?: HabitoDiarioConfig;
+}
+
+export interface SessaoTreino {
+  id: number;
+  habito_id: number | null;
+  tipo_treino: string;
+  meta_minutos: number;
+  iniciado_em: string;
+  finalizado_em: string | null;
+  duracao_real_min: number | null;
+  concluido: boolean;
 }
 
 export interface Notificacao {

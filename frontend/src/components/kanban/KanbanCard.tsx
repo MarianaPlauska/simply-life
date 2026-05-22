@@ -11,6 +11,7 @@ import type { TarefaUnificada } from '../../types';
 import { PRIO_BADGE, getOrigin } from '../../constants/kanbanConfig';
 import { getElapsed, getUrgencyBadge } from '../../utils/kanbanHelpers';
 import { useTaskStore } from '../../store/useTaskStore';
+import { TaskLineRow } from './TaskLineRow';
 
 interface KanbanCardProps
 {
@@ -119,6 +120,23 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kan
   const subtasks = { done: subs.filter((s) => s.concluida).length, total: subs.length };
   const labels = tarefa.labels || [];
 
+  if (flat)
+  {
+    return (
+      <TaskLineRow
+        tarefa={tarefa}
+        onOpen={() => onEdit?.(tarefa)}
+        drag={{
+          setNodeRef,
+          listeners,
+          attributes,
+          style,
+          isDragging,
+        }}
+      />
+    );
+  }
+
   return (
     <article
       ref={setNodeRef}
@@ -128,10 +146,8 @@ export function KanbanCard ({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kan
       role="listitem"
       aria-label={`Tarefa: ${tarefa.titulo}, urgência ${urgency.label}`}
       className={[
-        'relative rounded-xl overflow-hidden',
-        flat 
-          ? 'bg-zinc-950/20 hover:bg-zinc-950/40 border border-white/[0.03] hover:border-white/[0.06] shadow-none'
-          : 'bg-zinc-900/40 backdrop-blur-sm border hover:border-zinc-800 hover:bg-zinc-900/60 hover:shadow-xl hover:shadow-black/20',
+        'relative rounded-md overflow-hidden',
+        'bg-zinc-950/60 backdrop-blur-sm border border-white/[0.04] hover:border-violet-500/20 hover:bg-[#090514]',
         'transition-all duration-200 cursor-grab active:cursor-grabbing group',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50',
         isDragging ? 'shadow-2xl shadow-violet-500/10 scale-[1.02] rotate-1' : '',

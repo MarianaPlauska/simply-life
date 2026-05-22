@@ -16,6 +16,8 @@ import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
 import { useRealtimeSync } from './hooks/useRealtimeSync';
 import { OnboardingChecklist } from './components/Onboarding/OnboardingChecklist';
+import { MedicationLockOverlay } from './components/ui/MedicationLockOverlay';
+import { BurnoutAura } from './components/ui/BurnoutAura';
 import { Briefcase, Rocket } from 'lucide-react';
 
 // Lazy-loaded views
@@ -133,8 +135,19 @@ function NavigationSync() {
 function AppLayout() {
   const mainRef = useRef<HTMLElement>(null);
   useRealtimeSync();
+  const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos);
+  const fetchTarefas = useTaskStore((s) => s.fetchTarefas);
+
+  useEffect(() =>
+  {
+    fetchMedicamentos();
+    fetchTarefas();
+  }, [fetchMedicamentos, fetchTarefas]);
+
   return (
-    <div className="flex h-screen w-full bg-zinc-950 text-zinc-200 overflow-hidden">
+    <div className="flex h-screen w-full bg-black text-zinc-200 overflow-hidden">
+      <MedicationLockOverlay />
+      <BurnoutAura />
       <AmbientBackground scrollContainerRef={mainRef} />
       <QuickCaptureModal />
       <CommandPalette />

@@ -9,6 +9,9 @@ import type { HabitoDiario } from '../../store/useTaskStore';
 import { MoodTracker } from './MoodTracker';
 import { JournalEntry } from './JournalEntry';
 import { WeeklyReviewCard } from './WeeklyReviewCard';
+import { WaterTrackerCard } from './WaterTrackerCard';
+import { ProteinGoalCard } from './ProteinGoalCard';
+import { WorkoutTrackerCard } from './WorkoutTrackerCard';
 import { EmptyState } from '../ui/EmptyState';
 
 /* -- Icon map for habit types -- */
@@ -18,12 +21,12 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const PRESET_HABITOS = [
-  { tipo: 'agua', nome_exibicao: 'Copos de Agua', meta_diaria: 8, unidade: 'copos' },
   { tipo: 'sono', nome_exibicao: 'Horas de Sono', meta_diaria: 8, unidade: 'horas' },
   { tipo: 'leitura', nome_exibicao: 'Paginas Lidas', meta_diaria: 20, unidade: 'paginas' },
-  { tipo: 'exercicio', nome_exibicao: 'Minutos de Exercicio', meta_diaria: 30, unidade: 'min' },
   { tipo: 'meditacao', nome_exibicao: 'Minutos de Meditacao', meta_diaria: 10, unidade: 'min' },
 ];
+
+const CORE_HEALTH_TIPOS = new Set(['agua', 'proteina', 'treino']);
 
 function getBatteryColor(pct: number) {
   if (pct >= 80) return { bar: 'bg-emerald-500', text: 'text-emerald-400', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.08)]' };
@@ -39,6 +42,8 @@ export function HealthView() {
   const addMedicamento = useTaskStore((s) => s.addMedicamento);
   const habitos = useTaskStore((s) => s.habitos);
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos);
+  const fetchSessaoTreinoAtiva = useTaskStore((s) => s.fetchSessaoTreinoAtiva);
+  const fetchSessoesTreinoHoje = useTaskStore((s) => s.fetchSessoesTreinoHoje);
   const addHabito = useTaskStore((s) => s.addHabito);
   const incrementHabito = useTaskStore((s) => s.incrementHabito);
   const decrementHabito = useTaskStore((s) => s.decrementHabito);
@@ -62,6 +67,8 @@ export function HealthView() {
   {
     fetchMedicamentos();
     fetchHabitos();
+    fetchSessaoTreinoAtiva();
+    fetchSessoesTreinoHoje();
     /* carrega dados de bem-estar mental — inclui histórico de 30 dias para os pixels */
     fetchHumorHoje();
     fetchHumorSemana();
@@ -71,6 +78,8 @@ export function HealthView() {
   }, [
     fetchMedicamentos,
     fetchHabitos,
+    fetchSessaoTreinoAtiva,
+    fetchSessoesTreinoHoje,
     fetchHumorHoje,
     fetchHumorSemana,
     fetchHumorMes,
@@ -79,6 +88,7 @@ export function HealthView() {
   ]);
 
   /* -- Vitality score from habits + meds -- */
+  const habitosGerais = habitos.filter((h) => !CORE_HEALTH_TIPOS.has(h.tipo));
   const totalHabitoPct = habitos.length > 0
     ? habitos.reduce((sum, h) => sum + Math.min(h.progresso_atual / h.meta_diaria, 1), 0) / habitos.length * 100
     : 0;
@@ -162,6 +172,13 @@ export function HealthView() {
         </div>
       </div>
 
+      {/* metas essenciais: água, proteína, treinos com cronômetro */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+        <WaterTrackerCard />
+        <ProteinGoalCard />
+        <WorkoutTrackerCard />
+      </div>
+
       {/* bento row 1: vitalidade + journaling empilhados (1/3) | mood tracker (2/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
@@ -227,16 +244,16 @@ export function HealthView() {
             <h2 className="text-[13px] font-semibold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent">
               Habitos Configuraveis
             </h2>
-            <span className="text-[11px] text-zinc-600">{habitos.length} rastreadores</span>
+            <span className="text-[11px] text-zinc-600">{habitosGerais.length} rastreadores extras</span>
           </div>
           <button onClick={() => setShowHabitForm(true)} className="flex items-center gap-1.5 text-[12px] text-zinc-400 hover:text-white transition-colors">
             <Plus className="w-3.5 h-3.5" />Personalizar Habitos
           </button>
         </div>
 
-        {habitos.length > 0 ? (
+        {habitosGerais.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {habitos.map((h) =>
+            {habitosGerais.map((h) =>
             {
               const pct = h.meta_diaria > 0 ? Math.min((h.progresso_atual / h.meta_diaria) * 100, 100) : 0;
               const done = h.progresso_atual >= h.meta_diaria;

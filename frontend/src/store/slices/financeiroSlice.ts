@@ -2,6 +2,7 @@
 import type { StateCreator } from 'zustand'
 import type { Despesa, Transaction, BudgetLimit, Category, FinancialGoal, VirtualCard } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
+import { evaluateRule503020Compliance } from './financeiroRule503020'
 
 interface DatabaseDespesa
 {
@@ -49,6 +50,7 @@ export interface FinanceiroSlice
   toggleCardStatus: (id: string) => Promise<void>
   updateCardLimit: (id: string, limite: number) => Promise<void>
   runFinanceCheck: () => Promise<void>
+  evaluateRule503020Compliance: () => Promise<void>
 }
 
 export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], FinanceiroSlice> = (set, get) => ({
@@ -125,6 +127,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
           }
         }),
       })
+      await evaluateRule503020Compliance(get)
     }
     catch { /* offline */ }
   },
@@ -206,6 +209,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
           return { transactions: newTransactions }
         })
+        await evaluateRule503020Compliance(get)
       }
     }
     catch (e)
@@ -218,7 +222,10 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   removeTransaction: (id) =>
   {
     set((s) => ({ transactions: s.transactions.filter((t) => t.id !== id) }))
-    supabase.from('despesas').delete().eq('id', id).then(() => {})
+    supabase.from('despesas').delete().eq('id', id).then(async () =>
+    {
+      await evaluateRule503020Compliance(get)
+    })
   },
 
   fetchCategories: async () =>
@@ -325,7 +332,6 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     {
       const anyGet = get() as any
       if (anyGet.addXP) await anyGet.addXP('financeiro', 50)
-      if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Bater a meta da Regra 50/30/20', 1)
     }
   },
 
@@ -525,5 +531,10 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       }
     }
     catch (e) { console.error('runFinanceCheck:', e) }
+  },
+
+  evaluateRule503020Compliance: async () =>
+  {
+    await evaluateRule503020Compliance(get)
   },
 })

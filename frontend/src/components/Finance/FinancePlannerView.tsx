@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { useFinancePlannerInit } from '../../hooks/useFinancePlannerInit';
 import {
   Settings2, ChevronLeft, ChevronRight, Eye, List, Target, Plus, CreditCard, Receipt
 } from 'lucide-react';
@@ -21,17 +22,11 @@ export function FinancePlannerView() {
   const transactions = useTaskStore((s) => s.transactions);
   const budgetLimits = useTaskStore((s) => s.budgetLimits);
   const setBudgetLimit = useTaskStore((s) => s.setBudgetLimit);
-  const fetchTransactions = useTaskStore((s) => s.fetchTransactions);
-  const fetchCards = useTaskStore((s) => s.fetchCards);
-
   const categories = useTaskStore((s) => s.categories);
-  const fetchCategories = useTaskStore((s) => s.fetchCategories);
   const financialGoals = useTaskStore((s) => s.financialGoals);
-  const fetchGoals = useTaskStore((s) => s.fetchGoals);
   const updateGoalProgress = useTaskStore((s) => s.updateGoalProgress);
 
-  const fetchContasFixas = useTaskStore((s) => s.fetchContasFixas);
-  const runFinanceCheck = useTaskStore((s) => s.runFinanceCheck);
+  useFinancePlannerInit();
 
   const [tab, setTab] = useState<PlannerTab>('visao-geral');
   const [showModal, setShowModal] = useState(false);
@@ -44,15 +39,6 @@ export function FinancePlannerView() {
   const [editVal, setEditVal] = useState('');
   const [editingMeta, setEditingMeta] = useState<number | null>(null);
   const [metaEditVal, setMetaEditVal] = useState('');
-
-  useEffect(() => { 
-    fetchTransactions(); 
-    fetchCategories();
-    fetchGoals();
-    fetchCards();
-    fetchContasFixas();
-    runFinanceCheck();
-  }, [fetchTransactions, fetchCategories, fetchGoals, fetchCards, fetchContasFixas, runFinanceCheck]);
 
   const activeCategories = useMemo(() => {
     return categories.length > 0 ? categories : [];

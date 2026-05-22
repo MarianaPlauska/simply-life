@@ -63,11 +63,19 @@ export const STATUS_OPTIONS = ['pendente', 'em_progresso', 'concluida'] as const
 // ── origem ─────────────────────────────────────────────────────
 
 export const ORIGINS: Record<string, { label: string; Icon: React.ElementType; color: string }> = {
-  manual:       { label: 'Manual',       Icon: Square,         color: 'text-zinc-400'   },
-  gmail_triage: { label: 'Gmail',        Icon: Mail,           color: 'text-blue-400'   },
-  gmail_mock:   { label: 'Gmail (mock)', Icon: Mail,           color: 'text-violet-400' },
-  gmail_api:    { label: 'Gmail API',    Icon: Mail,           color: 'text-blue-400'   },
-  webhook:      { label: 'Webhook',      Icon: Code2,          color: 'text-violet-400' },
+  manual:        { label: 'Manual',       Icon: Square,         color: 'text-zinc-400'   },
+  gmail_triage:  { label: 'Gmail',        Icon: Mail,           color: 'text-blue-400'   },
+  gmail_mock:    { label: 'Gmail (mock)', Icon: Mail,           color: 'text-violet-400' },
+  gmail_api:     { label: 'Gmail API',    Icon: Mail,           color: 'text-blue-400'   },
+  gmail:         { label: 'Gmail',        Icon: Mail,           color: 'text-blue-400'   },
+  email:         { label: 'E-mail',       Icon: Mail,           color: 'text-cyan-400'   },
+  webhook:       { label: 'Webhook',      Icon: Code2,          color: 'text-violet-400' },
+  github_issue:  { label: 'GitHub',       Icon: Code2,          color: 'text-violet-400' },
+  github_pr:     { label: 'GitHub PR',    Icon: Code2,          color: 'text-violet-400' },
+  google_cal:    { label: 'Agenda',       Icon: Square,         color: 'text-emerald-400' },
+  meeting:       { label: 'Reunião',      Icon: Square,         color: 'text-emerald-400' },
+  financeiro:    { label: 'Financeiro',   Icon: Square,         color: 'text-amber-400'  },
+  saude:         { label: 'Saúde',        Icon: Square,         color: 'text-emerald-400' },
 };
 export const ORIGINS_FALLBACK = { label: 'Outro', Icon: MessageSquare, color: 'text-zinc-400' };
 

@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback } from 'react';
 import { DndContext, type DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import {
   FlaskConical, LayoutGrid, List, Archive,
-  CalendarDays, CalendarRange, Calendar, Loader2,
+  CalendarDays, CalendarRange, Calendar, Loader2, Radio,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { KanbanCard } from './KanbanCard';
@@ -43,7 +43,28 @@ export function KanbanBoard() {
   const [viewMode, setViewMode] = useState<ViewMode>('board');
   const [tab, setTab] = useState<Tab>('active');
   const [groupBy, setGroupBy] = useState<GroupBy>('none');
-  const [boardStyle, setBoardStyle] = useState<'classico' | 'temporal'>('classico');
+  const [boardStyle, setBoardStyle] = useState<'classico' | 'temporal'>(() =>
+  {
+    try
+    {
+      const saved = localStorage.getItem('jarvis_kanban_style')
+      if (saved === 'classico' || saved === 'temporal') return saved
+    }
+    catch { /* privado */ }
+    return 'temporal'
+  });
+
+  const realtimeStatus = useTaskStore((s) => s.realtimeStatus);
+
+  const persistBoardStyle = (style: 'classico' | 'temporal') =>
+  {
+    setBoardStyle(style)
+    try
+    {
+      localStorage.setItem('jarvis_kanban_style', style)
+    }
+    catch { /* modo privado */ }
+  }
 
   // filtros
   const [searchQuery, setSearchQuery] = useState('');
@@ -461,10 +482,23 @@ export function KanbanBoard() {
         <div className="mb-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl font-semibold text-zinc-100 tracking-tight">Tarefas</h1>
+              <h1 className="text-xl font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
+                Tarefas
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-500 normal-case">
+                  <Radio className="w-3 h-3" />
+                  <span className={`w-1.5 h-1.5 rounded-full ${
+                    realtimeStatus === 'live' ? 'bg-emerald-500'
+                      : realtimeStatus === 'connecting' ? 'bg-amber-400 animate-pulse'
+                        : realtimeStatus === 'error' ? 'bg-red-500'
+                          : 'bg-zinc-600'
+                  }`} />
+                  {realtimeStatus === 'live' ? 'Ao vivo' : realtimeStatus === 'error' ? 'Realtime' : ''}
+                </span>
+              </h1>
               <p className="text-zinc-500 text-[12px] font-medium mt-0.5">
                 {filtered.length} tarefa{filtered.length !== 1 ? 's' : ''}
                 {hasActiveFilters ? ' filtradas' : ' ativas'}
+                {boardStyle === 'temporal' ? ' · visão Jarvis' : ''}
               </p>
             </div>
 
@@ -566,7 +600,7 @@ export function KanbanBoard() {
                   <button
                     onClick={() =>
                     {
-                      return setBoardStyle('classico');
+                      persistBoardStyle('classico');
                     }}
                     className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
                       boardStyle === 'classico'
@@ -579,7 +613,7 @@ export function KanbanBoard() {
                   <button
                     onClick={() =>
                     {
-                      return setBoardStyle('temporal');
+                      persistBoardStyle('temporal');
                     }}
                     className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
                       boardStyle === 'temporal'

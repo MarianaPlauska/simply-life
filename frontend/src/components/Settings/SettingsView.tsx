@@ -5,8 +5,9 @@ import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
 import type { AccessibilitySettings } from '../../store/useTaskStore';
+import { WebhookJarvisSection } from './WebhookJarvisSection';
 
-type SettingsTab = 'integracoes' | 'foco' | 'acessibilidade' | 'ia' | 'sistema';
+type SettingsTab = 'integracoes' | 'webhook' | 'foco' | 'acessibilidade' | 'ia' | 'sistema';
 
 interface Platform {
   id: string;
@@ -27,6 +28,7 @@ const PLATFORMS: Platform[] = [
 
 const TABS = [
   { id: 'integracoes' as SettingsTab, label: 'Integracoes', icon: Link2 },
+  { id: 'webhook' as SettingsTab, label: 'Webhooks Jarvis', icon: Code2 },
   { id: 'foco' as SettingsTab, label: 'Preferencias de Foco', icon: Timer },
   { id: 'ia' as SettingsTab, label: 'Keywords & IA', icon: Brain },
   { id: 'acessibilidade' as SettingsTab, label: 'Acessibilidade', icon: Accessibility },
@@ -324,6 +326,8 @@ export function SettingsView() {
               {PLATFORMS.map((p) => <PlatformCard key={p.id} platform={p} />)}
             </div>
           )}
+
+          {activeTab === 'webhook' && <WebhookJarvisSection />}
 
           {/* === FOCO === */}
           {activeTab === 'foco' && (

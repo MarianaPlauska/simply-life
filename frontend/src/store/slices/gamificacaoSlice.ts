@@ -216,32 +216,98 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
 
       if (diariasHoje.length === 0)
       {
-        const novasDiarias = [
-          {
+        const state = get() as GamificacaoSlice & {
+          medicamentos?: { tomado: boolean }[]
+          habitos?: { tipo: string; progresso_atual: number; meta_diaria: number }[]
+          tarefas?: { status: string }[]
+          transactions?: unknown[]
+        }
+
+        const medsPendentes = (state.medicamentos || []).filter((m) => !m.tomado).length
+        const agua = (state.habitos || []).find((h) => h.tipo === 'agua')
+        const proteina = (state.habitos || []).find((h) => h.tipo === 'proteina')
+        const tarefasAbertas = (state.tarefas || []).filter((t) => t.status !== 'concluida').length
+
+        const novasDiarias: {
+          tipo: 'diaria' | 'semanal'
+          titulo: string
+          recompensa_xp: number
+          progresso: number
+          meta: number
+          concluida: boolean
+        }[] = []
+
+        if (medsPendentes > 0)
+        {
+          novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Tomar um medicamento pendente',
             recompensa_xp: 20,
             progresso: 0,
             meta: 1,
             concluida: false,
-          },
-          {
+          })
+        }
+
+        if (tarefasAbertas > 0)
+        {
+          novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Concluir 1 tarefa do Kanban',
             recompensa_xp: 15,
             progresso: 0,
             meta: 1,
             concluida: false,
-          },
-          {
+          })
+        }
+
+        if ((state.transactions || []).length === 0)
+        {
+          novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Registrar 1 movimentação financeira',
             recompensa_xp: 15,
             progresso: 0,
             meta: 1,
             concluida: false,
-          },
-        ]
+          })
+        }
+
+        if (agua && agua.progresso_atual < agua.meta_diaria)
+        {
+          novasDiarias.push({
+            tipo: 'diaria',
+            titulo: 'Bater a meta de água do dia',
+            recompensa_xp: 15,
+            progresso: 0,
+            meta: 1,
+            concluida: false,
+          })
+        }
+
+        if (proteina && proteina.progresso_atual < proteina.meta_diaria)
+        {
+          novasDiarias.push({
+            tipo: 'diaria',
+            titulo: 'Bater a meta de proteína do dia',
+            recompensa_xp: 15,
+            progresso: 0,
+            meta: 1,
+            concluida: false,
+          })
+        }
+
+        if (novasDiarias.length === 0)
+        {
+          novasDiarias.push({
+            tipo: 'diaria',
+            titulo: 'Manter o ritmo Jarvis — registre 1 hábito de saúde',
+            recompensa_xp: 10,
+            progresso: 0,
+            meta: 1,
+            concluida: false,
+          })
+        }
 
         // Adiciona semanal se não houver semanal criada nos últimos 7 dias
         const ultimaSemanal = quests.find((q) => q.tipo === 'semanal')
@@ -306,7 +372,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
               // Determina o módulo pelo título da quest
               let modulo: 'foco' | 'saude' | 'financeiro' = 'foco'
               const titleLower = q.titulo.toLowerCase()
-              if (titleLower.includes('medicamento')) modulo = 'saude'
+              if (titleLower.includes('medicamento') || titleLower.includes('água') || titleLower.includes('agua') || titleLower.includes('proteína') || titleLower.includes('proteina') || titleLower.includes('saúde') || titleLower.includes('saude') || titleLower.includes('treino')) modulo = 'saude'
               else if (titleLower.includes('financeira') || titleLower.includes('50/30/20')) modulo = 'financeiro'
 
               await get().addXP(modulo, q.recompensa_xp)

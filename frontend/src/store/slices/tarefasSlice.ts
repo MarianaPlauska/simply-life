@@ -2,6 +2,7 @@
 import type { StateCreator } from 'zustand'
 import type { TarefaUnificada, Label, Subtarefa } from '../../types'
 import { supabase } from '../../lib/supabase'
+import { applyTaskCompletionRewards } from './tarefasCompletionRewards'
 
 
 interface DBTemplateRow
@@ -128,36 +129,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
         if (isCompleting)
         {
-          const isUrgente = oldTarefa?.prioridade === 'alta' || oldTarefa?.prioridade === 'critica' || (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
-          const xpAmount = isUrgente ? 25 : 15
-
-          const anyGet = get() as any
-          if (anyGet.addXP) await anyGet.addXP('foco', xpAmount)
-          if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Concluir 1 tarefa do Kanban', 1)
-
-          if (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
-          {
-            const stats = anyGet.userStats
-            if (stats)
-            {
-              const newStreakFoco = stats.streak_foco + 1
-              if (newStreakFoco === 3)
-              {
-                if (anyGet.addXP) await anyGet.addXP('foco', 50)
-                const { toast } = await import('sonner')
-                toast.success('🔥 Bônus Foco Absoluto! (+50 XP)', {
-                  description: 'Você concluiu 3 tarefas de alta urgência em sequência!',
-                })
-                await supabase.from('user_stats').update({ streak_foco: 0 }).eq('id', stats.id);
-                (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: 0 } : null }))
-              }
-              else
-              {
-                await supabase.from('user_stats').update({ streak_foco: newStreakFoco }).eq('id', stats.id);
-                (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: newStreakFoco } : null }))
-              }
-            }
-          }
+          await applyTaskCompletionRewards(oldTarefa, get as unknown as () => Record<string, unknown>, set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)
         }
       }
     }
@@ -191,36 +163,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     {
       if (isCompleting)
       {
-        const isUrgente = oldTarefa?.prioridade === 'alta' || oldTarefa?.prioridade === 'critica' || (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
-        const xpAmount = isUrgente ? 25 : 15
-
-        const anyGet = get() as any
-        if (anyGet.addXP) await anyGet.addXP('foco', xpAmount)
-        if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Concluir 1 tarefa do Kanban', 1)
-
-        if (oldTarefa?.score_urgencia && oldTarefa.score_urgencia > 80)
-        {
-          const stats = anyGet.userStats
-          if (stats)
-          {
-            const newStreakFoco = stats.streak_foco + 1
-            if (newStreakFoco === 3)
-            {
-              if (anyGet.addXP) await anyGet.addXP('foco', 50)
-              const { toast } = await import('sonner')
-              toast.success('🔥 Bônus Foco Absoluto! (+50 XP)', {
-                description: 'Você concluiu 3 tarefas de alta urgência em sequência!',
-              })
-              await supabase.from('user_stats').update({ streak_foco: 0 }).eq('id', stats.id);
-              (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: 0 } : null }))
-            }
-            else
-            {
-              await supabase.from('user_stats').update({ streak_foco: newStreakFoco }).eq('id', stats.id);
-              (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_foco: newStreakFoco } : null }))
-            }
-          }
-        }
+        await applyTaskCompletionRewards(oldTarefa, get as unknown as () => Record<string, unknown>, set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)
       }
     })
   },

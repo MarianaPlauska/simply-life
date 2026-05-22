@@ -1,44 +1,10 @@
 import { useMemo } from 'react';
 import type { Category, Transaction } from '../../store/storeTypes';
+import { computeRule503020 } from '../../utils/rule503020';
 
-// Formatação de valores monetários
-function fmt(value: number) {
+function fmt(value: number)
+{
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-// Helper para classificar categorias na regra 50-30-20
-function getCategoryBudgetGroup(categoryName: string): 'necessidades' | 'desejos' | 'poupanca' {
-  const name = categoryName.toLowerCase();
-  if (
-    name.includes('moradia') ||
-    name.includes('habita') ||
-    name.includes('casa') ||
-    name.includes('saude') ||
-    name.includes('educa') ||
-    name.includes('internet') ||
-    name.includes('alimenta') ||
-    name.includes('mercado') ||
-    name.includes('energia') ||
-    name.includes('transporte') ||
-    name.includes('luz') ||
-    name.includes('agua') ||
-    name.includes('contas')
-  ) {
-    return 'necessidades';
-  }
-
-  if (
-    name.includes('poupan') ||
-    name.includes('invest') ||
-    name.includes('reserva') ||
-    name.includes('poupar') ||
-    name.includes('acoes') ||
-    name.includes('fundos')
-  ) {
-    return 'poupanca';
-  }
-
-  return 'desejos';
 }
 
 interface Rule503020SectionProps {
@@ -52,71 +18,45 @@ export function Rule503020Section({
   receita,
   despesas,
   monthTx,
-  activeCategories
-}: Rule503020SectionProps) {
-  // Cálculo matemático para a regra 50-30-20
-  const realNecessidades = useMemo(() => {
-    return monthTx
-      .filter((t) => t.tipo === 'despesa')
-      .filter((t) => {
-        const cat = activeCategories.find((c) => c.id === t.categoria_id);
-        const catName = cat ? cat.nome : (t.categoria || '');
-        return getCategoryBudgetGroup(catName) === 'necessidades';
-      })
-      .reduce((sum, t) => sum + t.valor, 0);
-  }, [monthTx, activeCategories]);
+  activeCategories,
+}: Rule503020SectionProps)
+{
+  const rule = useMemo(
+    () => computeRule503020({ receita, despesas, monthTx, activeCategories }),
+    [receita, despesas, monthTx, activeCategories],
+  );
 
-  const realDesejos = useMemo(() => {
-    return monthTx
-      .filter((t) => t.tipo === 'despesa')
-      .filter((t) => {
-        const cat = activeCategories.find((c) => c.id === t.categoria_id);
-        const catName = cat ? cat.nome : (t.categoria || '');
-        return getCategoryBudgetGroup(catName) === 'desejos';
-      })
-      .reduce((sum, t) => sum + t.valor, 0);
-  }, [monthTx, activeCategories]);
-
-  const realPoupancaExplicito = useMemo(() => {
-    return monthTx
-      .filter((t) => t.tipo === 'despesa')
-      .filter((t) => {
-        const cat = activeCategories.find((c) => c.id === t.categoria_id);
-        const catName = cat ? cat.nome : (t.categoria || '');
-        return getCategoryBudgetGroup(catName) === 'poupanca';
-      })
-      .reduce((sum, t) => sum + t.valor, 0);
-  }, [monthTx, activeCategories]);
-
-  const realPoupanca = useMemo(() => {
-    const leftOver = receita - despesas;
-    return realPoupancaExplicito + (leftOver > 0 ? leftOver : 0);
-  }, [receita, despesas, realPoupancaExplicito]);
-
-  const pctNecessidades = useMemo(() => {
-    const pctDenom = receita > 0 ? receita : (despesas > 0 ? despesas : 1);
-    return (realNecessidades / pctDenom) * 100;
-  }, [realNecessidades, receita, despesas]);
-
-  const pctDesejos = useMemo(() => {
-    const pctDenom = receita > 0 ? receita : (despesas > 0 ? despesas : 1);
-    return (realDesejos / pctDenom) * 100;
-  }, [realDesejos, receita, despesas]);
-
-  const pctPoupanca = useMemo(() => {
-    const pctDenom = receita > 0 ? receita : (despesas > 0 ? despesas : 1);
-    return (realPoupanca / pctDenom) * 100;
-  }, [realPoupanca, receita, despesas]);
+  const {
+    realNecessidades,
+    realDesejos,
+    realPoupanca,
+    pctNecessidades,
+    pctDesejos,
+    pctPoupanca,
+    isCompliant,
+  } = rule;
 
   return (
     <div className="space-y-4 py-6 border-t border-zinc-900/50">
-      <div>
-        <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Distribuição 50-30-20 (Sua Meta vs Real)</h2>
-        <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Análise de conformidade com a regra de ouro das finanças pessoais</p>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Distribuição 50-30-20 (Sua Meta vs Real)</h2>
+          <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Análise de conformidade com a regra de ouro das finanças pessoais</p>
+        </div>
+        {receita > 0 && (
+          <span
+            className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+              isCompliant
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+            }`}
+          >
+            {isCompliant ? 'Dentro da regra' : 'Ajustar gastos'}
+          </span>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Necessidades */}
         <div className="space-y-2">
           <div className="flex justify-between text-[11px]">
             <span className="font-semibold text-zinc-300">Necessidades (Meta: 50%)</span>
@@ -132,7 +72,6 @@ export function Rule503020Section({
           <p className="text-[9px] text-zinc-500">Moradia, Saúde, Educação, Alimentação e Contas Essenciais.</p>
         </div>
 
-        {/* Desejos */}
         <div className="space-y-2">
           <div className="flex justify-between text-[11px]">
             <span className="font-semibold text-zinc-300">Desejos (Meta: 30%)</span>
@@ -148,7 +87,6 @@ export function Rule503020Section({
           <p className="text-[9px] text-zinc-500">Lazer, Compras, Viagens, Restaurantes e Estilo de Vida.</p>
         </div>
 
-        {/* Poupança / Reservas */}
         <div className="space-y-2">
           <div className="flex justify-between text-[11px]">
             <span className="font-semibold text-zinc-300">Poupança & Reservas (Meta: 20%)</span>

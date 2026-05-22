@@ -14,8 +14,6 @@ import { TriagemInboxWidget } from '../dashboard/TriagemInboxWidget';
 import { NewsRadarSection } from '../dashboard/NewsRadarSection';
 import { AvatarStatusWidget } from '../dashboard/AvatarStatusWidget';
 import { ActiveQuestsList } from '../dashboard/ActiveQuestsList';
-import { MedicationLockOverlay } from '../ui/MedicationLockOverlay';
-import { BurnoutAura } from '../ui/BurnoutAura';
 import { Bug, Loader2 } from 'lucide-react';
 
 
@@ -107,9 +105,6 @@ export function DashboardHome() {
 
   return (
     <>
-      <MedicationLockOverlay />
-      <BurnoutAura />
-      
       <div className="max-w-5xl mx-auto p-6 space-y-8 pb-16 text-zinc-50">
         {/* Camada 1 — Contexto Imediato */}
         <div className="relative">

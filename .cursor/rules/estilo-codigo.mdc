@@ -1,0 +1,38 @@
+---
+description: Estilo Allman + comentários em português (preferência do time)
+alwaysApply: true
+---
+
+# Estilo de código — Simply-Life
+
+## Chaves Allman (obrigatório)
+
+Sempre usar abertura de bloco na linha seguinte:
+
+```typescript
+if (condicao)
+{
+  fazerAlgo();
+}
+
+for (const item of lista)
+{
+  processar(item);
+}
+
+function exemplo()
+{
+  return true;
+}
+```
+
+Não usar `if (x) {` na mesma linha. Aplicar em TypeScript, JavaScript e Python quando editar arquivos do projeto.
+
+## Comentários
+
+- Escrever comentários em **português (PT-BR)**.
+- Comentar regras de negócio ou detalhes não óbvios — evitar narrar o que o código já diz.
+
+## Modularidade
+
+Ver `docs/SISTEMA_REFERENCIA.md` §8 (hooks, arquivos 100–150 linhas, sem `any`).

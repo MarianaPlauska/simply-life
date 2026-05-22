@@ -27,9 +27,10 @@ function calcMedScore(horario: string): number
   const scheduled = new Date();
   scheduled.setHours(h, m, 0, 0);
   const diffMinutes = (now.getTime() - scheduled.getTime()) / 60000;
-  // Score sobe 1 ponto a cada 10 minutos de atraso, base 60
+  // Saúde = prioridade máxima (spec 200+). Escala após 1h de atraso.
   if (diffMinutes <= 0) return 0;
-  return Math.min(Math.round(60 + diffMinutes / 10), 120);
+  if (diffMinutes <= 60) return Math.min(Math.round(80 + diffMinutes), 120);
+  return Math.min(Math.round(200 + (diffMinutes - 60) / 5), 250);
 }
 
 /* ── Interfaces ────────────────────────────────────── */
@@ -205,7 +206,7 @@ export async function checkMedicamentosPendentes(
     }
     else
     {
-      const prioridade = score >= 90 ? 'critica' : score >= 70 ? 'alta' : 'media';
+      const prioridade = score >= 200 ? 'critica' : score >= 90 ? 'critica' : score >= 70 ? 'alta' : 'media';
       const { error } = await supabase
         .from('tarefas_unificadas')
         .insert({
