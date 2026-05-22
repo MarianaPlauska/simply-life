@@ -51,7 +51,7 @@ export function GlassHeader() {
   }, [isProfileOpen, isNotifOpen]);
 
   return (
-    <header className="shrink-0 w-full bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50 relative z-50">
+    <header className="shrink-0 w-full bg-black border-b border-zinc-900 relative z-50">
       <div className="px-6 h-14 flex items-center justify-between gap-4">
 
         {/* Breadcrumb */}

@@ -558,9 +558,7 @@ export function KanbanBoard() {
                   <button
                     onClick={() => persistBoardStyle('temporal')}
                     className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
-                      boardStyle === 'temporal'
-                        ? 'bg-zinc-900 text-zinc-200'
-                        : 'text-zinc-500 hover:text-zinc-300'
+                      boardStyle === 'temporal' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
                     }`}
                   >
                     Temporal
@@ -650,8 +648,8 @@ export function KanbanBoard() {
         {/* overlay de arraste (drag overlay) */}
         <DragOverlay>
           {activeTarefa ? (
-            <div className="opacity-80 rotate-1 scale-[1.02] shadow-2xl">
-              <KanbanCard tarefa={activeTarefa} />
+            <div className="opacity-90">
+              <KanbanCard tarefa={activeTarefa} flat={boardStyle === 'temporal'} />
             </div>
           ) : null}
         </DragOverlay>

@@ -10,7 +10,6 @@ import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { GoogleCallbackView } from './components/Auth/GoogleCallbackView';
 import { ResetPasswordView } from './components/Auth/ResetPasswordView';
 import { CommandPalette } from './components/ui/CommandPalette';
-import { AmbientBackground } from './components/ui/AmbientBackground';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { useTaskStore, type ActiveView } from './store/useTaskStore';
 import { useEffect, useRef } from 'react';
@@ -148,7 +147,7 @@ function AppLayout() {
     <div className="flex h-screen w-full bg-black text-zinc-200 overflow-hidden">
       <MedicationLockOverlay />
       <BurnoutAura />
-      <AmbientBackground scrollContainerRef={mainRef} />
+      {/* AmbientBackground desativado — fundo preto puro (Design System §2.1) */}
       <QuickCaptureModal />
       <CommandPalette />
       <NavigationSync />

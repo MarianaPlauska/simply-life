@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import {
   Pill, Droplets, Dumbbell, Beef, HeartPulse, Sparkles,
-  Plus, Trash2, Minus, Check, Clock, X, BookOpen, Moon, Brain,
+  Plus, Trash2, Minus, Clock, X, BookOpen, Moon, Brain,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -14,12 +15,15 @@ import { ProteinGoalCard } from './ProteinGoalCard'
 import { WorkoutTrackerCard } from './WorkoutTrackerCard'
 import { EmptyState } from '../ui/EmptyState'
 
+// HealthView — visao unificada com aba ativa lida do hash (#hidratacao, #medicamentos...)
+// Densidade alta, sem rounded-xl, bg-card (zinc-950) nas listas
+
 type HealthTab = 'hidratacao' | 'alimentacao' | 'academia' | 'medicamentos' | 'bem_estar'
 
 const TABS: { id: HealthTab; label: string; Icon: typeof Droplets; color: string }[] = [
   { id: 'hidratacao',    label: 'Hidratação',    Icon: Droplets,   color: 'text-cyan-400'    },
   { id: 'alimentacao',   label: 'Alimentação',   Icon: Beef,       color: 'text-amber-400'   },
-  { id: 'academia',      label: 'Academia',      Icon: Dumbbell,   color: 'text-white'       },
+  { id: 'academia',      label: 'Academia',      Icon: Dumbbell,   color: 'text-zinc-200'    },
   { id: 'medicamentos',  label: 'Medicamentos',  Icon: Pill,       color: 'text-teal-400'    },
   { id: 'bem_estar',     label: 'Bem-estar',     Icon: HeartPulse, color: 'text-rose-400'    },
 ]
@@ -38,7 +42,16 @@ const CORE_HEALTH = new Set(['agua', 'proteina', 'treino'])
 
 export function HealthView()
 {
-  const [tab, setTab] = useState<HealthTab>('hidratacao')
+  const location = useLocation()
+  const initialTab = (location.hash.replace('#', '') as HealthTab) || 'hidratacao'
+  const [tab, setTab] = useState<HealthTab>(initialTab)
+
+  // sincroniza com submenu da sidebar
+  useEffect(() =>
+  {
+    const fromHash = location.hash.replace('#', '') as HealthTab
+    if (fromHash && fromHash !== tab) setTab(fromHash)
+  }, [location.hash, tab])
 
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
@@ -53,7 +66,6 @@ export function HealthView()
   const decrementHabito = useTaskStore((s) => s.decrementHabito)
   const deleteHabito = useTaskStore((s) => s.deleteHabito)
   const concluirHabito = useTaskStore((s) => s.concluirHabito)
-
   const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje)
   const fetchHumorSemana = useTaskStore((s) => s.fetchHumorSemana)
   const fetchHumorMes = useTaskStore((s) => s.fetchHumorMes)
@@ -76,20 +88,22 @@ export function HealthView()
     fetchHumorHoje, fetchHumorSemana, fetchHumorMes, fetchDiarioHoje, fetchPromptDoDia,
   ])
 
-  // resumo numérico topo
   const habitosGerais = useMemo(() => habitos.filter((h) => !CORE_HEALTH.has(h.tipo)), [habitos])
   const totalMeds = medicamentos.length
   const medsTomados = medicamentos.filter((m) => m.tomado).length
 
   return (
-    <div className="max-w-6xl mx-auto pb-16 space-y-5">
-      <header className="space-y-3">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Saúde</h1>
-          <p className="text-sm text-zinc-400 mt-1">Hidratação, alimentação, academia, medicamentos e bem-estar.</p>
+    <div className="max-w-5xl mx-auto pb-12 space-y-3">
+      <header>
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-xl font-bold text-white tracking-tight">Saúde</h1>
+          <span className="text-[12px] text-zinc-500">
+            {medsTomados}/{totalMeds} medicamentos · {habitosGerais.length} hábitos ativos
+          </span>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-1 border-b border-zinc-800/80 pb-0">
+        {/* abas — densas, sem moldura, igual a sub-sidebar */}
+        <nav className="flex flex-wrap items-center gap-0 border-b border-zinc-900 mt-2">
           {TABS.map(({ id, label, Icon, color }) =>
           {
             const active = tab === id
@@ -98,13 +112,11 @@ export function HealthView()
                 key={id}
                 onClick={() => setTab(id)}
                 className={[
-                  'flex items-center gap-2 px-3 py-2 text-[13px] font-medium border-b-2 -mb-px transition-colors',
-                  active
-                    ? 'border-violet-500 text-white'
-                    : 'border-transparent text-zinc-500 hover:text-zinc-200',
+                  'flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium border-b-2 -mb-px transition-colors',
+                  active ? 'border-violet-500 text-white' : 'border-transparent text-zinc-500 hover:text-zinc-200',
                 ].join(' ')}
               >
-                <Icon className={`w-4 h-4 ${active ? color : 'text-zinc-500'}`} />
+                <Icon className={`w-3.5 h-3.5 ${active ? color : 'text-zinc-500'}`} />
                 {label}
               </button>
             )
@@ -113,47 +125,41 @@ export function HealthView()
       </header>
 
       {tab === 'hidratacao' && (
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <WaterTrackerCard />
-          <HabitosExtrasSection
-            tipos={['sono']}
-            habitos={habitos}
-            onAdd={addHabito}
-            onInc={incrementHabito}
-            onDec={decrementHabito}
-            onDel={deleteHabito}
-            onConcluir={concluirHabito}
+          <HabitosExtras
+            habitos={habitos.filter((h) => h.tipo === 'sono')}
+            onAdd={addHabito} onInc={incrementHabito} onDec={decrementHabito}
+            onDel={deleteHabito} onConcluir={concluirHabito}
+            preset={PRESET_HABITOS.filter((p) => p.tipo === 'sono')}
           />
         </section>
       )}
 
       {tab === 'alimentacao' && (
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <ProteinGoalCard />
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-5 text-[13px] text-zinc-400">
-            <h2 className="text-base font-semibold text-white mb-2">Refeições</h2>
-            <p>Em breve: log rápido de café, almoço, jantar com macros. Por enquanto, foque na meta de proteína.</p>
+          <div className="bg-card border border-zinc-900 rounded-md p-3 text-[12px] text-zinc-400">
+            <h2 className="text-[13px] font-semibold text-white mb-1">Refeições</h2>
+            <p>Em breve: log rápido de café, almoço, jantar com macros.</p>
           </div>
         </section>
       )}
 
       {tab === 'academia' && (
-        <section className="space-y-4">
+        <section className="space-y-3">
           <WorkoutTrackerCard />
-          <HabitosExtrasSection
-            tipos={['exercicio', 'customizado']}
+          <HabitosExtras
             habitos={habitosGerais.filter((h) => h.tipo === 'exercicio' || h.tipo === 'customizado')}
-            onAdd={addHabito}
-            onInc={incrementHabito}
-            onDec={decrementHabito}
-            onDel={deleteHabito}
-            onConcluir={concluirHabito}
+            onAdd={addHabito} onInc={incrementHabito} onDec={decrementHabito}
+            onDel={deleteHabito} onConcluir={concluirHabito}
+            preset={[]}
           />
         </section>
       )}
 
       {tab === 'medicamentos' && (
-        <MedicamentosSection
+        <MedicamentosLista
           medicamentos={medicamentos}
           totalMeds={totalMeds}
           medsTomados={medsTomados}
@@ -164,20 +170,17 @@ export function HealthView()
       )}
 
       {tab === 'bem_estar' && (
-        <section className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-1"><JournalEntry /></div>
+        <section className="space-y-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <JournalEntry />
             <div className="lg:col-span-2"><MoodTracker /></div>
           </div>
           <WeeklyReviewCard />
-          <HabitosExtrasSection
-            tipos={['leitura', 'meditacao', 'customizado']}
+          <HabitosExtras
             habitos={habitosGerais.filter((h) => h.tipo !== 'exercicio')}
-            onAdd={addHabito}
-            onInc={incrementHabito}
-            onDec={decrementHabito}
-            onDel={deleteHabito}
-            onConcluir={concluirHabito}
+            onAdd={addHabito} onInc={incrementHabito} onDec={decrementHabito}
+            onDel={deleteHabito} onConcluir={concluirHabito}
+            preset={PRESET_HABITOS.filter((p) => p.tipo !== 'sono')}
           />
         </section>
       )}
@@ -185,10 +188,10 @@ export function HealthView()
   )
 }
 
-interface HabitosExtrasProps
+interface HabitosProps
 {
-  tipos: string[]
   habitos: HabitoDiario[]
+  preset: typeof PRESET_HABITOS
   onAdd: (preset: typeof PRESET_HABITOS[number]) => Promise<HabitoDiario | null | void>
   onInc: (id: number) => Promise<void> | void
   onDec: (id: number) => Promise<void> | void
@@ -196,7 +199,8 @@ interface HabitosExtrasProps
   onConcluir: (pontos: number) => void
 }
 
-function HabitosExtrasSection({ habitos, onAdd, onInc, onDec, onDel, onConcluir }: HabitosExtrasProps)
+// Lista de habitos como linhas densas — sem caixa dentro de caixa
+function HabitosExtras({ habitos, preset, onAdd, onInc, onDec, onDel, onConcluir }: HabitosProps)
 {
   const handleInc = (h: HabitoDiario) =>
   {
@@ -210,67 +214,63 @@ function HabitosExtrasSection({ habitos, onAdd, onInc, onDec, onDel, onConcluir 
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-[14px] font-semibold text-white">Hábitos extras</h3>
+    <div className="bg-card border border-zinc-900 rounded-md">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-900">
+        <h3 className="text-[12px] font-semibold text-white">Hábitos</h3>
+        <span className="text-[11px] text-zinc-500">{habitos.length} ativo{habitos.length !== 1 ? 's' : ''}</span>
       </div>
 
       {habitos.length === 0 ? (
-        <p className="text-[13px] text-zinc-500">Nenhum hábito nesta aba ainda.</p>
+        <p className="px-3 py-3 text-[12px] text-zinc-500">Nenhum hábito ainda.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <ul className="divide-y divide-zinc-900">
           {habitos.map((h) =>
           {
             const pct = h.meta_diaria > 0 ? Math.min((h.progresso_atual / h.meta_diaria) * 100, 100) : 0
             const HIcon = ICON_MAP[h.tipo] || Sparkles
             return (
-              <div key={h.id} className="rounded-lg border border-zinc-800/60 bg-zinc-950/40 p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <HIcon className="w-4 h-4 text-zinc-400" />
-                    <span className="text-[13px] font-medium text-zinc-200">{h.nome_exibicao}</span>
-                  </div>
-                  <button onClick={() => onDel(h.id)} className="text-zinc-600 hover:text-red-400">
-                    <Trash2 className="w-3 h-3" />
-                  </button>
+              <li key={h.id} className="flex items-center gap-2 px-3 py-2 hover:bg-zinc-900/40 transition-colors">
+                <HIcon className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                <span className="flex-1 min-w-0 text-[12px] text-zinc-200 truncate">{h.nome_exibicao}</span>
+                <div className="w-20 h-1 rounded-full bg-zinc-900 overflow-hidden">
+                  <div className="h-full bg-violet-500 transition-all" style={{ width: `${pct}%` }} />
                 </div>
-                <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-2">
-                  <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => onDec(h.id)} disabled={h.progresso_atual <= 0} className="w-7 h-7 rounded border border-zinc-700 text-zinc-400 hover:text-white disabled:opacity-30">
-                      <Minus className="w-3.5 h-3.5 mx-auto" />
-                    </button>
-                    <span className="text-base font-bold tabular-nums text-white">{h.progresso_atual}<span className="text-[11px] text-zinc-500">/{h.meta_diaria}</span></span>
-                    <button onClick={() => handleInc(h)} className="w-7 h-7 rounded border border-zinc-700 text-zinc-400 hover:text-white">
-                      <Plus className="w-3.5 h-3.5 mx-auto" />
-                    </button>
-                  </div>
-                  <span className="text-[11px] text-zinc-500">{h.unidade}</span>
-                </div>
-              </div>
+                <button onClick={() => onDec(h.id)} disabled={h.progresso_atual <= 0} className="text-zinc-500 hover:text-white disabled:opacity-30 p-0.5">
+                  <Minus className="w-3 h-3" />
+                </button>
+                <span className="text-[11px] font-mono tabular-nums text-zinc-300 w-12 text-center">
+                  {h.progresso_atual}/{h.meta_diaria}
+                </span>
+                <button onClick={() => handleInc(h)} className="text-zinc-500 hover:text-white p-0.5">
+                  <Plus className="w-3 h-3" />
+                </button>
+                <button onClick={() => onDel(h.id)} className="text-zinc-600 hover:text-red-400 p-0.5 ml-1">
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      {preset.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-3 py-2 border-t border-zinc-900">
+          {preset.filter((p) => !habitos.some((h) => h.tipo === p.tipo)).map((p) =>
+          {
+            const PIcon = ICON_MAP[p.tipo] || Sparkles
+            return (
+              <button
+                key={p.tipo}
+                onClick={() => { void onAdd(p); toast.success(`${p.nome_exibicao} adicionado`) }}
+                className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] text-zinc-400 hover:text-white border border-zinc-900 hover:border-zinc-700"
+              >
+                <PIcon className="w-3 h-3" />{p.nome_exibicao}
+                <Plus className="w-2.5 h-2.5 text-zinc-500" />
+              </button>
             )
           })}
         </div>
       )}
-
-      <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/60">
-        {PRESET_HABITOS.filter((p) => !habitos.some((h) => h.tipo === p.tipo)).map((preset) =>
-        {
-          const PIcon = ICON_MAP[preset.tipo] || Sparkles
-          return (
-            <button
-              key={preset.tipo}
-              onClick={() => { void onAdd(preset); toast.success(`${preset.nome_exibicao} adicionado!`) }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-800/60 bg-zinc-950/40 text-[12px] text-zinc-300 hover:text-white hover:border-zinc-700"
-            >
-              <PIcon className="w-3.5 h-3.5" />{preset.nome_exibicao}
-              <Plus className="w-3 h-3 text-zinc-500" />
-            </button>
-          )
-        })}
-      </div>
     </div>
   )
 }
@@ -285,7 +285,8 @@ interface MedicamentosProps
   onConcluir: (pontos: number) => void
 }
 
-function MedicamentosSection({ medicamentos, totalMeds, medsTomados, onAdd, onToggle, onConcluir }: MedicamentosProps)
+// Medicamentos como linhas tipo "tudo é linha" do design system
+function MedicamentosLista({ medicamentos, totalMeds, medsTomados, onAdd, onToggle, onConcluir }: MedicamentosProps)
 {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ nome: '', horario: '' })
@@ -312,103 +313,89 @@ function MedicamentosSection({ medicamentos, totalMeds, medsTomados, onAdd, onTo
   }
 
   return (
-    <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-white flex items-center gap-2">
-            <Pill className="w-4 h-4 text-teal-400" /> Medicamentos
-          </h2>
-          <p className="text-[12px] text-zinc-500 mt-0.5">
-            {medsTomados}/{totalMeds} tomados hoje
-          </p>
+    <section className="bg-card border border-zinc-900 rounded-md">
+      <header className="flex items-center justify-between px-3 py-2 border-b border-zinc-900">
+        <div className="flex items-center gap-2">
+          <Pill className="w-4 h-4 text-teal-400" />
+          <h2 className="text-[13px] font-semibold text-white">Medicamentos</h2>
+          <span className="text-[11px] text-zinc-500">{medsTomados}/{totalMeds} hoje</span>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-teal-500/10 border border-teal-500/30 text-[12px] text-teal-300 hover:bg-teal-500/20"
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] text-violet-300 hover:text-white border border-zinc-900 hover:border-violet-500/40"
         >
-          <Plus className="w-3.5 h-3.5" /> Novo medicamento
+          <Plus className="w-3 h-3" /> Novo
         </button>
-      </div>
+      </header>
 
-      <div className="h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
-        <div className="h-full bg-teal-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+      <div className="h-[2px] bg-zinc-900 overflow-hidden">
+        <div className="h-full bg-teal-500 transition-all" style={{ width: `${pct}%` }} />
       </div>
 
       {showForm && (
-        <div className="rounded-lg border border-zinc-800/60 bg-zinc-950/60 p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[13px] font-medium text-white">Adicionar Medicamento</span>
-            <button onClick={() => setShowForm(false)}><X className="w-4 h-4 text-zinc-500 hover:text-white" /></button>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              type="text"
-              placeholder="Nome do medicamento"
-              value={form.nome}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
-              className="bg-zinc-900 border border-zinc-700 rounded-md px-3 py-2 text-[13px] text-white placeholder:text-zinc-500 outline-none focus:border-teal-500"
-            />
-            <input
-              type="text"
-              placeholder="Horário (ex: 08:00)"
-              value={form.horario}
-              onChange={(e) => setForm({ ...form, horario: e.target.value })}
-              className="bg-zinc-900 border border-zinc-700 rounded-md px-3 py-2 text-[13px] text-white placeholder:text-zinc-500 outline-none focus:border-teal-500"
-            />
-          </div>
+        <div className="px-3 py-2 border-b border-zinc-900 flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Nome"
+            value={form.nome}
+            onChange={(e) => setForm({ ...form, nome: e.target.value })}
+            className="flex-1 bg-transparent border border-zinc-900 rounded px-2 py-1 text-[12px] text-white placeholder:text-zinc-600 outline-none focus:border-violet-500/40"
+          />
+          <input
+            type="text"
+            placeholder="08:00"
+            value={form.horario}
+            onChange={(e) => setForm({ ...form, horario: e.target.value })}
+            className="w-20 bg-transparent border border-zinc-900 rounded px-2 py-1 text-[12px] text-white placeholder:text-zinc-600 outline-none focus:border-violet-500/40"
+          />
           <button
             onClick={handleAdd}
             disabled={!form.nome.trim() || !form.horario.trim()}
-            className="px-4 py-2 text-[13px] font-medium bg-teal-600 text-white rounded-md hover:bg-teal-500 disabled:opacity-40"
+            className="px-2 py-1 text-[11px] font-medium bg-violet-600 text-white rounded hover:bg-violet-500 disabled:opacity-40"
           >
             Salvar
+          </button>
+          <button onClick={() => setShowForm(false)} className="text-zinc-500 hover:text-white">
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
       {totalMeds === 0 ? (
-        <EmptyState
-          icon={Pill}
-          title="Nenhum medicamento cadastrado"
-          description="Adicione seus medicamentos com horário. O Jarvis lembra você no Kanban com prioridade máxima."
-          actionLabel="Novo medicamento"
-          onAction={() => setShowForm(true)}
-        />
+        <div className="p-4">
+          <EmptyState
+            icon={Pill}
+            title="Nenhum medicamento cadastrado"
+            description="Adicione com horário e o Jarvis lembra no Kanban com prioridade máxima."
+            actionLabel="Novo medicamento"
+            onAction={() => setShowForm(true)}
+          />
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <ul className="divide-y divide-zinc-900">
           {medicamentos.map((med) => (
-            <button
+            <li
               key={med.id}
-              onClick={() => handleToggle(med.id)}
               className={[
-                'flex items-center gap-3 rounded-lg border p-3 transition-all text-left',
-                med.tomado
-                  ? 'bg-zinc-900/30 border-zinc-800/30'
-                  : 'bg-zinc-900/40 border-zinc-800/60 hover:border-teal-500/40',
+                'flex items-center gap-2.5 px-3 py-1.5 cursor-pointer hover:bg-zinc-900/40 transition-colors border-l-2',
+                med.tomado ? 'border-l-emerald-500/60 opacity-60' : 'border-l-teal-500/60',
               ].join(' ')}
+              onClick={() => handleToggle(med.id)}
             >
               <div className={[
-                'w-5 h-5 rounded border-2 flex items-center justify-center shrink-0',
-                med.tomado ? 'bg-teal-500 border-teal-500' : 'border-zinc-600',
+                'w-4 h-4 rounded border flex items-center justify-center shrink-0',
+                med.tomado ? 'bg-teal-500 border-teal-500' : 'border-zinc-700',
               ].join(' ')}>
-                {med.tomado && <Check className="w-3 h-3 text-white" />}
+                {med.tomado && <div className="w-1.5 h-1.5 rounded-sm bg-white" />}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-[13px] ${med.tomado ? 'text-zinc-500 line-through' : 'text-zinc-100'}`}>{med.nome}</p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Clock className="w-3 h-3 text-zinc-500" />
-                  <span className="text-[11px] text-zinc-500">{med.horario}</span>
-                </div>
-              </div>
-              <span className={[
-                'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded',
-                med.tomado ? 'text-teal-400/70' : 'text-zinc-500',
-              ].join(' ')}>
-                {med.tomado ? 'Tomado' : 'Pendente'}
+              <span className={`flex-1 text-[13px] truncate ${med.tomado ? 'text-zinc-500 line-through' : 'text-zinc-100'}`}>
+                {med.nome}
               </span>
-            </button>
+              <Clock className="w-3 h-3 text-zinc-600" />
+              <span className="text-[11px] font-mono tabular-nums text-zinc-400">{med.horario}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   )

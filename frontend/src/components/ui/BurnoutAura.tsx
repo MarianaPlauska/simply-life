@@ -14,7 +14,7 @@ export function BurnoutAura()
 {
   const tarefas = useTaskStore((s) => s.tarefas);
   const updateTarefa = useTaskStore((s) => s.updateTarefa);
-  const [modalOpen, setModalOpen] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
   const [postponing, setPostponing] = useState(false);
 
   const stressTasks = useMemo(() => getStressTasks(tarefas), [tarefas]);
@@ -72,17 +72,17 @@ export function BurnoutAura()
           className="fixed inset-0 pointer-events-none z-[9990] overflow-hidden"
         >
           <div
-            className="absolute inset-0 border-[6px] border-red-500/20 rounded-none shadow-[inset_0_0_60px_rgba(239,68,68,0.25)] animate-[pulse_2.5s_ease-in-out_infinite]"
+            className="absolute inset-0 border border-red-500/15"
           />
 
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="absolute top-4 right-4 bg-red-950/80 border border-red-500/30 px-3 py-1.5 rounded-full backdrop-blur-md shadow-lg pointer-events-auto flex items-center gap-2 hover:border-red-400/50 transition-colors"
+            className="absolute top-3 right-3 bg-card border border-red-500/30 px-2 py-1 rounded pointer-events-auto flex items-center gap-1.5 hover:border-red-400/50 transition-colors"
           >
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-            <span className="text-[10px] font-black text-red-400 uppercase tracking-widest">
-              Burnout: {stressTasksCount} críticas
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+            <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">
+              Burnout · {stressTasksCount}
             </span>
           </button>
         </motion.div>
