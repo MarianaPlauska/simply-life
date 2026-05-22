@@ -3,7 +3,9 @@
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui"
   },
+  "type": "module",
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
     "react-router-dom": "^7.14.0"
   },
   "devDependencies": {

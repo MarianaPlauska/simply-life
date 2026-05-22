@@ -1,431 +1,415 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react'
 import {
-  Pill, Check, Clock, Battery, Droplets, Moon, Plus, X, Minus,
-  Zap, Trash2, Sparkles, BookOpen, Dumbbell, Brain,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { useTaskStore } from '../../store/useTaskStore';
-import type { HabitoDiario } from '../../store/useTaskStore';
-import { MoodTracker } from './MoodTracker';
-import { JournalEntry } from './JournalEntry';
-import { WeeklyReviewCard } from './WeeklyReviewCard';
-import { WaterTrackerCard } from './WaterTrackerCard';
-import { ProteinGoalCard } from './ProteinGoalCard';
-import { WorkoutTrackerCard } from './WorkoutTrackerCard';
-import { EmptyState } from '../ui/EmptyState';
+  Pill, Droplets, Dumbbell, Beef, HeartPulse, Sparkles,
+  Plus, Trash2, Minus, Check, Clock, X, BookOpen, Moon, Brain,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { useTaskStore } from '../../store/useTaskStore'
+import type { HabitoDiario } from '../../store/useTaskStore'
+import { MoodTracker } from './MoodTracker'
+import { JournalEntry } from './JournalEntry'
+import { WeeklyReviewCard } from './WeeklyReviewCard'
+import { WaterTrackerCard } from './WaterTrackerCard'
+import { ProteinGoalCard } from './ProteinGoalCard'
+import { WorkoutTrackerCard } from './WorkoutTrackerCard'
+import { EmptyState } from '../ui/EmptyState'
 
-/* -- Icon map for habit types -- */
+type HealthTab = 'hidratacao' | 'alimentacao' | 'academia' | 'medicamentos' | 'bem_estar'
+
+const TABS: { id: HealthTab; label: string; Icon: typeof Droplets; color: string }[] = [
+  { id: 'hidratacao',    label: 'Hidratação',    Icon: Droplets,   color: 'text-cyan-400'    },
+  { id: 'alimentacao',   label: 'Alimentação',   Icon: Beef,       color: 'text-amber-400'   },
+  { id: 'academia',      label: 'Academia',      Icon: Dumbbell,   color: 'text-white'       },
+  { id: 'medicamentos',  label: 'Medicamentos',  Icon: Pill,       color: 'text-teal-400'    },
+  { id: 'bem_estar',     label: 'Bem-estar',     Icon: HeartPulse, color: 'text-rose-400'    },
+]
+
 const ICON_MAP: Record<string, React.ElementType> = {
-  agua: Droplets, sono: Moon, leitura: BookOpen,
-  exercicio: Dumbbell, meditacao: Brain, customizado: Sparkles,
-};
-
-const PRESET_HABITOS = [
-  { tipo: 'sono', nome_exibicao: 'Horas de Sono', meta_diaria: 8, unidade: 'horas' },
-  { tipo: 'leitura', nome_exibicao: 'Paginas Lidas', meta_diaria: 20, unidade: 'paginas' },
-  { tipo: 'meditacao', nome_exibicao: 'Minutos de Meditacao', meta_diaria: 10, unidade: 'min' },
-];
-
-const CORE_HEALTH_TIPOS = new Set(['agua', 'proteina', 'treino']);
-
-function getBatteryColor(pct: number) {
-  if (pct >= 80) return { bar: 'bg-emerald-500', text: 'text-emerald-400', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.08)]' };
-  if (pct >= 50) return { bar: 'bg-amber-500', text: 'text-amber-400', glow: 'shadow-[0_0_20px_rgba(245,158,11,0.08)]' };
-  return { bar: 'bg-red-500', text: 'text-red-400', glow: 'shadow-[0_0_20px_rgba(239,68,68,0.08)]' };
+  sono: Moon, leitura: BookOpen, meditacao: Brain, customizado: Sparkles,
 }
 
-/* ── Component ── */
-export function HealthView() {
-  const medicamentos = useTaskStore((s) => s.medicamentos);
-  const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos);
-  const toggleMedicamento = useTaskStore((s) => s.toggleMedicamento);
-  const addMedicamento = useTaskStore((s) => s.addMedicamento);
-  const habitos = useTaskStore((s) => s.habitos);
-  const fetchHabitos = useTaskStore((s) => s.fetchHabitos);
-  const fetchSessaoTreinoAtiva = useTaskStore((s) => s.fetchSessaoTreinoAtiva);
-  const fetchSessoesTreinoHoje = useTaskStore((s) => s.fetchSessoesTreinoHoje);
-  const addHabito = useTaskStore((s) => s.addHabito);
-  const incrementHabito = useTaskStore((s) => s.incrementHabito);
-  const decrementHabito = useTaskStore((s) => s.decrementHabito);
-  const deleteHabito = useTaskStore((s) => s.deleteHabito);
-  const scoreDiario = useTaskStore((s) => s.scoreDiario);
-  const concluirHabito = useTaskStore((s) => s.concluirHabito);
+const PRESET_HABITOS = [
+  { tipo: 'sono',      nome_exibicao: 'Horas de Sono',         meta_diaria: 8,  unidade: 'horas'   },
+  { tipo: 'leitura',   nome_exibicao: 'Páginas Lidas',         meta_diaria: 20, unidade: 'páginas' },
+  { tipo: 'meditacao', nome_exibicao: 'Minutos de Meditação',  meta_diaria: 10, unidade: 'min'     },
+]
 
-  const [showMedForm, setShowMedForm] = useState(false);
-  const [newMed, setNewMed] = useState({ nome: '', horario: '' });
-  const [showHabitForm, setShowHabitForm] = useState(false);
-  const [habitForm, setHabitForm] = useState({ tipo: 'customizado', nome_exibicao: '', meta_diaria: '5', unidade: 'un' });
+const CORE_HEALTH = new Set(['agua', 'proteina', 'treino'])
 
-  // bem-estar mental fetches
-  const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje);
-  const fetchHumorSemana = useTaskStore((s) => s.fetchHumorSemana);
-  const fetchHumorMes = useTaskStore((s) => s.fetchHumorMes);
-  const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje);
-  const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia);
+export function HealthView()
+{
+  const [tab, setTab] = useState<HealthTab>('hidratacao')
+
+  const medicamentos = useTaskStore((s) => s.medicamentos)
+  const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
+  const toggleMedicamento = useTaskStore((s) => s.toggleMedicamento)
+  const addMedicamento = useTaskStore((s) => s.addMedicamento)
+  const habitos = useTaskStore((s) => s.habitos)
+  const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
+  const fetchSessaoTreinoAtiva = useTaskStore((s) => s.fetchSessaoTreinoAtiva)
+  const fetchSessoesTreinoHoje = useTaskStore((s) => s.fetchSessoesTreinoHoje)
+  const addHabito = useTaskStore((s) => s.addHabito)
+  const incrementHabito = useTaskStore((s) => s.incrementHabito)
+  const decrementHabito = useTaskStore((s) => s.decrementHabito)
+  const deleteHabito = useTaskStore((s) => s.deleteHabito)
+  const concluirHabito = useTaskStore((s) => s.concluirHabito)
+
+  const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje)
+  const fetchHumorSemana = useTaskStore((s) => s.fetchHumorSemana)
+  const fetchHumorMes = useTaskStore((s) => s.fetchHumorMes)
+  const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje)
+  const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia)
 
   useEffect(() =>
   {
-    fetchMedicamentos();
-    fetchHabitos();
-    fetchSessaoTreinoAtiva();
-    fetchSessoesTreinoHoje();
-    /* carrega dados de bem-estar mental — inclui histórico de 30 dias para os pixels */
-    fetchHumorHoje();
-    fetchHumorSemana();
-    fetchHumorMes();
-    fetchDiarioHoje();
-    fetchPromptDoDia();
+    fetchMedicamentos()
+    fetchHabitos()
+    fetchSessaoTreinoAtiva()
+    fetchSessoesTreinoHoje()
+    fetchHumorHoje()
+    fetchHumorSemana()
+    fetchHumorMes()
+    fetchDiarioHoje()
+    fetchPromptDoDia()
   }, [
-    fetchMedicamentos,
-    fetchHabitos,
-    fetchSessaoTreinoAtiva,
-    fetchSessoesTreinoHoje,
-    fetchHumorHoje,
-    fetchHumorSemana,
-    fetchHumorMes,
-    fetchDiarioHoje,
-    fetchPromptDoDia,
-  ]);
+    fetchMedicamentos, fetchHabitos, fetchSessaoTreinoAtiva, fetchSessoesTreinoHoje,
+    fetchHumorHoje, fetchHumorSemana, fetchHumorMes, fetchDiarioHoje, fetchPromptDoDia,
+  ])
 
-  /* -- Vitality score from habits + meds -- */
-  const habitosGerais = habitos.filter((h) => !CORE_HEALTH_TIPOS.has(h.tipo));
-  const totalHabitoPct = habitos.length > 0
-    ? habitos.reduce((sum, h) => sum + Math.min(h.progresso_atual / h.meta_diaria, 1), 0) / habitos.length * 100
-    : 0;
-  const tomados = medicamentos.filter((m) => m.tomado).length;
-  const totalMeds = medicamentos.length;
-  const medPct = totalMeds > 0 ? (tomados / totalMeds) * 100 : 0;
-  const vitalidade = habitos.length > 0 || totalMeds > 0
-    ? Math.round((totalHabitoPct * 0.6) + (medPct * 0.4))
-    : scoreDiario;
-  const battery = getBatteryColor(vitalidade);
-
-  const handleIncrement = (h: HabitoDiario) => {
-    if (h.progresso_atual >= h.meta_diaria) return;
-    incrementHabito(h.id);
-    if (h.progresso_atual + 1 === h.meta_diaria) {
-      concluirHabito(15);
-      toast.success(`${h.nome_exibicao} completo! +15 pts`, { description: 'Meta diaria atingida!' });
-    } else {
-      toast.success(`+1 ${h.unidade}`, { description: `${h.progresso_atual + 1}/${h.meta_diaria}` });
-    }
-  };
-
-  const handleDecrement = (h: HabitoDiario) => {
-    if (h.progresso_atual <= 0) return;
-    decrementHabito(h.id);
-  };
-
-  const handleToggleMed = (id: number) => {
-    const med = medicamentos.find((m) => m.id === id);
-    if (med && !med.tomado) {
-      concluirHabito(10);
-      toast.success('+10 Pontos de Foco!', { description: med.nome });
-    }
-    toggleMedicamento(id);
-  };
-
-  const handleAddMed = () => {
-    if (!newMed.nome.trim() || !newMed.horario.trim()) return;
-    addMedicamento({ nome: newMed.nome.trim(), horario: newMed.horario.trim() });
-    setNewMed({ nome: '', horario: '' });
-    setShowMedForm(false);
-    toast.success('Medicamento adicionado');
-  };
-
-  const handleAddPreset = (preset: typeof PRESET_HABITOS[number]) => {
-    if (habitos.some((h) => h.tipo === preset.tipo)) {
-      toast.error('Esse habito ja existe');
-      return;
-    }
-    addHabito(preset);
-    toast.success(`${preset.nome_exibicao} adicionado!`);
-  };
-
-  const handleAddCustom = () => {
-    if (!habitForm.nome_exibicao.trim()) return;
-    addHabito({
-      tipo: 'customizado',
-      nome_exibicao: habitForm.nome_exibicao.trim(),
-      meta_diaria: parseInt(habitForm.meta_diaria) || 5,
-      unidade: habitForm.unidade || 'un',
-    });
-    setHabitForm({ tipo: 'customizado', nome_exibicao: '', meta_diaria: '5', unidade: 'un' });
-    setShowHabitForm(false);
-    toast.success('Habito personalizado criado!');
-  };
+  // resumo numérico topo
+  const habitosGerais = useMemo(() => habitos.filter((h) => !CORE_HEALTH.has(h.tipo)), [habitos])
+  const totalMeds = medicamentos.length
+  const medsTomados = medicamentos.filter((m) => m.tomado).length
 
   return (
-    <div className="max-w-5xl mx-auto pb-16 space-y-4">
-      {/* cabeçalho da view */}
-      <div className="flex items-center justify-between pb-2">
+    <div className="max-w-6xl mx-auto pb-16 space-y-5">
+      <header className="space-y-3">
         <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent tracking-tight">
-            Saude & Bem-Estar
-          </h1>
-          <p className="text-sm text-zinc-500 mt-1">Habitos, medicamentos e vitalidade diaria</p>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
-          <Zap className={`w-4 h-4 ${battery.text}`} />
-          <span className={`text-xl font-bold tabular-nums ${battery.text}`}>{vitalidade}</span>
-          <span className="text-[11px] text-zinc-500 font-medium">%</span>
-        </div>
-      </div>
-
-      {/* metas essenciais: água, proteína, treinos com cronômetro */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <WaterTrackerCard />
-        <ProteinGoalCard />
-        <WorkoutTrackerCard />
-      </div>
-
-      {/* bento row 1: vitalidade + journaling empilhados (1/3) | mood tracker (2/3) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-        {/* coluna esquerda — empilha dois cards menores */}
-        <div className="lg:col-span-1 flex flex-col gap-4">
-          {/* vitalidade */}
-          <section className={`flex-1 rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-md p-5 ${battery.glow}
-                              shadow-[0_-1px_0_rgba(16,185,129,0.1)] hover:border-emerald-500/20 transition-colors duration-300`}>
-            <div className="flex items-center gap-2.5 mb-4">
-              <Battery className={`w-4 h-4 ${battery.text}`} />
-              <h2 className={`text-[13px] font-semibold bg-gradient-to-r ${vitalidade >= 80 ? 'from-emerald-300 to-emerald-500' : vitalidade >= 50 ? 'from-amber-300 to-amber-500' : 'from-red-300 to-red-500'} bg-clip-text text-transparent`}>
-                Vitalidade Diaria
-              </h2>
-              <span className={`ml-auto text-[13px] font-bold tabular-nums ${battery.text}`}>{vitalidade}%</span>
-            </div>
-            {/* barra de vitalidade */}
-            <div className="h-3 rounded-full bg-zinc-800/60 overflow-hidden mb-3">
-              <div
-                className={`h-full rounded-full ${battery.bar} transition-all duration-700 ease-out`}
-                style={{ width: `${vitalidade}%` }}
-              />
-            </div>
-            <div className="space-y-2 mt-4">
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-zinc-500">Habitos</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
-                    <div className="h-full rounded-full bg-emerald-500 transition-all duration-500" style={{ width: `${totalHabitoPct}%` }} />
-                  </div>
-                  <span className={battery.text}>{Math.round(totalHabitoPct)}%</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between text-[11px]">
-                <span className="text-zinc-500">Medicamentos</span>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
-                    <div className="h-full rounded-full bg-teal-500 transition-all duration-500" style={{ width: `${medPct}%` }} />
-                  </div>
-                  <span className="text-teal-400">{tomados}/{totalMeds}</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* journaling — mesmo coluna, sem espaço vazio */}
-          <JournalEntry />
+          <h1 className="text-2xl font-bold text-white tracking-tight">Saúde</h1>
+          <p className="text-sm text-zinc-400 mt-1">Hidratação, alimentação, academia, medicamentos e bem-estar.</p>
         </div>
 
-        {/* mood tracker — col-span-2, ocupa a coluna direita inteira */}
-        <div className="lg:col-span-2">
-          <MoodTracker />
-        </div>
-      </div>
-
-      {/* weekly review — full width, não precisa de coluna colada */}
-      <WeeklyReviewCard />
-
-      {/* habitos — full width */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Sparkles className="w-4 h-4 text-emerald-400" />
-            <h2 className="text-[13px] font-semibold bg-gradient-to-r from-emerald-300 to-emerald-500 bg-clip-text text-transparent">
-              Habitos Configuraveis
-            </h2>
-            <span className="text-[11px] text-zinc-600">{habitosGerais.length} rastreadores extras</span>
-          </div>
-          <button onClick={() => setShowHabitForm(true)} className="flex items-center gap-1.5 text-[12px] text-zinc-400 hover:text-white transition-colors">
-            <Plus className="w-3.5 h-3.5" />Personalizar Habitos
-          </button>
-        </div>
-
-        {habitosGerais.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {habitosGerais.map((h) =>
-            {
-              const pct = h.meta_diaria > 0 ? Math.min((h.progresso_atual / h.meta_diaria) * 100, 100) : 0;
-              const done = h.progresso_atual >= h.meta_diaria;
-              const HIcon = ICON_MAP[h.tipo] || Sparkles;
-              return (
-                <div
-                  key={h.id}
-                  className={`group relative rounded-xl border p-4 transition-all duration-300
-                    ${done
-                      ? 'bg-emerald-500/5 border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.08)] habit-done'
-                      : 'bg-zinc-900/50 backdrop-blur-md border-zinc-800/50 hover:border-emerald-500/20 hover:shadow-[0_0_20px_rgba(16,185,129,0.06)]'}`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <HIcon className={`w-4 h-4 transition-colors ${done ? 'text-emerald-400' : 'text-zinc-400 group-hover:text-emerald-400/60'}`} />
-                      <span className="text-[13px] font-medium text-zinc-200">{h.nome_exibicao}</span>
-                    </div>
-                    <button
-                      onClick={() => deleteHabito(h.id)}
-                      className="p-1 rounded-lg hover:bg-zinc-800 text-zinc-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                  {/* barra de progresso */}
-                  <div className="h-2 rounded-full bg-zinc-800/60 overflow-hidden mb-3">
-                    <div
-                      className={`h-full rounded-full transition-all duration-500 ease-out ${done ? 'bg-emerald-500' : 'bg-emerald-600'}`}
-                      style={{ width: `${pct}%` }}
-                    />
-                  </div>
-                  {/* controles de incremento */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleDecrement(h)}
-                        disabled={h.progresso_atual <= 0}
-                        className="w-8 h-8 rounded-lg border border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <Minus className="w-3.5 h-3.5" />
-                      </button>
-                      <span className={`text-lg font-bold tabular-nums min-w-[48px] text-center ${done ? 'text-emerald-400' : 'text-white'}`}>
-                        {h.progresso_atual}<span className="text-[11px] text-zinc-500 font-normal">/{h.meta_diaria}</span>
-                      </span>
-                      <button
-                        onClick={() => handleIncrement(h)}
-                        disabled={done}
-                        className="w-8 h-8 rounded-lg border border-zinc-700/50 flex items-center justify-center text-zinc-400 hover:text-white hover:border-zinc-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    <span className="text-[10px] text-zinc-500">{h.unidade}</span>
-                  </div>
-                  {done && (
-                    <p className="text-[10px] text-emerald-400 font-medium mt-2 flex items-center gap-1">
-                      <Check className="w-3 h-3" />Meta atingida!
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState
-            icon={Sparkles}
-            title="Nenhum hábito configurado"
-            description="Comece a rastrear seus hábitos diários para construir uma rotina saudável."
-            actionLabel="Personalizar Hábitos"
-            onAction={() => setShowHabitForm(true)}
-          />
-        )}
-
-        {/* presets de habitos disponiveis */}
-        <div className="flex flex-wrap gap-2">
-          {PRESET_HABITOS.filter((p) => !habitos.some((h) => h.tipo === p.tipo)).map((preset) =>
+        <nav className="flex flex-wrap items-center gap-1 border-b border-zinc-800/80 pb-0">
+          {TABS.map(({ id, label, Icon, color }) =>
           {
-            const PIcon = ICON_MAP[preset.tipo] || Sparkles;
+            const active = tab === id
             return (
               <button
-                key={preset.tipo}
-                onClick={() => handleAddPreset(preset)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-800/50 bg-zinc-900/30 text-[11px] text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+                key={id}
+                onClick={() => setTab(id)}
+                className={[
+                  'flex items-center gap-2 px-3 py-2 text-[13px] font-medium border-b-2 -mb-px transition-colors',
+                  active
+                    ? 'border-violet-500 text-white'
+                    : 'border-transparent text-zinc-500 hover:text-zinc-200',
+                ].join(' ')}
               >
-                <PIcon className="w-3 h-3" />{preset.nome_exibicao}
-                <Plus className="w-2.5 h-2.5 text-zinc-600" />
+                <Icon className={`w-4 h-4 ${active ? color : 'text-zinc-500'}`} />
+                {label}
               </button>
-            );
+            )
+          })}
+        </nav>
+      </header>
+
+      {tab === 'hidratacao' && (
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <WaterTrackerCard />
+          <HabitosExtrasSection
+            tipos={['sono']}
+            habitos={habitos}
+            onAdd={addHabito}
+            onInc={incrementHabito}
+            onDec={decrementHabito}
+            onDel={deleteHabito}
+            onConcluir={concluirHabito}
+          />
+        </section>
+      )}
+
+      {tab === 'alimentacao' && (
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ProteinGoalCard />
+          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-5 text-[13px] text-zinc-400">
+            <h2 className="text-base font-semibold text-white mb-2">Refeições</h2>
+            <p>Em breve: log rápido de café, almoço, jantar com macros. Por enquanto, foque na meta de proteína.</p>
+          </div>
+        </section>
+      )}
+
+      {tab === 'academia' && (
+        <section className="space-y-4">
+          <WorkoutTrackerCard />
+          <HabitosExtrasSection
+            tipos={['exercicio', 'customizado']}
+            habitos={habitosGerais.filter((h) => h.tipo === 'exercicio' || h.tipo === 'customizado')}
+            onAdd={addHabito}
+            onInc={incrementHabito}
+            onDec={decrementHabito}
+            onDel={deleteHabito}
+            onConcluir={concluirHabito}
+          />
+        </section>
+      )}
+
+      {tab === 'medicamentos' && (
+        <MedicamentosSection
+          medicamentos={medicamentos}
+          totalMeds={totalMeds}
+          medsTomados={medsTomados}
+          onAdd={addMedicamento}
+          onToggle={toggleMedicamento}
+          onConcluir={concluirHabito}
+        />
+      )}
+
+      {tab === 'bem_estar' && (
+        <section className="space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1"><JournalEntry /></div>
+            <div className="lg:col-span-2"><MoodTracker /></div>
+          </div>
+          <WeeklyReviewCard />
+          <HabitosExtrasSection
+            tipos={['leitura', 'meditacao', 'customizado']}
+            habitos={habitosGerais.filter((h) => h.tipo !== 'exercicio')}
+            onAdd={addHabito}
+            onInc={incrementHabito}
+            onDec={decrementHabito}
+            onDel={deleteHabito}
+            onConcluir={concluirHabito}
+          />
+        </section>
+      )}
+    </div>
+  )
+}
+
+interface HabitosExtrasProps
+{
+  tipos: string[]
+  habitos: HabitoDiario[]
+  onAdd: (preset: typeof PRESET_HABITOS[number]) => Promise<HabitoDiario | null | void>
+  onInc: (id: number) => Promise<void> | void
+  onDec: (id: number) => Promise<void> | void
+  onDel: (id: number) => Promise<void> | void
+  onConcluir: (pontos: number) => void
+}
+
+function HabitosExtrasSection({ habitos, onAdd, onInc, onDec, onDel, onConcluir }: HabitosExtrasProps)
+{
+  const handleInc = (h: HabitoDiario) =>
+  {
+    if (h.progresso_atual >= h.meta_diaria) return
+    onInc(h.id)
+    if (h.progresso_atual + 1 === h.meta_diaria)
+    {
+      onConcluir(15)
+      toast.success(`${h.nome_exibicao} completo! +15 pts`)
+    }
+  }
+
+  return (
+    <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <h3 className="text-[14px] font-semibold text-white">Hábitos extras</h3>
+      </div>
+
+      {habitos.length === 0 ? (
+        <p className="text-[13px] text-zinc-500">Nenhum hábito nesta aba ainda.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {habitos.map((h) =>
+          {
+            const pct = h.meta_diaria > 0 ? Math.min((h.progresso_atual / h.meta_diaria) * 100, 100) : 0
+            const HIcon = ICON_MAP[h.tipo] || Sparkles
+            return (
+              <div key={h.id} className="rounded-lg border border-zinc-800/60 bg-zinc-950/40 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <HIcon className="w-4 h-4 text-zinc-400" />
+                    <span className="text-[13px] font-medium text-zinc-200">{h.nome_exibicao}</span>
+                  </div>
+                  <button onClick={() => onDel(h.id)} className="text-zinc-600 hover:text-red-400">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="h-1.5 rounded-full bg-zinc-800 overflow-hidden mb-2">
+                  <div className="h-full bg-emerald-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => onDec(h.id)} disabled={h.progresso_atual <= 0} className="w-7 h-7 rounded border border-zinc-700 text-zinc-400 hover:text-white disabled:opacity-30">
+                      <Minus className="w-3.5 h-3.5 mx-auto" />
+                    </button>
+                    <span className="text-base font-bold tabular-nums text-white">{h.progresso_atual}<span className="text-[11px] text-zinc-500">/{h.meta_diaria}</span></span>
+                    <button onClick={() => handleInc(h)} className="w-7 h-7 rounded border border-zinc-700 text-zinc-400 hover:text-white">
+                      <Plus className="w-3.5 h-3.5 mx-auto" />
+                    </button>
+                  </div>
+                  <span className="text-[11px] text-zinc-500">{h.unidade}</span>
+                </div>
+              </div>
+            )
           })}
         </div>
+      )}
 
-        {/* form de habito customizado */}
-        {showHabitForm && (
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-white">Criar Habito Personalizado</span>
-              <button onClick={() => setShowHabitForm(false)}><X className="w-4 h-4 text-zinc-500 hover:text-white transition-colors" /></button>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <input type="text" placeholder="Nome (ex: Meditacao)" value={habitForm.nome_exibicao} onChange={(e) => setHabitForm({ ...habitForm, nome_exibicao: e.target.value })} className="col-span-3 sm:col-span-1 bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-emerald-500/40" autoFocus />
-              <input type="number" min="1" placeholder="Meta diaria" value={habitForm.meta_diaria} onChange={(e) => setHabitForm({ ...habitForm, meta_diaria: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-emerald-500/40" />
-              <input type="text" placeholder="Unidade (ex: min)" value={habitForm.unidade} onChange={(e) => setHabitForm({ ...habitForm, unidade: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-emerald-500/40" />
-            </div>
-            <button onClick={handleAddCustom} disabled={!habitForm.nome_exibicao.trim()} className="px-4 py-2 text-[12px] font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-              Criar Habito
+      <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-800/60">
+        {PRESET_HABITOS.filter((p) => !habitos.some((h) => h.tipo === p.tipo)).map((preset) =>
+        {
+          const PIcon = ICON_MAP[preset.tipo] || Sparkles
+          return (
+            <button
+              key={preset.tipo}
+              onClick={() => { void onAdd(preset); toast.success(`${preset.nome_exibicao} adicionado!`) }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-800/60 bg-zinc-950/40 text-[12px] text-zinc-300 hover:text-white hover:border-zinc-700"
+            >
+              <PIcon className="w-3.5 h-3.5" />{preset.nome_exibicao}
+              <Plus className="w-3 h-3 text-zinc-500" />
             </button>
-          </div>
-        )}
-      </section>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
 
-      {/* medicamentos — full width */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Pill className="w-4 h-4 text-teal-400" />
-            <h2 className="text-[13px] font-semibold bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent">
-              Medicamentos Hoje
-            </h2>
-            <span className="text-[11px] text-zinc-500 ml-1">{tomados}/{totalMeds}</span>
+interface MedicamentosProps
+{
+  medicamentos: { id: number; nome: string; horario: string; tomado: boolean }[]
+  totalMeds: number
+  medsTomados: number
+  onAdd: (med: { nome: string; horario: string }) => Promise<void>
+  onToggle: (id: number) => Promise<void> | void
+  onConcluir: (pontos: number) => void
+}
+
+function MedicamentosSection({ medicamentos, totalMeds, medsTomados, onAdd, onToggle, onConcluir }: MedicamentosProps)
+{
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState({ nome: '', horario: '' })
+  const pct = totalMeds > 0 ? (medsTomados / totalMeds) * 100 : 0
+
+  const handleAdd = async () =>
+  {
+    if (!form.nome.trim() || !form.horario.trim()) return
+    await onAdd({ nome: form.nome.trim(), horario: form.horario.trim() })
+    setForm({ nome: '', horario: '' })
+    setShowForm(false)
+    toast.success('Medicamento adicionado')
+  }
+
+  const handleToggle = (id: number) =>
+  {
+    const med = medicamentos.find((m) => m.id === id)
+    if (med && !med.tomado)
+    {
+      onConcluir(10)
+      toast.success('+10 pts', { description: med.nome })
+    }
+    void onToggle(id)
+  }
+
+  return (
+    <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-white flex items-center gap-2">
+            <Pill className="w-4 h-4 text-teal-400" /> Medicamentos
+          </h2>
+          <p className="text-[12px] text-zinc-500 mt-0.5">
+            {medsTomados}/{totalMeds} tomados hoje
+          </p>
+        </div>
+        <button
+          onClick={() => setShowForm((v) => !v)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-teal-500/10 border border-teal-500/30 text-[12px] text-teal-300 hover:bg-teal-500/20"
+        >
+          <Plus className="w-3.5 h-3.5" /> Novo medicamento
+        </button>
+      </div>
+
+      <div className="h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
+        <div className="h-full bg-teal-500 transition-all duration-500" style={{ width: `${pct}%` }} />
+      </div>
+
+      {showForm && (
+        <div className="rounded-lg border border-zinc-800/60 bg-zinc-950/60 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-medium text-white">Adicionar Medicamento</span>
+            <button onClick={() => setShowForm(false)}><X className="w-4 h-4 text-zinc-500 hover:text-white" /></button>
           </div>
-          <button onClick={() => setShowMedForm(true)} className="flex items-center gap-1.5 text-[12px] text-zinc-400 hover:text-white transition-colors">
-            <Plus className="w-3.5 h-3.5" />Novo Medicamento
+          <div className="grid grid-cols-2 gap-3">
+            <input
+              type="text"
+              placeholder="Nome do medicamento"
+              value={form.nome}
+              onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              className="bg-zinc-900 border border-zinc-700 rounded-md px-3 py-2 text-[13px] text-white placeholder:text-zinc-500 outline-none focus:border-teal-500"
+            />
+            <input
+              type="text"
+              placeholder="Horário (ex: 08:00)"
+              value={form.horario}
+              onChange={(e) => setForm({ ...form, horario: e.target.value })}
+              className="bg-zinc-900 border border-zinc-700 rounded-md px-3 py-2 text-[13px] text-white placeholder:text-zinc-500 outline-none focus:border-teal-500"
+            />
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={!form.nome.trim() || !form.horario.trim()}
+            className="px-4 py-2 text-[13px] font-medium bg-teal-600 text-white rounded-md hover:bg-teal-500 disabled:opacity-40"
+          >
+            Salvar
           </button>
         </div>
+      )}
 
-        <div className="h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
-          <div className="h-full rounded-full bg-teal-500 transition-all duration-500" style={{ width: `${medPct}%` }} />
-        </div>
-
-        {showMedForm && (
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-medium text-white">Adicionar Medicamento</span>
-              <button onClick={() => setShowMedForm(false)}><X className="w-4 h-4 text-zinc-500 hover:text-white transition-colors" /></button>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <input type="text" placeholder="Nome do medicamento" value={newMed.nome} onChange={(e) => setNewMed({ ...newMed, nome: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-teal-500/40" />
-              <input type="text" placeholder="Horario (ex: 08:00)" value={newMed.horario} onChange={(e) => setNewMed({ ...newMed, horario: e.target.value })} className="bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-teal-500/40" />
-            </div>
-            <button onClick={handleAddMed} disabled={!newMed.nome.trim() || !newMed.horario.trim()} className="px-4 py-2 text-[12px] font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-              Salvar
+      {totalMeds === 0 ? (
+        <EmptyState
+          icon={Pill}
+          title="Nenhum medicamento cadastrado"
+          description="Adicione seus medicamentos com horário. O Jarvis lembra você no Kanban com prioridade máxima."
+          actionLabel="Novo medicamento"
+          onAction={() => setShowForm(true)}
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          {medicamentos.map((med) => (
+            <button
+              key={med.id}
+              onClick={() => handleToggle(med.id)}
+              className={[
+                'flex items-center gap-3 rounded-lg border p-3 transition-all text-left',
+                med.tomado
+                  ? 'bg-zinc-900/30 border-zinc-800/30'
+                  : 'bg-zinc-900/40 border-zinc-800/60 hover:border-teal-500/40',
+              ].join(' ')}
+            >
+              <div className={[
+                'w-5 h-5 rounded border-2 flex items-center justify-center shrink-0',
+                med.tomado ? 'bg-teal-500 border-teal-500' : 'border-zinc-600',
+              ].join(' ')}>
+                {med.tomado && <Check className="w-3 h-3 text-white" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-[13px] ${med.tomado ? 'text-zinc-500 line-through' : 'text-zinc-100'}`}>{med.nome}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Clock className="w-3 h-3 text-zinc-500" />
+                  <span className="text-[11px] text-zinc-500">{med.horario}</span>
+                </div>
+              </div>
+              <span className={[
+                'text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded',
+                med.tomado ? 'text-teal-400/70' : 'text-zinc-500',
+              ].join(' ')}>
+                {med.tomado ? 'Tomado' : 'Pendente'}
+              </span>
             </button>
-          </div>
-        )}
-
-        {totalMeds > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {medicamentos.map((med) => (
-              <button key={med.id} onClick={() => handleToggleMed(med.id)} className={`flex items-center gap-3 rounded-xl border p-3.5 transition-all group ${med.tomado ? 'bg-zinc-900/30 border-zinc-800/30' : 'bg-zinc-900/40 border-zinc-800/50 hover:border-teal-500/20 hover:shadow-[0_0_16px_rgba(20,184,166,0.06)]'}`}>
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${med.tomado ? 'bg-teal-500 border-teal-500' : 'border-zinc-600 group-hover:border-teal-500/60'}`}>
-                  {med.tomado && <Check className="w-3 h-3 text-white" />}
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className={`text-[13px] transition-all ${med.tomado ? 'text-zinc-500 line-through' : 'text-zinc-200'}`}>{med.nome}</p>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Clock className="w-3 h-3 text-zinc-600" />
-                    <span className="text-[11px] text-zinc-600">{med.horario}</span>
-                  </div>
-                </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${med.tomado ? 'text-teal-400/60' : 'text-zinc-500'}`}>
-                  {med.tomado ? 'Tomado' : 'Pendente'}
-                </span>
-              </button>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-xl border border-zinc-800/50 bg-zinc-900/30 p-6 text-center">
-            <Pill className="w-6 h-6 text-zinc-700 mx-auto mb-2" />
-            <p className="text-[12px] text-zinc-500">Nenhum medicamento cadastrado</p>
-          </div>
-        )}
-      </section>
-    </div>
-  );
+          ))}
+        </div>
+      )}
+    </section>
+  )
 }

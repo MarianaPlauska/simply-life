@@ -96,9 +96,22 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     {
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
+
+      // calcula score local — palavras como "urgente" jogam para "Fazer em 1h"
+      const { localScoreFromText } = await import('../../utils/localScore')
+      const { score, prioridade } = localScoreFromText(`${titulo} ${notas || ''}`)
+
       const { data, error } = await supabase
         .from('tarefas_unificadas')
-        .insert({ user_id: uid, titulo, notas_locais: notas || null })
+        .insert({
+          user_id: uid,
+          titulo,
+          notas_locais: notas || null,
+          score_urgencia: score,
+          prioridade,
+          origem: 'manual',
+          status: 'pendente',
+        })
         .select()
         .single()
       if (error) throw error

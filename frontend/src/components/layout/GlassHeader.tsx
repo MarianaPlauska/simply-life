@@ -52,13 +52,13 @@ export function GlassHeader() {
 
   return (
     <header className="shrink-0 w-full bg-zinc-950/80 backdrop-blur-md border-b border-zinc-800/50 relative z-50">
-      <div className="px-6 h-12 flex items-center justify-between gap-4">
+      <div className="px-6 h-14 flex items-center justify-between gap-4">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[12px] text-zinc-500">Simply-Life</span>
+          <span className="text-[13px] text-zinc-500">Simply-Life</span>
           <span className="text-zinc-700">/</span>
-          <span className="text-[12px] font-medium text-zinc-200">{VIEW_LABELS[activeView] || activeView}</span>
+          <span className="text-[14px] font-semibold text-white">{VIEW_LABELS[activeView] || activeView}</span>
         </div>
 
         {/* Pinned Tabs (center) */}
@@ -70,10 +70,10 @@ export function GlassHeader() {
                 <button
                   key={moduleId}
                   onClick={() => setActiveView(moduleId as ActiveView)}
-                  className={`relative px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors ${
+                  className={`relative px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
                     isActive
                       ? 'text-white bg-zinc-800/80'
-                      : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60'
+                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60'
                   }`}
                 >
                   {VIEW_LABELS[moduleId] || moduleId}

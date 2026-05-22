@@ -130,53 +130,52 @@ export function KanbanBoard() {
 
   const boardColumns = boardStyle === 'temporal' ? TEMPORAL_COLUMNS : COLUMNS;
 
+  // regra temporal — prioridade crítica/alta também sobe coluna
+  const isFazer1h = useCallback((t: TarefaUnificada) =>
+  {
+    if (t.status !== 'pendente') return false
+    const score = t.score_urgencia ?? 0
+    return score >= 60 || t.prioridade === 'critica'
+  }, [])
+
+  const isFazerHoje = useCallback((t: TarefaUnificada) =>
+  {
+    if (t.status === 'em_progresso') return true
+    if (t.status !== 'pendente') return false
+    const score = t.score_urgencia ?? 0
+    return (score >= 35 && score < 60) || t.prioridade === 'alta'
+  }, [])
+
+  const isNestaSemana = useCallback((t: TarefaUnificada) =>
+  {
+    if (t.status !== 'pendente') return false
+    if (isFazer1h(t) || isFazerHoje(t)) return false
+    return true
+  }, [isFazer1h, isFazerHoje])
+
   const getColumnTasks = useCallback((colId: string) =>
   {
     if (boardStyle === 'temporal')
     {
-      if (colId === 'fazer_1h')
-      {
-        return filtered.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) >= 60);
-      }
-      if (colId === 'fazer_hoje')
-      {
-        return filtered.filter((t) => t.status === 'em_progresso');
-      }
-      if (colId === 'nesta_semana')
-      {
-        return filtered.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) < 60);
-      }
-      return [];
+      if (colId === 'fazer_1h') return filtered.filter(isFazer1h)
+      if (colId === 'fazer_hoje') return filtered.filter(isFazerHoje)
+      if (colId === 'nesta_semana') return filtered.filter(isNestaSemana)
+      return []
     }
-    else
-    {
-      return filtered.filter((t) => t.status === colId);
-    }
-  }, [filtered, boardStyle]);
+    return filtered.filter((t) => t.status === colId);
+  }, [filtered, boardStyle, isFazer1h, isFazerHoje, isNestaSemana]);
 
   const getGroupColumnTasks = useCallback((tasks: TarefaUnificada[], colId: string) =>
   {
     if (boardStyle === 'temporal')
     {
-      if (colId === 'fazer_1h')
-      {
-        return tasks.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) >= 60);
-      }
-      if (colId === 'fazer_hoje')
-      {
-        return tasks.filter((t) => t.status === 'em_progresso');
-      }
-      if (colId === 'nesta_semana')
-      {
-        return tasks.filter((t) => t.status === 'pendente' && (t.score_urgencia ?? 0) < 60);
-      }
-      return [];
+      if (colId === 'fazer_1h') return tasks.filter(isFazer1h)
+      if (colId === 'fazer_hoje') return tasks.filter(isFazerHoje)
+      if (colId === 'nesta_semana') return tasks.filter(isNestaSemana)
+      return []
     }
-    else
-    {
-      return tasks.filter((t) => t.status === colId);
-    }
-  }, [boardStyle]);
+    return tasks.filter((t) => t.status === colId);
+  }, [boardStyle, isFazer1h, isFazerHoje, isNestaSemana]);
 
   // agrupa tarefas se houver seleção de agrupamento
   const groups = useMemo(() => {
@@ -413,11 +412,11 @@ export function KanbanBoard() {
       );
     }
 
-    // renderização padrão das colunas do quadro
+    // renderização padrão — colunas lado a lado com gap menor (densidade §2.4)
     return (
-      <div 
-        className="flex items-start gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-900 scrollbar-track-transparent" 
-        role="region" 
+      <div
+        className="flex items-start gap-4 overflow-x-auto pb-4"
+        role="region"
         aria-label="Quadro Kanban"
       >
         {boardColumns.map((col) =>
@@ -477,55 +476,46 @@ export function KanbanBoard() {
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="max-w-7xl mx-auto w-full pb-16 relative px-1">
-        
-        {/* cabeçalho principal */}
-        <div className="mb-8 space-y-6">
+        {/* cabeçalho principal — espaçamento reduzido para densidade */}
+        <div className="mb-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl font-semibold text-zinc-100 tracking-tight flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
                 Tarefas
-                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-500 normal-case">
-                  <Radio className="w-3 h-3" />
-                  <span className={`w-1.5 h-1.5 rounded-full ${
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 normal-case">
+                  <Radio className="w-3.5 h-3.5" />
+                  <span className={`w-2 h-2 rounded-full ${
                     realtimeStatus === 'live' ? 'bg-emerald-500'
                       : realtimeStatus === 'connecting' ? 'bg-amber-400 animate-pulse'
                         : realtimeStatus === 'error' ? 'bg-red-500'
                           : 'bg-zinc-600'
                   }`} />
-                  {realtimeStatus === 'live' ? 'Ao vivo' : realtimeStatus === 'error' ? 'Realtime' : ''}
+                  {realtimeStatus === 'live' ? 'Ao vivo' : realtimeStatus === 'error' ? 'Realtime off' : ''}
                 </span>
               </h1>
-              <p className="text-zinc-500 text-[12px] font-medium mt-0.5">
+              <p className="text-zinc-400 text-[13px] font-medium mt-1">
                 {filtered.length} tarefa{filtered.length !== 1 ? 's' : ''}
                 {hasActiveFilters ? ' filtradas' : ' ativas'}
                 {boardStyle === 'temporal' ? ' · visão Jarvis' : ''}
               </p>
             </div>
 
-            {/* controles de visualização premium flat */}
-            <div className="flex items-center gap-3 flex-wrap">
+            {/* toolbar — visual plano, separadores sutis (§2.4) */}
+            <div className="flex items-center gap-2 flex-wrap">
               {/* abas: ativas / arquivo */}
-              <div className="flex items-center gap-1.5 border-r border-zinc-900 pr-3 mr-1">
+              <div className="flex items-center gap-0.5 border-r border-zinc-900 pr-2 mr-1">
                 <button
-                  onClick={() => {
-                    return setTab('active');
-                  }}
-                  className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
-                    tab === 'active'
-                      ? 'bg-zinc-900 text-zinc-200'
-                      : 'text-zinc-500 hover:text-zinc-300'
+                  onClick={() => setTab('active')}
+                  className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
+                    tab === 'active' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
                   }`}
                 >
                   Ativas
                 </button>
                 <button
-                  onClick={() => {
-                    return setTab('arquivo');
-                  }}
-                  className={`flex items-center gap-1 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all ${
-                    tab === 'arquivo'
-                      ? 'bg-zinc-900 text-zinc-200'
-                      : 'text-zinc-500 hover:text-zinc-300'
+                  onClick={() => setTab('arquivo')}
+                  className={`flex items-center gap-1 px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
+                    tab === 'arquivo' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
                   }`}
                 >
                   <Archive className="w-3.5 h-3.5" />
@@ -533,89 +523,41 @@ export function KanbanBoard() {
                 </button>
               </div>
 
-              {/* seletores de modo de visualização */}
+              {/* seletor de modo de visualização */}
               {tab === 'active' && (
-                <div className="flex items-center gap-0.5 bg-zinc-900/40 p-0.5 rounded-lg border border-zinc-900">
-                  <button
-                    onClick={() => {
-                      return setViewMode('board');
-                    }}
-                    className={`p-1.5 rounded-md transition-all ${
-                      viewMode === 'board' ? 'bg-zinc-900 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Quadro"
-                  >
+                <div className="flex items-center gap-0.5 border border-zinc-900 rounded p-0.5">
+                  <button onClick={() => setViewMode('board')} className={`p-1.5 rounded transition-colors ${viewMode === 'board' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Quadro">
                     <LayoutGrid className="w-3.5 h-3.5" />
                   </button>
-                  <button
-                    onClick={() => {
-                      return setViewMode('list');
-                    }}
-                    className={`p-1.5 rounded-md transition-all ${
-                      viewMode === 'list' ? 'bg-zinc-900 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Lista"
-                  >
+                  <button onClick={() => setViewMode('list')} className={`p-1.5 rounded transition-colors ${viewMode === 'list' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Lista">
                     <List className="w-3.5 h-3.5" />
                   </button>
-                  <button
-                    onClick={() => {
-                      return setViewMode('week');
-                    }}
-                    className={`p-1.5 rounded-md transition-all ${
-                      viewMode === 'week' ? 'bg-zinc-900 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Calendário Semanal"
-                  >
+                  <button onClick={() => setViewMode('week')} className={`p-1.5 rounded transition-colors ${viewMode === 'week' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Semanal">
                     <CalendarRange className="w-3.5 h-3.5" />
                   </button>
-                  <button
-                    onClick={() => {
-                      return setViewMode('month');
-                    }}
-                    className={`p-1.5 rounded-md transition-all ${
-                      viewMode === 'month' ? 'bg-zinc-900 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Calendário Mensal"
-                  >
+                  <button onClick={() => setViewMode('month')} className={`p-1.5 rounded transition-colors ${viewMode === 'month' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Mensal">
                     <Calendar className="w-3.5 h-3.5" />
                   </button>
-                  <button
-                    onClick={() => {
-                      return setViewMode('gantt');
-                    }}
-                    className={`p-1.5 rounded-md transition-all ${
-                      viewMode === 'gantt' ? 'bg-zinc-900 text-zinc-200' : 'text-zinc-500 hover:text-zinc-300'
-                    }`}
-                    title="Cronograma Gantt"
-                  >
+                  <button onClick={() => setViewMode('gantt')} className={`p-1.5 rounded transition-colors ${viewMode === 'gantt' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Gantt">
                     <CalendarDays className="w-3.5 h-3.5" />
                   </button>
                 </div>
               )}
 
-              {/* seletor de estilo do quadro (clássico / temporal) */}
+              {/* estilo do quadro: clássico vs temporal */}
               {viewMode === 'board' && tab === 'active' && (
-                <div className="flex items-center gap-0.5 bg-zinc-900/40 p-0.5 rounded-lg border border-zinc-900">
+                <div className="flex items-center gap-0.5 border border-zinc-900 rounded p-0.5">
                   <button
-                    onClick={() =>
-                    {
-                      persistBoardStyle('classico');
-                    }}
-                    className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
-                      boardStyle === 'classico'
-                        ? 'bg-zinc-900 text-zinc-200'
-                        : 'text-zinc-500 hover:text-zinc-300'
+                    onClick={() => persistBoardStyle('classico')}
+                    className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
+                      boardStyle === 'classico' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
                     }`}
                   >
                     Clássico
                   </button>
                   <button
-                    onClick={() =>
-                    {
-                      persistBoardStyle('temporal');
-                    }}
-                    className={`px-3 py-1.5 text-[11px] font-semibold rounded-md transition-all ${
+                    onClick={() => persistBoardStyle('temporal')}
+                    className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
                       boardStyle === 'temporal'
                         ? 'bg-zinc-900 text-zinc-200'
                         : 'text-zinc-500 hover:text-zinc-300'
@@ -634,8 +576,7 @@ export function KanbanBoard() {
                     onChange={(e) => {
                       return setGroupBy(e.target.value as GroupBy);
                     }}
-                    className="bg-zinc-900/40 border border-zinc-900 rounded-lg pl-3 pr-8 py-1.5 text-[11px] font-semibold text-zinc-400
-                               outline-none focus:border-violet-500/20 transition-all appearance-none cursor-pointer"
+                    className="bg-transparent border border-zinc-900 rounded pl-2.5 pr-7 py-1 text-[12px] font-medium text-zinc-400 outline-none focus:border-violet-500/30 appearance-none cursor-pointer"
                   >
                     <option value="none">Sem Agrupamento</option>
                     <option value="prioridade">Agrupar por Prioridade</option>
@@ -733,7 +674,7 @@ export function KanbanBoard() {
           onClick={() => {
             return setDevModalOpen(true);
           }}
-          className="fixed bottom-6 right-6 flex items-center gap-2 bg-zinc-950/80 hover:bg-zinc-900 border border-zinc-900 text-zinc-550 hover:text-violet-400 rounded-full px-3.5 py-2 text-[10px] uppercase tracking-wider font-semibold backdrop-blur-sm shadow-xl transition-all z-35"
+          className="fixed bottom-6 right-6 flex items-center gap-2 bg-card hover:bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-violet-400 rounded px-3 py-1.5 text-[11px] uppercase tracking-wider font-semibold transition-colors z-35"
         >
           <FlaskConical className="w-3.5 h-3.5" />
           <span>Simular Triagem</span>

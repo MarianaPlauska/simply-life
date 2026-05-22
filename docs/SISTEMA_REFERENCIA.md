@@ -48,10 +48,13 @@ Filosofia: **alta densidade de dados**, sem “cara de template genérico de IA�
 
 ### 2.4 Densidade visual — “Tudo é linha”
 
-- Tarefa no Kanban temporal = **linha compacta**, não card com borda pesada
-- Prioridade = **traço colorido na borda esquerda** (`border-l-2`)
-- Meta de densidade: ~10 e-mails / 15 transações visíveis sem scroll infinito
-- Hover discreto: `hover:bg-zinc-950/80`, sem elevação 3D
+- Tarefa no Kanban temporal = **linha compacta** (`TaskLineRow`), nunca card com sombra
+- Prioridade = **traço fino** `border-l-2` colorido (`prioStripClass`)
+- Meta de densidade: **~10 e-mails / 15 transações** visíveis sem scroll
+- Hover discreto: `hover:bg-card`, sem `shadow-xl`/`shadow-2xl`
+- Padding interno: `py-1.5 pl-2.5 pr-2` no máximo
+- Botões em segmento: `border border-zinc-900 rounded` + `bg-card` quando ativo
+- Sem `backdrop-blur` em componentes internos do Kanban (apenas o header global)
 
 ### 2.5 Modo Academia (exclusivo saúde/treino)
 
@@ -282,4 +285,4 @@ Exemplos:
 - “Implemente roadmap §7 item keywords no webhook.”
 - “Respeite Modo Academia §2.5 ao editar treinos.”
 
-**Última atualização:** Pilar 1 — Realtime reforçado, `TaskLineRow`, Superhuman + Kanban temporal alinhados.
+**Última atualização:** Pilar 1 — refatoração visual minimalista (Allman + PT-BR), sem sombras pesadas, padrão "tudo é linha" reforçado.
