@@ -64,6 +64,8 @@ export function useRealtimeSync(): void
         if (row.deletado_em) return
 
         const mapped = mapTarefaFromRow(row)
+        const isNew = !useTaskStore.getState().tarefas.some((t) => t.id === mapped.id)
+
         useTaskStore.setState((s) =>
         {
           if (s.tarefas.some((t) => t.id === mapped.id)) return s
@@ -77,6 +79,11 @@ export function useRealtimeSync(): void
         })
 
         const origem = String(row.origem || '')
+        if (isNew && mapped.id > 0)
+        {
+          useTaskStore.getState().pushIngestionHighlights([mapped.id])
+        }
+
         if (isExternalOrigin(origem))
         {
           notifyTriaged(String(row.titulo || 'Item recebido'))

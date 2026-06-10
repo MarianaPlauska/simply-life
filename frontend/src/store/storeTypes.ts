@@ -62,6 +62,8 @@ export interface UserProfile {
   avatar: string;
 }
 
+export type ColorScheme = 'dark' | 'light';
+
 export interface AccessibilitySettings {
   fontSize: number;
   highContrast: boolean;
@@ -69,6 +71,8 @@ export interface AccessibilitySettings {
   focusVisible: boolean;
   soundFeedback: boolean;
   keyboardShortcuts: boolean;
+  /** Tema global — classe `dark` no html (Tailwind) */
+  colorScheme: ColorScheme;
 }
 
 export interface VirtualCard

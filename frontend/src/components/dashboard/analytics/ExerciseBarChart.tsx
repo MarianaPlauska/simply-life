@@ -1,0 +1,56 @@
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
+import type { AnalyticsChartRow } from '../../../data/analyticsMockData'
+import { useOrionChartTheme } from '../../../hooks/useOrionChartTheme'
+import { ORION_DISPLAY_STAT, ORION_TEXT_SECONDARY } from '../../../constants/orionSurfaces'
+import { OrionChartTooltip, CHART_HEIGHT, type OrionTooltipProps } from './orionChartConfig'
+
+// Modo Academia — barras com fill/stroke dependentes do tema
+
+interface ExerciseBarChartProps
+{
+  rows: AnalyticsChartRow[]
+  consistencyPct: number
+}
+
+export function ExerciseBarChart({ rows, consistencyPct }: ExerciseBarChartProps)
+{
+  const theme = useOrionChartTheme()
+  const totalMin = rows.reduce((s, r) => s + r.treinoMin, 0)
+
+  return (
+    <div className="flex flex-col h-full min-h-[280px]">
+      <div className="flex items-baseline justify-between mb-2">
+        <span className={ORION_DISPLAY_STAT}>
+          {totalMin}m
+        </span>
+        <span className={`text-[11px] ${ORION_TEXT_SECONDARY}`}>{consistencyPct}% consistência</span>
+      </div>
+
+      <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+        <BarChart data={rows} margin={{ top: 8, right: 4, left: -16, bottom: 0 }}>
+          <CartesianGrid {...theme.grid} />
+          <XAxis dataKey="label" {...theme.axis} />
+          <YAxis {...theme.axis} unit="m" />
+          <Tooltip content={(props) => <OrionChartTooltip {...(props as OrionTooltipProps)} />} />
+          <Bar
+            dataKey="treinoMin"
+            name="Treino (min)"
+            fill={theme.exercise.fill}
+            stroke={theme.exercise.stroke}
+            strokeWidth={1}
+            radius={[4, 4, 0, 0]}
+            maxBarSize={32}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}

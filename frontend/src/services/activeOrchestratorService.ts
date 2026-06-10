@@ -211,7 +211,7 @@ export async function checkMedicamentosPendentes(
         .from('tarefas_unificadas')
         .insert({
           user_id: userId,
-          titulo: `💊 Tomar ${med.nome} (era às ${med.horario})`,
+          titulo: `Tomar ${med.nome} (era às ${med.horario})`,
           descricao: `Medicamento ${med.nome} com horário previsto às ${med.horario} ainda não foi tomado. Score de urgência crescente.`,
           snippet_100_char: phantomKey,
           score_urgencia: score,

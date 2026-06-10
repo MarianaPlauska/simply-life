@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Flame, Zap, Trophy, Star } from 'lucide-react';
+import { Coffee, Flame, Sprout, TrendingUp, Trophy, Zap, Star, type LucideIcon } from 'lucide-react';
 import { CircularProgress, fadeUp } from './DashboardPrimitives';
 import type { DashboardResumo } from '../../store/useTaskStore';
 
@@ -44,12 +44,13 @@ function computeFocusScore(r: DashboardResumo | null): {
   return { score: Math.min(score, 100), tarefasPct, habitosPct, medsPct, criticalBonus };
 }
 
-function getScoreLabel(score: number): { label: string; color: string; emoji: string } {
-  if (score >= 90) return { label: 'Excepcional', color: 'text-amber-400', emoji: '🔥' };
-  if (score >= 70) return { label: 'Otimo', color: 'text-emerald-400', emoji: '⚡' };
-  if (score >= 50) return { label: 'Bom Ritmo', color: 'text-cyan-400', emoji: '📈' };
-  if (score >= 25) return { label: 'Aquecendo', color: 'text-zinc-400', emoji: '🌱' };
-  return { label: 'Comecando', color: 'text-zinc-500', emoji: '☕' };
+function getScoreLabel(score: number): { label: string; color: string; Icon: LucideIcon; iconColor: string }
+{
+  if (score >= 90) return { label: 'Excepcional', color: 'text-amber-400', Icon: Flame, iconColor: 'text-amber-400' };
+  if (score >= 70) return { label: 'Otimo', color: 'text-emerald-400', Icon: Zap, iconColor: 'text-emerald-400' };
+  if (score >= 50) return { label: 'Bom Ritmo', color: 'text-cyan-400', Icon: TrendingUp, iconColor: 'text-cyan-400' };
+  if (score >= 25) return { label: 'Aquecendo', color: 'text-zinc-400', Icon: Sprout, iconColor: 'text-zinc-400' };
+  return { label: 'Comecando', color: 'text-zinc-500', Icon: Coffee, iconColor: 'text-zinc-500' };
 }
 
 function getScoreStrokeColor(score: number): string {
@@ -70,7 +71,7 @@ function getScoreBarGradient(score: number): string {
 
 export function FocusScoreSection({ resumo, scoreDiario }: FocusScoreProps) {
   const { score, tarefasPct, habitosPct, medsPct, criticalBonus } = computeFocusScore(resumo);
-  const { label, color, emoji } = getScoreLabel(score);
+  const { label, color, Icon, iconColor } = getScoreLabel(score);
   const strokeColor = getScoreStrokeColor(score);
   const barGradient = getScoreBarGradient(score);
 
@@ -100,8 +101,9 @@ export function FocusScoreSection({ resumo, scoreDiario }: FocusScoreProps) {
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-[11px] text-zinc-500 font-medium uppercase tracking-wider mb-0.5">Focus</span>
                 <span className="text-4xl font-black text-white tracking-tighter tabular-nums">{score}</span>
-                <span className={`text-[11px] font-semibold ${color} mt-0.5`}>
-                  {emoji} {label}
+                <span className={`text-[11px] font-semibold ${color} mt-0.5 inline-flex items-center gap-1`}>
+                  <Icon size={14} strokeWidth={1.5} className={iconColor} aria-hidden />
+                  {label}
                 </span>
               </div>
             </div>

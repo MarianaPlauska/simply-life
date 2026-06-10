@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -7,17 +8,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        // O seu Design System focado em baixa fadiga ocular
-        fundo: '#000000',     // True Black — OLED / contraste infinito
-        card: '#090514',      // Roxo-cinza ultracescuro (data containers)
-        urgente: '#ef4444',   // red-500 (Acelerador: Urgência máxima)
-        atencao: '#f59e0b',   // amber-500 (Acelerador: Atenção)
-        concluido: '#10b981', // emerald-500 (Baixa fricção / Feito)
-        ia: '#8b5cf6',        // violet-500 (Ações da Inteligência Artificial)
+        // Instrumento — paleta quente, um único acento cobre
+        fundo: 'var(--sl-canvas)',
+        card: 'var(--sl-surface)',
+        chrome: 'var(--sl-chrome)',
+        elevated: 'var(--sl-elevated)',
+        ink: 'var(--sl-text)',
+        'ink-muted': 'var(--sl-text-muted)',
+        line: 'var(--sl-border)',
+        accent: {
+          DEFAULT: 'var(--sl-accent)',
+          hover: 'var(--sl-accent-hover)',
+          muted: 'var(--sl-accent-muted)',
+        },
+        urgente: 'var(--sl-urgent)',
+        atencao: 'var(--sl-attention)',
+        concluido: 'var(--sl-success)',
+      },
+      borderRadius: {
+        sl: 'var(--sl-radius)',
       },
       fontFamily: {
-        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
-      }
+        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
+        display: ['Newsreader', 'Georgia', '"Times New Roman"', 'serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+      },
     },
   },
   plugins: [],

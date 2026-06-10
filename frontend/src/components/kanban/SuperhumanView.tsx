@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Zap, Search, Loader2, Sparkles, Radio } from 'lucide-react'
 import { toast } from 'sonner'
+import { orionCompleteTask } from '../../lib/orionTaskCompletion'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useSuperhumanTasks } from '../../hooks/useSuperhumanTasks'
 import { SuperhumanTaskRow } from './SuperhumanTaskRow'
@@ -89,8 +90,7 @@ export function SuperhumanView()
             tarefa={t}
             onComplete={async (task) =>
             {
-              await updateTarefa(task.id, { status: 'concluida' })
-              toast.success('Concluída')
+              await orionCompleteTask(task)
             }}
             onUpdate={updateTarefa}
             onArchive={async (id) =>

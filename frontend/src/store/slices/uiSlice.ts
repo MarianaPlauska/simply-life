@@ -1,12 +1,19 @@
 // slice de ui — controla views, sidebar, modais, acessibilidade
 import type { StateCreator } from 'zustand';
-import type { ActiveView, TimerConfig, AccessibilitySettings } from '../storeTypes';
+import type { ActiveView, TimerConfig, AccessibilitySettings, ColorScheme } from '../storeTypes';
+import { applyColorScheme } from '../../utils/applyColorScheme';
 
 export type RealtimeStatus = 'offline' | 'connecting' | 'live' | 'error';
 
 export interface UISlice {
   realtimeStatus: RealtimeStatus;
   setRealtimeStatus: (status: RealtimeStatus) => void;
+  /** IDs de tarefas recém-ingeridas — highlight no Kanban */
+  orionIngestionHighlightIds: number[];
+  pushIngestionHighlights: (ids: number[]) => void;
+  clearIngestionHighlights: () => void;
+  orionIngestionPolling: boolean;
+  setOrionIngestionPolling: (active: boolean) => void;
   activeView: ActiveView;
   isQuickCaptureOpen: boolean;
   isCommandPaletteOpen: boolean;
@@ -25,13 +32,30 @@ export interface UISlice {
   toggleSidebar: () => void;
   concluirHabito: (pontos: number) => void;
   togglePin: (moduleId: string) => void;
-  setAccessibility: (key: keyof AccessibilitySettings, value: boolean | number) => void;
+  setAccessibility: <K extends keyof AccessibilitySettings>(
+    key: K,
+    value: AccessibilitySettings[K],
+  ) => void;
+  toggleColorScheme: () => void;
   setKeywords: (keywords: string[]) => void;
 }
 
-export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
+export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) => ({
   realtimeStatus: 'offline',
   setRealtimeStatus: (status) => set({ realtimeStatus: status }),
+  orionIngestionHighlightIds: [],
+  pushIngestionHighlights: (ids) =>
+  {
+    if (ids.length === 0) return;
+    set((state) =>
+    {
+      const merged = new Set([...state.orionIngestionHighlightIds, ...ids]);
+      return { orionIngestionHighlightIds: [...merged] };
+    });
+  },
+  clearIngestionHighlights: () => set({ orionIngestionHighlightIds: [] }),
+  orionIngestionPolling: false,
+  setOrionIngestionPolling: (active) => set({ orionIngestionPolling: active }),
   activeView: 'dashboard',
   isQuickCaptureOpen: false,
   isCommandPaletteOpen: false,
@@ -47,6 +71,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
     focusVisible: true,
     soundFeedback: false,
     keyboardShortcuts: true,
+    colorScheme: 'dark',
   },
   keywords: [] as string[],
 
@@ -91,14 +116,24 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set) => ({
 
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
+  toggleColorScheme: () =>
+  {
+    const next: ColorScheme = get().accessibility.colorScheme === 'dark' ? 'light' : 'dark';
+    set((state) => ({
+      accessibility: { ...state.accessibility, colorScheme: next },
+    }));
+    applyColorScheme(next);
+  },
+
   setAccessibility: (key, value) =>
   {
     set((state) => ({
       accessibility: { ...state.accessibility, [key]: value },
     }));
-    if ( key === 'fontSize' ) document.documentElement.style.fontSize = `${value}px`;
-    if ( key === 'highContrast' ) document.documentElement.classList.toggle('high-contrast', value as boolean);
-    if ( key === 'reducedMotion' ) document.documentElement.classList.toggle('reduce-motion', value as boolean);
+    if (key === 'fontSize') document.documentElement.style.fontSize = `${value}px`;
+    if (key === 'highContrast') document.documentElement.classList.toggle('high-contrast', value as boolean);
+    if (key === 'reducedMotion') document.documentElement.classList.toggle('reduce-motion', value as boolean);
+    if (key === 'colorScheme') applyColorScheme(value as ColorScheme);
   },
 
   setKeywords: (keywords) => set({ keywords }),

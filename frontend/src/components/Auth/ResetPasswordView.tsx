@@ -1,7 +1,7 @@
 // tela de redefinição de senha — quando o user clica no link do email de recuperação
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock, Eye, EyeOff, Zap, CheckCircle2, Loader2 } from 'lucide-react'
+import { AlertCircle, Lock, Eye, EyeOff, Zap, CheckCircle2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 
@@ -189,7 +189,10 @@ export function ResetPasswordView ()
 
               {/* match check */}
               {confirmar.length > 0 && senha !== confirmar && (
-                <p className="text-[11px] text-red-400/80">⚠️ As senhas não coincidem</p>
+                <p className="text-[11px] text-red-400/80 inline-flex items-center gap-1">
+                  <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
+                  As senhas não coincidem
+                </p>
               )}
 
               <button

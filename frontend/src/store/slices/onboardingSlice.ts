@@ -11,11 +11,11 @@ export interface OnboardingSlice
 }
 
 export const ONBOARDING_STEPS = [
-  { id: 'create_task',       label: 'Criar primeira tarefa',   emoji: '✅', path: '/kanban' },
-  { id: 'add_expense',       label: 'Registrar uma despesa',   emoji: '💰', path: '/financeiro' },
-  { id: 'add_habit',         label: 'Registrar um hábito',     emoji: '💊', path: '/saude' },
-  { id: 'activate_focus',    label: 'Ativar modo foco',        emoji: '🎯', path: '/foco' },
-  { id: 'customize_sidebar', label: 'Personalizar sidebar',    emoji: '📌', path: '/configuracoes' },
+  { id: 'create_task',       label: 'Criar primeira tarefa',   path: '/kanban' },
+  { id: 'add_expense',       label: 'Registrar uma despesa',   path: '/financeiro' },
+  { id: 'add_habit',         label: 'Registrar um hábito',     path: '/saude' },
+  { id: 'activate_focus',    label: 'Ativar modo foco',        path: '/foco' },
+  { id: 'customize_sidebar', label: 'Personalizar sidebar',    path: '/configuracoes' },
 ] as const;
 
 export const createOnboardingSlice: StateCreator<OnboardingSlice> = (set) => ({

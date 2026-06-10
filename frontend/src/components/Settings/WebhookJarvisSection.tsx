@@ -17,7 +17,12 @@ export function WebhookJarvisSection()
   const [hasSecret, setHasSecret] = useState(false);
   const [plainSecret, setPlainSecret] = useState<string | null>(null);
 
-  const endpoint =
+  const endpointUniversal =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/api/webhooks/ingest`
+      : '/api/webhooks/ingest';
+
+  const endpointLegacy =
     typeof window !== 'undefined'
       ? `${window.location.origin}/api/webhook-ingest`
       : '/api/webhook-ingest';
@@ -95,25 +100,26 @@ export function WebhookJarvisSection()
           Webhooks Jarvis (M2M)
         </h2>
         <p className="text-xs text-zinc-500 mt-1">
-          GitHub, Gmail (Zapier/Make) ou qualquer serviço envia eventos para triagem automática no Supabase.
+          Ingestão universal com orquestração de urgência antes de gravar no Kanban (Realtime + polling).
         </p>
       </div>
 
       <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-5 space-y-4">
         <div>
-          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Endpoint</p>
+          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Endpoint ORION (recomendado)</p>
           <div className="flex gap-2">
             <code className="flex-1 text-xs text-violet-300 bg-zinc-950 px-3 py-2 rounded-lg border border-zinc-800 break-all">
-              {endpoint}
+              {endpointUniversal}
             </code>
             <button
               type="button"
-              onClick={() => copy(endpoint, 'Endpoint')}
+              onClick={() => copy(endpointUniversal, 'Endpoint universal')}
               className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white"
             >
               <Copy className="w-4 h-4" />
             </button>
           </div>
+          <p className="text-[10px] text-zinc-600 mt-2">Legado (lote): {endpointLegacy}</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -152,14 +158,10 @@ export function WebhookJarvisSection()
         <pre className="text-[11px] text-zinc-400 overflow-x-auto">
 {`{
   "user_id": "<seu-uuid-supabase>",
-  "items": [
-    {
-      "subject": "Título ou assunto",
-      "body": "Corpo resumido (opcional)",
-      "sender": "github|gmail",
-      "origem": "github_issue | gmail | webhook"
-    }
-  ]
+  "source": "github_issue",
+  "title": "[SST] Integrar parsing e-Social",
+  "content": "Corpo ou descrição resumida",
+  "priority": "critica"
 }`}
         </pre>
         <p className="text-[10px] text-zinc-600 mt-3">

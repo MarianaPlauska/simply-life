@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import {
   X, Calendar, Clock, Tag, Hash, Zap, Sparkles,
   CheckSquare, Plus, Trash2, Pencil, Check, AlertTriangle, GripVertical,
-  FileText, StickyNote, ArrowRight, Loader2, ChevronDown,
-  RefreshCw, Link, Activity, Timer, Play,
+  FileText, StickyNote, ArrowRight, ArrowUpRight, Loader2, ChevronDown,
+  RefreshCw, Link, Activity, Timer, Play, Archive, MessageSquare, Circle,
+  type LucideIcon,
 } from 'lucide-react';
 import { DndContext, closestCenter, type DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
@@ -331,8 +332,13 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
   };
 
   const FREQ_LABELS: Record<string, string> = { diaria: 'Diária', semanal: 'Semanal', mensal: 'Mensal' };
-  const TIPO_ICON: Record<string, string> = {
-    criou: '✨', editou: '✏️', moveu: '↗️', concluiu: '✅', arquivou: '📦', comentou: '💬',
+  const TIPO_ICON: Record<string, LucideIcon> = {
+    criou: Sparkles,
+    editou: Pencil,
+    moveu: ArrowUpRight,
+    concluiu: Check,
+    arquivou: Archive,
+    comentou: MessageSquare,
   };
 
   return (
@@ -472,7 +478,11 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                       
                       <div className="bg-zinc-900/20 border border-zinc-800/40 rounded-xl p-3.5 hover:border-zinc-800/60 transition-all duration-200">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm leading-none">{TIPO_ICON[ativ.tipo] ?? '🔹'}</span>
+                          {(() =>
+                          {
+                            const Icon = TIPO_ICON[ativ.tipo] ?? Circle;
+                            return <Icon size={14} strokeWidth={1.5} className="text-violet-400 shrink-0" />;
+                          })()}
                           <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500">
                             {ativ.tipo}
                           </span>

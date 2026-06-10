@@ -170,7 +170,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
             if (isStreakBonus)
             {
               const { toast } = await import('sonner')
-              toast.success('💊 Combo Vitalidade Renovada! (+40 XP)', {
+              toast.success('Combo Vitalidade Renovada (+40 XP)', {
                 description: 'Você tomou seus medicamentos no horário por 3 dias seguidos!',
               })
             }
@@ -557,7 +557,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       if (created > 0)
       {
         const { toast } = await import('sonner')
-        toast.info(`💊 ${created} medicamento${created > 1 ? 's' : ''} pendente${created > 1 ? 's' : ''} detectado${created > 1 ? 's' : ''}`, {
+        toast.info(`${created} medicamento${created > 1 ? 's' : ''} pendente${created > 1 ? 's' : ''} detectado${created > 1 ? 's' : ''}`, {
           description: 'Tarefas criadas automaticamente no seu Kanban.',
         })
       }

@@ -46,6 +46,10 @@ export interface GamificacaoSlice
   fetchAchievements: () => Promise<void>;
   fetchQuests: () => Promise<void>;
   addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number) => Promise<void>;
+  /** Debita XP total (prioriza módulo foco) — compras na loja ORION */
+  spendXp: (amount: number) => Promise<boolean>;
+  /** Conclui tarefa e converte score de urgência em XP (1:1) */
+  completeTask: (taskId: number, urgencyScore: number) => Promise<void>;
   checkAndUnlockAchievements: () => Promise<void>;
   generateQuestsForToday: () => Promise<void>;
   incrementQuestProgress: (tituloContendo: string, valor: number) => Promise<void>;
@@ -190,7 +194,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
       if (leveledUp)
       {
         const { toast } = await import('sonner')
-        toast.success(`⚡ LEVEL UP! Você subiu para o Nível ${newLevel}! 🎉`, {
+        toast.success(`LEVEL UP — você subiu para o Nível ${newLevel}`, {
           description: 'Seus atributos e reputação no Jarvis aumentaram.',
         })
       }
@@ -199,6 +203,104 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
       await get().checkAndUnlockAchievements()
     }
     catch (e) { console.error('addXP:', e) }
+  },
+
+  spendXp: async (amount) =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid || amount <= 0) return false
+
+      let stats = get().userStats
+      if (!stats)
+      {
+        await get().fetchGamificacaoStats()
+        stats = get().userStats
+      }
+      if (!stats) return false
+
+      const total =
+        stats.xp_foco + stats.xp_vitalidade + stats.xp_estabilidade
+      if (total < amount) return false
+
+      let xp_f = stats.xp_foco
+      let xp_v = stats.xp_vitalidade
+      let xp_e = stats.xp_estabilidade
+      let remaining = amount
+
+      const take = (current: number): number =>
+      {
+        const used = Math.min(current, remaining)
+        remaining -= used
+        return current - used
+      }
+
+      xp_f = take(xp_f)
+      if (remaining > 0) xp_v = take(xp_v)
+      if (remaining > 0) xp_e = take(xp_e)
+
+      const total_xp = xp_f + xp_v + xp_e
+      const newLevel = Math.max(1, Math.floor(total_xp / 100) + 1)
+
+      const updatedStats = {
+        ...stats,
+        xp_foco: xp_f,
+        xp_vitalidade: xp_v,
+        xp_estabilidade: xp_e,
+        level: newLevel,
+      }
+
+      set({ userStats: updatedStats })
+
+      const { error } = await supabase
+        .from('user_stats')
+        .upsert({
+          id: uid,
+          level: newLevel,
+          xp_foco: xp_f,
+          xp_vitalidade: xp_v,
+          xp_estabilidade: xp_e,
+          updated_at: new Date().toISOString(),
+        })
+
+      if (error) throw error
+      return true
+    }
+    catch (e)
+    {
+      console.error('spendXp:', e)
+      return false
+    }
+  },
+
+  completeTask: async (taskId, urgencyScore) =>
+  {
+    const xpGain = Math.max(1, Math.round(urgencyScore))
+    const store = get() as GamificacaoSlice & {
+      tarefas?: { id: number; status: string }[]
+      updateTarefa?: (id: number, dados: { status: string }) => Promise<void>
+    }
+
+    const existing = store.tarefas?.find((t) => t.id === taskId)
+    if (existing?.status === 'concluida')
+    {
+      return
+    }
+
+    // Tarefas reais — updateTarefa dispara recompensa com score de urgência
+    if (taskId > 0 && typeof store.updateTarefa === 'function')
+    {
+      await store.updateTarefa(taskId, { status: 'concluida' })
+      return
+    }
+
+    // Mock / preview — XP direto no store
+    await get().addXP('foco', xpGain)
+    const { toast } = await import('sonner')
+    toast.success(`+${xpGain} XP`, {
+      description: 'Score de urgência convertido em progresso',
+    })
   },
 
   generateQuestsForToday: async () =>
@@ -378,7 +480,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
               await get().addXP(modulo, q.recompensa_xp)
 
               const { toast } = await import('sonner')
-              toast.success(`Quest Concluída: "${q.titulo}"! 🎉`, {
+              toast.success(`Quest concluída: "${q.titulo}"`, {
                 description: `+${q.recompensa_xp} XP em ${modulo.toUpperCase()}`,
               })
             }
@@ -462,7 +564,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
           {
             set((s) => ({ achievements: [...s.achievements, data] }))
             const { toast } = await import('sonner')
-            toast.success(`🏆 Conquista Desbloqueada: "${m.titulo}"!`, {
+            toast.success(`Conquista desbloqueada: "${m.titulo}"`, {
               description: m.descricao,
             })
           }

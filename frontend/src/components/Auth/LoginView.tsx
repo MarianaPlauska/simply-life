@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { Zap, Mail, Lock, Eye, EyeOff, UserPlus, Globe } from 'lucide-react';
+import { AlertCircle, Mail, Lock, Eye, EyeOff, UserPlus, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '../../store/useTaskStore';
@@ -207,67 +207,15 @@ export function LoginView() {
   const isSubmitDisabled = !email.trim() || !senha.trim() || (mode === 'register' && !nome.trim());
 
   return (
-    <div
-      className="relative h-screen w-screen bg-zinc-900 overflow-hidden flex items-center justify-center"
-    >
-      {/* Spotlight com animação flutuante e sutil */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <style>{`
-          @keyframes float-ambient-1
-          {
-            0% { transform: translate(-10%, -10%) scale(1); }
-            50% { transform: translate(10%, 10%) scale(1.1); }
-            100% { transform: translate(-10%, -10%) scale(1); }
-          }
-          @keyframes float-ambient-2
-          {
-            0% { transform: translate(10%, 10%) scale(1.05); }
-            50% { transform: translate(-10%, -10%) scale(0.95); }
-            100% { transform: translate(10%, 10%) scale(1.05); }
-          }
-        `}</style>
-        <div
-          className="absolute w-[800px] h-[800px] rounded-full blur-[140px] will-change-transform opacity-70"
-          style={{
-            background: 'radial-gradient(circle, rgba(139,92,246,0.14) 0%, rgba(109,40,217,0.05) 50%, transparent 80%)',
-            left: 'calc(50% - 400px)',
-            top: 'calc(50% - 450px)',
-            animation: 'float-ambient-1 25s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute w-[600px] h-[600px] rounded-full blur-[140px] will-change-transform opacity-60"
-          style={{
-            background: 'radial-gradient(circle, rgba(236,72,153,0.07) 0%, transparent 65%)',
-            left: 'calc(50% - 300px)',
-            top: 'calc(50% - 250px)',
-            animation: 'float-ambient-2 30s ease-in-out infinite',
-          }}
-        />
-      </div>
-
-      {/* Grid overlay */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
-        aria-hidden="true"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '64px 64px',
-        }}
-      />
-
-      {/* Card */}
+    <div className="relative h-screen w-screen bg-fundo sl-ruled-bg overflow-hidden flex items-center justify-center">
       <div className="relative z-10 w-full max-w-md mx-4">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-10">
-          <div className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/[0.06] backdrop-blur-sm mb-4 shadow-[0_0_40px_rgba(139,92,246,0.06)]">
-            <Zap className="w-8 h-8 text-violet-400" aria-hidden="true" />
-          </div>
-          <h1 className="text-[26px] font-bold text-white tracking-tight">{t('login.title')}</h1>
-          <p className="text-[13px] text-zinc-500 mt-1.5 tracking-wide">{t('login.subtitle')}</p>
+        <div className="mb-10 text-center">
+          <p className="sl-eyebrow mb-4">Simply-Life OS</p>
+          <h1 className="text-[28px] font-display text-ink leading-tight">{t('login.title')}</h1>
+          <p className="text-[13px] text-ink-muted mt-2 max-w-xs mx-auto">{t('login.subtitle')}</p>
         </div>
 
-        <div className="bg-zinc-900/40 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-8 shadow-2xl shadow-black/40">
+        <div className="sl-panel p-8">
           <TabToggle
             tabs={AUTH_TABS_KEYS.map((tab) => ({ value: tab.value, label: t(tab.key) }))}
             active={mode}
@@ -317,7 +265,7 @@ export function LoginView() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="text-zinc-600 hover:text-zinc-300 transition-colors"
+                  className="text-ink-muted hover:text-ink transition-colors"
                   aria-label={showPassword ? t('login.hide_password') : t('login.show_password')}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -326,24 +274,27 @@ export function LoginView() {
             />
 
             {mode === 'register' && senhaErro && (
-              <p className="text-[11px] text-amber-400/80 -mt-2">⚠️ {senhaErro}</p>
+              <p className="text-[11px] text-amber-400/80 -mt-2 inline-flex items-center gap-1">
+                <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
+                {senhaErro}
+              </p>
             )}
 
             {mode === 'register' && !senhaErro && senha.length > 0 && (
               <div className="-mt-2 flex items-center gap-2">
-                <div className="flex-1 h-1 rounded-full bg-zinc-800 overflow-hidden">
+                <div className="flex-1 h-1 rounded-sl bg-chrome overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      senha.length >= 8 ? 'w-full bg-emerald-500' :
-                      senha.length >= 6 ? 'w-2/3 bg-amber-500' :
-                      'w-1/3 bg-red-500'
+                    className={`h-full rounded-sl transition-all ${
+                      senha.length >= 8 ? 'w-full bg-concluido' :
+                      senha.length >= 6 ? 'w-2/3 bg-atencao' :
+                      'w-1/3 bg-urgente'
                     }`}
                   />
                 </div>
-                <span className={`text-[10px] ${
-                  senha.length >= 8 ? 'text-emerald-400' :
-                  senha.length >= 6 ? 'text-amber-400' :
-                  'text-red-400'
+                <span className={`font-mono text-[10px] ${
+                  senha.length >= 8 ? 'text-concluido' :
+                  senha.length >= 6 ? 'text-atencao' :
+                  'text-urgente'
                 }`}>
                   {senha.length >= 8 ? 'Forte' : senha.length >= 6 ? 'Ok' : 'Fraca'}
                 </span>
@@ -351,7 +302,7 @@ export function LoginView() {
             )}
 
             {error && (
-              <p role="alert" className="text-[12px] text-red-400/90 text-center py-1">{error}</p>
+              <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
             )}
 
             {mode === 'login' && (
@@ -359,7 +310,7 @@ export function LoginView() {
                 <button
                   type="button"
                   onClick={() => { setForgotMode(true); setForgotEmail(email); }}
-                  className="text-[11px] text-zinc-600 hover:text-violet-400 transition-colors"
+                  className="text-[11px] text-ink-muted hover:text-accent transition-colors"
                 >
                   {t('login.forgot_password')}
                 </button>
@@ -375,15 +326,15 @@ export function LoginView() {
           </form>
 
           <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-            <span className="text-[10px] text-zinc-600 uppercase tracking-[0.15em]">{t('login.or_continue')}</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+            <div className="flex-1 h-px bg-line" />
+            <span className="font-mono text-[10px] text-ink-muted uppercase tracking-[0.14em]">{t('login.or_continue')}</span>
+            <div className="flex-1 h-px bg-line" />
           </div>
 
           <button
             type="button"
             onClick={handleGoogle}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-white text-zinc-800 text-sm font-semibold hover:bg-zinc-100 transition-all duration-200 shadow-md shadow-black/10"
+            className="w-full flex items-center justify-center gap-3 py-3 rounded-sl bg-elevated border border-line text-ink text-sm font-medium hover:border-ink-muted/50 transition-colors"
           >
             <GoogleLogo className="w-5 h-5" />
             {t('login.google')}
@@ -392,7 +343,7 @@ export function LoginView() {
           <button
             type="button"
             onClick={handleGuest}
-            className="w-full mt-3 py-2.5 rounded-xl border border-white/[0.06] text-[13px] font-medium text-zinc-500 hover:text-white hover:border-white/[0.12] transition-all duration-300"
+            className="w-full mt-3 py-2.5 rounded-sl border border-line text-[13px] font-medium text-ink-muted hover:text-ink hover:border-ink-muted/50 transition-colors"
           >
             {t('login.guest')}
           </button>
@@ -400,10 +351,10 @@ export function LoginView() {
 
         {/* ── Modal de recuperação de senha ── */}
         {forgotMode && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-            <div className="bg-zinc-900 border border-white/[0.08] rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl">
-              <h2 className="text-lg font-semibold text-white mb-1">Recuperar senha</h2>
-              <p className="text-[13px] text-zinc-500 mb-5">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-fundo/90">
+            <div className="sl-panel p-8 w-full max-w-sm mx-4">
+              <h2 className="text-lg font-display text-ink mb-1">Recuperar senha</h2>
+              <p className="text-[13px] text-ink-muted mb-5">
                 Digite seu email e enviaremos um link para redefinir sua senha.
               </p>
               <input
@@ -411,14 +362,14 @@ export function LoginView() {
                 value={forgotEmail}
                 onChange={(e) => setForgotEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full px-4 py-3 rounded-xl bg-zinc-800/60 border border-white/[0.06] text-white text-sm placeholder-zinc-600 focus:border-violet-500/40 focus:outline-none transition-colors"
+                className="w-full px-4 py-3 rounded-sl bg-chrome border border-line text-ink text-sm placeholder:text-ink-muted focus:border-accent focus:outline-none transition-colors"
                 autoFocus
               />
               <div className="flex gap-3 mt-5">
                 <button
                   type="button"
                   onClick={() => setForgotMode(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-white/[0.06] text-sm text-zinc-500 hover:text-white transition-colors"
+                  className="flex-1 py-2.5 rounded-sl border border-line text-sm text-ink-muted hover:text-ink transition-colors"
                 >
                   Cancelar
                 </button>
@@ -426,7 +377,7 @@ export function LoginView() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={forgotLoading || !forgotEmail.trim()}
-                  className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-medium transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-sl bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
                 >
                   {forgotLoading ? 'Enviando...' : 'Enviar link'}
                 </button>
@@ -436,21 +387,20 @@ export function LoginView() {
         )}
 
         <div className="flex items-center justify-center gap-4 mt-8">
-          <p className="text-[11px] text-zinc-700">
+          <p className="text-[11px] text-ink-muted">
             {t('login.terms_agree')}{' '}
-            <span className="text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors">{t('login.terms')}</span>
+            <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.terms')}</span>
             {' '}{t('login.and')}{' '}
-            <span className="text-zinc-500 hover:text-violet-400 cursor-pointer transition-colors">{t('login.privacy')}</span>
+            <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.privacy')}</span>
           </p>
 
-          {/* seletor de idioma */}
           <button
             type="button"
             onClick={() => i18n.changeLanguage(i18n.language === 'pt-BR' ? 'en' : 'pt-BR')}
-            className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-zinc-600 hover:text-zinc-300 border border-zinc-800/40 hover:border-zinc-700 transition-all"
+            className="flex items-center gap-1 px-2 py-1 rounded-sl font-mono text-[10px] text-ink-muted hover:text-ink border border-line hover:border-ink-muted/50 transition-colors"
           >
             <Globe className="w-3 h-3" />
-            {i18n.language === 'pt-BR' ? '🇧🇷 PT' : '🇺🇸 EN'}
+            {i18n.language === 'pt-BR' ? 'PT' : 'EN'}
           </button>
         </div>
       </div>

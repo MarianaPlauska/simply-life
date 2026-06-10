@@ -1,20 +1,21 @@
 import { motion } from 'framer-motion';
+import { ORION_ANALYTICS_CARD, ORION_PROGRESS_THICK, ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces';
 
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
-    <div className={`animate-pulse rounded-[1.5rem] bg-zinc-800/40 ${className}`} />
+    <div className={`animate-pulse rounded-sl bg-chrome ${className}`} />
   );
 }
 
 export function CardSkeleton() {
   return (
-    <div className="relative overflow-hidden bg-zinc-950/50 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-8 space-y-4 shadow-2xl">
+    <div className={`${ORION_ANALYTICS_CARD} space-y-4`}>
       <div className="flex items-center gap-3">
-        <Skeleton className="w-10 h-10 !rounded-xl" />
-        <Skeleton className="h-4 w-24 !rounded-lg" />
+        <Skeleton className="w-10 h-10" />
+        <Skeleton className="h-4 w-24" />
       </div>
-      <Skeleton className="h-10 w-24 !rounded-lg" />
-      <Skeleton className="h-2 w-full !rounded-full" />
+      <Skeleton className="h-10 w-24" />
+      <Skeleton className="h-2 w-full" />
     </div>
   );
 }
@@ -31,13 +32,13 @@ export function ProgressBar({
   const clampedPct = Math.min(Math.max(pct, 0), 100);
   return (
     <div className="mt-6">
-      <div className="flex justify-between text-xs text-zinc-500 font-medium mb-2">
+      <div className={`flex justify-between text-xs font-mono mb-2 ${ORION_TEXT_SECONDARY}`}>
         <span>{label}</span>
         <span className="tabular-nums">{clampedPct}%</span>
       </div>
-      <div className="w-full h-2 bg-zinc-900/80 rounded-full overflow-hidden border border-white/5 relative">
+      <div className={`${ORION_PROGRESS_THICK} relative`}>
         <motion.div
-          className={`absolute top-0 left-0 h-full rounded-full ${color}`}
+          className={`absolute top-0 left-0 h-full rounded-sl ${color}`}
           initial={{ width: 0 }}
           whileInView={{ width: `${clampedPct}%` }}
           viewport={{ once: true }}
@@ -52,8 +53,8 @@ export function CircularProgress({
   pct,
   size = 80,
   strokeWidth = 6,
-  color = 'stroke-violet-500',
-  trackColor = 'stroke-zinc-800/60',
+  color = 'stroke-accent',
+  trackColor = 'stroke-chrome',
   children,
 }: {
   pct: number;

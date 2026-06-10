@@ -136,19 +136,19 @@ export function generateLocalGreeting(weather: WeatherData | null, context: {
   // meds
   if (context.medsPendentes > 0)
   {
-    parts.push(`💊 ${context.medsPendentes} medicamento${context.medsPendentes > 1 ? 's' : ''} pendente${context.medsPendentes > 1 ? 's' : ''}.`);
+    parts.push(`${context.medsPendentes} medicamento${context.medsPendentes > 1 ? 's' : ''} pendente${context.medsPendentes > 1 ? 's' : ''}.`);
   }
 
   // tarefas críticas
   if (context.tarefasCriticas > 0)
   {
-    parts.push(`⚡ ${context.tarefasCriticas} tarefa${context.tarefasCriticas > 1 ? 's' : ''} crítica${context.tarefasCriticas > 1 ? 's' : ''} no Kanban.`);
+    parts.push(`${context.tarefasCriticas} tarefa${context.tarefasCriticas > 1 ? 's' : ''} crítica${context.tarefasCriticas > 1 ? 's' : ''} no Kanban.`);
   }
 
   // streak positivo
   if (context.streak >= 5 && parts.length < 3)
   {
-    parts.push(`🔥 ${context.streak} dias de streak! Não quebre.`);
+    parts.push(`${context.streak} dias de streak — mantenha o ritmo.`);
   }
 
   // monta a saudação final (max 2 destaques)

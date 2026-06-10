@@ -14,16 +14,16 @@ interface TabToggleProps<T extends string> {
 
 export function TabToggle<T extends string>({ tabs, active, onChange }: TabToggleProps<T>) {
   return (
-    <div className="flex bg-zinc-950/60 rounded-xl p-1 mb-7 border border-white/[0.04]">
+    <div className="flex border border-line rounded-sl p-0.5 mb-7 bg-chrome">
       {tabs.map((tab) => (
         <button
           key={tab.value}
           type="button"
           onClick={() => onChange(tab.value)}
-          className={`flex-1 py-2.5 rounded-lg text-[13px] font-semibold transition-all duration-300 ${
+          className={`flex-1 py-2.5 rounded-sl text-[13px] font-medium transition-colors ${
             active === tab.value
-              ? 'bg-zinc-800/80 text-white shadow-md shadow-black/30'
-              : 'text-zinc-500 hover:text-zinc-300'
+              ? 'bg-card text-ink border border-line'
+              : 'text-ink-muted hover:text-ink'
           }`}
         >
           {tab.label}

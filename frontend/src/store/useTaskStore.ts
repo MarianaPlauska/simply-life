@@ -21,6 +21,12 @@ import { createInboxSlice, type InboxSlice } from './slices/inboxSlice';
 import { createNewsSlice, type NewsSlice } from './slices/newsSlice';
 import { createContasFixasSlice, type ContasFixasSlice } from './slices/contasFixasSlice';
 import { createGamificacaoSlice, type GamificacaoSlice } from './slices/gamificacaoSlice';
+import { createOrionExecutionSlice, type OrionExecutionSlice } from './slices/orionExecutionSlice';
+import { createOrionStreakSlice, type OrionStreakSlice } from './slices/orionStreakSlice';
+import { createOrionTaskMetaSlice, type OrionTaskMetaSlice } from './slices/orionTaskMetaSlice';
+import { createOrionZenFocusSlice, type OrionZenFocusSlice } from './slices/orionZenFocusSlice';
+import { createOrionOrchestrationSlice, type OrionOrchestrationSlice } from './slices/orionOrchestrationSlice';
+import { createOrionAchievementSlice, type OrionAchievementSlice } from './slices/orionAchievementSlice';
 
 // re-exporta types para compatibilidade
 export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, ContaFixa, BudgetLimit, FinancialGoal, HabitoDiario, SessaoTreino, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
@@ -44,7 +50,13 @@ export type TaskStore =
   InboxSlice &
   NewsSlice &
   ContasFixasSlice &
-  GamificacaoSlice;
+  GamificacaoSlice &
+  OrionExecutionSlice &
+  OrionStreakSlice &
+  OrionTaskMetaSlice &
+  OrionZenFocusSlice &
+  OrionOrchestrationSlice &
+  OrionAchievementSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -67,6 +79,12 @@ export const useTaskStore = create<TaskStore>()(
       ...createNewsSlice(...a),
       ...createContasFixasSlice(...a),
       ...createGamificacaoSlice(...a),
+      ...createOrionExecutionSlice(...a),
+      ...createOrionStreakSlice(...a),
+      ...createOrionTaskMetaSlice(...a),
+      ...createOrionZenFocusSlice(...a),
+      ...createOrionOrchestrationSlice(...a),
+      ...createOrionAchievementSlice(...a),
     }),
     {
       name: 'simply-life-store',
@@ -88,6 +106,17 @@ export const useTaskStore = create<TaskStore>()(
         onboardingDismissed: state.onboardingDismissed,
         cards: state.cards,
         contasFixas: state.contasFixas,
+        streakCount: state.streakCount,
+        lastActiveDate: state.lastActiveDate,
+        hasCompletedTaskToday: state.hasCompletedTaskToday,
+        streakFreezes: state.streakFreezes,
+        focusMinutesByDate: state.focusMinutesByDate,
+        taskLastMovedAt: state.taskLastMovedAt,
+        taskEstimates: state.taskEstimates,
+        taskElapsedSeconds: state.taskElapsedSeconds,
+        dailyScoreCap: state.dailyScoreCap,
+        personalVelocityFactor: state.personalVelocityFactor,
+        velocitySamplesByTag: state.velocitySamplesByTag,
       }),
       onRehydrateStorage: () => () =>
       {

@@ -29,15 +29,15 @@ export function StatusRow({
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-1.5">
         {ok ? (
-          <div className="w-3 h-3 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <div className="w-3 h-3 rounded-sl bg-concluido/15 flex items-center justify-center">
+            <div className="w-1.5 h-1.5 rounded-sl bg-concluido" />
           </div>
         ) : (
-          <div className="w-3 h-3 rounded-full border border-zinc-700" />
+          <div className="w-3 h-3 rounded-sl border border-line" />
         )}
-        <span className={`text-[11px] ${ok ? 'text-zinc-300' : 'text-zinc-500'}`}>{label}</span>
+        <span className={`text-[11px] font-mono ${ok ? 'text-ink' : 'text-ink-muted'}`}>{label}</span>
       </div>
-      <span className={`text-[10px] tabular-nums ${ok ? 'text-emerald-400' : 'text-zinc-600'}`}>{detail}</span>
+      <span className={`font-mono text-[10px] tabular-nums ${ok ? 'text-concluido' : 'text-ink-muted'}`}>{detail}</span>
     </div>
   );
 }

@@ -525,7 +525,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       if (created > 0)
       {
         const { toast } = await import('sonner')
-        toast.info(`🔔 ${created} vencimento${created > 1 ? 's' : ''} financeiro${created > 1 ? 's' : ''} detectado${created > 1 ? 's' : ''}`, {
+        toast.info(`${created} vencimento${created > 1 ? 's' : ''} financeiro${created > 1 ? 's' : ''} detectado${created > 1 ? 's' : ''}`, {
           description: 'Tarefas criadas automaticamente no seu Kanban.',
         })
       }

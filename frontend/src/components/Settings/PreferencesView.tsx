@@ -4,8 +4,10 @@ import {
   Plus, Search, Trash2, Brain, Filter, SlidersHorizontal,
   Bell, Shield, Eye, Globe, Moon, Sun, Zap, Layout, Monitor,
   Smartphone, Clock, Palette, AlertTriangle, Info, Sparkles, KeyRound,
-  Fingerprint, RefreshCw, Volume2, VolumeX,
+  Fingerprint, RefreshCw, Volume2, VolumeX, CheckCircle, Key,
+  Lock as LockIcon,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
@@ -512,19 +514,23 @@ export function PreferencesView() {
         <SectionHeader icon={Shield} title="Criptografia & Dados" subtitle="Informações sobre a proteção dos seus dados." iconColor="text-cyan-400" />
         <div className="space-y-3">
           {[
-            { label: 'Senhas', value: 'bcrypt (cost 12)', icon: '🔒' },
-            { label: 'Tokens de integração', value: 'Fernet AES-256', icon: '🛡️' },
-            { label: 'Sessões', value: 'JWT HS256 (24h)', icon: '🔑' },
-            { label: 'Integridade financeira', value: 'SHA-256 + salt', icon: '✅' },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-zinc-800/20 border border-zinc-800/40">
-              <div className="flex items-center gap-3">
-                <span className="text-[14px]">{item.icon}</span>
-                <span className="text-[12px] text-zinc-300">{item.label}</span>
+            { label: 'Senhas', value: 'bcrypt (cost 12)', Icon: LockIcon },
+            { label: 'Tokens de integração', value: 'Fernet AES-256', Icon: Shield },
+            { label: 'Sessões', value: 'JWT HS256 (24h)', Icon: Key },
+            { label: 'Integridade financeira', value: 'SHA-256 + salt', Icon: CheckCircle },
+          ].map((item) =>
+          {
+            const Icon = item.Icon as LucideIcon;
+            return (
+              <div key={item.label} className="flex items-center justify-between py-2.5 px-4 rounded-xl bg-zinc-800/20 border border-zinc-800/40">
+                <div className="flex items-center gap-3">
+                  <Icon size={16} strokeWidth={1.5} className="text-zinc-500 shrink-0" />
+                  <span className="text-[12px] text-zinc-300">{item.label}</span>
+                </div>
+                <span className="text-[11px] text-emerald-400/80 font-mono">{item.value}</span>
               </div>
-              <span className="text-[11px] text-emerald-400/80 font-mono">{item.value}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </SectionCard>
 

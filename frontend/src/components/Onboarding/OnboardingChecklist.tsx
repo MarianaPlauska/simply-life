@@ -1,7 +1,19 @@
 // widget flutuante de onboarding — checklist de 5 passos para novos usuários
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronUp, X, Check, Sparkles } from 'lucide-react';
+import {
+  Check,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  Pin,
+  Pill,
+  Sparkles,
+  Target,
+  Wallet,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { ONBOARDING_STEPS } from '../../store/slices/onboardingSlice';
 
@@ -122,12 +134,21 @@ function OnboardingHeader ({ completedCount, totalSteps, collapsed, onToggle, on
 
 
 /* ── item individual de step ─────────────────────────────── */
+const STEP_ICONS: Record<string, LucideIcon> = {
+  create_task: CheckCircle,
+  add_expense: Wallet,
+  add_habit: Pill,
+  activate_focus: Target,
+  customize_sidebar: Pin,
+};
+
 function OnboardingStepItem ({ step, done, onClick }: {
-  step: { id: string; label: string; emoji: string };
+  step: { id: string; label: string };
   done: boolean;
   onClick: () => void;
 })
 {
+  const StepIcon = STEP_ICONS[step.id] ?? CheckCircle;
   return (
     <button
       onClick={onClick}
@@ -143,7 +164,7 @@ function OnboardingStepItem ({ step, done, onClick }: {
       >
         {done
           ? <Check className="w-3.5 h-3.5 text-emerald-400" />
-          : <span>{step.emoji}</span>
+          : <StepIcon size={14} strokeWidth={1.5} className="text-zinc-400" />
         }
       </div>
       <span className={`text-[12px] font-medium ${done ? 'text-zinc-500 line-through' : 'text-zinc-300'}`}>

@@ -24,7 +24,10 @@ export async function applyTaskCompletionRewards(
     oldTarefa.prioridade === 'critica' ||
     (oldTarefa.score_urgencia && oldTarefa.score_urgencia > 80)
 
-  const xpAmount = isUrgente ? 25 : 15
+  const scoreXp = oldTarefa.score_urgencia && oldTarefa.score_urgencia > 0
+    ? Math.round(oldTarefa.score_urgencia)
+    : null
+  const xpAmount = scoreXp ?? (isUrgente ? 25 : 15)
   const anyGet = get()
 
   if (typeof anyGet.addXP === 'function')
@@ -62,7 +65,7 @@ export async function applyTaskCompletionRewards(
       await (anyGet.addXP as (m: string, n: number) => Promise<void>)('foco', 50)
     }
     const { toast } = await import('sonner')
-    toast.success('🔥 Deep Work Matinal! (+50 XP)', {
+    toast.success('Deep Work Matinal (+50 XP)', {
       description: '3 tarefas críticas concluídas antes do meio-dia.',
     })
     await supabase.from('user_stats').update({ streak_foco: 0 }).eq('id', stats.id)
@@ -82,7 +85,7 @@ export async function applyTaskCompletionRewards(
       await (anyGet.addXP as (m: string, n: number) => Promise<void>)('foco', 50)
     }
     const { toast } = await import('sonner')
-    toast.success('🔥 Bônus Foco Absoluto! (+50 XP)', {
+    toast.success('Bônus Foco Absoluto (+50 XP)', {
       description: 'Você concluiu 3 tarefas de alta urgência na manhã.',
     })
     await supabase.from('user_stats').update({ streak_foco: 0 }).eq('id', stats.id)

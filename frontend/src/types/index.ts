@@ -28,6 +28,18 @@ export interface TarefaUnificada {
   subtarefas: Subtarefa[];
   labels: Label[];
   contexto?: { titulo: string; cor: string };
+  /** IDs de tarefas predecessoras (soft lock até status concluída) */
+  blockedBy?: string[];
+  /** Dias sem movimento — degradação térmica no Kanban */
+  daysStagnant?: number;
+  /** E-mail ou identificador do remetente — Motor de Relevância */
+  remetente?: string | null;
+  /** Justificativa explicativa do score (Motor de Relevância) */
+  score_reason?: string | null;
+  /** Intenção detectada — bloqueio | alinhamento | execucao */
+  intent_category?: 'bloqueio' | 'alinhamento' | 'execucao' | null;
+  /** Razão da urgência (IntentAnalyzer) */
+  urgency_reason?: string | null;
 }
 
 // sprint D — recorrência, dependências, atividade

@@ -24,7 +24,20 @@ export interface TarefasSlice
   arquivoLoading: boolean
   fetchTarefas: () => Promise<void>
   createTarefa: (titulo: string, notas?: string) => Promise<void>
-  updateTarefa: (id: number, dados: { titulo?: string; status?: string; notas_locais?: string; prioridade?: string; versao?: number; score_urgencia?: number }) => Promise<void>
+  updateTarefa: (id: number, dados: {
+    titulo?: string
+    status?: string
+    notas_locais?: string
+    prioridade?: string
+    versao?: number
+    score_urgencia?: number
+    score_reason?: string | null
+    urgency_reason?: string | null
+    intent_category?: 'bloqueio' | 'alinhamento' | 'execucao' | null
+    remetente?: string | null
+    data_vencimento?: string | null
+  }) => Promise<void>
+  patchTarefaLocal: (id: number, dados: Partial<TarefaUnificada>) => void
   deleteTarefa: (id: number) => Promise<void>
   moveTask: (taskId: number, newStatus: string) => void
   simularIngestao: (params: { sender?: string; subject: string; body?: string; origem?: string }) => Promise<void>
@@ -147,6 +160,13 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       }
     }
     catch (e) { console.error('updateTarefa:', e) }
+  },
+
+  patchTarefaLocal: (id, dados) =>
+  {
+    set((s) => ({
+      tarefas: s.tarefas.map((t) => (t.id === id ? { ...t, ...dados } : t)),
+    }))
   },
 
   deleteTarefa: async (id) =>

@@ -49,7 +49,7 @@ export function PreferenciasIA() {
     }
     setIsAdding(true);
     await addPalavraChave(termo, peso);
-    toast.success(`"${termo}" adicionado ao radar ⚡`);
+    toast.success(`"${termo}" adicionado ao radar`);
     setInput('');
     setPeso(1);
     setIsAdding(false);
@@ -105,7 +105,7 @@ export function PreferenciasIA() {
             <p className="text-xs text-zinc-400 leading-relaxed">
               Quando uma mensagem (e-mail, webhook) é recebida, o motor verifica se alguma
               das suas palavras-chave aparece no texto. Se sim, uma tarefa <span className="text-red-400 font-medium">critica</span> é criada
-              automaticamente com um ícone de <span className="text-violet-400 font-medium">⚡ IA</span> no dashboard.
+              automaticamente com indicador <span className="inline-flex items-center gap-0.5 text-violet-400 font-medium"><Zap size={12} strokeWidth={1.5} /> IA</span> no dashboard.
             </p>
           </div>
         </div>

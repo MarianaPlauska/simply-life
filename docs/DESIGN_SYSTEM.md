@@ -1,117 +1,235 @@
-# Design System — Simply-Life OS
+# Design System — Simply-Life OS · Instrumento
 
-## Filosofia Visual: SaaS OS (Dark UI)
+## Filosofia
 
-O frontend **não é um dashboard estático**. É um sistema operacional pessoal que usa **Scrolltelling** (fluxo vertical contínuo) com animações baseadas no viewport.
+O Simply-Life **não imita landing pages de SaaS com IA** (navy + roxo + glassmorphism + cards pill). A direção visual é **editorial/instrumental**: tipografia com personalidade, superfícies sólidas, um único acento cobre e cantos quase retos — como um painel de controle sério, não um template de vibe-coding.
+
+**Princípios:**
+
+1. **Um acento só** — cobre (`accent`). Urgência, atenção e sucesso usam tokens semânticos, não arco-íris de neon.
+2. **Sem glassmorphism** — nada de `backdrop-blur`, glow no hover ou gradientes decorativos em texto.
+3. **Tipografia em três vozes** — Newsreader (títulos), IBM Plex Sans (UI), IBM Plex Mono (rótulos e números).
+4. **Cantos retos** — `rounded-sl` (2px). Evitar `rounded-2xl` em containers principais.
+5. **Tokens primeiro** — usar `orionSurfaces.ts` e classes Tailwind semânticas (`bg-fundo`, `text-ink`), não `zinc-*` / `indigo-*` soltos.
 
 ---
 
-## UI01 — Composição Material (Glassmorphism)
+## Tokens CSS (`index.css`)
 
-Nenhum card usa cor sólida opaca. Todos os containers principais usam:
+| Token | Claro | Escuro | Uso |
+|-------|-------|--------|-----|
+| `--sl-canvas` | `#F4F1EA` | `#141312` | Fundo da página |
+| `--sl-chrome` | `#EDE9E0` | `#1C1B19` | Sidebar, header, footer |
+| `--sl-surface` | `#FFFFFF` | `#232220` | Cards e painéis |
+| `--sl-elevated` | `#FAF8F4` | `#2A2926` | Hover, inputs |
+| `--sl-text` | `#1A1814` | `#E8E6E1` | Texto primário |
+| `--sl-text-muted` | `#6B6560` | `#9C9890` | Texto secundário |
+| `--sl-border` | `#D8D3C8` | `#2E2C28` | Bordas |
+| `--sl-accent` | `#9A5B1A` | `#C17F3A` | Acento único |
+| `--sl-urgent` | `#B83A3A` | `#C44D4D` | Crítico |
+| `--sl-attention` | `#A67C00` | `#C9A227` | Alerta |
+| `--sl-success` | `#3D6B4F` | `#4A7C59` | Concluído / OK |
+
+---
+
+## Tailwind semântico (`tailwind.config.js`)
 
 ```
-bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] shadow-2xl
-```
-
-- Fundo semi-transparente (`bg-zinc-900/30` ou `bg-zinc-900/40`)
-- Desfoque intenso (`backdrop-blur-xl` ou `backdrop-blur-2xl`)
-- Borda capilar (`border border-white/5`)
-- Hover reactivo: `hover:border-white/10 hover:bg-zinc-800/40`
-- Transição fluida: `transition-all duration-500`
-
-## UI02 — Arredondamento Acentuado
-
-Para evitar aspecto de "planilha", cantos usam raio amplo:
-
-```
-rounded-[2rem]  ou  rounded-3xl
-```
-
-Nunca use `rounded-lg` ou `rounded-md` em containers principais.
-
-## UI03 — Tipografia Brutalista
-
-- Números primários: `text-4xl md:text-5xl font-black tracking-tighter tabular-nums`
-- Textos secundários: `text-[11px] text-zinc-500` ou `text-[13px] text-zinc-400`
-- Labels de card: `text-[13px] font-medium text-zinc-400`
-
-## UI04 — Fundo Dinâmico (Ambient Background)
-
-O body/main não tem fundo sólido. Usa-se `bg-zinc-950` com divs absolutas de gradientes radiais:
-
-```tsx
-<div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-  <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-violet-900/20 rounded-full blur-[120px]" />
-  <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-900/15 rounded-full blur-[100px]" />
-  <div className="absolute top-[40%] left-[60%] w-[400px] h-[400px] bg-cyan-900/10 rounded-full blur-[100px]" />
-</div>
+fundo · chrome · card · elevated · ink · ink-muted · line
+accent · accent-hover · accent-muted
+urgente · atencao · concluido
+font-sans · font-display · font-mono
+rounded-sl
 ```
 
 ---
 
-## UX01 — Revelação Progressiva (Scroll-triggered Fade-up)
+## Constantes TS (`frontend/src/constants/orionSurfaces.ts`)
 
-Cada bloco de conteúdo é encapsulado em `<motion.div>`:
+Importar deste arquivo em componentes — **não duplicar strings de classe**.
+
+| Constante | Uso |
+|-----------|-----|
+| `ORION_CANVAS` | Fundo do main |
+| `ORION_CHROME_PLANE` | Sidebar, header |
+| `ORION_BORDERLESS_PANEL` / `ORION_ANALYTICS_CARD` | Painel com borda |
+| `ORION_SECTION_TITLE` | Rótulo de seção (mono, uppercase) |
+| `ORION_TEXT_PRIMARY` / `ORION_TEXT_SECONDARY` | Texto |
+| `ORION_FILTER_PILL_*` | Filtros temporais |
+| `ORION_PROGRESS` | Barra de progresso (sólida, sem gradiente) |
+| `ORION_BTN_PRIMARY` | Botão primário |
+| `ORION_NAV_ACTIVE` / `ORION_NAV_IDLE` | Itens de navegação |
+| `ORION_LINK` | Links discretos |
+| `ORION_ROW_HOVER` | Linhas clicáveis |
+| `ORION_DROPDOWN` | Menus suspensos |
+
+### Classes utilitárias (`index.css`)
+
+| Classe | Uso |
+|--------|-----|
+| `.sl-eyebrow` | Rótulo accent, mono, uppercase |
+| `.sl-panel` | Painel padrão (surface + border + 2px) |
+| `.sl-ruled-bg` | Grade de fundo sutil (login) |
+
+---
+
+## Tipografia
+
+| Papel | Fonte | Exemplo |
+|-------|-------|---------|
+| Display | Newsreader | Títulos de página, saudação |
+| UI | IBM Plex Sans | Corpo, botões |
+| Mono | IBM Plex Mono | Rótulos, KPIs, status |
+
+**Hierarquia no dashboard:**
+
+- Eyebrow: `.sl-eyebrow` ou `ORION_SECTION_TITLE`
+- Título de página: `text-3xl md:text-4xl font-display`
+- Título de seção: `text-xl font-display`
+- Título de card: `text-[13px] font-semibold`
+- Corpo: `text-[13px]` + `ORION_TEXT_PRIMARY`
+- Meta: `text-[11px]` + `ORION_TEXT_SECONDARY` ou `font-mono`
+
+**Evitar:** `font-black`, gradiente em texto, `tracking-widest` em excesso, emojis como decoração.
+
+---
+
+## Superfícies e cards
+
+**Padrão (substitui GlassCard antigo):**
 
 ```tsx
-<motion.div
-  initial={{ opacity: 0, y: 30 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, margin: "-50px" }}
-  transition={{ duration: 0.7, ease: "easeOut" }}
->
+<article className={ORION_ANALYTICS_CARD}>
   {/* conteúdo */}
-</motion.div>
+</article>
 ```
 
-## UX02 — Interação Tátil (Hover States)
+Ou diretamente: `className="sl-panel p-6"`.
 
-Cards reagem ao hover com:
-- `hover:border-white/10`
-- `hover:bg-zinc-800/40`
-- `hover:scale-[1.01]` (opcional, sutil)
-- `transition-all duration-500`
+**Proibido em containers principais:**
 
-## UX03 — Arquitetura de Informação em Funil
+- `bg-zinc-900/30 backdrop-blur-*`
+- `rounded-[2rem]` / `rounded-3xl`
+- `shadow-2xl` com glow colorido
+- Gradientes radiais de fundo (orbs roxos)
 
-O fluxo de rolagem segue a jornada de foco:
-
-1. **Camada 1 (Contexto Imediato):** Saudação, tarefas bloqueantes, última notificação da IA
-2. **Camada 2 (Fluxo Tático):** Kanban em lista horizontal / linha do tempo
-3. **Camada 3 (Consulta Secundária):** Agenda do Google, gráficos financeiros, medicação
+**Hover:** `hover:border-ink-muted/50` ou `ORION_ROW_HOVER` — sem `scale` exagerado.
 
 ---
 
-## Paleta de Cores
+## Cores de estado
 
-| Uso | Classe |
-|-----|--------|
-| Fundo principal | `bg-zinc-950` |
-| Card base | `bg-zinc-900/30` |
-| Card hover | `bg-zinc-800/40` |
-| Borda card | `border-white/5` |
-| Borda hover | `border-white/10` |
-| Texto primário | `text-white` |
-| Texto secundário | `text-zinc-400` |
-| Texto terciário | `text-zinc-500` / `text-zinc-600` |
-| Acento principal | `violet-500` / `violet-400` |
-| Acento secundário | `indigo-500` / `cyan-400` |
-| Sucesso | `emerald-400` / `emerald-500` |
-| Erro | `red-400` / `red-500` |
-| Alerta | `amber-400` |
-| Blur | `backdrop-blur-2xl` |
+| Estado | Classe |
+|--------|--------|
+| Urgência alta (>90) | `text-urgente` |
+| Urgência média (>70) | `text-atencao` |
+| Neutro | `text-ink-muted` |
+| Sucesso | `text-concluido` |
+| Acento / link | `text-accent` |
+
+Gráficos: paleta em `useOrionChartTheme.ts` — linhas e áreas usam cobre, não roxo.
 
 ---
 
-## Componente GlassCard (padrão)
+## Dashboard — layout enterprise
+
+O dashboard segue uma **narrativa vertical** ao rolar (centro de comando → escopo → operação → indicadores → finanças/IA → analytics):
+
+| Bloco | Componente | Função |
+|-------|------------|--------|
+| Faixa superior | `DashboardCommandBar` | KPIs densos + selos de confiança (sessão, sync, TLS) |
+| Registro | `DashboardModulesRegistry` | 6 pilares clicáveis — mostra que o OS é completo |
+| 01 Execução | `DashboardCriticalTasksPreview` + `SystemStatePanel` + `UserStatus` | Fila crítica, carga operacional, operador |
+| 02 Indicadores | `QuickStatsBar` | Saúde e finanças em mini-cards |
+| 03 Operacional | `FinancasTabelaDensa` + `InboxIACard` + `AtividadeRecenteCard` | Tabela, IA, auditoria |
+| 04 Analytics | `HolisticAnalyticsSection` | Gráficos holísticos |
+
+**Densidade:** `max-w-[1600px]`, `gap-3` entre painéis, bordas `border-line` contínuas — sem áreas vazias largas.
+
+**Cabeçalho de painel:** usar `DashboardPanel` com `section="01"` etc. para numeração editorial.
+
+---
+
+## Kanban (Task Board)
+
+O Kanban é o **centro de execução** — mesma densidade editorial do dashboard, inspirado no redesign do Linear (hierarquia em camadas, superfícies neutras, acento contido).
+
+### Camadas (de cima para baixo)
+
+| Camada | Componente | Função |
+|--------|------------|--------|
+| Título + ações | `KanbanView` header | Centro de Execução — não “Task Board” genérico |
+| Comando | `KanbanCommandBar` | KPIs em células (`Pipeline`, `Hoje`, carga, críticos) |
+| Hoje | `KanbanTodayPanel` | Fila ordenada + detalhe compacto + drop zone (sem coluna duplicada) |
+| Planejamento | `ORION_KANBAN_PLAN_SHELL` | Semana + Backlog à direita, assimétrico |
+| Conquistas | `OrionAchievementTrail` | Faixa inferior monocromática |
+
+### Princípios (benchmark: Linear, enterprise PM)
+
+| Padrão | Implementação |
+|--------|----------------|
+| Prioridade discreta | Barra lateral 3px + dot 6px — não card inteiro colorido |
+| Board unificado | Uma borda externa; colunas separadas por linha vertical |
+| Referência editorial | `SL-0001` mono + tag + título `font-display` |
+| Ações no hover | Barra inferior do card (Iniciar / Abrir) — não botão sempre visível |
+| Coluna numerada | `01 · Hoje` + subtítulo + Σ pts no rodapé |
+| Drop zone vazia | Borda tracejada + copy de arrastar |
+
+### Arquivos-chave
+
+| Peça | Arquivo |
+|------|---------|
+| Tokens | `constants/orionKanbanTheme.ts` |
+| Utilitários | `lib/kanbanVisual.ts` |
+| Comando KPI | `KanbanCommandBar.tsx` |
+| Card / Coluna | `OrionKanbanCard.tsx`, `OrionKanbanColumn.tsx` |
+| Orquestrador | `KanbanView.tsx` |
+
+---
+
+## Migração por área
+
+Ordem sugerida (do mais visível ao menos):
+
+1. **Dashboard** — `DashboardView`, `HolisticAnalyticsSection`, `UserStatus`, `DashboardCriticalTasksPreview`
+2. **Chrome** — Sidebar, header, footer, mobile nav *(já migrado)*
+3. **Auth** — Login, reset *(já migrado)*
+4. **Kanban** — cards, colunas, toolbar *(fase 1 migrado)* · drawer/foco *(fase 2)*
+5. **Finanças · Saúde · Configurações**
+
+**Checklist por componente:**
+
+- [ ] Trocar `zinc-*` / `indigo-*` / `violet-*` por tokens semânticos
+- [ ] Trocar `rounded-xl`/`rounded-2xl` por `rounded-sl`
+- [ ] Remover gradientes decorativos
+- [ ] Títulos com `font-display`; rótulos com `font-mono`
+- [ ] Importar tokens de `orionSurfaces.ts`
+
+---
+
+## Componente painel (referência)
 
 ```tsx
-function GlassCard({ children, className = '' }) {
+import { ORION_ANALYTICS_CARD, ORION_SECTION_TITLE, ORION_TEXT_PRIMARY } from '@/constants/orionSurfaces'
+
+export function ExemploCard() {
   return (
-    <div className={`relative overflow-hidden bg-zinc-900/30 backdrop-blur-2xl border border-white/5 hover:border-white/10 hover:bg-zinc-800/40 transition-all duration-500 rounded-[2rem] p-8 shadow-2xl ${className}`}>
-      {children}
-    </div>
-  );
+    <section className={ORION_ANALYTICS_CARD}>
+      <p className={ORION_SECTION_TITLE}>Seção</p>
+      <h3 className={`text-[13px] font-semibold mt-1 ${ORION_TEXT_PRIMARY}`}>Título</h3>
+    </section>
+  )
 }
 ```
+
+---
+
+## O que foi descontinuado
+
+| Antigo | Substituir por |
+|--------|----------------|
+| Glassmorphism UI01 | `sl-panel` / `ORION_BORDERLESS_PANEL` |
+| `rounded-[2rem]` UI02 | `rounded-sl` |
+| Ambient orbs violet UI04 | Fundo `bg-fundo` plano |
+| `GlassCard` com glow | `GlassCard` sem glow (wrapper `sl-panel`) |
+| Paleta violet/indigo | `accent`, `urgente`, `atencao`, `concluido` |

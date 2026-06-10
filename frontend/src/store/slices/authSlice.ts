@@ -2,6 +2,7 @@
 import type { StateCreator } from 'zustand'
 import type { UserProfile } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
+import { getSessionWithTimeout, isLocalGuestUser } from '../../lib/authSession'
 
 export interface AuthSlice
 {
@@ -14,7 +15,7 @@ export interface AuthSlice
   checkSession: () => Promise<void>
 }
 
-export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set) => ({
+export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set, get) => ({
   isLoggedIn: false,
   userProfile: { nome: '', email: '', avatar: '' },
   userId: '',
@@ -49,8 +50,18 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set)
   // verifica se já tem sessão ativa (cookie do supabase)
   checkSession: async () =>
   {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.user)
+    if (isLocalGuestUser(get().userId))
+    {
+      return
+    }
+
+    const { session, timedOut } = await getSessionWithTimeout()
+    if (timedOut || !session?.user)
+    {
+      return
+    }
+
+    try
     {
       const { data: profile } = await supabase
         .from('profiles')
@@ -63,6 +74,19 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set)
         userId: session.user.id,
         userProfile: {
           nome: profile?.nome_completo || session.user.email?.split('@')[0] || '',
+          email: session.user.email || '',
+          avatar: '',
+        },
+      })
+    }
+    catch (e)
+    {
+      console.error('checkSession profile:', e)
+      set({
+        isLoggedIn: true,
+        userId: session.user.id,
+        userProfile: {
+          nome: session.user.email?.split('@')[0] || '',
           email: session.user.email || '',
           avatar: '',
         },
