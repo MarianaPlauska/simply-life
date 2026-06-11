@@ -21,9 +21,14 @@ export function useAxelChartTheme()
 
     const accent = isDarkMode ? '#C17F3A' : '#9A5B1A'
 
+    const waterBar = isDarkMode ? '#C17F3A' : '#9A5B1A'
+    const waterBarMuted = isDarkMode ? '#8A5A2E' : '#C4A574'
+
     return {
       isDarkMode,
       accent,
+      waterBar,
+      waterBarMuted,
       grid: {
         strokeDasharray: '3 3',
         stroke: gridStroke,

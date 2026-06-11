@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Flame, Shield, Zap } from 'lucide-react'
+import { Flame, Shield, Zap, TrendingUp } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { computeGamificationProfile } from '../../lib/gamificationProfile'
+import { STREAK_MIN_SCORE } from '../../lib/proofOfWork'
 import { ProductivityHeatmap } from './ProductivityHeatmap'
 import {
   AXEL_BORDERLESS_PANEL,
@@ -14,20 +15,21 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Ofensiva, XP e atributos — mora no Perfil, não no dashboard de comando
+// Momentum AXEL — prova de trabalho, não RPG no dashboard
 
 interface AtributoChip
 {
   key: 'foco' | 'vitalidade' | 'estabilidade'
   label: string
+  hint: string
   Icon: typeof Zap
   iconClass: string
 }
 
 const ATRIBUTOS: AtributoChip[] = [
-  { key: 'foco', label: 'Foco', Icon: Zap, iconClass: 'text-accent' },
-  { key: 'vitalidade', label: 'Vitalidade', Icon: Flame, iconClass: 'text-atencao' },
-  { key: 'estabilidade', label: 'Estabilidade', Icon: Shield, iconClass: 'text-ink-muted' },
+  { key: 'foco', label: 'Foco', hint: 'timer + execução', Icon: Zap, iconClass: 'text-accent' },
+  { key: 'vitalidade', label: 'Vitalidade', hint: 'saúde e hábitos', Icon: Flame, iconClass: 'text-atencao' },
+  { key: 'estabilidade', label: 'Estabilidade', hint: 'consistência', Icon: Shield, iconClass: 'text-ink-muted' },
 ]
 
 function arquetipo(level: number): string
@@ -43,6 +45,8 @@ export function OperadorOfensivaCard()
   const navigate = useNavigate()
   const userStats = useTaskStore((s) => s.userStats)
   const streakCount = useTaskStore((s) => s.streakCount)
+  const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
+  const streakFreezes = useTaskStore((s) => s.streakFreezes)
   const focusMinutesByDate = useTaskStore((s) => s.focusMinutesByDate)
   const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
   const fetchAchievements = useTaskStore((s) => s.fetchAchievements)
@@ -62,28 +66,45 @@ export function OperadorOfensivaCard()
     estabilidade: Math.floor((userStats?.xp_estabilidade ?? 0) / 100) + 1,
   }
 
-  return (
-    <section className={`${AXEL_BORDERLESS_PANEL} flex flex-col`} aria-labelledby="ofensiva-heading">
-      <h2 id="ofensiva-heading" className={`${AXEL_SECTION_TITLE} mb-1`}>
-        Ofensiva &amp; progresso
-      </h2>
-      <p className={`text-[12px] mb-4 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-        Apoio · aceleração · execução · log — seu ritmo de prova de trabalho.
-      </p>
+  const proofLabel = hasCompletedTaskToday
+    ? 'Prova de trabalho validada hoje'
+    : `Hoje: score > ${STREAK_MIN_SCORE} + ${15} min de foco na tarefa`
 
-      <div className="flex items-end justify-between gap-3 mb-4">
+  return (
+    <section className={`${AXEL_BORDERLESS_PANEL} flex flex-col`} aria-labelledby="momentum-heading">
+      <div className="flex items-start gap-2 mb-4">
+        <TrendingUp className="w-4 h-4 text-accent shrink-0 mt-0.5" strokeWidth={1.75} />
         <div>
-          <p className={`font-mono text-[10px] uppercase tracking-wider ${AXEL_TEXT_SECONDARY}`}>
-            Nível {profile.level} · {arquetipo(profile.level)}
-          </p>
-          <p className={`text-2xl font-display tabular-nums mt-1 ${AXEL_TEXT_PRIMARY}`}>
-            {profile.xpInLevel}
-            <span className={`text-sm ${AXEL_TEXT_SECONDARY}`}>/{profile.xpToNextLevel} XP</span>
+          <h2 id="momentum-heading" className={AXEL_SECTION_TITLE}>
+            Momentum AXEL
+          </h2>
+          <p className={`text-[12px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            {proofLabel}
           </p>
         </div>
-        <div className="text-right">
-          <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>Ofensiva</p>
-          <p className="text-xl font-display tabular-nums text-atencao">{streakCount}d</p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="p-3 rounded-sl border border-line bg-chrome/30">
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Ofensiva</p>
+          <p className="text-2xl font-display tabular-nums text-atencao mt-1">
+            {streakCount}
+            <span className="text-sm text-ink-muted ml-1">dias</span>
+          </p>
+          {streakFreezes > 0 && (
+            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+              {streakFreezes} escudo{streakFreezes > 1 ? 's' : ''}
+            </p>
+          )}
+        </div>
+        <div className="p-3 rounded-sl border border-line bg-chrome/30">
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+            Nível {profile.level}
+          </p>
+          <p className={`text-sm font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>{arquetipo(profile.level)}</p>
+          <p className={`font-mono text-[10px] tabular-nums mt-1 ${AXEL_TEXT_SECONDARY}`}>
+            {profile.xpInLevel}/{profile.xpToNextLevel} XP
+          </p>
         </div>
       </div>
 
@@ -99,14 +120,12 @@ export function OperadorOfensivaCard()
         {
           const Icon = a.Icon
           return (
-            <div key={a.key} className="flex flex-col items-center gap-1 py-2">
-              <Icon className={`w-4 h-4 ${a.iconClass}`} strokeWidth={1.75} />
-              <span className={`text-lg font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
+            <div key={a.key} className="text-center py-1">
+              <Icon className={`w-4 h-4 mx-auto ${a.iconClass}`} strokeWidth={1.75} />
+              <p className={`text-lg font-display tabular-nums mt-1 ${AXEL_TEXT_PRIMARY}`}>
                 {attrLevels[a.key]}
-              </span>
-              <span className={`font-mono text-[9px] uppercase tracking-wider ${AXEL_TEXT_SECONDARY}`}>
-                {a.label}
-              </span>
+              </p>
+              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>{a.label}</p>
             </div>
           )
         })}
@@ -121,7 +140,7 @@ export function OperadorOfensivaCard()
         onClick={() => navigate('/kanban')}
         className={`mt-4 w-full font-mono text-[10px] uppercase tracking-wide py-2.5 ${AXEL_BTN_PRIMARY}`}
       >
-        Voltar à execução
+        Ganhar XP executando
       </button>
     </section>
   )

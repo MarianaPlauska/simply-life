@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { calculateAdaptiveUrgency } from '../lib/adaptiveOrchestration'
 import { recordOrchestrationMetrics } from '../lib/contextRationale'
 import { fetchIntelligenceStatus, type IntelligenceMode } from '../lib/orchestrateApi'
+import { computeDeadlineProposals } from '../lib/deadlineProposal'
 import { runPipelineOrchestration } from '../lib/orchestratePipeline'
 import type { TemporalHorizon } from '../lib/temporalHorizon'
 import type { TarefaUnificada } from '../types'
@@ -38,6 +39,8 @@ interface UseKanbanOrchestrationOptions
   patchTarefaLocal: (id: number, patch: Partial<TarefaUnificada>) => void
   pushAiDecision: (message: string) => void
   resolveLastMovedAt?: (taskId: number, createdAt: string | null) => string | null
+  setDeadlineProposals?: (list: ReturnType<typeof computeDeadlineProposals>) => void
+  personalVelocityFactor?: number
   ingestionTick?: number
 }
 
@@ -48,6 +51,8 @@ export function useKanbanOrchestration({
   patchTarefaLocal,
   pushAiDecision,
   resolveLastMovedAt,
+  setDeadlineProposals,
+  personalVelocityFactor = 1,
   ingestionTick = 0,
 }: UseKanbanOrchestrationOptions)
 {
@@ -161,8 +166,26 @@ export function useKanbanOrchestration({
       pushAiDecision(d.message)
     }
 
+    if (setDeadlineProposals)
+    {
+      const proposals = computeDeadlineProposals(
+        result.scoredTasks,
+        dailyScoreCap,
+        personalVelocityFactor,
+      )
+      setDeadlineProposals(proposals)
+      for (const p of proposals.slice(0, 3))
+      {
+        const task = tasks.find((t) => t.id === p.taskId)
+        if (!task) continue
+        pushAiDecision(
+          `Prazo sugerido · ${task.titulo.slice(0, 36)} — ${p.reason}`,
+        )
+      }
+    }
+
     return result
-  }, [tasks, updateTarefa, patchTarefaLocal, pushAiDecision])
+  }, [tasks, updateTarefa, patchTarefaLocal, pushAiDecision, dailyScoreCap, personalVelocityFactor, setDeadlineProposals])
 
   const runOrchestration = useCallback(async (options?: { clearManual?: boolean }) =>
   {

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Target } from 'lucide-react'
-import { getEnergyPeriod, shouldHighlightNobleHour } from '../../lib/energyOrchestration'
 import { useSearchParams } from 'react-router-dom'
 import {
   DndContext,
@@ -8,7 +7,9 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  type DragCancelEvent,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { toast } from 'sonner'
@@ -16,21 +17,37 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { KanbanCommandBar } from './KanbanCommandBar'
 import { KanbanDecisionLog } from './KanbanDecisionLog'
+import { KanbanNextStep } from './KanbanNextStep'
 import { KanbanMorningBrief } from './KanbanMorningBrief'
+import { KanbanInsightsPanel } from './KanbanInsightsPanel'
 import { KanbanOrchestrationStatus } from './KanbanOrchestrationStatus'
 import { KanbanTodayPanel } from './KanbanTodayPanel'
 import { useKanbanOrchestration } from '../../hooks/useKanbanOrchestration'
 import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
 import { AxelKanbanListView } from './AxelKanbanListView'
-import { AxelKanbanTimelineView } from './AxelKanbanTimelineView'
+import { KanbanCalendarView } from './KanbanCalendarView'
+import { GanttView } from './GanttView'
+import { KanbanMobileBoardShell, type MobileBoardTab } from './KanbanMobileBoardShell'
+import { resolveKanbanDragIntent } from './KanbanDragSemantics'
+import { KanbanBoardLegend } from './KanbanBoardLegend'
+import { KanbanStatusRibbon } from './KanbanStatusRibbon'
+import type { DueBucket } from '../../lib/dueBucket'
 import { KanbanViewSwitcher, type KanbanViewMode } from './KanbanViewSwitcher'
 import { AxelKanbanCard } from './AxelKanbanCard'
-import { AxelKanbanColumn } from './AxelKanbanColumn'
+import { DueBucketBoard } from './DueBucketBoard'
 import { AxelTaskDrawer } from './AxelTaskDrawer'
 import { AxelAbsoluteFocusOverlay } from './AxelAbsoluteFocusOverlay'
 import { AxelAchievementTrail } from './AxelAchievementTrail'
 import { AxelFlowSuggestionButton } from './AxelFlowSuggestionButton'
 import { computeDailyLoadBalancer } from '../../lib/adaptiveOrchestration'
+import {
+  bucketByDueDate,
+  DUE_BUCKET_LABELS,
+  dueBucketDropHint,
+  parseDueBucketDropId,
+  snapDueDateForBucket,
+} from '../../lib/dueBucket'
+import { deriveExecutionQueue, deriveExecutionQueueIds } from '../../lib/executionQueue'
 import {
   HORIZON_LABELS,
   bucketByTemporalHorizon,
@@ -42,22 +59,13 @@ import { recordDragPreference } from '../../lib/axelDragLearning'
 import {
   AXEL_KANBAN_GLOW,
   AXEL_KANBAN_PAGE,
-  AXEL_KANBAN_PLAN_SHELL,
-  AXEL_KANBAN_TOOLBAR,
-  AXEL_KANBAN_WORKSPACE,
 } from '../../constants/axelKanbanTheme'
-import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
-import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import { AXEL_BTN_PRIMARY, AXEL_MAIN_PB_MOBILE } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
 // Orquestrador Temporal — colunas por horizonte (Bitrix logic)
 
 const HORIZONS: TemporalHorizon[] = ['hoje', 'semana', 'backlog']
-
-const PLAN_COLUMNS: { id: TemporalHorizon; title: string }[] = [
-  { id: 'semana', title: 'Esta Semana' },
-  { id: 'backlog', title: 'Backlog / Próximo' },
-]
 
 export function KanbanView()
 {
@@ -70,7 +78,10 @@ export function KanbanView()
   const setZenFocusActive = useTaskStore((s) => s.setZenFocusActive)
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
   const dailyScoreCap = useTaskStore((s) => s.dailyScoreCap)
+  const personalVelocityFactor = useTaskStore((s) => s.personalVelocityFactor)
   const pushAiDecision = useTaskStore((s) => s.pushAiDecision)
+  const setDeadlineProposals = useTaskStore((s) => s.setDeadlineProposals)
+  const hydrateDeadlineProposals = useTaskStore((s) => s.hydrateDeadlineProposals)
   const resolveLastMovedAt = useTaskStore((s) => s.resolveLastMovedAt)
   const realtimeStatus = useTaskStore((s) => s.realtimeStatus)
   const axelIngestionPolling = useTaskStore((s) => s.axelIngestionPolling)
@@ -79,6 +90,11 @@ export function KanbanView()
 
   const [ingestionTick, setIngestionTick] = useState(0)
   const prevHighlightRef = useRef<number[]>([])
+
+  useEffect(() =>
+  {
+    void hydrateDeadlineProposals()
+  }, [hydrateDeadlineProposals])
 
   useEffect(() =>
   {
@@ -115,6 +131,8 @@ export function KanbanView()
     patchTarefaLocal,
     pushAiDecision,
     resolveLastMovedAt,
+    setDeadlineProposals,
+    personalVelocityFactor,
     ingestionTick,
   })
 
@@ -135,6 +153,8 @@ export function KanbanView()
     }, 200)
   }
   const [activeId, setActiveId] = useState<number | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | number | null>(null)
+  const [mobileTab, setMobileTab] = useState<MobileBoardTab>('executar')
   const [drawerCreating, setDrawerCreating] = useState(false)
   const [createHorizon, setCreateHorizon] = useState<TemporalHorizon>('backlog')
   const [focusTaskId, setFocusTaskId] = useState<number | null>(null)
@@ -167,12 +187,24 @@ export function KanbanView()
   )
 
   const hojeActiveSorted = useMemo(
-    () =>
-      columns.hoje
-        .filter((t) => t.status !== 'concluida')
-        .sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0)),
-    [columns.hoje],
+    () => deriveExecutionQueue(tarefas, horizonOverrides),
+    [tarefas, horizonOverrides],
   )
+
+  const executionQueueIds = useMemo(
+    () => deriveExecutionQueueIds(tarefas, horizonOverrides),
+    [tarefas, horizonOverrides],
+  )
+
+  const dueBuckets = useMemo(() => bucketByDueDate(tarefas), [tarefas])
+
+  const dueCount = useMemo(() =>
+    dueBuckets.vencido.length
+    + dueBuckets.hoje.length
+    + dueBuckets.esta_semana.length
+    + dueBuckets.proxima_semana.length
+    + dueBuckets.sem_prazo.length,
+  [dueBuckets])
 
   const heroTask = useMemo(() =>
   {
@@ -198,16 +230,6 @@ export function KanbanView()
     }
   }, [hojeActiveSorted, focusTaskId])
 
-  const [energyPeriod, setEnergyPeriod] = useState(() => getEnergyPeriod())
-
-  useEffect(() =>
-  {
-    const tick = () => setEnergyPeriod(getEnergyPeriod())
-    tick()
-    const id = window.setInterval(tick, 60_000)
-    return () => window.clearInterval(id)
-  }, [])
-
   const gargalos = useMemo(() =>
   {
     const now = Date.now()
@@ -218,7 +240,41 @@ export function KanbanView()
     }).length
   }, [tarefas])
 
+  const bucketParam = searchParams.get('bucket')
+  const panelParam = searchParams.get('panel')
   const taskIdParam = searchParams.get('task')
+
+  const jumpToDueBucket = useCallback((bucket: DueBucket) =>
+  {
+    setMobileTab('prazo')
+    window.requestAnimationFrame(() =>
+    {
+      document.getElementById(`due-section-${bucket}`)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }, [])
+
+  useEffect(() =>
+  {
+    if (panelParam === 'executar')
+    {
+      setMobileTab('executar')
+      setViewMode('board')
+      return
+    }
+
+    if (!bucketParam) return
+
+    const valid: DueBucket[] = [
+      'vencido', 'hoje', 'esta_semana', 'proxima_semana', 'sem_prazo',
+    ]
+    if (!valid.includes(bucketParam as DueBucket)) return
+
+    setViewMode('board')
+    jumpToDueBucket(bucketParam as DueBucket)
+  }, [bucketParam, panelParam, jumpToDueBucket])
   const selectedTask = useMemo(() =>
   {
     if (!taskIdParam) return null
@@ -286,8 +342,35 @@ export function KanbanView()
       await moveTask(task.id, 'pendente')
     }
 
-    toast.success(`Movido para ${HORIZON_LABELS[horizon]}`)
+    if (horizon === 'hoje')
+    {
+      toast.success('Priorizado em Executar agora')
+    }
+    else
+    {
+      toast.success(`Movido para ${HORIZON_LABELS[horizon]}`)
+    }
   }, [horizonOverrides, updateTarefa, moveTask, recordTaskMoved, setManualHorizon])
+
+  const moveToDueBucket = useCallback(async (task: TarefaUnificada, bucket: ReturnType<typeof parseDueBucketDropId>) =>
+  {
+    if (!bucket) return
+
+    const nextDue = snapDueDateForBucket(bucket)
+    const currentDue = task.data_vencimento ?? null
+
+    if (currentDue === nextDue)
+    {
+      return
+    }
+
+    if (task.id > 0)
+    {
+      await updateTarefa(task.id, { data_vencimento: nextDue })
+    }
+
+    toast.success(`${dueBucketDropHint(bucket)} · ${DUE_BUCKET_LABELS[bucket]}`)
+  }, [updateTarefa])
 
   const moveTasksForFlow = useCallback(
     async (taskIds: number[], target: TemporalHorizon) =>
@@ -351,22 +434,55 @@ export function KanbanView()
   const handleDragStart = (event: DragStartEvent) =>
   {
     setActiveId(event.active.id as number)
+    setDragOverId(null)
+  }
+
+  const handleDragOver = (event: DragOverEvent) =>
+  {
+    setDragOverId(event.over?.id ?? null)
+  }
+
+  const clearDragState = () =>
+  {
+    setActiveId(null)
+    setDragOverId(null)
   }
 
   const handleDragEnd = (event: DragEndEvent) =>
   {
-    setActiveId(null)
+    clearDragState()
     const { active, over } = event
     if (!over) return
 
     const task = tarefas.find((t) => t.id === active.id)
     if (!task) return
 
-    const target = over.id as TemporalHorizon
-    if (!HORIZONS.includes(target)) return
+    const dueBucket = parseDueBucketDropId(over.id)
+    if (dueBucket)
+    {
+      void moveToDueBucket(task, dueBucket)
+      return
+    }
 
-    void moveToHorizon(task, target)
+    const target = over.id as TemporalHorizon
+    if (target === 'hoje')
+    {
+      void moveToHorizon(task, 'hoje')
+      return
+    }
+
+    if (HORIZONS.includes(target))
+    {
+      void moveToHorizon(task, target)
+    }
   }
+
+  const handleDragCancel = (_event: DragCancelEvent) =>
+  {
+    clearDragState()
+  }
+
+  const dragIntent = resolveKanbanDragIntent(dragOverId)
 
   const handleTaskCreated = (task: TarefaUnificada) =>
   {
@@ -404,84 +520,122 @@ export function KanbanView()
   }
 
   return (
-    <div className={`relative w-full h-full min-h-0 flex flex-col flex-1 min-w-0 ${AXEL_KANBAN_PAGE}`}>
+    <div className={`relative w-full h-full min-h-0 flex flex-col flex-1 min-w-0 ${AXEL_KANBAN_PAGE} ${AXEL_MAIN_PB_MOBILE}`}>
       <div className={AXEL_KANBAN_GLOW} aria-hidden />
 
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
-        <div className="shrink-0 px-5 lg:px-7 pt-5 pb-4 flex flex-col gap-4 max-w-[1680px] mx-auto w-full">
-          <header className={`shrink-0 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between pb-4 ${AXEL_KANBAN_TOOLBAR}`}>
+        <div className="shrink-0 px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-3 flex flex-col gap-2 sm:gap-3 max-w-[1680px] mx-auto w-full">
+          <header className={`shrink-0 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-line`}>
             <div>
-              <p className="sl-eyebrow mb-2">AXEL · Execução</p>
-              <h1 className="text-2xl sm:text-[1.85rem] font-display tracking-tight text-ink leading-tight">
-                Centro de Execução
+              <h1 className="text-xl sm:text-2xl font-display tracking-tight text-ink leading-tight">
+                Execução
               </h1>
-              <p className="text-[12px] mt-1.5 text-ink-muted font-mono max-w-lg">
-                AXEL define prioridade · você ajusta arrastando ·{' '}
-                <kbd className="font-mono text-[10px] px-1 py-0.5 border border-line rounded-sl bg-chrome">
-                  Ctrl+Shift+F
-                </kbd>{' '}
-                foco
+              <p className="hidden sm:block text-[12px] mt-1 text-ink-muted">
+                Priorize à esquerda · execute · ajuste prazos à direita
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2 justify-end">
               <KanbanViewSwitcher mode={viewMode} onChange={handleViewModeChange} />
               <button
                 type="button"
-                onClick={() => openZenFocus()}
-                className="inline-flex items-center gap-1.5 border border-line text-ink-muted hover:text-accent hover:border-accent/40 font-mono text-[11px] uppercase tracking-wide px-3 py-2 rounded-sl transition-colors"
-                title="Foco Absoluto (Ctrl+Shift+F)"
+                onClick={() => openCreateDrawer('backlog')}
+                className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide px-3 py-2 ${AXEL_BTN_PRIMARY}`}
               >
-                <Target size={14} strokeWidth={1.75} aria-hidden />
-                Foco
+                <span className="hidden sm:inline">Nova demanda</span>
+                <span className="sm:hidden">Nova</span>
+              </button>
+            </div>
+          </header>
+
+          {viewMode === 'board' && (
+            <>
+              <KanbanBoardLegend
+                execCount={hojeActiveSorted.length}
+                dueCount={dueCount}
+              />
+              <KanbanStatusRibbon
+                overdue={dueBuckets.vencido.length}
+                dueToday={dueBuckets.hoje.length}
+                thisWeek={dueBuckets.esta_semana.length}
+                noDate={dueBuckets.sem_prazo.length}
+                execCount={hojeActiveSorted.length}
+                onJump={jumpToDueBucket}
+                onExecJump={() => setMobileTab('executar')}
+              />
+            </>
+          )}
+
+          {viewMode === 'board' && (dueBuckets.vencido.length > 0 || dueBuckets.hoje.length > 0) && (
+            <KanbanMorningBrief
+              hojeTasks={hojeActiveSorted}
+              dueToday={dueBuckets.hoje.length}
+              overdue={dueBuckets.vencido.length}
+              dailyScoreCap={dailyScoreCap}
+            />
+          )}
+
+          {viewMode === 'board' && (
+            <KanbanNextStep
+              executionQueue={hojeActiveSorted}
+              tarefas={tarefas}
+              heroTask={heroTask}
+              isExecuting={heroTask != null && execution?.taskId === heroTask.id}
+              orchestrating={orchestrating}
+              onExecute={() =>
+              {
+                if (heroTask) void startTask(heroTask)
+              }}
+              onOpenTask={handleOpen}
+              onReorganize={() => void handleReorganizeAll()}
+              onPrioritizeTask={(task) => void moveToHorizon(task, 'hoje')}
+            />
+          )}
+
+          <KanbanInsightsPanel
+            summary={`${tarefas.filter((t) => t.status !== 'concluida').length} ativas · ${columns.hoje.length} na fila`}
+          >
+            <KanbanCommandBar
+              key={`kanban-cmd-${metricsKey}`}
+              tarefas={tarefas}
+              hojeTasks={columns.hoje}
+              hojeCount={columns.hoje.length}
+              dailyScoreCap={dailyScoreCap}
+              gargalos={gargalos}
+              intelligenceOn={webhookListening}
+              onRecalculate={handleReorganizeAll}
+              loading={orchestrating}
+            />
+            <KanbanOrchestrationStatus
+              autoEnabled={autoEnabled}
+              orchestrating={orchestrating}
+              lastRunAt={lastRunAt}
+              lastSource={lastSource}
+              intelligenceReady={intelligenceReady}
+              manualCount={Object.keys(manualHorizons).length}
+              onToggleAuto={setAutoEnabled}
+              onReorganizeAll={() => void handleReorganizeAll()}
+            />
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => openZenFocus()}
+                className="inline-flex items-center gap-1.5 border border-line text-ink-muted hover:text-accent font-mono text-[10px] uppercase tracking-wide px-2.5 py-1.5 rounded-sl transition-colors"
+              >
+                <Target size={12} strokeWidth={1.75} />
+                Foco absoluto
               </button>
               <AxelFlowSuggestionButton
                 hojeTasks={columns.hoje}
                 dailyScoreCap={dailyScoreCap}
                 onMoveTasks={moveTasksForFlow}
               />
-              <button
-                type="button"
-                onClick={() => openCreateDrawer('backlog')}
-                className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide px-3 py-2 ${AXEL_BTN_PRIMARY}`}
-              >
-                Nova demanda
-              </button>
             </div>
-          </header>
-
-          <KanbanCommandBar
-            key={`kanban-cmd-${metricsKey}`}
-            tarefas={tarefas}
-            hojeTasks={columns.hoje}
-            hojeCount={columns.hoje.length}
-            dailyScoreCap={dailyScoreCap}
-            gargalos={gargalos}
-            intelligenceOn={webhookListening}
-            onRecalculate={handleReorganizeAll}
-            loading={orchestrating}
-          />
-
-          <KanbanMorningBrief
-            hojeTasks={columns.hoje}
-            dailyScoreCap={dailyScoreCap}
-          />
-
-          <KanbanOrchestrationStatus
-            autoEnabled={autoEnabled}
-            orchestrating={orchestrating}
-            lastRunAt={lastRunAt}
-            lastSource={lastSource}
-            intelligenceReady={intelligenceReady}
-            manualCount={Object.keys(manualHorizons).length}
-            onToggleAuto={setAutoEnabled}
-            onReorganizeAll={() => void handleReorganizeAll()}
-          />
-
-          <KanbanDecisionLog />
+            <KanbanDecisionLog />
+          </KanbanInsightsPanel>
         </div>
 
         <div
-          className={`flex-1 min-h-0 flex flex-col px-5 lg:px-7 pb-4 max-w-[1680px] mx-auto w-full sl-kanban-canvas transition-opacity duration-200 ${
+          className={`flex-1 min-h-0 flex flex-col px-3 sm:px-5 lg:px-7 pb-4 max-w-[1680px] mx-auto w-full transition-opacity duration-200 ${
             viewVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
@@ -493,80 +647,71 @@ export function KanbanView()
           />
         )}
 
-        {viewMode === 'timeline' && (
-          <AxelKanbanTimelineView tarefas={tarefas} onOpen={handleOpen} />
+        {viewMode === 'calendar' && (
+          <KanbanCalendarView tarefas={tarefas} onOpen={handleOpen} />
+        )}
+
+        {viewMode === 'gantt' && (
+          <div className="flex-1 min-h-0 border border-line rounded-sl bg-card overflow-auto">
+            <GanttView tarefas={tarefas} onSelectTarefa={handleOpen} />
+          </div>
         )}
 
         {viewMode === 'board' && (
           <DndContext
             sensors={sensors}
             onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
           >
-            <div className={AXEL_KANBAN_WORKSPACE}>
-              <KanbanTodayPanel
-                tasks={hojeActiveSorted}
-                totalCount={columns.hoje.length}
-                selectedId={focusTaskId}
-                selectedTask={heroTask}
-                executingId={execution?.taskId ?? null}
-                loadBalance={hojeLoadBalance}
-                isExecuting={heroTask != null && execution?.taskId === heroTask.id}
-                onSelect={setFocusTaskId}
-                onOpen={handleOpen}
-                onExecute={() =>
-                {
-                  if (heroTask) void startTask(heroTask)
-                }}
-                onAddTask={() => openCreateDrawer('hoje')}
-              />
-
-              <div className="flex-1 flex flex-col min-w-0 min-h-0">
-                <div className="shrink-0 px-4 py-2 border-b border-line bg-chrome/30">
-                  <p className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
-                    02–03 · Planejamento — arraste para Hoje quando for executar
-                  </p>
-                </div>
-                <div className={AXEL_KANBAN_PLAN_SHELL}>
-                  {PLAN_COLUMNS.map((col) =>
+            <KanbanMobileBoardShell
+              execCount={hojeActiveSorted.length}
+              dueCount={dueCount}
+              tab={mobileTab}
+              onTabChange={setMobileTab}
+              onAddTask={() => openCreateDrawer('backlog')}
+              executar={(
+                <KanbanTodayPanel
+                  tasks={hojeActiveSorted}
+                  totalCount={columns.hoje.length}
+                  selectedId={focusTaskId}
+                  selectedTask={heroTask}
+                  executingId={execution?.taskId ?? null}
+                  loadBalance={hojeLoadBalance}
+                  isExecuting={heroTask != null && execution?.taskId === heroTask.id}
+                  onSelect={setFocusTaskId}
+                  onOpen={handleOpen}
+                  onExecute={() =>
                   {
-                    const items = columns[col.id]
-                    const scoreSum = items.reduce((s, t) => s + (t.score_urgencia ?? 0), 0)
-
-                    return (
-                      <AxelKanbanColumn
-                        key={col.id}
-                        id={col.id}
-                        title={col.title}
-                        count={items.length}
-                        scoreSum={scoreSum}
-                        embedded
-                        isEmpty={items.length === 0}
-                        onAddTask={() => openCreateDrawer(col.id)}
-                      >
-                        {items.map((t) => (
-                          <AxelKanbanCard
-                            key={t.id}
-                            tarefa={t}
-                            allTasks={tarefas}
-                            columnHorizon={col.id}
-                            isDragging={activeId === t.id}
-                            isIngestionHighlight={highlightIds.includes(t.id)}
-                            onOpen={() => handleOpen(t)}
-                            onDemoteToBacklog={(task) => void moveToHorizon(task, 'backlog')}
-                            nobleHourHighlight={shouldHighlightNobleHour(t, energyPeriod)}
-                          />
-                        ))}
-                      </AxelKanbanColumn>
-                    )
-                  })}
+                    if (heroTask) void startTask(heroTask)
+                  }}
+                  onAddTask={() => openCreateDrawer('hoje')}
+                  onReorganize={() => void handleReorganizeAll()}
+                />
+              )}
+              prazo={(
+                <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+                  <DueBucketBoard
+                    tarefas={tarefas}
+                    executionQueueIds={executionQueueIds}
+                    activeId={activeId}
+                    onOpen={handleOpen}
+                  />
                 </div>
-              </div>
-            </div>
+              )}
+            />
 
             <DragOverlay dropAnimation={null}>
               {activeTask && (
-                <AxelKanbanCard tarefa={activeTask} allTasks={tarefas} isDragging />
+                <div className="relative">
+                  {dragIntent && (
+                    <span className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-sl border border-accent/40 bg-accent/15 text-accent shadow-lg">
+                      {dragIntent}
+                    </span>
+                  )}
+                  <AxelKanbanCard tarefa={activeTask} allTasks={tarefas} isDragging />
+                </div>
               )}
             </DragOverlay>
           </DndContext>

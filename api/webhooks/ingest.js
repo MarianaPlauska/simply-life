@@ -118,6 +118,12 @@ export default async function handler(req, res)
         itemOrigem: item.source || 'webhook',
       };
 
+      const extra = {
+        data_vencimento: orchestrated.due_at || item.due_at || null,
+        urgency_reason: orchestrated.rationale || null,
+        intent_category: orchestrated.intent_category || null,
+      };
+
       const { data: inserted, error: insertErr } = await insertTriagedTask(
         supabase,
         userId,
@@ -127,6 +133,7 @@ export default async function handler(req, res)
           origem: item.source || 'webhook',
         },
         scored,
+        extra,
       );
 
       if (insertErr)
@@ -155,6 +162,8 @@ export default async function handler(req, res)
         project_tag: labelLinked || orchestrated.projectTag,
         urgency_source: orchestrated.source,
         rationale: orchestrated.rationale,
+        due_at: extra.data_vencimento,
+        intent_category: extra.intent_category,
       });
     }
     catch (err)

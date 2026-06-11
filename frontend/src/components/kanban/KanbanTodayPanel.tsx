@@ -1,8 +1,8 @@
 import { useDroppable } from '@dnd-kit/core'
 import { Plus } from 'lucide-react'
 import type { LoadBalanceEntry } from '../../lib/adaptiveOrchestration'
-import { COLUMN_META, urgencyScoreClass } from '../../lib/kanbanVisual'
-import { AXEL_KANBAN_DROPZONE } from '../../constants/axelKanbanTheme'
+import { urgencyScoreClass } from '../../lib/kanbanVisual'
+import { AXEL_KANBAN_DROPZONE, AXEL_KANBAN_EXEC_COLUMN } from '../../constants/axelKanbanTheme'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { KanbanTaskDetailStrip } from './KanbanTaskDetailStrip'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
@@ -23,6 +23,7 @@ interface KanbanTodayPanelProps
   onOpen: (task: TarefaUnificada) => void
   onExecute: () => void
   onAddTask: () => void
+  onReorganize?: () => void
 }
 
 const WIP_LIMIT = 8
@@ -39,10 +40,10 @@ export function KanbanTodayPanel({
   onOpen,
   onExecute,
   onAddTask,
+  onReorganize,
 }: KanbanTodayPanelProps)
 {
   const { setNodeRef, isOver } = useDroppable({ id: 'hoje' })
-  const meta = COLUMN_META.hoje
   const overWip = totalCount > WIP_LIMIT
   const scoreSum = tasks.reduce((s, t) => s + (t.score_urgencia ?? 0), 0)
 
@@ -51,21 +52,21 @@ export function KanbanTodayPanel({
       ref={setNodeRef}
       aria-labelledby="kanban-today-panel"
       className={[
-        'flex flex-col w-full lg:w-[min(100%,340px)] lg:shrink-0 lg:max-w-[360px]',
-        'border-b lg:border-b-0 lg:border-r border-line bg-chrome/20 min-h-[280px] lg:min-h-0',
+        'flex flex-col w-full min-h-0 overflow-hidden',
+        AXEL_KANBAN_EXEC_COLUMN,
+        'border-b lg:border-b-0 lg:border-r border-line bg-chrome/20',
         isOver ? 'bg-accent-muted/25 ring-1 ring-inset ring-accent/30' : '',
       ].join(' ')}
     >
       <header
         id="kanban-today-panel"
-        className="shrink-0 px-4 pt-4 pb-3 border-b border-line border-t-2 border-t-accent"
+        className="shrink-0 px-3 pt-3 pb-2 border-b border-line border-t-2 border-t-accent"
       >
         <div className="flex items-start gap-2">
-          <span className="font-mono text-[10px] text-accent tabular-nums pt-0.5">{meta.index}</span>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h2 className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_PRIMARY}`}>
-                Hoje
+                Executar agora
               </h2>
               <span className={`font-mono text-[11px] tabular-nums ml-auto ${overWip ? 'text-atencao' : AXEL_TEXT_SECONDARY}`}>
                 {totalCount} / {WIP_LIMIT}
@@ -74,25 +75,36 @@ export function KanbanTodayPanel({
                 type="button"
                 onClick={onAddTask}
                 className="p-1 rounded-sl text-ink-muted hover:text-accent hover:bg-chrome shrink-0 transition-colors"
-                aria-label="Nova tarefa em Hoje"
+                aria-label="Nova tarefa na fila de execução"
               >
                 <Plus size={14} strokeWidth={1.5} />
               </button>
             </div>
-            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{meta.subtitle}</p>
+            <p className={`font-mono text-[9px] mt-0.5 leading-snug ${AXEL_TEXT_SECONDARY}`}>
+              Fila curta · máx. {WIP_LIMIT}
+            </p>
           </div>
         </div>
       </header>
 
-      <div className="flex-1 min-h-[160px] max-h-[320px] lg:max-h-none overflow-y-auto custom-scrollbar">
+      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
         {tasks.length === 0 ? (
-          <div className={`mx-3 my-3 px-4 py-8 text-center ${AXEL_KANBAN_DROPZONE} ${isOver ? 'border-accent/50 text-accent' : ''}`}>
+          <div className={`mx-2 my-2 px-3 py-4 text-center ${AXEL_KANBAN_DROPZONE} ${isOver ? 'border-accent/50 text-accent' : ''}`}>
             <p className="font-mono text-[10px] uppercase tracking-[0.12em]">
-              {isOver ? 'Soltar em Hoje' : 'Fila vazia'}
+              {isOver ? 'Soltar aqui' : 'Nada priorizado'}
             </p>
-            <p className={`text-[11px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
-              Arraste de Semana ou Backlog
+            <p className={`text-[11px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+              Arraste da coluna Prazo → ou use o botão acima
             </p>
+            {onReorganize && !isOver && (
+              <button
+                type="button"
+                onClick={onReorganize}
+                className="mt-4 font-mono text-[10px] uppercase tracking-wide text-accent hover:underline"
+              >
+                AXEL montar fila
+              </button>
+            )}
           </div>
         ) : (
           <ol className="divide-y divide-line">
@@ -110,7 +122,7 @@ export function KanbanTodayPanel({
                     onClick={() => onSelect(t.id)}
                     onDoubleClick={() => onOpen(t)}
                     className={[
-                      'w-full text-left px-4 py-3 transition-colors',
+                      'w-full text-left px-3 py-2 transition-colors',
                       selected
                         ? 'bg-accent-muted/50 border-l-[3px] border-l-accent'
                         : 'border-l-[3px] border-l-transparent hover:bg-chrome/60',
@@ -122,20 +134,20 @@ export function KanbanTodayPanel({
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] leading-snug line-clamp-2 text-ink">
+                        <p className="text-[12px] leading-snug line-clamp-2 text-ink">
                           {cleanTitleForDisplay(t.titulo)}
                         </p>
-                        <p className={`font-mono text-[10px] tabular-nums mt-1 ${urgencyScoreClass(score)}`}>
+                        <p className={`font-mono text-[9px] tabular-nums mt-0.5 ${urgencyScoreClass(score)}`}>
                           {score} pts
                           {executing && (
-                            <span className="text-accent ml-2 uppercase text-[9px]">em foco</span>
+                            <span className="text-accent ml-1.5 uppercase text-[8px]">foco</span>
                           )}
                           {snoozed && (
-                            <span className="text-ink-muted ml-2 uppercase text-[9px]">adiada</span>
+                            <span className="text-ink-muted ml-1.5 uppercase text-[8px]">adiada</span>
                           )}
                         </p>
-                        {(t.urgency_reason ?? t.score_reason) && (
-                          <p className={`text-[11px] mt-1.5 leading-snug line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
+                        {selected && (t.urgency_reason ?? t.score_reason) && (
+                          <p className={`text-[10px] mt-1 leading-snug line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
                             {t.urgency_reason ?? t.score_reason}
                           </p>
                         )}
@@ -155,12 +167,15 @@ export function KanbanTodayPanel({
         </p>
       )}
 
-      <KanbanTaskDetailStrip
-        task={selectedTask}
-        isExecuting={isExecuting}
-        onExecute={onExecute}
-        onOpen={() => selectedTask && onOpen(selectedTask)}
-      />
+      {tasks.length > 0 && selectedTask && (
+        <KanbanTaskDetailStrip
+          task={selectedTask}
+          isExecuting={isExecuting}
+          onExecute={onExecute}
+          onOpen={() => onOpen(selectedTask)}
+          compact
+        />
+      )}
     </section>
   )
 }

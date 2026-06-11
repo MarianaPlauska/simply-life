@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { Pill, Droplets, Moon, Wallet, PieChart } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
-  AXEL_PROGRESS_THICK,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
@@ -116,15 +115,11 @@ export function QuickStatsBar()
       <MiniCard
         title="Hidratação"
         Icon={Droplets}
-        iconClass="text-accent"
-        primary={`${agua?.progresso_atual ?? 0}/${agua?.meta_diaria ?? 8}`}
-        secondary={`${aguaPct}% da meta`}
-        onClick={() => navigate('/saude#hidratacao')}
-      >
-        <div className={`${AXEL_PROGRESS_THICK} mt-2`}>
-          <div className="h-full bg-accent rounded-sl" style={{ width: `${aguaPct}%` }} />
-        </div>
-      </MiniCard>
+        iconClass="text-sky-400"
+        primary={`${agua?.progresso_atual ?? 0}/${agua?.meta_diaria ?? 8} copos`}
+        secondary={aguaPct >= 100 ? 'Meta do dia ✓' : `${aguaPct}% · card com ondas no topo`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      />
       <MiniCard
         title="Sono"
         Icon={Moon}

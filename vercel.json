@@ -12,5 +12,11 @@
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/gmail-sync",
+      "schedule": "0 */6 * * *"
+    }
   ]
 }

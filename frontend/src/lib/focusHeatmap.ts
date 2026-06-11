@@ -22,13 +22,13 @@ export function levelCellClass(level: HeatmapLevel): string
   switch (level)
   {
     case 'none':
-      return 'bg-zinc-800'
+      return 'bg-chrome'
     case 'light':
-      return 'bg-indigo-900'
+      return 'bg-accent/20'
     case 'ideal':
-      return 'bg-indigo-600'
+      return 'bg-accent/50'
     case 'deep':
-      return 'bg-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.5)]'
+      return 'bg-accent shadow-[0_0_8px_rgba(193,127,58,0.35)]'
   }
 }
 

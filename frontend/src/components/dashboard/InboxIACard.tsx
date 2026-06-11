@@ -42,7 +42,15 @@ export function InboxIACard()
     fetchInbox?.()
   }, [fetchInbox])
 
-  const items = useMemo(() => (eventos || []).slice(0, 5), [eventos])
+  const { top, restCount, total } = useMemo(() =>
+  {
+    const all = eventos || []
+    return {
+      top: all[0] ?? null,
+      restCount: Math.max(0, all.length - 1),
+      total: all.length,
+    }
+  }, [eventos])
 
   return (
     <section className={`${AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
@@ -51,47 +59,57 @@ export function InboxIACard()
           <p className={AXEL_SECTION_TITLE}>Inteligência</p>
           <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Inbox triado · tempo real</p>
         </div>
-        <span className="font-mono text-[10px] text-accent tabular-nums">{items.length}</span>
+        <span className="font-mono text-[10px] text-accent tabular-nums">{total}</span>
       </header>
 
-      <ul role="list" className="flex-1 divide-y divide-line min-h-[140px]">
-        {items.length === 0 && (
-          <li className={`px-4 py-8 text-center font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+      <div className="flex-1 min-h-[120px] flex flex-col">
+        {!top && (
+          <p className={`px-4 py-8 text-center font-mono text-[11px] flex-1 ${AXEL_TEXT_SECONDARY}`}>
             Fila vazia — aguardando ingestão
-          </li>
+          </p>
         )}
-        {items.map((e) =>
-        {
-          const Icon = iconFor(e.source)
-          const urgente = (e.score_urgencia ?? 0) >= 80
-          return (
-            <li
-              key={e.id}
-              className={`px-4 py-2.5 flex items-center gap-2.5 cursor-pointer ${AXEL_ROW_HOVER}`}
-              onClick={() => navigate('/inteligencia')}
-              onKeyDown={(ev) => ev.key === 'Enter' && navigate('/inteligencia')}
-              role="button"
-              tabIndex={0}
-            >
-              <Icon className={`w-3.5 h-3.5 shrink-0 ${AXEL_TEXT_SECONDARY}`} strokeWidth={1.75} />
-              <div className="flex-1 min-w-0">
-                <div className={`font-mono text-[10px] truncate ${AXEL_TEXT_SECONDARY}`}>
-                  {e.sender || e.source}
-                </div>
-                <div className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
-                  {e.raw_subject || e.resumo || 'Sem título'}
-                </div>
-              </div>
-              <span className={`font-mono text-[11px] tabular-nums shrink-0 ${urgente ? 'text-urgente' : AXEL_TEXT_PRIMARY}`}>
-                {e.score_urgencia ?? '—'}
-              </span>
-              <span className={`font-mono text-[9px] shrink-0 w-6 text-right ${AXEL_TEXT_SECONDARY}`}>
-                {timeAgo(e.created_at)}
-              </span>
-            </li>
-          )
-        })}
-      </ul>
+        {top && (
+          <div
+            className={`px-4 py-3 flex items-start gap-2.5 cursor-pointer flex-1 ${AXEL_ROW_HOVER}`}
+            onClick={() => navigate('/inteligencia')}
+            onKeyDown={(ev) => ev.key === 'Enter' && navigate('/inteligencia')}
+            role="button"
+            tabIndex={0}
+          >
+            {(() =>
+            {
+              const Icon = iconFor(top.source)
+              const urgente = (top.score_urgencia ?? 0) >= 80
+              return (
+                <>
+                  <Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${AXEL_TEXT_SECONDARY}`} strokeWidth={1.75} />
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-mono text-[10px] truncate ${AXEL_TEXT_SECONDARY}`}>
+                      {top.sender || top.source}
+                    </div>
+                    <div className={`text-[12px] font-medium line-clamp-2 mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
+                      {top.raw_subject || top.resumo || 'Sem título'}
+                    </div>
+                    {restCount > 0 && (
+                      <p className={`font-mono text-[10px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
+                        +{restCount} na fila
+                      </p>
+                    )}
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <span className={`font-mono text-[11px] tabular-nums block ${urgente ? 'text-urgente' : AXEL_TEXT_PRIMARY}`}>
+                      {top.score_urgencia ?? '—'}
+                    </span>
+                    <span className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
+                      {timeAgo(top.created_at)}
+                    </span>
+                  </div>
+                </>
+              )
+            })()}
+          </div>
+        )}
+      </div>
 
       <div className={`px-4 py-2.5 border-t border-line flex justify-center`}>
         <button
@@ -99,7 +117,7 @@ export function InboxIACard()
           onClick={() => navigate('/inteligencia')}
           className={`inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide ${AXEL_LINK}`}
         >
-          Abrir inbox
+          {total > 0 ? `Ver inbox (${total})` : 'Abrir inbox'}
           <ArrowRight className="w-3 h-3" />
         </button>
       </div>

@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Web app mobile — safe area e toque */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
 /* ── Simply-Life Instrumento — tokens semânticos (evita paleta SaaS genérica) ── */
 :root {
   --sl-canvas: #F4F1EA;
@@ -197,6 +207,45 @@
 .animate-radar-pulse {
   animation: radar-pulse 1.2s ease-in-out infinite;
 }
+
+/* ondas de hidratação — WaterWaveCard */
+@keyframes water-wave-drift {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.water-wave-layer {
+  animation: water-wave-drift 4.5s linear infinite;
+}
+.water-wave-b {
+  animation-duration: 6.2s;
+  animation-direction: reverse;
+}
+.water-wave-c {
+  animation-duration: 8s;
+  opacity: 0.85;
+}
+@keyframes water-vessel-splash {
+  0%, 100% { transform: scale(1); }
+  40% { transform: scale(1.02); }
+  70% { transform: scale(0.995); }
+}
+.water-vessel-splash {
+  animation: water-vessel-splash 0.65s ease-out;
+}
+@keyframes water-bubble-rise {
+  0% { transform: translateY(0) scale(1); opacity: 0.5; }
+  100% { transform: translateY(-120px) scale(0.4); opacity: 0; }
+}
+.water-bubble {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(186, 230, 253, 0.35);
+  pointer-events: none;
+  animation: water-bubble-rise 4s ease-in infinite;
+}
+.water-bubble-a { width: 8px; height: 8px; left: 18%; bottom: 22%; animation-delay: 0s; }
+.water-bubble-b { width: 5px; height: 5px; left: 62%; bottom: 18%; animation-delay: 1.2s; }
+.water-bubble-c { width: 6px; height: 6px; left: 44%; bottom: 30%; animation-delay: 2.4s; }
 
 /* acessibilidade — respeita a config do OS para reduzir animações */
 @media (prefers-reduced-motion: reduce) {

@@ -27,6 +27,7 @@ import { createAxelTaskMetaSlice, type AxelTaskMetaSlice } from './slices/axelTa
 import { createAxelZenFocusSlice, type AxelZenFocusSlice } from './slices/axelZenFocusSlice';
 import { createAxelOrchestrationSlice, type AxelOrchestrationSlice } from './slices/axelOrchestrationSlice';
 import { createAxelAchievementSlice, type AxelAchievementSlice } from './slices/axelAchievementSlice';
+import { createAxelDeadlineProposalSlice, type AxelDeadlineProposalSlice } from './slices/axelDeadlineProposalSlice';
 
 // re-exporta types para compatibilidade
 export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, ContaFixa, BudgetLimit, FinancialGoal, HabitoDiario, SessaoTreino, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
@@ -56,7 +57,8 @@ export type TaskStore =
   AxelTaskMetaSlice &
   AxelZenFocusSlice &
   AxelOrchestrationSlice &
-  AxelAchievementSlice;
+  AxelAchievementSlice &
+  AxelDeadlineProposalSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -85,6 +87,7 @@ export const useTaskStore = create<TaskStore>()(
       ...createAxelZenFocusSlice(...a),
       ...createAxelOrchestrationSlice(...a),
       ...createAxelAchievementSlice(...a),
+      ...createAxelDeadlineProposalSlice(...a),
     }),
     {
       name: 'simply-life-store',

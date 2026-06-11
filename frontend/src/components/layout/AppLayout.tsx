@@ -9,6 +9,8 @@ import { CommandPalette } from '../ui/CommandPalette'
 import { OnboardingChecklist } from '../Onboarding/OnboardingChecklist'
 import { MedicationLockOverlay } from '../ui/MedicationLockOverlay'
 import { BurnoutAura } from '../ui/BurnoutAura'
+import { CelebrationOverlay } from '../gamification/CelebrationOverlay'
+import { MentalHealthCheckIn } from '../gamification/MentalHealthCheckIn'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useRealtimeSync } from '../../hooks/useRealtimeSync'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
@@ -47,6 +49,8 @@ export function AppLayout()
     <>
       <MedicationLockOverlay />
       <BurnoutAura />
+      <CelebrationOverlay />
+      <MentalHealthCheckIn />
       <QuickCaptureModal />
       <CommandPalette />
       <OnboardingChecklist />

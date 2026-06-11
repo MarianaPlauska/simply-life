@@ -7,6 +7,11 @@ import {
   resolveAssigneeName,
 } from '../../lib/axelTaskMetadata'
 import { showFocusRewardToast } from '../../lib/axelTaskCompletion'
+import {
+  DUE_BUCKET_LABELS,
+  resolveDueBucket,
+} from '../../lib/dueBucket'
+import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
 // Faixa horizontal de metadados — micro-tags + timer inline
@@ -19,6 +24,9 @@ interface AxelDrawerDetailsStripProps
   isCreatingNew?: boolean
   onDeadlineChange?: (iso: string | null) => void
 }
+
+const TAG =
+  'inline-flex items-center gap-1 text-xs text-ink-muted px-2 py-1 rounded-sl border border-line bg-chrome/25'
 
 function formatPrazoTag(iso: string | null): string
 {
@@ -68,6 +76,9 @@ export function AxelDrawerDetailsStrip({
   const assigneeShort = initialsFromName(assignee)
   const isActive = !isCreatingNew && execution?.taskId === tarefa.id
   const estimate = taskEstimates[tarefa.id] ?? 45
+  const dueBucket = isCreatingNew
+    ? null
+    : resolveDueBucket({ ...tarefa, data_vencimento: deadline })
 
   useEffect(() =>
   {
@@ -102,14 +113,21 @@ export function AxelDrawerDetailsStrip({
       className="flex flex-wrap items-center gap-2 min-w-0"
       aria-label="Detalhes da tarefa"
     >
-      <span className="inline-flex items-center gap-1 text-xs text-zinc-400 px-2 py-1 rounded-md border border-white/[0.04]">
-        <span className="text-[10px] uppercase tracking-wider text-zinc-500">Responsável</span>
-        <span className="text-zinc-200 font-medium font-mono">{assigneeShort}</span>
+      <span className={TAG}>
+        <span className="text-[10px] uppercase tracking-wider text-ink-muted">Responsável</span>
+        <span className="text-ink font-medium font-mono">{assigneeShort}</span>
       </span>
 
+      {dueBucket && (
+        <span className={TAG} title="Faixa de prazo no board">
+          <span className="text-[10px] uppercase tracking-wider text-ink-muted">Faixa</span>
+          <span className="font-mono text-ink text-[11px]">{DUE_BUCKET_LABELS[dueBucket]}</span>
+        </span>
+      )}
+
       {onDeadlineChange ? (
-        <label className="inline-flex items-center gap-1.5 text-xs text-zinc-400 px-2 py-1 rounded-md border border-white/[0.04] cursor-pointer">
-          <span className="text-[10px] uppercase tracking-wider text-zinc-500 shrink-0">Prazo</span>
+        <label className={`${TAG} cursor-pointer`}>
+          <span className="text-[10px] uppercase tracking-wider text-ink-muted shrink-0">Prazo</span>
           <input
             type="datetime-local"
             value={toInputValue(deadline)}
@@ -123,22 +141,22 @@ export function AxelDrawerDetailsStrip({
               }
               onDeadlineChange(new Date(v).toISOString())
             }}
-            className="text-xs font-mono text-zinc-200 bg-transparent border-none outline-none focus:ring-0 p-0 max-w-[150px]"
+            className="text-xs font-mono text-ink bg-transparent border-none outline-none focus:ring-0 p-0 max-w-[150px]"
             title={deadline ? formatDrawerDate(deadline) : 'Definir prazo'}
           />
         </label>
       ) : (
         <span
-          className="inline-flex items-center gap-1 text-xs text-zinc-400 px-2 py-1 rounded-md border border-white/[0.04]"
+          className={TAG}
           title={deadline ? formatDrawerDate(deadline) : undefined}
         >
-          <span className="text-[10px] uppercase tracking-wider text-zinc-500">Prazo</span>
-          <span className="font-mono tabular-nums text-zinc-200">{formatPrazoTag(deadline)}</span>
+          <span className="text-[10px] uppercase tracking-wider text-ink-muted">Prazo</span>
+          <span className="font-mono tabular-nums text-ink">{formatPrazoTag(deadline)}</span>
         </span>
       )}
 
-      <label className="inline-flex items-center gap-1 text-xs text-zinc-400 px-2 py-1 rounded-md border border-white/[0.04]">
-        <span className="text-[10px] uppercase tracking-wider text-zinc-500">Est.</span>
+      <label className={TAG}>
+        <span className="text-[10px] uppercase tracking-wider text-ink-muted">Est.</span>
         <input
           type="number"
           min={5}
@@ -150,9 +168,9 @@ export function AxelDrawerDetailsStrip({
             const id = isCreatingNew ? 0 : tarefa.id
             setTaskEstimate(id, Number(e.target.value) || 45)
           }}
-          className="w-10 text-xs font-mono tabular-nums text-zinc-200 bg-transparent border-none outline-none focus:ring-0 p-0"
+          className="w-10 text-xs font-mono tabular-nums text-ink bg-transparent border-none outline-none focus:ring-0 p-0"
         />
-        <span className="font-mono text-zinc-400">m</span>
+        <span className="font-mono text-ink-muted">m</span>
       </label>
 
       {!isCreatingNew && (
@@ -165,7 +183,7 @@ export function AxelDrawerDetailsStrip({
               stopExecution()
               if (early) showFocusRewardToast(true)
             }}
-            className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-mono font-semibold tabular-nums text-indigo-300 border border-indigo-500/25 rounded-md animate-pulse hover:bg-indigo-600/10 transition-colors"
+            className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-mono font-semibold tabular-nums text-accent border border-accent/30 rounded-sl animate-pulse hover:bg-accent-muted/30 transition-colors"
           >
             <Pause size={14} strokeWidth={1.5} />
             {formatStopwatch(elapsedSeconds)}
@@ -175,10 +193,10 @@ export function AxelDrawerDetailsStrip({
             type="button"
             onClick={() => void handleStart()}
             disabled={!tarefa.id}
-            className="inline-flex items-center gap-1.5 h-8 px-3 text-xs font-medium text-indigo-400 border border-indigo-500/20 rounded-md hover:bg-indigo-600/10 hover:text-indigo-300 transition-colors disabled:opacity-40"
+            className={`inline-flex items-center gap-1.5 h-8 px-3 text-xs font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
           >
             <Play size={14} strokeWidth={1.5} />
-            Iniciar Timer
+            Iniciar
           </button>
         )
       )}

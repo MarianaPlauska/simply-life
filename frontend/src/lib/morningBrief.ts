@@ -41,9 +41,15 @@ export function buildMorningBrief(
   }
 
   const top = [...active].sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0))[0]
-  const detail = top
-    ? `Próximo foco sugerido: ${top.titulo.slice(0, 56)}${top.titulo.length > 56 ? '…' : ''}`
-    : 'Arraste do planejamento ou deixe o AXEL reorganizar.'
+  let detail = 'Arraste do planejamento ou deixe o AXEL reorganizar.'
+  if (top)
+  {
+    const short = top.titulo.trim().slice(0, 56)
+    const generic = short.length < 12 || /^(urgente|teste|tarefa)/i.test(short)
+    detail = generic
+      ? 'AXEL já ordenou por score — comece pela primeira da fila.'
+      : `Foco sugerido: ${short}${top.titulo.length > 56 ? '…' : ''}`
+  }
 
   return { headline, detail, criticalCount, loadPercent, hojeCount }
 }

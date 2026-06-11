@@ -16,6 +16,7 @@ interface KanbanTaskDetailStripProps
   isExecuting: boolean
   onExecute: () => void
   onOpen: () => void
+  compact?: boolean
 }
 
 export function KanbanTaskDetailStrip({
@@ -23,17 +24,12 @@ export function KanbanTaskDetailStrip({
   isExecuting,
   onExecute,
   onOpen,
+  compact = false,
 }: KanbanTaskDetailStripProps)
 {
   if (!task)
   {
-    return (
-      <div className="shrink-0 border-t border-line px-4 py-4 bg-chrome/30">
-        <p className="font-mono text-[11px] text-ink-muted leading-relaxed">
-          Selecione uma demanda na fila ou arraste do planejamento para Hoje.
-        </p>
-      </div>
-    )
+    return null
   }
 
   const score = task.score_urgencia ?? 0
@@ -42,6 +38,38 @@ export function KanbanTaskDetailStrip({
   const subPct = subs.length > 0 ? calcSubtaskProgress(subs) : null
   const elapsed = useTaskStore((s) => s.taskElapsedSeconds[task.id] ?? 0)
   const proof = evaluateProofOfWork(score, elapsed, 45)
+
+  if (compact)
+  {
+    return (
+      <div className="shrink-0 border-t border-line px-2 py-2 bg-chrome/30 flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] text-ink leading-snug line-clamp-1">
+            {cleanTitleForDisplay(task.titulo)}
+          </p>
+          <p className={`font-mono text-[9px] tabular-nums ${urgencyScoreClass(score)}`}>
+            {score} pts
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onExecute}
+          disabled={isExecuting}
+          className={`inline-flex items-center gap-1 px-2 py-1.5 font-mono text-[9px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
+        >
+          <Play size={10} strokeWidth={1.75} fill="currentColor" />
+          {isExecuting ? '…' : 'Go'}
+        </button>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="px-2 py-1.5 font-mono text-[9px] uppercase border border-line text-ink-muted hover:text-accent rounded-sl"
+        >
+          ···
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="shrink-0 border-t border-line px-4 py-3 bg-chrome/30">

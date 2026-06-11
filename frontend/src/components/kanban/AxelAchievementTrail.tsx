@@ -9,6 +9,11 @@ export function AxelAchievementTrail()
 {
   const entries = useTaskStore((s) => s.recentAchievements)
 
+  if (entries.length === 0)
+  {
+    return null
+  }
+
   return (
     <section
       className={`shrink-0 border-t border-line ${AXEL_CHROME_PLANE}`}
@@ -24,13 +29,8 @@ export function AxelAchievementTrail()
           </span>
         </div>
 
-        {entries.length === 0 ? (
-          <p className="font-mono text-[11px] text-ink-muted py-1">
-            Suas conquistas aparecem aqui ao concluir demandas.
-          </p>
-        ) : (
-          <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
-            {entries.map((entry) => (
+        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+          {entries.map((entry) => (
               <article
                 key={entry.id}
                 className="achievement-pop-in shrink-0 h-11 min-w-[240px] max-w-[280px] flex items-center gap-2.5 px-3 rounded-sl border border-line bg-card"
@@ -47,8 +47,7 @@ export function AxelAchievementTrail()
                 </span>
               </article>
             ))}
-          </div>
-        )}
+        </div>
       </div>
     </section>
   )

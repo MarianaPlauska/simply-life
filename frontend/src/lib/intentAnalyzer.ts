@@ -184,18 +184,18 @@ export const INTENT_CATEGORY_STYLES: Record<
   { border: string; text: string; badge: string }
 > = {
   bloqueio: {
-    border: 'border-rose-500/30',
-    text: 'text-rose-300',
-    badge: 'bg-rose-500/15 text-rose-300 border-rose-500/25',
+    border: 'border-urgente/35',
+    text: 'text-urgente',
+    badge: 'bg-urgente/10 text-urgente border-urgente/30',
   },
   alinhamento: {
-    border: 'border-zinc-600/40',
-    text: 'text-zinc-400',
-    badge: 'bg-zinc-800/60 text-zinc-400 border-zinc-600/40',
+    border: 'border-line',
+    text: 'text-ink-muted',
+    badge: 'bg-chrome/40 text-ink-muted border-line',
   },
   execucao: {
-    border: 'border-indigo-500/25',
-    text: 'text-indigo-300',
-    badge: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
+    border: 'border-accent/30',
+    text: 'text-accent',
+    badge: 'bg-accent-muted/40 text-accent border-accent/25',
   },
 }

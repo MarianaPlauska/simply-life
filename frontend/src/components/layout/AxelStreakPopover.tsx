@@ -84,12 +84,12 @@ export function AxelStreakPopover()
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-1.5 px-2 py-1 rounded-md border transition-all duration-300 ${
+        className={`flex items-center gap-1.5 px-2 py-1 rounded-sl border transition-all duration-300 ${
           animating
-            ? 'animate-bounce border-orange-500/40 bg-orange-500/10 shadow-[0_0_12px_rgba(249,115,22,0.35)]'
+            ? 'animate-bounce border-atencao/40 bg-atencao/10'
             : open
-              ? 'border-orange-500/30 bg-orange-500/5'
-              : 'border-transparent hover:border-white/[0.06] hover:bg-white/[0.02]'
+              ? 'border-accent/30 bg-accent-muted/30'
+              : 'border-transparent hover:border-line hover:bg-chrome'
         }`}
         aria-expanded={open}
         aria-haspopup="dialog"
@@ -104,22 +104,20 @@ export function AxelStreakPopover()
         ) : (
           <Flame
             className={`w-4 h-4 shrink-0 transition-colors ${
-              activeToday
-                ? 'text-orange-500'
-                : 'text-zinc-500 dark:text-zinc-600'
+              activeToday ? 'text-atencao' : 'text-ink-muted'
             } ${animating ? 'animate-pulse' : ''}`}
             strokeWidth={1.75}
             aria-hidden
           />
         )}
-        <span className="text-[11px] font-mono tabular-nums text-zinc-600 dark:text-zinc-400">
+        <span className="text-[11px] font-mono tabular-nums text-ink-muted">
           <span
             className={`font-semibold ${
               weekendFreeze
-                ? 'text-sky-300'
+                ? 'text-sky-400'
                 : activeToday
-                  ? 'text-orange-500 dark:text-orange-400'
-                  : 'text-zinc-500'
+                  ? 'text-atencao'
+                  : 'text-ink-muted'
             }`}
           >
             {streakCount}
@@ -128,7 +126,7 @@ export function AxelStreakPopover()
           {dayLabel}
         </span>
         {streakFreezes > 0 && (
-          <span className="text-[10px] font-mono text-indigo-400" title="Escudos disponíveis">
+          <span className="text-[10px] font-mono text-accent" title="Escudos disponíveis">
             🛡{streakFreezes}
           </span>
         )}
@@ -137,12 +135,12 @@ export function AxelStreakPopover()
       {open && (
         <div
           role="dialog"
-          className="absolute right-0 top-full mt-2 z-[200] w-[min(100vw-2rem,320px)] rounded-xl border border-white/[0.08] bg-[#0B0C14] shadow-2xl shadow-black/50 p-4 space-y-4"
+          className="absolute right-0 top-full mt-2 z-[200] w-[min(100vw-2rem,320px)] rounded-sl border border-line bg-card shadow-lg p-4 space-y-4"
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <p className="text-xs font-semibold text-zinc-200">Ofensiva AXEL</p>
-              <p className="text-[11px] text-zinc-500 mt-0.5">
+              <p className="font-mono text-[10px] uppercase tracking-wide text-accent">Momentum AXEL</p>
+              <p className="text-[11px] text-ink-muted mt-0.5">
                 {weekendFreeze
                   ? WEEKEND_STREAK_TOOLTIP
                   : activeToday
@@ -151,10 +149,10 @@ export function AxelStreakPopover()
               </p>
             </div>
             <div className="text-right shrink-0">
-              <p className="text-2xl font-mono font-bold tabular-nums text-orange-400">
+              <p className="text-2xl font-display font-semibold tabular-nums text-atencao">
                 {streakCount}
               </p>
-              <p className="text-[10px] uppercase tracking-wider text-zinc-500">
+              <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
                 {streakCount === 1 ? 'dia' : 'dias'}
               </p>
             </div>
@@ -165,7 +163,7 @@ export function AxelStreakPopover()
             compact
           />
 
-          <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+          <div className="flex items-center justify-between text-[11px] font-mono text-ink-muted">
             <span>Escudos: {streakFreezes}</span>
             <span>XP: {totalXp}</span>
           </div>
@@ -174,7 +172,7 @@ export function AxelStreakPopover()
             type="button"
             disabled={buying || !canBuy}
             onClick={() => void handleBuyShield()}
-            className="w-full inline-flex items-center justify-center gap-2 h-9 px-3 text-xs font-medium rounded-lg border border-indigo-500/25 bg-indigo-600/10 text-indigo-300 hover:bg-indigo-600/20 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 h-9 px-3 font-mono text-[10px] uppercase tracking-wide rounded-sl border border-line text-ink-muted hover:text-accent hover:border-accent/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <Shield size={14} strokeWidth={1.75} aria-hidden />
             Comprar Escudo (Custa {SHIELD_COST} XP)

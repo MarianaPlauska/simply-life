@@ -33,7 +33,7 @@ export const COLUMN_META: Record<
   TemporalHorizon,
   { index: string; subtitle: string }
 > = {
-  hoje: { index: '01', subtitle: 'Execução imediata' },
+  hoje: { index: '01', subtitle: 'Fila AXEL · WIP' },
   semana: { index: '02', subtitle: 'Janela de 7 dias' },
   backlog: { index: '03', subtitle: 'Fila de entrada' },
 }

@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { Shield, Lock, Cloud, Activity } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import {
@@ -45,30 +44,6 @@ function KpiCell({ label, value, hint, variant = 'default' }: KpiCellProps)
   )
 }
 
-function StatusPill({
-  ok,
-  label,
-  Icon,
-}: {
-  ok: boolean
-  label: string
-  Icon: typeof Shield
-})
-{
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider px-2 py-1 border rounded-sl ${
-        ok
-          ? 'border-concluido/30 text-concluido bg-concluido/5'
-          : 'border-line text-ink-muted bg-chrome'
-      }`}
-    >
-      <Icon className="w-3 h-3" strokeWidth={1.75} />
-      {label}
-    </span>
-  )
-}
-
 interface DashboardCommandBarProps
 {
   greeting: string
@@ -79,10 +54,6 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
 {
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const storeTarefas = useTaskStore((s) => s.tarefas)
-  const realtimeStatus = useTaskStore((s) => s.realtimeStatus)
-  const googleConnected = useTaskStore((s) => s.googleCalendarConnected)
-  const isLoggedIn = useTaskStore((s) => s.isLoggedIn)
-
   const tarefas = useMemo(() => mergeDashboardTasks(storeTarefas), [storeTarefas])
 
   const pendentes = resumo?.tarefas_pendentes
@@ -101,7 +72,6 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
   const notifs = resumo?.notificacoes_nao_lidas ?? 0
   const habitosPct = resumo?.habitos_progresso_pct ?? 0
 
-  const syncOk = realtimeStatus === 'live' || realtimeStatus === 'connecting'
   const now = new Date()
   const dateLine = now.toLocaleDateString('pt-BR', {
     weekday: 'long',
@@ -112,27 +82,15 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
 
   return (
     <div className={`border-b border-line ${AXEL_CHROME_PLANE}`}>
-      <div className="px-4 lg:px-8 py-4 max-w-[1600px] mx-auto w-full">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-4">
-          <div>
-            <p className="sl-eyebrow">Centro de comando</p>
-            <h1 className={`${AXEL_DISPLAY_STAT} text-2xl md:text-3xl mt-1`}>
-              {greeting}, {firstName}
-            </h1>
-            <p className={`font-mono text-[11px] capitalize mt-1 ${AXEL_TEXT_SECONDARY}`}>
-              {dateLine}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusPill ok={isLoggedIn} label="Sessão" Icon={Lock} />
-            <StatusPill ok={syncOk} label={syncOk ? 'Sync ativo' : 'Offline'} Icon={Cloud} />
-            <StatusPill ok label="TLS 1.3" Icon={Shield} />
-            <StatusPill
-              ok={googleConnected}
-              label={googleConnected ? 'Google' : 'Google pend.'}
-              Icon={Activity}
-            />
-          </div>
+      <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full">
+        <div className="mb-3 sm:mb-4">
+          <p className="sl-eyebrow">Centro de comando</p>
+          <h1 className={`${AXEL_DISPLAY_STAT} text-xl sm:text-2xl md:text-3xl mt-1`}>
+            {greeting}, {firstName}
+          </h1>
+          <p className={`font-mono text-[11px] capitalize mt-1 ${AXEL_TEXT_SECONDARY}`}>
+            {dateLine}
+          </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border border-line rounded-sl bg-card overflow-hidden">

@@ -1,10 +1,10 @@
-import { CalendarDays, GanttChart, LayoutGrid } from 'lucide-react'
+import { CalendarDays, ChartGantt, LayoutGrid, List } from 'lucide-react'
 import {
   AXEL_FILTER_PILL_ACTIVE,
   AXEL_FILTER_PILL_IDLE,
 } from '../../constants/axelSurfaces'
 
-export type KanbanViewMode = 'board' | 'list' | 'timeline'
+export type KanbanViewMode = 'board' | 'list' | 'calendar' | 'gantt'
 
 interface KanbanViewSwitcherProps
 {
@@ -12,10 +12,11 @@ interface KanbanViewSwitcherProps
   onChange: (mode: KanbanViewMode) => void
 }
 
-const MODES: { id: KanbanViewMode; label: string; Icon: typeof LayoutGrid }[] = [
-  { id: 'board', label: 'Board', Icon: LayoutGrid },
-  { id: 'list', label: 'Lista', Icon: GanttChart },
-  { id: 'timeline', label: 'Timeline', Icon: CalendarDays },
+const MODES: { id: KanbanViewMode; label: string; Icon: typeof LayoutGrid; shortLabel?: string }[] = [
+  { id: 'board', label: 'Planejador', Icon: LayoutGrid },
+  { id: 'list', label: 'Lista', Icon: List },
+  { id: 'calendar', label: 'Calendário', Icon: CalendarDays, shortLabel: 'Cal.' },
+  { id: 'gantt', label: 'Gantt', Icon: ChartGantt },
 ]
 
 export function KanbanViewSwitcher({ mode, onChange }: KanbanViewSwitcherProps)
@@ -41,8 +42,9 @@ export function KanbanViewSwitcher({ mode, onChange }: KanbanViewSwitcherProps)
               active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
             }`}
           >
-            <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
-            {m.label}
+            <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
+            <span className="hidden sm:inline">{m.label}</span>
+            <span className="sm:hidden">{m.shortLabel ?? m.label}</span>
           </button>
         )
       })}

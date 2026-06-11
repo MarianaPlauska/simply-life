@@ -56,6 +56,7 @@ interface AxelKanbanCardProps
   nobleHourHighlight?: boolean
   featured?: boolean
   queueRank?: number
+  inExecutionQueue?: boolean
 }
 
 export function AxelKanbanCard({
@@ -70,6 +71,7 @@ export function AxelKanbanCard({
   nobleHourHighlight = false,
   featured = false,
   queueRank,
+  inExecutionQueue = false,
 }: AxelKanbanCardProps)
 {
   const resolveLastMovedAt = useTaskStore((s) => s.resolveLastMovedAt)
@@ -180,6 +182,11 @@ export function AxelKanbanCard({
           · {tag}
         </span>
         <div className="ml-auto flex items-center gap-1.5 shrink-0">
+          {inExecutionQueue && (
+            <span className="font-mono text-[9px] uppercase tracking-wider text-accent border border-accent/30 px-1 rounded-sm">
+              Exec
+            </span>
+          )}
           {inProgress && (
             <span className="font-mono text-[9px] uppercase tracking-wider text-accent">
               {isTimerHere ? 'Foco' : 'Curso'}

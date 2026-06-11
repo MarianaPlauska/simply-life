@@ -1,6 +1,12 @@
-// slice de calendário — placeholder (google calendar adiado)
+// slice de calendário — OAuth Google (Calendar + Gmail) via API Vercel
 import type { StateCreator } from 'zustand'
 import type { CalendarEvent } from '../storeTypes'
+import {
+  completeGoogleOAuth,
+  disconnectGoogle,
+  fetchGoogleStatus,
+  startGoogleOAuth,
+} from '../../lib/googleIntegrationApi'
 
 export interface CalendarSlice
 {
@@ -8,11 +14,12 @@ export interface CalendarSlice
   calendarLoading: boolean
   calendarError: string | null
   googleCalendarConnected: boolean
+  lastGmailSyncAt: string | null
   fetchCalendarEvents: () => Promise<void>
   connectGoogleCalendar: () => Promise<void>
   disconnectGoogleCalendar: () => Promise<void>
   checkGoogleStatus: () => Promise<void>
-  processGoogleCallback: (code: string) => Promise<boolean>
+  processGoogleCallback: (code: string, state: string | null) => Promise<boolean>
 }
 
 export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSlice> = (set) => ({
@@ -20,33 +27,52 @@ export const createCalendarSlice: StateCreator<CalendarSlice, [], [], CalendarSl
   calendarLoading: false,
   calendarError: null,
   googleCalendarConnected: false,
+  lastGmailSyncAt: null,
 
   fetchCalendarEvents: async () =>
   {
-    // google calendar será integrado via supabase oauth futuramente
     set({ calendarLoading: false, calendarError: null, calendarEvents: [] })
   },
 
   connectGoogleCalendar: async () =>
   {
-    // placeholder — precisa configurar provider no supabase dashboard
-    const { toast } = await import('sonner')
-    toast.info('Google Calendar será configurado em breve')
+    const url = await startGoogleOAuth()
+    window.location.href = url
   },
 
   disconnectGoogleCalendar: async () =>
   {
-    set({ googleCalendarConnected: false, calendarEvents: [] })
+    await disconnectGoogle()
+    set({
+      googleCalendarConnected: false,
+      lastGmailSyncAt: null,
+      calendarEvents: [],
+    })
   },
 
   checkGoogleStatus: async () =>
   {
-    // sempre false até configurar
-    set({ googleCalendarConnected: false })
+    try
+    {
+      const status = await fetchGoogleStatus()
+      set({
+        googleCalendarConnected: status.connected,
+        lastGmailSyncAt: status.last_gmail_sync_at,
+      })
+    }
+    catch
+    {
+      set({ googleCalendarConnected: false, lastGmailSyncAt: null })
+    }
   },
 
-  processGoogleCallback: async () =>
+  processGoogleCallback: async (code, state) =>
   {
-    return false
+    const ok = await completeGoogleOAuth(code, state)
+    if (ok)
+    {
+      set({ googleCalendarConnected: true })
+    }
+    return ok
   },
 })

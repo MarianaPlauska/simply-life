@@ -43,7 +43,7 @@ export function WaterBarChart({ rows }: WaterBarChartProps)
           <Bar
             dataKey="aguaLitros"
             name="Água (L)"
-            fill="#6366f1"
+            fill={theme.waterBar}
             radius={[4, 4, 0, 0]}
             maxBarSize={28}
           />

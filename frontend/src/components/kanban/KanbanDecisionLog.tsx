@@ -14,7 +14,7 @@ export function KanbanDecisionLog()
 {
   const log = useTaskStore((s) => s.aiDecisionLog)
   const dailyScoreCap = useTaskStore((s) => s.dailyScoreCap)
-  const [open, setOpen] = useState(log.length > 0)
+  const [open, setOpen] = useState(false)
 
   if (log.length === 0)
   {

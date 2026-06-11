@@ -9,6 +9,7 @@ import { AxelAiDecisionLog } from './AxelAiDecisionLog'
 import { AxelUrgencyReasonCard } from './AxelUrgencyReasonCard'
 import { analyzeTaskIntent } from '../../lib/intentAnalyzer'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
+import { AxelDeadlineProposalBanner } from './AxelDeadlineProposalBanner'
 import { AxelDrawerDetailsStrip } from './AxelDrawerDetailsStrip'
 import { AxelActivityEventPanel } from './AxelActivityEventPanel'
 import { AxelDrawerQuickInput } from './AxelDrawerQuickInput'
@@ -50,6 +51,10 @@ export function AxelTaskDrawer({
   const updateTarefa = useTaskStore((s) => s.updateTarefa)
   const createSubtarefa = useTaskStore((s) => s.createSubtarefa)
   const updateSubtarefa = useTaskStore((s) => s.updateSubtarefa)
+  const getDeadlineProposal = useTaskStore((s) => s.getDeadlineProposal)
+  const acceptDeadlineProposal = useTaskStore((s) => s.acceptDeadlineProposal)
+  const rejectDeadlineProposal = useTaskStore((s) => s.rejectDeadlineProposal)
+  const pushAiDecision = useTaskStore((s) => s.pushAiDecision)
 
   const draftBase = tarefaProp ?? createEmptyTaskDraft()
   const live = useTaskStore((s) =>
@@ -73,6 +78,11 @@ export function AxelTaskDrawer({
     isCreatingNew ? null : live.data_vencimento,
   )
   const [submitting, setSubmitting] = useState(false)
+  const [proposalLoading, setProposalLoading] = useState(false)
+
+  const deadlineProposal = !isCreatingNew && live.id > 0
+    ? getDeadlineProposal(live.id)
+    : null
 
   const taskIdForLog = isCreatingNew ? -1 : live.id
 
@@ -284,10 +294,43 @@ export function AxelTaskDrawer({
               onDeadlineChange={setDeadline}
             />
 
-            <AxelUrgencyReasonCard
-              tarefa={scorePreviewTask}
-              isCreatingNew={isCreatingNew}
-            />
+            {deadlineProposal && (
+              <AxelDeadlineProposalBanner
+                proposal={deadlineProposal}
+                loading={proposalLoading}
+                onAccept={() =>
+                {
+                  setProposalLoading(true)
+                  const accepted = acceptDeadlineProposal(live.id)
+                  if (!accepted)
+                  {
+                    setProposalLoading(false)
+                    return
+                  }
+                  setDeadline(accepted.proposedDue)
+                  if (canPersistServer)
+                  {
+                    void updateTarefa(live.id, { data_vencimento: accepted.proposedDue })
+                      .then(() =>
+                      {
+                        pushAiDecision(`Prazo aceito · ${live.titulo.slice(0, 40)}`)
+                        toast.success('Novo prazo aplicado')
+                      })
+                      .finally(() => setProposalLoading(false))
+                  }
+                  else
+                  {
+                    pushAiDecision(`Prazo aceito · ${live.titulo.slice(0, 40)}`)
+                    setProposalLoading(false)
+                  }
+                }}
+                onReject={() =>
+                {
+                  rejectDeadlineProposal(live.id)
+                  pushAiDecision(`Prazo mantido · ${live.titulo.slice(0, 40)}`)
+                }}
+              />
+            )}
 
             <section className="min-w-0">
               <h3 className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted mb-2">
@@ -303,13 +346,19 @@ export function AxelTaskDrawer({
               />
             </section>
 
+            <AxelUrgencyReasonCard
+              tarefa={scorePreviewTask}
+              isCreatingNew={isCreatingNew}
+            />
+
             <AxelAiContextBreakdown
               tarefa={scorePreviewTask}
               allTasks={allTasks}
               isCreatingNew={isCreatingNew}
+              defaultCollapsed
             />
 
-            <AxelAiDecisionLog />
+            <AxelAiDecisionLog defaultCollapsed />
 
             <section className="min-w-0 border-t border-line pt-4">
               <div className="flex items-center justify-between mb-2">

@@ -3,11 +3,19 @@
 export const AXEL_KANBAN_PAGE = 'bg-fundo font-sans text-ink'
 export const AXEL_KANBAN_GLOW = 'pointer-events-none absolute inset-0'
 
-/** Shell externo — painel Hoje + planejamento */
+/** Shell externo — altura fixa; scroll só dentro dos painéis (não cresce a página) */
 export const AXEL_KANBAN_WORKSPACE =
-  'flex-1 min-h-[440px] border border-line rounded-sl bg-card overflow-hidden flex flex-col lg:flex-row'
+  'flex-1 min-h-[360px] max-h-[min(680px,calc(100vh-260px))] h-[min(680px,calc(100vh-260px))] border border-line rounded-sl bg-card overflow-hidden flex flex-col lg:flex-row'
 
-/** Colunas de planejamento (Semana + Backlog) */
+/** Coluna Executar agora — fila curta (máx. 8 itens), não compete com Prazo */
+export const AXEL_KANBAN_EXEC_COLUMN =
+  'lg:w-[248px] lg:max-w-[260px] lg:shrink-0'
+
+/** Painel de faixas de prazo (DueBucketBoard) */
+export const AXEL_KANBAN_DUE_SHELL =
+  'flex-1 min-h-0 flex flex-col min-h-[280px]'
+
+/** @deprecated Semana + Backlog — substituído por AXEL_KANBAN_DUE_SHELL */
 export const AXEL_KANBAN_PLAN_SHELL =
   'flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)] min-h-[280px]'
 

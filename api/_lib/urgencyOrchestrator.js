@@ -1,6 +1,7 @@
 // Motor de urgência AXEL — triagem antes de persistir (Motor de Relevância)
 
 import { calculateUrgency } from './relevanceEngine.js';
+import { parseEmailWithAI, heuristicEmailParse } from './emailGroqParser.js';
 
 const PROJECT_TAGS = ['SST', 'FINALLY', 'HUB', 'CORE'];
 
@@ -68,6 +69,43 @@ export async function orchestrateIngestPayload(payload)
 {
   const groqKey = process.env.GROQ_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+  const source = (payload.source || '').toLowerCase();
+  const isEmail = source.includes('gmail') || source.includes('email') || source.includes('mail');
+
+  if (isEmail)
+  {
+    try
+    {
+      const parsed = groqKey || geminiKey
+        ? await parseEmailWithAI(
+          {
+            sender: payload.sender || payload.from,
+            subject: payload.title,
+            body: payload.content,
+          },
+          { groqKey, geminiKey },
+        )
+        : heuristicEmailParse({
+          sender: payload.sender,
+          subject: payload.title,
+          body: payload.content,
+        });
+
+      return {
+        score: parsed.score,
+        prioridade: parsed.prioridade,
+        projectTag: detectProjectTag(payload.title, payload.content || ''),
+        rationale: parsed.rationale,
+        due_at: parsed.due_at,
+        intent_category: parsed.intent_category,
+        source: parsed.source,
+      };
+    }
+    catch (err)
+    {
+      console.warn('[urgencyOrchestrator] email parse falhou:', err?.message);
+    }
+  }
 
   if (groqKey || geminiKey)
   {

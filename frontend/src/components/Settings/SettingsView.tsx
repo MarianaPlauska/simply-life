@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Code2, Mail, MessageSquare, CalendarDays, HardDrive, Globe, Check, ChevronDown, ChevronUp, Key, Link2, Timer, Minus, Plus, Accessibility, Monitor, Palette, Bell, Keyboard, MousePointer, Eye, Database, Shield, Volume2, Brain, Tag, Save, Loader2, ExternalLink, Unlink } from 'lucide-react';
+import { Code2, Mail, MessageSquare, CalendarDays, HardDrive, Globe, Check, ChevronDown, ChevronUp, Key, Link2, Timer, Minus, Plus, Accessibility, Monitor, Palette, Bell, Keyboard, MousePointer, Eye, Database, Shield, Volume2, Brain, Tag, Save, Loader2, ExternalLink, Unlink, ShoppingBag } from 'lucide-react';
+import { AxelRewardShop } from '../gamification/AxelRewardShop';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
 import type { AccessibilitySettings } from '../../store/useTaskStore';
 import { WebhookJarvisSection } from './WebhookJarvisSection';
+import { AxelOnboardingWizard } from './AxelOnboardingWizard';
+import { GmailImapSection } from './GmailImapSection';
 
-type SettingsTab = 'integracoes' | 'webhook' | 'foco' | 'acessibilidade' | 'ia' | 'sistema';
+type SettingsTab = 'integracoes' | 'webhook' | 'foco' | 'gamificacao' | 'acessibilidade' | 'ia' | 'sistema';
 
 interface Platform {
   id: string;
@@ -30,6 +33,7 @@ const TABS = [
   { id: 'integracoes' as SettingsTab, label: 'Integracoes', icon: Link2 },
   { id: 'webhook' as SettingsTab, label: 'Webhooks Jarvis', icon: Code2 },
   { id: 'foco' as SettingsTab, label: 'Preferencias de Foco', icon: Timer },
+  { id: 'gamificacao' as SettingsTab, label: 'Gamificacao', icon: ShoppingBag },
   { id: 'ia' as SettingsTab, label: 'Keywords & IA', icon: Brain },
   { id: 'acessibilidade' as SettingsTab, label: 'Acessibilidade', icon: Accessibility },
   { id: 'sistema' as SettingsTab, label: 'Sistema', icon: Monitor },
@@ -40,6 +44,9 @@ function GoogleCalendarCard() {
   const connectGoogle = useTaskStore((s) => s.connectGoogleCalendar);
   const disconnectGoogle = useTaskStore((s) => s.disconnectGoogleCalendar);
   const checkStatus = useTaskStore((s) => s.checkGoogleStatus);
+  const sincronizarGmail = useTaskStore((s) => s.sincronizarGmail);
+  const isSyncingGmail = useTaskStore((s) => s.isSyncingGmail);
+  const lastSyncResult = useTaskStore((s) => s.lastSyncResult);
   const [loading, setLoading] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
 
@@ -59,11 +66,24 @@ function GoogleCalendarCard() {
     setDisconnecting(true);
     try {
       await disconnectGoogle();
-      toast.success('Google Calendar desconectado');
+      toast.success('Google desconectado');
     } catch {
       toast.error('Erro ao desconectar');
     } finally {
       setDisconnecting(false);
+    }
+  }
+
+  async function handleGmailSync() {
+    try {
+      const result = await sincronizarGmail();
+      if (!result) {
+        toast.error('Sync não disponível — faça login ou conecte o Google');
+        return;
+      }
+      toast.success(`${result.tarefas_geradas} tarefa(s) de ${result.emails_lidos} e-mail(s)`);
+    } catch {
+      toast.error('Erro ao sincronizar Gmail');
     }
   }
 
@@ -74,9 +94,11 @@ function GoogleCalendarCard() {
           <CalendarDays className={`w-5 h-5 ${connected ? 'text-emerald-400' : 'text-violet-400'}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-semibold text-white">Google Calendar</h3>
+          <h3 className="text-[15px] font-semibold text-white">Google OAuth (opcional)</h3>
           <p className="text-xs text-zinc-500 mt-0.5">
-            {connected ? 'Agenda sincronizada via OAuth2' : 'Conecte para sincronizar eventos e compromissos'}
+            {connected
+              ? 'OAuth ativo — exige projeto no Google Cloud'
+              : 'Opcional. Para e-mail grátis, use Gmail com senha de app acima.'}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -85,6 +107,15 @@ function GoogleCalendarCard() {
               <span className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
                 <Check className="w-3.5 h-3.5" /> Conectado
               </span>
+              <button
+                type="button"
+                onClick={() => void handleGmailSync()}
+                disabled={isSyncingGmail}
+                className="px-3 py-1.5 text-[12px] font-medium rounded-lg border border-violet-500/25 text-violet-300 hover:bg-violet-500/10 transition-all flex items-center gap-1.5 disabled:opacity-40"
+              >
+                {isSyncingGmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+                Sync Gmail
+              </button>
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
@@ -101,11 +132,16 @@ function GoogleCalendarCard() {
               className="px-4 py-2 text-[13px] font-semibold rounded-xl bg-violet-600 text-white hover:bg-violet-500 transition-all flex items-center gap-2 disabled:opacity-40 shadow-lg shadow-violet-500/20"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
-              Conectar Agenda
+              Conectar Google
             </button>
           )}
         </div>
       </div>
+      {connected && lastSyncResult && (
+        <p className="px-5 pb-4 text-[11px] text-zinc-500 font-mono tabular-nums">
+          Último sync: {lastSyncResult.emails_lidos} e-mails · {lastSyncResult.tarefas_geradas} tarefas
+        </p>
+      )}
     </div>
   );
 }
@@ -286,24 +322,24 @@ export function SettingsView() {
   const kwList = kwInput.split(',').map((k: string) => k.trim()).filter(Boolean);
 
   return (
-    <div className="max-w-5xl mx-auto pb-12">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Configuracoes</h1>
+    <div className="max-w-5xl mx-auto px-3 sm:px-4 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-12">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Configuracoes</h1>
         <p className="text-zinc-500 text-sm mt-0.5">Gerencie integracoes e preferencias do Simply-Life.</p>
       </div>
 
-      <div className="flex gap-8">
-        <nav className="w-56 shrink-0">
-          <div className="space-y-1">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8">
+        <nav className="md:w-56 shrink-0 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto md:overflow-visible">
+          <div className="flex md:flex-col gap-1.5 md:gap-1 min-w-max md:min-w-0 pb-1 md:pb-0">
             {TABS.map(({ id, label, icon: TabIcon }) => {
               const isActive = activeTab === id;
               return (
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all ${isActive ? 'bg-zinc-800/80 text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30'}`}
+                  className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-[12px] md:text-[13px] font-medium transition-all whitespace-nowrap ${isActive ? 'bg-zinc-800/80 text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30'}`}
                 >
-                  <TabIcon className="w-4 h-4" />
+                  <TabIcon className="w-4 h-4 shrink-0" />
                   {label}
                 </button>
               );
@@ -315,7 +351,9 @@ export function SettingsView() {
           {/* === INTEGRACOES === */}
           {activeTab === 'integracoes' && (
             <div className="space-y-4">
-              <div className="mb-6">
+              <AxelOnboardingWizard onSelectTab={(tab) => setActiveTab(tab)} />
+              <GmailImapSection />
+              <div className="mb-6 mt-6">
                 <h2 className="text-lg font-semibold text-white">Integracoes</h2>
                 <p className="text-xs text-zinc-500 mt-1">Conecte suas plataformas para o Simply-Life capturar dados automaticamente.</p>
               </div>
@@ -328,6 +366,18 @@ export function SettingsView() {
           )}
 
           {activeTab === 'webhook' && <WebhookJarvisSection />}
+
+          {activeTab === 'gamificacao' && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-white">Gamificacao</h2>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Troque XP por recompensas e proteja sua ofensiva diaria.
+                </p>
+              </div>
+              <AxelRewardShop />
+            </div>
+          )}
 
           {/* === FOCO === */}
           {activeTab === 'foco' && (

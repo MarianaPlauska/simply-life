@@ -1,4 +1,6 @@
 import { toast } from 'sonner'
+import { celebrateTaskComplete } from './axelCelebration'
+import { isMainQuestTask, mainQuestBonusXp } from './mainQuest'
 import { evaluateProofOfWork } from './proofOfWork'
 import { useTaskStore } from '../store/useTaskStore'
 import type { TarefaUnificada } from '../types'
@@ -35,14 +37,28 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
 
   store.recordAchievement(tarefa.id, tarefa.titulo, focusMinutes)
 
+  const baseXp = Math.max(15, Math.round(score || 25))
+  if (isMainQuestTask(tarefa.id))
+  {
+    const bonus = mainQuestBonusXp(baseXp)
+    await store.addXP('foco', bonus)
+  }
+
+  celebrateTaskComplete({
+    streakIncremented: incremented,
+    streakCount: streakCount,
+    mainQuest: isMainQuestTask(tarefa.id),
+  })
+
   if (streakQualified && incremented)
   {
     const streakLabel = `Ofensiva ${streakCount} ${streakCount === 1 ? 'dia' : 'dias'}!`
+    const mq = isMainQuestTask(tarefa.id) ? ` · Main Quest +${mainQuestBonusXp(baseXp)} XP` : ''
     toast.success(`+${FOCUS_XP_BONUS} XP | ${streakLabel}`, {
       duration: 3200,
       position: 'bottom-right',
       className: 'font-mono text-sm',
-      description: 'Prova de trabalho validada',
+      description: `Prova de trabalho validada${mq}`,
     })
     return
   }
