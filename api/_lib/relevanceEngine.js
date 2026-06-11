@@ -1,4 +1,4 @@
-// Motor de Relevância ORION — influência + semântica + prazo
+// Motor de Relevância AXEL — influência + semântica + prazo
 
 import {
   DEFAULT_INFLUENCE_MAP,

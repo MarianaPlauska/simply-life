@@ -10,7 +10,7 @@ import { QuickStatsBar } from '../dashboard/QuickStatsBar'
 import { FinancasTabelaDensa } from '../dashboard/FinancasTabelaDensa'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
-import { UserStatus } from '../dashboard/UserStatus'
+import { DashboardAxelFocus } from '../dashboard/DashboardAxelFocus'
 import { DashboardPanel } from '../dashboard/DashboardPanel'
 
 // Dashboard enterprise — comando denso, módulos, operação e analytics em sequência
@@ -85,7 +85,7 @@ export function DashboardView()
       <div className="px-4 lg:px-8 py-4 max-w-[1600px] mx-auto w-full flex flex-col gap-4 flex-1">
         <DashboardModulesRegistry />
 
-        {/* 01 — Execução + carga + operador */}
+        {/* 01 — Comando: execução + carga + próximo passo AXEL */}
         <div className="grid grid-cols-12 gap-3 items-stretch">
           <div className="col-span-12 xl:col-span-5 min-w-0">
             <DashboardCriticalTasksPreview />
@@ -94,7 +94,7 @@ export function DashboardView()
             <SystemStatePanel />
           </div>
           <div className="col-span-12 md:col-span-6 xl:col-span-4 min-w-0">
-            <UserStatus />
+            <DashboardAxelFocus />
           </div>
         </div>
 

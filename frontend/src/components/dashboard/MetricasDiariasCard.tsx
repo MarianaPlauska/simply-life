@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
-  ORION_RAIL_BLOCK,
-  ORION_SECTION_TITLE,
-  ORION_LINE,
-  ORION_PROGRESS,
-  ORION_TEXT_PRIMARY,
-} from '../../constants/orionSurfaces'
+  AXEL_RAIL_BLOCK,
+  AXEL_SECTION_TITLE,
+  AXEL_LINE,
+  AXEL_PROGRESS,
+  AXEL_TEXT_PRIMARY,
+} from '../../constants/axelSurfaces'
 import { NutricaoProteinaBlock } from './NutricaoProteinaBlock'
 
 // Métricas diárias — hidratação, foco e bloco visual de nutrição
@@ -29,15 +29,15 @@ function MetricRow({ label, detail, pct, onClick }: MetricRowProps)
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left py-2.5 ${ORION_LINE}`}
+      className={`w-full text-left py-2.5 ${AXEL_LINE}`}
     >
       <div className="flex items-center justify-between gap-3 mb-2">
-        <span className={`text-[13px] font-medium tracking-tight ${ORION_TEXT_PRIMARY}`}>{label}</span>
+        <span className={`text-[13px] font-medium tracking-tight ${AXEL_TEXT_PRIMARY}`}>{label}</span>
         <span className="text-[12px] text-zinc-500 tabular-nums shrink-0">{detail}</span>
       </div>
       <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-900 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${ORION_PROGRESS}`}
+          className={`h-full rounded-full transition-all duration-700 ${AXEL_PROGRESS}`}
           style={{ width: `${Math.min(100, pct)}%` }}
         />
       </div>
@@ -89,9 +89,9 @@ export function MetricasDiariasCard()
   }, [habitos, focusState])
 
   return (
-    <section aria-labelledby="metricas-diarias" className={ORION_RAIL_BLOCK}>
+    <section aria-labelledby="metricas-diarias" className={AXEL_RAIL_BLOCK}>
       <div className="flex items-center justify-between gap-3 mb-3">
-        <h2 id="metricas-diarias" className={ORION_SECTION_TITLE}>
+        <h2 id="metricas-diarias" className={AXEL_SECTION_TITLE}>
           Saúde e nutrição
         </h2>
         <button

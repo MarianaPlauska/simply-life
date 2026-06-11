@@ -5,11 +5,11 @@ import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { useTaskStore } from '../../store/useTaskStore'
 import { urgencyBadgeClass } from '../../lib/urgencyEngine'
 import {
-  ORION_LINK,
-  ORION_ROW_HOVER,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_LINK,
+  AXEL_ROW_HOVER,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 import { DashboardPanel, DashboardPanelLink } from './DashboardPanel'
 
 const PREVIEW_LIMIT = 5
@@ -52,16 +52,16 @@ export function DashboardCriticalTasksPreview()
               <button
                 type="button"
                 onClick={() => navigate('/kanban')}
-                className={`w-full flex items-center gap-3 py-3 px-4 text-left ${ORION_ROW_HOVER}`}
+                className={`w-full flex items-center gap-3 py-3 px-4 text-left ${AXEL_ROW_HOVER}`}
               >
-                <span className={`font-mono text-[11px] tabular-nums w-6 shrink-0 ${ORION_TEXT_SECONDARY}`}>
+                <span className={`font-mono text-[11px] tabular-nums w-6 shrink-0 ${AXEL_TEXT_SECONDARY}`}>
                   {String(idx + 1).padStart(2, '0')}
                 </span>
-                <span className={`flex-1 min-w-0 text-[13px] truncate ${ORION_TEXT_PRIMARY}`}>
+                <span className={`flex-1 min-w-0 text-[13px] truncate ${AXEL_TEXT_PRIMARY}`}>
                   {t.titulo}
                 </span>
                 {tag && (
-                  <span className={`hidden md:inline font-mono text-[9px] uppercase tracking-wider shrink-0 ${ORION_TEXT_SECONDARY}`}>
+                  <span className={`hidden md:inline font-mono text-[9px] uppercase tracking-wider shrink-0 ${AXEL_TEXT_SECONDARY}`}>
                     {tag}
                   </span>
                 )}
@@ -69,7 +69,7 @@ export function DashboardCriticalTasksPreview()
                   <Zap className="w-3 h-3" strokeWidth={2} />
                   {score}
                 </span>
-                <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${ORION_LINK}`} />
+                <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${AXEL_LINK}`} />
               </button>
             </li>
           )

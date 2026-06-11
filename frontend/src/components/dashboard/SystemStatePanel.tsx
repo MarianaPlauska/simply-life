@@ -5,14 +5,14 @@ import {
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
-  ORION_BORDERLESS_PANEL,
-  ORION_BTN_PRIMARY,
-  ORION_PROGRESS_THICK,
-  ORION_ROW_HOVER,
-  ORION_SECTION_TITLE,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_BORDERLESS_PANEL,
+  AXEL_BTN_PRIMARY,
+  AXEL_PROGRESS_THICK,
+  AXEL_ROW_HOVER,
+  AXEL_SECTION_TITLE,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
 // Carga operacional + resumo rápido — painel lateral enterprise
 
@@ -121,36 +121,36 @@ export function SystemStatePanel()
   const pct = Math.round(CARGA_PCT[state.carga] * 100)
 
   return (
-    <aside className={`${ORION_BORDERLESS_PANEL} flex flex-col h-full`}>
+    <aside className={`${AXEL_BORDERLESS_PANEL} flex flex-col h-full`}>
       <header className="mb-3">
-        <p className={ORION_SECTION_TITLE}>Carga operacional</p>
+        <p className={AXEL_SECTION_TITLE}>Carga operacional</p>
       </header>
 
       <div className="flex items-end justify-between gap-3 pb-3 border-b border-line">
         <div>
-          <p className={`font-mono text-[10px] uppercase ${ORION_TEXT_SECONDARY}`}>Índice</p>
+          <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>Índice</p>
           <p className={`text-3xl font-display capitalize mt-1 ${CARGA_CLASS[state.carga]}`}>
             {state.carga}
           </p>
         </div>
         <div className="text-right">
-          <p className={`font-mono text-[10px] ${ORION_TEXT_SECONDARY}`}>Capacidade</p>
-          <p className={`font-mono text-lg tabular-nums ${ORION_TEXT_PRIMARY}`}>{pct}%</p>
+          <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>Capacidade</p>
+          <p className={`font-mono text-lg tabular-nums ${AXEL_TEXT_PRIMARY}`}>{pct}%</p>
         </div>
       </div>
 
-      <div className={`${ORION_PROGRESS_THICK} my-3`}>
+      <div className={`${AXEL_PROGRESS_THICK} my-3`}>
         <div
           className={`h-full rounded-sl ${CARGA_BAR[state.carga]}`}
           style={{ width: `${pct}%` }}
         />
       </div>
 
-      <p className={`text-[12px] leading-relaxed mb-4 ${ORION_TEXT_SECONDARY}`}>
+      <p className={`text-[12px] leading-relaxed mb-4 ${AXEL_TEXT_SECONDARY}`}>
         {state.sugestaoFrase}
       </p>
 
-      <h4 className={`${ORION_SECTION_TITLE} mb-2`}>Resumo rápido</h4>
+      <h4 className={`${AXEL_SECTION_TITLE} mb-2`}>Resumo rápido</h4>
       <ul role="list" className="space-y-0 divide-y divide-line border border-line rounded-sl overflow-hidden mb-4">
         <ResumoItem
           Icon={ListChecks}
@@ -177,7 +177,7 @@ export function SystemStatePanel()
       <button
         type="button"
         onClick={() => navigate('/saude')}
-        className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-mono uppercase tracking-wide ${ORION_BTN_PRIMARY}`}
+        className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
       >
         Saúde completa
         <ArrowRight className="w-3.5 h-3.5" />
@@ -196,12 +196,12 @@ interface ResumoItemProps
 function ResumoItem({ Icon, primary, secondary }: ResumoItemProps)
 {
   return (
-    <li className={`flex items-start gap-2.5 px-3 py-2.5 ${ORION_ROW_HOVER}`}>
-      <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${ORION_TEXT_SECONDARY}`} strokeWidth={1.75} />
+    <li className={`flex items-start gap-2.5 px-3 py-2.5 ${AXEL_ROW_HOVER}`}>
+      <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${AXEL_TEXT_SECONDARY}`} strokeWidth={1.75} />
       <div className="min-w-0">
-        <div className={`text-[12px] font-medium ${ORION_TEXT_PRIMARY}`}>{primary}</div>
+        <div className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>{primary}</div>
         {secondary && (
-          <div className={`font-mono text-[10px] mt-0.5 ${ORION_TEXT_SECONDARY}`}>{secondary}</div>
+          <div className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{secondary}</div>
         )}
       </div>
     </li>

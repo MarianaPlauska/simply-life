@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Egg } from 'lucide-react'
-import { ORION_PROGRESS, ORION_PROGRESS_THICK } from '../../constants/orionSurfaces'
+import { AXEL_PROGRESS, AXEL_PROGRESS_THICK } from '../../constants/axelSurfaces'
 
 // Bloco visual de nutrição — proteína + controle de ovos (máx. 3/dia)
 
@@ -44,9 +44,9 @@ export function NutricaoProteinaBlock({ atual, meta, pct, onNavigate }: Nutricao
         </div>
       </button>
 
-      <div className={ORION_PROGRESS_THICK} aria-hidden="true">
+      <div className={AXEL_PROGRESS_THICK} aria-hidden="true">
         <div
-          className={`h-full rounded-full transition-all duration-700 ${ORION_PROGRESS}`}
+          className={`h-full rounded-full transition-all duration-700 ${AXEL_PROGRESS}`}
           style={{ width: `${Math.min(100, pct)}%` }}
         />
       </div>
@@ -71,7 +71,7 @@ export function NutricaoProteinaBlock({ atual, meta, pct, onNavigate }: Nutricao
                 onClick={() => toggleOvo(i)}
                 className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all ${
                   ativo
-                    ? `${ORION_PROGRESS} border-transparent shadow-[0_0_12px_rgba(168,85,247,0.25)]`
+                    ? `${AXEL_PROGRESS} border-transparent shadow-[0_0_12px_rgba(168,85,247,0.25)]`
                     : noLimite
                       ? 'bg-zinc-100 border-zinc-200 opacity-40 cursor-not-allowed dark:bg-zinc-900/30 dark:border-zinc-800/80'
                       : 'bg-zinc-100 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-200 dark:bg-zinc-900/50 dark:border-zinc-700/40 dark:hover:border-zinc-600 dark:hover:bg-zinc-800/60'

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { User, Mail, Camera, Shield, Bell, Moon, Keyboard, Monitor, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
+import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard';
 
 export function ProfileView() {
   const userProfile = useTaskStore((s) => s.userProfile);
@@ -46,6 +47,8 @@ export function ProfileView() {
           </div>
         </div>
       </section>
+
+      <OperadorOfensivaCard />
 
       {/* Edit Fields */}
       <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-6 space-y-5">

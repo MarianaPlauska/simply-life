@@ -3,11 +3,11 @@ import { Shield, Lock, Cloud, Activity } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import {
-  ORION_CHROME_PLANE,
-  ORION_DISPLAY_STAT,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_CHROME_PLANE,
+  AXEL_DISPLAY_STAT,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
 // Barra de comando — KPIs densos + indicadores de confiança (enterprise)
 
@@ -28,18 +28,18 @@ function KpiCell({ label, value, hint, variant = 'default' }: KpiCellProps)
     ? 'text-urgente'
     : variant === 'ok'
       ? 'text-concluido'
-      : ORION_TEXT_PRIMARY
+      : AXEL_TEXT_PRIMARY
 
   return (
     <div className="px-4 py-3 border-r border-line last:border-r-0 min-w-0">
-      <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${ORION_TEXT_SECONDARY}`}>
+      <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
         {label}
       </p>
       <p className={`text-xl font-display tabular-nums mt-1 leading-none ${valueClass}`}>
         {value}
       </p>
       {hint && (
-        <p className={`font-mono text-[10px] mt-1 truncate ${ORION_TEXT_SECONDARY}`}>{hint}</p>
+        <p className={`font-mono text-[10px] mt-1 truncate ${AXEL_TEXT_SECONDARY}`}>{hint}</p>
       )}
     </div>
   )
@@ -111,15 +111,15 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
   })
 
   return (
-    <div className={`border-b border-line ${ORION_CHROME_PLANE}`}>
+    <div className={`border-b border-line ${AXEL_CHROME_PLANE}`}>
       <div className="px-4 lg:px-8 py-4 max-w-[1600px] mx-auto w-full">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-4">
           <div>
             <p className="sl-eyebrow">Centro de comando</p>
-            <h1 className={`${ORION_DISPLAY_STAT} text-2xl md:text-3xl mt-1`}>
+            <h1 className={`${AXEL_DISPLAY_STAT} text-2xl md:text-3xl mt-1`}>
               {greeting}, {firstName}
             </h1>
-            <p className={`font-mono text-[11px] capitalize mt-1 ${ORION_TEXT_SECONDARY}`}>
+            <p className={`font-mono text-[11px] capitalize mt-1 ${AXEL_TEXT_SECONDARY}`}>
               {dateLine}
             </p>
           </div>

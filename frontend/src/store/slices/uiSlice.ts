@@ -9,11 +9,11 @@ export interface UISlice {
   realtimeStatus: RealtimeStatus;
   setRealtimeStatus: (status: RealtimeStatus) => void;
   /** IDs de tarefas recém-ingeridas — highlight no Kanban */
-  orionIngestionHighlightIds: number[];
+  axelIngestionHighlightIds: number[];
   pushIngestionHighlights: (ids: number[]) => void;
   clearIngestionHighlights: () => void;
-  orionIngestionPolling: boolean;
-  setOrionIngestionPolling: (active: boolean) => void;
+  axelIngestionPolling: boolean;
+  setAxelIngestionPolling: (active: boolean) => void;
   activeView: ActiveView;
   isQuickCaptureOpen: boolean;
   isCommandPaletteOpen: boolean;
@@ -43,19 +43,19 @@ export interface UISlice {
 export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) => ({
   realtimeStatus: 'offline',
   setRealtimeStatus: (status) => set({ realtimeStatus: status }),
-  orionIngestionHighlightIds: [],
+  axelIngestionHighlightIds: [],
   pushIngestionHighlights: (ids) =>
   {
     if (ids.length === 0) return;
     set((state) =>
     {
-      const merged = new Set([...state.orionIngestionHighlightIds, ...ids]);
-      return { orionIngestionHighlightIds: [...merged] };
+      const merged = new Set([...state.axelIngestionHighlightIds, ...ids]);
+      return { axelIngestionHighlightIds: [...merged] };
     });
   },
-  clearIngestionHighlights: () => set({ orionIngestionHighlightIds: [] }),
-  orionIngestionPolling: false,
-  setOrionIngestionPolling: (active) => set({ orionIngestionPolling: active }),
+  clearIngestionHighlights: () => set({ axelIngestionHighlightIds: [] }),
+  axelIngestionPolling: false,
+  setAxelIngestionPolling: (active) => set({ axelIngestionPolling: active }),
   activeView: 'dashboard',
   isQuickCaptureOpen: false,
   isCommandPaletteOpen: false,

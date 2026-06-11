@@ -1,5 +1,5 @@
 import { MOCK_BUDGET_503020 } from '../../data/mockDashboardData'
-import { ORION_PROGRESS } from '../../constants/orionSurfaces'
+import { AXEL_PROGRESS } from '../../constants/axelSurfaces'
 
 // Mini gráfico de barras — meta vs real da regra 50-30-20
 
@@ -84,7 +84,7 @@ export function Budget503020Chart()
           Meta
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-sm ${ORION_PROGRESS}`} />
+          <span className={`w-2 h-2 rounded-sm ${AXEL_PROGRESS}`} />
           Gasto real
         </span>
         {categories.map((cat) => (

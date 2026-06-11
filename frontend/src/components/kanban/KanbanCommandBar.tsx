@@ -1,15 +1,15 @@
 import { Activity, AlertTriangle, Brain, Loader2, Zap } from 'lucide-react'
 import { computeMentalLoad } from '../../lib/energyOrchestration'
 import { readOrchestrationMetrics } from '../../lib/contextRationale'
-import { ORION_KANBAN_COMMAND } from '../../constants/orionKanbanTheme'
+import { AXEL_KANBAN_COMMAND } from '../../constants/axelKanbanTheme'
 import {
-  ORION_BTN_PRIMARY,
-  ORION_CHROME_PLANE,
-  ORION_DISPLAY_STAT,
-  ORION_PROGRESS_THICK,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_BTN_PRIMARY,
+  AXEL_CHROME_PLANE,
+  AXEL_DISPLAY_STAT,
+  AXEL_PROGRESS_THICK,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
 // Faixa de comando Kanban — KPIs densos no padrão do dashboard
@@ -45,18 +45,18 @@ function KpiCell({
         ? 'text-atencao'
         : variant === 'ok'
           ? 'text-concluido'
-          : ORION_TEXT_PRIMARY
+          : AXEL_TEXT_PRIMARY
 
   return (
     <div className="px-4 py-3 border-r border-line last:border-r-0 min-w-[88px] flex-1">
-      <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${ORION_TEXT_SECONDARY}`}>
+      <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
         {label}
       </p>
-      <p className={`${ORION_DISPLAY_STAT} text-lg mt-0.5 leading-none ${valueClass}`}>
+      <p className={`${AXEL_DISPLAY_STAT} text-lg mt-0.5 leading-none ${valueClass}`}>
         {value}
       </p>
       {hint && (
-        <p className={`font-mono text-[10px] mt-1 truncate ${ORION_TEXT_SECONDARY}`}>{hint}</p>
+        <p className={`font-mono text-[10px] mt-1 truncate ${AXEL_TEXT_SECONDARY}`}>{hint}</p>
       )}
     </div>
   )
@@ -89,8 +89,8 @@ export function KanbanCommandBar({
   const minutes = metrics.minutesSaved > 0 ? `${metrics.minutesSaved}m` : '—'
 
   return (
-    <section className={ORION_KANBAN_COMMAND} aria-label="Comando do pipeline">
-      <div className={`flex flex-wrap items-stretch ${ORION_CHROME_PLANE} border-b border-line`}>
+    <section className={AXEL_KANBAN_COMMAND} aria-label="Comando do pipeline">
+      <div className={`flex flex-wrap items-stretch ${AXEL_CHROME_PLANE} border-b border-line`}>
         <KpiCell label="Pipeline" value={String(tarefas.length)} hint="demandas ativas" />
         <KpiCell
           label="Hoje"
@@ -99,16 +99,16 @@ export function KanbanCommandBar({
           variant={hojeCount > 8 ? 'warn' : 'default'}
         />
         <div className="px-4 py-3 border-r border-line min-w-[140px] flex-[1.2]">
-          <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${ORION_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
             Carga mental
           </p>
           <div className="flex items-baseline gap-2 mt-1">
-            <span className={`text-lg font-display tabular-nums leading-none ${ORION_TEXT_PRIMARY}`}>
+            <span className={`text-lg font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
               {load.sum}
             </span>
-            <span className={`font-mono text-[10px] ${ORION_TEXT_SECONDARY}`}>/ {load.cap}</span>
+            <span className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>/ {load.cap}</span>
           </div>
-          <div className={`mt-2 ${ORION_PROGRESS_THICK} h-1.5`} title={load.tooltip}>
+          <div className={`mt-2 ${AXEL_PROGRESS_THICK} h-1.5`} title={load.tooltip}>
             <div
               className={`h-full rounded-sl transition-all duration-500 ${fillClass}`}
               style={{ width: `${fillPct}%` }}
@@ -144,7 +144,7 @@ export function KanbanCommandBar({
             <Brain className="w-3 h-3" strokeWidth={1.75} />
             {intelligenceOn ? 'Orquestração ativa' : 'Standby'}
           </span>
-          <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] ${ORION_TEXT_SECONDARY}`}>
+          <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
             <Activity className="w-3 h-3" strokeWidth={1.75} />
             Economia {minutes}
           </span>
@@ -162,7 +162,7 @@ export function KanbanCommandBar({
           type="button"
           onClick={onRecalculate}
           disabled={loading}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono uppercase tracking-wide disabled:opacity-40 shrink-0 ${ORION_BTN_PRIMARY}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono uppercase tracking-wide disabled:opacity-40 shrink-0 ${AXEL_BTN_PRIMARY}`}
           aria-busy={loading}
         >
           {loading ? (

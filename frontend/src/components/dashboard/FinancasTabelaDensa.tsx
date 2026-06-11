@@ -5,10 +5,10 @@ import {
   type MockFinanceStatus,
 } from '../../data/mockDashboardData'
 import {
-  ORION_ROW_HOVER,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_ROW_HOVER,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
 import { FinanceBalanceInsight } from './FinanceBalanceInsight'
 import { Budget503020Chart } from './Budget503020Chart'
@@ -45,7 +45,7 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
       <div className="overflow-x-auto mt-3">
         <table className="w-full border-collapse text-[11px]">
           <thead>
-            <tr className={`font-mono uppercase text-[9px] tracking-wider ${ORION_TEXT_SECONDARY} border-b border-line`}>
+            <tr className={`font-mono uppercase text-[9px] tracking-wider ${AXEL_TEXT_SECONDARY} border-b border-line`}>
               <th className="pb-2 pr-3 text-left font-medium w-[52px]">Data</th>
               <th className="pb-2 pr-3 text-left font-medium">Descrição</th>
               <th className="pb-2 pr-3 text-right font-medium w-[80px]">Valor</th>
@@ -59,13 +59,13 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
               return (
                 <tr
                   key={row.id}
-                  className={`border-b border-line last:border-0 cursor-pointer ${ORION_ROW_HOVER}`}
+                  className={`border-b border-line last:border-0 cursor-pointer ${AXEL_ROW_HOVER}`}
                   onClick={() => navigate('/financeiro')}
                 >
-                  <td className={`py-2.5 pr-3 font-mono tabular-nums align-middle ${ORION_TEXT_SECONDARY}`}>
+                  <td className={`py-2.5 pr-3 font-mono tabular-nums align-middle ${AXEL_TEXT_SECONDARY}`}>
                     {row.data}
                   </td>
-                  <td className={`py-2.5 pr-3 truncate max-w-[160px] align-middle ${ORION_TEXT_PRIMARY}`}>
+                  <td className={`py-2.5 pr-3 truncate max-w-[160px] align-middle ${AXEL_TEXT_PRIMARY}`}>
                     {row.descricao}
                   </td>
                   <td className={`py-2.5 pr-3 text-right font-mono tabular-nums align-middle ${
@@ -87,7 +87,7 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
 
       <div className="mt-4 pt-4 border-t border-line">
         <div className="flex items-center justify-between mb-2">
-          <span className={`font-mono text-[9px] uppercase tracking-wider ${ORION_TEXT_SECONDARY}`}>
+          <span className={`font-mono text-[9px] uppercase tracking-wider ${AXEL_TEXT_SECONDARY}`}>
             Regra 50 · 30 · 20
           </span>
         </div>

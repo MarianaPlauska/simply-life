@@ -1,6 +1,6 @@
 import { Home, KanbanSquare, Wallet, Heart } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { ORION_CHROME_PLANE } from '../../constants/orionSurfaces'
+import { AXEL_CHROME_PLANE } from '../../constants/axelSurfaces'
 
 // Navegação de bolso — visível só no mobile (md:hidden no App)
 
@@ -47,7 +47,7 @@ export function MobileBottomNav()
   return (
     <nav
       aria-label="Navegação principal"
-      className={`fixed bottom-0 inset-x-0 z-50 flex md:hidden items-center justify-around border-t border-line pb-[env(safe-area-inset-bottom,0px)] ${ORION_CHROME_PLANE}`}
+      className={`fixed bottom-0 inset-x-0 z-50 flex md:hidden items-center justify-around border-t border-line pb-[env(safe-area-inset-bottom,0px)] ${AXEL_CHROME_PLANE}`}
     >
       {NAV_ITEMS.map(({ path, label, icon: Icon, isActive }) =>
       {

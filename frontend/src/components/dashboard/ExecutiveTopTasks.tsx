@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight } from 'lucide-react'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import {
-  ORION_SOFT_CARD,
-  ORION_SECTION_TITLE,
-  ORION_TOUCH_ROW,
-} from '../../constants/orionSurfaces'
+  AXEL_SOFT_CARD,
+  AXEL_SECTION_TITLE,
+  AXEL_TOUCH_ROW,
+} from '../../constants/axelSurfaces'
 import { useTaskStore } from '../../store/useTaskStore'
 import { TaskLineRow } from '../kanban/TaskLineRow'
 
@@ -28,10 +28,10 @@ export function ExecutiveTopTasks()
   }, [storeTarefas])
 
   return (
-    <section aria-labelledby="executive-top-tasks" className={ORION_SOFT_CARD}>
+    <section aria-labelledby="executive-top-tasks" className={AXEL_SOFT_CARD}>
       <div className="flex items-end justify-between gap-4 mb-4">
         <div>
-          <h2 id="executive-top-tasks" className={`${ORION_SECTION_TITLE} mb-2`}>
+          <h2 id="executive-top-tasks" className={`${AXEL_SECTION_TITLE} mb-2`}>
             Linha de execução
           </h2>
           <p className="text-lg sm:text-[22px] font-semibold tracking-tighter text-zinc-100 leading-none">
@@ -42,7 +42,7 @@ export function ExecutiveTopTasks()
         <button
           type="button"
           onClick={() => navigate('/kanban')}
-          className={`flex items-center gap-1 text-[12px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors ${ORION_TOUCH_ROW} px-2 -my-3`}
+          className={`flex items-center gap-1 text-[12px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors ${AXEL_TOUCH_ROW} px-2 -my-3`}
         >
           Kanban
           <ChevronRight className="w-4 h-4" />
@@ -51,7 +51,7 @@ export function ExecutiveTopTasks()
 
       <div role="list">
         {topTasks.length === 0 ? (
-          <p className={`${ORION_TOUCH_ROW} text-[13px] text-zinc-500 tracking-tight`}>
+          <p className={`${AXEL_TOUCH_ROW} text-[13px] text-zinc-500 tracking-tight`}>
             Nenhuma tarefa pendente no radar.
           </p>
         ) : (

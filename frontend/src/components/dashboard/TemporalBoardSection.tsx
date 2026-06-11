@@ -5,7 +5,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import type { TarefaUnificada } from '../../types'
 import { TaskLineRow } from '../kanban/TaskLineRow'
 
-// LINHA DE EXECUÇÃO ATIVA — 4 colunas Kanban temporal (estilo Orion)
+// LINHA DE EXECUÇÃO ATIVA — 4 colunas Kanban temporal (estilo Axel)
 // Ordenado por prioridade matematica (Score)
 
 interface TemporalColumn

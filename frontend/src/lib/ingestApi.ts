@@ -1,6 +1,6 @@
-// Cliente HTTP — endpoint universal de ingestão ORION
+// Cliente HTTP — endpoint universal de ingestão AXEL
 
-export interface OrionIngestPayload
+export interface AxelIngestPayload
 {
   user_id: string
   source: string
@@ -9,7 +9,7 @@ export interface OrionIngestPayload
   priority?: string
 }
 
-export interface OrionIngestResult
+export interface AxelIngestResult
 {
   success: boolean
   id?: number
@@ -18,8 +18,8 @@ export interface OrionIngestResult
   error?: string
 }
 
-export async function postOrionIngest(
-  payload: OrionIngestPayload,
+export async function postAxelIngest(
+  payload: AxelIngestPayload,
   signature?: string,
 ): Promise<Response>
 {

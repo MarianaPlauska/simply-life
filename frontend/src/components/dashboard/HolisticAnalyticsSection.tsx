@@ -6,14 +6,14 @@ import {
   type AnalyticsTimeframe,
 } from '../../data/analyticsMockData'
 import {
-  ORION_ANALYTICS_CARD,
-  ORION_FILTER_PILL_ACTIVE,
-  ORION_FILTER_PILL_IDLE,
-  ORION_SECTION_DIVIDER,
-  ORION_SECTION_TITLE,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_ANALYTICS_CARD,
+  AXEL_FILTER_PILL_ACTIVE,
+  AXEL_FILTER_PILL_IDLE,
+  AXEL_SECTION_DIVIDER,
+  AXEL_SECTION_TITLE,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 import { ProteinAreaChart } from './analytics/ProteinAreaChart'
 import { WaterBarChart } from './analytics/WaterBarChart'
 import { ExerciseBarChart } from './analytics/ExerciseBarChart'
@@ -33,14 +33,14 @@ interface ChartPanelProps
 function ChartPanel({ title, subtitle, Icon, iconClass, children }: ChartPanelProps)
 {
   return (
-    <article className={`${ORION_ANALYTICS_CARD} flex flex-col`}>
+    <article className={`${AXEL_ANALYTICS_CARD} flex flex-col`}>
       <div className="flex items-start gap-2.5 mb-3 shrink-0">
         <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${iconClass}`} strokeWidth={1.75} />
         <div className="min-w-0">
-          <h3 className={`text-[13px] font-semibold ${ORION_TEXT_PRIMARY}`}>
+          <h3 className={`text-[13px] font-semibold ${AXEL_TEXT_PRIMARY}`}>
             {title}
           </h3>
-          <p className={`text-[11px] font-mono mt-0.5 ${ORION_TEXT_SECONDARY}`}>{subtitle}</p>
+          <p className={`text-[11px] font-mono mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{subtitle}</p>
         </div>
       </div>
       {children}
@@ -56,18 +56,18 @@ export function HolisticAnalyticsSection({ borderless = false }: { borderless?: 
   return (
     <section
       aria-labelledby="holistic-analytics-title"
-      className={`flex-1 flex flex-col min-h-0 ${borderless ? '' : ORION_SECTION_DIVIDER}`}
+      className={`flex-1 flex flex-col min-h-0 ${borderless ? '' : AXEL_SECTION_DIVIDER}`}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-4 shrink-0 pt-2 border-t border-line">
         <div>
-          <p className={ORION_SECTION_TITLE}>
+          <p className={AXEL_SECTION_TITLE}>
             <span className="text-accent mr-2">04</span>
             Analytics
           </p>
-          <h2 id="holistic-analytics-title" className={`text-xl font-display mt-1 ${ORION_TEXT_PRIMARY}`}>
+          <h2 id="holistic-analytics-title" className={`text-xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
             Visão holística
           </h2>
-          <p className={`font-mono text-[11px] mt-1 ${ORION_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             Saúde · hidratação · exercício · produtividade
           </p>
         </div>
@@ -81,7 +81,7 @@ export function HolisticAnalyticsSection({ borderless = false }: { borderless?: 
                 key={id}
                 type="button"
                 onClick={() => setTimeframe(id)}
-                className={active ? ORION_FILTER_PILL_ACTIVE : ORION_FILTER_PILL_IDLE}
+                className={active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE}
                 aria-pressed={active}
               >
                 {label}

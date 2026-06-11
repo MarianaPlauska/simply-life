@@ -2,10 +2,10 @@ import { useDroppable } from '@dnd-kit/core'
 import { Plus } from 'lucide-react'
 import type { LoadBalanceEntry } from '../../lib/adaptiveOrchestration'
 import { COLUMN_META, urgencyScoreClass } from '../../lib/kanbanVisual'
-import { ORION_KANBAN_DROPZONE } from '../../constants/orionKanbanTheme'
-import { ORION_TEXT_PRIMARY, ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces'
+import { AXEL_KANBAN_DROPZONE } from '../../constants/axelKanbanTheme'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { KanbanTaskDetailStrip } from './KanbanTaskDetailStrip'
-import { cleanTitleForDisplay } from './orionKanbanUtils'
+import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
 // Painel Hoje — fila + detalhe (sem duplicar coluna no board)
@@ -64,10 +64,10 @@ export function KanbanTodayPanel({
           <span className="font-mono text-[10px] text-accent tabular-nums pt-0.5">{meta.index}</span>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className={`font-mono text-[10px] uppercase tracking-[0.14em] ${ORION_TEXT_PRIMARY}`}>
+              <h2 className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_PRIMARY}`}>
                 Hoje
               </h2>
-              <span className={`font-mono text-[11px] tabular-nums ml-auto ${overWip ? 'text-atencao' : ORION_TEXT_SECONDARY}`}>
+              <span className={`font-mono text-[11px] tabular-nums ml-auto ${overWip ? 'text-atencao' : AXEL_TEXT_SECONDARY}`}>
                 {totalCount} / {WIP_LIMIT}
               </span>
               <button
@@ -79,18 +79,18 @@ export function KanbanTodayPanel({
                 <Plus size={14} strokeWidth={1.5} />
               </button>
             </div>
-            <p className={`font-mono text-[10px] mt-1 ${ORION_TEXT_SECONDARY}`}>{meta.subtitle}</p>
+            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{meta.subtitle}</p>
           </div>
         </div>
       </header>
 
       <div className="flex-1 min-h-[160px] max-h-[320px] lg:max-h-none overflow-y-auto custom-scrollbar">
         {tasks.length === 0 ? (
-          <div className={`mx-3 my-3 px-4 py-8 text-center ${ORION_KANBAN_DROPZONE} ${isOver ? 'border-accent/50 text-accent' : ''}`}>
+          <div className={`mx-3 my-3 px-4 py-8 text-center ${AXEL_KANBAN_DROPZONE} ${isOver ? 'border-accent/50 text-accent' : ''}`}>
             <p className="font-mono text-[10px] uppercase tracking-[0.12em]">
               {isOver ? 'Soltar em Hoje' : 'Fila vazia'}
             </p>
-            <p className={`text-[11px] mt-2 ${ORION_TEXT_SECONDARY}`}>
+            <p className={`text-[11px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
               Arraste de Semana ou Backlog
             </p>
           </div>
@@ -134,6 +134,11 @@ export function KanbanTodayPanel({
                             <span className="text-ink-muted ml-2 uppercase text-[9px]">adiada</span>
                           )}
                         </p>
+                        {(t.urgency_reason ?? t.score_reason) && (
+                          <p className={`text-[11px] mt-1.5 leading-snug line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
+                            {t.urgency_reason ?? t.score_reason}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </button>
@@ -145,7 +150,7 @@ export function KanbanTodayPanel({
       </div>
 
       {tasks.length > 0 && (
-        <p className={`shrink-0 px-4 py-1.5 font-mono text-[10px] tabular-nums border-t border-line ${ORION_TEXT_SECONDARY}`}>
+        <p className={`shrink-0 px-4 py-1.5 font-mono text-[10px] tabular-nums border-t border-line ${AXEL_TEXT_SECONDARY}`}>
           Σ {scoreSum} pts na fila ativa
         </p>
       )}

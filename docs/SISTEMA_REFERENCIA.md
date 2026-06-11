@@ -1,7 +1,18 @@
-# Simply-Life — Referência do Sistema (Jarvis)
+# Simply-Life — Referência do Sistema
 
 Documento mestre para orientar desenvolvimento, design e agentes de IA.  
 **Stack:** React + Vite + TypeScript + Zustand + **Supabase** (Auth, Postgres, RLS, Realtime) + APIs Vercel (`/api/*`).
+
+## AXEL — assistente central
+
+| Letra | Significado |
+|-------|-------------|
+| **A** | Apoio |
+| **X** | Fator de aceleração / inteligência |
+| **E** | Execução |
+| **L** | Log (transparência das decisões) |
+
+O nome evoca *eixo* — o sistema que sustenta tarefas e compromissos. AXEL prioriza; o usuário ajusta se quiser.
 
 **Projeto Supabase:** `zuxkqmooxvnulgllduhr`
 

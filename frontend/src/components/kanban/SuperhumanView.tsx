@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Zap, Search, Loader2, Sparkles, Radio } from 'lucide-react'
 import { toast } from 'sonner'
-import { orionCompleteTask } from '../../lib/orionTaskCompletion'
+import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useSuperhumanTasks } from '../../hooks/useSuperhumanTasks'
 import { SuperhumanTaskRow } from './SuperhumanTaskRow'
@@ -90,7 +90,7 @@ export function SuperhumanView()
             tarefa={t}
             onComplete={async (task) =>
             {
-              await orionCompleteTask(task)
+              await axelCompleteTask(task)
             }}
             onUpdate={updateTarefa}
             onArchive={async (id) =>

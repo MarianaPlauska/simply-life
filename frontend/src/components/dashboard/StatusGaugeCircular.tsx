@@ -8,7 +8,7 @@ interface StatusGaugeCircularProps
   size?: number
 }
 
-// Medalhao gauge circular com numero grande no centro (estilo Orion)
+// Medalhao gauge circular com numero grande no centro (estilo Axel)
 // SVG nativo, sem libs — leve e crisp
 
 export function StatusGaugeCircular({

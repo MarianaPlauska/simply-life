@@ -15,43 +15,39 @@ import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { KanbanCommandBar } from './KanbanCommandBar'
+import { KanbanDecisionLog } from './KanbanDecisionLog'
+import { KanbanMorningBrief } from './KanbanMorningBrief'
+import { KanbanOrchestrationStatus } from './KanbanOrchestrationStatus'
 import { KanbanTodayPanel } from './KanbanTodayPanel'
+import { useKanbanOrchestration } from '../../hooks/useKanbanOrchestration'
 import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
-import { OrionKanbanListView } from './OrionKanbanListView'
-import { OrionKanbanTimelineView } from './OrionKanbanTimelineView'
+import { AxelKanbanListView } from './AxelKanbanListView'
+import { AxelKanbanTimelineView } from './AxelKanbanTimelineView'
 import { KanbanViewSwitcher, type KanbanViewMode } from './KanbanViewSwitcher'
-import { OrionKanbanCard } from './OrionKanbanCard'
-import { OrionKanbanColumn } from './OrionKanbanColumn'
-import { OrionTaskDrawer } from './OrionTaskDrawer'
-import { OrionAbsoluteFocusOverlay } from './OrionAbsoluteFocusOverlay'
-import { OrionAchievementTrail } from './OrionAchievementTrail'
-import { OrionFlowSuggestionButton } from './OrionFlowSuggestionButton'
-import {
-  applyUrgencyScores,
-  calculateUrgencyScores,
-} from '../../lib/urgencyEngine'
-import {
-  calculateAdaptiveUrgency,
-  computeDailyLoadBalancer,
-  sumHojeScore,
-} from '../../lib/adaptiveOrchestration'
-import { recordOrchestrationMetrics } from '../../lib/contextRationale'
+import { AxelKanbanCard } from './AxelKanbanCard'
+import { AxelKanbanColumn } from './AxelKanbanColumn'
+import { AxelTaskDrawer } from './AxelTaskDrawer'
+import { AxelAbsoluteFocusOverlay } from './AxelAbsoluteFocusOverlay'
+import { AxelAchievementTrail } from './AxelAchievementTrail'
+import { AxelFlowSuggestionButton } from './AxelFlowSuggestionButton'
+import { computeDailyLoadBalancer } from '../../lib/adaptiveOrchestration'
 import {
   HORIZON_LABELS,
   bucketByTemporalHorizon,
   resolveTemporalHorizon,
   type TemporalHorizon,
 } from '../../lib/temporalHorizon'
-import { useOrionIngestion } from '../../hooks/useOrionIngestion'
+import { useAxelIngestion } from '../../hooks/useAxelIngestion'
+import { recordDragPreference } from '../../lib/axelDragLearning'
 import {
-  ORION_KANBAN_GLOW,
-  ORION_KANBAN_PAGE,
-  ORION_KANBAN_PLAN_SHELL,
-  ORION_KANBAN_TOOLBAR,
-  ORION_KANBAN_WORKSPACE,
-} from '../../constants/orionKanbanTheme'
-import { ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces'
-import { ORION_BTN_PRIMARY } from '../../constants/orionSurfaces'
+  AXEL_KANBAN_GLOW,
+  AXEL_KANBAN_PAGE,
+  AXEL_KANBAN_PLAN_SHELL,
+  AXEL_KANBAN_TOOLBAR,
+  AXEL_KANBAN_WORKSPACE,
+} from '../../constants/axelKanbanTheme'
+import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
 // Orquestrador Temporal — colunas por horizonte (Bitrix logic)
@@ -75,13 +71,55 @@ export function KanbanView()
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
   const dailyScoreCap = useTaskStore((s) => s.dailyScoreCap)
   const pushAiDecision = useTaskStore((s) => s.pushAiDecision)
+  const resolveLastMovedAt = useTaskStore((s) => s.resolveLastMovedAt)
   const realtimeStatus = useTaskStore((s) => s.realtimeStatus)
-  const orionIngestionPolling = useTaskStore((s) => s.orionIngestionPolling)
+  const axelIngestionPolling = useTaskStore((s) => s.axelIngestionPolling)
 
-  const { highlightIds } = useOrionIngestion({ enabled: true })
+  const { highlightIds } = useAxelIngestion({ enabled: true })
+
+  const [ingestionTick, setIngestionTick] = useState(0)
+  const prevHighlightRef = useRef<number[]>([])
+
+  useEffect(() =>
+  {
+    const fresh = highlightIds.filter((id) => !prevHighlightRef.current.includes(id))
+    if (fresh.length > 0)
+    {
+      setIngestionTick((t) => t + 1)
+    }
+    prevHighlightRef.current = highlightIds
+  }, [highlightIds])
+
+  const baseTarefas = useMemo(
+    () => mergeDashboardTasks(storeTarefas),
+    [storeTarefas],
+  )
+
+  const {
+    scoreOverrides,
+    horizonOverrides,
+    manualHorizons,
+    orchestrating,
+    lastRunAt,
+    lastSource,
+    intelligenceReady,
+    autoEnabled,
+    setAutoEnabled,
+    metricsKey,
+    runOrchestration,
+    setManualHorizon,
+  } = useKanbanOrchestration({
+    tasks: baseTarefas,
+    dailyScoreCap,
+    updateTarefa,
+    patchTarefaLocal,
+    pushAiDecision,
+    resolveLastMovedAt,
+    ingestionTick,
+  })
 
   const webhookListening =
-    realtimeStatus === 'live' || orionIngestionPolling
+    realtimeStatus === 'live' || axelIngestionPolling
 
   const [viewMode, setViewMode] = useState<KanbanViewMode>('board')
   const [viewVisible, setViewVisible] = useState(true)
@@ -96,10 +134,6 @@ export function KanbanView()
       setViewVisible(true)
     }, 200)
   }
-  const [scoreOverrides, setScoreOverrides] = useState<Record<number, number>>({})
-  const [horizonOverrides, setHorizonOverrides] = useState<Record<number, TemporalHorizon>>({})
-  const [orchestrating, setOrchestrating] = useState(false)
-  const [metricsKey, setMetricsKey] = useState(0)
   const [activeId, setActiveId] = useState<number | null>(null)
   const [drawerCreating, setDrawerCreating] = useState(false)
   const [createHorizon, setCreateHorizon] = useState<TemporalHorizon>('backlog')
@@ -114,14 +148,13 @@ export function KanbanView()
 
   const tarefas = useMemo(() =>
   {
-    const merged = mergeDashboardTasks(storeTarefas).map((t) =>
+    return baseTarefas.map((t) =>
     {
       const score = scoreOverrides[t.id] ?? t.score_urgencia
       if (score === t.score_urgencia) return t
       return { ...t, score_urgencia: score }
     })
-    return merged
-  }, [storeTarefas, scoreOverrides])
+  }, [baseTarefas, scoreOverrides])
 
   const columns = useMemo(
     () => bucketByTemporalHorizon(tarefas, horizonOverrides),
@@ -174,24 +207,6 @@ export function KanbanView()
     const id = window.setInterval(tick, 60_000)
     return () => window.clearInterval(id)
   }, [])
-
-  const loadCapLoggedRef = useRef(false)
-
-  useEffect(() =>
-  {
-    const sum = sumHojeScore(columns.hoje)
-    if (sum > dailyScoreCap && !loadCapLoggedRef.current)
-    {
-      loadCapLoggedRef.current = true
-      pushAiDecision(
-        `Carga de HOJE (${sum} pts) excedeu o cap (${dailyScoreCap}). Demandas de menor score foram adiadas.`,
-      )
-    }
-    if (sum <= dailyScoreCap)
-    {
-      loadCapLoggedRef.current = false
-    }
-  }, [columns.hoje, dailyScoreCap, pushAiDecision])
 
   const gargalos = useMemo(() =>
   {
@@ -248,12 +263,12 @@ export function KanbanView()
     if (current === horizon) return
 
     recordTaskMoved(task.id)
-    setHorizonOverrides((prev) => ({ ...prev, [task.id]: horizon }))
+    recordDragPreference(task.titulo, horizon)
+    setManualHorizon(task.id, horizon)
 
     if (horizon === 'hoje')
     {
       const boosted = Math.max(task.score_urgencia ?? 0, 92)
-      setScoreOverrides((prev) => ({ ...prev, [task.id]: boosted }))
       if (task.id > 0)
       {
         await updateTarefa(task.id, { score_urgencia: boosted, status: 'em_progresso' })
@@ -272,7 +287,7 @@ export function KanbanView()
     }
 
     toast.success(`Movido para ${HORIZON_LABELS[horizon]}`)
-  }, [horizonOverrides, updateTarefa, moveTask, recordTaskMoved])
+  }, [horizonOverrides, updateTarefa, moveTask, recordTaskMoved, setManualHorizon])
 
   const moveTasksForFlow = useCallback(
     async (taskIds: number[], target: TemporalHorizon) =>
@@ -356,102 +371,52 @@ export function KanbanView()
   const handleTaskCreated = (task: TarefaUnificada) =>
   {
     setDrawerCreating(false)
-    setHorizonOverrides((prev) => ({ ...prev, [task.id]: createHorizon }))
+    setManualHorizon(task.id, createHorizon)
     setSearchParams({ task: String(task.id) })
   }
 
-  const handleRecalculate = useCallback(async () =>
+  const handleReorganizeAll = useCallback(async () =>
   {
-    setOrchestrating(true)
     try
     {
-      const scores = await calculateUrgencyScores(tarefas)
-      const scoreMap: Record<number, number> = {}
-
-      for (const entry of scores)
-      {
-        scoreMap[entry.taskId] = entry.score
-        const task = tarefas.find((t) => t.id === entry.taskId)
-        const adaptive = task ? calculateAdaptiveUrgency(task, tarefas) : null
-        const reason = entry.rationale ?? adaptive?.reason
-        const intent = adaptive?.intent
-
-        if (entry.taskId > 0)
-        {
-          await updateTarefa(entry.taskId, {
-            score_urgencia: intent?.forceMinScore != null
-              ? Math.max(entry.score, intent.forceMinScore)
-              : entry.score,
-            score_reason: reason ?? null,
-            urgency_reason: intent?.urgencyReason ?? null,
-            intent_category: intent?.category ?? null,
-          })
-        }
-        else if (task && adaptive?.intent)
-        {
-          const mockIntent = adaptive.intent
-          patchTarefaLocal(entry.taskId, {
-            score_reason: reason,
-            urgency_reason: mockIntent.urgencyReason,
-            intent_category: mockIntent.category,
-            score_urgencia: mockIntent.forceMinScore != null
-              ? Math.max(entry.score, mockIntent.forceMinScore)
-              : entry.score,
-          })
-        }
-      }
-
-      setScoreOverrides(scoreMap)
-      setHorizonOverrides({})
-
-      const rescored = applyUrgencyScores(tarefas, scores)
-      const hoje = rescored.filter((t) =>
-        resolveTemporalHorizon(t) === 'hoje',
-      ).length
-
-      recordOrchestrationMetrics(scores.length)
-      setMetricsKey((k) => k + 1)
-
-      toast.success(`Orquestração temporal · ${hoje} em Hoje`, {
-        description: scores.every((s) => s.source === 'mock')
-          ? 'Motor mock — configure VITE_GROQ_API_KEY para IA real'
-          : 'Horizontes recalculados pelo Motor de Contexto',
+      const result = await runOrchestration({ clearManual: true })
+      if (!result) return
+      toast.success(`AXEL reorganizou · ${result.hojeCount} em Hoje`, {
+        description: result.source === 'mock'
+          ? 'Motor local — configure IA para análise avançada'
+          : 'Prioridades e horizontes recalculados',
       })
     }
     catch (err)
     {
-      console.error('[KanbanView] recálculo falhou:', err)
-      toast.error('Falha ao recalcular prioridades')
+      console.error('[KanbanView] reorganização falhou:', err)
+      toast.error('Falha ao reorganizar o pipeline')
     }
-    finally
-    {
-      setOrchestrating(false)
-    }
-  }, [tarefas, updateTarefa])
+  }, [runOrchestration])
 
   if (zenFocusActive)
   {
     return (
       <>
-        <OrionAbsoluteFocusOverlay horizonOverrides={horizonOverrides} />
+        <AxelAbsoluteFocusOverlay horizonOverrides={horizonOverrides} />
       </>
     )
   }
 
   return (
-    <div className={`relative w-full h-full min-h-0 flex flex-col flex-1 min-w-0 ${ORION_KANBAN_PAGE}`}>
-      <div className={ORION_KANBAN_GLOW} aria-hidden />
+    <div className={`relative w-full h-full min-h-0 flex flex-col flex-1 min-w-0 ${AXEL_KANBAN_PAGE}`}>
+      <div className={AXEL_KANBAN_GLOW} aria-hidden />
 
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
         <div className="shrink-0 px-5 lg:px-7 pt-5 pb-4 flex flex-col gap-4 max-w-[1680px] mx-auto w-full">
-          <header className={`shrink-0 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between pb-4 ${ORION_KANBAN_TOOLBAR}`}>
+          <header className={`shrink-0 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between pb-4 ${AXEL_KANBAN_TOOLBAR}`}>
             <div>
-              <p className="sl-eyebrow mb-2">Orion · Execução</p>
+              <p className="sl-eyebrow mb-2">AXEL · Execução</p>
               <h1 className="text-2xl sm:text-[1.85rem] font-display tracking-tight text-ink leading-tight">
                 Centro de Execução
               </h1>
               <p className="text-[12px] mt-1.5 text-ink-muted font-mono max-w-lg">
-                Hoje à esquerda · planejamento à direita · arraste entre painéis ·{' '}
+                AXEL define prioridade · você ajusta arrastando ·{' '}
                 <kbd className="font-mono text-[10px] px-1 py-0.5 border border-line rounded-sl bg-chrome">
                   Ctrl+Shift+F
                 </kbd>{' '}
@@ -469,7 +434,7 @@ export function KanbanView()
                 <Target size={14} strokeWidth={1.75} aria-hidden />
                 Foco
               </button>
-              <OrionFlowSuggestionButton
+              <AxelFlowSuggestionButton
                 hojeTasks={columns.hoje}
                 dailyScoreCap={dailyScoreCap}
                 onMoveTasks={moveTasksForFlow}
@@ -477,7 +442,7 @@ export function KanbanView()
               <button
                 type="button"
                 onClick={() => openCreateDrawer('backlog')}
-                className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide px-3 py-2 ${ORION_BTN_PRIMARY}`}
+                className={`inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide px-3 py-2 ${AXEL_BTN_PRIMARY}`}
               >
                 Nova demanda
               </button>
@@ -492,10 +457,27 @@ export function KanbanView()
             dailyScoreCap={dailyScoreCap}
             gargalos={gargalos}
             intelligenceOn={webhookListening}
-            onRecalculate={handleRecalculate}
+            onRecalculate={handleReorganizeAll}
             loading={orchestrating}
           />
 
+          <KanbanMorningBrief
+            hojeTasks={columns.hoje}
+            dailyScoreCap={dailyScoreCap}
+          />
+
+          <KanbanOrchestrationStatus
+            autoEnabled={autoEnabled}
+            orchestrating={orchestrating}
+            lastRunAt={lastRunAt}
+            lastSource={lastSource}
+            intelligenceReady={intelligenceReady}
+            manualCount={Object.keys(manualHorizons).length}
+            onToggleAuto={setAutoEnabled}
+            onReorganizeAll={() => void handleReorganizeAll()}
+          />
+
+          <KanbanDecisionLog />
         </div>
 
         <div
@@ -504,7 +486,7 @@ export function KanbanView()
           }`}
         >
         {viewMode === 'list' && (
-          <OrionKanbanListView
+          <AxelKanbanListView
             tarefas={tarefas}
             horizonOverrides={horizonOverrides}
             onOpen={handleOpen}
@@ -512,7 +494,7 @@ export function KanbanView()
         )}
 
         {viewMode === 'timeline' && (
-          <OrionKanbanTimelineView tarefas={tarefas} onOpen={handleOpen} />
+          <AxelKanbanTimelineView tarefas={tarefas} onOpen={handleOpen} />
         )}
 
         {viewMode === 'board' && (
@@ -521,7 +503,7 @@ export function KanbanView()
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <div className={ORION_KANBAN_WORKSPACE}>
+            <div className={AXEL_KANBAN_WORKSPACE}>
               <KanbanTodayPanel
                 tasks={hojeActiveSorted}
                 totalCount={columns.hoje.length}
@@ -541,18 +523,18 @@ export function KanbanView()
 
               <div className="flex-1 flex flex-col min-w-0 min-h-0">
                 <div className="shrink-0 px-4 py-2 border-b border-line bg-chrome/30">
-                  <p className={`font-mono text-[10px] uppercase tracking-[0.14em] ${ORION_TEXT_SECONDARY}`}>
+                  <p className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
                     02–03 · Planejamento — arraste para Hoje quando for executar
                   </p>
                 </div>
-                <div className={ORION_KANBAN_PLAN_SHELL}>
+                <div className={AXEL_KANBAN_PLAN_SHELL}>
                   {PLAN_COLUMNS.map((col) =>
                   {
                     const items = columns[col.id]
                     const scoreSum = items.reduce((s, t) => s + (t.score_urgencia ?? 0), 0)
 
                     return (
-                      <OrionKanbanColumn
+                      <AxelKanbanColumn
                         key={col.id}
                         id={col.id}
                         title={col.title}
@@ -563,7 +545,7 @@ export function KanbanView()
                         onAddTask={() => openCreateDrawer(col.id)}
                       >
                         {items.map((t) => (
-                          <OrionKanbanCard
+                          <AxelKanbanCard
                             key={t.id}
                             tarefa={t}
                             allTasks={tarefas}
@@ -575,7 +557,7 @@ export function KanbanView()
                             nobleHourHighlight={shouldHighlightNobleHour(t, energyPeriod)}
                           />
                         ))}
-                      </OrionKanbanColumn>
+                      </AxelKanbanColumn>
                     )
                   })}
                 </div>
@@ -584,17 +566,17 @@ export function KanbanView()
 
             <DragOverlay dropAnimation={null}>
               {activeTask && (
-                <OrionKanbanCard tarefa={activeTask} allTasks={tarefas} isDragging />
+                <AxelKanbanCard tarefa={activeTask} allTasks={tarefas} isDragging />
               )}
             </DragOverlay>
           </DndContext>
         )}
         </div>
 
-        <OrionAchievementTrail />
+        <AxelAchievementTrail />
 
         {(selectedTask || drawerCreating) && (
-          <OrionTaskDrawer
+          <AxelTaskDrawer
             tarefa={selectedTask ?? undefined}
             temporalHorizon={drawerCreating ? createHorizon : selectedHorizon}
             isCreatingNew={drawerCreating}

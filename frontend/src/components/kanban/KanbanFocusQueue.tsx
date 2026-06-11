@@ -1,5 +1,5 @@
 import { urgencyScoreClass } from '../../lib/kanbanVisual'
-import { cleanTitleForDisplay } from './orionKanbanUtils'
+import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
 // Fila lateral — ranking de Hoje (densidade Superhuman dentro do board)

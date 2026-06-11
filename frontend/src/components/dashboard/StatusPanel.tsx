@@ -6,7 +6,7 @@ import { Flame, Trophy } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { StatusGaugeCircular } from './StatusGaugeCircular'
 
-// SEU STATUS — painel lateral estilo Orion
+// SEU STATUS — painel lateral estilo Axel
 // Avatar pixel-art + nivel/XP + 3 gauges + ofensiva + conquistas
 
 export function StatusPanel()

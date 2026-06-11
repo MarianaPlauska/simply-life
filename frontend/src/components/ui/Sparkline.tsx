@@ -20,7 +20,7 @@ export function Sparkline({
   stroke = '#a855f7',
   strokeWidth = 1.5,
   className = '',
-  gradientId = 'orion-spark-gradient',
+  gradientId = 'axel-spark-gradient',
   useGradient = true,
 }: SparklineProps)
 {

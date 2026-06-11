@@ -1,5 +1,5 @@
 import { Circle } from 'lucide-react'
-import { ORION_LINE, ORION_TEXT_SECONDARY } from '../../../constants/orionSurfaces'
+import { AXEL_LINE, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 
 // Indicador de ovos consumidos no dia (máx. 3)
 
@@ -12,8 +12,8 @@ interface EggLimitDotsProps
 export function EggLimitDots({ consumed, max = 3 }: EggLimitDotsProps)
 {
   return (
-    <div className={`flex items-center gap-2 pt-3 ${ORION_LINE}`}>
-      <span className={`font-mono text-[10px] uppercase tracking-wider mr-1 ${ORION_TEXT_SECONDARY}`}>Ovos</span>
+    <div className={`flex items-center gap-2 pt-3 ${AXEL_LINE}`}>
+      <span className={`font-mono text-[10px] uppercase tracking-wider mr-1 ${AXEL_TEXT_SECONDARY}`}>Ovos</span>
       {Array.from({ length: max }, (_, i) =>
       {
         const filled = i < consumed
@@ -30,7 +30,7 @@ export function EggLimitDots({ consumed, max = 3 }: EggLimitDotsProps)
           />
         )
       })}
-      <span className={`font-mono text-[10px] tabular-nums ml-auto ${ORION_TEXT_SECONDARY}`}>
+      <span className={`font-mono text-[10px] tabular-nums ml-auto ${AXEL_TEXT_SECONDARY}`}>
         {consumed}/{max} hoje
       </span>
     </div>

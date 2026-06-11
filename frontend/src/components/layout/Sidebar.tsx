@@ -8,9 +8,9 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore'
 import {
-  ORION_NAV_PLANE, ORION_TEXT_PRIMARY, ORION_NAV_ACTIVE, ORION_NAV_IDLE,
-  ORION_AVATAR, ORION_AVATAR_INITIALS, ORION_BTN_PRIMARY,
-} from '../../constants/orionSurfaces'
+  AXEL_NAV_PLANE, AXEL_TEXT_PRIMARY, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE,
+  AXEL_AVATAR, AXEL_AVATAR_INITIALS, AXEL_BTN_PRIMARY,
+} from '../../constants/axelSurfaces'
 
 // Sidebar — plano de navegação (#121214) separado do conteúdo (#09090B)
 
@@ -87,7 +87,7 @@ function iniciaisDe(nome: string): string
 
 function navItemClasses(isActive: boolean): string
 {
-  return isActive ? ORION_NAV_ACTIVE : ORION_NAV_IDLE
+  return isActive ? AXEL_NAV_ACTIVE : AXEL_NAV_IDLE
 }
 
 export function Sidebar()
@@ -138,7 +138,7 @@ export function Sidebar()
   if (sidebarCollapsed)
   {
     return (
-      <aside className={`hidden md:flex w-14 shrink-0 min-h-screen sticky top-0 self-start ${ORION_NAV_PLANE} flex-col items-center py-4 gap-1`}>
+      <aside className={`hidden md:flex w-14 shrink-0 min-h-screen sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col items-center py-4 gap-1`}>
         <button onClick={toggleSidebar} className="p-2 text-ink-muted hover:text-ink hover:bg-chrome transition-colors mb-4">
           <PanelLeft className="w-4 h-4" />
         </button>
@@ -161,12 +161,12 @@ export function Sidebar()
   }
 
   return (
-    <aside className={`hidden md:flex w-60 shrink-0 min-h-screen sticky top-0 self-start ${ORION_NAV_PLANE} flex-col overflow-hidden`}>
+    <aside className={`hidden md:flex w-60 shrink-0 min-h-screen sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col overflow-hidden`}>
       <div className="px-5 h-16 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-2 h-2 rounded-sl bg-accent shrink-0" />
           <div className="flex flex-col leading-tight">
-            <span className={`text-[13px] font-display tracking-tight ${ORION_TEXT_PRIMARY}`}>
+            <span className={`text-[13px] font-display tracking-tight ${AXEL_TEXT_PRIMARY}`}>
               Simply-Life
             </span>
             <span className="font-mono text-[9px] tracking-[0.2em] text-ink-muted mt-0.5 uppercase">OS</span>
@@ -180,7 +180,7 @@ export function Sidebar()
       <div className="px-4 mb-3">
         <button
           onClick={() => setQuickCaptureOpen(true)}
-          className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-[11px] font-mono uppercase tracking-wide ${ORION_BTN_PRIMARY}`}
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-[11px] font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
         >
           <Zap className="w-3 h-3 opacity-80" />
           Captura
@@ -230,7 +230,7 @@ export function Sidebar()
                               key={sub.tab}
                               onClick={() => navigate(`${item.path}#${sub.tab}`)}
                               className={`w-full flex items-center gap-2 px-2 py-1.5 text-[12px] transition-colors rounded-r-md ${
-                                subActive ? ORION_NAV_ACTIVE : ORION_NAV_IDLE
+                                subActive ? AXEL_NAV_ACTIVE : AXEL_NAV_IDLE
                               }`}
                             >
                               <SubIcon className="w-3.5 h-3.5 shrink-0" />
@@ -253,13 +253,13 @@ export function Sidebar()
           onClick={() => navigate('/perfil')}
           className="w-full flex items-center gap-3 px-1 py-2 hover:bg-chrome transition-colors text-left rounded-sl"
         >
-          <div className={`w-8 h-8 shrink-0 ${ORION_AVATAR}`}>
-            <span className={`text-[10px] ${ORION_AVATAR_INITIALS}`}>
+          <div className={`w-8 h-8 shrink-0 ${AXEL_AVATAR}`}>
+            <span className={`text-[10px] ${AXEL_AVATAR_INITIALS}`}>
               {iniciais}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <div className={`text-[12px] font-medium truncate ${ORION_TEXT_PRIMARY}`}>
+            <div className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
               {userProfile?.nome?.split(' ')[0] || 'Convidado'}
             </div>
             <div className="text-[10.5px] font-mono text-ink-muted">

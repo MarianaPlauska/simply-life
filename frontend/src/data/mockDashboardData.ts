@@ -1,8 +1,8 @@
 import type { TarefaUnificada } from '../types'
 
-// Mock do Dashboard ORION — exemplos genéricos do produto (dev/preview)
+// Mock do Dashboard AXEL — exemplos genéricos do produto (dev/preview)
 
-const MOCK_USER = 'orion-mock'
+const MOCK_USER = 'axel-mock'
 
 /** Vencimento hoje em horário fixo (HH:mm) */
 function dueTodayAt(hours: number, minutes: number): string
@@ -47,16 +47,16 @@ export function getExecutionRowMeta(taskId: number): ExecutionRowMeta
   return MOCK_EXECUTION_ROW_META[taskId] ?? { context: 'database', iniciais: 'MC' }
 }
 
-/** Tarefas simuladas — foco no próprio sistema ORION */
+/** Tarefas simuladas — foco no próprio sistema AXEL */
 export const MOCK_DASHBOARD_TASKS: TarefaUnificada[] = [
   baseTask({
     id: -901,
-    titulo: '[ORION] Implementar Ofensiva Diária no header global',
+    titulo: '[AXEL] Implementar Ofensiva Diária no header global',
     score_urgencia: 92,
     status: 'pendente',
     prioridade: 'alta',
     origem: 'manual',
-    labels: [{ id: 1, nome: 'ORION', cor: '#6366f1' }],
+    labels: [{ id: 1, nome: 'AXEL', cor: '#6366f1' }],
     data_vencimento: dueTodayAt(17, 0),
     blockedBy: ['-903'],
     daysStagnant: 0,

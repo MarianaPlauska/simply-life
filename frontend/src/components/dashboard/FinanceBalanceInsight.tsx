@@ -3,7 +3,7 @@ import { TrendingDown, TrendingUp } from 'lucide-react'
 import { Sparkline } from '../ui/Sparkline'
 import { MOCK_BALANCE_SPARKLINE_7D } from '../../data/mockDashboardData'
 
-import { ORION_TEXT_PRIMARY } from '../../constants/orionSurfaces'
+import { AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
 
 // Saldo + tendência 7d — sparkline integrado ao resumo financeiro
 
@@ -37,7 +37,7 @@ export function FinanceBalanceInsight()
     >
       <div className="min-w-0">
         <p className="text-[11px] text-zinc-500 tracking-tight mb-0.5">Saldo disponível</p>
-        <p className={`text-[18px] font-semibold tabular-nums leading-none ${ORION_TEXT_PRIMARY}`}>
+        <p className={`text-[18px] font-semibold tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
           {fmtBRL(current)}
         </p>
         <p className={`mt-1.5 inline-flex items-center gap-1 text-[11px] tabular-nums ${trendClass}`}>

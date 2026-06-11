@@ -12,7 +12,7 @@ export interface TaskActivityEntry
   createdAt: string
 }
 
-const STORAGE_KEY = 'orion-task-activity-v1'
+const STORAGE_KEY = 'axel-task-activity-v1'
 
 function loadAll(): Record<string, TaskActivityEntry[]>
 {

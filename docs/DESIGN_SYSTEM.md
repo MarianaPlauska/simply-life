@@ -10,7 +10,7 @@ O Simply-Life **não imita landing pages de SaaS com IA** (navy + roxo + glassmo
 2. **Sem glassmorphism** — nada de `backdrop-blur`, glow no hover ou gradientes decorativos em texto.
 3. **Tipografia em três vozes** — Newsreader (títulos), IBM Plex Sans (UI), IBM Plex Mono (rótulos e números).
 4. **Cantos retos** — `rounded-sl` (2px). Evitar `rounded-2xl` em containers principais.
-5. **Tokens primeiro** — usar `orionSurfaces.ts` e classes Tailwind semânticas (`bg-fundo`, `text-ink`), não `zinc-*` / `indigo-*` soltos.
+5. **Tokens primeiro** — usar `axelSurfaces.ts` e classes Tailwind semânticas (`bg-fundo`, `text-ink`), não `zinc-*` / `indigo-*` soltos.
 
 ---
 
@@ -44,24 +44,24 @@ rounded-sl
 
 ---
 
-## Constantes TS (`frontend/src/constants/orionSurfaces.ts`)
+## Constantes TS (`frontend/src/constants/axelSurfaces.ts`)
 
 Importar deste arquivo em componentes — **não duplicar strings de classe**.
 
 | Constante | Uso |
 |-----------|-----|
-| `ORION_CANVAS` | Fundo do main |
-| `ORION_CHROME_PLANE` | Sidebar, header |
-| `ORION_BORDERLESS_PANEL` / `ORION_ANALYTICS_CARD` | Painel com borda |
-| `ORION_SECTION_TITLE` | Rótulo de seção (mono, uppercase) |
-| `ORION_TEXT_PRIMARY` / `ORION_TEXT_SECONDARY` | Texto |
-| `ORION_FILTER_PILL_*` | Filtros temporais |
-| `ORION_PROGRESS` | Barra de progresso (sólida, sem gradiente) |
-| `ORION_BTN_PRIMARY` | Botão primário |
-| `ORION_NAV_ACTIVE` / `ORION_NAV_IDLE` | Itens de navegação |
-| `ORION_LINK` | Links discretos |
-| `ORION_ROW_HOVER` | Linhas clicáveis |
-| `ORION_DROPDOWN` | Menus suspensos |
+| `AXEL_CANVAS` | Fundo do main |
+| `AXEL_CHROME_PLANE` | Sidebar, header |
+| `AXEL_BORDERLESS_PANEL` / `AXEL_ANALYTICS_CARD` | Painel com borda |
+| `AXEL_SECTION_TITLE` | Rótulo de seção (mono, uppercase) |
+| `AXEL_TEXT_PRIMARY` / `AXEL_TEXT_SECONDARY` | Texto |
+| `AXEL_FILTER_PILL_*` | Filtros temporais |
+| `AXEL_PROGRESS` | Barra de progresso (sólida, sem gradiente) |
+| `AXEL_BTN_PRIMARY` | Botão primário |
+| `AXEL_NAV_ACTIVE` / `AXEL_NAV_IDLE` | Itens de navegação |
+| `AXEL_LINK` | Links discretos |
+| `AXEL_ROW_HOVER` | Linhas clicáveis |
+| `AXEL_DROPDOWN` | Menus suspensos |
 
 ### Classes utilitárias (`index.css`)
 
@@ -83,12 +83,12 @@ Importar deste arquivo em componentes — **não duplicar strings de classe**.
 
 **Hierarquia no dashboard:**
 
-- Eyebrow: `.sl-eyebrow` ou `ORION_SECTION_TITLE`
+- Eyebrow: `.sl-eyebrow` ou `AXEL_SECTION_TITLE`
 - Título de página: `text-3xl md:text-4xl font-display`
 - Título de seção: `text-xl font-display`
 - Título de card: `text-[13px] font-semibold`
-- Corpo: `text-[13px]` + `ORION_TEXT_PRIMARY`
-- Meta: `text-[11px]` + `ORION_TEXT_SECONDARY` ou `font-mono`
+- Corpo: `text-[13px]` + `AXEL_TEXT_PRIMARY`
+- Meta: `text-[11px]` + `AXEL_TEXT_SECONDARY` ou `font-mono`
 
 **Evitar:** `font-black`, gradiente em texto, `tracking-widest` em excesso, emojis como decoração.
 
@@ -99,7 +99,7 @@ Importar deste arquivo em componentes — **não duplicar strings de classe**.
 **Padrão (substitui GlassCard antigo):**
 
 ```tsx
-<article className={ORION_ANALYTICS_CARD}>
+<article className={AXEL_ANALYTICS_CARD}>
   {/* conteúdo */}
 </article>
 ```
@@ -113,7 +113,7 @@ Ou diretamente: `className="sl-panel p-6"`.
 - `shadow-2xl` com glow colorido
 - Gradientes radiais de fundo (orbs roxos)
 
-**Hover:** `hover:border-ink-muted/50` ou `ORION_ROW_HOVER` — sem `scale` exagerado.
+**Hover:** `hover:border-ink-muted/50` ou `AXEL_ROW_HOVER` — sem `scale` exagerado.
 
 ---
 
@@ -127,7 +127,7 @@ Ou diretamente: `className="sl-panel p-6"`.
 | Sucesso | `text-concluido` |
 | Acento / link | `text-accent` |
 
-Gráficos: paleta em `useOrionChartTheme.ts` — linhas e áreas usam cobre, não roxo.
+Gráficos: paleta em `useAxelChartTheme.ts` — linhas e áreas usam cobre, não roxo.
 
 ---
 
@@ -161,8 +161,17 @@ O Kanban é o **centro de execução** — mesma densidade editorial do dashboar
 | Título + ações | `KanbanView` header | Centro de Execução — não “Task Board” genérico |
 | Comando | `KanbanCommandBar` | KPIs em células (`Pipeline`, `Hoje`, carga, críticos) |
 | Hoje | `KanbanTodayPanel` | Fila ordenada + detalhe compacto + drop zone (sem coluna duplicada) |
-| Planejamento | `ORION_KANBAN_PLAN_SHELL` | Semana + Backlog à direita, assimétrico |
-| Conquistas | `OrionAchievementTrail` | Faixa inferior monocromática |
+| Planejamento | `AXEL_KANBAN_PLAN_SHELL` | Semana + Backlog à direita, assimétrico |
+| Orquestração | `useKanbanOrchestration` + `orchestratePipeline.ts` | Auto-score, horizonte e cap de carga |
+
+### Orquestração automática
+
+1. **Pontuação** — influência + semântica + prazo (`relevanceEngine` / IA se houver chave)
+2. **Horizonte** — score > 90 ou prazo hoje → Hoje; > 70 / em progresso / semana → Semana; resto → Backlog
+3. **Carga** — soma de scores em Hoje > cap → excedente vai para Semana automaticamente
+4. **Manual** — arrastar define override até “Reorganizar tudo”
+5. **Auto** — toggle em `KanbanOrchestrationStatus`; nova demanda (webhook) re-dispara o pipeline
+| Conquistas | `AxelAchievementTrail` | Faixa inferior monocromática |
 
 ### Princípios (benchmark: Linear, enterprise PM)
 
@@ -179,10 +188,10 @@ O Kanban é o **centro de execução** — mesma densidade editorial do dashboar
 
 | Peça | Arquivo |
 |------|---------|
-| Tokens | `constants/orionKanbanTheme.ts` |
+| Tokens | `constants/axelKanbanTheme.ts` |
 | Utilitários | `lib/kanbanVisual.ts` |
 | Comando KPI | `KanbanCommandBar.tsx` |
-| Card / Coluna | `OrionKanbanCard.tsx`, `OrionKanbanColumn.tsx` |
+| Card / Coluna | `AxelKanbanCard.tsx`, `AxelKanbanColumn.tsx` |
 | Orquestrador | `KanbanView.tsx` |
 
 ---
@@ -203,20 +212,20 @@ Ordem sugerida (do mais visível ao menos):
 - [ ] Trocar `rounded-xl`/`rounded-2xl` por `rounded-sl`
 - [ ] Remover gradientes decorativos
 - [ ] Títulos com `font-display`; rótulos com `font-mono`
-- [ ] Importar tokens de `orionSurfaces.ts`
+- [ ] Importar tokens de `axelSurfaces.ts`
 
 ---
 
 ## Componente painel (referência)
 
 ```tsx
-import { ORION_ANALYTICS_CARD, ORION_SECTION_TITLE, ORION_TEXT_PRIMARY } from '@/constants/orionSurfaces'
+import { AXEL_ANALYTICS_CARD, AXEL_SECTION_TITLE, AXEL_TEXT_PRIMARY } from '@/constants/axelSurfaces'
 
 export function ExemploCard() {
   return (
-    <section className={ORION_ANALYTICS_CARD}>
-      <p className={ORION_SECTION_TITLE}>Seção</p>
-      <h3 className={`text-[13px] font-semibold mt-1 ${ORION_TEXT_PRIMARY}`}>Título</h3>
+    <section className={AXEL_ANALYTICS_CARD}>
+      <p className={AXEL_SECTION_TITLE}>Seção</p>
+      <h3 className={`text-[13px] font-semibold mt-1 ${AXEL_TEXT_PRIMARY}`}>Título</h3>
     </section>
   )
 }
@@ -228,7 +237,7 @@ export function ExemploCard() {
 
 | Antigo | Substituir por |
 |--------|----------------|
-| Glassmorphism UI01 | `sl-panel` / `ORION_BORDERLESS_PANEL` |
+| Glassmorphism UI01 | `sl-panel` / `AXEL_BORDERLESS_PANEL` |
 | `rounded-[2rem]` UI02 | `rounded-sl` |
 | Ambient orbs violet UI04 | Fundo `bg-fundo` plano |
 | `GlassCard` com glow | `GlassCard` sem glow (wrapper `sl-panel`) |

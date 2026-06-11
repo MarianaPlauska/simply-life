@@ -21,12 +21,12 @@ import { createInboxSlice, type InboxSlice } from './slices/inboxSlice';
 import { createNewsSlice, type NewsSlice } from './slices/newsSlice';
 import { createContasFixasSlice, type ContasFixasSlice } from './slices/contasFixasSlice';
 import { createGamificacaoSlice, type GamificacaoSlice } from './slices/gamificacaoSlice';
-import { createOrionExecutionSlice, type OrionExecutionSlice } from './slices/orionExecutionSlice';
-import { createOrionStreakSlice, type OrionStreakSlice } from './slices/orionStreakSlice';
-import { createOrionTaskMetaSlice, type OrionTaskMetaSlice } from './slices/orionTaskMetaSlice';
-import { createOrionZenFocusSlice, type OrionZenFocusSlice } from './slices/orionZenFocusSlice';
-import { createOrionOrchestrationSlice, type OrionOrchestrationSlice } from './slices/orionOrchestrationSlice';
-import { createOrionAchievementSlice, type OrionAchievementSlice } from './slices/orionAchievementSlice';
+import { createAxelExecutionSlice, type AxelExecutionSlice } from './slices/axelExecutionSlice';
+import { createAxelStreakSlice, type AxelStreakSlice } from './slices/axelStreakSlice';
+import { createAxelTaskMetaSlice, type AxelTaskMetaSlice } from './slices/axelTaskMetaSlice';
+import { createAxelZenFocusSlice, type AxelZenFocusSlice } from './slices/axelZenFocusSlice';
+import { createAxelOrchestrationSlice, type AxelOrchestrationSlice } from './slices/axelOrchestrationSlice';
+import { createAxelAchievementSlice, type AxelAchievementSlice } from './slices/axelAchievementSlice';
 
 // re-exporta types para compatibilidade
 export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, ContaFixa, BudgetLimit, FinancialGoal, HabitoDiario, SessaoTreino, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
@@ -51,12 +51,12 @@ export type TaskStore =
   NewsSlice &
   ContasFixasSlice &
   GamificacaoSlice &
-  OrionExecutionSlice &
-  OrionStreakSlice &
-  OrionTaskMetaSlice &
-  OrionZenFocusSlice &
-  OrionOrchestrationSlice &
-  OrionAchievementSlice;
+  AxelExecutionSlice &
+  AxelStreakSlice &
+  AxelTaskMetaSlice &
+  AxelZenFocusSlice &
+  AxelOrchestrationSlice &
+  AxelAchievementSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -79,12 +79,12 @@ export const useTaskStore = create<TaskStore>()(
       ...createNewsSlice(...a),
       ...createContasFixasSlice(...a),
       ...createGamificacaoSlice(...a),
-      ...createOrionExecutionSlice(...a),
-      ...createOrionStreakSlice(...a),
-      ...createOrionTaskMetaSlice(...a),
-      ...createOrionZenFocusSlice(...a),
-      ...createOrionOrchestrationSlice(...a),
-      ...createOrionAchievementSlice(...a),
+      ...createAxelExecutionSlice(...a),
+      ...createAxelStreakSlice(...a),
+      ...createAxelTaskMetaSlice(...a),
+      ...createAxelZenFocusSlice(...a),
+      ...createAxelOrchestrationSlice(...a),
+      ...createAxelAchievementSlice(...a),
     }),
     {
       name: 'simply-life-store',

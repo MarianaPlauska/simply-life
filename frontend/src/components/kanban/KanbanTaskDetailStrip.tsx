@@ -1,8 +1,11 @@
 import { Play } from 'lucide-react'
 import { formatTaskRef, urgencyScoreClass } from '../../lib/kanbanVisual'
 import { getProjectTag } from '../../lib/contextRationale'
-import { ORION_BTN_PRIMARY } from '../../constants/orionSurfaces'
-import { cleanTitleForDisplay } from './orionKanbanUtils'
+import { evaluateProofOfWork, STREAK_MIN_SCORE } from '../../lib/proofOfWork'
+import { calcSubtaskProgress } from '../../lib/subtaskProgress'
+import { useTaskStore } from '../../store/useTaskStore'
+import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
 // Detalhe compacto da tarefa selecionada — vive dentro do painel Hoje
@@ -35,6 +38,10 @@ export function KanbanTaskDetailStrip({
 
   const score = task.score_urgencia ?? 0
   const reason = task.urgency_reason ?? task.score_reason
+  const subs = task.subtarefas ?? []
+  const subPct = subs.length > 0 ? calcSubtaskProgress(subs) : null
+  const elapsed = useTaskStore((s) => s.taskElapsedSeconds[task.id] ?? 0)
+  const proof = evaluateProofOfWork(score, elapsed, 45)
 
   return (
     <div className="shrink-0 border-t border-line px-4 py-3 bg-chrome/30">
@@ -53,12 +60,24 @@ export function KanbanTaskDetailStrip({
           {reason}
         </p>
       )}
+      {(subPct != null || isExecuting) && (
+        <p className="font-mono text-[10px] text-ink-muted mt-2">
+          {subPct != null && <span>Checklist {subPct}%</span>}
+          {subPct != null && isExecuting && <span> · </span>}
+          {isExecuting && (
+            <span className={proof.qualifiesForStreak ? 'text-concluido' : 'text-atencao'}>
+              Foco {proof.focusMinutesOnTask}m
+              {score > STREAK_MIN_SCORE ? '' : ` · score abaixo de ${STREAK_MIN_SCORE}`}
+            </span>
+          )}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2 mt-3">
         <button
           type="button"
           onClick={onExecute}
           disabled={isExecuting}
-          className={`inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-wide ${ORION_BTN_PRIMARY}`}
+          className={`inline-flex items-center gap-1.5 px-3 py-2 font-mono text-[10px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
         >
           <Play size={12} strokeWidth={1.75} fill="currentColor" />
           {isExecuting ? 'Em execução' : 'Executar'}

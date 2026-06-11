@@ -46,7 +46,7 @@ export interface GamificacaoSlice
   fetchAchievements: () => Promise<void>;
   fetchQuests: () => Promise<void>;
   addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number) => Promise<void>;
-  /** Debita XP total (prioriza módulo foco) — compras na loja ORION */
+  /** Debita XP total (prioriza módulo foco) — compras na loja AXEL */
   spendXp: (amount: number) => Promise<boolean>;
   /** Conclui tarefa e converte score de urgência em XP (1:1) */
   completeTask: (taskId: number, urgencyScore: number) => Promise<void>;

@@ -2,7 +2,7 @@ import { calculateAdaptiveUrgency } from './adaptiveOrchestration'
 import type { TarefaUnificada } from '../types'
 import type { RelevanceUrgencyLog } from './relevanceEngine'
 
-// Score Breakdown — Motor de Relevância ORION (40/40/20)
+// Score Breakdown — Motor de Relevância AXEL (40/40/20)
 
 export type ScoreFactorId = 'influence' | 'semantic' | 'deadline'
 

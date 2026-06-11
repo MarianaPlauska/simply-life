@@ -4,7 +4,7 @@ import type { Subtarefa } from '../types'
 
 // Subtarefas locais para tarefas mock (id negativo) — checklist funcional sem Supabase
 
-const STORAGE_KEY = 'orion-local-subtasks-v1'
+const STORAGE_KEY = 'axel-local-subtasks-v1'
 
 export { readLocalSubtasks }
 

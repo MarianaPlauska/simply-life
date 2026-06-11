@@ -2,8 +2,8 @@ import { Suspense, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { MobileBottomNav } from './MobileBottomNav'
-import { OrionGlobalHeader } from './OrionGlobalHeader'
-import { OrionSystemFooter } from './OrionSystemFooter'
+import { AxelGlobalHeader } from './AxelGlobalHeader'
+import { AxelSystemFooter } from './AxelSystemFooter'
 import { QuickCaptureModal } from '../Anotacoes/QuickCaptureModal'
 import { CommandPalette } from '../ui/CommandPalette'
 import { OnboardingChecklist } from '../Onboarding/OnboardingChecklist'
@@ -11,7 +11,7 @@ import { MedicationLockOverlay } from '../ui/MedicationLockOverlay'
 import { BurnoutAura } from '../ui/BurnoutAura'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useRealtimeSync } from '../../hooks/useRealtimeSync'
-import { ORION_CANVAS } from '../../constants/orionSurfaces'
+import { AXEL_CANVAS } from '../../constants/axelSurfaces'
 
 // Layout global — sidebar, header, conteúdo (flex-1) e footer sticky
 
@@ -52,14 +52,14 @@ export function AppLayout()
       <OnboardingChecklist />
       {!isAcademy && !hideChrome && <MobileBottomNav />}
 
-      <div className={`min-h-screen flex flex-col w-full ${isAcademy ? 'bg-black text-white' : ORION_CANVAS}`}>
+      <div className={`min-h-screen flex flex-col w-full ${isAcademy ? 'bg-black text-white' : AXEL_CANVAS}`}>
         <div className="flex flex-1 min-h-screen w-full">
           {!isAcademy && !hideChrome && <Sidebar />}
-          <div className={`flex-1 flex flex-col min-w-0 min-h-screen ${isAcademy ? '' : ORION_CANVAS}`}>
-            {!isAcademy && !hideChrome && <OrionGlobalHeader />}
+          <div className={`flex-1 flex flex-col min-w-0 min-h-screen ${isAcademy ? '' : AXEL_CANVAS}`}>
+            {!isAcademy && !hideChrome && <AxelGlobalHeader />}
             <main
               ref={mainRef}
-              className={`flex flex-col flex-1 min-h-0 w-full ${isAcademy ? 'px-0 pt-0 pb-0' : ORION_CANVAS}`}
+              className={`flex flex-col flex-1 min-h-0 w-full ${isAcademy ? 'px-0 pt-0 pb-0' : AXEL_CANVAS}`}
               role="main"
             >
               <div className="flex flex-col flex-1 min-h-0 w-full">
@@ -68,7 +68,7 @@ export function AppLayout()
                 </Suspense>
               </div>
               {!isAcademy && !hideChrome && (
-                <OrionSystemFooter className="mt-auto shrink-0 pb-[calc(1rem+5.75rem+env(safe-area-inset-bottom,0px))] md:pb-4" />
+                <AxelSystemFooter className="mt-auto shrink-0 pb-[calc(1rem+5.75rem+env(safe-area-inset-bottom,0px))] md:pb-4" />
               )}
             </main>
           </div>

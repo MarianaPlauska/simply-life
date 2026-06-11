@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Egg } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
-  ORION_PROGRESS,
-  ORION_SECTION_PAD,
-  ORION_SECTION_TITLE,
-  ORION_LINE,
-} from '../../constants/orionSurfaces'
+  AXEL_PROGRESS,
+  AXEL_SECTION_PAD,
+  AXEL_SECTION_TITLE,
+  AXEL_LINE,
+} from '../../constants/axelSurfaces'
 
 // Saúde e rotina — borderless, divisores internos border-white/5
 
@@ -80,10 +80,10 @@ export function SaudeBentoEditorial()
   }
 
   return (
-    <div className={`${ORION_SECTION_PAD} flex flex-col lg:col-span-2`}>
+    <div className={`${AXEL_SECTION_PAD} flex flex-col lg:col-span-2`}>
       <div className="flex items-end justify-between gap-6 mb-8 shrink-0">
         <div>
-          <h3 className={`${ORION_SECTION_TITLE} mb-3`}>
+          <h3 className={`${AXEL_SECTION_TITLE} mb-3`}>
             Saúde e rotina diária
           </h3>
           <p className="text-[22px] font-semibold tracking-tighter text-zinc-100 leading-none">
@@ -101,7 +101,7 @@ export function SaudeBentoEditorial()
       </div>
 
       <div className="flex-1 flex flex-col min-h-0">
-        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-8 pb-8 ${ORION_LINE}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 gap-8 pb-8 ${AXEL_LINE}`}>
           <button
             type="button"
             onClick={() => navigate('/saude#hidratacao')}
@@ -119,7 +119,7 @@ export function SaudeBentoEditorial()
             </p>
             <div className="mt-4 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-700 ${ORION_PROGRESS}`}
+                className={`h-full rounded-full transition-all duration-700 ${AXEL_PROGRESS}`}
                 style={{ width: `${Math.min(100, saude.aguaPct)}%` }}
               />
             </div>
@@ -170,7 +170,7 @@ export function SaudeBentoEditorial()
           </p>
           <div className="h-1.5 rounded-full bg-zinc-800/60 overflow-hidden mb-8">
             <div
-              className={`h-full rounded-full transition-all duration-700 ${ORION_PROGRESS}`}
+              className={`h-full rounded-full transition-all duration-700 ${AXEL_PROGRESS}`}
               style={{ width: `${saude.proteinaPct}%` }}
             />
           </div>
@@ -190,7 +190,7 @@ export function SaudeBentoEditorial()
                     onClick={() => toggleOvo(i)}
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                       ativo
-                        ? ORION_PROGRESS
+                        ? AXEL_PROGRESS
                         : 'bg-zinc-900/40 hover:bg-zinc-900/70'
                     }`}
                     aria-label={`Ovo ${i + 1}${ativo ? ' consumido' : ''}`}

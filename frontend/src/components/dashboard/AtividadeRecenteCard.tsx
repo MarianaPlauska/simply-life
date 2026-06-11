@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, Pill, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
-  ORION_BORDERLESS_PANEL,
-  ORION_LINE,
-  ORION_LINK,
-  ORION_ROW_HOVER,
-  ORION_SECTION_TITLE,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_BORDERLESS_PANEL,
+  AXEL_LINE,
+  AXEL_LINK,
+  AXEL_ROW_HOVER,
+  AXEL_SECTION_TITLE,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
 interface Atividade
 {
@@ -103,36 +103,36 @@ export function AtividadeRecenteCard()
   }, [tarefas, medicamentos, transactions])
 
   return (
-    <section className={`${ORION_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
+    <section className={`${AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
       <header className="px-4 pt-4 pb-3 border-b border-line">
-        <p className={ORION_SECTION_TITLE}>Auditoria</p>
-        <p className={`font-mono text-[10px] mt-1 ${ORION_TEXT_SECONDARY}`}>Atividade recente</p>
+        <p className={AXEL_SECTION_TITLE}>Auditoria</p>
+        <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Atividade recente</p>
       </header>
 
       <ul role="list" className="flex-1 divide-y divide-line min-h-[140px]">
         {items.length === 0 && (
-          <li className={`px-4 py-8 text-center font-mono text-[11px] ${ORION_TEXT_SECONDARY}`}>
+          <li className={`px-4 py-8 text-center font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>
             Nenhum evento registrado hoje
           </li>
         )}
         {items.map((a) => (
-          <li key={a.id} className={`px-4 py-2.5 flex items-center gap-2.5 ${ORION_ROW_HOVER}`}>
+          <li key={a.id} className={`px-4 py-2.5 flex items-center gap-2.5 ${AXEL_ROW_HOVER}`}>
             <a.Icon className={`w-3.5 h-3.5 shrink-0 ${a.iconClass}`} strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
-              <div className={`text-[12px] font-medium truncate ${ORION_TEXT_PRIMARY}`}>{a.primary}</div>
-              <div className={`font-mono text-[10px] truncate ${ORION_TEXT_SECONDARY}`}>{a.secondary}</div>
+              <div className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{a.primary}</div>
+              <div className={`font-mono text-[10px] truncate ${AXEL_TEXT_SECONDARY}`}>{a.secondary}</div>
             </div>
             <span className={`font-mono text-[9px] text-accent shrink-0`}>{a.xpGain}</span>
-            <span className={`font-mono text-[9px] w-6 text-right shrink-0 ${ORION_TEXT_SECONDARY}`}>{a.when}</span>
+            <span className={`font-mono text-[9px] w-6 text-right shrink-0 ${AXEL_TEXT_SECONDARY}`}>{a.when}</span>
           </li>
         ))}
       </ul>
 
-      <div className={`px-4 py-2.5 ${ORION_LINE} border-t flex justify-center`}>
+      <div className={`px-4 py-2.5 ${AXEL_LINE} border-t flex justify-center`}>
         <button
           type="button"
           onClick={() => navigate('/relatorios')}
-          className={`inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide ${ORION_LINK}`}
+          className={`inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide ${AXEL_LINK}`}
         >
           Relatório completo
           <ArrowRight className="w-3 h-3" />

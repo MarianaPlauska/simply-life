@@ -4,7 +4,7 @@ import { pixelArt } from '@dicebear/collection'
 import { Brain, HeartPulse, ShieldCheck, Trophy, Flame } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 
-// USER STATUS — bloco lateral estilo Orion
+// USER STATUS — bloco lateral estilo Axel
 // Avatar pixel-art via @dicebear/collection (pixelArt) — biblioteca real
 // 3 atributos circulares (Foco/Vitalidade/Estabilidade), barra de XP, inventario
 
@@ -69,7 +69,7 @@ export function AvatarStatusWidget()
         </div>
       </div>
 
-      {/* atributos — 3 medalhoes circulares estilo Orion */}
+      {/* atributos — 3 medalhoes circulares estilo AXEL */}
       <div className="grid grid-cols-3 gap-2 px-3 pb-3">
         <Attribute Icon={Brain}       label="Foco"          value={userStats.xp_foco}         ring="ring-violet-500/40"  color="text-violet-300" />
         <Attribute Icon={HeartPulse}  label="Vitalidade"    value={userStats.xp_vitalidade}   ring="ring-emerald-500/40" color="text-emerald-300" />
@@ -138,7 +138,7 @@ interface AttributeProps
   color: string
 }
 
-// Medalhao circular para atributo — como na imagem Orion
+// Medalhao circular para atributo — como na imagem Axel
 function Attribute({ Icon, label, value, ring, color }: AttributeProps)
 {
   return (

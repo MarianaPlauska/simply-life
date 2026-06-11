@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
-import { ORION_ROW_HOVER, ORION_TEXT_PRIMARY, ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces'
+import { AXEL_ROW_HOVER, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 // Registro de módulos — mostra escopo completo do OS ao rolar
 
@@ -118,15 +118,15 @@ export function DashboardModulesRegistry()
               key={m.id}
               type="button"
               onClick={() => navigate(m.path)}
-              className={`text-left px-4 py-3 flex flex-col gap-2 min-h-[108px] ${ORION_ROW_HOVER}`}
+              className={`text-left px-4 py-3 flex flex-col gap-2 min-h-[108px] ${AXEL_ROW_HOVER}`}
             >
               <div className="flex items-center justify-between gap-2">
                 <Icon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.75} />
                 <span className={`w-1.5 h-1.5 rounded-sl shrink-0 ${statusDot(m.status)}`} />
               </div>
               <div>
-                <p className={`text-[13px] font-semibold ${ORION_TEXT_PRIMARY}`}>{m.label}</p>
-                <p className={`text-[10px] font-mono mt-0.5 line-clamp-2 ${ORION_TEXT_SECONDARY}`}>
+                <p className={`text-[13px] font-semibold ${AXEL_TEXT_PRIMARY}`}>{m.label}</p>
+                <p className={`text-[10px] font-mono mt-0.5 line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
                   {m.desc}
                 </p>
               </div>

@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { Pill, Droplets, Moon, Wallet, PieChart } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
-  ORION_PROGRESS_THICK,
-  ORION_ROW_HOVER,
-  ORION_TEXT_PRIMARY,
-  ORION_TEXT_SECONDARY,
-} from '../../constants/orionSurfaces'
+  AXEL_PROGRESS_THICK,
+  AXEL_ROW_HOVER,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
 // Indicadores operacionais — faixa densa abaixo da execução
 
@@ -31,19 +31,19 @@ function MiniCard({
     <button
       type="button"
       onClick={onClick}
-      className={`text-left border border-line rounded-sl bg-card p-3 min-h-[88px] flex flex-col ${ORION_ROW_HOVER}`}
+      className={`text-left border border-line rounded-sl bg-card p-3 min-h-[88px] flex flex-col ${AXEL_ROW_HOVER}`}
     >
       <div className="flex items-center gap-1.5 mb-2">
         <Icon className={`w-3.5 h-3.5 ${iconClass}`} strokeWidth={1.75} />
-        <span className={`font-mono text-[9px] uppercase tracking-[0.12em] ${ORION_TEXT_SECONDARY}`}>
+        <span className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
           {title}
         </span>
       </div>
-      <div className={`text-[15px] font-display tabular-nums leading-tight ${valueClass ?? ORION_TEXT_PRIMARY}`}>
+      <div className={`text-[15px] font-display tabular-nums leading-tight ${valueClass ?? AXEL_TEXT_PRIMARY}`}>
         {primary}
       </div>
       {secondary && (
-        <div className={`font-mono text-[10px] mt-1 ${ORION_TEXT_SECONDARY}`}>{secondary}</div>
+        <div className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{secondary}</div>
       )}
       {children}
     </button>
@@ -121,7 +121,7 @@ export function QuickStatsBar()
         secondary={`${aguaPct}% da meta`}
         onClick={() => navigate('/saude#hidratacao')}
       >
-        <div className={`${ORION_PROGRESS_THICK} mt-2`}>
+        <div className={`${AXEL_PROGRESS_THICK} mt-2`}>
           <div className="h-full bg-accent rounded-sl" style={{ width: `${aguaPct}%` }} />
         </div>
       </MiniCard>

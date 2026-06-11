@@ -4,9 +4,9 @@ import {
   Droplets, Pill, Dumbbell, Brain, ChevronRight,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { ORION_PROGRESS, ORION_SECTION_PAD, ORION_SECTION_TITLE } from '../../constants/orionSurfaces'
+import { AXEL_PROGRESS, AXEL_SECTION_PAD, AXEL_SECTION_TITLE } from '../../constants/axelSurfaces'
 
-// Pilares — superfície ORION; Foco expande verticalmente com estado vazio elegante
+// Pilares — superfície AXEL; Foco expande verticalmente com estado vazio elegante
 
 function useSaudeResumo()
 {
@@ -107,7 +107,7 @@ export function SaudeResumoCard({ embedded: _embedded }: CardProps = {})
         </div>
         <div className="h-2 rounded-full bg-zinc-800/80 overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-700 ${ORION_PROGRESS}`}
+            className={`h-full rounded-full transition-all duration-700 ${AXEL_PROGRESS}`}
             style={{ width: `${Math.min(100, saude.aguaPct)}%` }}
           />
         </div>
@@ -127,10 +127,10 @@ export function FocoResumoCard({ embedded: _embedded = false }: CardProps)
   return (
     <button
       onClick={() => navigate('/superhuman')}
-      className={`group w-full text-left transition-opacity hover:opacity-95 ${ORION_SECTION_PAD} flex flex-col`}
+      className={`group w-full text-left transition-opacity hover:opacity-95 ${AXEL_SECTION_PAD} flex flex-col`}
     >
       <div className="flex items-center justify-between mb-4 shrink-0">
-        <h3 className={ORION_SECTION_TITLE}>
+        <h3 className={AXEL_SECTION_TITLE}>
           Foco profundo
         </h3>
         <ChevronRight className="w-3.5 h-3.5 text-zinc-600 group-hover:text-zinc-400 transition-colors" />
@@ -150,7 +150,7 @@ export function FocoResumoCard({ embedded: _embedded = false }: CardProps)
           <div key={i} className="flex-1 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
-                i < deepWork ? ORION_PROGRESS : 'bg-transparent'
+                i < deepWork ? AXEL_PROGRESS : 'bg-transparent'
               }`}
               style={{ width: i < deepWork ? '100%' : '0%' }}
             />

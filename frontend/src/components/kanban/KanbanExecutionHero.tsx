@@ -3,8 +3,8 @@ import type { EnergyPeriod } from '../../lib/energyOrchestration'
 import { formatTaskRef, urgencyScoreClass } from '../../lib/kanbanVisual'
 import { getProjectTag } from '../../lib/contextRationale'
 import { ZenFocusProgressRing } from './ZenFocusProgressRing'
-import { ORION_BTN_PRIMARY } from '../../constants/orionSurfaces'
-import { cleanTitleForDisplay } from './orionKanbanUtils'
+import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
 // Bloco “Executar agora” — gancho de uso diário (por que esta tarefa, CTA claro)
@@ -48,7 +48,7 @@ export function KanbanExecutionHero({
   const reason =
     task?.urgency_reason
     ?? task?.score_reason
-    ?? (task ? 'Prioridade calculada pelo motor Orion.' : null)
+    ?? (task ? 'Prioridade calculada pelo motor AXEL.' : null)
 
   return (
     <section
@@ -76,7 +76,7 @@ export function KanbanExecutionHero({
                 Nada em execução imediata
               </p>
               <p className="font-mono text-[12px] text-ink-muted mt-2 max-w-lg">
-                Arraste uma demanda para Hoje ou use Nova demanda. O Orion ordena por score e contexto.
+                Arraste uma demanda para Hoje ou use Nova demanda. O AXEL ordena por score e contexto.
               </p>
             </div>
           ) : (
@@ -114,7 +114,7 @@ export function KanbanExecutionHero({
                   type="button"
                   onClick={onExecute}
                   disabled={isExecuting}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-wide ${ORION_BTN_PRIMARY}`}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
                 >
                   <Play size={14} strokeWidth={1.75} fill="currentColor" />
                   {isExecuting ? 'Em execução' : 'Executar agora'}

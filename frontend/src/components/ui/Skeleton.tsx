@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ORION_ANALYTICS_CARD, ORION_PROGRESS_THICK, ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces';
+import { AXEL_ANALYTICS_CARD, AXEL_PROGRESS_THICK, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
@@ -9,7 +9,7 @@ export function Skeleton({ className = '' }: { className?: string }) {
 
 export function CardSkeleton() {
   return (
-    <div className={`${ORION_ANALYTICS_CARD} space-y-4`}>
+    <div className={`${AXEL_ANALYTICS_CARD} space-y-4`}>
       <div className="flex items-center gap-3">
         <Skeleton className="w-10 h-10" />
         <Skeleton className="h-4 w-24" />
@@ -32,11 +32,11 @@ export function ProgressBar({
   const clampedPct = Math.min(Math.max(pct, 0), 100);
   return (
     <div className="mt-6">
-      <div className={`flex justify-between text-xs font-mono mb-2 ${ORION_TEXT_SECONDARY}`}>
+      <div className={`flex justify-between text-xs font-mono mb-2 ${AXEL_TEXT_SECONDARY}`}>
         <span>{label}</span>
         <span className="tabular-nums">{clampedPct}%</span>
       </div>
-      <div className={`${ORION_PROGRESS_THICK} relative`}>
+      <div className={`${AXEL_PROGRESS_THICK} relative`}>
         <motion.div
           className={`absolute top-0 left-0 h-full rounded-sl ${color}`}
           initial={{ width: 0 }}

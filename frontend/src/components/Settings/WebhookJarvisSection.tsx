@@ -106,7 +106,7 @@ export function WebhookJarvisSection()
 
       <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-2xl p-5 space-y-4">
         <div>
-          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Endpoint ORION (recomendado)</p>
+          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Endpoint AXEL (recomendado)</p>
           <div className="flex gap-2">
             <code className="flex-1 text-xs text-violet-300 bg-zinc-950 px-3 py-2 rounded-lg border border-zinc-800 break-all">
               {endpointUniversal}

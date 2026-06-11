@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Accessibility, Minus, Plus, Sun, Moon } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { ORION_HEADER_ACTION, ORION_LINE } from '../../constants/orionSurfaces'
+import { AXEL_HEADER_ACTION, AXEL_LINE } from '../../constants/axelSurfaces'
 
 // Acessibilidade — alternância claro/escuro + ajustes finos
 
@@ -69,7 +69,7 @@ export function AccessibilityQuickMenu()
       <button
         type="button"
         onClick={toggleColorScheme}
-        className={ORION_HEADER_ACTION}
+        className={AXEL_HEADER_ACTION}
         aria-label={themeLabel}
         title={themeLabel}
       >
@@ -79,7 +79,7 @@ export function AccessibilityQuickMenu()
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={ORION_HEADER_ACTION}
+        className={AXEL_HEADER_ACTION}
         aria-label="Mais opções de acessibilidade"
         aria-expanded={open}
         aria-haspopup="dialog"
@@ -98,7 +98,7 @@ export function AccessibilityQuickMenu()
               Acessibilidade
             </p>
           </div>
-          <div className={ORION_LINE} />
+          <div className={AXEL_LINE} />
 
           <button
             type="button"
@@ -112,7 +112,7 @@ export function AccessibilityQuickMenu()
             <ThemeIcon className="w-4 h-4 text-zinc-500" />
           </button>
 
-          <div className={ORION_LINE} />
+          <div className={AXEL_LINE} />
 
           <div className="flex items-center justify-between gap-3 px-3 py-3">
             <span className="text-[13px] text-zinc-700 dark:text-zinc-300">Tamanho da fonte</span>
@@ -120,7 +120,7 @@ export function AccessibilityQuickMenu()
               <button
                 type="button"
                 onClick={() => setAccessibility('fontSize', Math.max(12, accessibility.fontSize - 1))}
-                className={ORION_HEADER_ACTION}
+                className={AXEL_HEADER_ACTION}
                 aria-label="Diminuir fonte"
               >
                 <Minus className="w-3.5 h-3.5" />
@@ -131,7 +131,7 @@ export function AccessibilityQuickMenu()
               <button
                 type="button"
                 onClick={() => setAccessibility('fontSize', Math.min(22, accessibility.fontSize + 1))}
-                className={ORION_HEADER_ACTION}
+                className={AXEL_HEADER_ACTION}
                 aria-label="Aumentar fonte"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ export function AccessibilityQuickMenu()
             </div>
           </div>
 
-          <div className={ORION_LINE} />
+          <div className={AXEL_LINE} />
 
           <ToggleRow
             label="Alto contraste"

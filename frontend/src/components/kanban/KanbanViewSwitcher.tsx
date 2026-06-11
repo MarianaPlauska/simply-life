@@ -1,8 +1,8 @@
 import { CalendarDays, GanttChart, LayoutGrid } from 'lucide-react'
 import {
-  ORION_FILTER_PILL_ACTIVE,
-  ORION_FILTER_PILL_IDLE,
-} from '../../constants/orionSurfaces'
+  AXEL_FILTER_PILL_ACTIVE,
+  AXEL_FILTER_PILL_IDLE,
+} from '../../constants/axelSurfaces'
 
 export type KanbanViewMode = 'board' | 'list' | 'timeline'
 
@@ -38,7 +38,7 @@ export function KanbanViewSwitcher({ mode, onChange }: KanbanViewSwitcherProps)
             aria-selected={active}
             onClick={() => onChange(m.id)}
             className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sl text-[11px] font-mono transition-colors ${
-              active ? ORION_FILTER_PILL_ACTIVE : ORION_FILTER_PILL_IDLE
+              active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
             }`}
           >
             <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />

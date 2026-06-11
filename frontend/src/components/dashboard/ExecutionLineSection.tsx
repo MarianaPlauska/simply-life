@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { ExecutionCommandRow } from './ExecutionCommandRow'
-import { ORION_TEXT_PRIMARY, ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import {
   applyUrgencyScores,
   calculateUrgencyScores,
@@ -139,13 +139,13 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
     <section aria-labelledby="execution-line-title">
       <header className="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h2 id="execution-line-title" className={`text-[13px] font-semibold tracking-tight ${ORION_TEXT_PRIMARY}`}>
+          <h2 id="execution-line-title" className={`text-[13px] font-semibold tracking-tight ${AXEL_TEXT_PRIMARY}`}>
             Contexto ativo
             {!isEmpty && (
-              <span className={`ml-1.5 font-normal tabular-nums ${ORION_TEXT_SECONDARY}`}>{total}</span>
+              <span className={`ml-1.5 font-normal tabular-nums ${AXEL_TEXT_SECONDARY}`}>{total}</span>
             )}
           </h2>
-          <p className={`text-[11px] mt-0.5 ${ORION_TEXT_SECONDARY}`}>
+          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
             Motor de urgência · filas dinâmicas
             {lastOrchestration && (
               <span className="ml-1 opacity-70">
@@ -162,7 +162,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
             className={
               prominent
                 ? 'inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-amber-500/40 bg-gradient-to-r from-amber-500/10 to-yellow-500/10 text-amber-700 dark:text-yellow-300 font-semibold text-[13px] transition-all disabled:opacity-50 hover:border-amber-500/60 hover:from-amber-500/15 hover:to-yellow-500/15 shadow-sm'
-                : `inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-100/60 dark:bg-zinc-900/40 transition-colors disabled:opacity-50 ${ORION_TEXT_SECONDARY} hover:text-amber-500 hover:border-amber-500/30 dark:hover:text-yellow-400`
+                : `inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-100/60 dark:bg-zinc-900/40 transition-colors disabled:opacity-50 ${AXEL_TEXT_SECONDARY} hover:text-amber-500 hover:border-amber-500/30 dark:hover:text-yellow-400`
             }
             aria-busy={orchestrating}
           >
@@ -177,7 +177,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
             <button
               type="button"
               onClick={() => navigate('/kanban')}
-              className={`inline-flex items-center gap-0.5 transition-colors ${ORION_TEXT_SECONDARY} hover:text-zinc-800 dark:hover:text-zinc-300`}
+              className={`inline-flex items-center gap-0.5 transition-colors ${AXEL_TEXT_SECONDARY} hover:text-zinc-800 dark:hover:text-zinc-300`}
             >
               Kanban
               <ChevronRight className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
           <button
             type="button"
             onClick={() => setQuickCaptureOpen(true)}
-            className={`inline-flex items-center gap-1 transition-colors ${ORION_TEXT_SECONDARY} hover:text-zinc-800 dark:hover:text-zinc-300`}
+            className={`inline-flex items-center gap-1 transition-colors ${AXEL_TEXT_SECONDARY} hover:text-zinc-800 dark:hover:text-zinc-300`}
           >
             <Plus className="w-3.5 h-3.5" />
             Captura
@@ -195,7 +195,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
       </header>
 
       {isEmpty ? (
-        <p className={`py-4 text-[13px] ${ORION_TEXT_SECONDARY}`}>
+        <p className={`py-4 text-[13px] ${AXEL_TEXT_SECONDARY}`}>
           Nenhuma tarefa ativa.{' '}
           <button
             type="button"
@@ -255,8 +255,8 @@ function BucketSection({ cfg, items, collapsed, onToggle, onOpen, onAdd }: Bucke
         <h3 className={`text-[12px] font-semibold tracking-tight ${cfg.accent}`}>
           {cfg.label}
         </h3>
-        <span className={`text-[11px] ${ORION_TEXT_SECONDARY}`}>({cfg.hint})</span>
-        <span className={`text-[11px] font-mono tabular-nums ml-auto ${ORION_TEXT_SECONDARY}`}>
+        <span className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>({cfg.hint})</span>
+        <span className={`text-[11px] font-mono tabular-nums ml-auto ${AXEL_TEXT_SECONDARY}`}>
           {items.length}
         </span>
         <span
@@ -272,7 +272,7 @@ function BucketSection({ cfg, items, collapsed, onToggle, onOpen, onAdd }: Bucke
       {!collapsed && (
         <div role="list" className="min-w-0 w-full pl-1">
           {items.length === 0 && (
-            <p className={`py-2 pl-5 text-[12px] ${ORION_TEXT_SECONDARY}`}>{cfg.emptyHint}</p>
+            <p className={`py-2 pl-5 text-[12px] ${AXEL_TEXT_SECONDARY}`}>{cfg.emptyHint}</p>
           )}
           {items.map((t) => (
             <ExecutionCommandRow

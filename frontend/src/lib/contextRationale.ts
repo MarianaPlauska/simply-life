@@ -1,8 +1,8 @@
 import type { TarefaUnificada } from '../types'
 
-// Razão do contexto — explicação legível da priorização ORION
+// Razão do contexto — explicação legível da priorização AXEL
 
-const TAG_FROM_TITLE = /\[(ORION|FRONTEND|CORE|HUB|API|UX|BACKEND)\]/i
+const TAG_FROM_TITLE = /\[(AXEL|FRONTEND|CORE|HUB|API|UX|BACKEND)\]/i
 
 export function getProjectTag(tarefa: TarefaUnificada): string
 {
@@ -41,7 +41,7 @@ export function getContextRationale(
 
   if (title.includes('drawer') || title.includes('kanban'))
   {
-    return 'Reordenado: entrega de UX no fluxo principal do board — desbloqueia uso diário do ORION.'
+    return 'Reordenado: entrega de UX no fluxo principal do board — desbloqueia uso diário do AXEL.'
   }
 
   if (title.includes('score') || title.includes('urgência') || title.includes('urgencia'))
@@ -54,7 +54,7 @@ export function getContextRationale(
     return `Priorizado: score ${score} — contexto ativo com prazo ou prioridade elevada em ${tag}.`
   }
 
-  return `Na fila: score ${score} — aguardando orquestração; critérios de produtividade do ORION.`
+  return `Na fila: score ${score} — aguardando orquestração; critérios de produtividade do AXEL.`
 }
 
 function formatEngineRationale(raw: string, tarefa: TarefaUnificada): string
@@ -74,7 +74,7 @@ export function recordOrchestrationMetrics(taskCount: number): void
     tasksTriaged: taskCount,
     minutesSaved: Math.round(minutesSaved),
   }
-  sessionStorage.setItem('orion-last-orchestration', JSON.stringify(payload))
+  sessionStorage.setItem('axel-last-orchestration', JSON.stringify(payload))
 }
 
 export function readOrchestrationMetrics(): {
@@ -85,7 +85,7 @@ export function readOrchestrationMetrics(): {
 {
   try
   {
-    const raw = sessionStorage.getItem('orion-last-orchestration')
+    const raw = sessionStorage.getItem('axel-last-orchestration')
     if (!raw) return { at: null, tasksTriaged: 0, minutesSaved: 0 }
     const parsed = JSON.parse(raw) as { at?: string; tasksTriaged?: number; minutesSaved?: number }
     return {

@@ -3,8 +3,8 @@ import type { Subtarefa } from '../types'
 
 // Progresso de checklist — merge servidor + localStorage (mock)
 
-const STORAGE_KEY = 'orion-local-subtasks-v1'
-export const SUBTASKS_CHANGED_EVENT = 'orion-local-subtasks-changed'
+const STORAGE_KEY = 'axel-local-subtasks-v1'
+export const SUBTASKS_CHANGED_EVENT = 'axel-local-subtasks-changed'
 
 export function readLocalSubtasks(taskId: number): Subtarefa[]
 {

@@ -6,7 +6,7 @@ import {
 import { analyzeTaskIntent, type IntentAnalysis } from './intentAnalyzer'
 import type { TarefaUnificada } from '../types'
 
-// Motor de Relevância ORION — influência social + densidade semântica + prazo
+// Motor de Relevância AXEL — influência social + densidade semântica + prazo
 
 const HIGH_PRIORITY_TERMS = [
   { term: 'urgente', label: 'Urgência' },

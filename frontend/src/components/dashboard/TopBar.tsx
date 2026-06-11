@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Cloud, Bell } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AccessibilityQuickMenu } from './AccessibilityQuickMenu'
-import { ORION_HEADER_ACTION, ORION_TEXT_PRIMARY, ORION_TEXT_SECONDARY } from '../../constants/orionSurfaces'
+import { AXEL_HEADER_ACTION, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 // TopBar — ações rápidas (acessibilidade primeiro), clima e notificações
 
@@ -55,9 +55,9 @@ export function TopBar()
   return (
     <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
       {weather && (
-        <div className={`hidden sm:flex items-center gap-2 text-[12px] mr-1 ${ORION_TEXT_SECONDARY}`}>
+        <div className={`hidden sm:flex items-center gap-2 text-[12px] mr-1 ${AXEL_TEXT_SECONDARY}`}>
           <Cloud className="w-3.5 h-3.5 text-zinc-500" />
-          <span className={`font-medium ${ORION_TEXT_PRIMARY}`}>{weather.temp}</span>
+          <span className={`font-medium ${AXEL_TEXT_PRIMARY}`}>{weather.temp}</span>
           <span className="text-zinc-400">·</span>
           <span>{weather.city}</span>
         </div>
@@ -67,7 +67,7 @@ export function TopBar()
 
       <button
         type="button"
-        className={`relative ${ORION_HEADER_ACTION}`}
+        className={`relative ${AXEL_HEADER_ACTION}`}
         aria-label="Notificações"
       >
         <Bell className="w-4 h-4" />
