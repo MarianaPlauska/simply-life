@@ -1,20 +1,44 @@
-import { useState, useMemo } from 'react';
-import { useFinancePlannerInit } from '../../hooks/useFinancePlannerInit';
+import { useState, useMemo, useEffect } from 'react';
 import {
-  Settings2, ChevronLeft, ChevronRight, Eye, List, Target, Plus, CreditCard, Receipt
-} from 'lucide-react';
+  createDefaultPeriodConfig,
+  filterTransactionsByPeriod,
+  resolveFinancePeriod,
+  shiftPeriodConfig,
+  type FinancePeriodConfig,
+} from '../../lib/financePeriodFilter';
+import { useFinancePlannerInit } from '../../hooks/useFinancePlannerInit';
+import { computeCashPosition } from '../../lib/financeReservedBills';
+import { useFinanceDueNotifications } from '../../hooks/useFinanceDueNotifications';
+import { FinanceSetupTab } from './setup/FinanceSetupTab';
+import {
+  FINANCE_MAIN_TABS,
+  FINANCE_SUB_TABS,
+  navigateToLeaf,
+  resolveLeafTab,
+  defaultSubForGroup,
+  type PlannerGroup,
+  type PlannerLeafTab,
+} from '../../lib/financePlannerNav';
+import {
+  buildCategoryBudgetRows,
+  filterActiveBudgetRows,
+} from '../../lib/financeCategoryBudget';
 import { useTaskStore } from '../../store/useTaskStore';
-import { PrintButton } from '../ui/PrintButton';
+import { FinancePlannerShell } from './FinancePlannerShell';
 import { FinanceCategories } from './FinanceCategories';
 import { FinanceOverviewTab } from './FinanceOverviewTab';
 import { FinanceTransactionsTab } from './FinanceTransactionsTab';
 import { FinanceGoalsTab } from './FinanceGoalsTab';
 import { VirtualCardsTab } from './VirtualCardsTab';
 import { ContasFixasTab } from './ContasFixasTab';
+import { FinanceDailyLedgerTab } from './FinanceDailyLedgerTab';
+import { FinanceSpreadsheetTab } from './FinanceSpreadsheetTab';
+import { FinanceHomeTab } from './FinanceHomeTab';
+import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
+import { clampFinanceMonthOffset } from '../../lib/financeMonthOutlook';
+import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
 import { NewTransactionModal } from './NewTransactionModal';
 import { NewGoalModal } from './NewGoalModal';
-
-type PlannerTab = 'visao-geral' | 'tabela' | 'cartoes' | 'metas' | 'contas-fixas';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
@@ -25,10 +49,30 @@ export function FinancePlannerView() {
   const categories = useTaskStore((s) => s.categories);
   const financialGoals = useTaskStore((s) => s.financialGoals);
   const updateGoalProgress = useTaskStore((s) => s.updateGoalProgress);
+  const cashAccount = useTaskStore((s) => s.cashAccount);
+  const reservedBills = useTaskStore((s) => s.reservedBills);
 
   useFinancePlannerInit();
+  useFinanceDueNotifications(true);
 
-  const [tab, setTab] = useState<PlannerTab>('visao-geral');
+  const [navGroup, setNavGroup] = useState<PlannerGroup>('inicio');
+  const [leafTab, setLeafTab] = useState<PlannerLeafTab>('inicio');
+
+  const activeLeaf = resolveLeafTab(navGroup, leafTab);
+
+  const goToGroup = (group: PlannerGroup) =>
+  {
+    setNavGroup(group);
+    const def = defaultSubForGroup(group);
+    if (def) setLeafTab(def);
+  };
+
+  const goToLeaf = (leaf: PlannerLeafTab) =>
+  {
+    const target = navigateToLeaf(leaf);
+    setNavGroup(target.group);
+    setLeafTab(target.sub);
+  };
   const [showModal, setShowModal] = useState(false);
   const [showCatModal, setShowCatModal] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
@@ -39,6 +83,22 @@ export function FinancePlannerView() {
   const [editVal, setEditVal] = useState('');
   const [editingMeta, setEditingMeta] = useState<number | null>(null);
   const [metaEditVal, setMetaEditVal] = useState('');
+  const [periodConfig, setPeriodConfig] = useState<FinancePeriodConfig>(() => createDefaultPeriodConfig(0));
+
+  useEffect(() =>
+  {
+    setPeriodConfig((c) => ({ ...c, monthOffset }));
+  }, [monthOffset]);
+
+  const resolvedPeriod = useMemo(
+    () => resolveFinancePeriod(periodConfig),
+    [periodConfig],
+  );
+
+  const periodTx = useMemo(
+    () => filterTransactionsByPeriod(transactions, periodConfig),
+    [transactions, periodConfig],
+  );
 
   const activeCategories = useMemo(() => {
     return categories.length > 0 ? categories : [];
@@ -72,22 +132,10 @@ export function FinancePlannerView() {
     });
   }, [transactions, monthOffset]);
 
-  const filteredTx = useMemo(() => {
-    let result = monthTx;
-    if (filterCat !== 'all') {
-      if (filterCat === 'receita') result = result.filter((t) => t.tipo === 'receita');
-      else result = result.filter((t) => t.categoria_id === parseInt(filterCat) || t.categoria === filterCat);
-    }
-    if (filterStatus !== 'all') {
-      result = result.filter((t) => {
-        const sp = (t as any).status_pagamento;
-        return sp === filterStatus || (!sp && filterStatus === 'pendente');
-      });
-    }
-    return result;
-  }, [monthTx, filterCat, filterStatus]);
-
-  const sorted = useMemo(() => [...filteredTx].sort((a, b) => b.data.localeCompare(a.data)), [filteredTx]);
+  const recentTx = useMemo(
+    () => [...transactions].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 5),
+    [transactions],
+  );
 
   const receita = monthTx.filter((t) => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
   const despesas = monthTx.filter((t) => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
@@ -97,8 +145,25 @@ export function FinancePlannerView() {
   const diffDespesas = despesas - prevDespesas;
   const diffDespesasPct = prevDespesas > 0 ? (diffDespesas / prevDespesas) * 100 : 0;
 
-  const totalBudget = useMemo(() => budgetLimits.reduce((s, b) => s + b.limite, 0), [budgetLimits]);
-  const budgetUsedPct = totalBudget > 0 ? (despesas / totalBudget) * 100 : 0;
+  const budgetRows = useMemo(
+    () => buildCategoryBudgetRows(activeCategories, budgetLimits, monthTx),
+    [activeCategories, budgetLimits, monthTx],
+  );
+
+  const budgetRowsTracked = useMemo(
+    () => filterActiveBudgetRows(budgetRows),
+    [budgetRows],
+  );
+
+  const totalBudget = useMemo(
+    () => budgetRowsTracked.reduce((s, b) => s + b.limite, 0),
+    [budgetRowsTracked],
+  );
+  const totalBudgetSpend = useMemo(
+    () => budgetRowsTracked.reduce((s, b) => s + b.gasto, 0),
+    [budgetRowsTracked],
+  );
+  const budgetUsedPct = totalBudget > 0 ? (totalBudgetSpend / totalBudget) * 100 : 0;
 
   // Maiores categorias (Resumo)
   const categoryTotals = useMemo(() => {
@@ -142,13 +207,10 @@ export function FinancePlannerView() {
     });
   }, [categoryTotals, activeCategories]);
 
-  const budgetData = activeCategories.filter(c => c.tipo === 'despesa').map((cat) => {
-    const gasto = monthTx.filter((t) => t.tipo === 'despesa' && t.categoria_id === cat.id).reduce((s, t) => s + t.valor, 0);
-    const limitObj = budgetLimits.find(b => b.categoria_id === cat.id);
-    const limite = limitObj?.limite || 0;
-    const pct = limite > 0 ? (gasto / limite) * 100 : 0;
-    return { ...cat, gasto, limite, pct };
-  });
+  const cashPosition = useMemo(
+    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills),
+    [transactions, cashAccount.saldo_inicial, reservedBills],
+  );
 
   const handleSaveBudget = (catId: number, name: string) => {
     const val = parseFloat(editVal);
@@ -157,66 +219,81 @@ export function FinancePlannerView() {
     setEditingBudget(null);
   };
 
+  const subTabs = navGroup !== 'inicio' ? FINANCE_SUB_TABS[navGroup] : undefined;
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-24 relative">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Planejamento Financeiro</h1>
-          <p className="text-[13px] text-zinc-500 mt-0.5">Dashboard de gestão financeira e metas de vida</p>
+    <FinancePlannerShell
+      monthLabel={monthLabel}
+      monthOffset={monthOffset}
+      onMonthPrev={() => setMonthOffset((m) => clampFinanceMonthOffset(m - 1))}
+      onMonthNext={() => setMonthOffset((m) => clampFinanceMonthOffset(m + 1))}
+      tabs={FINANCE_MAIN_TABS}
+      activeTab={navGroup}
+      onTabChange={(id) => goToGroup(id as PlannerGroup)}
+      subTabs={subTabs}
+      activeSubTab={navGroup !== 'inicio' ? activeLeaf : undefined}
+      onSubTabChange={(id) => setLeafTab(id as PlannerLeafTab)}
+      onManageCategories={() => setShowCatModal(true)}
+      onNewTransaction={() => setShowModal(true)}
+    >
+      {monthOffset > 0 && (
+        <div className="rounded-sl border border-accent/35 bg-accent/10 px-3 py-2.5 mb-1">
+          <p className="font-mono text-[10px] uppercase text-accent">
+            Modo previsão · {monthLabel}
+            {monthOffset > 1 && ' · encadeado'}
+          </p>
+          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            Estimativas com receitas recorrentes, contas fixas e faturas — meses distantes usam projeção encadeada.
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => setMonthOffset((m) => m - 1)} className="p-2 rounded-lg hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-[13px] font-semibold text-white min-w-[140px] text-center">{monthLabel}</span>
-          <button onClick={() => setMonthOffset((m) => m + 1)} disabled={monthOffset >= 0} className="p-2 rounded-lg hover:bg-zinc-800/60 text-zinc-400 hover:text-white transition-colors disabled:opacity-30">
-            <ChevronRight className="w-4 h-4" />
-          </button>
-          <PrintButton />
-        </div>
-      </div>
+      )}
 
-      <div className="flex items-center justify-between border-b border-white/5 pb-px">
-        <div className="flex gap-6 w-fit">
-          {([
-            { id: 'visao-geral' as PlannerTab, label: 'Visão Geral', icon: Eye },
-            { id: 'tabela' as PlannerTab, label: 'Lançamentos', icon: List },
-            { id: 'cartoes' as PlannerTab, label: 'Cartões & Caixa', icon: CreditCard },
-            { id: 'metas' as PlannerTab, label: 'Metas', icon: Target },
-            { id: 'contas-fixas' as PlannerTab, label: 'Contas Fixas', icon: Receipt },
-          ]).map(({ id, label, icon: TIcon }) => {
-            const isActive = tab === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
-                className={`flex items-center gap-2 pb-3 px-1 text-[12px] font-medium transition-all relative ${
-                  isActive ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                <TIcon className="w-3.5 h-3.5" />
-                {label}
-                {isActive && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-500" />
-                )}
-              </button>
-            );
-          })}
+      {monthOffset < 0 && (
+        <div className="rounded-sl border border-line bg-chrome/30 px-3 py-2.5 mb-1">
+          <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+            Histórico · {monthLabel}
+          </p>
+          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            Lançamentos reais do período — compare com o que estava previsto nas fixas e recorrentes.
+          </p>
         </div>
+      )}
 
-        <button 
-          onClick={() => setShowCatModal(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 text-[12px] text-zinc-400 hover:bg-zinc-800 hover:text-white transition-all"
-        >
-          <Settings2 className="w-3.5 h-3.5" />
-          Gerenciar Categorias
-        </button>
-      </div>
+      {activeLeaf === 'inicio' && (
+        <FinanceHomeTab
+          monthLabel={monthLabel}
+          monthOffset={monthOffset}
+          onOpenNextMonth={() => setMonthOffset((m) => clampFinanceMonthOffset(m + 1))}
+          onSetLimits={() => goToLeaf('visao-geral')}
+          onConfigure={() => goToLeaf('config')}
+          onNewTransaction={() => setShowModal(true)}
+          receita={receita}
+          despesas={despesas}
+          saldo={saldo}
+          transactions={transactions}
+          monthTransactions={monthTx}
+          recentTransactions={recentTx}
+          activeCategories={activeCategories}
+          onNavigate={(t) => goToLeaf(t as PlannerLeafTab)}
+          onManageCategories={() => setShowCatModal(true)}
+        />
+      )}
+
+      {activeLeaf === 'config' && (
+        <FinanceSetupTab
+          onNavigate={(t) => goToLeaf(t)}
+          saldoDisponivel={cashPosition.saldoDisponivel}
+          saldoCorrente={cashPosition.saldoCorrente}
+          reservaRestante={cashPosition.reservaRestante}
+          saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
+        />
+      )}
 
       {/* ═══════ VISÃO GERAL ═══════ */}
-      {tab === 'visao-geral' && (
+      {activeLeaf === 'visao-geral' && (
         <FinanceOverviewTab
+          monthOffset={monthOffset}
+          onOpenNextMonth={() => setMonthOffset((m) => clampFinanceMonthOffset(m + 1))}
           receita={receita}
           despesas={despesas}
           saldo={saldo}
@@ -227,7 +304,7 @@ export function FinancePlannerView() {
           pieChartData={pieChartData}
           areaChartData={areaChartData}
           budgetUsedPct={budgetUsedPct}
-          budgetData={budgetData}
+          budgetRows={budgetRowsTracked}
           monthTx={monthTx}
           activeCategories={activeCategories}
           editingBudget={editingBudget}
@@ -235,61 +312,82 @@ export function FinancePlannerView() {
           editVal={editVal}
           setEditVal={setEditVal}
           handleSaveBudget={handleSaveBudget}
-          setTab={setTab}
+          setTab={(t) => goToLeaf(t as PlannerLeafTab)}
+        />
+      )}
+
+      {activeLeaf === 'diario' && (
+        <FinanceDailyLedgerTab
           transactions={transactions}
+          activeCategories={activeCategories}
+          monthTransactions={monthTx}
+        />
+      )}
+
+      {activeLeaf === 'planilha' && (
+        <FinanceSpreadsheetTab
+          periodLabel={resolvedPeriod.label}
+          periodTransactions={periodTx}
+          allTransactions={transactions}
+          periodConfig={periodConfig}
+          onPeriodChange={setPeriodConfig}
+          onPeriodShift={(dir) => setPeriodConfig((c) => shiftPeriodConfig(c, dir))}
+          activeCategories={activeCategories}
+          onNewTransaction={() => setShowModal(true)}
         />
       )}
 
       {/* ═══════ TABELA DETALHADA ═══════ */}
-      {tab === 'tabela' && (
+      {activeLeaf === 'tabela' && (
         <FinanceTransactionsTab
+          periodLabel={resolvedPeriod.label}
+          periodConfig={periodConfig}
+          onPeriodChange={setPeriodConfig}
+          onPeriodShift={(dir) => setPeriodConfig((c) => shiftPeriodConfig(c, dir))}
           filterCat={filterCat}
           setFilterCat={setFilterCat}
           activeCategories={activeCategories}
           filterStatus={filterStatus}
           setFilterStatus={setFilterStatus}
-          sorted={sorted}
+          periodTransactions={periodTx}
           removeTransaction={useTaskStore.getState().removeTransaction}
-          filteredTx={filteredTx}
         />
       )}
 
       {/* ═══════ METAS DE VIDA ═══════ */}
-      {tab === 'metas' && (
+      {activeLeaf === 'metas' && (
         <FinanceGoalsTab
           financialGoals={financialGoals}
+          monthTransactions={monthTx}
           editingMeta={editingMeta}
           setEditingMeta={setEditingMeta}
           metaEditVal={metaEditVal}
           setMetaEditVal={setMetaEditVal}
           updateGoalProgress={updateGoalProgress}
           setShowGoalModal={setShowGoalModal}
+          onNavigate={(t) => goToLeaf(t as PlannerLeafTab)}
         />
       )}
 
       {/* ═══════ CARTÕES & CAIXA ═══════ */}
-      {tab === 'cartoes' && (
+      {activeLeaf === 'cartoes' && (
         <VirtualCardsTab />
       )}
 
+      {activeLeaf === 'faturas' && (
+        <FinanceReservedBillsTab />
+      )}
+
       {/* ═══════ CONTAS FIXAS ═══════ */}
-      {tab === 'contas-fixas' && (
+      {activeLeaf === 'contas-fixas' && (
         <ContasFixasTab />
       )}
 
-      {/* FAB */}
-      <button onClick={() => setShowModal(true)} className="fixed bottom-8 right-8 flex items-center gap-2 px-5 py-3 rounded-full bg-white text-zinc-900 text-[13px] font-semibold shadow-lg shadow-black/30 hover:bg-zinc-200 transition-all hover:scale-105 active:scale-95 z-50">
-        <Plus className="w-[18px] h-[18px]" />Novo Lançamento
-      </button>
-
-      {/* Slide out Transaction Panel */}
       <NewTransactionModal isOpen={showModal} onClose={() => setShowModal(false)} />
 
-      {/* New Goal Modal */}
       <NewGoalModal isOpen={showGoalModal} onClose={() => setShowGoalModal(false)} />
 
-      {/* Categories Modal */}
       {showCatModal && <FinanceCategories onClose={() => setShowCatModal(false)} />}
-    </div>
+    </FinancePlannerShell>
   );
 }

@@ -26,6 +26,10 @@ export const AXEL_HEADER_ACTION =
 export const AXEL_MAIN_PB_MOBILE =
   'pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:pb-8'
 
+/** Respiro superior abaixo do header global */
+export const AXEL_MAIN_PT =
+  'pt-4 sm:pt-5 md:pt-6'
+
 /** Painel com borda fina — sem glassmorphism */
 export const AXEL_BORDERLESS_PANEL =
   'rounded-sl bg-card border border-line p-4'

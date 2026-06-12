@@ -4,7 +4,20 @@ import {
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart,
   Zap, Briefcase, Shield, Target, Wallet, DollarSign, Search, ArrowUpDown,
 } from 'lucide-react'
-import type { Category, Transaction } from '../../store/storeTypes'
+import { FinancePeriodToolbar } from './FinancePeriodToolbar'
+import { FinanceGroupedRollupTable } from './FinanceGroupedRollupTable'
+import { CATEGORY_GRUPO_LABELS } from '../../lib/financeDefaultCategories'
+import { filterTransactionsByGrupo, GRUPO_ORDER } from '../../lib/financeGroupRollup'
+import { resolveFinancePeriod, type FinancePeriodConfig } from '../../lib/financePeriodFilter'
+import {
+  AXEL_FILTER_PILL_ACTIVE,
+  AXEL_FILTER_PILL_IDLE,
+  AXEL_ROW_HOVER,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
+import { paymentMethodLabel } from '../../lib/financePaymentMethod'
+import type { Category, CategoryGrupo, Transaction } from '../../store/storeTypes'
 
 // FinanceTransactionsTab — tabela densa estilo Excel/Bloomberg
 // Sem caixas, sem rounded-lg pesado, sem hover que cresce
@@ -36,30 +49,70 @@ type SortDir = 'asc' | 'desc'
 
 interface FinanceTransactionsTabProps
 {
+  periodLabel: string
+  periodConfig: FinancePeriodConfig
+  onPeriodChange: (config: FinancePeriodConfig) => void
+  onPeriodShift: (direction: -1 | 1) => void
   filterCat: string
   setFilterCat: (cat: string) => void
   activeCategories: Category[]
   filterStatus: string
   setFilterStatus: (status: string) => void
-  sorted: Transaction[]
+  periodTransactions: Transaction[]
   removeTransaction: (id: number) => void
-  filteredTx: Transaction[]
 }
 
 export function FinanceTransactionsTab({
+  periodLabel,
+  periodConfig,
+  onPeriodChange,
+  onPeriodShift,
   filterCat,
   setFilterCat,
   activeCategories,
   filterStatus,
   setFilterStatus,
-  sorted,
+  periodTransactions,
   removeTransaction,
-  filteredTx,
 }: FinanceTransactionsTabProps)
 {
   const [search, setSearch] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('data')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [filterGrupo, setFilterGrupo] = useState<CategoryGrupo | 'all'>('all')
+  const [showGrupos, setShowGrupos] = useState(false)
+
+  const resolvedPeriod = useMemo(
+    () => resolveFinancePeriod(periodConfig),
+    [periodConfig],
+  )
+
+  const filteredTx = useMemo(() =>
+  {
+    let result = filterTransactionsByGrupo(periodTransactions, activeCategories, filterGrupo)
+
+    if (filterCat !== 'all')
+    {
+      if (filterCat === 'receita') result = result.filter((t) => t.tipo === 'receita')
+      else result = result.filter((t) => t.categoria_id === parseInt(filterCat) || t.categoria === filterCat)
+    }
+
+    if (filterStatus !== 'all')
+    {
+      result = result.filter((t) =>
+      {
+        const sp = t.status_pagamento
+        return sp === filterStatus || (!sp && filterStatus === 'pendente')
+      })
+    }
+
+    return result
+  }, [periodTransactions, activeCategories, filterGrupo, filterCat, filterStatus])
+
+  const sorted = useMemo(
+    () => [...filteredTx].sort((a, b) => b.data.localeCompare(a.data)),
+    [filteredTx],
+  )
 
   // aplica busca textual + ordenacao definida pelo usuario sobre o ja-filtrado
   const rows = useMemo(() =>
@@ -116,7 +169,13 @@ export function FinanceTransactionsTab({
 
   return (
     <div className="space-y-3">
-      {/* TOOLBAR — filtros + busca */}
+      <FinancePeriodToolbar
+        config={periodConfig}
+        resolved={resolvedPeriod}
+        onChange={onPeriodChange}
+        onShift={onPeriodShift}
+      />
+
       <Toolbar
         search={search}
         setSearch={setSearch}
@@ -125,13 +184,83 @@ export function FinanceTransactionsTab({
         activeCategories={activeCategories}
         filterStatus={filterStatus}
         setFilterStatus={setFilterStatus}
+        filterGrupo={filterGrupo}
+        setFilterGrupo={setFilterGrupo}
+        showGrupos={showGrupos}
+        setShowGrupos={setShowGrupos}
       />
 
-      {/* TABELA — densa, sticky, mono */}
-      <div className="border-y border-zinc-900 overflow-x-auto">
-        <table className="w-full text-[12px] border-collapse">
-          <thead className="bg-black sticky top-0 z-10">
-            <tr className="border-b border-zinc-900">
+      {showGrupos && (
+        <FinanceGroupedRollupTable
+          transactions={filteredTx}
+          activeCategories={activeCategories}
+          periodLabel={periodLabel}
+        />
+      )}
+
+      {/* Lista mobile */}
+      <ul className="md:hidden border border-line rounded-sl divide-y divide-line">
+        {rows.length === 0 && (
+          <li className="py-12 text-center text-[12px] text-zinc-600 px-4">
+            Nenhum lançamento para os filtros atuais.
+          </li>
+        )}
+        {rows.map((t) =>
+        {
+          const isRec = t.tipo === 'receita'
+          const cat = activeCategories.find((c) => c.id === t.categoria_id || c.nome === t.categoria)
+          const statusKey = (t.status_pagamento || 'pendente') as keyof typeof STATUS_CONFIG
+          const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pendente
+          const StatusIcon = status.icon
+          const acc = accumulated.get(t.id) ?? 0
+
+          return (
+            <li key={t.id} className={`px-3 py-3 space-y-2 ${AXEL_ROW_HOVER}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] text-zinc-200 break-words">{t.descricao}</p>
+                  <p className="font-mono text-[10px] text-zinc-500 mt-0.5">
+                    {fmtDate(t.data)}
+                    {' · '}
+                    {paymentMethodLabel(t)}
+                    {' · '}
+                    {isRec ? 'Receita' : (cat?.nome || '-')}
+                  </p>
+                </div>
+                <span className={`font-mono tabular-nums font-semibold shrink-0 text-[13px] ${
+                  isRec ? 'text-emerald-400' : 'text-zinc-200'
+                }`}>
+                  {isRec ? '+' : '−'}{fmt(t.valor)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${status.text}`}>
+                  <StatusIcon className="w-3 h-3" />
+                  {status.label}
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className={`font-mono tabular-nums text-[10px] ${acc >= 0 ? 'text-zinc-400' : 'text-rose-400'}`}>
+                    Saldo {fmt(acc)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeTransaction(t.id)}
+                    className="p-2 text-zinc-600 hover:text-rose-400 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                    aria-label="Remover lançamento"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+
+      <div className="hidden md:block border border-line rounded-sl overflow-x-auto">
+        <table className="w-full min-w-[720px] text-[12px] border-collapse">
+          <thead className="bg-chrome sticky top-0 z-10">
+            <tr className="border-b border-line">
               <Th onClick={() => toggleSort('data')} active={sortKey === 'data'} dir={sortDir} width="w-[68px]">Data</Th>
               <Th width="w-[36px]"></Th>
               <Th onClick={() => toggleSort('descricao')} active={sortKey === 'descricao'} dir={sortDir}>Descrição</Th>
@@ -156,8 +285,8 @@ export function FinanceTransactionsTab({
               return (
                 <tr
                   key={t.id}
-                  className={`group border-b border-zinc-900/50 hover:bg-violet-500/5 transition-colors ${
-                    i % 2 === 0 ? '' : 'bg-zinc-950/40'
+                  className={`group border-b border-line ${AXEL_ROW_HOVER} ${
+                    i % 2 === 0 ? '' : 'bg-chrome/30'
                   }`}
                 >
                   <Td className="text-zinc-500 tabular-nums font-mono text-[11px]">{fmtDate(t.data)}</Td>
@@ -207,11 +336,11 @@ export function FinanceTransactionsTab({
       </div>
 
       {/* RODAPE — totalizadores estilo Bloomberg */}
-      <footer className="flex items-center justify-between text-[11px] pt-1">
+      <footer className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-[11px] pt-1">
         <span className="text-zinc-500 font-mono tabular-nums">
           {rows.length} de {filteredTx.length} lançamentos
         </span>
-        <div className="flex items-center gap-6 font-mono tabular-nums">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-6 font-mono tabular-nums">
           <Total label="Entradas" value={`+${fmt(totalReceita)}`} color="text-emerald-400" />
           <Total label="Saídas"   value={`−${fmt(totalDespesa)}`} color="text-rose-400" />
           <Total label="Saldo"    value={fmt(saldo)} color={saldo >= 0 ? 'text-emerald-400' : 'text-rose-400'} highlight />
@@ -297,21 +426,61 @@ interface ToolbarProps
   activeCategories: Category[]
   filterStatus: string
   setFilterStatus: (status: string) => void
+  filterGrupo: CategoryGrupo | 'all'
+  setFilterGrupo: (g: CategoryGrupo | 'all') => void
+  showGrupos: boolean
+  setShowGrupos: (v: boolean) => void
 }
 
-function Toolbar({ search, setSearch, filterCat, setFilterCat, activeCategories, filterStatus, setFilterStatus }: ToolbarProps)
+function Toolbar({
+  search,
+  setSearch,
+  filterCat,
+  setFilterCat,
+  activeCategories,
+  filterStatus,
+  setFilterStatus,
+  filterGrupo,
+  setFilterGrupo,
+  showGrupos,
+  setShowGrupos,
+}: ToolbarProps)
 {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2">
-      {/* busca */}
-      <div className="flex items-center gap-2 bg-card border border-zinc-900 rounded-md px-2 py-1.5 max-w-xs">
-        <Search className="w-3 h-3 text-zinc-500" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar lançamento..."
-          className="bg-transparent text-[12px] text-zinc-200 placeholder-zinc-600 outline-none w-full"
-        />
+    <div className="flex flex-col gap-3 pb-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 bg-card border border-line rounded-sl px-2 py-1.5 w-full sm:max-w-xs min-h-[44px]">
+          <Search className={`w-3 h-3 ${AXEL_TEXT_SECONDARY}`} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar lançamento..."
+            className={`bg-transparent text-[12px] placeholder:text-ink-muted outline-none w-full ${AXEL_TEXT_PRIMARY}`}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowGrupos(!showGrupos)}
+          className={showGrupos ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE}
+        >
+          Resumo por grupo
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+        <FilterChip active={filterGrupo === 'all'} onClick={() => setFilterGrupo('all')}>
+          Todos grupos
+        </FilterChip>
+        {GRUPO_ORDER.map((g) => (
+          <FilterChip
+            key={g}
+            active={filterGrupo === g}
+            onClick={() => setFilterGrupo(g)}
+          >
+            {CATEGORY_GRUPO_LABELS[g]}
+          </FilterChip>
+        ))}
       </div>
 
       <div className="flex items-center gap-3 overflow-x-auto scrollbar-none">
@@ -334,7 +503,7 @@ function Toolbar({ search, setSearch, filterCat, setFilterCat, activeCategories,
           ))}
         </div>
 
-        <div className="h-4 w-px bg-zinc-900" />
+        <div className="h-4 w-px bg-line" />
 
         {/* status */}
         <div className="flex gap-1 shrink-0">
@@ -361,16 +530,19 @@ interface FilterChipProps
   color?: 'emerald' | 'violet'
 }
 
-function FilterChip({ active, onClick, children, color = 'violet' }: FilterChipProps)
+function FilterChip({ active, onClick, children }: FilterChipProps)
 {
-  const activeBg = color === 'emerald' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-violet-500/15 text-violet-200'
+  if (active)
+  {
+    return (
+      <button type="button" onClick={onClick} className={AXEL_FILTER_PILL_ACTIVE}>
+        {children}
+      </button>
+    )
+  }
+
   return (
-    <button
-      onClick={onClick}
-      className={`px-2.5 py-1 text-[10.5px] font-semibold whitespace-nowrap transition-colors rounded ${
-        active ? activeBg : 'text-zinc-500 hover:text-zinc-300'
-      }`}
-    >
+    <button type="button" onClick={onClick} className={AXEL_FILTER_PILL_IDLE}>
       {children}
     </button>
   )

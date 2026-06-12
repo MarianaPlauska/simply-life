@@ -3,8 +3,6 @@ import { Accessibility, Minus, Plus, Sun, Moon } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_HEADER_ACTION, AXEL_LINE } from '../../constants/axelSurfaces'
 
-// Acessibilidade — alternância claro/escuro + ajustes finos
-
 interface ToggleRowProps
 {
   label: string
@@ -48,7 +46,7 @@ export function AccessibilityQuickMenu()
 
   const isDark = accessibility.colorScheme === 'dark'
   const ThemeIcon = isDark ? Sun : Moon
-  const themeLabel = isDark ? 'Ativar modo claro' : 'Ativar modo escuro'
+  const themeLabel = isDark ? 'Modo claro' : 'Modo escuro'
 
   useEffect(() =>
   {
@@ -65,24 +63,15 @@ export function AccessibilityQuickMenu()
   }, [open])
 
   return (
-    <div ref={ref} className="relative flex items-center gap-1.5">
-      <button
-        type="button"
-        onClick={toggleColorScheme}
-        className={AXEL_HEADER_ACTION}
-        aria-label={themeLabel}
-        title={themeLabel}
-      >
-        <ThemeIcon className="w-4 h-4" />
-      </button>
-
+    <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={AXEL_HEADER_ACTION}
-        aria-label="Mais opções de acessibilidade"
+        aria-label="Aparência e acessibilidade"
         aria-expanded={open}
         aria-haspopup="dialog"
+        title="Aparência e acessibilidade"
       >
         <Accessibility className="w-4 h-4" />
       </button>
@@ -90,12 +79,12 @@ export function AccessibilityQuickMenu()
       {open && (
         <div
           role="dialog"
-          aria-label="Configurações de acessibilidade"
+          aria-label="Aparência e acessibilidade"
           className="absolute right-0 top-full mt-2 z-50 w-64 rounded-xl border border-zinc-200 bg-white shadow-xl shadow-zinc-400/20 overflow-hidden dark:border-zinc-800/80 dark:bg-[#121214] dark:shadow-black/40"
         >
           <div className="px-3 py-2.5">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
-              Acessibilidade
+              Aparência
             </p>
           </div>
           <div className={AXEL_LINE} />
@@ -108,11 +97,17 @@ export function AccessibilityQuickMenu()
             }}
             className="w-full flex items-center justify-between gap-3 px-3 py-3 text-left text-[13px] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/[0.03]"
           >
-            <span>Tema {isDark ? 'escuro' : 'claro'}</span>
+            <span>{themeLabel}</span>
             <ThemeIcon className="w-4 h-4 text-zinc-500" />
           </button>
 
           <div className={AXEL_LINE} />
+
+          <div className="px-3 py-2">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+              Acessibilidade
+            </p>
+          </div>
 
           <div className="flex items-center justify-between gap-3 px-3 py-3">
             <span className="text-[13px] text-zinc-700 dark:text-zinc-300">Tamanho da fonte</span>

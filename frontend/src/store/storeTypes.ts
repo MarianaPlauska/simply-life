@@ -33,12 +33,16 @@ export interface TimerConfig {
   longBreak: number;
 }
 
+export type CategoryGrupo = 'casa' | 'contas' | 'futuro' | 'geral';
+
 export interface Category {
   id: number;
   nome: string;
   cor: string;
   icone: string;
   tipo: 'receita' | 'despesa';
+  grupo?: CategoryGrupo;
+  parent_id?: number | null;
 }
 
 export interface Despesa {
@@ -85,6 +89,7 @@ export interface VirtualCard
   cvv: string;
   limite: number;
   dia_vencimento?: number;
+  dia_fechamento?: number;
   tipo_gradiente: 'purple' | 'obsidian' | 'sunset' | 'ocean' | 'mint';
   bandeira: 'visa' | 'mastercard';
   status: 'ativo' | 'bloqueado';
@@ -100,6 +105,15 @@ export interface ContaFixa
   ativa: boolean;
 }
 
+export type FinancePaymentMethod =
+  | 'pix'
+  | 'debito'
+  | 'dinheiro'
+  | 'boleto'
+  | 'cartao'
+  | 'ted'
+  | 'outro';
+
 export interface Transaction
 {
   id: number;
@@ -107,10 +121,44 @@ export interface Transaction
   categoria: string; // Legado
   categoria_id?: number;
   valor: number;
-  tipo: 'receita' | 'despesa';
+  tipo: 'receita' | 'despesa' | 'investimento';
   data: string;
   status_pagamento?: 'pago' | 'pendente' | 'agendado';
+  forma_pagamento?: FinancePaymentMethod;
   card_id?: string;
+  fatura_reserva_id?: number;
+}
+
+export interface CashAccountSettings
+{
+  saldo_inicial: number;
+}
+
+export type ReservedBillStatus = 'aberta' | 'quitada' | 'cancelada';
+
+export interface ReservedBill
+{
+  id: number;
+  titulo: string;
+  valor_alocado: number;
+  valor_gasto: number;
+  data_vencimento: string;
+  card_id?: string;
+  categoria_id?: number;
+  status: ReservedBillStatus;
+}
+
+export interface ReservedBillItem
+{
+  id: number;
+  fatura_reserva_id: number;
+  descricao: string;
+  valor: number;
+  parcela_atual?: number;
+  parcela_total?: number;
+  destaque?: 'erro' | null;
+  despesa_id?: number;
+  created_at?: string;
 }
 
 export interface BudgetLimit {
@@ -120,6 +168,16 @@ export interface BudgetLimit {
   limite: number;
   mes?: number;
   ano?: number;
+}
+
+export interface RecurringIncome
+{
+  id: number;
+  titulo: string;
+  valor: number;
+  dia_recebimento: number;
+  categoria_id?: number;
+  ativa: boolean;
 }
 
 export interface FinancialGoal {

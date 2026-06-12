@@ -1,138 +1,139 @@
-import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Info } from 'lucide-react';
-import type { Transaction } from '../../store/useTaskStore';
+import { useMemo } from 'react'
+import { TrendingUp, TrendingDown, Info } from 'lucide-react'
+import { useTaskStore } from '../../store/useTaskStore'
+import { buildCashflowProjection } from '../../lib/financeCashflowProjection'
+import { computeCashPosition } from '../../lib/financeReservedBills'
+import {
+  AXEL_BORDERLESS_PANEL,
+  AXEL_ROW_HOVER,
+  AXEL_SECTION_TITLE,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
-interface CashflowForecastProps
-{
-  transactions: Transaction[];
-}
+const fmt = (v: number) =>
+  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-function fmt(value: number)
+export function CashflowForecast()
 {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
+  const transactions = useTaskStore((s) => s.transactions)
+  const recurringIncomes = useTaskStore((s) => s.recurringIncomes)
+  const contasFixas = useTaskStore((s) => s.contasFixas)
+  const cashAccount = useTaskStore((s) => s.cashAccount)
+  const reservedBills = useTaskStore((s) => s.reservedBills)
 
-export function CashflowForecast({ transactions }: CashflowForecastProps)
-{
-  // Projeção de fluxo de caixa para os próximos 6 meses
-  const projectionData = useMemo(() =>
+  const saldoAtual = useMemo(() =>
   {
-    const data = [];
-    const now = new Date();
+    const position = computeCashPosition(
+      transactions,
+      cashAccount.saldo_inicial,
+      reservedBills,
+    )
+    return position.saldoDisponivel
+  }, [transactions, cashAccount.saldo_inicial, reservedBills])
 
-    const uniqueMonths = new Set<string>();
-    transactions.forEach((t) =>
-    {
-      if (t.data)
-      {
-        const monthKey = t.data.substring(0, 7); // extrai YYYY-MM
-        uniqueMonths.add(monthKey);
-      }
-    });
+  const projectionData = useMemo(
+    () => buildCashflowProjection(
+      transactions,
+      recurringIncomes,
+      contasFixas,
+      saldoAtual,
+    ),
+    [transactions, recurringIncomes, contasFixas, saldoAtual],
+  )
 
-    const monthCount = uniqueMonths.size;
-    const totalIncome = transactions.filter((t) => t.tipo === 'receita').reduce((sum, t) => sum + t.valor, 0);
-    const totalExpense = transactions.filter((t) => t.tipo === 'despesa').reduce((sum, t) => sum + t.valor, 0);
-
-    let monthlyIncomeEstimate = 7500;
-    let monthlyExpenseEstimate = 4200;
-
-    if (monthCount >= 2)
-    {
-      monthlyIncomeEstimate = totalIncome / monthCount;
-      monthlyExpenseEstimate = totalExpense / monthCount;
-    }
-    else if (monthCount === 1)
-    {
-      monthlyIncomeEstimate = totalIncome > 0 ? totalIncome : 7500;
-      monthlyExpenseEstimate = totalExpense > 0 ? totalExpense : 4200;
-    }
-
-    let currentBalance = totalIncome - totalExpense;
-    if (currentBalance <= 0)
-    {
-      currentBalance = 3500; // saldo inicial mínimo simulado caso o banco esteja limpo
-    }
-
-    const MONTH_NAMES = [
-      'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-    ];
-
-    for (let i = 1; i <= 6; i++)
-    {
-      const targetDate = new Date(now.getFullYear(), now.getMonth() + i, 1);
-      const mName = MONTH_NAMES[targetDate.getMonth()];
-      const year = targetDate.getFullYear();
-
-      // Variações aleatórias muito sutis baseadas em sazonalidade
-      const seasonalityFactor = 1 + Math.sin(i * 0.5) * 0.05;
-      const projectedIncome = monthlyIncomeEstimate * seasonalityFactor;
-      const projectedExpense = monthlyExpenseEstimate * (1 + (i * 0.02)); // inflação simulada de gastos
-
-      currentBalance = currentBalance + projectedIncome - projectedExpense;
-
-      data.push({
-        mes: `${mName} ${year}`,
-        receita: projectedIncome,
-        despesa: projectedExpense,
-        saldo: currentBalance
-      });
-    }
-
-    return data;
-  }, [transactions]);
+  const usesRecorrentes = recurringIncomes.some((r) => r.ativa)
+  const usesFixas = contasFixas.some((c) => c.ativa)
 
   return (
-    <div className="space-y-6">
-      <div className="pb-3 border-b border-zinc-900/40 flex items-center justify-between">
+    <section className={AXEL_BORDERLESS_PANEL}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between pb-4 border-b border-line">
         <div>
-          <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Previsão de Caixa (Fluxo de Caixa)</h2>
-          <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Projeções matemáticas estimadas para os próximos 6 meses</p>
+          <h2 className={AXEL_SECTION_TITLE}>Previsão de caixa</h2>
+          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            Projeção para os próximos 6 meses
+          </p>
         </div>
-        <div className="flex items-center gap-1 bg-zinc-950 px-2.5 py-1 rounded-md border border-zinc-900">
-          <Info className="w-3 h-3 text-zinc-600" />
-          <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Cálculo Base Sazonal</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-sl border border-line bg-chrome self-start">
+          <Info className={`w-3 h-3 shrink-0 ${AXEL_TEXT_SECONDARY}`} />
+          <span className={`text-[9px] font-mono uppercase ${AXEL_TEXT_SECONDARY}`}>
+            {usesRecorrentes || usesFixas ? 'Recorrentes + histórico' : 'Média histórica'}
+          </span>
         </div>
       </div>
 
-      {/* Painel de Projeção de Caixa - Alta Densidade */}
-      <div className="space-y-1">
-        {/* Cabeçalho */}
-        <div className="grid grid-cols-[1fr_120px_120px_140px] gap-4 py-2 border-b border-zinc-900/50 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-          <span>Período Previsto</span>
-          <span className="text-right">Receitas Est.</span>
-          <span className="text-right">Despesas Est.</span>
-          <span className="text-right">Saldo Projetado</span>
-        </div>
-
-        {/* Linhas de Projeção */}
-        <div className="divide-y divide-zinc-900/40">
-          {projectionData.map((proj, idx) =>
-          {
-            const isBalancePositive = proj.saldo >= 0;
-            return (
-              <div
-                key={idx}
-                className="grid grid-cols-[1fr_120px_120px_140px] gap-4 items-center py-3.5 hover:bg-white/[0.01] hover:px-3 -mx-3 rounded-lg transition-all duration-200"
-              >
-                <span className="text-[12px] font-semibold text-zinc-300">{proj.mes}</span>
-                <span className="text-[12px] text-emerald-400 font-mono font-medium text-right flex items-center justify-end gap-1">
-                  <TrendingUp className="w-3 h-3 text-emerald-500/80" />
-                  +{fmt(proj.receita)}
-                </span>
-                <span className="text-[12px] text-zinc-400 font-mono font-medium text-right flex items-center justify-end gap-1">
-                  <TrendingDown className="w-3 h-3 text-zinc-600" />
-                  -{fmt(proj.despesa)}
-                </span>
-                <span className={`text-[13px] font-bold font-mono text-right ${isBalancePositive ? 'text-violet-400' : 'text-rose-400'}`}>
-                  {fmt(proj.saldo)}
-                </span>
+      {/* Cards mobile */}
+      <div className="mt-3 md:hidden space-y-2">
+        {projectionData.map((proj) =>
+        {
+          const positive = proj.saldo >= 0
+          return (
+            <div
+              key={proj.mes}
+              className={`rounded-sl border border-line p-3 ${AXEL_ROW_HOVER}`}
+            >
+              <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>{proj.mes}</p>
+              <div className="grid grid-cols-1 gap-2 mt-2 text-[11px] font-mono">
+                <div className="flex justify-between gap-2">
+                  <span className={AXEL_TEXT_SECONDARY}>Receitas est.</span>
+                  <span className="text-concluido tabular-nums shrink-0">+{fmt(proj.receita)}</span>
+                </div>
+                <div className="flex justify-between gap-2">
+                  <span className={AXEL_TEXT_SECONDARY}>Despesas est.</span>
+                  <span className={`tabular-nums shrink-0 ${AXEL_TEXT_SECONDARY}`}>-{fmt(proj.despesa)}</span>
+                </div>
+                <div className="flex justify-between gap-2 pt-1 border-t border-line">
+                  <span className={AXEL_TEXT_SECONDARY}>Saldo projetado</span>
+                  <span className={`font-medium tabular-nums shrink-0 ${positive ? 'text-accent' : 'text-urgente'}`}>
+                    {fmt(proj.saldo)}
+                  </span>
+                </div>
               </div>
-            );
-          })}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Tabela desktop */}
+      <div className="mt-3 hidden md:block overflow-x-auto">
+        <div className="min-w-[520px]">
+          <div className={`grid grid-cols-[1fr_110px_110px_120px] gap-3 py-2 border-b border-line text-[10px] font-mono uppercase ${AXEL_TEXT_SECONDARY}`}>
+            <span>Período</span>
+            <span className="text-right">Receitas est.</span>
+            <span className="text-right">Despesas est.</span>
+            <span className="text-right">Saldo projetado</span>
+          </div>
+
+          <div className="divide-y divide-line">
+            {projectionData.map((proj) =>
+            {
+              const positive = proj.saldo >= 0
+              return (
+                <div
+                  key={proj.mes}
+                  className={`grid grid-cols-[1fr_110px_110px_120px] gap-3 items-center py-3 ${AXEL_ROW_HOVER}`}
+                >
+                  <span className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>{proj.mes}</span>
+                  <span className="text-[12px] text-concluido font-mono text-right flex items-center justify-end gap-1">
+                    <TrendingUp className="w-3 h-3 opacity-70" />
+                    +{fmt(proj.receita)}
+                  </span>
+                  <span className={`text-[12px] font-mono text-right flex items-center justify-end gap-1 ${AXEL_TEXT_SECONDARY}`}>
+                    <TrendingDown className="w-3 h-3 opacity-50" />
+                    -{fmt(proj.despesa)}
+                  </span>
+                  <span className={`text-[12px] font-mono font-medium text-right tabular-nums ${
+                    positive ? 'text-accent' : 'text-urgente'
+                  }`}
+                  >
+                    {fmt(proj.saldo)}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    </section>
+  )
 }

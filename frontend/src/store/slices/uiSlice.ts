@@ -38,6 +38,9 @@ export interface UISlice {
   ) => void;
   toggleColorScheme: () => void;
   setKeywords: (keywords: string[]) => void;
+  /** Destaque temporário no sino (timestamp até quando pulsa) */
+  sinoDestaqueAte: number;
+  pulseSino: (durationMs?: number) => void;
 }
 
 export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) => ({
@@ -137,4 +140,9 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   },
 
   setKeywords: (keywords) => set({ keywords }),
+  sinoDestaqueAte: 0,
+  pulseSino: (durationMs = 6000) =>
+  {
+    set({ sinoDestaqueAte: Date.now() + durationMs });
+  },
 });

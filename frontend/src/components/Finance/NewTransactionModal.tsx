@@ -1,244 +1,599 @@
-import { useState } from 'react';
-import { 
-  X, Plus, Wallet, CheckCircle2, AlertCircle, CalendarClock 
-} from 'lucide-react';
-import { useTaskStore } from '../../store/useTaskStore';
-import { toast } from 'sonner';
-import { FinanceCategories } from './FinanceCategories';
-
-// Mapa de ícones para exibição dinâmica
+import { useMemo, useState } from 'react'
 import {
-  Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Shield, Target, Briefcase
-} from 'lucide-react';
+  X,
+  CheckCircle2,
+  CalendarClock,
+  TrendingUp,
+  PiggyBank,
+} from 'lucide-react'
+import { useTaskStore } from '../../store/useTaskStore'
+import { toast } from 'sonner'
+import { FinanceCategories } from './FinanceCategories'
+import { CategoryPicker } from './CategoryPicker'
+import { PaymentMethodPicker } from './PaymentMethodPicker'
+import { findCategory, formatCategoryPath } from '../../lib/financeCategoryTree'
+import {
+  DEFAULT_EXPENSE_PAYMENT,
+  DEFAULT_INCOME_PAYMENT,
+  isCardPaymentSelection,
+  resolvePaymentFromSelection,
+} from '../../lib/financePaymentMethod'
+import {
+  AXEL_BTN_PRIMARY,
+  AXEL_FILTER_PILL_ACTIVE,
+  AXEL_FILTER_PILL_IDLE,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
+import { useFinancePurchaseCheck } from '../../hooks/useFinancePurchaseCheck'
+import { FinancePurchaseCheckStep } from './overview/FinancePurchaseCheckStep'
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
-  Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Wallet, Shield, Target, Briefcase
-};
+type LancamentoModo = 'imediato' | 'futuro'
+type LancamentoTipo = 'despesa' | 'receita' | 'investimento'
 
-const STATUS_CONFIG = {
-  pago: { label: 'Pago', icon: CheckCircle2, text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  pendente: { label: 'Pendente', icon: AlertCircle, text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
-  agendado: { label: 'Agendado', icon: CalendarClock, text: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-} as const;
-
-interface NewTransactionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface NewTransactionModalProps
+{
+  isOpen: boolean
+  onClose: () => void
 }
 
-export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProps) {
-  const cards = useTaskStore((s) => s.cards);
-  const categories = useTaskStore((s) => s.categories);
-  const addTransaction = useTaskStore((s) => s.addTransaction);
-  const registerInteraction = useTaskStore((s) => s.registerInteraction);
+const TIPO_LABELS: Record<LancamentoTipo, string> = {
+  despesa: 'Gasto',
+  receita: 'Receita',
+  investimento: 'Investimento',
+}
 
-  const [showCatModal, setShowCatModal] = useState(false);
-  const [form, setForm] = useState({ 
-    descricao: '', 
-    valor: '', 
-    tipo: 'despesa' as 'receita' | 'despesa', 
-    categoria: '', 
-    categoria_id: undefined as number | undefined,
-    data: '', 
-    status_pagamento: 'pendente',
-    card_id: undefined as string | undefined
-  });
+const TIPO_HINTS: Record<LancamentoTipo, string> = {
+  despesa: 'Dinheiro que saiu — compras, contas, consumo.',
+  receita: 'Dinheiro que entrou — salário, PIX recebido, freelance.',
+  investimento: 'Dinheiro guardado — poupança, CDB, ações, reserva.',
+}
 
-  if (!isOpen) return null;
+export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProps)
+{
+  const cards = useTaskStore((s) => s.cards)
+  const categories = useTaskStore((s) => s.categories)
+  const transactions = useTaskStore((s) => s.transactions)
+  const budgetLimits = useTaskStore((s) => s.budgetLimits)
+  const cashAccount = useTaskStore((s) => s.cashAccount)
+  const addTransaction = useTaskStore((s) => s.addTransaction)
+  const removeCategory = useTaskStore((s) => s.removeCategory)
+  const registerInteraction = useTaskStore((s) => s.registerInteraction)
+  const { loading: checkLoading, verdict, iaAtiva, checkPurchase, reset: resetCheck } = useFinancePurchaseCheck()
 
-  const handleAdd = async () => {
-    if (!form.descricao.trim() || !form.valor) return;
+  const [showCatModal, setShowCatModal] = useState(false)
+  const [catModalParentId, setCatModalParentId] = useState<number | null>(null)
+  const [modo, setModo] = useState<LancamentoModo>('imediato')
+  const [phase, setPhase] = useState<'form' | 'axel'>('form')
+  const reservedBills = useTaskStore((s) => s.reservedBills)
 
-    if (form.tipo === 'despesa' && form.card_id) {
-      const selectedCard = cards.find((c) => c.id === form.card_id);
-      if (selectedCard && selectedCard.status === 'bloqueado') {
-        toast.error('Não é possível registrar despesas em cartões virtuais bloqueados');
-        return;
+  const [form, setForm] = useState({
+    descricao: '',
+    valor: '',
+    tipo: 'despesa' as LancamentoTipo,
+    categoria_id: '' as number | '',
+    data: '',
+    payment: DEFAULT_EXPENSE_PAYMENT as string,
+    fatura_reserva_id: '' as number | '',
+  })
+
+  const investCatId = useMemo(() =>
+  {
+    const inv = categories.find(
+      (c) => c.tipo === 'despesa' && c.nome.toLowerCase().includes('invest'),
+    )
+    return inv?.id
+  }, [categories])
+
+  const openBills = useMemo(
+    () => reservedBills.filter((b) => b.status === 'aberta'),
+    [reservedBills],
+  )
+
+  const handleRemoveCategory = async (id: number) =>
+  {
+    if (!confirm('Remover esta categoria?')) return
+    await removeCategory(id)
+    if (form.categoria_id === id)
+    {
+      setForm((f) => ({ ...f, categoria_id: '' }))
+    }
+    toast.success('Categoria removida')
+  }
+
+  if (!isOpen) return null
+
+  const resetAndClose = () =>
+  {
+    setForm({
+      descricao: '',
+      valor: '',
+      tipo: 'despesa',
+      categoria_id: '',
+      data: '',
+      payment: DEFAULT_EXPENSE_PAYMENT,
+      fatura_reserva_id: '',
+    })
+    setModo('imediato')
+    setPhase('form')
+    resetCheck()
+    onClose()
+  }
+
+  const setTipo = (tipo: LancamentoTipo) =>
+  {
+    setForm({
+      ...form,
+      tipo,
+      categoria_id: tipo === 'investimento' && investCatId ? investCatId : '',
+      payment: tipo === 'receita' ? DEFAULT_INCOME_PAYMENT : DEFAULT_EXPENSE_PAYMENT,
+      fatura_reserva_id: '',
+    })
+    if (tipo !== 'despesa') setModo('imediato')
+  }
+
+  const resolveStatus = (): 'pago' | 'pendente' | 'agendado' =>
+  {
+    if (form.tipo === 'receita' || form.tipo === 'investimento') return 'pago'
+    if (modo === 'futuro') return 'agendado'
+    return 'pago'
+  }
+
+  const parseValor = (): number | null =>
+  {
+    const val = parseFloat(form.valor.replace(',', '.'))
+    if (!form.descricao.trim() || Number.isNaN(val) || val <= 0) return null
+    return val
+  }
+
+  const needsAxelCheck = (): boolean =>
+  {
+    return form.tipo === 'despesa' && modo === 'imediato'
+  }
+
+  const runAxelCheck = async () =>
+  {
+    const val = parseValor()
+    if (val == null)
+    {
+      toast.error('Preencha descrição e valor')
+      return
+    }
+
+    const paymentResolved = resolvePaymentFromSelection(form.payment, cards)
+    const now = new Date()
+    const monthTx = transactions.filter((t) =>
+    {
+      const d = new Date(`${t.data.slice(0, 10)}T12:00:00`)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    })
+
+    setPhase('axel')
+    await checkPurchase({
+      descricao: form.descricao.trim(),
+      valor: val,
+      categoriaId: form.categoria_id !== '' ? form.categoria_id : undefined,
+      cardId: paymentResolved.card_id,
+      formaPagamento: paymentResolved.forma_pagamento,
+      transactions,
+      monthTransactions: monthTx,
+      categories,
+      budgetLimits,
+      saldoInicial: cashAccount.saldo_inicial,
+      reservedBills,
+      cards,
+    })
+  }
+
+  const handleAdd = async () =>
+  {
+    const val = parseValor()
+    if (val == null)
+    {
+      toast.error('Preencha descrição e valor')
+      return
+    }
+
+    const paymentResolved = resolvePaymentFromSelection(form.payment, cards)
+    const cardId = form.tipo === 'despesa' ? paymentResolved.card_id : undefined
+    const formaPagamento = form.tipo === 'investimento'
+      ? undefined
+      : paymentResolved.forma_pagamento
+
+    if (cardId)
+    {
+      const selectedCard = cards.find((c) => c.id === cardId)
+      if (selectedCard?.status === 'bloqueado')
+      {
+        toast.error('Cartão bloqueado')
+        return
       }
     }
 
+    const cat = form.categoria_id !== ''
+      ? findCategory(categories, form.categoria_id)
+      : undefined
+
     await addTransaction({
       descricao: form.descricao.trim(),
-      valor: parseFloat(form.valor),
+      valor: val,
       tipo: form.tipo,
-      categoria: form.tipo === 'receita' ? '-' : form.categoria,
-      categoria_id: form.categoria_id,
-      data: form.data || new Date().toISOString().split('T')[0],
-      status_pagamento: form.status_pagamento as 'pago' | 'pendente' | 'agendado',
-      card_id: form.tipo === 'despesa' ? form.card_id : undefined,
-    });
+      categoria: form.tipo === 'receita'
+        ? (cat?.nome ?? '-')
+        : (cat?.nome ?? (form.tipo === 'investimento' ? 'investimentos' : 'outros')),
+      categoria_id: form.categoria_id !== ''
+        ? form.categoria_id
+        : form.tipo === 'investimento'
+          ? investCatId
+          : undefined,
+      data: form.data || new Date().toISOString().slice(0, 10),
+      status_pagamento: resolveStatus(),
+      forma_pagamento: formaPagamento,
+      card_id: cardId,
+      fatura_reserva_id: form.fatura_reserva_id !== '' ? form.fatura_reserva_id : undefined,
+    })
 
-    setForm({ 
-      descricao: '', 
-      valor: '', 
-      tipo: 'despesa', 
-      categoria: '', 
-      categoria_id: undefined, 
-      data: '', 
-      status_pagamento: 'pendente', 
-      card_id: undefined 
-    });
-    onClose();
-    registerInteraction('financeiro');
-    toast.success(form.tipo === 'receita' ? 'Receita adicionada' : 'Despesa registrada');
-  };
+    registerInteraction('financeiro')
+    toast.success(
+      form.tipo === 'receita'
+        ? 'Receita lançada no caixa'
+        : form.tipo === 'investimento'
+          ? 'Investimento registrado'
+          : modo === 'futuro'
+            ? 'Conta futura registrada'
+            : cardId
+              ? 'Gasto lançado no cartão'
+              : 'Gasto lançado na conta corrente',
+    )
+    resetAndClose()
+  }
+
+  const openCategories = (parentId: number | null = null) =>
+  {
+    setCatModalParentId(parentId)
+    setShowCatModal(true)
+  }
+
+  const selectedCatLabel = formatCategoryPath(
+    categories,
+    form.categoria_id !== '' ? form.categoria_id : undefined,
+  )
+
+  const saveLabel = form.tipo === 'receita'
+    ? 'receita'
+    : form.tipo === 'investimento'
+      ? 'investimento'
+      : modo === 'futuro'
+        ? 'conta futura'
+        : 'gasto'
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
-      <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm bg-zinc-950/95 border-l border-white/[0.04] shadow-2xl backdrop-blur-xl p-6 flex flex-col justify-between transform transition-all duration-300" onClick={(e) => e.stopPropagation()}>
-        <div className="space-y-6 overflow-y-auto pr-1 scrollbar-none flex-1 pb-6">
-          <div className="flex items-center justify-between border-b border-white/[0.04] pb-4">
-            <div>
-              <h3 className="text-[14px] font-bold text-white tracking-wide uppercase">Novo Lançamento</h3>
-              <p className="text-[10px] text-zinc-500 font-medium">Insira despesas ou receitas no Simply-Life</p>
+      <button
+        type="button"
+        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        onClick={resetAndClose}
+        aria-label="Fechar"
+      />
+
+      <div
+        className="fixed inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto z-50 flex flex-col w-full sm:max-w-md max-h-[min(92vh,100dvh)] sm:max-h-none sm:h-full border border-line bg-card shadow-2xl rounded-t-sl sm:rounded-none"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="finance-tx-title"
+      >
+        <div className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-4 border-b border-line">
+          <div className="min-w-0 pr-2">
+            <h3 id="finance-tx-title" className={`text-sm font-display uppercase tracking-wide ${AXEL_TEXT_PRIMARY}`}>
+              Novo lançamento
+            </h3>
+            <p className={`text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+              {TIPO_HINTS[form.tipo]}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={resetAndClose}
+            className="p-2 rounded-sl hover:bg-chrome text-ink-muted shrink-0"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
+          {phase === 'axel' ? (
+            <FinancePurchaseCheckStep
+              descricao={form.descricao.trim()}
+              valor={parseFloat(form.valor.replace(',', '.'))}
+              verdict={verdict}
+              loading={checkLoading}
+              iaAtiva={iaAtiva}
+              onConfirm={() => void handleAdd()}
+              onCancel={resetAndClose}
+              onBack={() =>
+              {
+                setPhase('form')
+                resetCheck()
+              }}
+            />
+          ) : (
+          <>
+          <div className="grid grid-cols-3 gap-1 p-1 rounded-sl border border-line bg-chrome/40">
+            {(['despesa', 'receita', 'investimento'] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setTipo(t)}
+                className={`py-2 px-1 rounded-sl font-mono text-[9px] sm:text-[10px] uppercase ${
+                  form.tipo === t ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                }`}
+              >
+                {TIPO_LABELS[t]}
+              </button>
+            ))}
+          </div>
+
+          {form.tipo === 'despesa' && (
+            <div className="space-y-1.5">
+              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Quando</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setModo('imediato')}
+                  className={`py-2 px-2 rounded-sl font-mono text-[10px] uppercase ${
+                    modo === 'imediato' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                  }`}
+                >
+                  Já gastei
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModo('futuro')}
+                  className={`py-2 px-2 rounded-sl font-mono text-[10px] uppercase ${
+                    modo === 'futuro' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                  }`}
+                >
+                  Conta futura
+                </button>
+              </div>
             </div>
-            <button onClick={onClose} className="p-1 hover:bg-zinc-800 rounded-lg transition-colors">
-              <X className="w-4 h-4 text-zinc-500" />
-            </button>
-          </div>
+          )}
 
-          {/* Tipo: Despesa / Receita */}
-          <div className="flex gap-2 p-1 bg-zinc-900/60 border border-white/[0.04] rounded-xl">
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, tipo: 'despesa' })}
-              className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${form.tipo === 'despesa' ? 'bg-red-500/10 text-red-400 border border-red-500/20 shadow-md' : 'text-zinc-500 hover:text-zinc-400'}`}
-            >
-              Despesa
-            </button>
-            <button
-              type="button"
-              onClick={() => setForm({ ...form, tipo: 'receita' })}
-              className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${form.tipo === 'receita' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-md' : 'text-zinc-500 hover:text-zinc-400'}`}
-            >
-              Receita
-            </button>
-          </div>
+          {form.tipo === 'receita' && (
+            <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-concluido/35 bg-concluido/10 text-concluido`}>
+              <TrendingUp size={14} className="shrink-0 mt-0.5" />
+              <span>Soma ao saldo da conta corrente — não é investimento nem gasto.</span>
+            </div>
+          )}
 
-          {/* Descrição */}
+          {form.tipo === 'investimento' && (
+            <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-accent/35 bg-accent/10 text-accent`}>
+              <PiggyBank size={14} className="shrink-0 mt-0.5" />
+              <span>Sai do caixa e vai para poupança/reserva — separado dos gastos do dia a dia.</span>
+            </div>
+          )}
+
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Descrição</label>
+            <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Descrição</label>
             <input
               type="text"
-              placeholder="Ex: Assinatura OpenAI, Freelance..."
+              placeholder={
+                form.tipo === 'receita'
+                  ? 'Ex: Salário, PIX cliente, freelance...'
+                  : form.tipo === 'investimento'
+                    ? 'Ex: Aporte Tesouro, CDB, reserva emergência...'
+                    : 'Ex: Almoço, Netflix, aluguel...'
+              }
               value={form.descricao}
               onChange={(e) => setForm({ ...form, descricao: e.target.value })}
-              className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white placeholder:text-zinc-650 outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/40 transition"
+              className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm text-ink placeholder:text-ink-muted outline-none focus:border-accent/50"
               autoFocus
             />
           </div>
 
-          {/* Valor */}
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Valor (R$)</label>
+            <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Valor (R$)</label>
             <input
-              type="number"
-              min="0.01"
-              step="0.01"
+              inputMode="decimal"
               placeholder="0,00"
               value={form.valor}
               onChange={(e) => setForm({ ...form, valor: e.target.value })}
-              className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white placeholder:text-zinc-650 outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/40 transition font-mono"
+              className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono text-ink outline-none focus:border-accent/50"
             />
           </div>
 
+          {form.tipo === 'receita' && (
+            <>
+            <div className="space-y-2">
+              <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Recebeu via</label>
+              <PaymentMethodPicker
+                cards={cards}
+                value={form.payment}
+                onChange={(payment) => setForm({ ...form, payment })}
+                variant="receita"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Origem (opcional)
+              </label>
+              <CategoryPicker
+                categories={categories}
+                tipo="receita"
+                value={form.categoria_id}
+                onChange={(id) => setForm({ ...form, categoria_id: id })}
+                compact
+                onAddCategory={() => openCategories(null)}
+                onRemoveCategory={(id) => void handleRemoveCategory(id)}
+              />
+            </div>
+            </>
+          )}
+
           {form.tipo === 'despesa' && (
             <>
-              {/* Categoria */}
               <div className="space-y-2">
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Categoria</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {categories.filter(c => c.tipo === 'despesa').map((cat) => {
-                    const CatIcon = ICON_MAP[cat.icone] || Wallet;
-                    const selected = form.categoria_id === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setForm({ ...form, categoria: cat.nome, categoria_id: cat.id })}
-                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[10px] font-medium transition-all ${selected ? 'bg-white/[0.04] border border-white/[0.12] shadow-lg' : 'bg-zinc-900/30 border border-transparent hover:bg-zinc-900/60'}`}
-                      >
-                        <CatIcon className="w-3.5 h-3.5" style={{ color: cat.cor }} />
-                        <span className={selected ? 'text-zinc-200 font-bold' : 'text-zinc-500'}>{cat.nome.split(' ')[0]}</span>
-                      </button>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() => setShowCatModal(true)}
-                    className="flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] bg-zinc-900/30 border border-dashed border-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Nova</span>
-                  </button>
-                </div>
+                <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  Categoria {form.categoria_id !== '' && (
+                    <span className="text-accent normal-case">· {selectedCatLabel}</span>
+                  )}
+                </label>
+                <CategoryPicker
+                  categories={categories}
+                  value={form.categoria_id}
+                  onChange={(id) => setForm({ ...form, categoria_id: id })}
+                  compact
+                  onAddCategory={() => openCategories(null)}
+                  onAddSubcategory={(parentId) => openCategories(parentId)}
+                  onRemoveCategory={(id) => void handleRemoveCategory(id)}
+                />
               </div>
 
-              {/* Cartão Virtual */}
               <div className="space-y-2">
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Pagar com Cartão Virtual</label>
-                <select
-                  value={form.card_id || ''}
-                  onChange={(e) => setForm({ ...form, card_id: e.target.value || undefined })}
-                  className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white outline-none focus:ring-1 focus:ring-violet-500/40 focus:border-violet-500/40 transition"
-                >
-                  <option value="" className="bg-zinc-950 text-zinc-400">Nenhum (Dinheiro/PIX)</option>
-                  {cards.map((c) => (
-                    <option key={c.id} value={c.id} className="bg-zinc-950 text-white">
-                      {c.nome} ({c.numero.slice(-4)})
-                    </option>
-                  ))}
-                </select>
+                <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Pagar com</label>
+                <PaymentMethodPicker
+                  cards={cards}
+                  value={form.payment}
+                  onChange={(payment) => setForm({ ...form, payment })}
+                  variant="despesa"
+                />
+                {isCardPaymentSelection(form.payment, cards) && modo === 'imediato' && (
+                  <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                    Abate o limite do cartão — sincronizado com seus cartões cadastrados.
+                  </p>
+                )}
+                {!isCardPaymentSelection(form.payment, cards) && form.payment === 'pix' && (
+                  <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                    PIX — desconta da conta corrente na hora.
+                  </p>
+                )}
               </div>
 
-              {/* Status */}
-              <div className="space-y-1.5">
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Status de Pagamento</label>
-                <div className="flex gap-2">
-                  {(['pendente', 'pago', 'agendado'] as const).map((st) => {
-                    const cfg = STATUS_CONFIG[st];
-                    const StIcon = cfg.icon;
-                    return (
+              {openBills.length > 0 && (
+                <div className="space-y-2">
+                  <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                    Abater de fatura reservada (opcional)
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, fatura_reserva_id: '' })}
+                      className={`uppercase max-w-full truncate ${
+                        form.fatura_reserva_id === '' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                      }`}
+                    >
+                      Nenhuma
+                    </button>
+                    {openBills.map((b) => (
                       <button
-                        key={st}
+                        key={b.id}
                         type="button"
-                        onClick={() => setForm({ ...form, status_pagamento: st })}
-                        className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold transition-colors ${form.status_pagamento === st ? `${cfg.bg} ${cfg.text} border ${cfg.border}` : 'bg-zinc-900/40 text-zinc-500 border border-white/[0.02]'}`}
+                        onClick={() => setForm({ ...form, fatura_reserva_id: b.id })}
+                        className={`uppercase max-w-full truncate ${
+                          form.fatura_reserva_id === b.id ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                        }`}
                       >
-                        <StIcon className="w-3 h-3" />{cfg.label}
+                        {b.titulo}
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
+              )}
+
+              <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] ${
+                modo === 'futuro'
+                  ? 'border-atencao/35 bg-atencao/10 text-atencao'
+                  : 'border-concluido/35 bg-concluido/10 text-concluido'
+              }`}>
+                {modo === 'futuro' ? <CalendarClock size={14} className="shrink-0" /> : <CheckCircle2 size={14} className="shrink-0" />}
+                <span>
+                  {modo === 'futuro'
+                    ? 'Agendado — aparece em próximas contas.'
+                    : isCardPaymentSelection(form.payment, cards)
+                      ? 'Pago no cartão — abate a fatura.'
+                      : 'Pago — desconta da conta corrente.'}
+                  {form.fatura_reserva_id !== '' && ' · Valor abate da reserva da fatura.'}
+                </span>
               </div>
             </>
           )}
 
-          {/* Data */}
+          {form.tipo === 'investimento' && (
+            <div className="space-y-2">
+              <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Destino (opcional)
+              </label>
+              <CategoryPicker
+                categories={categories}
+                value={form.categoria_id}
+                onChange={(id) => setForm({ ...form, categoria_id: id })}
+                compact
+                onAddCategory={() => openCategories(null)}
+                onRemoveCategory={(id) => void handleRemoveCategory(id)}
+              />
+            </div>
+          )}
+
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Data do Lançamento</label>
+            <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+              {modo === 'futuro' ? 'Data do vencimento' : 'Data do lançamento'}
+            </label>
             <input
               type="date"
               value={form.data}
               onChange={(e) => setForm({ ...form, data: e.target.value })}
-              className="w-full bg-zinc-900/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-[12px] text-white outline-none focus:ring-1 focus:ring-violet-500/40 transition"
+              className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono text-ink outline-none focus:border-accent/50"
             />
           </div>
+          </>
+          )}
         </div>
 
-        <div className="border-t border-white/[0.04] pt-4 mt-auto font-sans">
+        {phase === 'form' && (
+        <div className="shrink-0 border-t border-line px-4 sm:px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] space-y-2">
+          {needsAxelCheck() && (
+            <button
+              type="button"
+              onClick={() => void runAxelCheck()}
+              disabled={!form.descricao.trim() || !form.valor}
+              className="w-full py-3 font-mono text-[11px] uppercase rounded-sl border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-white transition-colors disabled:opacity-40"
+            >
+              Perguntar ao Axel
+            </button>
+          )}
           <button
-            onClick={handleAdd}
+            type="button"
+            onClick={() =>
+            {
+              if (needsAxelCheck())
+              {
+                void runAxelCheck()
+              }
+              else
+              {
+                void handleAdd()
+              }
+            }}
             disabled={!form.descricao.trim() || !form.valor}
-            className="w-full py-2.5 rounded-xl bg-white text-zinc-950 text-[12px] font-bold hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+            className={`w-full py-3 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
           >
-            Salvar {form.tipo === 'receita' ? 'Receita' : 'Despesa'}
+            {needsAxelCheck() ? 'Salvar e consultar Axel' : `Salvar ${saveLabel}`}
           </button>
         </div>
+        )}
       </div>
 
-      {showCatModal && <FinanceCategories onClose={() => setShowCatModal(false)} />}
+      {showCatModal && (
+        <FinanceCategories
+          defaultParentId={catModalParentId}
+          onClose={() =>
+          {
+            setShowCatModal(false)
+            setCatModalParentId(null)
+          }}
+        />
+      )}
     </>
-  );
+  )
 }

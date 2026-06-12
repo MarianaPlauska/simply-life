@@ -13,6 +13,8 @@ import { CelebrationOverlay } from '../gamification/CelebrationOverlay'
 import { MentalHealthCheckIn } from '../gamification/MentalHealthCheckIn'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useRealtimeSync } from '../../hooks/useRealtimeSync'
+import { useFinanceSystemSync } from '../../hooks/useFinanceSystemSync'
+import { PwaInstallBanner } from './PwaInstallBanner'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
 
 // Layout global — sidebar, header, conteúdo (flex-1) e footer sticky
@@ -31,6 +33,7 @@ export function AppLayout()
   const mainRef = useRef<HTMLElement>(null)
   const location = useLocation()
   useRealtimeSync()
+  useFinanceSystemSync()
 
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
   const fetchTarefas = useTaskStore((s) => s.fetchTarefas)
@@ -54,6 +57,7 @@ export function AppLayout()
       <QuickCaptureModal />
       <CommandPalette />
       <OnboardingChecklist />
+      <PwaInstallBanner />
       {!isAcademy && !hideChrome && <MobileBottomNav />}
 
       <div className={`min-h-screen flex flex-col w-full ${isAcademy ? 'bg-black text-white' : AXEL_CANVAS}`}>

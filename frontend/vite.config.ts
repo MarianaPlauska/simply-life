@@ -9,27 +9,37 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'og-image.png'],
       manifest: {
         name: 'Simply-Life OS',
         short_name: 'Simply-Life',
         description: 'Seu sistema operacional pessoal. Gerencie tarefas, finanças, saúde e produtividade em um só lugar.',
+        lang: 'pt-BR',
         start_url: '/',
+        scope: '/',
+        id: '/',
         display: 'standalone',
-        theme_color: '#09090b',
-        background_color: '#09090b',
-        categories: ['productivity', 'lifestyle'],
+        orientation: 'portrait-primary',
+        theme_color: '#141312',
+        background_color: '#141312',
+        categories: ['productivity', 'lifestyle', 'finance'],
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
+        shortcuts: [
+          { name: 'Finanças', short_name: 'Finanças', url: '/financeiro', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
+          { name: 'Kanban', short_name: 'Kanban', url: '/kanban', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
+          { name: 'Dashboard', short_name: 'Início', url: '/', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
+        ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
+        navigateFallback: '/index.html',
+        navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
-            // cache-first pra assets estáticos
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|woff2?|ttf|eot)$/,
             handler: 'CacheFirst',
             options: {
@@ -38,17 +48,24 @@ export default defineConfig({
             },
           },
           {
-            // network-first pra chamadas de API
-            urlPattern: /\/v1\/.*/,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
-              cacheName: 'api-cache',
+              cacheName: 'supabase-api',
+              networkTimeoutSeconds: 10,
+              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 },
+            },
+          },
+          {
+            urlPattern: /\/api\/.*/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'simply-life-api',
               networkTimeoutSeconds: 10,
               expiration: { maxEntries: 50, maxAgeSeconds: 24 * 60 * 60 },
             },
           },
           {
-            // stale-while-revalidate pra Google Fonts
             urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/,
             handler: 'StaleWhileRevalidate',
             options: {

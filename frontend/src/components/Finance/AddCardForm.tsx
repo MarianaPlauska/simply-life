@@ -1,160 +1,175 @@
-import { useState } from 'react';
-import { X, ShieldCheck } from 'lucide-react';
-import { useTaskStore } from '../../store/useTaskStore';
-import type { VirtualCard } from '../../store/storeTypes';
-import { toast } from 'sonner';
+import { useState } from 'react'
+import { X, CreditCard } from 'lucide-react'
+import { useTaskStore } from '../../store/useTaskStore'
+import type { VirtualCard } from '../../store/storeTypes'
+import { toast } from 'sonner'
+import {
+  AXEL_BTN_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
-interface AddCardFormProps {
-  onClose: () => void;
+interface AddCardFormProps
+{
+  onClose: () => void
 }
 
-export function AddCardForm({ onClose }: AddCardFormProps) {
-  const addCard = useTaskStore((s) => s.addCard);
+const GRADIENT_OPTIONS: VirtualCard['tipo_gradiente'][] = [
+  'purple', 'obsidian', 'sunset', 'ocean', 'mint',
+]
+
+export function AddCardForm({ onClose }: AddCardFormProps)
+{
+  const addCard = useTaskStore((s) => s.addCard)
 
   const [form, setForm] = useState({
     nome: '',
     titular: 'MARIANA PLAUSKA',
-    tipo_gradiente: 'purple' as VirtualCard['tipo_gradiente'],
-    bandeira: 'visa' as 'visa' | 'mastercard',
-    limite: '2000',
-    dia_vencimento: '10'
-  });
+    tipo_gradiente: 'obsidian' as VirtualCard['tipo_gradiente'],
+    bandeira: 'mastercard' as 'visa' | 'mastercard',
+    limite: '5000',
+    dia_fechamento: '5',
+    dia_vencimento: '12',
+  })
 
-  const handleAddCard = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.nome.trim()) {
-      toast.error('Informe um nome para o cartão');
-      return;
+  const handleAddCard = (e: React.FormEvent) =>
+  {
+    e.preventDefault()
+    if (!form.nome.trim())
+    {
+      toast.error('Informe um nome para o cartão')
+      return
     }
 
-    const lastDigits = Math.floor(1000 + Math.random() * 9000);
-    const mockNumber = `•••• •••• •••• ${lastDigits}`;
-    const expiryMonth = String(new Date().getMonth() + 1).padStart(2, '0');
-    const expiryYear = String(new Date().getFullYear() + 4).slice(-2);
-    const mockExpiry = `${expiryMonth}/${expiryYear}`;
-    const mockCVV = String(Math.floor(100 + Math.random() * 900));
+    const lastDigits = Math.floor(1000 + Math.random() * 9000)
+    const mockNumber = `•••• •••• •••• ${lastDigits}`
+    const expiryMonth = String(new Date().getMonth() + 1).padStart(2, '0')
+    const expiryYear = String(new Date().getFullYear() + 4).slice(-2)
 
     addCard({
       nome: form.nome.trim(),
       titular: form.titular.toUpperCase(),
       numero: mockNumber,
-      validade: mockExpiry,
-      cvv: mockCVV,
-      limite: parseFloat(form.limite) || 2000,
-      dia_vencimento: parseInt(form.dia_vencimento) || 10,
+      validade: `${expiryMonth}/${expiryYear}`,
+      cvv: String(Math.floor(100 + Math.random() * 900)),
+      limite: parseFloat(form.limite) || 5000,
+      dia_fechamento: parseInt(form.dia_fechamento, 10) || 5,
+      dia_vencimento: parseInt(form.dia_vencimento, 10) || 12,
       tipo_gradiente: form.tipo_gradiente,
       bandeira: form.bandeira,
-      status: 'ativo'
-    });
+      status: 'ativo',
+    })
 
-    setForm({
-      nome: '',
-      titular: 'MARIANA PLAUSKA',
-      tipo_gradiente: 'purple',
-      bandeira: 'visa',
-      limite: '2000',
-      dia_vencimento: '10'
-    });
-    onClose();
-    toast.success('Novo cartão virtual gerado com sucesso!');
-  };
+    onClose()
+    toast.success('Cartão cadastrado')
+  }
 
   return (
-    <form onSubmit={handleAddCard} className="bg-zinc-900/30 border border-zinc-800/80 rounded-xl p-5 space-y-4 max-w-xl transition-all duration-300">
-      <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-        <h3 className="text-[12px] font-bold text-zinc-300 uppercase tracking-wide flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-violet-400" />
-          Configurar Novo Cartão Virtual
+    <form
+      onSubmit={handleAddCard}
+      className="border border-line rounded-sl bg-card p-4 space-y-4 w-full max-w-xl"
+    >
+      <div className="flex items-center justify-between border-b border-line pb-2">
+        <h3 className={`font-mono text-[10px] uppercase tracking-wide flex items-center gap-2 ${AXEL_TEXT_SECONDARY}`}>
+          <CreditCard size={14} className="text-accent" />
+          Novo cartão
         </h3>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-zinc-500 hover:text-zinc-300 p-0.5 rounded"
-        >
-          <X className="w-4 h-4" />
+        <button type="button" onClick={onClose} className="text-ink-muted hover:text-ink p-1">
+          <X size={16} />
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Apelido do Cartão</label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <label className="flex flex-col gap-1 sm:col-span-2">
+          <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Apelido</span>
           <input
-            type="text"
-            placeholder="Ex: Assinaturas AWS, Uber..."
             value={form.nome}
             onChange={(e) => setForm({ ...form, nome: e.target.value })}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-[12px] text-white placeholder:text-zinc-700 outline-none focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20"
+            placeholder="Nubank, Inter, Itaú..."
+            className="border border-line rounded-sl bg-chrome px-3 py-2 text-sm text-ink"
           />
-        </div>
-        <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Limite (R$)</label>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Limite (R$)</span>
           <input
             type="number"
-            placeholder="2000"
             value={form.limite}
             onChange={(e) => setForm({ ...form, limite: e.target.value })}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-[12px] text-white font-mono placeholder:text-zinc-700 outline-none focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20"
+            className="border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono text-ink"
           />
-        </div>
-        <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Dia Vencimento</label>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Titular</span>
+          <input
+            value={form.titular}
+            onChange={(e) => setForm({ ...form, titular: e.target.value })}
+            className="border border-line rounded-sl bg-chrome px-3 py-2 text-sm text-ink"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Dia fechamento</span>
           <input
             type="number"
-            min="1"
-            max="31"
-            placeholder="10"
+            min={1}
+            max={28}
+            value={form.dia_fechamento}
+            onChange={(e) => setForm({ ...form, dia_fechamento: e.target.value })}
+            className="border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono text-ink"
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Dia vencimento</span>
+          <input
+            type="number"
+            min={1}
+            max={28}
             value={form.dia_vencimento}
             onChange={(e) => setForm({ ...form, dia_vencimento: e.target.value })}
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-[12px] text-white font-mono placeholder:text-zinc-700 outline-none focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20"
+            className="border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono text-ink"
           />
+        </label>
+      </div>
+
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex gap-1.5">
+          {GRADIENT_OPTIONS.map((g) => (
+            <button
+              key={g}
+              type="button"
+              onClick={() => setForm({ ...form, tipo_gradiente: g })}
+              className={`w-7 h-7 rounded-sl border ${
+                form.tipo_gradiente === g ? 'border-accent ring-1 ring-accent/40' : 'border-line'
+              }`}
+              style={{
+                background: g === 'purple' ? '#4c1d95' :
+                  g === 'obsidian' ? '#27272a' :
+                  g === 'sunset' ? '#9f1239' :
+                  g === 'ocean' ? '#1e40af' : '#065f46',
+              }}
+              aria-label={g}
+            />
+          ))}
+        </div>
+        <div className="flex gap-1.5 ml-auto">
+          {(['visa', 'mastercard'] as const).map((b) => (
+            <button
+              key={b}
+              type="button"
+              onClick={() => setForm({ ...form, bandeira: b })}
+              className={`px-2.5 py-1 rounded-sl font-mono text-[10px] uppercase border ${
+                form.bandeira === b
+                  ? 'border-accent bg-accent/10 text-accent'
+                  : 'border-line text-ink-muted'
+              }`}
+            >
+              {b}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Estilo Visual (Gradiente)</label>
-          <div className="flex gap-2">
-            {(['purple', 'obsidian', 'sunset', 'ocean', 'mint'] as const).map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setForm({ ...form, tipo_gradiente: color })}
-                className={`w-6 h-6 rounded-full border ${form.tipo_gradiente === color ? 'border-white ring-2 ring-violet-500/30' : 'border-zinc-800'}`}
-                style={{
-                  background: color === 'purple' ? 'linear-gradient(135deg, #7c3aed, #4f46e5)' :
-                              color === 'obsidian' ? 'linear-gradient(135deg, #27272a, #09090b)' :
-                              color === 'sunset' ? 'linear-gradient(135deg, #f43f5e, #d97706)' :
-                              color === 'ocean' ? 'linear-gradient(135deg, #2563eb, #0891b2)' :
-                              'linear-gradient(135deg, #059669, #0d9488)'
-                }}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Bandeira</label>
-          <div className="flex gap-2">
-            {(['visa', 'mastercard'] as const).map((b) => (
-              <button
-                key={b}
-                type="button"
-                onClick={() => setForm({ ...form, bandeira: b })}
-                className={`flex-1 py-1 px-3 border rounded-lg text-[10px] font-bold capitalize transition-colors ${form.bandeira === b ? 'bg-zinc-800 border-zinc-700 text-white' : 'border-zinc-900 text-zinc-500'}`}
-              >
-                {b}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        className="w-full py-2 bg-white text-zinc-950 rounded-lg text-[11px] font-bold hover:bg-zinc-200 transition-all active:scale-95 shadow-lg shadow-black/10"
-      >
-        Confirmar e Gerar Cartão
+      <button type="submit" className={`w-full py-2.5 font-mono text-[10px] uppercase ${AXEL_BTN_PRIMARY}`}>
+        Cadastrar cartão
       </button>
     </form>
-  );
+  )
 }

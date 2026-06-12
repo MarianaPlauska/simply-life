@@ -64,9 +64,11 @@ export function AxelGlobalHeader()
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes)
   const markNotificacaoRead = useTaskStore((s) => s.markNotificacaoRead)
   const markAllNotificacoesRead = useTaskStore((s) => s.markAllNotificacoesRead)
+  const sinoDestaqueAte = useTaskStore((s) => s.sinoDestaqueAte)
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const [sinoAtivo, setSinoAtivo] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const tarefas = useTaskStore((s) => s.tarefas)
@@ -81,6 +83,17 @@ export function AxelGlobalHeader()
   {
     fetchNotificacoes()
   }, [fetchNotificacoes])
+
+  useEffect(() =>
+  {
+    const tick = () =>
+    {
+      setSinoAtivo(sinoDestaqueAte > Date.now())
+    }
+    tick()
+    const id = window.setInterval(tick, 400)
+    return () => window.clearInterval(id)
+  }, [sinoDestaqueAte])
 
   useEffect(() =>
   {
@@ -131,7 +144,6 @@ export function AxelGlobalHeader()
           <div className="hidden lg:flex items-center gap-2 bg-chrome border border-line rounded-sl px-3 py-1.5">
             <Search className="w-3.5 h-3.5 text-ink-muted" />
             <span className={`font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>Buscar</span>
-            <kbd className="font-mono text-[10px] text-ink-muted bg-elevated border border-line px-1.5 py-0.5 rounded-sl ml-3">⌘K</kbd>
           </div>
 
           <AccessibilityQuickMenu />
@@ -142,10 +154,12 @@ export function AxelGlobalHeader()
             <button
               type="button"
               onClick={() => { setIsNotifOpen((v) => !v); if (!isNotifOpen) fetchNotificacoes() }}
-              className={`relative ${AXEL_HEADER_ACTION}`}
+              className={`relative ${AXEL_HEADER_ACTION} ${
+                sinoAtivo ? 'ring-2 ring-rose-400/70 ring-offset-2 ring-offset-[#08090D] rounded-full animate-pulse' : ''
+              }`}
               aria-label="Notificações"
             >
-              <Bell className="w-4 h-4" />
+              <Bell className={`w-4 h-4 ${sinoAtivo ? 'text-rose-400' : ''}`} />
               {urgentDeadlineCount > 0 && (
                 <span
                   className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse ring-2 ring-[#08090D]"

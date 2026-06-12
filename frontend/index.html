@@ -8,6 +8,8 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Simply-Life" />
+    <link rel="manifest" href="/manifest.webmanifest" />
 
     <!-- SEO -->
     <meta name="description" content="Simply-Life OS — Seu sistema operacional pessoal. Gerencie tarefas, finanças, saúde e produtividade em um só lugar." />
@@ -33,22 +35,6 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
 
     <title>Simply-Life OS</title>
-
-    <!-- limpa service workers e caches antigos do backend fastapi -->
-    <script>
-      (function(){
-        if('serviceWorker' in navigator){
-          // se existe um SW cacheando rotas /auth/* do backend antigo, limpa
-          caches.keys().then(function(names){
-            names.forEach(function(name){
-              if(name.indexOf('api-cache')>-1 || name.indexOf('runtime')>-1){
-                caches.delete(name);
-              }
-            });
-          });
-        }
-      })();
-    </script>
   </head>
   <body>
     <div id="root"></div>

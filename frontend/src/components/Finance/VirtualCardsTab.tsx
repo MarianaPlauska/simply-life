@@ -1,80 +1,143 @@
-import { useState, useMemo } from 'react';
-import { CreditCard, Plus } from 'lucide-react';
-import { useTaskStore } from '../../store/useTaskStore';
-import { AddCardForm } from './AddCardForm';
-import { VirtualCardItem } from './VirtualCardItem';
-import { CashflowForecast } from './CashflowForecast';
+import { useMemo, useState } from 'react'
+import { Plus, Lock, Unlock, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { useTaskStore } from '../../store/useTaskStore'
+import { AddCardForm } from './AddCardForm'
+import { CreditCardVisual } from './CreditCardVisual'
+import { CardInvoicePanel } from './CardInvoicePanel'
+import { CashflowForecast } from './CashflowForecast'
+import { getBillingCycle, getInvoiceTransactions } from '../../lib/financeCardCycle'
+import { sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
+import {
+  AXEL_BTN_PRIMARY,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
-export function VirtualCardsTab() {
-  const cards = useTaskStore((s) => s.cards);
-  const transactions = useTaskStore((s) => s.transactions);
+export function VirtualCardsTab()
+{
+  const cards = useTaskStore((s) => s.cards)
+  const transactions = useTaskStore((s) => s.transactions)
+  const categories = useTaskStore((s) => s.categories)
+  const toggleCardStatus = useTaskStore((s) => s.toggleCardStatus)
+  const removeCard = useTaskStore((s) => s.removeCard)
 
-  // Estados locais para formulário e UI
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(cards[0]?.id ?? null)
 
-  // Cálculo de gastos acumulados por cartão
-  const cardExpenses = useMemo(() => {
-    const map: Record<string, number> = {};
-    transactions
-      .filter((t) => t.tipo === 'despesa' && t.card_id)
-      .forEach((t) => {
-        map[t.card_id!] = (map[t.card_id!] || 0) + t.valor;
-      });
-    return map;
-  }, [transactions]);
+  const selected = cards.find((c) => c.id === selectedId) ?? cards[0] ?? null
+
+  const cardData = useMemo(() =>
+  {
+    return cards.map((card) =>
+    {
+      const cycle = getBillingCycle(card)
+      const invoiceTx = getInvoiceTransactions(transactions, card.id, cycle)
+      const invoiceTotal = sumOpenInvoiceSpend(transactions, card)
+      return { card, cycle, invoiceTx, invoiceTotal }
+    })
+  }, [cards, transactions])
+
+  const selectedData = cardData.find((d) => d.card.id === selected?.id)
 
   return (
-    <div className="space-y-12">
-      
-      {/* SEÇÃO 1: CARTÕES VIRTUAIS */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between pb-3 border-b border-zinc-900/40">
-          <div>
-            <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">Cartões Virtuais</h2>
-            <p className="text-[11px] text-zinc-500 mt-0.5 font-medium">Cartões seguros e temporários para despesas isoladas</p>
-          </div>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[11px] font-semibold text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Gerar Cartão
-          </button>
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+            Cartões de crédito
+          </p>
+          <p className={`text-[12px] sm:text-sm mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
+            Fatura aberta · ciclo · pagamento no caixa
+          </p>
         </div>
-
-        {/* Formulário Inline / Alta Densidade */}
-        {showAddForm && (
-          <AddCardForm onClose={() => setShowAddForm(false)} />
-        )}
-
-        {/* Grid de Cartões */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {cards.map((card) => (
-            <VirtualCardItem
-              key={card.id}
-              card={card}
-              spent={cardExpenses[card.id] || 0}
-            />
-          ))}
-
-          {cards.length === 0 && (
-            <div className="col-span-full border border-dashed border-zinc-900/60 rounded-xl py-12 flex flex-col items-center justify-center text-center">
-              <CreditCard className="w-8 h-8 text-zinc-700 mb-2.5" />
-              <p className="text-[12px] font-medium text-zinc-500">Nenhum cartão virtual gerado ainda.</p>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="text-[11px] font-semibold text-violet-400 hover:text-violet-300 mt-1 uppercase tracking-wider"
-              >
-                Gerar Primeiro Cartão
-              </button>
-            </div>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowAddForm((v) => !v)}
+          className={`inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-4 py-2.5 w-full sm:w-auto ${AXEL_BTN_PRIMARY}`}
+        >
+          <Plus size={14} />
+          Novo cartão
+        </button>
       </div>
 
-      {/* SEÇÃO 2: PROJEÇÃO DE FLUXO DE CAIXA (CASHFLOW FORECAST) */}
-      <CashflowForecast transactions={transactions} />
+      {showAddForm && (
+        <AddCardForm onClose={() => setShowAddForm(false)} />
+      )}
 
+      {cards.length === 0 ? (
+        <div className="border border-dashed border-line rounded-sl py-12 sm:py-16 text-center px-4">
+          <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>Nenhum cartão cadastrado</p>
+          <button
+            type="button"
+            onClick={() => setShowAddForm(true)}
+            className="mt-3 font-mono text-[10px] uppercase text-accent hover:underline min-h-[44px] px-4"
+          >
+            Adicionar primeiro cartão
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 w-full">
+            {cardData.map(({ card, cycle, invoiceTotal }) => (
+              <CreditCardVisual
+                key={card.id}
+                card={card}
+                cycle={cycle}
+                invoiceTotal={invoiceTotal}
+                selected={selected?.id === card.id}
+                onClick={() => setSelectedId(card.id)}
+              />
+            ))}
+          </div>
+
+          {selectedData && (
+            <div className="space-y-3 min-w-0">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => toggleCardStatus(selectedData.card.id)}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-ink-muted flex-1 sm:flex-none"
+                >
+                  {selectedData.card.status === 'bloqueado' ? (
+                    <><Unlock size={12} /> Desbloquear</>
+                  ) : (
+                    <><Lock size={12} /> Bloquear</>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                  {
+                    if (confirm('Excluir este cartão?'))
+                    {
+                      removeCard(selectedData.card.id)
+                      setSelectedId(cards.find((c) => c.id !== selectedData.card.id)?.id ?? null)
+                      toast.success('Cartão removido')
+                    }
+                  }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-urgente flex-1 sm:flex-none"
+                >
+                  <Trash2 size={12} />
+                  Excluir
+                </button>
+              </div>
+
+              <CardInvoicePanel
+                card={selectedData.card}
+                cycle={selectedData.cycle}
+                invoiceTx={selectedData.invoiceTx}
+                invoiceTotal={selectedData.invoiceTotal}
+                categories={categories}
+              />
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="border-t border-line pt-4 sm:pt-6">
+        <CashflowForecast />
+      </div>
     </div>
-  );
+  )
 }
