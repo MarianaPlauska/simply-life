@@ -26,6 +26,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
+import { looksLikeFinanceCapture, parseFinanceQuickCapture } from '../../lib/financeQuickCapture';
 
 type CommandGroup = 'Resultados' | 'Navegar' | 'Ações';
 
@@ -45,6 +46,8 @@ export function CommandPalette ()
   const isOpen = useTaskStore((s) => s.isCommandPaletteOpen);
   const setOpen = useTaskStore((s) => s.setCommandPaletteOpen);
   const setQuickCapture = useTaskStore((s) => s.setQuickCaptureOpen);
+  const setFinanceQuickCapture = useTaskStore((s) => s.setFinanceQuickCaptureOpen);
+  const setFinanceQuickCaptureSeed = useTaskStore((s) => s.setFinanceQuickCaptureSeed);
   const buscar = useTaskStore((s) => s.buscar);
   const searchResults = useTaskStore((s) => s.searchResults);
   const searchLoading = useTaskStore((s) => s.searchLoading);
@@ -123,13 +126,36 @@ export function CommandPalette ()
       action: () => { close(); setQuickCapture(true); },
     },
     {
+      id: 'financequick', label: 'Lançar gasto / receita', group: 'Ações', icon: Wallet,
+      action: () => { close(); setFinanceQuickCaptureSeed(''); setFinanceQuickCapture(true); },
+    },
+    {
       id: 'newtask', label: 'Nova Tarefa', group: 'Ações', icon: Plus,
       action: () => { navigate('/kanban'); close(); },
     },
   ];
 
+  const financeParsed = parseFinanceQuickCapture(query.trim());
+
   // ── comandos dinâmicos baseados na busca da api ────────────
   const searchCommands: Command[] = [];
+
+  if (financeParsed && looksLikeFinanceCapture(query.trim()))
+  {
+    searchCommands.push({
+      id: 'finance-capture-inline',
+      label: `Lançar ${financeParsed.tipo}: ${financeParsed.descricao}`,
+      subtitle: financeParsed.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
+      group: 'Ações',
+      icon: Wallet,
+      action: () =>
+      {
+        close();
+        setFinanceQuickCaptureSeed(query.trim());
+        setFinanceQuickCapture(true);
+      },
+    });
+  }
 
   if ( searchResults && query.trim().length >= 2 )
   {
@@ -179,7 +205,7 @@ export function CommandPalette ()
   // combina resultados da api + comandos locais
   const allCommands = [...searchCommands, ...filteredStatic];
 
-  const groups: CommandGroup[] = ['Resultados', 'Navegar', 'Ações'];
+  const groups: CommandGroup[] = ['Resultados', 'Ações', 'Navegar'];
   const flatList = groups.flatMap((g) => allCommands.filter((c) => c.group === g));
 
   // navegação com teclado
@@ -248,7 +274,7 @@ export function CommandPalette ()
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Buscar tarefas, anotações, comandos..."
+                placeholder="Buscar… ou gastei 45 almoço"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-600 text-sm outline-none"

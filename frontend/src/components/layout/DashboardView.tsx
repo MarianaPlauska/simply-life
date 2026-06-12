@@ -16,6 +16,7 @@ import { WaterWaveCard } from '../dashboard/WaterWaveCard'
 import { DailyEngagementCard } from '../dashboard/DailyEngagementCard'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
 import { FinancasTabelaDensa } from '../dashboard/FinancasTabelaDensa'
+import { FinanceDailyBriefCard } from '../Finance/overview/FinanceDailyBriefCard'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
 import { DashboardAxelFocus } from '../dashboard/DashboardAxelFocus'
@@ -179,8 +180,9 @@ export function DashboardView()
 
         {/* 03 — Finanças + inteligência */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 items-stretch">
-          <div className="md:col-span-2 lg:col-span-6 min-w-0">
-            <DashboardPanel section="03" title="Finanças" subtitle="Movimentação recente" className="h-full">
+          <div className="md:col-span-2 lg:col-span-6 min-w-0 flex flex-col gap-3">
+            <FinanceDailyBriefCard compact />
+            <DashboardPanel section="03" title="Finanças" subtitle="Movimentação recente" className="h-full flex-1">
               <FinancasTabelaDensa embedded />
             </DashboardPanel>
           </div>

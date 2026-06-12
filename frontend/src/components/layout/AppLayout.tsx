@@ -15,6 +15,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { useRealtimeSync } from '../../hooks/useRealtimeSync'
 import { useFinanceSystemSync } from '../../hooks/useFinanceSystemSync'
 import { PwaInstallBanner } from './PwaInstallBanner'
+import { FinanceQuickCaptureModal } from '../Finance/FinanceQuickCaptureModal'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
 
 // Layout global — sidebar, header, conteúdo (flex-1) e footer sticky
@@ -55,6 +56,7 @@ export function AppLayout()
       <CelebrationOverlay />
       <MentalHealthCheckIn />
       <QuickCaptureModal />
+      <FinanceQuickCaptureModal />
       <CommandPalette />
       <OnboardingChecklist />
       <PwaInstallBanner />

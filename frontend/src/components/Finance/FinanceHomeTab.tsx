@@ -11,6 +11,8 @@ import {
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { FinanceCoachCard } from './overview/FinanceCoachCard'
+import { FinanceDailyBriefCard } from './overview/FinanceDailyBriefCard'
+import { FinanceMonthCloseRitualCard } from './overview/FinanceMonthCloseRitualCard'
 import { computeCashPosition } from '../../lib/financeReservedBills'
 import { FinanceQuickPresets } from './FinanceQuickPresets'
 import { FinanceBalancePanel } from './FinanceBalancePanel'
@@ -181,6 +183,10 @@ export function FinanceHomeTab({
           </div>
         </div>
       </section>
+
+      {!isFutureMonth && <FinanceDailyBriefCard />}
+
+      {!isFutureMonth && <FinanceMonthCloseRitualCard onSetLimits={onSetLimits} />}
 
       {/* Axel — logo abaixo do saldo */}
       {!isFutureMonth && onSetLimits && (

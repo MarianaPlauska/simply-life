@@ -132,6 +132,8 @@ export interface Transaction
 export interface CashAccountSettings
 {
   saldo_inicial: number;
+  saldo_banco?: number | null;
+  saldo_banco_at?: string | null;
 }
 
 export type ReservedBillStatus = 'aberta' | 'quitada' | 'cancelada';

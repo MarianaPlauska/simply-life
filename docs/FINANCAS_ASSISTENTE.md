@@ -19,6 +19,11 @@ Visão: um **melhor amigo financeiro** — painel visual, categorias suas, caixa
 | E9 | UX mobile + meios de pagamento | Coluna única, PIX, previsão, hub Configurar, alertas de vencimento | **Concluído** |
 | **E10** | **Coach Axel (IA)** | Conselho personalizado Groq + fallback local; sugestão e botão de limites | **Concluído** |
 | **E11** | **Posso comprar?** | Axel antes de confirmar gasto — Groq + folga, categoria e cartão | **Concluído** |
+| **E12** | **Reconciliação bancária** | Saldo real vs app, delta Axel, streak + XP | **Concluído** |
+| **E13** | **Captura rápida global** | Ctrl+K · gastei 45 almoço · lançamento PIX pago | **Concluído** |
+| **E14** | **Resumo diário Axel** | Brief no dashboard/finanças + notificação 1x/dia | **Concluído** |
+| **E15** | **Ritual fim de mês** | Previsto vs real, sugestão de limites, +25 XP | **Concluído** |
+| **E16** | **Receitas recorrentes auto** | Salário/freelance lançam no dia (como fixas) | **Concluído** |
 
 ---
 
@@ -123,8 +128,25 @@ despesas.forma_pagamento — E9 (pix | debito | dinheiro | boleto | cartao | ted
 - Evita duplicar no mês; some da lista de “conta fixa” e aparece como lançamento pendente.
 - Toast discreto: “Axel lançou X — vencimento de hoje”.
 
+### E12 — Reconciliação
+- Configurar → informar saldo do app do banco; delta vs disponível calculado.
+- Axel explica diferença; streak de dias conferidos; +15 XP ao alinhar.
+
+### E13 — Captura rápida
+- `Ctrl+K` → `gastei 45 almoço` ou `recebi 3000 salário` → Enter.
+- Modal global em qualquer página; categoriza por palavras-chave.
+
+### E14 — Resumo diário
+- Card no Dashboard e Finanças; 1 notificação/dia no sino ao entrar.
+
+### E15 — Ritual fim de mês
+- Últimos 3 dias do mês ou primeiros 5 do seguinte; compara previsto vs real.
+
+### E16 — Receitas recorrentes automáticas
+- No dia do recebimento, cria receita paga no caixa (`[receita-recorrente:id]`).
+
 ### O que ainda NÃO está automatizado
-- **Reconciliação bancária** — não implementada; possível com campo “saldo real no app” vs calculado.
+- **Open Finance** — import automático do banco (Pluggy/Belvo).
 
 ### E10 — Coach Axel (melhor amigo financeiro)
 - `financeCoachContext.ts` — analisa ritmo diário, média 3 meses por categoria, folga e limites estourados.
@@ -137,6 +159,6 @@ despesas.forma_pagamento — E9 (pix | debito | dinheiro | boleto | cartao | ted
 
 ## Próximo passo
 
-1. Rodar migration `020` (`forma_pagamento`) no Supabase se ainda não rodou.
-2. **E8** — relatórios mensal/anual + export CSV/PDF (resumo para contador ou backup).
-3. **E11 (sugerido)** — “Posso comprar?” no lançamento: Axel responde antes de você confirmar a despesa.
+1. Rodar migration **021** (`saldo_banco`) no Supabase.
+2. **E8** — relatórios mensal/anual + export CSV/PDF (quando precisar).
+3. **Open Finance** — paridade com Mobills/Organizze (médio prazo).

@@ -1,17 +1,23 @@
 import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { syncFinanceDueNotifications } from '../lib/financeDueNotifications'
+import { syncFinanceDailyBrief } from '../lib/financeDailyBriefSync'
 import {
   buildAutoPostTransaction,
   isContaFixaDueToday,
   isContaFixaPostedThisMonth,
 } from '../lib/financeRecurringPost'
+import {
+  buildAutoPostReceitaRecorrente,
+  isReceitaRecorrenteDueToday,
+  isReceitaRecorrentePostedThisMonth,
+} from '../lib/financeRecurringIncomePost'
 import { useTaskStore } from '../store/useTaskStore'
 import { supabase } from '../lib/supabase'
 
 const SINO_DESTAQUE_MS = 6000
 
-/** Sincroniza finanças ao entrar no sistema — alertas no sino + lançamento automático de fixas */
+/** Sincroniza finanças ao entrar no sistema — alertas, fixas, receitas e resumo diário */
 export function useFinanceSystemSync(): void
 {
   const syncingRef = useRef(false)
@@ -20,6 +26,10 @@ export function useFinanceSystemSync(): void
   const fetchContasFixas = useTaskStore((s) => s.fetchContasFixas)
   const fetchCards = useTaskStore((s) => s.fetchCards)
   const fetchReservedBills = useTaskStore((s) => s.fetchReservedBills)
+  const fetchRecurringIncomes = useTaskStore((s) => s.fetchRecurringIncomes)
+  const fetchCategories = useTaskStore((s) => s.fetchCategories)
+  const fetchBudgets = useTaskStore((s) => s.fetchBudgets)
+  const fetchCashAccount = useTaskStore((s) => s.fetchCashAccount)
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes)
   const addTransaction = useTaskStore((s) => s.addTransaction)
   const pulseSino = useTaskStore((s) => s.pulseSino)
@@ -35,59 +45,88 @@ export function useFinanceSystemSync(): void
 
       try
       {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session || cancelled) return
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session || cancelled) return
 
-      await Promise.all([
-        fetchTransactions(),
-        fetchContasFixas(),
-        fetchCards(),
-        fetchReservedBills(),
-      ])
+        await Promise.all([
+          fetchTransactions(),
+          fetchContasFixas(),
+          fetchCards(),
+          fetchReservedBills(),
+          fetchRecurringIncomes(),
+          fetchCategories(),
+          fetchBudgets(),
+          fetchCashAccount(),
+        ])
 
-      if (cancelled) return
+        if (cancelled) return
 
-      const state = useTaskStore.getState()
-      const ref = new Date()
-      const postedNames: string[] = []
+        const state = useTaskStore.getState()
+        const ref = new Date()
+        const postedFixas: string[] = []
+        const postedReceitas: string[] = []
 
-      for (const conta of state.contasFixas)
-      {
-        if (!isContaFixaDueToday(conta, ref)) continue
-        if (isContaFixaPostedThisMonth(conta.id, state.transactions, ref)) continue
+        for (const conta of state.contasFixas)
+        {
+          if (!isContaFixaDueToday(conta, ref)) continue
+          if (isContaFixaPostedThisMonth(conta.id, state.transactions, ref)) continue
 
-        await addTransaction(buildAutoPostTransaction({ conta, ref }))
-        postedNames.push(conta.nome)
-      }
+          await addTransaction(buildAutoPostTransaction({ conta, ref }))
+          postedFixas.push(conta.nome)
+        }
 
-      if (postedNames.length > 0 && !cancelled)
-      {
-        const label = postedNames.length === 1
-          ? postedNames[0]
-          : `${postedNames.length} contas fixas`
-        toast.info(`Axel lançou ${label} — vencimento de hoje`, { duration: 4500 })
-      }
+        for (const item of state.recurringIncomes)
+        {
+          if (!isReceitaRecorrenteDueToday(item, ref)) continue
+          if (isReceitaRecorrentePostedThisMonth(item.id, state.transactions, ref)) continue
 
-      const freshTx = useTaskStore.getState().transactions
-      const dueResult = await syncFinanceDueNotifications({
-        transactions: freshTx,
-        contasFixas: state.contasFixas,
-        cards: state.cards,
-        reservedBills: state.reservedBills,
-      })
+          await addTransaction(buildAutoPostReceitaRecorrente(item, ref))
+          postedReceitas.push(item.titulo)
+        }
 
-      if (cancelled) return
+        if (postedFixas.length > 0 && !cancelled)
+        {
+          const label = postedFixas.length === 1 ? postedFixas[0] : `${postedFixas.length} contas fixas`
+          toast.info(`Axel lançou ${label} — vencimento de hoje`, { duration: 4500 })
+        }
 
-      await fetchNotificacoes()
+        if (postedReceitas.length > 0 && !cancelled)
+        {
+          const label = postedReceitas.length === 1 ? postedReceitas[0] : `${postedReceitas.length} receitas`
+          toast.success(`Axel registrou ${label} no caixa`, { duration: 4500 })
+        }
 
-      const unreadFinance = useTaskStore.getState().notificacoes.filter(
-        (n) => !n.lida && n.tipo === 'financeiro',
-      ).length
+        const fresh = useTaskStore.getState()
 
-      if (dueResult.created > 0 || unreadFinance > 0)
-      {
-        pulseSino(SINO_DESTAQUE_MS)
-      }
+        const dueResult = await syncFinanceDueNotifications({
+          transactions: fresh.transactions,
+          contasFixas: fresh.contasFixas,
+          cards: fresh.cards,
+          reservedBills: fresh.reservedBills,
+        })
+
+        const briefCreated = await syncFinanceDailyBrief({
+          transactions: fresh.transactions,
+          saldoInicial: fresh.cashAccount.saldo_inicial,
+          reservedBills: fresh.reservedBills,
+          contasFixas: fresh.contasFixas,
+          cards: fresh.cards,
+          categories: fresh.categories,
+          budgetLimits: fresh.budgetLimits,
+        })
+
+        if (cancelled) return
+
+        await fetchNotificacoes()
+
+        const unreadFinance = useTaskStore.getState().notificacoes.filter(
+          (n) => !n.lida && n.tipo === 'financeiro',
+        ).length
+
+        if (dueResult.created > 0 || briefCreated || unreadFinance > 0)
+        {
+          pulseSino(SINO_DESTAQUE_MS)
+        }
       }
       finally
       {
@@ -112,6 +151,10 @@ export function useFinanceSystemSync(): void
     fetchContasFixas,
     fetchCards,
     fetchReservedBills,
+    fetchRecurringIncomes,
+    fetchCategories,
+    fetchBudgets,
+    fetchCashAccount,
     fetchNotificacoes,
     addTransaction,
     pulseSino,

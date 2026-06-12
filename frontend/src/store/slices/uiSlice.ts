@@ -16,6 +16,8 @@ export interface UISlice {
   setAxelIngestionPolling: (active: boolean) => void;
   activeView: ActiveView;
   isQuickCaptureOpen: boolean;
+  isFinanceQuickCaptureOpen: boolean;
+  financeQuickCaptureSeed: string;
   isCommandPaletteOpen: boolean;
   timerConfig: TimerConfig;
   interactionScore: Record<string, number>;
@@ -26,6 +28,8 @@ export interface UISlice {
   keywords: string[];
   setActiveView: (view: ActiveView) => void;
   setQuickCaptureOpen: (isOpen: boolean) => void;
+  setFinanceQuickCaptureOpen: (isOpen: boolean) => void;
+  setFinanceQuickCaptureSeed: (text: string) => void;
   setCommandPaletteOpen: (isOpen: boolean) => void;
   setTimerConfig: (key: keyof TimerConfig, value: number) => void;
   registerInteraction: (moduleId: string) => void;
@@ -61,6 +65,8 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   setAxelIngestionPolling: (active) => set({ axelIngestionPolling: active }),
   activeView: 'dashboard',
   isQuickCaptureOpen: false,
+  isFinanceQuickCaptureOpen: false,
+  financeQuickCaptureSeed: '',
   isCommandPaletteOpen: false,
   timerConfig: { pomodoroTime: 25, shortBreak: 5, longBreak: 15 },
   interactionScore: {},
@@ -80,6 +86,8 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
 
   setActiveView: (view) => set({ activeView: view }),
   setQuickCaptureOpen: (isOpen) => set({ isQuickCaptureOpen: isOpen }),
+  setFinanceQuickCaptureOpen: (isOpen) => set({ isFinanceQuickCaptureOpen: isOpen }),
+  setFinanceQuickCaptureSeed: (text) => set({ financeQuickCaptureSeed: text }),
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
 
   setTimerConfig: (key, value) =>

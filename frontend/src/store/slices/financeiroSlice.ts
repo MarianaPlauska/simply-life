@@ -4,11 +4,11 @@ import type {
   Despesa,
   Transaction,
   BudgetLimit,
+  CashAccountSettings,
   Category,
   FinancialGoal,
   FinancePaymentMethod,
   VirtualCard,
-  CashAccountSettings,
   ReservedBill,
   ReservedBillItem,
   RecurringIncome,
@@ -108,6 +108,7 @@ export interface FinanceiroSlice
   reservedBillItems: ReservedBillItem[]
   fetchCashAccount: () => Promise<void>
   setCashInitialBalance: (valor: number) => Promise<void>
+  setBankBalance: (valor: number) => Promise<void>
   fetchReservedBills: () => Promise<void>
   fetchReservedBillItems: () => Promise<void>
   addReservedBill: (bill: Omit<ReservedBill, 'id' | 'valor_gasto' | 'status'>) => Promise<void>
@@ -241,6 +242,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
           const cleanDesc = d.descricao
             .replace(/\s*\[card:card_\d+\]/, '')
             .replace(/\s*\[fixa:\d+\]/, '')
+            .replace(/\s*\[receita-recorrente:\d+\]/, '')
             .trim()
           return {
             ...d,
@@ -388,6 +390,16 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         .update({ status_pagamento: 'pago' })
         .eq('id', id)
       if (error) throw error
+
+      const anyGet = get() as any
+      if (anyGet.addXP) await anyGet.addXP('financeiro', 8)
+      if (anyGet.incrementQuestProgress)
+      {
+        await (anyGet.incrementQuestProgress as (t: string, v: number) => Promise<void>)(
+          'movimentação',
+          1,
+        )
+      }
     }
     catch (e)
     {
@@ -817,13 +829,17 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       }
       const { data, error } = await supabase
         .from('fin_conta_corrente')
-        .select('saldo_inicial')
+        .select('saldo_inicial, saldo_banco, saldo_banco_at')
         .eq('user_id', uid)
         .maybeSingle()
       if (error) throw error
       if (data)
       {
-        const next = { saldo_inicial: Number(data.saldo_inicial) || 0 }
+        const next: CashAccountSettings = {
+          saldo_inicial: Number(data.saldo_inicial) || 0,
+          saldo_banco: data.saldo_banco != null ? Number(data.saldo_banco) : null,
+          saldo_banco_at: data.saldo_banco_at ?? null,
+        }
         persistCashAccountLocal(next)
         set({ cashAccount: next })
       }
@@ -840,7 +856,11 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
   setCashInitialBalance: async (valor) =>
   {
-    const next = { saldo_inicial: Math.max(0, valor) }
+    const prev = get().cashAccount
+    const next: CashAccountSettings = {
+      ...prev,
+      saldo_inicial: Math.max(0, valor),
+    }
     persistCashAccountLocal(next)
     set({ cashAccount: next })
 
@@ -851,10 +871,65 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       await supabase.from('fin_conta_corrente').upsert({
         user_id: uid,
         saldo_inicial: next.saldo_inicial,
+        saldo_banco: next.saldo_banco ?? null,
+        saldo_banco_at: next.saldo_banco_at ?? null,
         updated_at: new Date().toISOString(),
       })
     }
     catch (e) { console.error('setCashInitialBalance:', e) }
+  },
+
+  setBankBalance: async (valor) =>
+  {
+    const prev = get().cashAccount
+    const now = new Date().toISOString()
+    const next: CashAccountSettings = {
+      ...prev,
+      saldo_banco: Math.max(0, valor),
+      saldo_banco_at: now,
+    }
+    persistCashAccountLocal(next)
+    set({ cashAccount: next })
+
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      await supabase.from('fin_conta_corrente').upsert({
+        user_id: uid,
+        saldo_inicial: prev.saldo_inicial,
+        saldo_banco: next.saldo_banco,
+        saldo_banco_at: now,
+        updated_at: now,
+      })
+
+      const { recordReconciliationStreak } = await import('../../lib/financeGamification')
+      const { buildReconciliationSnapshot } = await import('../../lib/financeReconciliation')
+      const snap = buildReconciliationSnapshot(
+        get().transactions,
+        next,
+        get().reservedBills,
+      )
+      const streak = recordReconciliationStreak(snap.alinhado)
+
+      const anyGet = get() as any
+      if (anyGet.addXP) await anyGet.addXP('financeiro', 15)
+      if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('financeira', 1)
+
+      const { toast } = await import('sonner')
+      if (snap.alinhado)
+      {
+        toast.success('Saldo conferido com o banco', {
+          description: streak > 1 ? `Streak de reconciliação: ${streak} dias` : '+15 XP financeiro',
+        })
+      }
+      else if (snap.delta != null)
+      {
+        toast.info(snap.axelHeadline, { description: snap.axelDetail })
+      }
+    }
+    catch (e) { console.error('setBankBalance:', e) }
   },
 
   fetchReservedBills: async () =>
