@@ -151,6 +151,8 @@ npm run test:groq
 
 ### 3. Produção (Vercel)
 
+Guia completo: [`docs/DEPLOY_VERCEL.md`](docs/DEPLOY_VERCEL.md) (reconectar Git, Deploy Hook, settings corretos).
+
 Variáveis no painel Vercel:
 
 | Variável | Onde |

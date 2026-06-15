@@ -1,0 +1,49 @@
+# Dispara build de produção na Vercel a cada push na main.
+# Se o Git da Vercel estiver desconectado, use o Deploy Hook (docs/DEPLOY_VERCEL.md).
+name: Deploy Vercel
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Disparar Deploy Hook (recomendado)
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
+        run: |
+          if [ -n "$HOOK" ]; then
+            echo "Disparando build na Vercel via Deploy Hook..."
+            curl -fsS -X POST "$HOOK"
+            echo "Deploy Hook enviado com sucesso."
+            exit 0
+          fi
+          echo "::notice::VERCEL_DEPLOY_HOOK não configurado — tentando CLI abaixo."
+
+      - name: Deploy via Vercel CLI (alternativa)
+        if: ${{ secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          npm install --global vercel@latest
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+      - name: Aviso se nenhum método estiver configurado
+        if: ${{ secrets.VERCEL_DEPLOY_HOOK == '' && (secrets.VERCEL_TOKEN == '' || secrets.VERCEL_ORG_ID == '' || secrets.VERCEL_PROJECT_ID == '') }}
+        run: |
+          echo "::warning::Nenhum secret de deploy configurado no GitHub."
+          echo "Siga docs/DEPLOY_VERCEL.md — crie VERCEL_DEPLOY_HOOK ou reconecte o Git na Vercel."

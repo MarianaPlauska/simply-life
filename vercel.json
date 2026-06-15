@@ -1,8 +1,15 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install --no-audit --no-fund && cd frontend && npm install --no-audit --no-fund",
   "framework": "vite",
+  "github": {
+    "enabled": true,
+    "silent": false,
+    "autoJobCancelation": true
+  },
   "build": {
     "env": {
       "VITE_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
