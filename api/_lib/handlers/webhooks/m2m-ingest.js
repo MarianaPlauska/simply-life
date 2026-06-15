@@ -1,10 +1,10 @@
 // POST /api/webhook-ingest — triagem M2M com keywords do usuário (+50)
 
-import { getSupabaseAdmin } from './_lib/supabaseAdmin.js';
-import { verifyWebhookSignature } from './_lib/webhookAuth.js';
-import { fetchUserKeywords, matchUserKeywords } from './_lib/keywordBoost.js';
-import { scoreFromItem } from './_lib/triageScore.js';
-import { insertTriagedTask } from './_lib/insertTriagedTask.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
+import { verifyWebhookSignature } from '../../webhookAuth.js';
+import { fetchUserKeywords, matchUserKeywords } from '../../keywordBoost.js';
+import { scoreFromItem } from '../../triageScore.js';
+import { insertTriagedTask } from '../../insertTriagedTask.js';
 
 const FALLBACK_SECRET = process.env.WEBHOOK_INGEST_SECRET || '';
 

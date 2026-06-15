@@ -1,7 +1,7 @@
 // GET /api/integrations/google/url — URL de autorização OAuth Google
 
-import { buildGoogleAuthUrl } from '../../_lib/googleOAuth.js';
-import { corsJson, getUserFromBearer } from '../../_lib/supabaseUser.js';
+import { buildGoogleAuthUrl } from '../../googleOAuth.js';
+import { corsJson, getUserFromBearer } from '../../supabaseUser.js';
 
 export default async function handler(req, res)
 {

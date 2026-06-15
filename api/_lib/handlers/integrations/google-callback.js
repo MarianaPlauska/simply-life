@@ -1,12 +1,12 @@
 // POST /api/integrations/google/callback — troca code por tokens e persiste
 
-import { getSupabaseAdmin } from '../../_lib/supabaseAdmin.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import {
   exchangeCodeForTokens,
   parseOAuthState,
   upsertGoogleTokens,
-} from '../../_lib/googleOAuth.js';
-import { corsJson, getUserFromBearer } from '../../_lib/supabaseUser.js';
+} from '../../googleOAuth.js';
+import { corsJson, getUserFromBearer } from '../../supabaseUser.js';
 
 export default async function handler(req, res)
 {

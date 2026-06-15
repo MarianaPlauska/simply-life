@@ -1,9 +1,9 @@
 // POST /api/integrations/gmail/imap-sync — sync gratuito via IMAP (senha de app)
 
-import { getSupabaseAdmin } from '../../_lib/supabaseAdmin.js'
-import { fetchUnreadViaImap } from '../../_lib/gmailImap.js'
-import { ingestGmailBatch } from '../../_lib/gmailIngestRunner.js'
-import { corsJson, getUserFromBearer } from '../../_lib/supabaseUser.js'
+import { getSupabaseAdmin } from '../../supabaseAdmin.js'
+import { fetchUnreadViaImap } from '../../gmailImap.js'
+import { ingestGmailBatch } from '../../gmailIngestRunner.js'
+import { corsJson, getUserFromBearer } from '../../supabaseUser.js'
 
 export default async function handler(req, res)
 {

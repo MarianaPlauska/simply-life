@@ -1,10 +1,10 @@
 // POST /api/integrations/gmail/sync — sync manual Gmail + ingest Groq
 
-import { getSupabaseAdmin } from '../../_lib/supabaseAdmin.js';
-import { resolveGoogleAccessToken } from '../../_lib/googleOAuth.js';
-import { fetchUnreadEmails } from '../../_lib/gmailClient.js';
-import { ingestGmailBatch } from '../../_lib/gmailIngestRunner.js';
-import { corsJson, getUserFromBearer } from '../../_lib/supabaseUser.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
+import { resolveGoogleAccessToken } from '../../googleOAuth.js';
+import { fetchUnreadEmails } from '../../gmailClient.js';
+import { ingestGmailBatch } from '../../gmailIngestRunner.js';
+import { corsJson, getUserFromBearer } from '../../supabaseUser.js';
 
 export default async function handler(req, res)
 {

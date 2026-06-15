@@ -1,10 +1,10 @@
 // POST /api/webhooks/ingest — ingestão universal com orquestração de urgência antes do insert
 
-import { getSupabaseAdmin } from '../_lib/supabaseAdmin.js';
-import { verifyWebhookSignature } from '../_lib/webhookAuth.js';
-import { orchestrateIngestPayload } from '../_lib/urgencyOrchestrator.js';
-import { ensureProjectLabel, linkLabelToTask } from '../_lib/projectLabels.js';
-import { insertTriagedTask } from '../_lib/insertTriagedTask.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
+import { verifyWebhookSignature } from '../../webhookAuth.js';
+import { orchestrateIngestPayload } from '../../urgencyOrchestrator.js';
+import { ensureProjectLabel, linkLabelToTask } from '../../projectLabels.js';
+import { insertTriagedTask } from '../../insertTriagedTask.js';
 
 const FALLBACK_SECRET = process.env.WEBHOOK_INGEST_SECRET || '';
 

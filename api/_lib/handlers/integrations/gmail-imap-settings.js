@@ -1,7 +1,7 @@
 // POST /api/integrations/gmail/imap-settings — salva e-mail + senha de app (gratuito)
 
-import { getSupabaseAdmin } from '../../_lib/supabaseAdmin.js'
-import { corsJson, getUserFromBearer } from '../../_lib/supabaseUser.js'
+import { getSupabaseAdmin } from '../../supabaseAdmin.js'
+import { corsJson, getUserFromBearer } from '../../supabaseUser.js'
 
 export default async function handler(req, res)
 {
