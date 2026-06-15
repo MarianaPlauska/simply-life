@@ -49,7 +49,7 @@ Documento de execução alinhado à especificação AI Kanban e ao `KANBAN_REDES
 |---------|----------|
 | OAuth Google (Calendar + Gmail) | `api/integrations/google/*`, `googleIntegrationApi.ts`, `GoogleCallbackView.tsx`, `calendarSlice.ts` |
 | `deadline_proposals` no Supabase | `migrations/012_*`, `deadlineProposalApi.ts`, slice híbrido local+remoto |
-| Cron sync Gmail (6h) | `api/cron/gmail-sync.js`, `vercel.json` crons |
+| Cron sync Gmail (1x/dia — limite Hobby) | `api/cron/gmail-sync.js`, `vercel.json` crons |
 
 ### Variáveis necessárias
 
