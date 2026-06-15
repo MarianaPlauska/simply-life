@@ -40,6 +40,24 @@ Se não estiver conectado: **Connect Git Repository** → GitHub → `simply-lif
 3. **Deployments** → nos três pontos do último deploy → **Redeploy** → marque **Use existing Build Cache: No**
 4. Faça um push na `main` (ou use **Deploy Hook** abaixo)
 
+## Conta Hobby (sem Team ID visível)
+
+Na conta **Hobby** não aparece "Team ID" nas Settings do projeto — isso é normal.
+
+**Só precisa de 2 secrets:**
+
+| Secret | Valor |
+|--------|--------|
+| `VERCEL_TOKEN` | token com scope **Full Account** |
+| `VERCEL_PROJECT_ID` | `prj_...` do simply-life → Settings → General |
+
+**Pode apagar** `VERCEL_ORG_ID` e `VERCEL_DEPLOY_HOOK` — o workflow acha a conta automaticamente.
+
+No log do deploy deve aparecer algo como:
+`Projeto encontrado na conta/time: marianaplauska-...-projects (team_...)`
+
+---
+
 ## Opção B — Token Vercel + GitHub Actions (recomendado)
 
 Mais confiável que Deploy Hook. Funciona mesmo com Git desconectado.
@@ -47,34 +65,25 @@ Mais confiável que Deploy Hook. Funciona mesmo com Git desconectado.
 ### 1. Criar token
 
 1. https://vercel.com/account/tokens
-2. **Create** → nome: `github-simply-life` → copie o token (`vercel_...`)
+2. **Create** → nome: `github-simply-life`
+3. **SCOPE: Full Account** (obrigatório na Hobby)
+4. Copie o token (`vercel_...`)
 
-### 2. Pegar IDs no painel Vercel
+### 2. Project ID
 
-**Project ID** (projeto simply-life):
-
-1. Vercel → projeto **simply-life** → **Settings → General**
-2. Copie **Project ID** (`prj_...`)
-
-**Team / Org ID**:
-
-1. Vercel → clique no seu time/conta (canto superior) → **Settings**
-2. Na aba **General**, copie **Team ID** (`team_...`)  
-   *(conta pessoal também tem Team ID)*
+1. Projeto **simply-life** → **Settings → General**
+2. Copie **Project ID** (`prj_710prqzF6iSCPuzZ6GuO5pQ21MM6J`)
 
 ### 3. Secrets no GitHub
 
 https://github.com/MarianaPlauska/simply-life/settings/secrets/actions
 
-| Secret | Valor | Exemplo de formato |
-|--------|--------|---------------------|
-| `VERCEL_TOKEN` | token criado em account/tokens | `vercel_...` (~24+ chars) |
-| `VERCEL_ORG_ID` | **Team ID** do time da URL `vercel.com/SEU-TIME/simply-life` | `team_...` |
-| `VERCEL_PROJECT_ID` | **Project ID** (projeto simply-life) | `prj_710prqzF6iSCPuzZ6GuO5pQ21MM6J` |
+| Secret | Valor |
+|--------|--------|
+| `VERCEL_TOKEN` | token `vercel_...` (Full Account) |
+| `VERCEL_PROJECT_ID` | `prj_...` do simply-life |
 
-**Erro comum:** trocar `team_` com `prj_`. Se aparecer `Project not found`, o Team ID está do time errado — pegue o Team ID do time que aparece na URL ao abrir o projeto simply-life.
-
-**Token:** ao criar em account/tokens, use scope **Full Account** (não um time diferente).
+**Opcional:** `VERCEL_ORG_ID` só se quiser forçar um time — na Hobby o workflow detecta sozinho.
 
 ### 4. Rodar deploy
 
