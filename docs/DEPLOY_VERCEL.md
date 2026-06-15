@@ -42,14 +42,40 @@ Se não estiver conectado: **Connect Git Repository** → GitHub → `simply-lif
 
 ## Opção B — Deploy Hook + GitHub Actions (quando o Git da Vercel falha)
 
+**Os dois passos são obrigatórios.** Só criar o Hook na Vercel não dispara nada.
+
+### Passo 1 — Vercel (você já fez)
+
 1. Vercel → **Settings → Git → Deploy Hooks**
 2. **Create Hook** — nome: `github-main`, branch: `main`
-3. Copie a URL gerada
-4. GitHub → repo **simply-life** → **Settings → Secrets and variables → Actions**
-5. **New repository secret**: `VERCEL_DEPLOY_HOOK` = URL copiada
-6. Cada push na `main` dispara o workflow **Deploy Vercel** (`.github/workflows/deploy-vercel.yml`)
+3. Copie a URL (`https://api.vercel.com/v1/integrations/deploy/...`)
 
-Também pode rodar manualmente: GitHub → **Actions** → **Deploy Vercel** → **Run workflow**.
+### Passo 2 — GitHub (falta este)
+
+1. Abra: https://github.com/MarianaPlauska/simply-life/settings/secrets/actions
+2. **New repository secret**
+3. **Name:** `VERCEL_DEPLOY_HOOK` (exatamente assim, maiúsculas)
+4. **Secret:** cole a URL do passo 1
+5. **Add secret**
+
+### Passo 3 — Rodar
+
+1. https://github.com/MarianaPlauska/simply-life/actions/workflows/deploy-vercel.yml
+2. **Run workflow** → branch `main` → **Run workflow**
+3. O job deve levar poucos segundos e mostrar `Deploy Hook aceito`
+4. Na Vercel, em 1–3 min, aparece deploy novo (commit `e62e191` ou mais recente)
+
+Se o workflow terminar em ~7s com **Success** mas a Vercel não mudar, o secret **não** foi salvo — refaça o passo 2.
+
+### Teste rápido do Hook (sem GitHub)
+
+No PowerShell, cole a URL do hook:
+
+```powershell
+Invoke-WebRequest -Method POST -Uri "COLE_A_URL_DO_HOOK_AQUI"
+```
+
+Se retornar JSON com `"job"` ou `"pending"`, o hook funciona. Aí só falta o secret no GitHub.
 
 ## Opção C — Deploy manual pelo terminal
 
