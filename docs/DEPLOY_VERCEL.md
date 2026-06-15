@@ -69,12 +69,12 @@ https://github.com/MarianaPlauska/simply-life/settings/secrets/actions
 | Secret | Valor | Exemplo de formato |
 |--------|--------|---------------------|
 | `VERCEL_TOKEN` | token criado em account/tokens | `vercel_...` (~24+ chars) |
-| `VERCEL_ORG_ID` | **Team ID** (time/conta) | `team_...` |
+| `VERCEL_ORG_ID` | **Team ID** do time da URL `vercel.com/SEU-TIME/simply-life` | `team_...` |
 | `VERCEL_PROJECT_ID` | **Project ID** (projeto simply-life) | `prj_710prqzF6iSCPuzZ6GuO5pQ21MM6J` |
 
-**Erro comum:** colocar `prj_...` no `VERCEL_ORG_ID`. Org é `team_...`, Project é `prj_...`.
+**Erro comum:** trocar `team_` com `prj_`. Se aparecer `Project not found`, o Team ID está do time errado — pegue o Team ID do time que aparece na URL ao abrir o projeto simply-life.
 
-Se ainda tiver `VERCEL_DEPLOY_HOOK` com URL que dá 404, **apague** esse secret — com os 3 acima o workflow ignora o hook.
+**Token:** ao criar em account/tokens, use scope **Full Account** (não um time diferente).
 
 ### 4. Rodar deploy
 

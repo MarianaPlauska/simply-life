@@ -1,5 +1,5 @@
 # Deploy de produção na Vercel (GitHub Actions).
-# Secrets: VERCEL_TOKEN + VERCEL_ORG_ID + VERCEL_PROJECT_ID
+# Secrets: VERCEL_TOKEN + VERCEL_PROJECT_ID (+ VERCEL_ORG_ID opcional; auto-detecta se errado)
 name: Deploy Vercel
 
 on:
@@ -23,7 +23,6 @@ jobs:
           RAW_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           RAW_ORG: ${{ secrets.VERCEL_ORG_ID }}
           RAW_PROJECT: ${{ secrets.VERCEL_PROJECT_ID }}
-          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
         run: |
           set -euo pipefail
 
@@ -36,52 +35,91 @@ jobs:
           VERCEL_ORG_ID=$(trim "${RAW_ORG:-}")
           VERCEL_PROJECT_ID=$(trim "${RAW_PROJECT:-}")
 
-          echo "=== Diagnóstico (sem expor valores) ==="
-          echo "VERCEL_TOKEN: ${#VERCEL_TOKEN} caracteres"
-          echo "VERCEL_ORG_ID: ${#VERCEL_ORG_ID} caracteres (esperado: team_...)"
-          echo "VERCEL_PROJECT_ID: ${#VERCEL_PROJECT_ID} caracteres (esperado: prj_...)"
-          if [ -n "$VERCEL_ORG_ID" ]; then echo "ORG prefix: ${VERCEL_ORG_ID%%_*}_"; fi
-          if [ -n "$VERCEL_PROJECT_ID" ]; then echo "PROJECT prefix: ${VERCEL_PROJECT_ID%%_*}_"; fi
-          echo "======================================"
-
-          # Método 1 — CLI (build remoto na Vercel; usa env vars do painel)
-          if [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
-            case "$VERCEL_ORG_ID" in team_*) ;;
-              *)
-                echo "::error::VERCEL_ORG_ID deve começar com team_ (Team ID, não Project ID)."
-                exit 1
-                ;;
-            esac
-            case "$VERCEL_PROJECT_ID" in prj_*) ;;
-              *)
-                echo "::error::VERCEL_PROJECT_ID deve começar com prj_"
-                exit 1
-                ;;
-            esac
-
-            echo "Deploy via Vercel CLI (build remoto)..."
-            npm install --global vercel@latest
-            mkdir -p .vercel
-            printf '{"orgId":"%s","projectId":"%s"}' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
-            export VERCEL_ORG_ID
-            export VERCEL_PROJECT_ID
-            vercel deploy --prod --yes --token="$VERCEL_TOKEN"
-            exit 0
-          fi
-
-          # Método 2 — Deploy Hook (só se token não estiver completo)
-          if [ -n "${HOOK:-}" ]; then
-            HOOK=$(trim "$HOOK")
-            echo "Deploy Hook: ${#HOOK} caracteres"
-            HTTP_CODE=$(curl -sS -o /tmp/vercel-hook-response.json -w "%{http_code}" -X POST "$HOOK")
-            echo "Resposta Vercel (HTTP $HTTP_CODE):"
-            cat /tmp/vercel-hook-response.json || true
-            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
-              exit 0
-            fi
-            echo "::error::Deploy Hook falhou (HTTP $HTTP_CODE). Configure os 3 secrets do token."
+          if [ -z "$VERCEL_TOKEN" ] || [ -z "$VERCEL_PROJECT_ID" ]; then
+            echo "::error::Configure VERCEL_TOKEN e VERCEL_PROJECT_ID nos secrets do GitHub."
             exit 1
           fi
 
-          echo "::error::Faltam secrets: VERCEL_TOKEN, VERCEL_ORG_ID e VERCEL_PROJECT_ID"
-          exit 1
+          case "$VERCEL_PROJECT_ID" in prj_*) ;;
+            *)
+              echo "::error::VERCEL_PROJECT_ID deve começar com prj_"
+              exit 1
+              ;;
+          esac
+
+          echo "=== Diagnóstico ==="
+          echo "TOKEN: ${#VERCEL_TOKEN} chars | PROJECT: ${#VERCEL_PROJECT_ID} chars | ORG informado: ${#VERCEL_ORG_ID} chars"
+          echo "==================="
+
+          project_status()
+          {
+            local team_id="${1:-}"
+            local url="https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}"
+            if [ -n "$team_id" ]; then
+              url="${url}?teamId=${team_id}"
+            fi
+            curl -sS -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer ${VERCEL_TOKEN}" \
+              "$url"
+          }
+
+          RESOLVED_ORG=""
+          TEAM_SLUG=""
+
+          if [ -n "$VERCEL_ORG_ID" ]; then
+            code=$(project_status "$VERCEL_ORG_ID")
+            if [ "$code" = "200" ]; then
+              RESOLVED_ORG="$VERCEL_ORG_ID"
+              echo "Projeto OK com VERCEL_ORG_ID informado."
+            else
+              echo "::warning::VERCEL_ORG_ID não bate com o projeto (HTTP $code). Buscando time correto..."
+            fi
+          fi
+
+          if [ -z "$RESOLVED_ORG" ]; then
+            code=$(project_status "")
+            if [ "$code" = "200" ]; then
+              echo "Projeto encontrado na conta pessoal (sem teamId)."
+            else
+              TEAMS_JSON=$(curl -sS -H "Authorization: Bearer ${VERCEL_TOKEN}" "https://api.vercel.com/v2/teams")
+              TEAM_IDS=$(printf '%s' "$TEAMS_JSON" | grep -o '"id":"team_[^"]*"' | cut -d'"' -f4 || true)
+              for team in $TEAM_IDS; do
+                code=$(project_status "$team")
+                if [ "$code" = "200" ]; then
+                  RESOLVED_ORG="$team"
+                  TEAM_SLUG=$(printf '%s' "$TEAMS_JSON" | grep -A2 "\"id\":\"${team}\"" | grep -o '"slug":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
+                  echo "Projeto encontrado no time ${team} (slug: ${TEAM_SLUG:-desconhecido})."
+                  echo "::warning::Atualize VERCEL_ORG_ID no GitHub para: ${team}"
+                  break
+                fi
+              done
+            fi
+          fi
+
+          if [ -z "$RESOLVED_ORG" ] && [ "$(project_status "")" != "200" ]; then
+            echo "::error::Projeto não encontrado com este token."
+            echo "1. VERCEL_PROJECT_ID = prj_... do simply-life → Settings → General"
+            echo "2. Recrie VERCEL_TOKEN em vercel.com/account/tokens com scope **Full Account**"
+            echo "3. VERCEL_ORG_ID = Team ID do time que aparece na URL: vercel.com/SEU-TIME/simply-life"
+            exit 1
+          fi
+
+          echo "Deploy via Vercel CLI..."
+          npm install --global vercel@latest
+          mkdir -p .vercel
+
+          if [ -n "$RESOLVED_ORG" ]; then
+            printf '{"orgId":"%s","projectId":"%s"}' "$RESOLVED_ORG" "$VERCEL_PROJECT_ID" > .vercel/project.json
+            export VERCEL_ORG_ID="$RESOLVED_ORG"
+          else
+            printf '{"projectId":"%s"}' "$VERCEL_PROJECT_ID" > .vercel/project.json
+          fi
+
+          export VERCEL_PROJECT_ID
+
+          DEPLOY_ARGS=(deploy --prod --yes --token="$VERCEL_TOKEN")
+          if [ -n "$TEAM_SLUG" ]; then
+            DEPLOY_ARGS+=(--scope "$TEAM_SLUG")
+          fi
+
+          vercel "${DEPLOY_ARGS[@]}"
