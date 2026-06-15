@@ -66,11 +66,15 @@ Mais confiável que Deploy Hook. Funciona mesmo com Git desconectado.
 
 https://github.com/MarianaPlauska/simply-life/settings/secrets/actions
 
-| Secret | Valor |
-|--------|--------|
-| `VERCEL_TOKEN` | token `vercel_...` |
-| `VERCEL_ORG_ID` | `team_...` |
-| `VERCEL_PROJECT_ID` | `prj_...` |
+| Secret | Valor | Exemplo de formato |
+|--------|--------|---------------------|
+| `VERCEL_TOKEN` | token criado em account/tokens | `vercel_...` (~24+ chars) |
+| `VERCEL_ORG_ID` | **Team ID** (time/conta) | `team_...` |
+| `VERCEL_PROJECT_ID` | **Project ID** (projeto simply-life) | `prj_710prqzF6iSCPuzZ6GuO5pQ21MM6J` |
+
+**Erro comum:** colocar `prj_...` no `VERCEL_ORG_ID`. Org é `team_...`, Project é `prj_...`.
+
+Se ainda tiver `VERCEL_DEPLOY_HOOK` com URL que dá 404, **apague** esse secret — com os 3 acima o workflow ignora o hook.
 
 ### 4. Rodar deploy
 
