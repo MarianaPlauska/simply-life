@@ -46,15 +46,34 @@ export function LoginView()
   const { t, i18n } = useTranslation();
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [nome, setNome] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+
+  // Campos separados — evita vazar email/senha de login no cadastro (autofill)
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginSenha, setLoginSenha] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+
+  const [regNome, setRegNome] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regSenha, setRegSenha] = useState('');
+  const [regConfirm, setRegConfirm] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
+  const [showRegConfirm, setShowRegConfirm] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [senhaErro, setSenhaErro] = useState('');
   const [forgotMode, setForgotMode] = useState(false);
+
+  const switchMode = (next: 'login' | 'register') =>
+  {
+    setMode(next);
+    setError('');
+    setSenhaErro('');
+    setShowLoginPassword(false);
+    setShowRegPassword(false);
+    setShowRegConfirm(false);
+  };
 
   if (isLoggedIn)
   {
@@ -63,7 +82,13 @@ export function LoginView()
 
   const finishAuth = async (session: { user: { id: string; email?: string | null } }, displayName: string, successKey: string) =>
   {
+    const prevId = useTaskStore.getState().userId;
     login(session.user.email || '', displayName, session.user.id);
+    if (prevId !== session.user.id)
+    {
+      useTaskStore.getState().resetWorkspacePrefsState();
+    }
+    await useTaskStore.getState().fetchWorkspacePrefs();
     toast.success(t(successKey));
     const path = await resolvePostAuthPath();
     navigate(path, { replace: true });
@@ -71,43 +96,47 @@ export function LoginView()
 
   const handleRegister = async () =>
   {
-    if (senha.length < 6)
+    if (regSenha.length < 6)
     {
       setSenhaErro('A senha precisa ter no mínimo 6 caracteres');
+      return;
+    }
+    if (regSenha !== regConfirm)
+    {
+      setSenhaErro(t('login.error_password_mismatch'));
       return;
     }
     setSenhaErro('');
 
     const { data, error: err } = await supabase.auth.signUp({
-      email: email.trim(),
-      password: senha,
-      options: { data: { nome_completo: nome.trim() } },
+      email: regEmail.trim(),
+      password: regSenha,
+      options: { data: { nome_completo: regNome.trim() } },
     });
     if (err) throw new Error(err.message);
 
     if (data.session)
     {
-      await finishAuth(data.session, nome.trim(), 'login.success_register');
+      await finishAuth(data.session, regNome.trim(), 'login.success_register');
       return;
     }
 
-    // fallback: auto-confirm pode liberar login imediato
     const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: senha,
+      email: regEmail.trim(),
+      password: regSenha,
     });
     if (signInErr) throw new Error(signInErr.message);
     if (signInData.session)
     {
-      await finishAuth(signInData.session, nome.trim(), 'login.success_register');
+      await finishAuth(signInData.session, regNome.trim(), 'login.success_register');
     }
   };
 
   const handleLogin = async () =>
   {
     const { data, error: err } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: senha,
+      email: loginEmail.trim(),
+      password: loginSenha,
     });
     if (err) throw new Error(err.message);
     if (!data.session) return;
@@ -125,19 +154,42 @@ export function LoginView()
     await finishAuth(data.session, displayName, 'login.success_login');
   };
 
-  const handleSubmit = async (e: React.FormEvent) =>
+  const handleSubmitLogin = async (e: React.FormEvent) =>
   {
     e.preventDefault();
-    if (!email.trim() || !senha.trim()) return;
-    if (mode === 'register' && !nome.trim()) return;
+    if (!loginEmail.trim() || !loginSenha.trim()) return;
 
     setLoading(true);
     setError('');
 
     try
     {
-      if (mode === 'register') await handleRegister();
-      else await handleLogin();
+      await handleLogin();
+    }
+    catch (err)
+    {
+      const raw = err instanceof Error ? err.message : t('login.error_connection');
+      const msg = translateAuthError(raw, t);
+      setError(msg);
+      toast.error(msg);
+    }
+    finally
+    {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitRegister = async (e: React.FormEvent) =>
+  {
+    e.preventDefault();
+    if (!regEmail.trim() || !regSenha.trim() || !regConfirm.trim() || !regNome.trim()) return;
+
+    setLoading(true);
+    setError('');
+
+    try
+    {
+      await handleRegister();
     }
     catch (err)
     {
@@ -178,28 +230,39 @@ export function LoginView()
 
   const handleGuest = async () =>
   {
+    const goGuest = async (guestId: string) =>
+    {
+      const prevId = useTaskStore.getState().userId;
+      login('convidado@simplylife.app', 'Convidado', guestId);
+      if (prevId !== guestId)
+      {
+        useTaskStore.getState().resetWorkspacePrefsState();
+      }
+      await useTaskStore.getState().fetchWorkspacePrefs();
+      const path = await resolvePostAuthPath();
+      navigate(path, { replace: true });
+    };
+
     try
     {
       const { data, error: err } = await supabase.auth.signInAnonymously();
       if (err) throw new Error(err.message);
       if (data.user)
       {
-        login('convidado@simplylife.app', 'Convidado', data.user.id);
         toast.success(t('login.success_guest'));
-        navigate('/', { replace: true });
+        await goGuest(data.user.id);
         return;
       }
     }
     catch
     {
-      const guestId = `guest_${Date.now()}`;
-      login('convidado@simplylife.app', 'Convidado', guestId);
       toast.success('Entrando como convidado — seus dados ficam apenas neste dispositivo');
-      navigate('/', { replace: true });
+      await goGuest(`guest_${Date.now()}`);
     }
   };
 
-  const isSubmitDisabled = !email.trim() || !senha.trim() || (mode === 'register' && !nome.trim());
+  const isLoginDisabled = !loginEmail.trim() || !loginSenha.trim();
+  const isRegisterDisabled = !regEmail.trim() || !regSenha.trim() || !regConfirm.trim() || !regNome.trim();
 
   return (
     <div className="relative min-h-screen w-screen bg-fundo sl-ruled-bg overflow-hidden">
@@ -225,93 +288,59 @@ export function LoginView()
               <TabToggle
                 tabs={AUTH_TABS_KEYS.map((tab) => ({ value: tab.value, label: t(tab.key) }))}
                 active={mode}
-                onChange={(v) => { setMode(v); setError(''); }}
+                onChange={switchMode}
               />
 
-              <form onSubmit={handleSubmit} className="space-y-4 mt-5">
-                {mode === 'register' && (
+              {mode === 'login' ? (
+                <form
+                  key="simply-life-login-form"
+                  onSubmit={handleSubmitLogin}
+                  className="space-y-4 mt-5"
+                  autoComplete="on"
+                  name="simply-life-login"
+                >
                   <AuthInput
-                    id="auth-nome"
-                    label={t('login.name_label')}
-                    type="text"
+                    id="login-email"
+                    name="username"
+                    label={t('login.email_label')}
+                    type="email"
                     autoFocus
                     required
-                    autoComplete="name"
-                    placeholder={t('login.name_placeholder')}
-                    value={nome}
-                    onChange={(e) => setNome(e.target.value)}
-                    icon={<UserPlus className="w-4 h-4" />}
+                    autoComplete="username"
+                    inputMode="email"
+                    placeholder={t('login.email_placeholder')}
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    icon={<Mail className="w-4 h-4" />}
                   />
-                )}
 
-                <AuthInput
-                  id="auth-email"
-                  label={t('login.email_label')}
-                  type="email"
-                  autoFocus={mode === 'login'}
-                  required
-                  autoComplete="email"
-                  placeholder={t('login.email_placeholder')}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  icon={<Mail className="w-4 h-4" />}
-                />
+                  <AuthInput
+                    id="login-password"
+                    name="password"
+                    label={t('login.password_label')}
+                    type={showLoginPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="current-password"
+                    placeholder={t('login.password_placeholder_login')}
+                    value={loginSenha}
+                    onChange={(e) => setLoginSenha(e.target.value)}
+                    icon={<Lock className="w-4 h-4" />}
+                    suffix={
+                      <button
+                        type="button"
+                        onClick={() => setShowLoginPassword((v) => !v)}
+                        className="text-ink-muted hover:text-ink transition-colors"
+                        aria-label={showLoginPassword ? t('login.hide_password') : t('login.show_password')}
+                      >
+                        {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    }
+                  />
 
-                <AuthInput
-                  id="auth-senha"
-                  label={t('login.password_label')}
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                  placeholder={mode === 'login' ? t('login.password_placeholder_login') : t('login.password_placeholder_register')}
-                  value={senha}
-                  onChange={(e) => setSenha(e.target.value)}
-                  icon={<Lock className="w-4 h-4" />}
-                  suffix={
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((v) => !v)}
-                      className="text-ink-muted hover:text-ink transition-colors"
-                      aria-label={showPassword ? t('login.hide_password') : t('login.show_password')}
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  }
-                />
+                  {error && (
+                    <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
+                  )}
 
-                {mode === 'register' && senhaErro && (
-                  <p className="text-[11px] text-amber-400/80 -mt-2 inline-flex items-center gap-1">
-                    <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
-                    {senhaErro}
-                  </p>
-                )}
-
-                {mode === 'register' && !senhaErro && senha.length > 0 && (
-                  <div className="-mt-2 flex items-center gap-2">
-                    <div className="flex-1 h-1 rounded-sl bg-chrome overflow-hidden">
-                      <div
-                        className={`h-full rounded-sl transition-all ${
-                          senha.length >= 8 ? 'w-full bg-concluido' :
-                          senha.length >= 6 ? 'w-2/3 bg-atencao' :
-                          'w-1/3 bg-urgente'
-                        }`}
-                      />
-                    </div>
-                    <span className={`font-mono text-[10px] ${
-                      senha.length >= 8 ? 'text-concluido' :
-                      senha.length >= 6 ? 'text-atencao' :
-                      'text-urgente'
-                    }`}>
-                      {senha.length >= 8 ? 'Forte' : senha.length >= 6 ? 'Ok' : 'Fraca'}
-                    </span>
-                  </div>
-                )}
-
-                {error && (
-                  <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
-                )}
-
-                {mode === 'login' && (
                   <div className="flex justify-end -mt-1">
                     <button
                       type="button"
@@ -321,15 +350,150 @@ export function LoginView()
                       {t('login.forgot_password')}
                     </button>
                   </div>
-                )}
 
-                <AuthButton
-                  loading={loading}
-                  disabled={isSubmitDisabled}
-                  label={mode === 'login' ? t('login.submit_login') : t('login.submit_register')}
-                  loadingLabel={mode === 'login' ? t('login.loading_login') : t('login.loading_register')}
-                />
-              </form>
+                  <AuthButton
+                    loading={loading}
+                    disabled={isLoginDisabled}
+                    label={t('login.submit_login')}
+                    loadingLabel={t('login.loading_login')}
+                  />
+                </form>
+              ) : (
+                <form
+                  key="simply-life-register-form"
+                  onSubmit={handleSubmitRegister}
+                  className="space-y-4 mt-5"
+                  autoComplete="off"
+                  name="simply-life-register"
+                >
+                  {/* Iscas para absorver autofill de login em formulário de cadastro */}
+                  <div className="sr-only" aria-hidden tabIndex={-1}>
+                    <input type="text" name="username" autoComplete="username" tabIndex={-1} defaultValue="" />
+                    <input type="password" name="password" autoComplete="current-password" tabIndex={-1} defaultValue="" />
+                  </div>
+
+                  <AuthInput
+                    id="register-nome"
+                    name="nome_completo"
+                    label={t('login.name_label')}
+                    type="text"
+                    autoFocus
+                    required
+                    autoComplete="name"
+                    placeholder={t('login.name_placeholder')}
+                    value={regNome}
+                    onChange={(e) => setRegNome(e.target.value)}
+                    icon={<UserPlus className="w-4 h-4" />}
+                    preventAutofill
+                  />
+
+                  <AuthInput
+                    id="register-email"
+                    name="email"
+                    label={t('login.email_label')}
+                    type="email"
+                    required
+                    autoComplete="off"
+                    inputMode="email"
+                    placeholder={t('login.email_placeholder')}
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    icon={<Mail className="w-4 h-4" />}
+                    preventAutofill
+                  />
+
+                  <AuthInput
+                    id="register-password"
+                    name="new-password"
+                    label={t('login.password_label')}
+                    type={showRegPassword ? 'text' : 'password'}
+                    required
+                    autoComplete="new-password"
+                    placeholder={t('login.password_placeholder_register')}
+                    value={regSenha}
+                    onChange={(e) => setRegSenha(e.target.value)}
+                    icon={<Lock className="w-4 h-4" />}
+                    preventAutofill
+                    suffix={
+                      <button
+                        type="button"
+                        onClick={() => setShowRegPassword((v) => !v)}
+                        className="text-ink-muted hover:text-ink transition-colors"
+                        aria-label={showRegPassword ? t('login.hide_password') : t('login.show_password')}
+                      >
+                        {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    }
+                  />
+
+                  <AuthInput
+                    id="register-password-confirm"
+                    name="confirm-password"
+                    label={t('login.password_confirm_label')}
+                    type={showRegConfirm ? 'text' : 'password'}
+                    required
+                    autoComplete="new-password"
+                    placeholder={t('login.password_confirm_placeholder')}
+                    value={regConfirm}
+                    onChange={(e) => setRegConfirm(e.target.value)}
+                    icon={<Lock className="w-4 h-4" />}
+                    preventAutofill
+                    suffix={
+                      <button
+                        type="button"
+                        onClick={() => setShowRegConfirm((v) => !v)}
+                        className="text-ink-muted hover:text-ink transition-colors"
+                        aria-label={showRegConfirm ? t('login.hide_password') : t('login.show_password')}
+                      >
+                        {showRegConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    }
+                  />
+
+                  {senhaErro && (
+                    <p className="text-[11px] text-amber-400/80 -mt-2 inline-flex items-center gap-1">
+                      <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
+                      {senhaErro}
+                    </p>
+                  )}
+
+                  {!senhaErro && regSenha.length > 0 && (
+                    <div className="-mt-2 flex items-center gap-2">
+                      <div className="flex-1 h-1 rounded-sl bg-chrome overflow-hidden">
+                        <div
+                          className={`h-full rounded-sl transition-all ${
+                            regSenha.length >= 8 ? 'w-full bg-concluido' :
+                            regSenha.length >= 6 ? 'w-2/3 bg-atencao' :
+                            'w-1/3 bg-urgente'
+                          }`}
+                        />
+                      </div>
+                      <span className={`font-mono text-[10px] ${
+                        regSenha.length >= 8 ? 'text-concluido' :
+                        regSenha.length >= 6 ? 'text-atencao' :
+                        'text-urgente'
+                      }`}>
+                        {regSenha.length >= 8 ? 'Forte' : regSenha.length >= 6 ? 'Ok' : 'Fraca'}
+                      </span>
+                    </div>
+                  )}
+
+                  {regConfirm.length > 0 && regSenha !== regConfirm && (
+                    <p className="text-[11px] text-urgente -mt-2">{t('login.error_password_mismatch')}</p>
+                  )}
+
+                  {error && (
+                    <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
+                  )}
+
+                  <AuthButton
+                    loading={loading}
+                    disabled={isRegisterDisabled}
+                    label={t('login.submit_register')}
+                    loadingLabel={t('login.loading_register')}
+                  />
+                </form>
+              )}
 
               <div className="flex items-center gap-3 my-6">
                 <div className="flex-1 h-px bg-line" />
@@ -383,7 +547,7 @@ export function LoginView()
 
       {forgotMode && (
         <ForgotPasswordModal
-          initialEmail={email}
+          initialEmail={loginEmail}
           onClose={() => setForgotMode(false)}
         />
       )}

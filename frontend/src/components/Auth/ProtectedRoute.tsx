@@ -9,9 +9,9 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
   const userId = useTaskStore((s) => s.userId);
   const login = useTaskStore((s) => s.login);
   const logout = useTaskStore((s) => s.logout);
-  const [checking, setChecking] = useState(true);
+  // Já logado (ex.: voltando do /setup) — não bloquear a tela de novo
+  const [checking, setChecking] = useState(() => !useTaskStore.getState().isLoggedIn);
 
-  // valida sessão do supabase ao montar — com timeout e suporte a convidado local
   useEffect(() =>
   {
     let cancelled = false;
@@ -20,10 +20,14 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
     {
       try
       {
-        // convidado local não depende do Supabase
         if (isLoggedIn && isLocalGuestUser(userId))
         {
           return;
+        }
+
+        if (!isLoggedIn)
+        {
+          setChecking(true);
         }
 
         const { session, timedOut } = await getSessionWithTimeout();
@@ -37,19 +41,21 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
             session.user.email?.split('@')[0] || '',
             session.user.id,
           );
-          void useTaskStore.getState().fetchWorkspacePrefs();
+
+          const store = useTaskStore.getState();
+          if (!store.workspacePrefsLoaded)
+          {
+            void store.fetchWorkspacePrefs();
+          }
         }
         else if (!timedOut && isLoggedIn && !isLocalGuestUser(userId))
         {
-          // sessão expirou de fato — limpa store
           await logout();
         }
-        // timedOut + isLoggedIn: mantém estado local (modo offline)
       }
       catch (err)
       {
         console.error('ProtectedRoute verify:', err);
-        // falha de rede — não bloqueia convidado nem sessão persistida
       }
       finally
       {
@@ -57,7 +63,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
       }
     }
 
-    verify();
+    void verify();
 
     return () =>
     {

@@ -3,6 +3,8 @@ import type { StateCreator } from 'zustand'
 import type { UserProfile } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
 import { getSessionWithTimeout, isLocalGuestUser } from '../../lib/authSession'
+import { DEFAULT_WORKSPACE_PREFS } from '../../lib/userWorkspacePrefs'
+import type { UserPrefsSlice } from './userPrefsSlice'
 
 export interface AuthSlice
 {
@@ -15,7 +17,7 @@ export interface AuthSlice
   checkSession: () => Promise<void>
 }
 
-export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set, get) => ({
+export const createAuthSlice: StateCreator<AuthSlice & UserPrefsSlice, [], [], AuthSlice> = (set, get) => ({
   isLoggedIn: false,
   userProfile: { nome: '', email: '', avatar: '' },
   userId: '',
@@ -37,6 +39,8 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (set,
       isLoggedIn: false,
       userId: '',
       userProfile: { nome: '', email: '', avatar: '' },
+      workspacePrefs: { ...DEFAULT_WORKSPACE_PREFS },
+      workspacePrefsLoaded: false,
     })
   },
 

@@ -2,8 +2,8 @@ import type { StateCreator } from 'zustand'
 import {
   loadWorkspacePrefs,
   saveWorkspacePrefs,
-  type UserWorkspacePrefs,
   DEFAULT_WORKSPACE_PREFS,
+  type UserWorkspacePrefs,
 } from '../../lib/userWorkspacePrefs'
 import { applyAccentTheme } from '../../lib/applyAccentTheme'
 import {
@@ -24,6 +24,7 @@ export interface UserPrefsSlice
   workspacePrefsLoaded: boolean
   fetchWorkspacePrefs: () => Promise<void>
   patchWorkspacePrefs: (patch: Partial<UserWorkspacePrefs>) => Promise<UserWorkspacePrefs>
+  resetWorkspacePrefsState: () => void
   applyWorkspaceTheme: () => void
   reconcileCosmeticUnlocks: () => Promise<void>
   equipCosmetic: (cosmeticId: string) => Promise<boolean>
@@ -49,6 +50,14 @@ export const createUserPrefsSlice: StateCreator<PrefsStore, [], [], UserPrefsSli
   workspacePrefs: DEFAULT_WORKSPACE_PREFS,
   workspacePrefsLoaded: false,
 
+  resetWorkspacePrefsState: () =>
+  {
+    set({
+      workspacePrefs: { ...DEFAULT_WORKSPACE_PREFS },
+      workspacePrefsLoaded: false,
+    })
+  },
+
   fetchWorkspacePrefs: async () =>
   {
     const prefs = await loadWorkspacePrefs()
@@ -60,7 +69,7 @@ export const createUserPrefsSlice: StateCreator<PrefsStore, [], [], UserPrefsSli
   patchWorkspacePrefs: async (patch) =>
   {
     const merged = await saveWorkspacePrefs(patch)
-    set({ workspacePrefs: merged })
+    set({ workspacePrefs: merged, workspacePrefsLoaded: true })
     get().applyWorkspaceTheme()
     return merged
   },

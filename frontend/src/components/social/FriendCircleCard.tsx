@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { Flame, Users } from 'lucide-react'
 import { fetchFriendCircle, type FriendPublicCard } from '../../lib/friendsCircle'
 import { ACCENT_PALETTES, type AccentId } from '../../lib/userWorkspacePrefs'
+import { iniciaisDe, type AvatarStyleId } from '../../lib/axelAvatarPresets'
 import { useTaskStore } from '../../store/useTaskStore'
+import { AxelCompanionAvatar } from '../Onboarding/AxelCompanionAvatar'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_TEXT_PRIMARY,
@@ -16,9 +18,15 @@ function FriendMiniCard({ friend, myStreak }: { friend: FriendPublicCard; myStre
 
   return (
     <div
-      className="rounded-sl border border-line p-3 min-w-[140px] shrink-0"
+      className="rounded-sl border border-line p-3 min-w-[140px] shrink-0 flex gap-2.5"
       style={{ borderLeftColor: accent.dark, borderLeftWidth: 3 }}
     >
+      <AxelCompanionAvatar
+        style={(friend.avatar_style as AvatarStyleId) ?? 'initials'}
+        initials={iniciaisDe(friend.display_name)}
+        size={36}
+      />
+      <div className="min-w-0 flex-1">
       <p className="text-sm font-medium text-ink truncate">{friend.display_name || 'Amigo'}</p>
       <p className="text-[10px] text-ink-muted font-mono uppercase mt-0.5">
         Nv {friend.level} · {friend.streak_count}d ofensiva
@@ -32,6 +40,7 @@ function FriendMiniCard({ friend, myStreak }: { friend: FriendPublicCard; myStre
       {friend.episode_headline && (
         <p className="text-[11px] text-ink-muted mt-1 line-clamp-2">{friend.episode_headline}</p>
       )}
+      </div>
     </div>
   )
 }

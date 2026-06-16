@@ -197,7 +197,9 @@ function App()
           path="/setup"
           element={
             <ProtectedRoute>
-              <AxelSetupWizard />
+              <ErrorBoundary fallbackTitle="Erro no wizard AXEL">
+                <AxelSetupWizard />
+              </ErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -206,7 +208,16 @@ function App()
             <Suspense fallback={null}>
               <FocusImmersiveOverlay />
             </Suspense>
-            <AppShell />
+            <Suspense fallback={
+              <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-fundo gap-3">
+                <div className="w-8 h-8 rounded-sl border-2 border-line border-t-accent animate-spin" />
+                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+                  Carregando…
+                </p>
+              </div>
+            }>
+              <AppShell />
+            </Suspense>
           </>
         } />
       </Routes>

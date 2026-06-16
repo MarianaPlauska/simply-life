@@ -8,20 +8,23 @@ import {
   type AccentId,
   type DashboardPriority,
   type MascotMoodPref,
+  isSetupComplete,
 } from '../../lib/userWorkspacePrefs'
+import { iniciaisDe, type AvatarStyleId } from '../../lib/axelAvatarPresets'
 import { applyAccentTheme } from '../../lib/applyAccentTheme'
 import { canUseAccent } from '../../lib/axelPrivileges'
 import { saveMonthSavingsGoal } from '../../lib/financeMonthGoal'
 import { FinanceMoodMascot } from '../Finance/spreadsheet/FinanceMoodMascot'
-import {
-  AXEL_BTN_PRIMARY,
-  AXEL_BORDERLESS_PANEL,
-  AXEL_TEXT_PRIMARY,
-  AXEL_TEXT_SECONDARY,
-} from '../../constants/axelSurfaces'
-import { isSetupComplete } from '../../lib/userWorkspacePrefs'
+import { AxelAvatarPicker } from './AxelAvatarPicker'
+import { AxelCompanionAvatar } from './AxelCompanionAvatar'
+import { AXEL_BTN_PRIMARY, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-const STEPS = ['Identidade', 'Cor & mascote', 'Prioridade', 'Primeira meta'] as const
+const STEPS = ['Identidade', 'Cor & mascote', 'Prioridade', 'Quase lá'] as const
+
+const WIZARD_XP = 15
+const BONUS_XP = 10
+
+type QuickStartMode = 'skip' | 'task' | 'month'
 
 const PRIORITY_OPTIONS: { id: DashboardPriority; label: string; hint: string }[] = [
   { id: 'finance', label: 'Finanças', hint: 'Boletos e meta no topo' },
@@ -35,24 +38,18 @@ const MOOD_OPTIONS: { id: MascotMoodPref; label: string }[] = [
   { id: 'focused', label: 'Focado' },
 ]
 
-function iniciaisDe(nome: string): string
-{
-  const partes = nome.trim().split(/\s+/).filter(Boolean)
-  if (partes.length >= 2)
-  {
-    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase()
-  }
-  if (partes.length === 1 && partes[0].length >= 2)
-  {
-    return partes[0].slice(0, 2).toUpperCase()
-  }
-  return 'AX'
-}
+const INPUT =
+  'w-full px-3 py-2 md:px-4 md:py-2.5 rounded-sl border border-line bg-chrome text-sm md:text-base text-ink placeholder:text-ink-muted outline-none focus:border-accent transition-colors'
+
+const WIZARD_CARD =
+  'w-full max-w-[22rem] sm:max-w-[26rem] md:max-w-[32rem] lg:max-w-[36rem] flex flex-col max-h-[min(36rem,calc(100dvh-1.5rem))] md:max-h-[min(44rem,calc(100dvh-3rem))] rounded-sl border border-line bg-card shadow-lg overflow-hidden'
+
+const WIZARD_SHELL =
+  'min-h-[100dvh] bg-fundo sl-ruled-bg flex items-center justify-center px-3 py-4 sm:px-6 md:py-8 lg:py-10'
 
 export function AxelSetupWizard()
 {
   const navigate = useNavigate()
-  const userProfile = useTaskStore((s) => s.userProfile)
   const userStats = useTaskStore((s) => s.userStats)
   const accessibility = useTaskStore((s) => s.accessibility)
   const patchWorkspacePrefs = useTaskStore((s) => s.patchWorkspacePrefs)
@@ -64,12 +61,14 @@ export function AxelSetupWizard()
   const addXP = useTaskStore((s) => s.addXP)
 
   const [step, setStep] = useState(0)
-  const [displayName, setDisplayName] = useState(userProfile.nome || '')
+  // Sempre vazio — usuário preenche do zero (sem vazar email/login)
+  const [displayName, setDisplayName] = useState('')
   const [axelCallsYou, setAxelCallsYou] = useState('')
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('initials')
   const [accent, setAccent] = useState<AccentId>('copper')
   const [mascotMood, setMascotMood] = useState<MascotMoodPref>('calm')
   const [priority, setPriority] = useState<DashboardPriority>('tasks')
-  const [goalMode, setGoalMode] = useState<'month' | 'task'>('task')
+  const [quickStart, setQuickStart] = useState<QuickStartMode>('skip')
   const [monthGoal, setMonthGoal] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
   const [saving, setSaving] = useState(false)
@@ -89,8 +88,8 @@ export function AxelSetupWizard()
 
   const level = userStats?.level ?? 1
   const privilegeCtx = useMemo(() => ({ level, streakCount: 0 }), [level])
-
   const scheme = accessibility.colorScheme === 'light' ? 'light' : 'dark'
+  const initials = iniciaisDe(displayName)
 
   const previewAccent = (id: AccentId) =>
   {
@@ -101,11 +100,6 @@ export function AxelSetupWizard()
   const canNext = (): boolean =>
   {
     if (step === 0) return displayName.trim().length >= 2
-    if (step === 3)
-    {
-      if (goalMode === 'month') return parseFloat(monthGoal.replace(',', '.')) > 0
-      return taskTitle.trim().length >= 2
-    }
     return true
   }
 
@@ -123,8 +117,9 @@ export function AxelSetupWizard()
         axel_calls_you: callsYou,
         accent,
         mascot_mood: mascotMood,
+        avatar_style: avatarStyle,
         dashboard_priority: priority,
-        month_goal_amount: goalMode === 'month'
+        month_goal_amount: quickStart === 'month' && parseFloat(monthGoal.replace(',', '.')) > 0
           ? parseFloat(monthGoal.replace(',', '.'))
           : null,
         setup_completed_at: new Date().toISOString(),
@@ -133,22 +128,33 @@ export function AxelSetupWizard()
 
       updateProfile({ nome: displayName.trim() })
 
-      if (goalMode === 'month')
+      await addXP('foco', WIZARD_XP)
+
+      let bonusMsg = ''
+
+      if (quickStart === 'month')
       {
         const valor = parseFloat(monthGoal.replace(',', '.'))
-        if (valor > 0) saveMonthSavingsGoal(valor, 'Meta do mês')
+        if (valor > 0)
+        {
+          saveMonthSavingsGoal(valor, 'Meta do mês')
+          await addXP('foco', BONUS_XP)
+          bonusMsg = ` +${BONUS_XP} XP de bônus`
+        }
       }
-      else if (taskTitle.trim())
+      else if (quickStart === 'task' && taskTitle.trim())
       {
-        await createTarefa(taskTitle.trim(), 'Primeira vitória — wizard AXEL')
-        await addXP('foco', 25)
+        await createTarefa(taskTitle.trim(), 'Sugestão do wizard AXEL')
+        await addXP('foco', BONUS_XP)
+        bonusMsg = ` +${BONUS_XP} XP de bônus`
       }
 
-      toast.success('AXEL montado! Bem-vindo ao seu espaço.')
+      toast.success(`AXEL montado! +${WIZARD_XP} XP${bonusMsg}`)
       navigate('/', { replace: true })
     }
-    catch
+    catch (err)
     {
+      console.error('AxelSetupWizard finish:', err)
       toast.error('Não foi possível salvar. Tente de novo.')
     }
     finally
@@ -157,212 +163,251 @@ export function AxelSetupWizard()
     }
   }
 
-  const iniciais = iniciaisDe(displayName || 'AXEL')
-
   return (
-    <div className="min-h-screen bg-fundo flex flex-col">
-      <header className="px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3 border-b border-line">
-        <div className="max-w-lg mx-auto">
-          <p className="sl-eyebrow">Montar seu AXEL</p>
-          <h1 className={`text-xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
+    <div className={WIZARD_SHELL}>
+      <div
+        className={WIZARD_CARD}
+        role="dialog"
+        aria-labelledby="axel-wizard-title"
+      >
+        <header className="shrink-0 px-4 pt-4 pb-3 md:px-6 md:pt-5 md:pb-4 border-b border-line bg-card">
+          <p className="sl-eyebrow text-[10px] md:text-xs">Montar seu AXEL</p>
+          <h1 id="axel-wizard-title" className={`text-base md:text-xl font-display mt-0.5 md:mt-1 ${AXEL_TEXT_PRIMARY}`}>
             {STEPS[step]}
           </h1>
-          <div className="flex gap-1.5 mt-3">
-            {STEPS.map((label, i) => (
+          <div className="flex gap-1 md:gap-1.5 mt-2.5 md:mt-3" aria-hidden>
+            {STEPS.map((_, i) => (
               <div
-                key={label}
-                className={`h-1 flex-1 rounded-full transition-colors ${
+                key={STEPS[i]}
+                className={`h-0.5 md:h-1 flex-1 rounded-full transition-colors ${
                   i <= step ? 'bg-accent' : 'bg-line'
                 }`}
-                aria-hidden
               />
             ))}
           </div>
-          <p className={`text-[11px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
-            Passo {step + 1} de {STEPS.length} · ~2 min
+          <p className={`text-[10px] md:text-xs mt-1.5 md:mt-2 ${AXEL_TEXT_SECONDARY}`}>
+            {step + 1}/{STEPS.length} · ~2 min
           </p>
-        </div>
-      </header>
+        </header>
 
-      <main className="flex-1 px-4 py-6 max-w-lg mx-auto w-full">
-        {step === 0 && (
-          <div className="space-y-4">
-            <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>
-              Como o AXEL deve te chamar? Isso aparece no dashboard e no seu cartão público.
-            </p>
-            <label className="block space-y-1.5">
-              <span className="font-mono text-[10px] uppercase text-ink-muted">Seu nome</span>
-              <input
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-sl border border-line bg-card text-ink"
-                placeholder="Maria Silva"
-                autoFocus
-              />
-            </label>
-            <label className="block space-y-1.5">
-              <span className="font-mono text-[10px] uppercase text-ink-muted">Como o AXEL te chama</span>
-              <input
-                value={axelCallsYou}
-                onChange={(e) => setAxelCallsYou(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-sl border border-line bg-card text-ink"
-                placeholder={displayName.split(' ')[0] || 'Maria'}
-              />
-            </label>
-            <div className={`${AXEL_BORDERLESS_PANEL} flex items-center gap-3`}>
-              <div className="w-12 h-12 rounded-sl bg-accent/15 border border-accent/30 flex items-center justify-center font-display text-accent">
-                {iniciais}
-              </div>
-              <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>
-                Preview do seu avatar no Círculo
+        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-3 md:px-6 md:py-5">
+          {step === 0 && (
+            <div className="space-y-3 md:space-y-4">
+              <p className={`text-[12px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
+                Como o AXEL deve te chamar? Aparece no dashboard e no Círculo.
               </p>
-            </div>
-          </div>
-        )}
 
-        {step === 1 && (
-          <div className="space-y-5">
-            <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>
-              Escolha a cor de acento e o humor do mascote — seu privilégio desde o dia 1.
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              {(Object.keys(ACCENT_PALETTES) as AccentId[]).map((id) =>
-              {
-                const locked = !canUseAccent(id, privilegeCtx)
-                const palette = ACCENT_PALETTES[id]
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    disabled={locked}
-                    onClick={() => previewAccent(id)}
-                    className={`p-3 rounded-sl border text-left transition-all ${
-                      accent === id ? 'border-accent ring-2 ring-accent/30' : 'border-line'
-                    } ${locked ? 'opacity-40 cursor-not-allowed' : ''}`}
-                  >
-                    <span
-                      className="block w-8 h-8 rounded-full mb-2"
-                      style={{ background: palette.dark }}
-                    />
-                    <span className="text-sm font-medium text-ink">{palette.label}</span>
-                    {locked && (
-                      <span className="block text-[10px] text-ink-muted mt-0.5">Nível 3</span>
-                    )}
-                  </button>
-                )
-              })}
+              <AxelAvatarPicker
+                value={avatarStyle}
+                displayName={displayName}
+                onChange={setAvatarStyle}
+              />
+
+              <div className="flex items-center gap-2.5 md:gap-3 py-1 md:py-2">
+                <AxelCompanionAvatar
+                  style={avatarStyle}
+                  initials={initials || '?'}
+                  size="lg"
+                />
+                <p className={`text-[11px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
+                  Preview no seu cartão público
+                </p>
+              </div>
+
+              <label className="block space-y-1 md:space-y-1.5">
+                <span className="font-mono text-[9px] md:text-[10px] uppercase text-ink-muted">Seu nome</span>
+                <input
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className={INPUT}
+                  placeholder="Maria Silva"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  autoFocus
+                />
+              </label>
+              <label className="block space-y-1 md:space-y-1.5">
+                <span className="font-mono text-[9px] md:text-[10px] uppercase text-ink-muted">Como o AXEL te chama</span>
+                <input
+                  value={axelCallsYou}
+                  onChange={(e) => setAxelCallsYou(e.target.value)}
+                  className={INPUT}
+                  placeholder="Opcional"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </label>
             </div>
-            <div>
-              <p className="font-mono text-[10px] uppercase text-ink-muted mb-2">Humor do mascote</p>
-              <div className="flex gap-2 flex-wrap">
-                {MOOD_OPTIONS.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setMascotMood(m.id)}
-                    className={`px-3 py-2 rounded-sl border text-sm ${
-                      mascotMood === m.id ? 'border-accent bg-accent/10 text-ink' : 'border-line text-ink-muted'
-                    }`}
-                  >
-                    {m.label}
-                  </button>
-                ))}
+          )}
+
+          {step === 1 && (
+            <div className="space-y-3 md:space-y-4">
+              <p className={`text-[12px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
+                Cor de acento e humor do mascote — privilégio desde o dia 1.
+              </p>
+              <div className="grid grid-cols-2 gap-2 md:gap-3">
+                {(Object.keys(ACCENT_PALETTES) as AccentId[]).map((id) =>
+                {
+                  const locked = !canUseAccent(id, privilegeCtx)
+                  const palette = ACCENT_PALETTES[id]
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      disabled={locked}
+                      onClick={() => previewAccent(id)}
+                      className={`p-2.5 md:p-3.5 rounded-sl border text-left transition-all ${
+                        accent === id ? 'border-accent ring-1 ring-accent/30' : 'border-line'
+                      } ${locked ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    >
+                      <span
+                        className="block w-6 h-6 md:w-8 md:h-8 rounded-full mb-1.5 md:mb-2"
+                        style={{ background: palette.dark }}
+                      />
+                      <span className="text-[12px] md:text-sm font-medium text-ink">{palette.label}</span>
+                      {locked && (
+                        <span className="block text-[9px] md:text-[10px] text-ink-muted">Nv 3</span>
+                      )}
+                    </button>
+                  )
+                })}
+              </div>
+              <div>
+                <p className="font-mono text-[9px] md:text-[10px] uppercase text-ink-muted mb-1.5 md:mb-2">Humor</p>
+                <div className="flex gap-1.5 md:gap-2 flex-wrap">
+                  {MOOD_OPTIONS.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => setMascotMood(m.id)}
+                      className={`px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-sl border text-[12px] md:text-sm ${
+                        mascotMood === m.id ? 'border-accent bg-accent/10 text-ink' : 'border-line text-ink-muted'
+                      }`}
+                    >
+                      {m.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-3 py-1">
+                <FinanceMoodMascot
+                  mood={mascotMood === 'cheerful' ? 'great' : mascotMood === 'focused' ? 'stressed' : 'ok'}
+                  headline=""
+                  showLabel={false}
+                  size="sm"
+                />
+                <p className={`text-[11px] md:text-sm ${AXEL_TEXT_SECONDARY}`}>Assim o AXEL te acompanha</p>
               </div>
             </div>
-            <div className={`${AXEL_BORDERLESS_PANEL} flex items-center gap-4`}>
-              <FinanceMoodMascot mood={mascotMood === 'cheerful' ? 'great' : mascotMood === 'focused' ? 'stressed' : 'ok'} headline="Seu mascote" showLabel={false} size="sm" />
-              <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>Assim o AXEL vai te acompanhar</p>
-            </div>
-          </div>
-        )}
+          )}
 
-        {step === 2 && (
-          <div className="space-y-3">
-            <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>
-              O que importa primeiro no celular? Você pode mudar depois (nível 7 desbloqueia reordenar livremente).
-            </p>
-            {PRIORITY_OPTIONS.map((opt) => (
-              <button
-                key={opt.id}
-                type="button"
-                onClick={() => setPriority(opt.id)}
-                className={`w-full p-4 rounded-sl border text-left ${
-                  priority === opt.id ? 'border-accent bg-accent/8' : 'border-line'
-                }`}
-              >
-                <p className="font-medium text-ink">{opt.label}</p>
-                <p className="text-[12px] text-ink-muted mt-0.5">{opt.hint}</p>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="space-y-4">
-            <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>
-              Uma meta para a primeira vitória — e XP antes mesmo de explorar o app.
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setGoalMode('task')}
-                className={`flex-1 py-2.5 rounded-sl border text-sm ${
-                  goalMode === 'task' ? 'border-accent bg-accent/10' : 'border-line'
-                }`}
-              >
-                1 tarefa hoje
-              </button>
-              <button
-                type="button"
-                onClick={() => setGoalMode('month')}
-                className={`flex-1 py-2.5 rounded-sl border text-sm ${
-                  goalMode === 'month' ? 'border-accent bg-accent/10' : 'border-line'
-                }`}
-              >
-                Meta do mês
-              </button>
+          {step === 2 && (
+            <div className="space-y-2 md:space-y-3">
+              <p className={`text-[12px] md:text-sm leading-snug mb-2 md:mb-3 ${AXEL_TEXT_SECONDARY}`}>
+                O que fica no topo do celular?
+              </p>
+              {PRIORITY_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setPriority(opt.id)}
+                  className={`w-full p-3 md:p-4 rounded-sl border text-left ${
+                    priority === opt.id ? 'border-accent bg-accent/8' : 'border-line'
+                  }`}
+                >
+                  <p className="text-[13px] md:text-base font-medium text-ink">{opt.label}</p>
+                  <p className="text-[11px] md:text-sm text-ink-muted mt-0.5">{opt.hint}</p>
+                </button>
+              ))}
             </div>
-            {goalMode === 'task' ? (
-              <label className="block space-y-1.5">
-                <span className="font-mono text-[10px] uppercase text-ink-muted">O que você vai fazer hoje?</span>
-                <input
-                  value={taskTitle}
-                  onChange={(e) => setTaskTitle(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-sl border border-line bg-card text-ink"
-                  placeholder="Organizar a semana"
-                  autoFocus
-                />
-              </label>
-            ) : (
-              <label className="block space-y-1.5">
-                <span className="font-mono text-[10px] uppercase text-ink-muted">Quanto quer poupar este mês? (R$)</span>
-                <input
-                  value={monthGoal}
-                  onChange={(e) => setMonthGoal(e.target.value)}
-                  inputMode="decimal"
-                  className="w-full px-3 py-2.5 rounded-sl border border-line bg-card text-ink"
-                  placeholder="500"
-                  autoFocus
-                />
-              </label>
-            )}
-            <div className={`${AXEL_BORDERLESS_PANEL} flex items-center gap-2 text-accent`}>
-              <Sparkles size={16} />
-              <span className="text-sm">+25 XP de boas-vindas ao concluir</span>
-            </div>
-          </div>
-        )}
-      </main>
+          )}
 
-      <footer className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 border-t border-line">
-        <div className="max-w-lg mx-auto flex gap-2">
+          {step === 3 && (
+            <div className="space-y-3 md:space-y-4">
+              <p className={`text-[12px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
+                Pronto! Seu espaço está montado. Você pode entrar agora ou deixar uma sugestão para o AXEL.
+              </p>
+
+              <div className="rounded-sl border border-accent/25 bg-accent/8 px-3 py-2.5 flex items-center gap-2">
+                <Sparkles size={16} className="text-accent shrink-0" />
+                <p className="text-[12px] md:text-sm text-ink">
+                  <span className="font-medium">+{WIZARD_XP} XP</span>
+                  <span className="text-ink-muted"> por montar seu AXEL</span>
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-1.5 md:gap-2">
+                <button
+                  type="button"
+                  onClick={() => setQuickStart('skip')}
+                  className={`w-full p-3 md:p-3.5 rounded-sl border text-left ${
+                    quickStart === 'skip' ? 'border-accent bg-accent/8' : 'border-line'
+                  }`}
+                >
+                  <p className="text-[13px] md:text-sm font-medium text-ink">Só explorar</p>
+                  <p className="text-[11px] md:text-xs text-ink-muted mt-0.5">Entrar direto no dashboard</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuickStart('task')}
+                  className={`w-full p-3 md:p-3.5 rounded-sl border text-left ${
+                    quickStart === 'task' ? 'border-accent bg-accent/8' : 'border-line'
+                  }`}
+                >
+                  <p className="text-[13px] md:text-sm font-medium text-ink">Sugerir uma tarefa</p>
+                  <p className="text-[11px] md:text-xs text-ink-muted mt-0.5">Opcional · bônus +{BONUS_XP} XP</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuickStart('month')}
+                  className={`w-full p-3 md:p-3.5 rounded-sl border text-left ${
+                    quickStart === 'month' ? 'border-accent bg-accent/8' : 'border-line'
+                  }`}
+                >
+                  <p className="text-[13px] md:text-sm font-medium text-ink">Meta de poupança do mês</p>
+                  <p className="text-[11px] md:text-xs text-ink-muted mt-0.5">Opcional · bônus +{BONUS_XP} XP</p>
+                </button>
+              </div>
+
+              {quickStart === 'task' && (
+                <label className="block space-y-1 md:space-y-1.5">
+                  <span className="font-mono text-[9px] md:text-[10px] uppercase text-ink-muted">Sugestão (opcional)</span>
+                  <input
+                    value={taskTitle}
+                    onChange={(e) => setTaskTitle(e.target.value)}
+                    className={INPUT}
+                    placeholder="Organizar a semana"
+                    autoComplete="off"
+                  />
+                </label>
+              )}
+
+              {quickStart === 'month' && (
+                <label className="block space-y-1 md:space-y-1.5">
+                  <span className="font-mono text-[9px] md:text-[10px] uppercase text-ink-muted">Valor (R$, opcional)</span>
+                  <input
+                    value={monthGoal}
+                    onChange={(e) => setMonthGoal(e.target.value)}
+                    inputMode="decimal"
+                    className={INPUT}
+                    placeholder="500"
+                    autoComplete="off"
+                  />
+                </label>
+              )}
+            </div>
+          )}
+        </main>
+
+        <footer className="shrink-0 px-4 py-3 md:px-6 md:py-4 border-t border-line bg-card flex gap-2 md:gap-3">
           {step > 0 && (
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
-              className="px-4 py-2.5 rounded-sl border border-line text-ink-muted flex items-center gap-1"
+              className="px-3 py-2 md:px-4 md:py-2.5 rounded-sl border border-line text-ink-muted flex items-center gap-1 text-[12px] md:text-sm"
             >
-              <ArrowLeft size={14} />
+              <ArrowLeft size={14} className="md:w-4 md:h-4" />
               Voltar
             </button>
           )}
@@ -371,24 +416,24 @@ export function AxelSetupWizard()
               type="button"
               disabled={!canNext()}
               onClick={() => setStep((s) => s + 1)}
-              className={`flex-1 py-2.5 rounded-sl flex items-center justify-center gap-1 disabled:opacity-40 ${AXEL_BTN_PRIMARY}`}
+              className={`flex-1 py-2 md:py-2.5 rounded-sl flex items-center justify-center gap-1 text-sm md:text-base disabled:opacity-40 ${AXEL_BTN_PRIMARY}`}
             >
               Continuar
-              <ArrowRight size={14} />
+              <ArrowRight size={14} className="md:w-4 md:h-4" />
             </button>
           ) : (
             <button
               type="button"
-              disabled={!canNext() || saving}
+              disabled={saving}
               onClick={() => void finish()}
-              className={`flex-1 py-2.5 rounded-sl flex items-center justify-center gap-1 disabled:opacity-40 ${AXEL_BTN_PRIMARY}`}
+              className={`flex-1 py-2 md:py-2.5 rounded-sl flex items-center justify-center gap-1 text-sm md:text-base disabled:opacity-40 ${AXEL_BTN_PRIMARY}`}
             >
-              <Check size={14} />
-              {saving ? 'Salvando…' : 'Entrar no Simply-Life'}
+              <Check size={14} className="md:w-4 md:h-4" />
+              {saving ? 'Salvando…' : 'Entrar no AXEL'}
             </button>
           )}
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   )
 }

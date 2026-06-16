@@ -1,6 +1,7 @@
 import { supabase } from './supabase'
 import type { ActiveCosmetics } from './axelCosmetics'
 import { DEFAULT_ACTIVE_COSMETICS } from './axelCosmetics'
+import type { AvatarStyleId } from './axelAvatarPresets'
 
 // Preferências de workspace — wizard, cor, ordem, privacidade social
 
@@ -15,6 +16,7 @@ export interface UserWorkspacePrefs
   axel_calls_you: string
   accent: AccentId
   mascot_mood: MascotMoodPref
+  avatar_style: AvatarStyleId
   dashboard_priority: DashboardPriority
   month_goal_amount: number | null
   ai_coach_enabled: boolean
@@ -40,6 +42,7 @@ export const DEFAULT_WORKSPACE_PREFS: UserWorkspacePrefs = {
   axel_calls_you: '',
   accent: 'copper',
   mascot_mood: 'calm',
+  avatar_style: 'initials',
   dashboard_priority: 'tasks',
   month_goal_amount: null,
   ai_coach_enabled: true,
@@ -52,7 +55,68 @@ export const DEFAULT_WORKSPACE_PREFS: UserWorkspacePrefs = {
   },
 }
 
-const LOCAL_KEY = 'simply-life-workspace-prefs'
+const LOCAL_KEY_PREFIX = 'simply-life-workspace-prefs'
+
+function localKeyForUser(uid: string | null): string
+{
+  return uid ? `${LOCAL_KEY_PREFIX}:${uid}` : `${LOCAL_KEY_PREFIX}:anonymous`
+}
+
+async function resolveAuthUserId(): Promise<string | null>
+{
+  return (await supabase.auth.getUser()).data.user?.id ?? null
+}
+
+function readLocalPrefsForUser(uid: string | null): Partial<UserWorkspacePrefs> | null
+{
+  try
+  {
+    const raw = localStorage.getItem(localKeyForUser(uid))
+    if (!raw) return null
+    return JSON.parse(raw) as Partial<UserWorkspacePrefs>
+  }
+  catch
+  {
+    return null
+  }
+}
+
+function writeLocalPrefsForUser(uid: string | null, prefs: UserWorkspacePrefs): void
+{
+  localStorage.setItem(localKeyForUser(uid), JSON.stringify(prefs))
+}
+
+/** Mantém o wizard concluído mesmo se o Supabase ainda não sincronizou */
+function pickSetupCompletedAt(
+  remote: string | null | undefined,
+  local: string | null | undefined,
+): string | null
+{
+  if (remote && local)
+  {
+    return new Date(remote) >= new Date(local) ? remote : local
+  }
+  return remote ?? local ?? null
+}
+
+function mergeRemoteWithLocal(
+  remote: Partial<UserWorkspacePrefs>,
+  local: Partial<UserWorkspacePrefs> | null,
+): UserWorkspacePrefs
+{
+  const remoteMerged = mergePrefs(remote)
+  const localMerged = mergePrefs(local ?? {})
+  const setup_completed_at = pickSetupCompletedAt(
+    remoteMerged.setup_completed_at,
+    localMerged.setup_completed_at,
+  )
+
+  return mergePrefs({
+    ...remoteMerged,
+    ...localMerged,
+    ...(setup_completed_at ? { setup_completed_at } : {}),
+  })
+}
 
 function mergePrefs(raw: Partial<UserWorkspacePrefs> | null | undefined): UserWorkspacePrefs
 {
@@ -78,13 +142,14 @@ export function isSetupComplete(prefs: UserWorkspacePrefs | null | undefined): b
 
 export async function loadWorkspacePrefs(): Promise<UserWorkspacePrefs>
 {
+  const uid = await resolveAuthUserId()
+  const local = readLocalPrefsForUser(uid)
+
   try
   {
-    const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid)
     {
-      const raw = localStorage.getItem(LOCAL_KEY)
-      return mergePrefs(raw ? JSON.parse(raw) as Partial<UserWorkspacePrefs> : {})
+      return mergePrefs(local ?? {})
     }
 
     const { data, error } = await supabase
@@ -94,26 +159,29 @@ export async function loadWorkspacePrefs(): Promise<UserWorkspacePrefs>
       .maybeSingle()
 
     if (error) throw error
-    const merged = mergePrefs((data?.prefs ?? {}) as Partial<UserWorkspacePrefs>)
-    localStorage.setItem(LOCAL_KEY, JSON.stringify(merged))
+
+    const merged = mergeRemoteWithLocal(
+      (data?.prefs ?? {}) as Partial<UserWorkspacePrefs>,
+      local,
+    )
+    writeLocalPrefsForUser(uid, merged)
     return merged
   }
   catch
   {
-    const raw = localStorage.getItem(LOCAL_KEY)
-    return mergePrefs(raw ? JSON.parse(raw) as Partial<UserWorkspacePrefs> : {})
+    return mergePrefs(local ?? {})
   }
 }
 
 export async function saveWorkspacePrefs(patch: Partial<UserWorkspacePrefs>): Promise<UserWorkspacePrefs>
 {
-  const current = await loadWorkspacePrefs()
-  const merged = mergePrefs({ ...current, ...patch })
-  localStorage.setItem(LOCAL_KEY, JSON.stringify(merged))
+  const uid = await resolveAuthUserId()
+  const local = readLocalPrefsForUser(uid)
+  const merged = mergePrefs({ ...(local ?? {}), ...patch })
+  writeLocalPrefsForUser(uid, merged)
 
   try
   {
-    const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid) return merged
 
     await supabase.from('user_workspace_prefs').upsert({
@@ -122,11 +190,18 @@ export async function saveWorkspacePrefs(patch: Partial<UserWorkspacePrefs>): Pr
       updated_at: new Date().toISOString(),
     })
 
-    await syncPublicCard(uid, merged)
+    try
+    {
+      await syncPublicCard(uid, merged)
+    }
+    catch
+    {
+      /* cartão público opcional — migration 027/029 */
+    }
   }
   catch
   {
-    /* offline */
+    /* offline ou tabela ainda não migrada */
   }
 
   return merged
@@ -146,6 +221,7 @@ export async function syncPublicCard(userId: string, prefs: UserWorkspacePrefs):
     axel_calls_you: prefs.axel_calls_you || prefs.display_name,
     accent: prefs.accent,
     mascot_mood: prefs.mascot_mood,
+    avatar_style: prefs.avatar_style ?? 'initials',
     level: stats?.level ?? 1,
     streak_count: stats?.ofensiva_streak ?? 0,
     updated_at: new Date().toISOString(),

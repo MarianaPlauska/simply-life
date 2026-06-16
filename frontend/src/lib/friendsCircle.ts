@@ -9,6 +9,7 @@ export interface FriendPublicCard
   axel_calls_you: string
   accent: string
   mascot_mood: string
+  avatar_style?: string
   level: number
   streak_count: number
   episode_headline: string

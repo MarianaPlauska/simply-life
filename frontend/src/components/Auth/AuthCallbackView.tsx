@@ -34,7 +34,13 @@ export function AuthCallbackView()
       }
 
       finished = true
+      const prevId = useTaskStore.getState().userId
       await applySessionToStore(session, login)
+      if (prevId !== session.user.id)
+      {
+        useTaskStore.getState().resetWorkspacePrefsState()
+      }
+      await useTaskStore.getState().fetchWorkspacePrefs()
       toast.success(t('login.success_login'))
       const path = await resolvePostAuthPath()
       navigate(path, { replace: true })
