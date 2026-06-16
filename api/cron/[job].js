@@ -2,8 +2,10 @@
 
 import gmailSync from '../_lib/handlers/cron/gmail-sync.js';
 import pushBills from '../_lib/handlers/cron/push-bills.js';
+import daily from '../_lib/handlers/cron/daily.js';
 
 const ROUTES = {
+  daily,
   'gmail-sync': gmailSync,
   'push-bills': pushBills,
 };
