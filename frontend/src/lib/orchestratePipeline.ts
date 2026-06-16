@@ -55,6 +55,8 @@ export function mergeHorizonMaps(
 export interface HorizonAssignOptions
 {
   lastMovedAt?: (taskId: number, createdAt: string | null) => string | null
+  moodSnoozeReason?: string
+  moodCapNote?: string
 }
 
 /** Penaliza score de tarefas paradas e aplica bônus de aprendizado por drag */
@@ -152,7 +154,9 @@ export function assignOrchestratedHorizons(
   }
 
   const hojeCandidates = active.filter((t) => autoHorizons[t.id] === 'hoje')
-  const loadBalance = computeDailyLoadBalancer(hojeCandidates, dailyScoreCap)
+  const loadBalance = computeDailyLoadBalancer(hojeCandidates, dailyScoreCap, {
+    snoozeReason: options.moodSnoozeReason,
+  })
 
   for (const [taskId, entry] of loadBalance)
   {
@@ -162,9 +166,10 @@ export function assignOrchestratedHorizons(
     if (!task) continue
 
     autoHorizons[taskId] = 'semana'
+    const moodTail = options.moodCapNote ? ` · ${options.moodCapNote}` : ''
     decisions.push({
       taskId,
-      message: `Adiada para Semana — carga de Hoje no limite (${dailyScoreCap} pts). Score ${task.score_urgencia ?? 0}.`,
+      message: `Adiada para Semana — cap de Hoje em ${dailyScoreCap} pts. Score ${task.score_urgencia ?? 0}.${moodTail}`,
     })
   }
 

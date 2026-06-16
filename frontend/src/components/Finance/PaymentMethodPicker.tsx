@@ -8,7 +8,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import type { VirtualCard } from '../../store/storeTypes'
-import { cardChipClass, CARD_CHIP_STYLES } from '../../lib/financeCardTheme'
+import { cardChipClass } from '../../lib/financeCardTheme'
 import {
   EXPENSE_CASH_METHODS,
   INCOME_METHODS,
@@ -18,6 +18,7 @@ import {
 import {
   AXEL_FILTER_PILL_ACTIVE,
   AXEL_FILTER_PILL_IDLE,
+  AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
 const CASH_ICONS: Record<string, typeof QrCode> = {
@@ -48,46 +49,68 @@ export function PaymentMethodPicker({
   const cashMethods = variant === 'receita' ? INCOME_METHODS : EXPENSE_CASH_METHODS
 
   const pillClass = (active: boolean) =>
-    `shrink-0 inline-flex items-center justify-center gap-1.5 uppercase min-h-[44px] px-2.5 ${
+    `inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 rounded-sl font-mono text-[10px] uppercase ${
       active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
     }`
 
   return (
-    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 w-full">
-      {cashMethods.map((method) =>
-      {
-        const Icon = CASH_ICONS[method] ?? Wallet
-        const active = value === method
-        return (
-          <button
-            key={method}
-            type="button"
-            onClick={() => onChange(method)}
-            className={pillClass(active)}
-          >
-            <Icon size={12} className={method === 'pix' ? 'text-accent' : undefined} />
-            {PAYMENT_METHOD_LABELS[method as FinancePaymentMethod]}
-          </button>
-        )
-      })}
+    <div className="space-y-3">
+      <div>
+        <p className={`font-mono text-[9px] uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
+          {variant === 'receita' ? 'Conta que recebeu' : 'Conta / dinheiro'}
+        </p>
+        <p className={`text-[10px] mb-2 ${AXEL_TEXT_SECONDARY}`}>
+          {variant === 'receita'
+            ? 'Onde o dinheiro caiu — soma ao saldo.'
+            : 'Desconta da conta corrente na hora.'}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {cashMethods.map((method) =>
+          {
+            const Icon = CASH_ICONS[method] ?? Wallet
+            const active = value === method
+            return (
+              <button
+                key={method}
+                type="button"
+                onClick={() => onChange(method)}
+                className={pillClass(active)}
+              >
+                <Icon size={12} />
+                {PAYMENT_METHOD_LABELS[method as FinancePaymentMethod]}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
-      {variant === 'despesa' && activeCards.map((card) =>
-      {
-        const selected = value === card.id
-        const dotClass = CARD_CHIP_STYLES[card.tipo_gradiente].dot
-        return (
-          <button
-            key={card.id}
-            type="button"
-            onClick={() => onChange(card.id)}
-            className={`col-span-2 sm:col-span-1 min-h-[44px] ${cardChipClass(card, selected)}`}
-          >
-            <span className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`} aria-hidden />
-            <CreditCard size={12} className="shrink-0 opacity-70" />
-            <span className="truncate max-w-[140px]">{card.nome}</span>
-          </button>
-        )
-      })}
+      {variant === 'despesa' && activeCards.length > 0 && (
+        <div>
+          <p className={`font-mono text-[9px] uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
+            Cartão de crédito
+          </p>
+          <p className={`text-[10px] mb-2 ${AXEL_TEXT_SECONDARY}`}>
+            Vai para a fatura do cartão — não desconta o saldo agora.
+          </p>
+          <div className="flex flex-col gap-1.5">
+            {activeCards.map((card) =>
+            {
+              const selected = value === card.id
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => onChange(card.id)}
+                  className={`w-full min-h-[44px] justify-start ${cardChipClass(card, selected)}`}
+                >
+                  <CreditCard size={12} className="shrink-0 opacity-70" />
+                  <span className="truncate">{card.nome}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

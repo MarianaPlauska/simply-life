@@ -4,8 +4,12 @@ import { Toaster } from 'sonner'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { LoginView } from './components/Auth/LoginView'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
+import { SetupGuard } from './components/Auth/SetupGuard'
+import { JoinFriendView } from './components/Auth/JoinFriendView'
 import { GoogleCallbackView } from './components/Auth/GoogleCallbackView'
+import { AuthCallbackView } from './components/Auth/AuthCallbackView'
 import { ResetPasswordView } from './components/Auth/ResetPasswordView'
+import { AxelSetupWizard } from './components/Onboarding/AxelSetupWizard'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { useTaskStore, type ActiveView } from './store/useTaskStore'
 import { AppLayout } from './components/layout/AppLayout'
@@ -13,7 +17,6 @@ import { Briefcase, Rocket } from 'lucide-react'
 
 const DashboardView = lazy(() => import('./components/layout/DashboardView').then((m) => ({ default: m.DashboardView })))
 const KanbanView = lazy(() => import('./components/kanban/KanbanView').then((m) => ({ default: m.KanbanView })))
-const KanbanBoard = lazy(() => import('./components/kanban/KanbanBoard').then((m) => ({ default: m.KanbanBoard })))
 const AnotacoesView = lazy(() => import('./components/Anotacoes/AnotacoesView').then((m) => ({ default: m.AnotacoesView })))
 const AcademyModeView = lazy(() => import('./components/Health/AcademyModeView').then((m) => ({ default: m.AcademyModeView })))
 const FocusImmersiveOverlay = lazy(() => import('./components/FocusModeView').then((m) => ({ default: m.FocusImmersiveOverlay })))
@@ -31,6 +34,7 @@ const SuperhumanView = lazy(() => import('./components/kanban/SuperhumanView').t
 function useAccessibilityInit()
 {
   const a = useTaskStore((s) => s.accessibility)
+  const applyWorkspaceTheme = useTaskStore((s) => s.applyWorkspaceTheme)
   useEffect(() =>
   {
     document.documentElement.style.fontSize = `${a.fontSize}px`
@@ -38,7 +42,8 @@ function useAccessibilityInit()
     document.documentElement.classList.toggle('reduce-motion', a.reducedMotion)
     document.documentElement.classList.toggle('dark', a.colorScheme === 'dark')
     document.documentElement.style.colorScheme = a.colorScheme
-  }, [a.fontSize, a.highContrast, a.reducedMotion, a.colorScheme])
+    applyWorkspaceTheme()
+  }, [a.fontSize, a.highContrast, a.reducedMotion, a.colorScheme, applyWorkspaceTheme])
 }
 
 function PlaceholderView({ title, subtitle, icon: Icon }: { title: string; subtitle: string; icon?: React.ElementType })
@@ -123,14 +128,15 @@ function AppShell()
   return (
     <>
       <NavigationSync />
-      <Routes>
-        <Route
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
+      <SetupGuard>
+        <Routes>
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
           <Route index element={
             <ErrorBoundary fallbackTitle="Erro no Dashboard">
               <DashboardView />
@@ -141,11 +147,7 @@ function AppShell()
               <KanbanView />
             </ErrorBoundary>
           } />
-          <Route path="kanban/board" element={
-            <ErrorBoundary fallbackTitle="Erro no Kanban">
-              <KanbanBoard />
-            </ErrorBoundary>
-          } />
+          <Route path="kanban/board" element={<Navigate to="/kanban" replace />} />
           <Route path="anotacoes" element={<ErrorBoundary fallbackTitle="Erro nas Anotações"><AnotacoesView /></ErrorBoundary>} />
           <Route path="foco" element={<ErrorBoundary fallbackTitle="Erro no Modo Academia"><AcademyModeView /></ErrorBoundary>} />
           <Route path="configuracoes" element={<ErrorBoundary fallbackTitle="Erro nas Configurações"><SettingsView /></ErrorBoundary>} />
@@ -164,7 +166,8 @@ function AppShell()
           } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
-      </Routes>
+        </Routes>
+      </SetupGuard>
     </>
   )
 }
@@ -173,12 +176,13 @@ function App()
 {
   useAccessibilityInit()
   const checkSession = useTaskStore((s) => s.checkSession)
+  const fetchWorkspacePrefs = useTaskStore((s) => s.fetchWorkspacePrefs)
   const colorScheme = useTaskStore((s) => s.accessibility.colorScheme)
 
   useEffect(() =>
   {
-    checkSession()
-  }, [checkSession])
+    void checkSession().then(() => fetchWorkspacePrefs())
+  }, [checkSession, fetchWorkspacePrefs])
 
   return (
     <>
@@ -186,7 +190,17 @@ function App()
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/reset-password" element={<ResetPasswordView />} />
+        <Route path="/auth/callback" element={<AuthCallbackView />} />
         <Route path="/google-callback" element={<GoogleCallbackView />} />
+        <Route path="/join/:code" element={<JoinFriendView />} />
+        <Route
+          path="/setup"
+          element={
+            <ProtectedRoute>
+              <AxelSetupWizard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/*" element={
           <>
             <Suspense fallback={null}>

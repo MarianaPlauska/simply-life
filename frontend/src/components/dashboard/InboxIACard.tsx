@@ -31,7 +31,7 @@ function iconFor(source: string | null | undefined)
   return Mail
 }
 
-export function InboxIACard()
+export function InboxIACard({ embedded = false }: { embedded?: boolean })
 {
   const navigate = useNavigate()
   const eventos = useTaskStore((s) => s.inboxEvents)
@@ -53,14 +53,16 @@ export function InboxIACard()
   }, [eventos])
 
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
-      <header className="px-4 pt-4 pb-3 border-b border-line flex items-center justify-between gap-2">
-        <div>
-          <p className={AXEL_SECTION_TITLE}>Inteligência</p>
-          <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Inbox triado · tempo real</p>
-        </div>
-        <span className="font-mono text-[10px] text-accent tabular-nums">{total}</span>
-      </header>
+    <section className={`${embedded ? '' : AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
+      {!embedded && (
+        <header className="px-4 pt-4 pb-3 border-b border-line flex items-center justify-between gap-2">
+          <div>
+            <p className={AXEL_SECTION_TITLE}>Inteligência</p>
+            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Inbox triado · tempo real</p>
+          </div>
+          <span className="font-mono text-[10px] text-accent tabular-nums">{total}</span>
+        </header>
+      )}
 
       <div className="flex-1 min-h-[120px] flex flex-col">
         {!top && (

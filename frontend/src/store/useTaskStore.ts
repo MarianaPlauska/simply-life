@@ -28,6 +28,7 @@ import { createAxelZenFocusSlice, type AxelZenFocusSlice } from './slices/axelZe
 import { createAxelOrchestrationSlice, type AxelOrchestrationSlice } from './slices/axelOrchestrationSlice';
 import { createAxelAchievementSlice, type AxelAchievementSlice } from './slices/axelAchievementSlice';
 import { createAxelDeadlineProposalSlice, type AxelDeadlineProposalSlice } from './slices/axelDeadlineProposalSlice';
+import { createUserPrefsSlice, type UserPrefsSlice } from './slices/userPrefsSlice';
 
 // re-exporta types para compatibilidade
 export type { ActiveView, Anotacao, TimerConfig, Category, Despesa, Medicamento, UserProfile, AccessibilitySettings, Transaction, VirtualCard, ContaFixa, BudgetLimit, RecurringIncome, FinancialGoal, HabitoDiario, SessaoTreino, Notificacao, HabitoResumo, CalendarEvent, PalavraChave, ProcessarMensagemResult, FocusPhase, FocusState, GamificacaoProfile, DashboardResumo } from './storeTypes';
@@ -58,7 +59,8 @@ export type TaskStore =
   AxelZenFocusSlice &
   AxelOrchestrationSlice &
   AxelAchievementSlice &
-  AxelDeadlineProposalSlice;
+  AxelDeadlineProposalSlice &
+  UserPrefsSlice;
 
 export const useTaskStore = create<TaskStore>()(
   persist(
@@ -88,6 +90,7 @@ export const useTaskStore = create<TaskStore>()(
       ...createAxelOrchestrationSlice(...a),
       ...createAxelAchievementSlice(...a),
       ...createAxelDeadlineProposalSlice(...a),
+      ...createUserPrefsSlice(...a),
     }),
     {
       name: 'simply-life-store',
@@ -112,7 +115,10 @@ export const useTaskStore = create<TaskStore>()(
         streakCount: state.streakCount,
         lastActiveDate: state.lastActiveDate,
         hasCompletedTaskToday: state.hasCompletedTaskToday,
+        hasWellbeingToday: state.hasWellbeingToday,
         streakFreezes: state.streakFreezes,
+        streakSavedDays: state.streakSavedDays,
+        lastMonthlyFreezeClaim: state.lastMonthlyFreezeClaim,
         focusMinutesByDate: state.focusMinutesByDate,
         taskLastMovedAt: state.taskLastMovedAt,
         taskEstimates: state.taskEstimates,

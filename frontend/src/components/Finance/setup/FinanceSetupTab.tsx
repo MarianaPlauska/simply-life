@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { FinanceCashAccountCard } from '../FinanceCashAccountCard'
 import { FinanceReconciliationCard } from '../overview/FinanceReconciliationCard'
+import { FinanceImportExportPanel } from '../FinanceImportExportPanel'
 import { CARD_CHIP_STYLES } from '../../../lib/financeCardTheme'
 import type { VirtualCard } from '../../../store/storeTypes'
 import {
@@ -226,6 +227,8 @@ export function FinanceSetupTab({
           </div>
         </button>
       </div>
+
+      <FinanceImportExportPanel />
     </div>
   )
 }

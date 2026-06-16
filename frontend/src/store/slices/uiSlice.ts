@@ -3,6 +3,21 @@ import type { StateCreator } from 'zustand';
 import type { ActiveView, TimerConfig, AccessibilitySettings, ColorScheme } from '../storeTypes';
 import { applyColorScheme } from '../../utils/applyColorScheme';
 
+export const MAX_PINNED_MODULES = 4;
+
+export const PINNABLE_VIEWS: { id: string; label: string }[] = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'kanban', label: 'Kanban' },
+  { id: 'saude', label: 'Saúde' },
+  { id: 'financeiro', label: 'Finanças' },
+  { id: 'anotacoes', label: 'Anotações' },
+  { id: 'calendario', label: 'Calendário' },
+  { id: 'foco', label: 'Modo Academia' },
+  { id: 'superhuman', label: 'Foco Superhumano' },
+  { id: 'inteligencia', label: 'Inbox IA' },
+  { id: 'configuracoes', label: 'Configurações' },
+];
+
 export type RealtimeStatus = 'offline' | 'connecting' | 'live' | 'error';
 
 export interface UISlice {
@@ -22,6 +37,7 @@ export interface UISlice {
   timerConfig: TimerConfig;
   interactionScore: Record<string, number>;
   sidebarCollapsed: boolean;
+  mobileSidebarOpen: boolean;
   scoreDiario: number;
   pinnedModules: string[];
   accessibility: AccessibilitySettings;
@@ -34,6 +50,7 @@ export interface UISlice {
   setTimerConfig: (key: keyof TimerConfig, value: number) => void;
   registerInteraction: (moduleId: string) => void;
   toggleSidebar: () => void;
+  setMobileSidebarOpen: (open: boolean) => void;
   concluirHabito: (pontos: number) => void;
   togglePin: (moduleId: string) => void;
   setAccessibility: <K extends keyof AccessibilitySettings>(
@@ -71,6 +88,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   timerConfig: { pomodoroTime: 25, shortBreak: 5, longBreak: 15 },
   interactionScore: {},
   sidebarCollapsed: false,
+  mobileSidebarOpen: false,
   scoreDiario: 0,
   pinnedModules: ['dashboard', 'kanban'],
   accessibility: {
@@ -117,15 +135,25 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
     set((state) =>
     {
       const has = state.pinnedModules.includes(moduleId);
+      if (has)
+      {
+        return {
+          pinnedModules: state.pinnedModules.filter((m) => m !== moduleId),
+        };
+      }
+      if (state.pinnedModules.length >= MAX_PINNED_MODULES)
+      {
+        return state;
+      }
       return {
-        pinnedModules: has
-          ? state.pinnedModules.filter((m) => m !== moduleId)
-          : [...state.pinnedModules, moduleId],
+        pinnedModules: [...state.pinnedModules, moduleId],
       };
     });
   },
 
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+
+  setMobileSidebarOpen: (open) => set({ mobileSidebarOpen: open }),
 
   toggleColorScheme: () =>
   {

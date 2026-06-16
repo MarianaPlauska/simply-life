@@ -2,9 +2,11 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { countUrgentDeadlines } from '../../lib/axelAlerts'
 import { useNavigate } from 'react-router-dom'
 import { AxelStreakPopover } from './AxelStreakPopover'
+import { MobileSidebarDrawer } from './MobileSidebarDrawer'
+import { PinnedNavEditor } from './PinnedNavEditor'
 import {
   Search, User, SlidersHorizontal, LogOut, Bell,
-  CheckCheck, Info, Heart, ListTodo, Wallet2,
+  CheckCheck, Info, Heart, ListTodo, Wallet2, PanelLeft,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AccessibilityQuickMenu } from '../dashboard/AccessibilityQuickMenu'
@@ -60,6 +62,9 @@ export function AxelGlobalHeader()
   const navigate = useNavigate()
   const activeView = useTaskStore((s) => s.activeView)
   const pinnedModules = useTaskStore((s) => s.pinnedModules)
+  const toggleSidebar = useTaskStore((s) => s.toggleSidebar)
+  const setMobileSidebarOpen = useTaskStore((s) => s.setMobileSidebarOpen)
+  const sidebarCollapsed = useTaskStore((s) => s.sidebarCollapsed)
   const notificacoes = useTaskStore((s) => s.notificacoes)
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes)
   const markNotificacaoRead = useTaskStore((s) => s.markNotificacaoRead)
@@ -107,18 +112,39 @@ export function AxelGlobalHeader()
   }, [isProfileOpen, isNotifOpen])
 
   return (
-    <header className={`shrink-0 w-full border-b border-line relative z-50 ${AXEL_CHROME_PLANE}`}>
-      <div className="px-4 md:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2 shrink-0 min-w-0">
+    <>
+      <MobileSidebarDrawer />
+      <header className={`shrink-0 w-full border-b border-line relative z-50 ${AXEL_CHROME_PLANE}`}>
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 h-14 flex items-center justify-between gap-2 sm:gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
+          <button
+            type="button"
+            onClick={() =>
+            {
+              if (window.matchMedia('(min-width: 768px)').matches)
+              {
+                toggleSidebar()
+              }
+              else
+              {
+                setMobileSidebarOpen(true)
+              }
+            }}
+            className="p-2 -ml-1 rounded-sl text-ink-muted hover:text-ink hover:bg-chrome transition-colors shrink-0"
+            aria-label={sidebarCollapsed ? 'Abrir menu lateral' : 'Alternar menu lateral'}
+            title="Menu"
+          >
+            <PanelLeft className="w-4 h-4" />
+          </button>
           <span className={`font-mono text-[11px] uppercase tracking-wider hidden sm:inline ${AXEL_TEXT_SECONDARY}`}>Simply-Life</span>
           <span className="text-ink-muted hidden sm:inline">/</span>
-          <span className={`text-[14px] font-display truncate ${AXEL_TEXT_PRIMARY}`}>
+          <span className={`text-[13px] sm:text-[14px] font-display truncate ${AXEL_TEXT_PRIMARY}`}>
             {VIEW_LABELS[activeView] || activeView}
           </span>
         </div>
 
         {pinnedModules.length > 0 && (
-          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center max-w-xl overflow-x-auto">
+          <nav className="flex items-center gap-0.5 sm:gap-1 flex-1 justify-center min-w-0 max-w-[50vw] sm:max-w-xl overflow-x-auto scrollbar-none px-1">
             {pinnedModules.map((moduleId) =>
             {
               const isActive = activeView === moduleId
@@ -127,7 +153,7 @@ export function AxelGlobalHeader()
                   key={moduleId}
                   type="button"
                   onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
-                  className={`relative px-3 py-1.5 rounded-sl text-[12px] font-mono transition-colors whitespace-nowrap border ${
+                  className={`relative px-2 sm:px-3 py-1.5 rounded-sl text-[11px] sm:text-[12px] font-mono transition-colors whitespace-nowrap border shrink-0 ${
                     isActive
                       ? 'text-ink bg-accent-muted border-accent/30'
                       : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
@@ -140,7 +166,8 @@ export function AxelGlobalHeader()
           </nav>
         )}
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
+          <PinnedNavEditor />
           <div className="hidden lg:flex items-center gap-2 bg-chrome border border-line rounded-sl px-3 py-1.5">
             <Search className="w-3.5 h-3.5 text-ink-muted" />
             <span className={`font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>Buscar</span>
@@ -275,5 +302,6 @@ export function AxelGlobalHeader()
         </div>
       </div>
     </header>
+    </>
   )
 }

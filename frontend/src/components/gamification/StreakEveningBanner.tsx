@@ -14,7 +14,7 @@ export function StreakEveningBanner()
 {
   const navigate = useNavigate()
   const streakCount = useTaskStore((s) => s.streakCount)
-  const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
+  const isStreakSafeToday = useTaskStore((s) => s.isStreakSafeToday)
 
   const [dismissed, setDismissed] = useState(() =>
     sessionStorage.getItem(sessionDismissKey()) === '1',
@@ -24,10 +24,10 @@ export function StreakEveningBanner()
   {
     if (dismissed) return false
     if (streakCount < 1) return false
-    if (hasCompletedTaskToday) return false
+    if (isStreakSafeToday()) return false
     const hour = new Date().getHours()
     return hour >= 18
-  }, [dismissed, streakCount, hasCompletedTaskToday])
+  }, [dismissed, streakCount, isStreakSafeToday])
 
   if (!shouldShow)
   {
@@ -52,7 +52,7 @@ export function StreakEveningBanner()
         </p>
         <p className="text-sm text-ink mt-0.5">
           Você tem <strong>{streakCount}</strong> {streakCount === 1 ? 'dia' : 'dias'} de sequência.
-          Complete 1 tarefa qualificada hoje para não perder.
+          Complete 1 tarefa ou registre humor hoje para não perder.
         </p>
       </div>
       <button

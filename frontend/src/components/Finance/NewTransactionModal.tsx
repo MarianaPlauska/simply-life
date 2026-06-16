@@ -26,7 +26,12 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import { useFinancePurchaseCheck } from '../../hooks/useFinancePurchaseCheck'
+import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
 import { FinancePurchaseCheckStep } from './overview/FinancePurchaseCheckStep'
+import {
+  FinanceExtraIncomeSection,
+  type ReceitaCreditoQuando,
+} from './FinanceExtraIncomeSection'
 
 type LancamentoModo = 'imediato' | 'futuro'
 type LancamentoTipo = 'despesa' | 'receita' | 'investimento'
@@ -60,11 +65,13 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
   const removeCategory = useTaskStore((s) => s.removeCategory)
   const registerInteraction = useTaskStore((s) => s.registerInteraction)
   const { loading: checkLoading, verdict, iaAtiva, checkPurchase, reset: resetCheck } = useFinancePurchaseCheck()
+  const mood = useMoodOrchestration()
 
   const [showCatModal, setShowCatModal] = useState(false)
   const [catModalParentId, setCatModalParentId] = useState<number | null>(null)
   const [modo, setModo] = useState<LancamentoModo>('imediato')
   const [phase, setPhase] = useState<'form' | 'axel'>('form')
+  const [receitaCreditoQuando, setReceitaCreditoQuando] = useState<ReceitaCreditoQuando>('agora')
   const reservedBills = useTaskStore((s) => s.reservedBills)
 
   const [form, setForm] = useState({
@@ -115,6 +122,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
       fatura_reserva_id: '',
     })
     setModo('imediato')
+    setReceitaCreditoQuando('agora')
     setPhase('form')
     resetCheck()
     onClose()
@@ -134,7 +142,11 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const resolveStatus = (): 'pago' | 'pendente' | 'agendado' =>
   {
-    if (form.tipo === 'receita' || form.tipo === 'investimento') return 'pago'
+    if (form.tipo === 'receita')
+    {
+      return receitaCreditoQuando === 'proximo-mes' ? 'agendado' : 'pago'
+    }
+    if (form.tipo === 'investimento') return 'pago'
     if (modo === 'futuro') return 'agendado'
     return 'pago'
   }
@@ -182,6 +194,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
       saldoInicial: cashAccount.saldo_inicial,
       reservedBills,
       cards,
+      moodProfile: mood.profile,
     })
   }
 
@@ -363,8 +376,30 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           {form.tipo === 'receita' && (
             <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-concluido/35 bg-concluido/10 text-concluido`}>
               <TrendingUp size={14} className="shrink-0 mt-0.5" />
-              <span>Soma ao saldo da conta corrente — não é investimento nem gasto.</span>
+              <span>
+                {receitaCreditoQuando === 'proximo-mes'
+                  ? 'Agendado para o próximo mês — ainda não entra no saldo de hoje.'
+                  : 'Soma ao saldo da conta corrente agora.'}
+              </span>
             </div>
+          )}
+
+          {form.tipo === 'receita' && (
+            <FinanceExtraIncomeSection
+              onPatch={(patch) =>
+              {
+                setForm((f) => ({
+                  ...f,
+                  ...(patch.descricao !== undefined ? { descricao: patch.descricao } : {}),
+                  ...(patch.valor !== undefined ? { valor: patch.valor } : {}),
+                  ...(patch.data !== undefined ? { data: patch.data } : {}),
+                }))
+                if (patch.creditoQuando)
+                {
+                  setReceitaCreditoQuando(patch.creditoQuando)
+                }
+              }}
+            />
           )}
 
           {form.tipo === 'investimento' && (

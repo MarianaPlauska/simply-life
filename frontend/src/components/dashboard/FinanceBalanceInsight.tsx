@@ -1,20 +1,29 @@
 import { useMemo } from 'react'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { Sparkline } from '../ui/Sparkline'
-import { MOCK_BALANCE_SPARKLINE_7D } from '../../data/mockDashboardData'
-
+import { useTaskStore } from '../../store/useTaskStore'
+import { buildBalanceSparkline } from '../../lib/financeBalanceSparkline'
 import { AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
 
-// Saldo + tendência 7d — sparkline integrado ao resumo financeiro
+// Saldo + tendência 7d — sparkline com dados reais do store
 
 const fmtBRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export function FinanceBalanceInsight()
 {
+  const transactions = useTaskStore((s) => s.transactions)
+  const cashAccount = useTaskStore((s) => s.cashAccount)
+  const reservedBills = useTaskStore((s) => s.reservedBills)
+
   const { values, current, trendPct, trendUp } = useMemo(() =>
   {
-    const vals = MOCK_BALANCE_SPARKLINE_7D.map((d) => d.saldo)
+    const points = buildBalanceSparkline(
+      transactions,
+      cashAccount.saldo_inicial,
+      reservedBills,
+    )
+    const vals = points.map((d) => d.saldo)
     const last = vals[vals.length - 1] ?? 0
     const first = vals[0] ?? last
     const pct = first !== 0 ? ((last - first) / Math.abs(first)) * 100 : 0
@@ -25,7 +34,7 @@ export function FinanceBalanceInsight()
       trendPct: pct,
       trendUp: pct >= 0,
     }
-  }, [])
+  }, [transactions, cashAccount.saldo_inicial, reservedBills])
 
   const TrendIcon = trendUp ? TrendingUp : TrendingDown
   const trendClass = trendUp ? 'text-emerald-400/80' : 'text-rose-400/80'

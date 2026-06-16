@@ -23,8 +23,10 @@ export interface AdaptiveUrgencyResult extends RelevanceUrgencyResult
 export function computeDailyLoadBalancer(
   hojeTasks: TarefaUnificada[],
   cap: number = DEFAULT_DAILY_SCORE_CAP,
+  options?: { snoozeReason?: string },
 ): Map<number, LoadBalanceEntry>
 {
+  const snoozeReason = options?.snoozeReason ?? 'Excesso de carga para hoje'
   const result = new Map<number, LoadBalanceEntry>()
   const active = hojeTasks.filter((t) => t.status !== 'concluida')
   const sorted = [...active].sort(
@@ -45,7 +47,7 @@ export function computeDailyLoadBalancer(
     {
       result.set(task.id, {
         snoozed: true,
-        reason: 'Excesso de carga para hoje',
+        reason: snoozeReason,
       })
     }
   }

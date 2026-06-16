@@ -1,10 +1,12 @@
 import type { ReservedBill, ReservedBillItem } from '../store/storeTypes'
-import {
-  buildFinanceReservedBillsMock,
-  type ReservedBillsMockSnapshot,
-} from '../data/financeReservedBillsMock'
 
 const STORAGE_KEY = 'simply-life-finance-reserved-bills'
+
+export interface ReservedBillsLocalSnapshot
+{
+  bills: ReservedBill[]
+  items: ReservedBillItem[]
+}
 
 export function isMockReservedBillId(id: number): boolean
 {
@@ -16,13 +18,13 @@ export function isMockReservedBillItemId(id: number): boolean
   return id >= 910_001 && id < 911_000
 }
 
-export function loadReservedBillsLocal(): ReservedBillsMockSnapshot | null
+export function loadReservedBillsLocal(): ReservedBillsLocalSnapshot | null
 {
   try
   {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as ReservedBillsMockSnapshot
+    const parsed = JSON.parse(raw) as ReservedBillsLocalSnapshot
     if (!Array.isArray(parsed.bills)) return null
     return parsed
   }
@@ -37,15 +39,13 @@ export function persistReservedBillsLocal(bills: ReservedBill[], items: Reserved
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ bills, items }))
 }
 
-/** Usado quando o Supabase não tem faturas — preview local */
-export function ensureReservedBillsMock(): ReservedBillsMockSnapshot
+/** Retorno vazio quando não há faturas no Supabase */
+export function ensureReservedBillsMock(): ReservedBillsLocalSnapshot
 {
   const saved = loadReservedBillsLocal()
   if (saved && saved.bills.length > 0) return saved
 
-  const mock = buildFinanceReservedBillsMock()
-  persistReservedBillsLocal(mock.bills, mock.items)
-  return mock
+  return { bills: [], items: [] }
 }
 
 export function snapshotFromStore(bills: ReservedBill[], items: ReservedBillItem[]): void

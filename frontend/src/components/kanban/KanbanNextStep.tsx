@@ -1,9 +1,11 @@
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Play, Sparkles } from 'lucide-react'
-import { useMemo } from 'react'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
-import { bucketByDueDate } from '../../lib/dueBucket'
+import { buildMorningBrief, type MorningBrief } from '../../lib/morningBrief'
+import { fetchMorningBrief } from '../../lib/morningBriefApi'
 import { pickSuggestedExecutionTask } from '../../lib/suggestExecutionTask'
-import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import type { MoodOrchestrationContext } from '../../lib/moodOrchestration'
+import { AXEL_BTN_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
 interface KanbanNextStepProps
@@ -13,6 +15,10 @@ interface KanbanNextStepProps
   heroTask: TarefaUnificada | null
   isExecuting: boolean
   orchestrating: boolean
+  dueToday: number
+  overdue: number
+  dailyScoreCap: number
+  mood?: MoodOrchestrationContext | null
   onExecute: () => void
   onOpenTask: (task: TarefaUnificada) => void
   onReorganize: () => void
@@ -25,12 +31,41 @@ export function KanbanNextStep({
   heroTask,
   isExecuting,
   orchestrating,
+  dueToday,
+  overdue,
+  dailyScoreCap,
+  mood = null,
   onExecute,
   onOpenTask,
   onReorganize,
   onPrioritizeTask,
 }: KanbanNextStepProps)
 {
+  const [brief, setBrief] = useState<MorningBrief>(() =>
+    buildMorningBrief(executionQueue, dailyScoreCap, mood),
+  )
+
+  useEffect(() =>
+  {
+    setBrief(buildMorningBrief(executionQueue, dailyScoreCap, mood))
+  }, [executionQueue, dailyScoreCap, mood])
+
+  useEffect(() =>
+  {
+    let cancelled = false
+
+    void fetchMorningBrief({ hojeTasks: executionQueue, dueToday, overdue, dailyScoreCap }).then((b) =>
+    {
+      if (cancelled) return
+      setBrief(b)
+    })
+
+    return () =>
+    {
+      cancelled = true
+    }
+  }, [executionQueue, dueToday, overdue, dailyScoreCap, mood])
+
   const active = useMemo(
     () => tarefas.filter((t) => t.status !== 'concluida'),
     [tarefas],
@@ -40,12 +75,6 @@ export function KanbanNextStep({
     () => pickSuggestedExecutionTask(tarefas, heroTask),
     [tarefas, heroTask],
   )
-
-  const dueBuckets = useMemo(() => bucketByDueDate(tarefas), [tarefas])
-  const dueToday = dueBuckets.hoje.length
-  const dueWeek = dueBuckets.esta_semana.length
-  const noDate = dueBuckets.sem_prazo.length
-  const overdue = dueBuckets.vencido.length
 
   const queueEmpty = executionQueue.length === 0
 
@@ -57,79 +86,34 @@ export function KanbanNextStep({
   }
   else if (queueEmpty)
   {
-    headline = 'Escolha o que executar agora'
+    headline = 'Escolha o que executar'
   }
   else if (isExecuting)
   {
     headline = 'Sessão em andamento'
   }
+  else if (heroTask)
+  {
+    headline = cleanTitleForDisplay(heroTask.titulo)
+  }
   else
   {
-    headline = `${executionQueue.length} na fila de execução`
+    headline = `${executionQueue.length} na fila`
   }
 
   return (
     <section
-      className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 px-4 py-3 border border-line rounded-sl bg-card"
+      className="flex flex-col sm:flex-row sm:items-center gap-3 px-3 py-2.5 border border-line rounded-sl bg-card"
       aria-label="Próximo passo"
     >
       <div className="flex-1 min-w-0">
-        <p className="font-display text-[15px] sm:text-[16px] text-ink leading-snug">
+        <p className="font-display text-[15px] text-ink leading-snug truncate">
           {headline}
         </p>
-
-        <div className="flex flex-wrap gap-1.5 mt-2">
-          {overdue > 0 && (
-            <span className="font-mono text-[10px] tabular-nums px-2 py-1 rounded-sl border border-urgente/40 bg-urgente/10 text-urgente">
-              Atrasadas {overdue}
-            </span>
-          )}
-          <span className={`font-mono text-[10px] tabular-nums px-2 py-1 rounded-sl border ${dueToday > 0 ? 'border-atencao/40 bg-atencao/10 text-atencao' : 'border-line bg-chrome/20 text-ink-muted'}`}>
-            Prazo hoje {dueToday}
-          </span>
-          <span className={`font-mono text-[10px] tabular-nums px-2 py-1 rounded-sl border ${dueWeek > 0 ? 'border-accent/30 bg-accent-muted/30 text-accent' : 'border-line bg-chrome/20 text-ink-muted'}`}>
-            Esta semana {dueWeek}
-          </span>
-          <span className="font-mono text-[10px] tabular-nums px-2 py-1 rounded-sl border border-line bg-chrome/20 text-ink-muted">
-            Sem data {noDate}
-          </span>
-        </div>
-
-        <p className="text-[12px] text-ink-muted mt-2 leading-relaxed">
-          {queueEmpty && dueToday > 0 && (
-            <>Você tem <strong className="text-ink font-medium">{dueToday}</strong> com prazo hoje — arraste uma para <strong className="text-ink font-medium">Executar agora</strong> ou use Priorizar.</>
-          )}
-          {queueEmpty && dueToday === 0 && active.length > 0 && (
-            <>Nenhuma com prazo hoje. Priorize pela sugestão ou deixe o AXEL montar a fila.</>
-          )}
-          {queueEmpty && active.length === 0 && (
-            <>Capture uma tarefa ou aguarde ingestão do AXEL.</>
-          )}
-          {!queueEmpty && isExecuting && (
-            <>Conclua ou pause antes de trocar de foco.</>
-          )}
-          {!queueEmpty && !isExecuting && (
-            <>Selecione uma tarefa à esquerda e pressione Iniciar.</>
-          )}
+        <p className={`text-[11px] mt-0.5 leading-relaxed line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
+          {brief.headline}
+          {brief.detail ? ` · ${brief.detail}` : ''}
         </p>
-
-        {suggested && queueEmpty && (
-          <button
-            type="button"
-            onClick={() => onOpenTask(suggested)}
-            className="mt-3 w-full sm:w-auto text-left px-3 py-2 rounded-sl border border-line bg-elevated hover:border-accent/40 transition-colors"
-          >
-            <span className="font-mono text-[10px] uppercase tracking-wide text-accent block mb-1">
-              Próxima sugerida
-            </span>
-            <span className="text-[13px] text-ink line-clamp-2">
-              {cleanTitleForDisplay(suggested.titulo)}
-            </span>
-            <span className="font-mono text-[10px] text-ink-muted mt-1 block tabular-nums">
-              {suggested.score_urgencia ?? 0} pts
-            </span>
-          </button>
-        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -144,7 +128,7 @@ export function KanbanNextStep({
             Priorizar
           </button>
         )}
-        {queueEmpty && active.length > 0 && (
+        {queueEmpty && active.length > 0 && !suggested && (
           <button
             type="button"
             disabled={orchestrating}
@@ -152,7 +136,7 @@ export function KanbanNextStep({
             className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wide px-3 py-2 border border-line text-ink-muted hover:text-accent hover:border-accent/40 rounded-sl transition-colors disabled:opacity-40"
           >
             <Sparkles size={14} strokeWidth={1.75} />
-            AXEL organizar
+            Organizar
           </button>
         )}
         {!queueEmpty && heroTask && !isExecuting && (
@@ -163,6 +147,15 @@ export function KanbanNextStep({
           >
             <Play size={14} strokeWidth={1.75} />
             Iniciar
+          </button>
+        )}
+        {heroTask && !isExecuting && (
+          <button
+            type="button"
+            onClick={() => onOpenTask(heroTask)}
+            className="font-mono text-[10px] uppercase tracking-wide text-ink-muted hover:text-accent px-2 py-2"
+          >
+            Detalhes
           </button>
         )}
       </div>

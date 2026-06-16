@@ -7,6 +7,7 @@ import {
 } from '../lib/financeCoachContext'
 import { fetchFinanceCoachIA } from '../services/jarvisApi'
 import { useTaskStore } from '../store/useTaskStore'
+import { resolveAiTonePrompt } from '../lib/axelCosmetics'
 import type { Transaction } from '../store/storeTypes'
 
 interface UseFinanceCoachOptions
@@ -33,6 +34,9 @@ export function useFinanceCoach({
   const budgetLimits = useTaskStore((s) => s.budgetLimits)
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const reservedBills = useTaskStore((s) => s.reservedBills)
+  const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
+  const userStats = useTaskStore((s) => s.userStats)
+  const streakCount = useTaskStore((s) => s.streakCount)
 
   const [advice, setAdvice] = useState<FinanceCoachAdvice | null>(null)
   const [loading, setLoading] = useState(false)
@@ -75,9 +79,16 @@ export function useFinanceCoach({
 
     try
     {
+      const aiTone = resolveAiTonePrompt(
+        workspacePrefs.active_cosmetics.ai_tone,
+        { level: userStats?.level ?? 1, streakCount },
+        workspacePrefs.unlocked_cosmetics,
+      )
+
       const ia = await fetchFinanceCoachIA({
         context: serializeCoachContextForIA(ctx),
         localAdvice: { ...localAdvice },
+        aiTone,
         signal,
       })
 
@@ -105,7 +116,7 @@ export function useFinanceCoach({
     {
       if (!signal?.aborted) setLoading(false)
     }
-  }, [ctx, localAdvice, categories])
+  }, [ctx, localAdvice, categories, workspacePrefs, userStats?.level, streakCount])
 
   const refresh = useCallback(() =>
   {

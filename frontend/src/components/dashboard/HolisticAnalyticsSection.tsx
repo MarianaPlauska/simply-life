@@ -52,6 +52,7 @@ export function HolisticAnalyticsSection({ borderless = false }: { borderless?: 
 {
   const [timeframe, setTimeframe] = useState<AnalyticsTimeframe>('1W')
   const bundle = useMemo(() => ANALYTICS_BY_TIMEFRAME[timeframe], [timeframe])
+  const hasData = bundle.rows.length > 0
 
   return (
     <section
@@ -91,6 +92,11 @@ export function HolisticAnalyticsSection({ borderless = false }: { borderless?: 
         </div>
       </div>
 
+      {!hasData ? (
+        <p className={`text-sm py-8 text-center border border-dashed border-line rounded-sl ${AXEL_TEXT_SECONDARY}`}>
+          Use o app por alguns dias — gráficos de saúde e produtividade aparecem aqui com seus dados reais.
+        </p>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
         <ChartPanel
           title="Alimentação"
@@ -139,6 +145,7 @@ export function HolisticAnalyticsSection({ borderless = false }: { borderless?: 
           />
         </ChartPanel>
       </div>
+      )}
     </section>
   )
 }

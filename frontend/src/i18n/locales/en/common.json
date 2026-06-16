@@ -30,8 +30,15 @@
     "success_guest": "Entering as guest",
     "error_register": "Error creating account",
     "error_login": "Incorrect email or password",
-    "error_google": "Error connecting to Google. Please check if the server is running.",
-    "error_connection": "Connection error"
+    "error_google": "Error connecting to Google. Check if the provider is enabled in Supabase.",
+    "error_connection": "Connection error",
+    "oauth_processing": "Connecting with Google…",
+    "back_to_login": "Back to login",
+    "hero_title": "Organize your life in one place",
+    "hero_subtitle": "Tasks, finances, health and calendar — all synced at your pace.",
+    "hero_feature_1": "Kanban and focus for daily execution",
+    "hero_feature_2": "Finances and goals with clear visibility",
+    "hero_feature_3": "Google Calendar and Gmail integration"
   },
   "common": {
     "save": "Save",

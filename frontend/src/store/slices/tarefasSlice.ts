@@ -24,6 +24,12 @@ export interface TarefasSlice
   arquivoLoading: boolean
   fetchTarefas: () => Promise<void>
   createTarefa: (titulo: string, notas?: string) => Promise<void>
+  createFinanceBillTask: (opts: {
+    titulo: string
+    notas: string
+    vencimento: string
+    diasRestantes: number
+  }) => Promise<void>
   updateTarefa: (id: number, dados: {
     titulo?: string
     status?: string
@@ -131,6 +137,36 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       if (data) set((s) => ({ tarefas: [{ ...data, subtarefas: [], labels: [] }, ...s.tarefas] }))
     }
     catch (e) { console.error('createTarefa:', e) }
+  },
+
+  createFinanceBillTask: async (opts) =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      const score = opts.diasRestantes <= 0 ? 95 : opts.diasRestantes === 1 ? 88 : opts.diasRestantes === 2 ? 82 : 72
+      const prioridade = score >= 85 ? 'alta' : 'media'
+
+      const { data, error } = await supabase
+        .from('tarefas_unificadas')
+        .insert({
+          user_id: uid,
+          titulo: opts.titulo,
+          notas_locais: opts.notas,
+          score_urgencia: score,
+          prioridade,
+          origem: 'financeiro',
+          status: 'pendente',
+          data_vencimento: opts.vencimento,
+        })
+        .select()
+        .single()
+      if (error) throw error
+      if (data) set((s) => ({ tarefas: [{ ...data, subtarefas: [], labels: [] }, ...s.tarefas] }))
+    }
+    catch (e) { console.error('createFinanceBillTask:', e) }
   },
 
   updateTarefa: async (id, dados) =>

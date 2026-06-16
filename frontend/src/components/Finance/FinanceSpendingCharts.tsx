@@ -33,6 +33,7 @@ interface FinanceSpendingChartsProps
 {
   transactions: Transaction[]
   activeCategories: Category[]
+  compact?: boolean
 }
 
 function ChartTooltip({
@@ -56,8 +57,10 @@ function ChartTooltip({
 export function FinanceSpendingCharts({
   transactions,
   activeCategories,
+  compact = false,
 }: FinanceSpendingChartsProps)
 {
+  const chartHeight = compact ? 160 : 220
   const chart = useFinanceChartTheme()
   const cards = useTaskStore((s) => s.cards)
   const activeCards = cards.filter((c) => c.status === 'ativo')
@@ -83,7 +86,7 @@ export function FinanceSpendingCharts({
   const weekTotal = weekData.reduce((s, d) => s + d.value, 0)
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
       <section className={`${AXEL_BORDERLESS_PANEL}`}>
         <header className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
@@ -105,7 +108,7 @@ export function FinanceSpendingCharts({
             Sem gastos nesta semana ainda
           </p>
         ) : (
-          <div className="h-[220px] w-full">
+          <div className="w-full" style={{ height: chartHeight }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weekData} layout="vertical" margin={{ left: 4, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} horizontal={false} />
@@ -165,7 +168,7 @@ export function FinanceSpendingCharts({
               : 'Nenhum gasto neste cartão na semana'}
           </p>
         ) : (
-          <div className="h-[220px] w-full">
+          <div className="w-full" style={{ height: chartHeight }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={cardData} layout="vertical" margin={{ left: 4, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} horizontal={false} />

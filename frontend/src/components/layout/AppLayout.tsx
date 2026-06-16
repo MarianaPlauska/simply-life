@@ -10,10 +10,13 @@ import { OnboardingChecklist } from '../Onboarding/OnboardingChecklist'
 import { MedicationLockOverlay } from '../ui/MedicationLockOverlay'
 import { BurnoutAura } from '../ui/BurnoutAura'
 import { CelebrationOverlay } from '../gamification/CelebrationOverlay'
-import { MentalHealthCheckIn } from '../gamification/MentalHealthCheckIn'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useRealtimeSync } from '../../hooks/useRealtimeSync'
 import { useFinanceSystemSync } from '../../hooks/useFinanceSystemSync'
+import { useFinanceBillKanbanSync } from '../../hooks/useFinanceBillKanbanSync'
+import { useMedicationReminders } from '../../hooks/useMedicationReminders'
+import { usePwaBillNotifications } from '../../hooks/usePwaBillNotifications'
+import { usePushSubscription } from '../../hooks/usePushSubscription'
 import { PwaInstallBanner } from './PwaInstallBanner'
 import { FinanceQuickCaptureModal } from '../Finance/FinanceQuickCaptureModal'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
@@ -35,15 +38,30 @@ export function AppLayout()
   const location = useLocation()
   useRealtimeSync()
   useFinanceSystemSync()
+  useFinanceBillKanbanSync()
+  useMedicationReminders()
+  usePushSubscription()
+  usePwaBillNotifications()
+
+  const reconcileCosmeticUnlocks = useTaskStore((s) => s.reconcileCosmeticUnlocks)
+  const userStats = useTaskStore((s) => s.userStats)
+  const streakCount = useTaskStore((s) => s.streakCount)
+
+  useEffect(() =>
+  {
+    void reconcileCosmeticUnlocks()
+  }, [reconcileCosmeticUnlocks, userStats?.level, streakCount])
 
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
+  const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
   const fetchTarefas = useTaskStore((s) => s.fetchTarefas)
 
   useEffect(() =>
   {
     fetchMedicamentos()
+    fetchHabitos()
     fetchTarefas()
-  }, [fetchMedicamentos, fetchTarefas])
+  }, [fetchMedicamentos, fetchHabitos, fetchTarefas])
 
   const isAcademy = location.pathname === '/foco'
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
@@ -54,7 +72,6 @@ export function AppLayout()
       <MedicationLockOverlay />
       <BurnoutAura />
       <CelebrationOverlay />
-      <MentalHealthCheckIn />
       <QuickCaptureModal />
       <FinanceQuickCaptureModal />
       <CommandPalette />

@@ -1,9 +1,39 @@
 // slice de saúde — medicamentos, hábitos, treinos, streaks via supabase
 import type { StateCreator } from 'zustand'
-import type { Medicamento, HabitoDiario, HabitoDiarioConfig, SessaoTreino } from '../storeTypes'
+import type { Medicamento, MedicamentoTomada, HabitoDiario, HabitoDiarioConfig, SessaoTreino } from '../storeTypes'
 import type { HabitoStreak } from '../../types'
 import { supabase } from '../../lib/supabase'
 import { isWorkoutComplete, minutesBetween } from '../../utils/workoutCompletion'
+import {
+  habitoPrecisaReset,
+  isNovoDiaDeSaude,
+  localTodayIso,
+  resetHabitosParaHoje,
+  writeStoredHealthDay,
+} from '../../lib/healthDayBoundary'
+import { upsertHabitHistorico } from '../../lib/habitHistorico'
+import {
+  medicamentoCompletoHoje,
+  tomadaParaDose,
+} from '../../lib/medicamentosSchedule'
+
+function mapMedicamento(
+  row: Record<string, unknown>,
+  tomadas: MedicamentoTomada[],
+  today: string,
+): Medicamento
+{
+  const cfg = row.config
+  const med: Medicamento = {
+    id: row.id as number,
+    nome: String(row.nome ?? ''),
+    horario: String(row.horario ?? ''),
+    config: (typeof cfg === 'object' && cfg !== null ? cfg : {}) as Medicamento['config'],
+    tomado: false,
+  }
+  med.tomado = medicamentoCompletoHoje(med, tomadas, today)
+  return med
+}
 
 function mapHabito(row: Record<string, unknown>): HabitoDiario
 {
@@ -36,13 +66,17 @@ function mapSessao(row: Record<string, unknown>): SessaoTreino
 export interface SaudeSlice
 {
   medicamentos: Medicamento[]
+  medicamentoTomadas: MedicamentoTomada[]
   habitos: HabitoDiario[]
   habitosStreaks: HabitoStreak[]
   sessaoTreinoAtiva: SessaoTreino | null
   sessoesTreinoHoje: SessaoTreino[]
   fetchMedicamentos: () => Promise<void>
-  addMedicamento: (med: { nome: string; horario: string }) => Promise<void>
+  fetchMedicamentoTomadas: () => Promise<void>
+  addMedicamento: (med: { nome: string; horario: string; horarios?: string[] }) => Promise<void>
   toggleMedicamento: (id: number) => Promise<void>
+  registrarTomadaMedicamento: (medicamentoId: number, horarioPrevisto: string) => Promise<void>
+  updateTreinoPlanoSemana: (plano: HabitoDiarioConfig['plano_semana']) => Promise<void>
   fetchHabitos: () => Promise<void>
   addHabito: (h: {
     tipo: string
@@ -62,6 +96,7 @@ export interface SaudeSlice
   incrementHabito: (id: number) => Promise<void>
   incrementHabitoBy: (id: number, delta: number) => Promise<void>
   decrementHabito: (id: number) => Promise<void>
+  setHabitoProgress: (id: number, progresso_atual: number) => Promise<void>
   deleteHabito: (id: number) => Promise<void>
   fetchHabitosStreaks: () => Promise<void>
   fetchSessaoTreinoAtiva: () => Promise<void>
@@ -82,48 +117,262 @@ async function grantHabitoXp(get: () => SaudeSlice & Record<string, unknown>, ti
   }
 }
 
+const AGUA_MAX_COPOS = 32
+
+function progressCap(h: HabitoDiario, raw: number): number
+{
+  const max = h.tipo === 'agua' ? AGUA_MAX_COPOS : h.meta_diaria
+  return Math.min(Math.max(0, raw), max)
+}
+async function syncHealthDayBoundary(): Promise<void>
+{
+  const today = localTodayIso()
+  if (!isNovoDiaDeSaude(today))
+  {
+    return
+  }
+
+  try
+  {
+    const uid = (await supabase.auth.getUser()).data.user?.id
+
+    const { data: habitosRows } = await supabase.from('habitos_diarios').select('*')
+    for (const row of habitosRows || [])
+    {
+      const h = mapHabito(row as Record<string, unknown>)
+      if (!habitoPrecisaReset(h, today) && h.progresso_atual === 0)
+      {
+        continue
+      }
+      const config = { ...(h.config ?? {}), ultima_data: today }
+      await supabase
+        .from('habitos_diarios')
+        .update({ progresso_atual: 0, config })
+        .eq('id', h.id)
+    }
+
+    if (uid)
+    {
+      await supabase.from('medicamentos').update({ tomado_hoje: 0 }).eq('user_id', uid)
+    }
+
+    writeStoredHealthDay(today)
+  }
+  catch { /* offline — reset local na leitura */ }
+}
+
+async function cleanupMedPhantoms(uid: string, medId: number): Promise<void>
+{
+  const { cleanupResolvedPhantoms } = await import('../../services/activeOrchestratorService')
+  await cleanupResolvedPhantoms(uid, 'saude', medId)
+}
+
 export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (set, get) => ({
   medicamentos: [],
+  medicamentoTomadas: [],
   habitos: [],
   habitosStreaks: [] as HabitoStreak[],
   sessaoTreinoAtiva: null,
   sessoesTreinoHoje: [],
 
+  fetchMedicamentoTomadas: async () =>
+  {
+    try
+    {
+      const today = localTodayIso()
+      const { data, error } = await supabase
+        .from('medicamento_tomadas')
+        .select('*')
+        .gte('tomado_em', `${today}T00:00:00`)
+        .lte('tomado_em', `${today}T23:59:59`)
+      if (error) throw error
+      const tomadas = (data || []).map((row) => ({
+        id: row.id as number,
+        medicamento_id: row.medicamento_id as number,
+        horario_previsto: String(row.horario_previsto ?? ''),
+        tomado_em: String(row.tomado_em ?? ''),
+      }))
+      set({ medicamentoTomadas: tomadas })
+      const todayIso = localTodayIso()
+      set((s) => ({
+        medicamentos: s.medicamentos.map((m) => ({
+          ...m,
+          tomado: medicamentoCompletoHoje(m, tomadas, todayIso),
+        })),
+      }))
+    }
+    catch { /* offline ou migration pendente */ }
+  },
+
   fetchMedicamentos: async () =>
   {
     try
     {
+      await syncHealthDayBoundary()
       const { data, error } = await supabase
         .from('medicamentos')
         .select('*')
       if (error) throw error
-      set({ medicamentos: (data || []).map((m) => ({ ...m, tomado: m.tomado_hoje === 1 })) })
+      const today = localTodayIso()
+      let tomadas = get().medicamentoTomadas
+      try
+      {
+        const { data: tomadasRows } = await supabase
+          .from('medicamento_tomadas')
+          .select('*')
+          .gte('tomado_em', `${today}T00:00:00`)
+          .lte('tomado_em', `${today}T23:59:59`)
+        tomadas = (tomadasRows || []).map((row) => ({
+          id: row.id as number,
+          medicamento_id: row.medicamento_id as number,
+          horario_previsto: String(row.horario_previsto ?? ''),
+          tomado_em: String(row.tomado_em ?? ''),
+        }))
+      }
+      catch { /* tabela ainda não migrada */ }
+
+      set({
+        medicamentoTomadas: tomadas,
+        medicamentos: (data || []).map((row) => mapMedicamento(row as Record<string, unknown>, tomadas, today)),
+      })
     }
     catch (e) { console.error('fetchMedicamentos:', e) }
   },
 
   addMedicamento: async (med) =>
   {
+    const horarios = med.horarios?.length ? med.horarios : [med.horario]
+    const config = { horarios }
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid)
     {
-      set((s) => ({ medicamentos: [...s.medicamentos, { id: Date.now(), nome: med.nome, horario: med.horario, tomado: false }] }))
+      const local: Medicamento = {
+        id: Date.now(),
+        nome: med.nome,
+        horario: horarios[0],
+        config,
+        tomado: false,
+      }
+      set((s) => ({ medicamentos: [...s.medicamentos, local] }))
       return
     }
     try
     {
       const { data, error } = await supabase
         .from('medicamentos')
-        .insert({ user_id: uid, nome: med.nome, horario: med.horario })
+        .insert({ user_id: uid, nome: med.nome, horario: horarios[0], config })
         .select()
         .single()
       if (error) throw error
-      if (data) set((s) => ({ medicamentos: [...s.medicamentos, { ...data, tomado: data.tomado_hoje === 1 }] }))
+      if (data)
+      {
+        const today = localTodayIso()
+        const mapped = mapMedicamento(data as Record<string, unknown>, get().medicamentoTomadas, today)
+        set((s) => ({ medicamentos: [...s.medicamentos, mapped] }))
+      }
     }
     catch
     {
-      set((s) => ({ medicamentos: [...s.medicamentos, { id: Date.now(), nome: med.nome, horario: med.horario, tomado: false }] }))
+      set((s) => ({
+        medicamentos: [...s.medicamentos, {
+          id: Date.now(),
+          nome: med.nome,
+          horario: horarios[0],
+          config,
+          tomado: false,
+        }],
+      }))
     }
+  },
+
+  registrarTomadaMedicamento: async (medicamentoId, horarioPrevisto) =>
+  {
+    const today = localTodayIso()
+    const med = get().medicamentos.find((m) => m.id === medicamentoId)
+    if (!med) return
+    if (tomadaParaDose(get().medicamentoTomadas, medicamentoId, horarioPrevisto, today))
+    {
+      return
+    }
+
+    const tomadoEm = new Date().toISOString()
+    const optimistic: MedicamentoTomada = {
+      id: Date.now(),
+      medicamento_id: medicamentoId,
+      horario_previsto: horarioPrevisto,
+      tomado_em: tomadoEm,
+    }
+
+    set((s) =>
+    {
+      const tomadas = [...s.medicamentoTomadas, optimistic]
+      return {
+        medicamentoTomadas: tomadas,
+        medicamentos: s.medicamentos.map((m) =>
+          m.id === medicamentoId
+            ? { ...m, tomado: medicamentoCompletoHoje(m, tomadas, today) }
+            : m,
+        ),
+      }
+    })
+
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      const { data, error } = await supabase
+        .from('medicamento_tomadas')
+        .insert({
+          user_id: uid,
+          medicamento_id: medicamentoId,
+          horario_previsto: horarioPrevisto,
+        })
+        .select()
+        .single()
+      if (error) throw error
+
+      if (data)
+      {
+        const row = data as Record<string, unknown>
+        const saved: MedicamentoTomada = {
+          id: row.id as number,
+          medicamento_id: row.medicamento_id as number,
+          horario_previsto: String(row.horario_previsto ?? horarioPrevisto),
+          tomado_em: String(row.tomado_em ?? tomadoEm),
+        }
+        set((s) => ({
+          medicamentoTomadas: s.medicamentoTomadas.map((t) => t.id === optimistic.id ? saved : t),
+        }))
+      }
+
+      const tomadas = get().medicamentoTomadas
+      const completo = medicamentoCompletoHoje(med, tomadas, today)
+      await supabase.from('medicamentos').update({ tomado_hoje: completo ? 1 : 0 }).eq('id', medicamentoId)
+
+      if (completo)
+      {
+        await cleanupMedPhantoms(uid, medicamentoId)
+        const anyGet = get() as unknown as Record<string, unknown>
+        if (anyGet.addXP) await (anyGet.addXP as (m: string, n: number) => Promise<void>)('saude', 20)
+      }
+    }
+    catch { /* offline */ }
+  },
+
+  updateTreinoPlanoSemana: async (plano) =>
+  {
+    const treino = get().habitos.find((h) => h.tipo === 'treino')
+    if (!treino) return
+    const config = { ...(treino.config ?? {}), plano_semana: plano }
+    set((s) => ({
+      habitos: s.habitos.map((h) => h.id === treino.id ? { ...h, config } : h),
+    }))
+    try
+    {
+      await supabase.from('habitos_diarios').update({ config }).eq('id', treino.id)
+    }
+    catch { /* offline */ }
   },
 
   toggleMedicamento: async (id) =>
@@ -200,11 +449,33 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   {
     try
     {
+      await syncHealthDayBoundary()
       const { data, error } = await supabase
         .from('habitos_diarios')
         .select('*')
       if (error) throw error
-      set({ habitos: (data || []).map((row) => mapHabito(row as Record<string, unknown>)) })
+      const today = localTodayIso()
+      const mapped = (data || []).map((row) => mapHabito(row as Record<string, unknown>))
+      const habitos = resetHabitosParaHoje(mapped, today)
+      set({ habitos })
+
+      if (isNovoDiaDeSaude(today) || habitos.some((h, i) => h.progresso_atual !== mapped[i]?.progresso_atual))
+      {
+        writeStoredHealthDay(today)
+      }
+
+      for (const h of mapped)
+      {
+        if (!habitoPrecisaReset(h, today))
+        {
+          continue
+        }
+        const config = { ...(h.config ?? {}), ultima_data: today }
+        await supabase
+          .from('habitos_diarios')
+          .update({ progresso_atual: 0, config })
+          .eq('id', h.id)
+      }
     }
     catch { /* offline */ }
   },
@@ -268,13 +539,18 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
   incrementHabitoBy: async (id, delta) =>
   {
+    const today = localTodayIso()
     const before = get().habitos.find((h) => h.id === id)
     const wasDone = before ? before.progresso_atual >= before.meta_diaria : false
 
     set((s) => ({
       habitos: s.habitos.map((h) =>
         h.id === id
-          ? { ...h, progresso_atual: Math.min(h.progresso_atual + delta, h.meta_diaria) }
+          ? {
+            ...h,
+            progresso_atual: progressCap(h, h.progresso_atual + delta),
+            config: { ...(h.config ?? {}), ultima_data: today },
+          }
           : h
       ),
     }))
@@ -283,17 +559,22 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     {
       const { data: h } = await supabase
         .from('habitos_diarios')
-        .select('progresso_atual, meta_diaria')
+        .select('progresso_atual, meta_diaria, config')
         .eq('id', id)
         .single()
       if (h)
       {
-        const next = Math.min(h.progresso_atual + delta, h.meta_diaria)
-        await supabase.from('habitos_diarios').update({ progresso_atual: next }).eq('id', id)
+        const cfg = (typeof h.config === 'object' && h.config !== null ? h.config : {}) as HabitoDiarioConfig
+        const habitMeta = before ?? get().habitos.find((x) => x.id === id)
+        if (!habitMeta) return
+        const next = progressCap(habitMeta, h.progresso_atual + delta)
+        const config = { ...cfg, ultima_data: today }
+        await supabase.from('habitos_diarios').update({ progresso_atual: next, config }).eq('id', id)
 
         const after = get().habitos.find((x) => x.id === id)
         if (after && !wasDone && after.progresso_atual >= after.meta_diaria)
         {
+          await upsertHabitHistorico(id, true)
           const quest =
             after.tipo === 'agua' ? 'meta de água'
               : after.tipo === 'proteina' ? 'meta de proteína'
@@ -307,15 +588,68 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
   decrementHabito: async (id) =>
   {
+    const today = localTodayIso()
     set((s) => ({
       habitos: s.habitos.map((h) =>
-        h.id === id ? { ...h, progresso_atual: Math.max(h.progresso_atual - 1, 0) } : h
+        h.id === id
+          ? {
+            ...h,
+            progresso_atual: Math.max(h.progresso_atual - 1, 0),
+            config: { ...(h.config ?? {}), ultima_data: today },
+          }
+          : h
       ),
     }))
     try
     {
-      const { data: h } = await supabase.from('habitos_diarios').select('progresso_atual').eq('id', id).single()
-      if (h) await supabase.from('habitos_diarios').update({ progresso_atual: Math.max(h.progresso_atual - 1, 0) }).eq('id', id)
+      const { data: h } = await supabase
+        .from('habitos_diarios')
+        .select('progresso_atual, config')
+        .eq('id', id)
+        .single()
+      if (h)
+      {
+        const cfg = (typeof h.config === 'object' && h.config !== null ? h.config : {}) as HabitoDiarioConfig
+        const next = Math.max(h.progresso_atual - 1, 0)
+        const config = { ...cfg, ultima_data: today }
+        await supabase.from('habitos_diarios').update({ progresso_atual: next, config }).eq('id', id)
+      }
+    }
+    catch { /* offline */ }
+  },
+
+  setHabitoProgress: async (id, progresso_atual) =>
+  {
+    const today = localTodayIso()
+    const before = get().habitos.find((h) => h.id === id)
+    if (!before) return
+
+    const next = progressCap(before, progresso_atual)
+    const wasDone = before.progresso_atual >= before.meta_diaria
+    const config = { ...(before.config ?? {}), ultima_data: today }
+
+    set((s) => ({
+      habitos: s.habitos.map((h) =>
+        h.id === id ? { ...h, progresso_atual: next, config } : h
+      ),
+    }))
+
+    try
+    {
+      await supabase
+        .from('habitos_diarios')
+        .update({ progresso_atual: next, config })
+        .eq('id', id)
+
+      if (!wasDone && next >= before.meta_diaria)
+      {
+        await upsertHabitHistorico(id, true)
+        const quest =
+          before.tipo === 'agua' ? 'meta de água'
+            : before.tipo === 'proteina' ? 'meta de proteína'
+              : undefined
+        await grantHabitoXp(get as () => SaudeSlice & Record<string, unknown>, quest)
+      }
     }
     catch { /* offline */ }
   },
@@ -552,7 +886,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       if (meds.length === 0) return
 
       const { checkMedicamentosPendentes } = await import('../../services/activeOrchestratorService')
-      const created = await checkMedicamentosPendentes(uid, meds)
+      const created = await checkMedicamentosPendentes(uid, meds, get().medicamentoTomadas)
 
       if (created > 0)
       {

@@ -23,9 +23,8 @@ export const ACTIVE_DUE_BUCKETS: DueBucket[] = DUE_BUCKET_ORDER.filter(
   (b) => b !== 'concluido',
 )
 
-/** Faixas críticas — seção aberta mesmo vazia (alerta). Demais faixas só no mapa até ter itens. */
+/** Só "hoje" fica visível vazia — demais faixas aparecem quando têm itens */
 export const DUE_BUCKET_ALWAYS_VISIBLE: DueBucket[] = [
-  'vencido',
   'hoje',
 ]
 

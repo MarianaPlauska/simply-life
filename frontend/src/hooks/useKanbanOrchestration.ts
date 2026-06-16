@@ -6,6 +6,7 @@ import { computeDeadlineProposals } from '../lib/deadlineProposal'
 import { runPipelineOrchestration } from '../lib/orchestratePipeline'
 import type { TemporalHorizon } from '../lib/temporalHorizon'
 import type { TarefaUnificada } from '../types'
+import type { MoodOrchestrationContext } from '../lib/moodOrchestration'
 
 const AUTO_ORCHESTRATE_KEY = 'axel_kanban_auto_orchestrate'
 const DEBOUNCE_MS = 900
@@ -42,6 +43,7 @@ interface UseKanbanOrchestrationOptions
   setDeadlineProposals?: (list: ReturnType<typeof computeDeadlineProposals>) => void
   personalVelocityFactor?: number
   ingestionTick?: number
+  moodContext?: MoodOrchestrationContext | null
 }
 
 export function useKanbanOrchestration({
@@ -54,6 +56,7 @@ export function useKanbanOrchestration({
   setDeadlineProposals,
   personalVelocityFactor = 1,
   ingestionTick = 0,
+  moodContext = null,
 }: UseKanbanOrchestrationOptions)
 {
   const [scoreOverrides, setScoreOverrides] = useState<Record<number, number>>({})
@@ -205,6 +208,8 @@ export function useKanbanOrchestration({
 
       const result = await runPipelineOrchestration(tasks, dailyScoreCap, {
         lastMovedAt: resolveLastMovedAt,
+        moodSnoozeReason: moodContext?.snoozeReason,
+        moodCapNote: moodContext?.hasMoodToday ? moodContext.profileLabel : undefined,
       })
       await applyPipelineResult(result)
       return result
@@ -214,7 +219,7 @@ export function useKanbanOrchestration({
       runInFlightRef.current = false
       setOrchestrating(false)
     }
-  }, [tasks, dailyScoreCap, applyPipelineResult, resolveLastMovedAt])
+  }, [tasks, dailyScoreCap, applyPipelineResult, resolveLastMovedAt, moodContext])
 
   runRef.current = runOrchestration
 

@@ -1,18 +1,14 @@
 import { AlertTriangle, CalendarDays, CalendarRange, CircleDashed, Sun } from 'lucide-react'
-import {
-  DUE_BUCKET_HINTS,
-  DUE_BUCKET_LABELS,
-  type DueBucket,
-} from '../../lib/dueBucket'
+import { DUE_BUCKET_LABELS, type DueBucket } from '../../lib/dueBucket'
 
-// Mapa visual das faixas de prazo — o usuário entende o quadro antes de rolar
+// Navegação compacta entre faixas de prazo — sem repetir o mapa explicativo
 
 interface DueBucketMapProps
 {
   counts: Record<DueBucket, number>
 }
 
-const MAP_BUCKETS: DueBucket[] = [
+const NAV_BUCKETS: DueBucket[] = [
   'vencido',
   'hoje',
   'esta_semana',
@@ -20,54 +16,36 @@ const MAP_BUCKETS: DueBucket[] = [
   'sem_prazo',
 ]
 
-const BUCKET_UI: Record<DueBucket, {
-  Icon: typeof Sun
-  short: string
-  border: string
-  bg: string
-  iconClass: string
-}> = {
+const BUCKET_CHIP: Record<DueBucket, { Icon: typeof Sun; active: string; idle: string }> = {
   vencido: {
     Icon: AlertTriangle,
-    short: 'Atrasadas',
-    border: 'border-urgente/50',
-    bg: 'bg-urgente/10',
-    iconClass: 'text-urgente',
+    active: 'border-urgente/50 bg-urgente/15 text-urgente',
+    idle: 'border-line bg-chrome/20 text-ink-muted',
   },
   hoje: {
     Icon: Sun,
-    short: 'Hoje',
-    border: 'border-atencao/50',
-    bg: 'bg-atencao/10',
-    iconClass: 'text-atencao',
+    active: 'border-atencao/50 bg-atencao/15 text-atencao',
+    idle: 'border-line bg-chrome/20 text-ink-muted',
   },
   esta_semana: {
     Icon: CalendarDays,
-    short: 'Esta semana',
-    border: 'border-sky-500/40',
-    bg: 'bg-sky-500/10',
-    iconClass: 'text-sky-400',
+    active: 'border-sky-500/45 bg-sky-500/15 text-sky-400',
+    idle: 'border-line bg-chrome/20 text-ink-muted',
   },
   proxima_semana: {
     Icon: CalendarRange,
-    short: 'Depois',
-    border: 'border-line',
-    bg: 'bg-chrome/30',
-    iconClass: 'text-ink-muted',
+    active: 'border-accent/40 bg-accent-muted/30 text-accent',
+    idle: 'border-line bg-chrome/20 text-ink-muted',
   },
   sem_prazo: {
     Icon: CircleDashed,
-    short: 'Sem prazo',
-    border: 'border-line',
-    bg: 'bg-chrome/20',
-    iconClass: 'text-ink-muted',
+    active: 'border-line bg-elevated text-ink',
+    idle: 'border-line bg-chrome/20 text-ink-muted',
   },
   concluido: {
     Icon: CircleDashed,
-    short: 'Feitas',
-    border: 'border-line',
-    bg: 'bg-chrome/20',
-    iconClass: 'text-concluido',
+    active: 'border-line bg-elevated text-ink',
+    idle: 'border-line bg-chrome/20 text-ink-muted',
   },
 }
 
@@ -78,57 +56,37 @@ function scrollToBucket(bucket: DueBucket)
 
 export function DueBucketMap({ counts }: DueBucketMapProps)
 {
-  const visible = MAP_BUCKETS.filter((b) => b !== 'proxima_semana' || counts[b] > 0)
+  const visible = NAV_BUCKETS.filter((b) => b !== 'proxima_semana' || counts[b] > 0)
 
   return (
-    <div className="px-4 py-3 border-b border-line bg-gradient-to-b from-chrome/25 to-transparent space-y-3">
-      <div>
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
-          Mapa de prazos
-        </p>
-        <p className="text-[11px] text-ink-muted mt-1 leading-relaxed max-w-2xl">
-          <strong className="font-medium text-ink">Quando vence</strong> — clique para ir à faixa.
-          Faixas vazias ficam só no mapa. Listas longas mostram &quot;ver mais&quot;.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+    <nav
+      className="sticky top-0 z-10 px-3 py-2 border-b border-line bg-card/95 backdrop-blur-sm"
+      aria-label="Ir para faixa de prazo"
+    >
+      <div className="flex gap-1.5 overflow-x-auto custom-scrollbar pb-0.5">
         {visible.map((bucket) =>
         {
-          const ui = BUCKET_UI[bucket]
+          const ui = BUCKET_CHIP[bucket]
           const Icon = ui.Icon
           const count = counts[bucket]
+          const hasItems = count > 0
 
           return (
             <button
               key={bucket}
               type="button"
               onClick={() => scrollToBucket(bucket)}
-              className={`text-left p-2.5 rounded-sl border transition-all hover:scale-[1.02] active:scale-[0.98] ${ui.border} ${ui.bg} ${
-                count > 0 ? 'ring-1 ring-inset ring-white/5' : 'opacity-80'
+              className={`inline-flex items-center gap-1.5 shrink-0 px-2.5 py-1.5 rounded-sl border font-mono text-[10px] uppercase tracking-wide transition-colors hover:opacity-90 ${
+                hasItems ? ui.active : ui.idle
               }`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className={`w-4 h-4 shrink-0 ${ui.iconClass}`} strokeWidth={1.75} />
-                <span className="font-mono text-[10px] uppercase tracking-wide text-ink truncate">
-                  {ui.short}
-                </span>
-                <span className={`ml-auto font-display text-lg tabular-nums leading-none ${
-                  count > 0 && bucket === 'vencido' ? 'text-urgente' : 'text-ink'
-                }`}>
-                  {count}
-                </span>
-              </div>
-              <p className="text-[10px] text-ink-muted leading-snug line-clamp-2">
-                {DUE_BUCKET_HINTS[bucket]}
-              </p>
-              <p className="font-mono text-[9px] text-ink-muted/70 mt-1 truncate">
-                {DUE_BUCKET_LABELS[bucket]}
-              </p>
+              <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+              <span className="truncate max-w-[7rem]">{DUE_BUCKET_LABELS[bucket]}</span>
+              <span className="font-display text-sm tabular-nums leading-none">{count}</span>
             </button>
           )
         })}
       </div>
-    </div>
+    </nav>
   )
 }

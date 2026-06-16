@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Plus, Trash2 } from 'lucide-react'
+import { X, Plus, Trash2, Check, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { ExpensePreset } from '../../lib/financeExpensePresets'
@@ -28,6 +28,13 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
     valor: '',
     categoria_id: '' as string,
     status_pagamento: 'pago' as 'pago' | 'pendente',
+  })
+
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editDraft, setEditDraft] = useState({
+    label: '',
+    emoji: '',
+    valor: '',
   })
 
   const handleAdd = () =>
@@ -60,15 +67,56 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
     toast.success('Atalho adicionado')
   }
 
+  const startEdit = (p: ExpensePreset) =>
+  {
+    setEditingId(p.id)
+    setEditDraft({
+      label: p.label,
+      emoji: p.emoji ?? '💸',
+      valor: p.valor != null ? String(p.valor) : '',
+    })
+  }
+
+  const saveEdit = () =>
+  {
+    if (!editingId) return
+    if (!editDraft.label.trim())
+    {
+      toast.error('Nome obrigatório')
+      return
+    }
+
+    const val = editDraft.valor
+      ? parseFloat(editDraft.valor.replace(',', '.'))
+      : undefined
+
+    const next = presets.map((p) =>
+    {
+      if (p.id !== editingId) return p
+      return {
+        ...p,
+        label: editDraft.label.trim(),
+        emoji: editDraft.emoji || '💸',
+        valor: val && !Number.isNaN(val) && val > 0 ? val : undefined,
+      }
+    })
+
+    saveExpensePresets(next)
+    setEditingId(null)
+    toast.success('Atalho atualizado')
+  }
+
   const handleRemove = (id: string) =>
   {
     saveExpensePresets(presets.filter((p) => p.id !== id))
+    if (editingId === id) setEditingId(null)
   }
 
   const handleReset = () =>
   {
     if (!confirm('Restaurar atalhos padrão? Seus customizados serão substituídos.')) return
     saveExpensePresets(null)
+    setEditingId(null)
     toast.success('Atalhos padrão restaurados')
   }
 
@@ -102,7 +150,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
             <input
               value={draft.valor}
               onChange={(e) => setDraft({ ...draft, valor: e.target.value })}
-              placeholder="R$"
+              placeholder="R$ opcional"
               inputMode="decimal"
               className="col-span-4 border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono text-ink"
             />
@@ -140,32 +188,84 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
             </button>
           </div>
 
-          <ul className="border border-line rounded-sl divide-y divide-line max-h-[240px] overflow-y-auto">
-            {presets.map((p) => (
-              <li
-                key={p.id}
-                className={`flex items-center gap-3 px-3 py-2.5 ${AXEL_ROW_HOVER}`}
-              >
-                <span className="text-lg w-8 text-center">{p.emoji ?? '💸'}</span>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm truncate ${AXEL_TEXT_PRIMARY}`}>{p.label}</p>
-                  <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                    {p.valor != null
-                      ? p.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-                      : 'Valor na hora'}
-                    {p.categoria ? ` · ${p.categoria}` : ''}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemove(p.id)}
-                  className="text-ink-muted hover:text-urgente p-1"
-                  aria-label={`Remover ${p.label}`}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </li>
-            ))}
+          <ul className="border border-line rounded-sl divide-y divide-line max-h-[280px] overflow-y-auto">
+            {presets.map((p) =>
+            {
+              const isEditing = editingId === p.id
+              return (
+                <li key={p.id} className={`px-3 py-2.5 ${AXEL_ROW_HOVER}`}>
+                  {isEditing ? (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-12 gap-2">
+                        <input
+                          value={editDraft.emoji}
+                          onChange={(e) => setEditDraft({ ...editDraft, emoji: e.target.value.slice(0, 2) })}
+                          className="col-span-2 border border-line rounded-sl bg-chrome px-1 py-1.5 text-center"
+                        />
+                        <input
+                          value={editDraft.label}
+                          onChange={(e) => setEditDraft({ ...editDraft, label: e.target.value })}
+                          className="col-span-6 border border-line rounded-sl bg-chrome px-2 py-1.5 text-sm text-ink"
+                        />
+                        <input
+                          value={editDraft.valor}
+                          onChange={(e) => setEditDraft({ ...editDraft, valor: e.target.value })}
+                          placeholder="R$"
+                          inputMode="decimal"
+                          className="col-span-4 border border-line rounded-sl bg-chrome px-2 py-1.5 text-sm font-mono text-ink"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={saveEdit}
+                          className={`inline-flex items-center gap-1 px-2 py-1 font-mono text-[9px] uppercase ${AXEL_BTN_PRIMARY}`}
+                        >
+                          <Check size={12} />
+                          Salvar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(null)}
+                          className="font-mono text-[9px] uppercase text-ink-muted"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg w-8 text-center">{p.emoji ?? '💸'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm truncate ${AXEL_TEXT_PRIMARY}`}>{p.label}</p>
+                        <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                          {p.valor != null
+                            ? p.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                            : 'Sem valor fixo'}
+                          {p.categoria ? ` · ${p.categoria}` : ''}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => startEdit(p)}
+                        className="text-ink-muted hover:text-accent p-1"
+                        aria-label={`Editar ${p.label}`}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(p.id)}
+                        className="text-ink-muted hover:text-urgente p-1"
+                        aria-label={`Remover ${p.label}`}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
           </ul>
 
           <button
@@ -173,7 +273,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
             onClick={handleReset}
             className="w-full font-mono text-[10px] uppercase text-ink-muted hover:text-accent py-2"
           >
-            Restaurar padrões
+            Restaurar padrões (sem valores fixos)
           </button>
         </div>
       </div>

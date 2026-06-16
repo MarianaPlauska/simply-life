@@ -94,6 +94,11 @@ export function CreditCardVisual({
             <span>Fecha {cycle.end.split('-').reverse().join('/')}</span>
             <span>Vence {cycle.dueDate.split('-').reverse().join('/')}</span>
           </div>
+          {onClick && (
+            <p className="font-mono text-[8px] uppercase text-white/70 text-center pt-0.5">
+              Toque para ver fatura
+            </p>
+          )}
         </div>
       </div>
     </Tag>

@@ -1,14 +1,13 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, AlertCircle, Clock } from 'lucide-react'
-import {
-  MOCK_FINANCE_ROWS,
-  type MockFinanceStatus,
-} from '../../data/mockDashboardData'
+import { useTaskStore } from '../../store/useTaskStore'
 import {
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
+import type { Transaction } from '../../store/storeTypes'
 
 import { FinanceBalanceInsight } from './FinanceBalanceInsight'
 import { Budget503020Chart } from './Budget503020Chart'
@@ -16,7 +15,16 @@ import { Budget503020Chart } from './Budget503020Chart'
 const fmtBRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-function StatusIcon({ status }: { status: MockFinanceStatus })
+type RowStatus = 'ok' | 'alert' | 'pending'
+
+function resolveRowStatus(t: Transaction): RowStatus
+{
+  if (t.status_pagamento === 'pendente') return 'pending'
+  if (t.status_pagamento === 'agendado') return 'alert'
+  return 'ok'
+}
+
+function StatusIcon({ status }: { status: RowStatus })
 {
   if (status === 'ok')
   {
@@ -29,6 +37,12 @@ function StatusIcon({ status }: { status: MockFinanceStatus })
   return <Clock className="w-3 h-3 text-ink-muted" aria-label="Pendente" />
 }
 
+function formatRowDate(iso: string): string
+{
+  const [, m, d] = iso.slice(0, 10).split('-')
+  return `${d}/${m}`
+}
+
 interface FinancasTabelaDensaProps
 {
   embedded?: boolean
@@ -37,6 +51,13 @@ interface FinancasTabelaDensaProps
 export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaProps)
 {
   const navigate = useNavigate()
+  const transactions = useTaskStore((s) => s.transactions)
+
+  const rows = useMemo(() =>
+    [...transactions]
+      .sort((a, b) => b.data.localeCompare(a.data) || b.id - a.id)
+      .slice(0, 5),
+  [transactions])
 
   const content = (
     <>
@@ -53,9 +74,17 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
             </tr>
           </thead>
           <tbody>
-            {MOCK_FINANCE_ROWS.map((row) =>
+            {rows.length === 0 && (
+              <tr>
+                <td colSpan={4} className={`py-6 text-center ${AXEL_TEXT_SECONDARY}`}>
+                  Nenhum lançamento ainda
+                </td>
+              </tr>
+            )}
+            {rows.map((row) =>
             {
-              const negativo = row.valor < 0
+              const signed = row.tipo === 'receita' ? row.valor : -row.valor
+              const negativo = signed < 0
               return (
                 <tr
                   key={row.id}
@@ -63,7 +92,7 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
                   onClick={() => navigate('/financeiro')}
                 >
                   <td className={`py-2.5 pr-3 font-mono tabular-nums align-middle ${AXEL_TEXT_SECONDARY}`}>
-                    {row.data}
+                    {formatRowDate(row.data)}
                   </td>
                   <td className={`py-2.5 pr-3 truncate max-w-[160px] align-middle ${AXEL_TEXT_PRIMARY}`}>
                     {row.descricao}
@@ -71,11 +100,11 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
                   <td className={`py-2.5 pr-3 text-right font-mono tabular-nums align-middle ${
                     negativo ? 'text-urgente' : 'text-concluido'
                   }`}>
-                    {fmtBRL(row.valor)}
+                    {fmtBRL(signed)}
                   </td>
                   <td className="py-2.5 text-center align-middle">
                     <span className="inline-flex justify-center">
-                      <StatusIcon status={row.status} />
+                      <StatusIcon status={resolveRowStatus(row)} />
                     </span>
                   </td>
                 </tr>

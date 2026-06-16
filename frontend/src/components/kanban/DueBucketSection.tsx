@@ -11,7 +11,6 @@ import {
 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import {
-  DUE_BUCKET_HINTS,
   DUE_BUCKET_LABELS,
   DUE_BUCKET_META,
   dueBucketDropId,
@@ -19,7 +18,7 @@ import {
   type DueBucket,
 } from '../../lib/dueBucket'
 import { AXEL_KANBAN_DROPZONE } from '../../constants/axelKanbanTheme'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
 
 interface DueBucketSectionProps
 {
@@ -46,11 +45,11 @@ const BUCKET_ICON: Record<DueBucket, typeof Sun> = {
   concluido: CheckCircle2,
 }
 
-const STRIPE_CLASS: Record<string, string> = {
-  urgente: 'border-l-urgente',
-  atencao: 'border-l-atencao',
-  accent: 'border-l-sky-500',
-  muted: 'border-l-line',
+const SECTION_SHELL: Record<string, string> = {
+  urgente: 'bg-urgente/[0.04]',
+  atencao: 'bg-atencao/[0.04]',
+  accent: 'bg-sky-500/[0.04]',
+  muted: 'bg-chrome/30',
 }
 
 export function DueBucketSection({
@@ -70,7 +69,7 @@ export function DueBucketSection({
 
   const meta = DUE_BUCKET_META[bucket]
   const tone = TONE_CLASS[meta.tone] ?? TONE_CLASS.muted
-  const stripe = STRIPE_CLASS[meta.tone] ?? STRIPE_CLASS.muted
+  const shell = SECTION_SHELL[meta.tone] ?? SECTION_SHELL.muted
   const BucketIcon = BUCKET_ICON[bucket]
   const hidden = collapsible && collapsed
 
@@ -80,14 +79,14 @@ export function DueBucketSection({
       ref={droppable ? setNodeRef : undefined}
       aria-labelledby={`due-bucket-${bucket}`}
       className={[
-        'border-b border-line last:border-b-0 scroll-mt-2 border-l-4',
-        stripe,
-        droppable && isOver ? 'bg-accent-muted/20 ring-1 ring-inset ring-accent/25' : '',
+        'border-b border-line last:border-b-0 scroll-mt-12',
+        shell,
+        droppable && isOver ? 'ring-2 ring-inset ring-accent/30' : '',
       ].join(' ')}
     >
       <header
         id={`due-bucket-${bucket}`}
-        className={`shrink-0 px-3 py-2 border-b border-line/70 ${tone}`}
+        className={`shrink-0 px-3 py-2.5 border-b border-line/60 ${tone}`}
       >
         <div className="flex items-center gap-2">
           {collapsible && (
@@ -101,25 +100,13 @@ export function DueBucketSection({
               {collapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
             </button>
           )}
-          <BucketIcon className="w-4 h-4 shrink-0 opacity-90" strokeWidth={1.75} aria-hidden />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-[9px] uppercase tracking-widest text-ink-muted/80 shrink-0">
-                {meta.index}
-              </span>
-              <h3 className={`font-mono text-[11px] uppercase tracking-[0.12em] truncate ${AXEL_TEXT_PRIMARY}`}>
-                {DUE_BUCKET_LABELS[bucket]}
-              </h3>
-              <span className={`font-mono text-[11px] tabular-nums shrink-0 ml-auto ${AXEL_TEXT_SECONDARY}`}>
-                {count}
-              </span>
-            </div>
-            {!hidden && count > 0 && (
-              <p className={`text-[10px] mt-0.5 leading-snug line-clamp-1 ${AXEL_TEXT_SECONDARY}`}>
-                {DUE_BUCKET_HINTS[bucket]}
-              </p>
-            )}
-          </div>
+          <BucketIcon className="w-4 h-4 shrink-0" strokeWidth={1.75} aria-hidden />
+          <h3 className={`flex-1 min-w-0 font-mono text-[11px] uppercase tracking-[0.1em] truncate ${AXEL_TEXT_PRIMARY}`}>
+            {DUE_BUCKET_LABELS[bucket]}
+          </h3>
+          <span className={`font-display text-base tabular-nums shrink-0 ${AXEL_TEXT_PRIMARY}`}>
+            {count}
+          </span>
         </div>
       </header>
 

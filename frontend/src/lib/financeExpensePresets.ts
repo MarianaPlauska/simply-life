@@ -1,4 +1,5 @@
 // Atalhos de gasto — lançamento em 1 clique (persistência local)
+// Valores padrão vazios: o usuário define em Gerenciar ou ao lançar
 
 import type { FinancePaymentMethod } from '../store/storeTypes'
 
@@ -19,13 +20,13 @@ const STORAGE_KEY = 'simply-life-finance-presets'
 
 export const DEFAULT_EXPENSE_PRESETS: ExpensePreset[] = [
   { id: 'preset-pix', label: 'PIX', emoji: '⚡', categoria: 'outros', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-uber', label: 'Uber / 99', emoji: '🚗', valor: 22, categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-almoco', label: 'Almoço', emoji: '🍽️', valor: 38, categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-cafe', label: 'Café', emoji: '☕', valor: 12, categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-uber', label: 'Uber / 99', emoji: '🚗', categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-almoco', label: 'Almoço', emoji: '🍽️', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-cafe', label: 'Café', emoji: '☕', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
   { id: 'preset-mercado', label: 'Mercado', emoji: '🛒', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
   { id: 'preset-farmacia', label: 'Farmácia', emoji: '💊', categoria: 'saude', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-assinatura', label: 'Assinatura', emoji: '📱', valor: 49.9, categoria: 'internet', status_pagamento: 'pendente', forma_pagamento: 'boleto' },
-  { id: 'preset-gasolina', label: 'Combustível', emoji: '⛽', valor: 150, categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'debito' },
+  { id: 'preset-assinatura', label: 'Assinatura', emoji: '📱', categoria: 'internet', status_pagamento: 'pendente', forma_pagamento: 'boleto' },
+  { id: 'preset-gasolina', label: 'Combustível', emoji: '⛽', categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'debito' },
   { id: 'preset-lazer', label: 'Lazer', emoji: '🎬', categoria: 'lazer', status_pagamento: 'pago', forma_pagamento: 'pix' },
 ]
 

@@ -5,6 +5,8 @@ import {
   TrendingUp, TrendingDown, PiggyBank, Wallet,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
+import { mediaHumor } from '../../lib/moodInsights'
+import { moodLabel } from '../../lib/moodConstants'
 
 // PilaresDeVida — lista continua densa estilo Notion/Linear
 // Sem caixas vazias: hierarquia por tipografia e indentacao, divisores quase invisiveis
@@ -93,7 +95,9 @@ function LinhasSaude()
   const navigate = useNavigate()
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const habitos = useTaskStore((s) => s.habitos)
+  const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
+  const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje)
   const sessoesTreinoHoje = useTaskStore((s) => s.sessoesTreinoHoje)
   const fetchSessoesTreinoHoje = useTaskStore((s) => s.fetchSessoesTreinoHoje)
 
@@ -101,7 +105,8 @@ function LinhasSaude()
   {
     fetchHabitos()
     fetchSessoesTreinoHoje()
-  }, [fetchHabitos, fetchSessoesTreinoHoje])
+    fetchHumorHoje()
+  }, [fetchHabitos, fetchSessoesTreinoHoje, fetchHumorHoje])
 
   const stats = useMemo(() =>
   {
@@ -157,8 +162,17 @@ function LinhasSaude()
         Icon={HeartPulse}
         iconColor="text-pink-400"
         label="Bem-estar"
-        value="Registrar"
-        sub="humor não registrado hoje"
+        value={
+          humorHojeLista.length > 0
+            ? `${mediaHumor(humorHojeLista)}/5`
+            : 'Pendente'
+        }
+        sub={
+          humorHojeLista.length > 0
+            ? `${humorHojeLista.length} momento${humorHojeLista.length !== 1 ? 's' : ''} hoje · ${moodLabel(humorHojeLista[humorHojeLista.length - 1].humor)}`
+            : 'Registre seu humor — recomendado hoje'
+        }
+        valueColor={humorHojeLista.length === 0 ? 'text-accent' : undefined}
         onClick={() => navigate('/saude#bem_estar')}
       />
     </>

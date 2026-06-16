@@ -160,6 +160,7 @@ export async function fetchFinancePurchaseCheckIA(params: {
 export async function fetchFinanceCoachIA(params: {
   context: Record<string, unknown>
   localAdvice: Record<string, unknown>
+  aiTone?: string
   signal?: AbortSignal
 }): Promise<FinanceCoachIAResponse>
 {
@@ -169,6 +170,7 @@ export async function fetchFinanceCoachIA(params: {
     body: JSON.stringify({
       context: params.context,
       localAdvice: params.localAdvice,
+      aiTone: params.aiTone,
     }),
     signal: params.signal,
   })

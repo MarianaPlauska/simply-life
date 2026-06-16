@@ -1,6 +1,13 @@
 import type { StateCreator } from 'zustand'
 import { countAccountableMissedDays } from '../../lib/weekendStreak'
 import type { ProofOfWorkEvaluation } from '../../lib/proofOfWork'
+import {
+  mergeOfensivaFromRow,
+  pickOfensivaPayload,
+  scheduleOfensivaPersist,
+  type OfensivaStatsRow,
+} from '../../lib/ofensivaSync'
+import { supabase } from '../../lib/supabase'
 import type { GamificacaoSlice } from './gamificacaoSlice'
 
 // Ofensiva diária + heatmap de foco + escudos (retenção estilo GitHub)
@@ -12,17 +19,28 @@ export interface AxelStreakSlice
   streakCount: number
   lastActiveDate: string | null
   hasCompletedTaskToday: boolean
+  hasWellbeingToday: boolean
   streakPulseNonce: number
   streakFreezes: number
+  /** Dias em que a ofensiva foi salva (ISO date → true) */
+  streakSavedDays: Record<string, boolean>
+  /** Mês do último escudo grátis resgatado (YYYY-MM) */
+  lastMonthlyFreezeClaim: string | null
   focusMinutesByDate: Record<string, number>
 
   syncStreakCalendarDay: () => void
   addDailyFocusMinutes: (minutes: number) => void
+  isStreakSafeToday: () => boolean
   recordStreakOnTaskComplete: (
     proof: ProofOfWorkEvaluation,
   ) => { incremented: boolean; streakCount: number; streakQualified: boolean }
+  recordWellbeingForStreak: () => { incremented: boolean; streakCount: number; streakQualified: boolean }
   getTotalXp: () => number
   purchaseStreakFreeze: () => Promise<{ ok: boolean; message: string }>
+  canClaimMonthlyStreakFreeze: () => boolean
+  claimMonthlyStreakFreeze: () => { ok: boolean; message: string }
+  hydrateOfensivaFromServer: (row: OfensivaStatsRow) => void
+  syncOfensivaToServer: () => Promise<void>
 }
 
 function todayIsoDate(): string
@@ -39,6 +57,87 @@ function yesterdayIsoDate(): string
 
 type StreakStore = AxelStreakSlice & Pick<GamificacaoSlice, 'userStats' | 'spendXp'>
 
+interface StreakBumpResult
+{
+  incremented: boolean
+  streakCount: number
+  streakQualified: boolean
+}
+
+function currentMonthKey(): string
+{
+  return todayIsoDate().slice(0, 7)
+}
+
+function markStreakDaySaved(
+  set: (partial: Partial<AxelStreakSlice> | ((s: AxelStreakSlice) => Partial<AxelStreakSlice>)) => void,
+  get: () => AxelStreakSlice,
+  day: string,
+): void
+{
+  set({
+    streakSavedDays: { ...get().streakSavedDays, [day]: true },
+  })
+}
+
+function bumpDailyStreak(
+  get: () => StreakStore,
+  set: (partial: Partial<AxelStreakSlice> | ((s: AxelStreakSlice) => Partial<AxelStreakSlice>)) => void,
+  flag: 'hasCompletedTaskToday' | 'hasWellbeingToday',
+  onChanged?: () => void,
+): StreakBumpResult
+{
+  get().syncStreakCalendarDay()
+
+  const today = todayIsoDate()
+  const yesterday = yesterdayIsoDate()
+  const alreadySafe = get().hasCompletedTaskToday || get().hasWellbeingToday
+
+  if (alreadySafe)
+  {
+    set({ [flag]: true } as Partial<AxelStreakSlice>)
+    markStreakDaySaved(set, get, today)
+    onChanged?.()
+    return {
+      incremented: false,
+      streakCount: get().streakCount,
+      streakQualified: true,
+    }
+  }
+
+  let nextStreak = 1
+  const last = get().lastActiveDate
+
+  if (last === yesterday)
+  {
+    nextStreak = get().streakCount + 1
+  }
+  else if (last === today)
+  {
+    nextStreak = get().streakCount
+  }
+  else
+  {
+    nextStreak = 1
+  }
+
+  set({
+    streakCount: nextStreak,
+    lastActiveDate: today,
+    [flag]: true,
+    streakPulseNonce: get().streakPulseNonce + 1,
+    streakSavedDays: { ...get().streakSavedDays, [today]: true },
+  } as Partial<AxelStreakSlice>)
+
+  onChanged?.()
+
+  return {
+    incremented: true,
+    streakCount: nextStreak,
+    streakQualified: true,
+  }
+}
+
 export const createAxelStreakSlice: StateCreator<
   StreakStore,
   [],
@@ -48,14 +147,57 @@ export const createAxelStreakSlice: StateCreator<
   streakCount: 0,
   lastActiveDate: null,
   hasCompletedTaskToday: false,
+  hasWellbeingToday: false,
   streakPulseNonce: 0,
   streakFreezes: 0,
+  streakSavedDays: {},
+  lastMonthlyFreezeClaim: null,
   focusMinutesByDate: {},
+
+  hydrateOfensivaFromServer: (row) =>
+  {
+    const merged = mergeOfensivaFromRow(get(), row)
+    set(merged)
+    get().syncStreakCalendarDay()
+  },
+
+  syncOfensivaToServer: async () =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      const payload = pickOfensivaPayload(get())
+      const { error } = await supabase
+        .from('user_stats')
+        .update({
+          ...payload,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', uid)
+
+      if (error) throw error
+    }
+    catch (e)
+    {
+      console.error('syncOfensivaToServer:', e)
+    }
+  },
 
   syncStreakCalendarDay: () =>
   {
+    const before = JSON.stringify(pickOfensivaPayload(get()))
     const today = todayIsoDate()
     const last = get().lastActiveDate
+
+    const flush = () =>
+    {
+      if (JSON.stringify(pickOfensivaPayload(get())) !== before)
+      {
+        scheduleOfensivaPersist(() => get().syncOfensivaToServer())
+      }
+    }
 
     if (!last)
     {
@@ -74,14 +216,16 @@ export const createAxelStreakSlice: StateCreator<
     {
       if (last !== today)
       {
-        set({ hasCompletedTaskToday: false })
+        set({ hasCompletedTaskToday: false, hasWellbeingToday: false })
       }
+      flush()
       return
     }
 
     if (accountableGap === 1)
     {
-      set({ hasCompletedTaskToday: false })
+      set({ hasCompletedTaskToday: false, hasWellbeingToday: false })
+      flush()
       return
     }
 
@@ -91,15 +235,22 @@ export const createAxelStreakSlice: StateCreator<
         streakFreezes: get().streakFreezes - 1,
         lastActiveDate: yesterday,
         hasCompletedTaskToday: false,
+        hasWellbeingToday: false,
       })
+      flush()
       return
     }
 
     set({
       streakCount: 0,
       hasCompletedTaskToday: false,
+      hasWellbeingToday: false,
     })
+
+    flush()
   },
+
+  isStreakSafeToday: () => get().hasCompletedTaskToday || get().hasWellbeingToday,
 
   addDailyFocusMinutes: (minutes) =>
   {
@@ -111,12 +262,11 @@ export const createAxelStreakSlice: StateCreator<
         [today]: (s.focusMinutesByDate[today] ?? 0) + Math.round(minutes),
       },
     }))
+    scheduleOfensivaPersist(() => get().syncOfensivaToServer())
   },
 
   recordStreakOnTaskComplete: (proof) =>
   {
-    get().syncStreakCalendarDay()
-
     if (!proof.qualifiesForStreak)
     {
       return {
@@ -126,46 +276,14 @@ export const createAxelStreakSlice: StateCreator<
       }
     }
 
-    const today = todayIsoDate()
-    const yesterday = yesterdayIsoDate()
+    const onChanged = () => scheduleOfensivaPersist(() => get().syncOfensivaToServer())
+    return bumpDailyStreak(get, set, 'hasCompletedTaskToday', onChanged)
+  },
 
-    if (get().hasCompletedTaskToday)
-    {
-      return {
-        incremented: false,
-        streakCount: get().streakCount,
-        streakQualified: true,
-      }
-    }
-
-    let nextStreak = 1
-    const last = get().lastActiveDate
-
-    if (last === yesterday)
-    {
-      nextStreak = get().streakCount + 1
-    }
-    else if (last === today)
-    {
-      nextStreak = get().streakCount
-    }
-    else
-    {
-      nextStreak = 1
-    }
-
-    set({
-      streakCount: nextStreak,
-      lastActiveDate: today,
-      hasCompletedTaskToday: true,
-      streakPulseNonce: get().streakPulseNonce + 1,
-    })
-
-    return {
-      incremented: true,
-      streakCount: nextStreak,
-      streakQualified: true,
-    }
+  recordWellbeingForStreak: () =>
+  {
+    const onChanged = () => scheduleOfensivaPersist(() => get().syncOfensivaToServer())
+    return bumpDailyStreak(get, set, 'hasWellbeingToday', onChanged)
   },
 
   getTotalXp: () =>
@@ -197,6 +315,28 @@ export const createAxelStreakSlice: StateCreator<
     }
 
     set({ streakFreezes: get().streakFreezes + 1 })
+    scheduleOfensivaPersist(() => get().syncOfensivaToServer())
     return { ok: true, message: 'Escudo de Ofensiva adquirido' }
+  },
+
+  canClaimMonthlyStreakFreeze: () =>
+  {
+    return get().lastMonthlyFreezeClaim !== currentMonthKey()
+  },
+
+  claimMonthlyStreakFreeze: () =>
+  {
+    const month = currentMonthKey()
+    if (get().lastMonthlyFreezeClaim === month)
+    {
+      return { ok: false, message: 'Escudo grátis já resgatado neste mês' }
+    }
+
+    set({
+      streakFreezes: get().streakFreezes + 1,
+      lastMonthlyFreezeClaim: month,
+    })
+    scheduleOfensivaPersist(() => get().syncOfensivaToServer())
+    return { ok: true, message: 'Escudo grátis do mês na mochila!' }
   },
 })

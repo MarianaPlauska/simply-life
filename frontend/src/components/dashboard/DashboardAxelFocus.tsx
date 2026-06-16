@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Play, Sparkles } from 'lucide-react'
-import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { useTaskStore } from '../../store/useTaskStore'
+import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
 import { MAIN_QUEST_XP_BONUS_RATIO, syncMainQuest } from '../../lib/mainQuest'
 import { cleanTitleForDisplay } from '../kanban/axelKanbanUtils'
 import { formatTaskRef, urgencyScoreClass } from '../../lib/kanbanVisual'
@@ -19,27 +19,34 @@ interface DashboardAxelFocusProps
 {
   onOpenTask?: (taskId: number) => void
   onExecuteTask?: (taskId: number) => void
+  /** Dentro do hero — sem borda própria */
+  embedded?: boolean
 }
 
-export function DashboardAxelFocus({ onOpenTask, onExecuteTask }: DashboardAxelFocusProps)
+export function DashboardAxelFocus({ onOpenTask, onExecuteTask, embedded = false }: DashboardAxelFocusProps)
 {
   const navigate = useNavigate()
   const storeTarefas = useTaskStore((s) => s.tarefas)
+  const mood = useMoodOrchestration()
 
   const { topTask, bonusXp } = useMemo(() =>
   {
-    const tasks = mergeDashboardTasks(storeTarefas).filter((t) => t.status !== 'concluida')
-    const main = syncMainQuest(tasks)
+    const tasks = storeTarefas.filter((t) => t.status !== 'concluida')
+    const main = syncMainQuest(tasks, mood)
     const base = main?.score_urgencia ?? 0
     const bonus = base > 0 ? Math.round(base * MAIN_QUEST_XP_BONUS_RATIO) : 0
     return { topTask: main, bonusXp: bonus }
-  }, [storeTarefas])
+  }, [storeTarefas, mood])
 
   const title = topTask ? cleanTitleForDisplay(topTask.titulo) : null
 
   return (
     <section
-      className="rounded-sl bg-card border border-line border-l-[3px] border-l-accent p-3 sm:p-4"
+      className={
+        embedded
+          ? 'p-3 sm:p-4'
+          : 'rounded-sl bg-card border border-line border-l-[3px] border-l-accent p-3 sm:p-4'
+      }
       aria-labelledby="axel-focus-heading"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
@@ -74,7 +81,23 @@ export function DashboardAxelFocus({ onOpenTask, onExecuteTask }: DashboardAxelF
                 <span className={urgencyScoreClass(topTask.score_urgencia ?? 0)}>
                   {topTask.score_urgencia ?? 0} pts
                 </span>
+                {mood.hasMoodToday && (mood.profile === 'recuperacao' || mood.profile === 'cuidado') && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span className="text-atencao">missão calibrada ao humor</span>
+                  </>
+                )}
               </div>
+              {mood.profile === 'sem_registro' && (
+                <p className={`text-[11px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
+                  Registre humor no painel — o AXEL ajusta carga e prioridades.
+                </p>
+              )}
+              {mood.hasMoodToday && mood.capMultiplier < 1 && (
+                <p className={`text-[11px] mt-1.5 text-atencao`}>
+                  Cap de Hoje: {mood.effectiveDailyCap} pts ({mood.profileLabel.toLowerCase()}).
+                </p>
+              )}
             </>
           ) : (
             <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>

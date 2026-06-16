@@ -1,25 +1,13 @@
 import { useMemo } from 'react'
-import {
-  ArrowRight,
-  BookOpen,
-  CreditCard,
-  Settings2,
-  Table2,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
-} from 'lucide-react'
+import { BookOpen, Table2, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { FinanceCoachCard } from './overview/FinanceCoachCard'
-import { FinanceDailyBriefCard } from './overview/FinanceDailyBriefCard'
-import { FinanceMonthCloseRitualCard } from './overview/FinanceMonthCloseRitualCard'
 import { computeCashPosition } from '../../lib/financeReservedBills'
-import { FinanceQuickPresets } from './FinanceQuickPresets'
-import { FinanceBalancePanel } from './FinanceBalancePanel'
-import { FinanceSpendingCharts } from './FinanceSpendingCharts'
 import { resolveCashTone, BALANCE_TONE_TEXT } from '../../lib/financeBalanceTone'
+import { FinanceMonthKpisRow } from './overview/FinanceMonthKpisRow'
+import { FinanceMonthChartsCompact } from './overview/FinanceMonthChartsCompact'
 import {
-  AXEL_BORDERLESS_PANEL,
+  AXEL_FILTER_PILL_IDLE,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
@@ -28,13 +16,16 @@ import { formatCategoryPath } from '../../lib/financeCategoryTree'
 import type { FinanceAlertTab } from '../../lib/financeAlerts'
 import { useFinanceAlerts } from '../../hooks/useFinanceAlerts'
 import { FinanceAlertsPanel } from './goals/FinanceAlertsPanel'
-import { FinanceMonthOutlookPanel } from './overview/FinanceMonthOutlookPanel'
+import { CardQuickSpendStrip } from './CardQuickSpendStrip'
+import { FinanceBudgetProgressStrip } from './overview/FinanceBudgetProgressStrip'
+import { FinanceUpcomingBillsStrip } from './overview/FinanceUpcomingBillsStrip'
+import { FinanceMonthGoalWidget } from './overview/FinanceMonthGoalWidget'
 import type { Category, Transaction } from '../../store/storeTypes'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-type FinanceSubTab = 'diario' | 'planilha' | 'cartoes' | 'visao-geral' | 'faturas' | 'config'
+type FinanceSubTab = 'diario' | 'tabela' | 'planilha' | 'cartoes' | 'visao-geral' | 'faturas' | 'config'
 
 interface FinanceHomeTabProps
 {
@@ -47,12 +38,11 @@ interface FinanceHomeTabProps
   monthTransactions: Transaction[]
   recentTransactions: Transaction[]
   activeCategories: Category[]
+  pieChartData: { name: string; value: number; color: string }[]
+  areaChartData: { mes: string; receita: number; gastos: number }[]
   onNavigate: (tab: FinanceSubTab | FinanceAlertTab) => void
-  onManageCategories?: () => void
-  onOpenNextMonth?: () => void
   onSetLimits?: () => void
   onConfigure?: () => void
-  onNewTransaction?: () => void
 }
 
 export function FinanceHomeTab({
@@ -60,22 +50,22 @@ export function FinanceHomeTab({
   monthOffset = 0,
   receita,
   despesas,
+  saldo,
   transactions,
   monthTransactions,
   recentTransactions,
   activeCategories,
+  pieChartData,
+  areaChartData,
   onNavigate,
-  onManageCategories,
-  onOpenNextMonth,
   onSetLimits,
   onConfigure,
-  onNewTransaction,
 }: FinanceHomeTabProps)
 {
   const isFutureMonth = monthOffset > 0
-  const cards = useTaskStore((s) => s.cards)
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const reservedBills = useTaskStore((s) => s.reservedBills)
+  const budgetLimits = useTaskStore((s) => s.budgetLimits)
   const alerts = useFinanceAlerts(monthTransactions)
 
   const position = useMemo(
@@ -84,111 +74,62 @@ export function FinanceHomeTab({
   )
 
   const cashTone = resolveCashTone(position.saldoDisponivel, position.saldoProjetadoDisponivel)
+  const recent = recentTransactions.slice(0, 5)
 
-  const shortcuts = [
-    { id: 'config' as const, label: 'Configurar', hint: 'Conta · cartões · fixas', icon: Settings2 },
-    { id: 'diario' as const, label: 'Diário', hint: 'Anotar o dia', icon: BookOpen },
-    { id: 'cartoes' as const, label: 'Cartões', hint: `${cards.length} cadastrado(s)`, icon: CreditCard },
-    { id: 'planilha' as const, label: 'Planilha', hint: 'Excel + gráficos', icon: Table2 },
-    { id: 'visao-geral' as const, label: 'Análise', hint: '50-30-20 · gráficos', icon: TrendingUp },
+  const navItems = [
+    { id: 'diario' as const, label: 'Diário', icon: BookOpen },
+    { id: 'tabela' as const, label: 'Lista', icon: Wallet },
+    { id: 'planilha' as const, label: 'Planilha', icon: Table2 },
+    { id: 'visao-geral' as const, label: 'Análise', icon: Table2 },
   ]
 
-  const nextMonthOffset = monthOffset + 1
-
   return (
-    <div className="space-y-4">
-      {/* Hero — primeira coisa ao entrar */}
-      <section className="relative rounded-sl border border-line bg-card">
-        <div
-          className="absolute inset-0 overflow-hidden rounded-sl bg-gradient-to-br from-accent/8 via-transparent to-chrome/40 pointer-events-none"
-          aria-hidden
+    <div className="space-y-3">
+      <FinanceMonthKpisRow
+        saldoDisponivel={position.saldoDisponivel}
+        receita={receita}
+        despesas={despesas}
+        saldoMes={saldo}
+        balanceToneClass={BALANCE_TONE_TEXT[cashTone]}
+        compact
+      />
+
+      <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
+        {isFutureMonth ? `Previsão · ${monthLabel}` : monthLabel}
+        {' · '}reservado {fmt(position.reservaRestante)}
+        {' · '}projetado {fmt(position.saldoProjetadoDisponivel)}
+      </p>
+
+      {!isFutureMonth && (
+        <FinanceMonthGoalWidget monthTransactions={monthTransactions} monthOffset={monthOffset} />
+      )}
+
+      {!isFutureMonth && pieChartData.length > 0 && (
+        <FinanceMonthChartsCompact
+          pieChartData={pieChartData}
+          areaChartData={areaChartData}
         />
-        <div className="relative p-3 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 w-full">
-              <p className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
-                {isFutureMonth ? `Previsão · ${monthLabel}` : `Centro financeiro · ${monthLabel}`}
-              </p>
-              <p className={`text-2xl sm:text-3xl md:text-4xl font-display tabular-nums mt-2 break-all sm:break-normal ${BALANCE_TONE_TEXT[cashTone]}`}>
-                {fmt(position.saldoDisponivel)}
-              </p>
-              <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-                {isFutureMonth
-                  ? `Saldo atual · previsão do mês em ${monthLabel}`
-                  : 'Disponível agora · saldo inicial + lançamentos no caixa − reservas'}
-              </p>
-              <div className="flex flex-wrap gap-3 mt-2">
-                {onConfigure && (
-                  <button
-                    type="button"
-                    onClick={onConfigure}
-                    className="font-mono text-[9px] uppercase text-accent hover:underline min-h-[44px] sm:min-h-0 inline-flex items-center gap-1"
-                  >
-                    <Settings2 size={11} />
-                    Configurar conta e cartões
-                  </button>
-                )}
-                {onManageCategories && (
-                  <button
-                    type="button"
-                    onClick={onManageCategories}
-                    className="font-mono text-[9px] uppercase text-accent hover:underline min-h-[44px] sm:min-h-0"
-                  >
-                    Categorias
-                  </button>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 w-full sm:w-auto sm:flex sm:gap-6 shrink-0">
-              <div>
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <TrendingUp size={12} className="text-concluido" />
-                  <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Entrou</span>
-                </div>
-                <p className="font-display text-base sm:text-lg tabular-nums text-concluido break-all sm:break-normal">
-                  {fmt(receita)}
-                </p>
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <TrendingDown size={12} className="text-urgente" />
-                  <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Saiu</span>
-                </div>
-                <p className="font-display text-base sm:text-lg tabular-nums text-urgente break-all sm:break-normal">
-                  {fmt(despesas)}
-                </p>
-              </div>
-            </div>
-          </div>
+      )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 sm:mt-5">
-            <div className="border border-line rounded-sl bg-chrome/50 px-3 py-2">
-              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Caixa</p>
-              <p className={`text-sm font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
-                {fmt(position.saldoCorrente)}
-              </p>
-            </div>
-            <div className="border border-line rounded-sl bg-chrome/50 px-3 py-2">
-              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Reservado</p>
-              <p className="text-sm font-display tabular-nums text-atencao">
-                {fmt(position.reservaRestante)}
-              </p>
-            </div>
-            <div className="col-span-2 sm:col-span-1 border border-line rounded-sl bg-chrome/50 px-3 py-2">
-              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Projetado livre</p>
-              <p className={`text-sm font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
-                {fmt(position.saldoProjetadoDisponivel)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {!isFutureMonth && <CardQuickSpendStrip />}
 
-      {!isFutureMonth && <FinanceDailyBriefCard />}
+      {!isFutureMonth && (
+        <FinanceUpcomingBillsStrip onOpenBills={() => onNavigate('faturas')} />
+      )}
 
-      {!isFutureMonth && <FinanceMonthCloseRitualCard onSetLimits={onSetLimits} />}
+      {!isFutureMonth && (
+        <FinanceBudgetProgressStrip
+          categories={activeCategories}
+          budgetLimits={budgetLimits}
+          monthTransactions={monthTransactions}
+          onConfigure={onSetLimits}
+        />
+      )}
 
-      {/* Axel — logo abaixo do saldo */}
+      {alerts.length > 0 && (
+        <FinanceAlertsPanel alerts={alerts} compact onNavigate={onNavigate} />
+      )}
+
       {!isFutureMonth && onSetLimits && (
         <FinanceCoachCard
           monthTransactions={monthTransactions}
@@ -197,88 +138,40 @@ export function FinanceHomeTab({
         />
       )}
 
-      <FinanceBalancePanel
-        transactions={transactions}
-        onConfigure={onConfigure}
-        onNewBill={onNewTransaction}
-      />
-
-      {alerts.length > 0 && (
-        <FinanceAlertsPanel
-          alerts={alerts}
-          compact
-          onNavigate={onNavigate}
-        />
-      )}
-
-      {!isFutureMonth && (
-        <>
-          <FinanceMonthOutlookPanel monthOffset={monthOffset} compact showComparison={false} />
-          {onOpenNextMonth && (
-            <FinanceMonthOutlookPanel
-              monthOffset={nextMonthOffset}
-              compact
-              onOpenMonth={onOpenNextMonth}
-              showComparison={false}
-            />
-          )}
-        </>
-      )}
-
-      {isFutureMonth && (
-        <FinanceMonthOutlookPanel monthOffset={monthOffset} />
-      )}
-
-      <FinanceSpendingCharts
-        transactions={transactions}
-        activeCategories={activeCategories}
-      />
-
-      <section className={AXEL_BORDERLESS_PANEL}>
-        <FinanceQuickPresets />
-      </section>
-
-      <section className="grid grid-cols-2 lg:grid-cols-5 gap-2">
-        {shortcuts.map(({ id, label, hint, icon: Icon }) => (
+      <div className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5">
+        {navItems.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             type="button"
             onClick={() => onNavigate(id)}
-            className={`${AXEL_BORDERLESS_PANEL} text-left flex flex-col gap-2 min-h-[88px] ${AXEL_ROW_HOVER}`}
+            className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-sl font-mono text-[10px] uppercase ${AXEL_FILTER_PILL_IDLE} hover:bg-chrome`}
           >
-            <Icon size={18} className="text-accent" strokeWidth={1.75} />
-            <div>
-              <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>{label}</p>
-              <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>{hint}</p>
-            </div>
-            <ArrowRight size={14} className="text-ink-muted mt-auto" />
+            <Icon size={12} className="text-accent" />
+            {label}
           </button>
         ))}
-      </section>
+      </div>
 
-      <section className={AXEL_BORDERLESS_PANEL}>
-        <header className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Wallet size={14} className="text-accent" />
-            <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-              Últimos lançamentos
-            </p>
-          </div>
+      <section className="rounded-sl border border-line bg-card p-3">
+        <header className="flex items-center justify-between mb-2">
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+            Últimos lançamentos
+          </p>
           <button
             type="button"
             onClick={() => onNavigate('diario')}
             className="font-mono text-[9px] uppercase text-accent hover:underline"
           >
-            Ver diário
+            Diário
           </button>
         </header>
         <ul className="divide-y divide-line">
-          {recentTransactions.length === 0 && (
-            <li className={`py-6 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-              Nenhum lançamento ainda — use os atalhos acima
+          {recent.length === 0 && (
+            <li className={`py-4 text-center text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+              Nenhum lançamento ainda
             </li>
           )}
-          {recentTransactions.map((t) =>
+          {recent.map((t) =>
           {
             const cat = t.categoria_id
               ? formatCategoryPath(activeCategories, t.categoria_id)
@@ -286,21 +179,17 @@ export function FinanceHomeTab({
             return (
               <li
                 key={t.id}
-                className={`flex items-center justify-between gap-3 py-2.5 ${AXEL_ROW_HOVER}`}
+                className={`flex items-center justify-between gap-2 py-2 ${AXEL_ROW_HOVER}`}
               >
                 <div className="min-w-0">
-                  <p className={`text-sm truncate ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
-                  <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                  <p className={`text-[12px] truncate ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
+                  <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
                     {t.data.slice(0, 10).split('-').reverse().join('/')}
                     {cat ? ` · ${cat}` : ''}
                   </p>
                 </div>
-                <span className={`font-mono text-[12px] tabular-nums shrink-0 ${
-                  t.tipo === 'receita'
-                    ? 'text-concluido'
-                    : t.tipo === 'investimento'
-                      ? 'text-accent'
-                      : 'text-urgente'
+                <span className={`font-mono text-[11px] tabular-nums shrink-0 ${
+                  t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
                 }`}>
                   {t.tipo === 'receita' ? '+' : '−'}{fmt(t.valor)}
                 </span>

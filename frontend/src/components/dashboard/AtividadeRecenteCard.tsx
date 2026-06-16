@@ -35,7 +35,7 @@ function timeAgo(iso: string | null | undefined): string
   return `${Math.floor(h / 24)}d`
 }
 
-export function AtividadeRecenteCard()
+export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean })
 {
   const navigate = useNavigate()
   const tarefas = useTaskStore((s) => s.tarefas)
@@ -103,11 +103,13 @@ export function AtividadeRecenteCard()
   }, [tarefas, medicamentos, transactions])
 
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
-      <header className="px-4 pt-4 pb-3 border-b border-line">
-        <p className={AXEL_SECTION_TITLE}>Auditoria</p>
-        <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Atividade recente</p>
-      </header>
+    <section className={`${embedded ? '' : AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
+      {!embedded && (
+        <header className="px-4 pt-4 pb-3 border-b border-line">
+          <p className={AXEL_SECTION_TITLE}>Auditoria</p>
+          <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Atividade recente</p>
+        </header>
+      )}
 
       <ul role="list" className="flex-1 divide-y divide-line min-h-[140px]">
         {items.length === 0 && (

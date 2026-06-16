@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, Fragment } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
-import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
@@ -11,19 +10,24 @@ import { DashboardCriticalTasksPreview } from '../dashboard/DashboardCriticalTas
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
 import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
 import { SystemStatePanel } from '../dashboard/SystemStatePanel'
-import { QuickStatsBar } from '../dashboard/QuickStatsBar'
 import { WaterWaveCard } from '../dashboard/WaterWaveCard'
-import { DailyEngagementCard } from '../dashboard/DailyEngagementCard'
+import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
+import { WellbeingDashboardCard } from '../wellbeing/WellbeingDashboardCard'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
 import { FinancasTabelaDensa } from '../dashboard/FinancasTabelaDensa'
+import { DashboardFinanceMoodStrip } from '../dashboard/DashboardFinanceMoodStrip'
+import { DashboardFinanceMonthGoal } from '../dashboard/DashboardFinanceMonthGoal'
 import { FinanceDailyBriefCard } from '../Finance/overview/FinanceDailyBriefCard'
+import { CardQuickSpendStrip } from '../Finance/CardQuickSpendStrip'
+import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
-import { DashboardAxelFocus } from '../dashboard/DashboardAxelFocus'
-import { DashboardPulseStrip } from '../dashboard/DashboardPulseStrip'
-import { DashboardPanel } from '../dashboard/DashboardPanel'
+import { FinanceBillsAlertCard } from '../dashboard/FinanceBillsAlertCard'
+import { DashboardHeroPanel } from '../dashboard/DashboardHeroPanel'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
+import type { DashboardPriority } from '../../lib/userWorkspacePrefs'
 
-// Dashboard enterprise — comando denso, módulos, operação e analytics em sequência
+// Dashboard enxuto — ofensiva + foco no topo; ordem por preferência do wizard
 
 function getGreeting(): string
 {
@@ -32,6 +36,12 @@ function getGreeting(): string
   if (h < 12) return 'Bom dia'
   if (h < 18) return 'Boa tarde'
   return 'Boa noite'
+}
+
+const BLOCK_ORDER: Record<DashboardPriority, ('health' | 'tasks' | 'finance')[]> = {
+  finance: ['finance', 'tasks', 'health'],
+  tasks: ['tasks', 'health', 'finance'],
+  health: ['health', 'tasks', 'finance'],
 }
 
 export function DashboardView()
@@ -49,11 +59,15 @@ export function DashboardView()
   const runFinanceCheck = useTaskStore((s) => s.runFinanceCheck)
   const runHealthCheck = useTaskStore((s) => s.runHealthCheck)
   const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
+  const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
   const fetchInbox = useTaskStore((s) => s.fetchInbox)
+  const fetchHumorResumo = useTaskStore((s) => s.fetchHumorResumo)
+  const fetchContasFixas = useTaskStore((s) => s.fetchContasFixas)
 
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const loading = useTaskStore((s) => s.dashboardLoading)
   const userProfile = useTaskStore((s) => s.userProfile)
+  const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
 
   const hasFetched = useRef(false)
 
@@ -65,7 +79,8 @@ export function DashboardView()
     {
       await Promise.all([fetchDashboard(), fetchTarefas()])
       await Promise.all([fetchNotificacoes(), fetchPreferencias(), fetchGamificacaoStats?.()])
-      await Promise.all([fetchPalavrasChave(), checkGoogleStatus(), fetchInbox?.()])
+      syncStreakCalendarDay()
+      await Promise.all([fetchPalavrasChave(), checkGoogleStatus(), fetchInbox?.(), fetchHumorResumo(), fetchContasFixas()])
       await runFinanceCheck()
       await runHealthCheck()
     }
@@ -74,7 +89,11 @@ export function DashboardView()
   }, [])
 
   const greeting = getGreeting()
-  const firstName = (userProfile?.nome || '').split(' ')[0] || 'Convidado'
+  const firstName = workspacePrefs.axel_calls_you
+    || (workspacePrefs.display_name || userProfile?.nome || '').split(' ')[0]
+    || 'Convidado'
+
+  const sectionOrder = BLOCK_ORDER[workspacePrefs.dashboard_priority] ?? BLOCK_ORDER.tasks
 
   const taskIdParam = searchParams.get('task')
   const selectedTask = useMemo(() =>
@@ -82,7 +101,7 @@ export function DashboardView()
     if (!taskIdParam) return null
     const id = Number(taskIdParam)
     if (Number.isNaN(id)) return null
-    return mergeDashboardTasks(storeTarefas).find((t) => t.id === id) ?? null
+    return storeTarefas.find((t) => t.id === id) ?? null
   }, [taskIdParam, storeTarefas])
 
   const selectedHorizon = useMemo(() =>
@@ -103,7 +122,7 @@ export function DashboardView()
 
   const executeFromDashboard = useCallback((taskId: number) =>
   {
-    const task = mergeDashboardTasks(storeTarefas).find((t) => t.id === taskId)
+    const task = storeTarefas.find((t) => t.id === taskId)
     if (!task) return
     openTaskDrawer(taskId)
     void startTask(task)
@@ -132,85 +151,96 @@ export function DashboardView()
       <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4">
         <StreakEveningBanner />
 
-        <DashboardPulseStrip />
+        <DashboardHeroPanel
+          onOpenTask={openTaskDrawer}
+          onExecuteTask={executeFromDashboard}
+        />
 
-        <details className="group">
-          <summary className="cursor-pointer font-mono text-[10px] uppercase tracking-wide text-ink-muted hover:text-accent list-none flex items-center gap-2">
-            <span className="group-open:rotate-90 transition-transform">▸</span>
-            Módulos do sistema
-          </summary>
-          <div className="mt-2">
+        <CardQuickSpendStrip variant="dashboard" prominent />
+
+        <WeeklyEpisodeCard embedded />
+
+        {sectionOrder.map((block) =>
+        {
+          if (block === 'health')
+          {
+            return (
+              <Fragment key="health">
+                <HealthRitualStrip />
+                <DashboardCollapsible
+                  title="Rotina rápida"
+                  subtitle="Água e humor — o restante fica em Saúde"
+                  defaultOpen
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
+                    <div id="dashboard-water" className="min-w-0 flex scroll-mt-20">
+                      <WaterWaveCard hero className="flex-1" />
+                    </div>
+                    <div className="min-w-0 flex">
+                      <WellbeingDashboardCard />
+                    </div>
+                  </div>
+                </DashboardCollapsible>
+              </Fragment>
+            )
+          }
+
+          if (block === 'tasks')
+          {
+            return (
+              <DashboardCollapsible
+                key="tasks"
+                section="01"
+                title="Comando"
+                subtitle="Tarefas críticas e carga do sistema"
+                defaultOpen
+              >
+                <div className="grid grid-cols-12 gap-3 items-stretch">
+                  <div className="col-span-12 xl:col-span-8 min-w-0">
+                    <DashboardCriticalTasksPreview />
+                  </div>
+                  <div className="col-span-12 xl:col-span-4 min-w-0">
+                    <SystemStatePanel />
+                  </div>
+                </div>
+              </DashboardCollapsible>
+            )
+          }
+
+          return (
+            <Fragment key="finance">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
+                <DashboardFinanceMoodStrip />
+                <DashboardFinanceMonthGoal />
+              </div>
+              <DashboardCollapsible
+                section="02"
+                title="Finanças detalhadas"
+                subtitle="Faturas, resumo e movimentação"
+              >
+                <div className="flex flex-col gap-3">
+                  <FinanceBillsAlertCard />
+                  <FinanceDailyBriefCard compact />
+                  <FinancasTabelaDensa embedded />
+                </div>
+              </DashboardCollapsible>
+            </Fragment>
+          )
+        })}
+
+        <DashboardCollapsible
+          title="Mais"
+          subtitle="Módulos · inteligência · auditoria · analytics"
+        >
+          <div className="flex flex-col gap-3">
             <DashboardModulesRegistry />
-          </div>
-        </details>
-
-        {/* Hero — faixa Main Quest + bento água | loop (sem coluna vazia) */}
-        <div className="flex flex-col gap-3">
-          <DashboardAxelFocus
-            onOpenTask={openTaskDrawer}
-            onExecuteTask={executeFromDashboard}
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
-            <div id="dashboard-water" className="lg:col-span-7 min-w-0 flex scroll-mt-20">
-              <WaterWaveCard hero className="flex-1" />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <InboxIACard embedded />
+              <AtividadeRecenteCard embedded />
             </div>
-            <div className="lg:col-span-5 min-w-0 flex">
-              <DailyEngagementCard />
-            </div>
-          </div>
-        </div>
-
-        {/* 01 — Comando: execução + carga */}
-        <div className="grid grid-cols-12 gap-3 items-stretch">
-          <div className="col-span-12 xl:col-span-8 min-w-0">
-            <DashboardCriticalTasksPreview />
-          </div>
-          <div className="col-span-12 xl:col-span-4 min-w-0">
-            <SystemStatePanel />
-          </div>
-        </div>
-
-        {/* 02 — Indicadores vitais */}
-        <DashboardPanel section="02" title="Indicadores" subtitle="Saúde · finanças · ritmo diário" noPadding>
-          <div className="p-4">
-            <QuickStatsBar />
-          </div>
-        </DashboardPanel>
-
-        {/* 03 — Finanças + inteligência */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 items-stretch">
-          <div className="md:col-span-2 lg:col-span-6 min-w-0 flex flex-col gap-3">
-            <FinanceDailyBriefCard compact />
-            <DashboardPanel section="03" title="Finanças" subtitle="Movimentação recente" className="h-full flex-1">
-              <FinancasTabelaDensa embedded />
-            </DashboardPanel>
-          </div>
-          <div className="min-w-0 lg:col-span-3">
-            <InboxIACard />
-          </div>
-          <div className="min-w-0 lg:col-span-3">
-            <AtividadeRecenteCard />
-          </div>
-        </div>
-
-        {/* 04 — Analytics holístico (recolhido por padrão) */}
-        <details className="group border-t border-line pt-2">
-          <summary className="cursor-pointer list-none flex items-center justify-between gap-2 py-2">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-wide text-ink-muted">
-                <span className="text-accent mr-2">04</span>
-                Analytics holístico
-              </p>
-              <p className="text-sm text-ink-muted mt-0.5">Saúde · produtividade · tendências</p>
-            </div>
-            <span className="font-mono text-[10px] text-accent group-open:hidden">Expandir</span>
-            <span className="font-mono text-[10px] text-ink-muted hidden group-open:inline">Recolher</span>
-          </summary>
-          <div className="mt-2">
             <HolisticAnalyticsSection borderless />
           </div>
-        </details>
+        </DashboardCollapsible>
 
         {selectedTask && (
           <AxelTaskDrawer

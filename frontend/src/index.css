@@ -84,6 +84,23 @@ body {
     background-size: 48px 48px;
   }
 
+  /* Login — brilho sutil no painel e vinheta no grid */
+  .sl-login-glow {
+    box-shadow:
+      0 0 0 1px var(--sl-border-subtle),
+      0 24px 48px -12px rgba(26, 24, 20, 0.08);
+  }
+
+  .dark .sl-login-glow {
+    box-shadow:
+      0 0 0 1px var(--sl-border-subtle),
+      0 24px 48px -12px rgba(0, 0, 0, 0.35);
+  }
+
+  .sl-login-vignette {
+    background: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, var(--sl-canvas) 100%);
+  }
+
   /* Canvas do Kanban — régua sutil, não compete com o board */
   .sl-kanban-canvas {
     background-image:

@@ -19,6 +19,7 @@ export default defineConfig({
         scope: '/',
         id: '/',
         display: 'standalone',
+        display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
         theme_color: '#141312',
         background_color: '#141312',
@@ -38,6 +39,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
+        importScripts: ['push-sw-handler.js'],
+        // notificações locais de boleto no PWA instalado
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|woff2?|ttf|eot)$/,

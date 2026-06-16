@@ -3,6 +3,8 @@
 // Contém lógica pura (sem UI) para verificar vencimentos,
 // medicamentos e gerar/remover tarefas fantasma automaticamente.
 import { supabase } from '../lib/supabase';
+import { horariosDoMedicamento, tomadaParaDose } from '../lib/medicamentosSchedule';
+import { localTodayIso } from '../lib/healthDayBoundary';
 
 /* ── Helpers ───────────────────────────────────────── */
 
@@ -58,6 +60,14 @@ interface PhantomMedicamento
   nome: string;
   horario: string;
   tomado: boolean;
+  config?: { horarios?: string[] };
+}
+
+interface PhantomTomada
+{
+  medicamento_id: number;
+  horario_previsto: string;
+  tomado_em: string;
 }
 
 /* ── Vencimentos Financeiros ──────────────────────── */
@@ -173,54 +183,63 @@ export async function checkVencimentosFinanceiros(
 export async function checkMedicamentosPendentes(
   userId: string,
   medicamentos: PhantomMedicamento[],
+  tomadas: PhantomTomada[] = [],
 ): Promise<number>
 {
   let created = 0;
+  const today = localTodayIso();
 
   for (const med of medicamentos)
   {
-    if (med.tomado) continue;
+    const horarios = horariosDoMedicamento(med as Parameters<typeof horariosDoMedicamento>[0]);
 
-    const score = calcMedScore(med.horario);
-    if (score === 0) continue; // Ainda não chegou na hora
-
-    const phantomKey = `phantom_saude_med_${med.id}_${new Date().toISOString().slice(0, 10)}`;
-    const { data: existing } = await supabase
-      .from('tarefas_unificadas')
-      .select('id, score_urgencia')
-      .eq('user_id', userId)
-      .eq('snippet_100_char', phantomKey)
-      .eq('status', 'pendente')
-      .maybeSingle();
-
-    if (existing)
+    for (const horario of horarios)
     {
-      // Update score if it increased
-      if (score > (existing.score_urgencia || 0))
+      if (tomadaParaDose(tomadas as Parameters<typeof tomadaParaDose>[0], med.id, horario, today))
       {
-        await supabase
-          .from('tarefas_unificadas')
-          .update({ score_urgencia: score })
-          .eq('id', existing.id);
+        continue;
       }
-    }
-    else
-    {
-      const prioridade = score >= 200 ? 'critica' : score >= 90 ? 'critica' : score >= 70 ? 'alta' : 'media';
-      const { error } = await supabase
-        .from('tarefas_unificadas')
-        .insert({
-          user_id: userId,
-          titulo: `Tomar ${med.nome} (era às ${med.horario})`,
-          descricao: `Medicamento ${med.nome} com horário previsto às ${med.horario} ainda não foi tomado. Score de urgência crescente.`,
-          snippet_100_char: phantomKey,
-          score_urgencia: score,
-          status: 'pendente',
-          prioridade,
-          origem: 'saude',
-        });
 
-      if (!error) created++;
+      const score = calcMedScore(horario);
+      if (score === 0) continue;
+
+      const phantomKey = `phantom_saude_med_${med.id}_${horario}_${today}`;
+      const { data: existing } = await supabase
+        .from('tarefas_unificadas')
+        .select('id, score_urgencia')
+        .eq('user_id', userId)
+        .eq('snippet_100_char', phantomKey)
+        .eq('status', 'pendente')
+        .maybeSingle();
+
+      if (existing)
+      {
+        if (score > (existing.score_urgencia || 0))
+        {
+          await supabase
+            .from('tarefas_unificadas')
+            .update({ score_urgencia: score })
+            .eq('id', existing.id);
+        }
+      }
+      else
+      {
+        const prioridade = score >= 200 ? 'critica' : score >= 90 ? 'critica' : score >= 70 ? 'alta' : 'media';
+        const { error } = await supabase
+          .from('tarefas_unificadas')
+          .insert({
+            user_id: userId,
+            titulo: `Tomar ${med.nome} (era às ${horario})`,
+            descricao: `Medicamento ${med.nome} — dose das ${horario}. Registre em Saúde quando tomar.`,
+            snippet_100_char: phantomKey,
+            score_urgencia: score,
+            status: 'pendente',
+            prioridade,
+            origem: 'saude',
+          });
+
+        if (!error) created++;
+      }
     }
   }
 
@@ -239,8 +258,14 @@ export async function cleanupResolvedPhantoms(
 
   if (tipo === 'saude' && itemId)
   {
-    const todayStr = new Date().toISOString().slice(0, 10);
-    phantomKeyPattern = `phantom_saude_med_${itemId}_${todayStr}`;
+    const todayStr = localTodayIso();
+    await supabase
+      .from('tarefas_unificadas')
+      .update({ status: 'concluida' })
+      .eq('user_id', userId)
+      .eq('origem', 'saude')
+      .like('snippet_100_char', `phantom_saude_med_${itemId}_%_${todayStr}`);
+    return;
   }
   else if (tipo === 'financeiro' && itemId)
   {

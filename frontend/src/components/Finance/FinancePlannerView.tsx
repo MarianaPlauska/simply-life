@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   createDefaultPeriodConfig,
   filterTransactionsByPeriod,
@@ -25,6 +26,7 @@ import {
 } from '../../lib/financeCategoryBudget';
 import { useTaskStore } from '../../store/useTaskStore';
 import { FinancePlannerShell } from './FinancePlannerShell';
+import { FinanceSectionNav } from './FinanceSectionNav';
 import { FinanceCategories } from './FinanceCategories';
 import { FinanceOverviewTab } from './FinanceOverviewTab';
 import { FinanceTransactionsTab } from './FinanceTransactionsTab';
@@ -34,6 +36,7 @@ import { ContasFixasTab } from './ContasFixasTab';
 import { FinanceDailyLedgerTab } from './FinanceDailyLedgerTab';
 import { FinanceSpreadsheetTab } from './FinanceSpreadsheetTab';
 import { FinanceHomeTab } from './FinanceHomeTab';
+import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner';
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 import { clampFinanceMonthOffset } from '../../lib/financeMonthOutlook';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
@@ -84,6 +87,40 @@ export function FinancePlannerView() {
   const [editingMeta, setEditingMeta] = useState<number | null>(null);
   const [metaEditVal, setMetaEditVal] = useState('');
   const [periodConfig, setPeriodConfig] = useState<FinancePeriodConfig>(() => createDefaultPeriodConfig(0));
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [deepLinkCardId, setDeepLinkCardId] = useState<string | null>(null);
+
+  useEffect(() =>
+  {
+    const cardId = searchParams.get('cartao');
+    const aba = searchParams.get('aba');
+    if (cardId)
+    {
+      const target = navigateToLeaf('cartoes');
+      setNavGroup(target.group);
+      setLeafTab(target.sub);
+      setDeepLinkCardId(cardId);
+      setSearchParams((prev) =>
+      {
+        const next = new URLSearchParams(prev);
+        next.delete('cartao');
+        return next;
+      }, { replace: true });
+      return;
+    }
+    if (aba === 'faturas')
+    {
+      const target = navigateToLeaf('faturas');
+      setNavGroup(target.group);
+      setLeafTab(target.sub);
+      setSearchParams((prev) =>
+      {
+        const next = new URLSearchParams(prev);
+        next.delete('aba');
+        return next;
+      }, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() =>
   {
@@ -230,12 +267,16 @@ export function FinancePlannerView() {
       tabs={FINANCE_MAIN_TABS}
       activeTab={navGroup}
       onTabChange={(id) => goToGroup(id as PlannerGroup)}
-      subTabs={subTabs}
-      activeSubTab={navGroup !== 'inicio' ? activeLeaf : undefined}
-      onSubTabChange={(id) => setLeafTab(id as PlannerLeafTab)}
       onManageCategories={() => setShowCatModal(true)}
       onNewTransaction={() => setShowModal(true)}
     >
+      {subTabs && (
+        <FinanceSectionNav
+          tabs={subTabs}
+          activeId={activeLeaf}
+          onChange={(id) => setLeafTab(id as PlannerLeafTab)}
+        />
+      )}
       {monthOffset > 0 && (
         <div className="rounded-sl border border-accent/35 bg-accent/10 px-3 py-2.5 mb-1">
           <p className="font-mono text-[10px] uppercase text-accent">
@@ -259,14 +300,22 @@ export function FinancePlannerView() {
         </div>
       )}
 
+      <div className="mb-3">
+        <FinanceGlobalMoodBanner
+          monthLabel={monthLabel}
+          monthOffset={monthOffset}
+          monthTransactions={monthTx}
+          allTransactions={transactions}
+          saldoInicial={cashAccount.saldo_inicial}
+        />
+      </div>
+
       {activeLeaf === 'inicio' && (
         <FinanceHomeTab
           monthLabel={monthLabel}
           monthOffset={monthOffset}
-          onOpenNextMonth={() => setMonthOffset((m) => clampFinanceMonthOffset(m + 1))}
           onSetLimits={() => goToLeaf('visao-geral')}
           onConfigure={() => goToLeaf('config')}
-          onNewTransaction={() => setShowModal(true)}
           receita={receita}
           despesas={despesas}
           saldo={saldo}
@@ -274,8 +323,9 @@ export function FinancePlannerView() {
           monthTransactions={monthTx}
           recentTransactions={recentTx}
           activeCategories={activeCategories}
+          pieChartData={pieChartData}
+          areaChartData={areaChartData}
           onNavigate={(t) => goToLeaf(t as PlannerLeafTab)}
-          onManageCategories={() => setShowCatModal(true)}
         />
       )}
 
@@ -371,7 +421,10 @@ export function FinancePlannerView() {
 
       {/* ═══════ CARTÕES & CAIXA ═══════ */}
       {activeLeaf === 'cartoes' && (
-        <VirtualCardsTab />
+        <VirtualCardsTab
+          initialCardId={deepLinkCardId}
+          openInvoiceOnMount={!!deepLinkCardId}
+        />
       )}
 
       {activeLeaf === 'faturas' && (

@@ -64,8 +64,8 @@ export function DueBucketBoard({
         defaultCollapsed={collapseDefault}
       >
         {count === 0 ? (
-          <p className="font-mono text-[10px] text-ink-muted/60 px-1 py-1 text-center">
-            Vazio — use o mapa acima ou arraste tarefas
+          <p className="font-mono text-[10px] text-ink-muted/60 px-1 py-2 text-center">
+            Nenhuma tarefa nesta faixa
           </p>
         ) : (
           <DueBucketTaskList

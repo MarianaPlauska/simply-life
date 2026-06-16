@@ -11,4 +11,17 @@ if (!supabaseUrl || !supabaseAnonKey)
   )
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    flowType: 'pkce',
+  },
+})
+
+/** URL de retorno após OAuth (Google) — deve estar nas Redirect URLs do Supabase */
+export function getAuthCallbackUrl(): string
+{
+  return `${window.location.origin}/auth/callback`
+}

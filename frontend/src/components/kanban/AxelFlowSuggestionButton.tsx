@@ -1,6 +1,7 @@
 import { Zap } from 'lucide-react'
 import { toast } from 'sonner'
 import { buildFlowSuggestion } from '../../lib/energyOrchestration'
+import type { MoodOrchestrationContext } from '../../lib/moodOrchestration'
 import type { TarefaUnificada } from '../../types'
 import type { TemporalHorizon } from '../../lib/temporalHorizon'
 
@@ -8,18 +9,20 @@ interface AxelFlowSuggestionButtonProps
 {
   hojeTasks: TarefaUnificada[]
   dailyScoreCap: number
+  mood?: MoodOrchestrationContext | null
   onMoveTasks: (taskIds: number[], target: TemporalHorizon) => Promise<void>
 }
 
 export function AxelFlowSuggestionButton({
   hojeTasks,
   dailyScoreCap,
+  mood = null,
   onMoveTasks,
 }: AxelFlowSuggestionButtonProps)
 {
   function handleSuggest()
   {
-    const suggestion = buildFlowSuggestion(hojeTasks, dailyScoreCap)
+    const suggestion = buildFlowSuggestion(hojeTasks, dailyScoreCap, mood)
 
     if (!suggestion)
     {

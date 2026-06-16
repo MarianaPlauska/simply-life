@@ -1,6 +1,8 @@
 import type { TarefaUnificada } from '../types'
+import type { MoodOrchestrationContext } from './moodOrchestration'
+import { pickMainQuestCandidate } from './wellbeingAnalytics'
 
-// Main Quest do dia — uma tarefa com bônus +50% XP
+// Main Quest do dia — uma tarefa com bônus +50% XP (sensível ao humor)
 
 const STORAGE_KEY = 'axel-main-quest-v1'
 export const MAIN_QUEST_XP_BONUS_RATIO = 0.5
@@ -45,7 +47,10 @@ export function getMainQuestTaskId(): number | null
   return s.taskId
 }
 
-export function syncMainQuest(tarefas: TarefaUnificada[]): TarefaUnificada | null
+export function syncMainQuest(
+  tarefas: TarefaUnificada[],
+  mood?: MoodOrchestrationContext | null,
+): TarefaUnificada | null
 {
   const open = tarefas.filter((t) => t.status !== 'concluida')
   if (open.length === 0)
@@ -55,17 +60,28 @@ export function syncMainQuest(tarefas: TarefaUnificada[]): TarefaUnificada | nul
 
   const today = todayIso()
   const stored = readState()
+  const profile = mood?.profile ?? 'equilibrado'
 
   if (stored && stored.date === today)
   {
     const existing = open.find((t) => t.id === stored.taskId)
     if (existing)
     {
+      // revalida se humor mudou muito — troca quest em modo recuperação
+      if (profile === 'recuperacao' || profile === 'cuidado')
+      {
+        const better = pickMainQuestCandidate(open, profile)
+        if (better && better.id !== existing.id && (existing.score_urgencia ?? 0) > 80)
+        {
+          writeState({ date: today, taskId: better.id })
+          return better
+        }
+      }
       return existing
     }
   }
 
-  const top = [...open].sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0))[0]
+  const top = pickMainQuestCandidate(open, profile)
   if (top)
   {
     writeState({ date: today, taskId: top.id })

@@ -1,6 +1,7 @@
-import { Activity, AlertTriangle, Brain, Loader2, Zap } from 'lucide-react'
+import { Activity, AlertTriangle, Brain, HeartPulse, Loader2, Zap } from 'lucide-react'
 import { computeMentalLoad } from '../../lib/energyOrchestration'
 import { readOrchestrationMetrics } from '../../lib/contextRationale'
+import type { MoodOrchestrationContext } from '../../lib/moodOrchestration'
 import { AXEL_KANBAN_COMMAND } from '../../constants/axelKanbanTheme'
 import {
   AXEL_BTN_PRIMARY,
@@ -20,6 +21,8 @@ interface KanbanCommandBarProps
   hojeTasks: TarefaUnificada[]
   hojeCount: number
   dailyScoreCap: number
+  baseDailyCap?: number
+  mood?: MoodOrchestrationContext | null
   gargalos: number
   intelligenceOn: boolean
   onRecalculate: () => void
@@ -67,6 +70,8 @@ export function KanbanCommandBar({
   hojeTasks,
   hojeCount,
   dailyScoreCap,
+  baseDailyCap,
+  mood = null,
   gargalos,
   intelligenceOn,
   onRecalculate,
@@ -78,8 +83,12 @@ export function KanbanCommandBar({
   const avgScore = tarefas.length
     ? Math.round(tarefas.reduce((s, t) => s + (t.score_urgencia ?? 0), 0) / tarefas.length)
     : 0
-  const load = computeMentalLoad(hojeTasks, dailyScoreCap)
+  const load = computeMentalLoad(hojeTasks, dailyScoreCap, mood)
   const fillPct = Math.min(100, load.percent)
+  const capHint =
+    baseDailyCap && baseDailyCap !== dailyScoreCap
+      ? `ajustado · base ${baseDailyCap}`
+      : `cap ${dailyScoreCap} pts`
   const fillClass =
     load.level === 'overload'
       ? 'bg-urgente'
@@ -95,9 +104,22 @@ export function KanbanCommandBar({
         <KpiCell
           label="Hoje"
           value={String(hojeCount)}
-          hint={`cap ${dailyScoreCap} pts`}
+          hint={capHint}
           variant={hojeCount > 8 ? 'warn' : 'default'}
         />
+        {mood && (
+          <KpiCell
+            label="Bem-estar"
+            value={mood.humorMedia != null ? `${mood.humorMedia}` : '—'}
+            hint={mood.profileLabel}
+            variant={
+              mood.profile === 'recuperacao' ? 'urgent'
+                : mood.profile === 'cuidado' ? 'warn'
+                  : mood.profile === 'sem_registro' ? 'warn'
+                    : 'ok'
+            }
+          />
+        )}
         <div className="px-4 py-3 border-r border-line min-w-[140px] flex-[1.2]">
           <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
             Carga mental
@@ -144,6 +166,12 @@ export function KanbanCommandBar({
             <Brain className="w-3 h-3" strokeWidth={1.75} />
             {intelligenceOn ? 'Orquestração ativa' : 'Standby'}
           </span>
+          {mood?.hasMoodToday && (
+            <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wide text-accent border border-accent/25 px-2 py-1 rounded-sl bg-accent-muted/40">
+              <HeartPulse className="w-3 h-3" strokeWidth={1.75} />
+              {mood.profileLabel}
+            </span>
+          )}
           <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
             <Activity className="w-3 h-3" strokeWidth={1.75} />
             Economia {minutes}

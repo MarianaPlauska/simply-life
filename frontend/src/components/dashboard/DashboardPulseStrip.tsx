@@ -57,7 +57,7 @@ export function DashboardPulseStrip()
   const storeTarefas = useTaskStore((s) => s.tarefas)
   const habitos = useTaskStore((s) => s.habitos)
   const streakCount = useTaskStore((s) => s.streakCount)
-  const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
+  const isStreakSafeToday = useTaskStore((s) => s.isStreakSafeToday)
 
   const stats = useMemo(() =>
   {
@@ -98,10 +98,10 @@ export function DashboardPulseStrip()
       <PulseCard
         label="Ofensiva"
         value={String(streakCount)}
-        hint={hasCompletedTaskToday ? 'Segura hoje' : 'Complete 1 tarefa'}
+        hint={isStreakSafeToday() ? 'Segura hoje' : 'Tarefa ou humor'}
         Icon={Flame}
-        iconClass={hasCompletedTaskToday ? 'text-orange-500' : 'text-ink-muted'}
-        variant={hasCompletedTaskToday ? 'ok' : 'default'}
+        iconClass={isStreakSafeToday() ? 'text-orange-500' : 'text-ink-muted'}
+        variant={isStreakSafeToday() ? 'ok' : 'default'}
         onClick={() => navigate('/kanban?panel=executar')}
       />
       <PulseCard

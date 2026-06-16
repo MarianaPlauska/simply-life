@@ -19,24 +19,15 @@ const FILE_ICONS: Record<string, { icon: React.ElementType; color: string; bg: s
   doc: { icon: FileText, color: 'text-ia', bg: 'bg-ia/10' },
 };
 
-const MOCK_FILES: VaultFile[] = [
-  { id: 1, nome: 'Contrato Aluguel 2026.pdf', tipo: 'pdf', tamanho: '2.4 MB', modificado: '12 jan', pinned: true },
-  { id: 2, nome: 'Holerite Dezembro.pdf', tipo: 'pdf', tamanho: '340 KB', modificado: '05 jan', pinned: true },
-  { id: 3, nome: 'Passaporte Scan.jpg', tipo: 'img', tamanho: '1.2 MB', modificado: '28 dez', pinned: true },
-  { id: 4, nome: 'Apresentação Q4.pdf', tipo: 'pdf', tamanho: '5.8 MB', modificado: '20 dez' },
-  { id: 5, nome: 'Exames Laboratoriais.pdf', tipo: 'pdf', tamanho: '890 KB', modificado: '15 dez' },
-  { id: 6, nome: 'Wedding Highlight.mp4', tipo: 'video', tamanho: '124 MB', modificado: '10 dez' },
-  { id: 7, nome: 'Backup Fotos 2025.zip', tipo: 'zip', tamanho: '2.1 GB', modificado: '01 dez' },
-  { id: 8, nome: 'Notas de Reunião.docx', tipo: 'doc', tamanho: '45 KB', modificado: '25 nov' },
-];
+const VAULT_FILES: VaultFile[] = []
 
 export function DriveVaultView() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
   const [dragging, setDragging] = useState(false);
 
-  const pinnedFiles = MOCK_FILES.filter((f) => f.pinned);
-  const filteredFiles = MOCK_FILES.filter((f) =>
+  const pinnedFiles = VAULT_FILES.filter((f) => f.pinned);
+  const filteredFiles = VAULT_FILES.filter((f) =>
     f.nome.toLowerCase().includes(search.toLowerCase())
   );
 

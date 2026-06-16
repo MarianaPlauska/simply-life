@@ -1,4 +1,5 @@
 import type { TarefaUnificada } from '../types'
+import type { MoodLoadThresholds, MoodOrchestrationContext } from './moodOrchestration'
 
 // Motor de Orquestração de Energia — carga mental e horário nobre
 
@@ -43,6 +44,7 @@ export function getEnergyPeriod(now: Date = new Date()): EnergyPeriod
 export function computeMentalLoad(
   hojeTasks: TarefaUnificada[],
   cap: number,
+  mood?: MoodOrchestrationContext | null,
 ): MentalLoadState
 {
   const sum = hojeTasks
@@ -50,20 +52,34 @@ export function computeMentalLoad(
     .reduce((acc, t) => acc + (t.score_urgencia ?? 0), 0)
 
   const percent = cap > 0 ? Math.round((sum / cap) * 100) : 0
+  const thresholds: MoodLoadThresholds = mood?.thresholds ?? {
+    warningPercent: 80,
+    overloadPercent: 100,
+    flowSuggestMinPercent: 80,
+    maxActiveForFlow: 3,
+  }
 
   let level: MentalLoadLevel = 'ok'
   let tooltip = 'Carga mental equilibrada para hoje.'
 
-  if (percent >= 100)
+  if (percent >= thresholds.overloadPercent)
   {
     level = 'overload'
-    tooltip =
-      'Sua carga está alta. Recomendo mover tarefas para amanhã.'
+    tooltip = mood?.profile === 'recuperacao' || mood?.profile === 'cuidado'
+      ? 'Carga alta para o seu humor de hoje. O AXEL sugere adiar o que não for essencial.'
+      : 'Sua carga está alta. Recomendo mover tarefas para amanhã.'
   }
-  else if (percent >= 80)
+  else if (percent >= thresholds.warningPercent)
   {
     level = 'warning'
-    tooltip = 'Atenção: você está perto do limite de carga de hoje.'
+    tooltip = mood?.profile === 'recuperacao'
+      ? 'Atenção: com humor baixo, vale proteger sua energia — priorize poucas tarefas.'
+      : 'Atenção: você está perto do limite de carga de hoje.'
+  }
+
+  if (mood?.loadTooltipSuffix)
+  {
+    tooltip += mood.loadTooltipSuffix
   }
 
   return { sum, cap, percent, level, tooltip }
@@ -96,26 +112,48 @@ export function shouldHighlightNobleHour(
 export function buildFlowSuggestion(
   hojeTasks: TarefaUnificada[],
   cap: number,
+  mood?: MoodOrchestrationContext | null,
 ): FlowSuggestion | null
 {
   const active = hojeTasks.filter((t) => t.status !== 'concluida')
-  const load = computeMentalLoad(hojeTasks, cap)
+  const load = computeMentalLoad(hojeTasks, cap, mood)
+  const thresholds = mood?.thresholds ?? {
+    warningPercent: 80,
+    overloadPercent: 100,
+    flowSuggestMinPercent: 80,
+    maxActiveForFlow: 3,
+  }
 
-  if (load.percent < 80 && active.length <= 3)
+  if (load.percent < thresholds.flowSuggestMinPercent && active.length <= thresholds.maxActiveForFlow)
   {
     return null
   }
 
   const candidates = [...active]
     .sort((a, b) => (a.score_urgencia ?? 0) - (b.score_urgencia ?? 0))
-    .slice(0, 2)
+    .slice(0, mood?.profile === 'recuperacao' ? 3 : 2)
 
   if (candidates.length === 0) return null
 
   const names = candidates.map((t) => t.titulo.replace(/^\[[^\]]+\]\s*/, '').trim())
+  const listed = names.map((n) => `[${n}]`).join(' e ')
+
+  let message: string
+  if (mood?.profile === 'recuperacao' || mood?.profile === 'cuidado')
+  {
+    message = `Seu humor pede leveza hoje. Sugiro mover ${listed} para Esta Semana — cap ajustado para ${cap} pts.`
+  }
+  else if (mood?.profile === 'sem_registro')
+  {
+    message = `Carga cheia. Sugiro mover ${listed} para amanhã. Registre seu humor para o AXEL calibrar melhor.`
+  }
+  else
+  {
+    message = `Sua carga de hoje está cheia. Sugiro mover ${listed} para amanhã para manter seu score diário saudável.`
+  }
 
   return {
-    message: `Sua carga de hoje está cheia. Sugiro mover ${names.map((n) => `[${n}]`).join(' e ')} para amanhã para manter seu Score diário saudável.`,
+    message,
     taskIds: candidates.map((t) => t.id),
     taskTitles: names,
   }

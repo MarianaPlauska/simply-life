@@ -145,6 +145,32 @@ export function useRealtimeSync(): void
             }))
           },
         )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'despesas',
+            filter: `user_id=eq.${uid}`,
+          },
+          () =>
+          {
+            void useTaskStore.getState().fetchTransactions()
+          },
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notificacoes',
+            filter: `user_id=eq.${uid}`,
+          },
+          () =>
+          {
+            void useTaskStore.getState().fetchNotificacoes()
+          },
+        )
         .subscribe((status) =>
         {
           if (disposed) return

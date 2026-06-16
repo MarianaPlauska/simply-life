@@ -75,7 +75,7 @@ export default async function handler(req, res)
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { context, localAdvice } = req.body || {}
+  const { context, localAdvice, aiTone } = req.body || {}
 
   if (!context)
   {
@@ -93,6 +93,10 @@ export default async function handler(req, res)
       iaDisponivel: false,
     })
   }
+
+  const toneLine = aiTone
+    ? `\nTom de voz obrigatório: ${aiTone}`
+    : '';
 
   const systemInstruction = `Você é o AXEL, o melhor amigo financeiro do usuário no Simply-Life.
 Analise os dados reais de gastos e devolva um JSON exatamente neste formato:
@@ -113,7 +117,7 @@ Regras:
 - Se categoria estourou limite, nomeie e peça contenção
 - limitSuggestions: no máximo 3 categorias sem limite ou com gasto acima da média
 - valorSugerido: arredondado, realista (baseado em média ou gasto atual)
-- Nunca invente categorias que não estão no contexto`
+- Nunca invente categorias que não estão no contexto${toneLine}`
 
   const userPrompt = `Contexto financeiro do usuário (dados reais):
 ${JSON.stringify(context, null, 2)}

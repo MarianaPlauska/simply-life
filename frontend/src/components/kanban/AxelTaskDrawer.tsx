@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { X, Plus } from 'lucide-react'
+import { X, Plus, Pin, CalendarClock, CheckCircle2 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useTaskActivityLog } from '../../hooks/useTaskActivityLog'
 import { useLocalSubtasks } from '../../hooks/useLocalSubtasks'
@@ -21,6 +21,7 @@ import { calcSubtaskProgress, resolveEffectiveSubtasks } from '../../lib/subtask
 import { getProjectTag } from '../../lib/contextRationale'
 import { HORIZON_LABELS, type TemporalHorizon } from '../../lib/temporalHorizon'
 import { AXEL_BTN_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { toggleExecutionPin, isExecutionPinned } from '../../lib/kanbanExecutionPrefs'
 import type { TarefaUnificada } from '../../types'
 
 // Drawer — coluna única, título sempre visível, modo criação, rodapé fixo
@@ -78,6 +79,9 @@ export function AxelTaskDrawer({
     isCreatingNew ? null : live.data_vencimento,
   )
   const [submitting, setSubmitting] = useState(false)
+  const [pinned, setPinned] = useState(() =>
+    tarefaProp ? isExecutionPinned(tarefaProp.id) : false,
+  )
   const [proposalLoading, setProposalLoading] = useState(false)
 
   const deadlineProposal = !isCreatingNew && live.id > 0
@@ -147,6 +151,40 @@ export function AxelTaskDrawer({
       document.body.style.overflow = ''
     }
   }, [onClose])
+
+  const handleComplete = () =>
+  {
+    if (isCreatingNew || live.status === 'concluida') return
+    void axelCompleteTask({ ...live, subtarefas: subs })
+    addEntry('Tarefa concluída manualmente', 'progress')
+    onClose()
+  }
+
+  const handlePin = () =>
+  {
+    if (isCreatingNew) return
+    const next = toggleExecutionPin(live.id)
+    setPinned(next.includes(live.id))
+    pushAiDecision(
+      next.includes(live.id)
+        ? `Fixada em Executar agora: ${live.titulo}`
+        : `Removida da fila fixa: ${live.titulo}`,
+    )
+    window.dispatchEvent(new Event('axel-exec-pins-changed'))
+  }
+
+  const handleSnoozeDay = async () =>
+  {
+    if (isCreatingNew || !canPersistServer) return
+    const base = live.data_vencimento ? new Date(live.data_vencimento) : new Date()
+    base.setDate(base.getDate() + 1)
+    const next = base.toISOString()
+    await updateTarefa(live.id, { data_vencimento: next })
+    setDeadline(next)
+    pushAiDecision(`Prazo adiado +1 dia: ${live.titulo}`)
+    addEntry('Prazo adiado +1 dia', 'progress')
+    toast.info('Prazo adiado para amanhã')
+  }
 
   const saveTitle = async () =>
   {
@@ -426,6 +464,36 @@ export function AxelTaskDrawer({
             </button>
           ) : (
             <>
+              <div className="flex flex-wrap gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={handleComplete}
+                  disabled={live.status === 'concluida'}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-sl bg-concluido/15 text-concluido font-mono text-[9px] uppercase"
+                >
+                  <CheckCircle2 size={12} />
+                  Concluir
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePin}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-sl border font-mono text-[9px] uppercase ${
+                    pinned ? 'border-accent text-accent bg-accent/10' : 'border-line text-ink-muted'
+                  }`}
+                >
+                  <Pin size={12} />
+                  {pinned ? 'Fixada' : 'Fixar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleSnoozeDay()}
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-sl border border-line text-ink-muted font-mono text-[9px] uppercase"
+                >
+                  <CalendarClock size={12} />
+                  +1 dia
+                </button>
+              </div>
+
               <h3 className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted mb-2">
                 Log de atividades
               </h3>

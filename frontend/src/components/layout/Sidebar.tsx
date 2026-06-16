@@ -1,9 +1,8 @@
 import { useMemo, useState } from 'react'
 import {
   LayoutDashboard, KanbanSquare, CalendarDays, StickyNote, SlidersHorizontal,
-  Wallet, Pill, HardDrive, PanelLeftClose, PanelLeft, Settings,
-  Zap, ChevronDown, Droplets, Beef, Dumbbell, HeartPulse,
-  Webhook, PlugZap, Inbox, Crosshair, GraduationCap,
+  Wallet, HardDrive, PanelLeftClose, PanelLeft, Settings,
+  Zap, Webhook, PlugZap, Inbox, Crosshair, GraduationCap, HeartPulse,
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore'
@@ -30,23 +29,19 @@ interface NavGroup
   items: NavItem[]
 }
 
-const NAV_GROUPS: NavGroup[] = [
+export const NAV_GROUPS: NavGroup[] = [
   {
-    label: 'Navegação',
+    label: 'Principal',
     items: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, moduleKey: 'dashboard', path: '/' },
       { id: 'kanban', label: 'Kanban', icon: KanbanSquare, moduleKey: 'kanban', path: '/kanban' },
-      {
-        id: 'saude', label: 'Saúde', icon: HeartPulse, moduleKey: 'saude', path: '/saude',
-        subItems: [
-          { label: 'Hidratação',   tab: 'hidratacao',   icon: Droplets   },
-          { label: 'Alimentação',  tab: 'alimentacao',  icon: Beef       },
-          { label: 'Academia',     tab: 'academia',     icon: Dumbbell   },
-          { label: 'Medicamentos', tab: 'medicamentos', icon: Pill       },
-          { label: 'Bem-estar',    tab: 'bem_estar',    icon: HeartPulse },
-        ],
-      },
+      { id: 'saude', label: 'Saúde', icon: HeartPulse, moduleKey: 'saude', path: '/saude' },
       { id: 'financeiro', label: 'Finanças', icon: Wallet, moduleKey: 'financeiro', path: '/financeiro' },
+    ],
+  },
+  {
+    label: 'Mais',
+    items: [
       { id: 'superhuman', label: 'Foco Superhumano', icon: Zap, moduleKey: 'superhuman', path: '/superhuman' },
       { id: 'foco', label: 'Modo Academia', icon: GraduationCap, moduleKey: 'foco', path: '/foco' },
       { id: 'calendario', label: 'Calendário', icon: CalendarDays, moduleKey: 'calendario', path: '/calendario' },
@@ -125,10 +120,6 @@ export function Sidebar()
     }
   }
 
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({
-    saude: location.pathname === '/saude',
-  })
-
   const handleNav = (item: NavItem) =>
   {
     navigate(item.path)
@@ -198,48 +189,17 @@ export function Sidebar()
               {group.items.map((item) =>
               {
                 const isActive = activeView === item.id || (item.path === '/' && location.pathname === '/')
-                const hasSub = Boolean(item.subItems?.length)
-                const isOpen = expanded[String(item.id)]
                 const Icon = item.icon
 
                 return (
                   <div key={String(item.id)} className="group relative">
                     <button
-                      onClick={() =>
-                      {
-                        handleNav(item)
-                        if (hasSub) setExpanded((s) => ({ ...s, [String(item.id)]: !isOpen }))
-                      }}
+                      onClick={() => handleNav(item)}
                       className={`w-full flex items-center gap-2.5 px-2 py-2 text-[13px] transition-colors rounded-r-md ${navItemClasses(isActive)}`}
                     >
                       <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-accent' : ''}`} />
                       <span className="truncate flex-1 text-left">{item.label}</span>
-                      {hasSub && (
-                        <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${isOpen ? '' : '-rotate-90'}`} />
-                      )}
                     </button>
-
-                    {hasSub && isOpen && (
-                      <div className="ml-5 mt-0.5 mb-1 pl-3 space-y-0.5 border-l border-line">
-                        {item.subItems!.map((sub) =>
-                        {
-                          const SubIcon = sub.icon
-                          const subActive = location.hash === `#${sub.tab}`
-                          return (
-                            <button
-                              key={sub.tab}
-                              onClick={() => navigate(`${item.path}#${sub.tab}`)}
-                              className={`w-full flex items-center gap-2 px-2 py-1.5 text-[12px] transition-colors rounded-r-md ${
-                                subActive ? AXEL_NAV_ACTIVE : AXEL_NAV_IDLE
-                              }`}
-                            >
-                              <SubIcon className="w-3.5 h-3.5 shrink-0" />
-                              <span className="truncate">{sub.label}</span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    )}
                   </div>
                 )
               })}

@@ -1,6 +1,9 @@
 // slice de gamificação — rpg, xp, conquistas, e quests do Jarvis
 import type { StateCreator } from 'zustand'
 import { supabase } from '../../lib/supabase'
+import type { AxelStreakSlice } from './axelStreakSlice'
+
+type GamificacaoStore = GamificacaoSlice & Pick<AxelStreakSlice, 'hydrateOfensivaFromServer'>
 
 export interface UserStats
 {
@@ -11,6 +14,14 @@ export interface UserStats
   xp_estabilidade: number;
   streak_saude: number;
   streak_foco: number;
+  ofensiva_streak?: number;
+  ofensiva_last_active_date?: string | null;
+  ofensiva_freezes?: number;
+  ofensiva_freeze_claim_month?: string | null;
+  ofensiva_saved_days?: Record<string, boolean>;
+  ofensiva_focus_minutes?: Record<string, number>;
+  ofensiva_task_today?: boolean;
+  ofensiva_wellbeing_today?: boolean;
 }
 
 export interface Achievement
@@ -55,7 +66,7 @@ export interface GamificacaoSlice
   incrementQuestProgress: (tituloContendo: string, valor: number) => Promise<void>;
 }
 
-export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], GamificacaoSlice> = (set, get) => ({
+export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], GamificacaoSlice> = (set, get) => ({
   userStats: null,
   achievements: [],
   userQuests: [],
@@ -78,6 +89,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoSlice, [], [], Gami
       if (data)
       {
         set({ userStats: data })
+        get().hydrateOfensivaFromServer(data)
       }
       else
       {

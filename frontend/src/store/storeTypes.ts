@@ -53,11 +53,24 @@ export interface Despesa {
   data: string;
 }
 
+export interface MedicamentoConfig {
+  horarios?: string[];
+  notas?: string;
+}
+
+export interface MedicamentoTomada {
+  id: number;
+  medicamento_id: number;
+  horario_previsto: string;
+  tomado_em: string;
+}
+
 export interface Medicamento {
   id: number;
   nome: string;
   horario: string;
   tomado: boolean;
+  config?: MedicamentoConfig;
 }
 
 export interface UserProfile {
@@ -196,6 +209,10 @@ export interface FinancialGoal {
 export interface HabitoDiarioConfig {
   incremento?: number;
   meta_minutos?: number;
+  /** Data (YYYY-MM-DD) do último progresso — reset diário */
+  ultima_data?: string;
+  /** Plano semanal de treino — chave: seg, ter, qua... */
+  plano_semana?: Record<string, { titulo: string; meta_minutos: number }>;
 }
 
 export interface HabitoDiario {

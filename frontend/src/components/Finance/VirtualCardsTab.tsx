@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
-import { Plus, Lock, Unlock, Trash2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Plus, Lock, Unlock, Trash2, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AddCardForm } from './AddCardForm'
 import { CreditCardVisual } from './CreditCardVisual'
 import { CardInvoicePanel } from './CardInvoicePanel'
+import { CardInvoiceDrawer } from './CardInvoiceDrawer'
 import { CashflowForecast } from './CashflowForecast'
 import { getBillingCycle, getInvoiceTransactions } from '../../lib/financeCardCycle'
 import { sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
@@ -14,7 +15,16 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-export function VirtualCardsTab()
+interface VirtualCardsTabProps
+{
+  initialCardId?: string | null
+  openInvoiceOnMount?: boolean
+}
+
+export function VirtualCardsTab({
+  initialCardId = null,
+  openInvoiceOnMount = false,
+}: VirtualCardsTabProps)
 {
   const cards = useTaskStore((s) => s.cards)
   const transactions = useTaskStore((s) => s.transactions)
@@ -24,6 +34,17 @@ export function VirtualCardsTab()
 
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(cards[0]?.id ?? null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  useEffect(() =>
+  {
+    if (!initialCardId) return
+    if (cards.some((c) => c.id === initialCardId))
+    {
+      setSelectedId(initialCardId)
+      if (openInvoiceOnMount) setDrawerOpen(true)
+    }
+  }, [initialCardId, openInvoiceOnMount, cards])
 
   const selected = cards.find((c) => c.id === selectedId) ?? cards[0] ?? null
 
@@ -40,6 +61,14 @@ export function VirtualCardsTab()
 
   const selectedData = cardData.find((d) => d.card.id === selected?.id)
 
+  const openFatura = (cardId: string) =>
+  {
+    setSelectedId(cardId)
+    const isMobile = typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 1023px)').matches
+    if (isMobile) setDrawerOpen(true)
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -48,7 +77,7 @@ export function VirtualCardsTab()
             Cartões de crédito
           </p>
           <p className={`text-[12px] sm:text-sm mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-            Fatura aberta · ciclo · pagamento no caixa
+            Toque no cartão para ver a fatura individual
           </p>
         </div>
         <button
@@ -86,18 +115,29 @@ export function VirtualCardsTab()
                 cycle={cycle}
                 invoiceTotal={invoiceTotal}
                 selected={selected?.id === card.id}
-                onClick={() => setSelectedId(card.id)}
+                onClick={() => openFatura(card.id)}
               />
             ))}
           </div>
 
           {selectedData && (
-            <div className="space-y-3 min-w-0">
-              <div className="flex flex-wrap gap-2">
+            <div className="hidden lg:block space-y-3 min-w-0">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  <FileText size={12} />
+                  Fatura selecionada · {selectedData.card.nome}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="font-mono text-[9px] uppercase text-accent hover:underline"
+                >
+                  Abrir painel lateral
+                </button>
                 <button
                   type="button"
                   onClick={() => toggleCardStatus(selectedData.card.id)}
-                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-ink-muted flex-1 sm:flex-none"
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-ink-muted"
                 >
                   {selectedData.card.status === 'bloqueado' ? (
                     <><Unlock size={12} /> Desbloquear</>
@@ -116,7 +156,7 @@ export function VirtualCardsTab()
                       toast.success('Cartão removido')
                     }
                   }}
-                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-urgente flex-1 sm:flex-none"
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-urgente"
                 >
                   <Trash2 size={12} />
                   Excluir
@@ -133,6 +173,18 @@ export function VirtualCardsTab()
             </div>
           )}
         </>
+      )}
+
+      {selectedData && (
+        <CardInvoiceDrawer
+          open={drawerOpen}
+          card={selectedData.card}
+          cycle={selectedData.cycle}
+          invoiceTx={selectedData.invoiceTx}
+          invoiceTotal={selectedData.invoiceTotal}
+          categories={categories}
+          onClose={() => setDrawerOpen(false)}
+        />
       )}
 
       <div className="border-t border-line pt-4 sm:pt-6">

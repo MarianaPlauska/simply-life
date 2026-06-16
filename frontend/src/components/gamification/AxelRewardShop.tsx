@@ -59,21 +59,23 @@ export function AxelRewardShop()
             <Shield size={18} className="text-sky-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>Escudo de ofensiva</p>
+            <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>Escudo extra (500 XP)</p>
             <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              Absorve 1 dia perdido · você tem {streakFreezes}
+              1 grátis/mês no perfil · você tem {streakFreezes}
             </p>
           </div>
           <span className="font-mono text-[10px] text-accent shrink-0">{STREAK_FREEZE_COST} XP</span>
         </button>
 
-        <div className="flex items-center gap-3 p-3 rounded-sl border border-dashed border-line opacity-70">
+        <div className="flex items-center gap-3 p-3 rounded-sl border border-dashed border-line">
           <div className="p-2 rounded-sl bg-chrome/40">
-            <Sparkles size={18} className="text-ink-muted" />
+            <Sparkles size={18} className="text-accent" />
           </div>
           <div className="flex-1">
-            <p className={`text-sm ${AXEL_TEXT_PRIMARY}`}>Temas e relíquias</p>
-            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>Em breve — coleção visual</p>
+            <p className={`text-sm ${AXEL_TEXT_PRIMARY}`}>Mais cosméticos</p>
+            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+              Veja a Coleção AXEL acima — skins, tons de IA e molduras
+            </p>
           </div>
         </div>
       </div>

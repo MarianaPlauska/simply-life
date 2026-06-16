@@ -47,7 +47,7 @@ export function PwaInstallBanner()
     return () => window.removeEventListener('beforeinstallprompt', onInstall)
   }, [])
 
-  if (standalone || hidden || !deferred) return null
+  if (standalone || hidden) return null
 
   const dismiss = () =>
   {
@@ -58,6 +58,32 @@ export function PwaInstallBanner()
     }
     catch { /* quota */ }
   }
+
+  const isIos = typeof navigator !== 'undefined'
+    && /iPad|iPhone|iPod/.test(navigator.userAgent)
+
+  if (isIos && !deferred)
+  {
+    return (
+      <div className="fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-[90]">
+        <div className="rounded-sl border border-accent/30 bg-card shadow-xl p-4">
+          <p className="text-sm font-medium text-ink">Instalar no iPhone</p>
+          <p className="text-[11px] text-ink-muted mt-1 leading-relaxed">
+            Safari → Compartilhar → Adicionar à Tela de Início. Abre em tela cheia como app.
+          </p>
+          <button
+            type="button"
+            onClick={dismiss}
+            className="mt-3 px-3 py-2 rounded-sl border border-line font-mono text-[10px] uppercase text-ink-muted"
+          >
+            Entendi
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!deferred) return null
 
   const install = async () =>
   {

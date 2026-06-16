@@ -2,6 +2,7 @@ import { Sunrise } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { buildMorningBrief, type MorningBrief } from '../../lib/morningBrief'
 import { fetchMorningBrief } from '../../lib/morningBriefApi'
+import type { MoodOrchestrationContext } from '../../lib/moodOrchestration'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
@@ -11,6 +12,7 @@ interface KanbanMorningBriefProps
   dueToday: number
   overdue: number
   dailyScoreCap: number
+  mood?: MoodOrchestrationContext | null
 }
 
 export function KanbanMorningBrief({
@@ -18,12 +20,18 @@ export function KanbanMorningBrief({
   dueToday,
   overdue,
   dailyScoreCap,
+  mood = null,
 }: KanbanMorningBriefProps)
 {
   const [brief, setBrief] = useState<MorningBrief>(() =>
-    buildMorningBrief(hojeTasks, dailyScoreCap),
+    buildMorningBrief(hojeTasks, dailyScoreCap, mood),
   )
   const [source, setSource] = useState<string>('local')
+
+  useEffect(() =>
+  {
+    setBrief(buildMorningBrief(hojeTasks, dailyScoreCap, mood))
+  }, [hojeTasks, dailyScoreCap, mood])
 
   useEffect(() =>
   {
@@ -40,7 +48,7 @@ export function KanbanMorningBrief({
     {
       cancelled = true
     }
-  }, [hojeTasks, dueToday, overdue, dailyScoreCap])
+  }, [hojeTasks, dueToday, overdue, dailyScoreCap, mood])
 
   return (
     <section

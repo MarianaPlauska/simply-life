@@ -14,6 +14,14 @@ export interface SpreadsheetPeriodSummary
   despesas: number
 }
 
+export interface SpreadsheetIncomeBreakdown
+{
+  receitasFixas: number
+  receitasExtras: number
+  totalReceitas: number
+  metaFixa: number
+}
+
 export interface SpreadsheetLedgerRow
 {
   transaction: Transaction
@@ -114,6 +122,43 @@ export function summarizeSpreadsheetPeriod(
     saldoFinal: saldoInicio + net,
     receitas,
     despesas,
+  }
+}
+
+const EXTRA_INCOME_MARKERS = ['[extra:', '[receita-recorrente:']
+
+function isExtraIncomeTransaction(t: Transaction): boolean
+{
+  if (t.tipo !== 'receita') return false
+  const desc = t.descricao.toLowerCase()
+  if (EXTRA_INCOME_MARKERS.some((m) => desc.includes(m))) return false
+  if (desc.includes('hora extra') || desc.includes('horas extra')) return true
+  if (desc.includes('freelance') || desc.includes('bônus') || desc.includes('bonus')) return true
+  return desc.includes('[extra:')
+}
+
+/** Separa receitas fixas (recorrentes postadas) vs extras no período */
+export function buildPeriodIncomeBreakdown(
+  periodTransactions: Transaction[],
+  recurringIncomes: RecurringIncome[],
+): SpreadsheetIncomeBreakdown
+{
+  const receitaTx = periodTransactions.filter((t) => t.tipo === 'receita')
+  const receitasExtras = receitaTx
+    .filter(isExtraIncomeTransaction)
+    .reduce((s, t) => s + t.valor, 0)
+  const receitasFixas = receitaTx
+    .filter((t) => !isExtraIncomeTransaction(t))
+    .reduce((s, t) => s + t.valor, 0)
+  const metaFixa = recurringIncomes
+    .filter((r) => r.ativa)
+    .reduce((s, r) => s + r.valor, 0)
+
+  return {
+    receitasFixas,
+    receitasExtras,
+    totalReceitas: receitasFixas + receitasExtras,
+    metaFixa,
   }
 }
 

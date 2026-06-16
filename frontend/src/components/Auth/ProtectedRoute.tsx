@@ -37,6 +37,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
             session.user.email?.split('@')[0] || '',
             session.user.id,
           );
+          void useTaskStore.getState().fetchWorkspacePrefs();
         }
         else if (!timedOut && isLoggedIn && !isLocalGuestUser(userId))
         {

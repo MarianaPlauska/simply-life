@@ -28,7 +28,6 @@ import {
 import { dedupeCategories, missingSeedNames } from '../../lib/financeCategoryDedupe'
 import { cardLimitUsagePct, sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
 import {
-  ensureReservedBillsMock,
   isMockReservedBillId,
   isMockReservedBillItemId,
   loadReservedBillsLocal,
@@ -589,60 +588,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       }
       else
       {
-        // If empty, let's insert default cards so they exist in database for this user
-        const uid = (await supabase.auth.getUser()).data.user?.id
-        if (uid)
-        {
-          const defaultCards: Omit<VirtualCard, 'id'>[] = [
-            {
-              nome: 'Assinaturas Dev',
-              titular: 'MARIANA PLAUSKA',
-              numero: '•••• •••• •••• 8432',
-              validade: '12/31',
-              cvv: '123',
-              limite: 2500,
-              dia_vencimento: 12,
-              dia_fechamento: 5,
-              tipo_gradiente: 'purple',
-              bandeira: 'mastercard',
-              status: 'ativo'
-            },
-            {
-              nome: 'AWS & GCP Cloud',
-              titular: 'MARIANA PLAUSKA',
-              numero: '•••• •••• •••• 9015',
-              validade: '06/30',
-              cvv: '456',
-              limite: 8000,
-              dia_vencimento: 15,
-              dia_fechamento: 8,
-              tipo_gradiente: 'obsidian',
-              bandeira: 'visa',
-              status: 'ativo'
-            }
-          ]
-          
-          const insertData = defaultCards.map((c, i) => ({
-            ...c,
-            id: `card_${Date.now()}_${i}`,
-            user_id: uid
-          }))
-          
-          const { data: inserted, error: insertError } = await supabase
-            .from('fin_cartoes')
-            .insert(insertData)
-            .select()
-          
-          if (!insertError && inserted)
-          {
-            set({ cards: inserted as VirtualCard[] })
-          }
-          else
-          {
-            // Fallback locally
-            set({ cards: insertData as VirtualCard[] })
-          }
-        }
+        set({ cards: [] })
       }
     }
     catch (e) { console.error('fetchCards error:', e) }
@@ -959,14 +905,12 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         return
       }
 
-      const mock = ensureReservedBillsMock()
-      set({ reservedBills: mock.bills, reservedBillItems: mock.items })
+      set({ reservedBills: [], reservedBillItems: [] })
     }
     catch (e)
     {
       console.error('fetchReservedBills:', e)
-      const mock = ensureReservedBillsMock()
-      set({ reservedBills: mock.bills, reservedBillItems: mock.items })
+      set({ reservedBills: [], reservedBillItems: [] })
     }
   },
 
@@ -1131,8 +1075,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
       if (get().reservedBills.length === 0)
       {
-        const mock = ensureReservedBillsMock()
-        set({ reservedBills: mock.bills, reservedBillItems: mock.items })
+        set({ reservedBills: [], reservedBillItems: [] })
       }
     }
     catch (e)

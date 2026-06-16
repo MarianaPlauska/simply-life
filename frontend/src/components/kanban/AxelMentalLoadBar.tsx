@@ -1,4 +1,5 @@
 import { computeMentalLoad } from '../../lib/energyOrchestration'
+import type { MoodOrchestrationContext } from '../../lib/moodOrchestration'
 import { AXEL_PROGRESS_THICK, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
@@ -6,11 +7,12 @@ interface AxelMentalLoadBarProps
 {
   hojeTasks: TarefaUnificada[]
   cap: number
+  mood?: MoodOrchestrationContext | null
 }
 
-export function AxelMentalLoadBar({ hojeTasks, cap }: AxelMentalLoadBarProps)
+export function AxelMentalLoadBar({ hojeTasks, cap, mood = null }: AxelMentalLoadBarProps)
 {
-  const load = computeMentalLoad(hojeTasks, cap)
+  const load = computeMentalLoad(hojeTasks, cap, mood)
   const fillPct = Math.min(100, load.percent)
 
   const fillClass =

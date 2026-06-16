@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
-import { AlertCircle, Mail, Lock, Eye, EyeOff, UserPlus, Globe } from 'lucide-react';
+import { AlertCircle, Mail, Lock, Eye, EyeOff, UserPlus, Globe, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { useTaskStore } from '../../store/useTaskStore';
 import { AuthInput } from '../ui/AuthInput';
 import { AuthButton } from '../ui/AuthButton';
 import { TabToggle } from '../ui/TabToggle';
-import { supabase } from '../../lib/supabase';
+import { getAuthCallbackUrl, supabase } from '../../lib/supabase';
+import { resolvePostAuthPath } from '../../lib/postAuthRoute';
+import { LoginHero } from './LoginHero';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
 
-/* ── Google "G" SVG ─────────────────────────────────────────── */
 function GoogleLogo({ className }: { className?: string })
 {
   return (
@@ -22,15 +24,22 @@ function GoogleLogo({ className }: { className?: string })
   );
 }
 
-
-
 const AUTH_TABS_KEYS = [
   { value: 'login' as const, key: 'login.tab_login' },
   { value: 'register' as const, key: 'login.tab_register' },
 ];
 
+function translateAuthError(msg: string, t: (k: string) => string): string
+{
+  if (msg.includes('Invalid login credentials')) return t('login.error_login')
+  if (msg.includes('Email not confirmed')) return 'Confirme seu email antes de fazer login'
+  if (msg.includes('already registered') || msg.includes('already been registered')) return 'Este email já possui uma conta'
+  if (msg.includes('Password should be')) return 'A senha precisa ter no mínimo 6 caracteres'
+  return msg
+}
 
-export function LoginView() {
+export function LoginView()
+{
   const login = useTaskStore((s) => s.login);
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn);
   const navigate = useNavigate();
@@ -42,368 +51,363 @@ export function LoginView() {
   const [nome, setNome] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [senhaErro, setSenhaErro] = useState('');
   const [forgotMode, setForgotMode] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotLoading, setForgotLoading] = useState(false);
 
-  /* Already authenticated â€” redirect to app */
-  if (isLoggedIn) {
-    return <Navigate to="/" replace />;
+  if (isLoggedIn)
+  {
+    return <LoggedInRedirect />;
   }
 
-  /* ── submit ── */
+  const finishAuth = async (session: { user: { id: string; email?: string | null } }, displayName: string, successKey: string) =>
+  {
+    login(session.user.email || '', displayName, session.user.id);
+    toast.success(t(successKey));
+    const path = await resolvePostAuthPath();
+    navigate(path, { replace: true });
+  };
+
+  const handleRegister = async () =>
+  {
+    if (senha.length < 6)
+    {
+      setSenhaErro('A senha precisa ter no mínimo 6 caracteres');
+      return;
+    }
+    setSenhaErro('');
+
+    const { data, error: err } = await supabase.auth.signUp({
+      email: email.trim(),
+      password: senha,
+      options: { data: { nome_completo: nome.trim() } },
+    });
+    if (err) throw new Error(err.message);
+
+    if (data.session)
+    {
+      await finishAuth(data.session, nome.trim(), 'login.success_register');
+      return;
+    }
+
+    // fallback: auto-confirm pode liberar login imediato
+    const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: senha,
+    });
+    if (signInErr) throw new Error(signInErr.message);
+    if (signInData.session)
+    {
+      await finishAuth(signInData.session, nome.trim(), 'login.success_register');
+    }
+  };
+
+  const handleLogin = async () =>
+  {
+    const { data, error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: senha,
+    });
+    if (err) throw new Error(err.message);
+    if (!data.session) return;
+
+    const displayName = await (async () =>
+    {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nome_completo')
+        .eq('id', data.session!.user.id)
+        .maybeSingle();
+      return profile?.nome_completo || data.user.email?.split('@')[0] || '';
+    })();
+
+    await finishAuth(data.session, displayName, 'login.success_login');
+  };
+
   const handleSubmit = async (e: React.FormEvent) =>
   {
-    e.preventDefault()
-    if (!email.trim() || !senha.trim()) return
-    if (mode === 'register' && !nome.trim()) return
+    e.preventDefault();
+    if (!email.trim() || !senha.trim()) return;
+    if (mode === 'register' && !nome.trim()) return;
 
-    setLoading(true)
-    setError('')
+    setLoading(true);
+    setError('');
 
     try
     {
-      if (mode === 'register')
-      {
-        // validação de senha
-        if (senha.length < 6)
-        {
-          setSenhaErro('A senha precisa ter no mínimo 6 caracteres')
-          setLoading(false)
-          return
-        }
-        setSenhaErro('')
-
-        // registro via supabase auth
-        const { data, error: err } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: senha,
-          options: { data: { nome_completo: nome.trim() } },
-        })
-        if (err) throw new Error(err.message)
-
-        // supabase retorna user mas sem session se email confirmation está ativo
-        if (data.user && !data.session)
-        {
-          toast.info('Conta criada! Verifique seu email para confirmar.', { duration: 6000 })
-          setMode('login')
-          setError('')
-          setLoading(false)
-          return
-        }
-
-        if (data.user && data.session)
-        {
-          login(data.user.email || '', nome.trim(), data.user.id)
-          toast.success(t('login.success_register'))
-          navigate('/', { replace: true })
-        }
-      }
-      else
-      {
-        // login via supabase auth
-        const { data, error: err } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: senha,
-        })
-        if (err) throw new Error(err.message)
-        if (data.user)
-        {
-          // busca nome do perfil
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('nome_completo')
-            .eq('id', data.user.id)
-            .single()
-
-          login(
-            data.user.email || '',
-            profile?.nome_completo || data.user.email?.split('@')[0] || '',
-            data.user.id,
-          )
-          toast.success(t('login.success_login'))
-          navigate('/', { replace: true })
-        }
-      }
+      if (mode === 'register') await handleRegister();
+      else await handleLogin();
     }
     catch (err)
     {
-      let msg = err instanceof Error ? err.message : t('login.error_connection')
-      // traduz mensagens do supabase
-      if (msg.includes('Invalid login credentials')) msg = 'Email ou senha incorretos'
-      if (msg.includes('Email not confirmed')) msg = 'Confirme seu email antes de fazer login'
-      if (msg.includes('already registered')) msg = 'Este email já possui uma conta'
-      if (msg.includes('Password should be')) msg = 'A senha precisa ter no mínimo 6 caracteres'
-      setError(msg)
-      toast.error(msg)
+      const raw = err instanceof Error ? err.message : t('login.error_connection');
+      const msg = translateAuthError(raw, t);
+      setError(msg);
+      toast.error(msg);
     }
     finally
     {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  // google oauth — desabilitado por enquanto
   const handleGoogle = async () =>
   {
-    toast.info('Google login será configurado em breve')
-  }
-
-  // recuperação de senha via supabase
-  const handleForgotPassword = async () =>
-  {
-    if (!forgotEmail.trim())
-    {
-      toast.error('Digite seu email')
-      return
-    }
-    setForgotLoading(true)
+    setGoogleLoading(true);
+    setError('');
     try
     {
-      const { error: err } = await supabase.auth.resetPasswordForEmail(
-        forgotEmail.trim(),
-        { redirectTo: `${window.location.origin}/reset-password` }
-      )
-      if (err) throw new Error(err.message)
-      toast.success('Email de recuperação enviado! Verifique sua caixa de entrada.', { duration: 6000 })
-      setForgotMode(false)
-      setForgotEmail('')
+      const { error: err } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: getAuthCallbackUrl(),
+          queryParams: { prompt: 'select_account' },
+        },
+      });
+      if (err) throw new Error(err.message);
     }
     catch (err)
     {
-      const msg = err instanceof Error ? err.message : 'Erro ao enviar email'
-      toast.error(msg)
+      const msg = err instanceof Error ? err.message : t('login.error_google');
+      setError(msg);
+      toast.error(msg);
+      setGoogleLoading(false);
     }
-    finally { setForgotLoading(false) }
-  }
+  };
 
-  // login como convidado — tenta sessão anônima, senão cria local
   const handleGuest = async () =>
   {
     try
     {
-      const { data, error: err } = await supabase.auth.signInAnonymously()
-      if (err) throw new Error(err.message)
+      const { data, error: err } = await supabase.auth.signInAnonymously();
+      if (err) throw new Error(err.message);
       if (data.user)
       {
-        login('convidado@simplylife.app', 'Convidado', data.user.id)
-        toast.success(t('login.success_guest'))
-        navigate('/', { replace: true })
-        return
+        login('convidado@simplylife.app', 'Convidado', data.user.id);
+        toast.success(t('login.success_guest'));
+        navigate('/', { replace: true });
+        return;
       }
     }
     catch
     {
-      // fallback: sessão local sem supabase auth (modo exploração)
-      const guestId = `guest_${Date.now()}`
-      login('convidado@simplylife.app', 'Convidado', guestId)
-      toast.success('Entrando como convidado — seus dados ficam apenas neste dispositivo')
-      navigate('/', { replace: true })
+      const guestId = `guest_${Date.now()}`;
+      login('convidado@simplylife.app', 'Convidado', guestId);
+      toast.success('Entrando como convidado — seus dados ficam apenas neste dispositivo');
+      navigate('/', { replace: true });
     }
-  }
+  };
 
   const isSubmitDisabled = !email.trim() || !senha.trim() || (mode === 'register' && !nome.trim());
 
   return (
-    <div className="relative h-screen w-screen bg-fundo sl-ruled-bg overflow-hidden flex items-center justify-center">
-      <div className="relative z-10 w-full max-w-md mx-4">
-        <div className="mb-10 text-center">
-          <p className="sl-eyebrow mb-4">Simply-Life OS</p>
-          <h1 className="text-[28px] font-display text-ink leading-tight">{t('login.title')}</h1>
-          <p className="text-[13px] text-ink-muted mt-2 max-w-xs mx-auto">{t('login.subtitle')}</p>
-        </div>
+    <div className="relative min-h-screen w-screen bg-fundo sl-ruled-bg overflow-hidden">
+      <div className="absolute inset-0 sl-login-vignette pointer-events-none" />
 
-        <div className="sl-panel p-8">
-          <TabToggle
-            tabs={AUTH_TABS_KEYS.map((tab) => ({ value: tab.value, label: t(tab.key) }))}
-            active={mode}
-            onChange={(v) => { setMode(v); setError(''); }}
-          />
+      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-5xl grid lg:grid-cols-[1fr_420px] gap-10 xl:gap-16 items-center">
+          <LoginHero />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === 'register' && (
-              <AuthInput
-                id="auth-nome"
-                label={t('login.name_label')}
-                type="text"
-                autoFocus
-                required
-                autoComplete="name"
-                placeholder={t('login.name_placeholder')}
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                icon={<UserPlus className="w-4 h-4" />}
+          <div className="w-full max-w-md mx-auto lg:max-w-none">
+            <div className="lg:hidden mb-8 text-center">
+              <p className="sl-eyebrow mb-3">Simply-Life OS</p>
+              <h1 className="text-[26px] font-display text-ink leading-tight">{t('login.title')}</h1>
+              <p className="text-[13px] text-ink-muted mt-2">{t('login.subtitle')}</p>
+            </div>
+
+            <div className="sl-panel sl-login-glow p-8">
+              <div className="hidden lg:block mb-6">
+                <h2 className="text-xl font-display text-ink">{t('login.title')}</h2>
+                <p className="text-[13px] text-ink-muted mt-1">{t('login.subtitle')}</p>
+              </div>
+
+              <TabToggle
+                tabs={AUTH_TABS_KEYS.map((tab) => ({ value: tab.value, label: t(tab.key) }))}
+                active={mode}
+                onChange={(v) => { setMode(v); setError(''); }}
               />
-            )}
 
-            <AuthInput
-              id="auth-email"
-              label={t('login.email_label')}
-              type="email"
-              autoFocus={mode === 'login'}
-              required
-              autoComplete="email"
-              placeholder={t('login.email_placeholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              icon={<Mail className="w-4 h-4" />}
-            />
-
-            <AuthInput
-              id="auth-senha"
-              label={t('login.password_label')}
-              type={showPassword ? 'text' : 'password'}
-              required
-              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              placeholder={mode === 'login' ? t('login.password_placeholder_login') : t('login.password_placeholder_register')}
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              icon={<Lock className="w-4 h-4" />}
-              suffix={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="text-ink-muted hover:text-ink transition-colors"
-                  aria-label={showPassword ? t('login.hide_password') : t('login.show_password')}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              }
-            />
-
-            {mode === 'register' && senhaErro && (
-              <p className="text-[11px] text-amber-400/80 -mt-2 inline-flex items-center gap-1">
-                <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
-                {senhaErro}
-              </p>
-            )}
-
-            {mode === 'register' && !senhaErro && senha.length > 0 && (
-              <div className="-mt-2 flex items-center gap-2">
-                <div className="flex-1 h-1 rounded-sl bg-chrome overflow-hidden">
-                  <div
-                    className={`h-full rounded-sl transition-all ${
-                      senha.length >= 8 ? 'w-full bg-concluido' :
-                      senha.length >= 6 ? 'w-2/3 bg-atencao' :
-                      'w-1/3 bg-urgente'
-                    }`}
+              <form onSubmit={handleSubmit} className="space-y-4 mt-5">
+                {mode === 'register' && (
+                  <AuthInput
+                    id="auth-nome"
+                    label={t('login.name_label')}
+                    type="text"
+                    autoFocus
+                    required
+                    autoComplete="name"
+                    placeholder={t('login.name_placeholder')}
+                    value={nome}
+                    onChange={(e) => setNome(e.target.value)}
+                    icon={<UserPlus className="w-4 h-4" />}
                   />
-                </div>
-                <span className={`font-mono text-[10px] ${
-                  senha.length >= 8 ? 'text-concluido' :
-                  senha.length >= 6 ? 'text-atencao' :
-                  'text-urgente'
-                }`}>
-                  {senha.length >= 8 ? 'Forte' : senha.length >= 6 ? 'Ok' : 'Fraca'}
-                </span>
+                )}
+
+                <AuthInput
+                  id="auth-email"
+                  label={t('login.email_label')}
+                  type="email"
+                  autoFocus={mode === 'login'}
+                  required
+                  autoComplete="email"
+                  placeholder={t('login.email_placeholder')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  icon={<Mail className="w-4 h-4" />}
+                />
+
+                <AuthInput
+                  id="auth-senha"
+                  label={t('login.password_label')}
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                  placeholder={mode === 'login' ? t('login.password_placeholder_login') : t('login.password_placeholder_register')}
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                  icon={<Lock className="w-4 h-4" />}
+                  suffix={
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="text-ink-muted hover:text-ink transition-colors"
+                      aria-label={showPassword ? t('login.hide_password') : t('login.show_password')}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  }
+                />
+
+                {mode === 'register' && senhaErro && (
+                  <p className="text-[11px] text-amber-400/80 -mt-2 inline-flex items-center gap-1">
+                    <AlertCircle size={14} strokeWidth={1.5} className="shrink-0" />
+                    {senhaErro}
+                  </p>
+                )}
+
+                {mode === 'register' && !senhaErro && senha.length > 0 && (
+                  <div className="-mt-2 flex items-center gap-2">
+                    <div className="flex-1 h-1 rounded-sl bg-chrome overflow-hidden">
+                      <div
+                        className={`h-full rounded-sl transition-all ${
+                          senha.length >= 8 ? 'w-full bg-concluido' :
+                          senha.length >= 6 ? 'w-2/3 bg-atencao' :
+                          'w-1/3 bg-urgente'
+                        }`}
+                      />
+                    </div>
+                    <span className={`font-mono text-[10px] ${
+                      senha.length >= 8 ? 'text-concluido' :
+                      senha.length >= 6 ? 'text-atencao' :
+                      'text-urgente'
+                    }`}>
+                      {senha.length >= 8 ? 'Forte' : senha.length >= 6 ? 'Ok' : 'Fraca'}
+                    </span>
+                  </div>
+                )}
+
+                {error && (
+                  <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
+                )}
+
+                {mode === 'login' && (
+                  <div className="flex justify-end -mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setForgotMode(true)}
+                      className="text-[11px] text-ink-muted hover:text-accent transition-colors"
+                    >
+                      {t('login.forgot_password')}
+                    </button>
+                  </div>
+                )}
+
+                <AuthButton
+                  loading={loading}
+                  disabled={isSubmitDisabled}
+                  label={mode === 'login' ? t('login.submit_login') : t('login.submit_register')}
+                  loadingLabel={mode === 'login' ? t('login.loading_login') : t('login.loading_register')}
+                />
+              </form>
+
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-line" />
+                <span className="font-mono text-[10px] text-ink-muted uppercase tracking-[0.14em]">{t('login.or_continue')}</span>
+                <div className="flex-1 h-px bg-line" />
               </div>
-            )}
 
-            {error && (
-              <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
-            )}
+              <button
+                type="button"
+                onClick={() => void handleGoogle()}
+                disabled={googleLoading}
+                className="w-full flex items-center justify-center gap-3 py-3 rounded-sl bg-elevated border border-line text-ink text-sm font-medium hover:border-accent/40 hover:bg-chrome/60 transition-colors disabled:opacity-60"
+              >
+                {googleLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-ink-muted" />
+                ) : (
+                  <GoogleLogo className="w-5 h-5" />
+                )}
+                {t('login.google')}
+              </button>
 
-            {mode === 'login' && (
-              <div className="flex justify-end -mt-1">
-                <button
-                  type="button"
-                  onClick={() => { setForgotMode(true); setForgotEmail(email); }}
-                  className="text-[11px] text-ink-muted hover:text-accent transition-colors"
-                >
-                  {t('login.forgot_password')}
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                onClick={() => void handleGuest()}
+                className="w-full mt-3 py-2.5 rounded-sl border border-line text-[13px] font-medium text-ink-muted hover:text-ink hover:border-ink-muted/50 transition-colors"
+              >
+                {t('login.guest')}
+              </button>
+            </div>
 
-            <AuthButton
-              loading={loading}
-              disabled={isSubmitDisabled}
-              label={mode === 'login' ? t('login.submit_login') : t('login.submit_register')}
-              loadingLabel={mode === 'login' ? t('login.loading_login') : t('login.loading_register')}
-            />
-          </form>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-line" />
-            <span className="font-mono text-[10px] text-ink-muted uppercase tracking-[0.14em]">{t('login.or_continue')}</span>
-            <div className="flex-1 h-px bg-line" />
-          </div>
-
-          <button
-            type="button"
-            onClick={handleGoogle}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-sl bg-elevated border border-line text-ink text-sm font-medium hover:border-ink-muted/50 transition-colors"
-          >
-            <GoogleLogo className="w-5 h-5" />
-            {t('login.google')}
-          </button>
-
-          <button
-            type="button"
-            onClick={handleGuest}
-            className="w-full mt-3 py-2.5 rounded-sl border border-line text-[13px] font-medium text-ink-muted hover:text-ink hover:border-ink-muted/50 transition-colors"
-          >
-            {t('login.guest')}
-          </button>
-        </div>
-
-        {/* ── Modal de recuperação de senha ── */}
-        {forgotMode && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-fundo/90">
-            <div className="sl-panel p-8 w-full max-w-sm mx-4">
-              <h2 className="text-lg font-display text-ink mb-1">Recuperar senha</h2>
-              <p className="text-[13px] text-ink-muted mb-5">
-                Digite seu email e enviaremos um link para redefinir sua senha.
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-8">
+              <p className="text-[11px] text-ink-muted text-center">
+                {t('login.terms_agree')}{' '}
+                <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.terms')}</span>
+                {' '}{t('login.and')}{' '}
+                <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.privacy')}</span>
               </p>
-              <input
-                type="email"
-                value={forgotEmail}
-                onChange={(e) => setForgotEmail(e.target.value)}
-                placeholder="seu@email.com"
-                className="w-full px-4 py-3 rounded-sl bg-chrome border border-line text-ink text-sm placeholder:text-ink-muted focus:border-accent focus:outline-none transition-colors"
-                autoFocus
-              />
-              <div className="flex gap-3 mt-5">
-                <button
-                  type="button"
-                  onClick={() => setForgotMode(false)}
-                  className="flex-1 py-2.5 rounded-sl border border-line text-sm text-ink-muted hover:text-ink transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  disabled={forgotLoading || !forgotEmail.trim()}
-                  className="flex-1 py-2.5 rounded-sl bg-accent hover:bg-accent-hover text-white text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  {forgotLoading ? 'Enviando...' : 'Enviar link'}
-                </button>
-              </div>
+
+              <button
+                type="button"
+                onClick={() => i18n.changeLanguage(i18n.language === 'pt-BR' ? 'en' : 'pt-BR')}
+                className="flex items-center gap-1 px-2 py-1 rounded-sl font-mono text-[10px] text-ink-muted hover:text-ink border border-line hover:border-ink-muted/50 transition-colors shrink-0"
+              >
+                <Globe className="w-3 h-3" />
+                {i18n.language === 'pt-BR' ? 'PT' : 'EN'}
+              </button>
             </div>
           </div>
-        )}
-
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <p className="text-[11px] text-ink-muted">
-            {t('login.terms_agree')}{' '}
-            <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.terms')}</span>
-            {' '}{t('login.and')}{' '}
-            <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.privacy')}</span>
-          </p>
-
-          <button
-            type="button"
-            onClick={() => i18n.changeLanguage(i18n.language === 'pt-BR' ? 'en' : 'pt-BR')}
-            className="flex items-center gap-1 px-2 py-1 rounded-sl font-mono text-[10px] text-ink-muted hover:text-ink border border-line hover:border-ink-muted/50 transition-colors"
-          >
-            <Globe className="w-3 h-3" />
-            {i18n.language === 'pt-BR' ? 'PT' : 'EN'}
-          </button>
         </div>
       </div>
+
+      {forgotMode && (
+        <ForgotPasswordModal
+          initialEmail={email}
+          onClose={() => setForgotMode(false)}
+        />
+      )}
     </div>
   );
+}
+
+function LoggedInRedirect()
+{
+  const [target, setTarget] = useState<string | null>(null);
+
+  useEffect(() =>
+  {
+    void resolvePostAuthPath().then(setTarget);
+  }, []);
+
+  if (!target)
+  {
+    return (
+      <div className="flex items-center justify-center h-screen bg-fundo">
+        <div className="w-8 h-8 rounded-sl border-2 border-line border-t-accent animate-spin" />
+      </div>
+    );
+  }
+
+  return <Navigate to={target} replace />;
 }

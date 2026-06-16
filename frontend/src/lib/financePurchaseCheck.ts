@@ -1,3 +1,4 @@
+import type { MoodProfile } from './moodOrchestration'
 import { adviseSpend, daysUntilMonthEnd } from './financeSpendAdvice'
 import { buildCategoryBudgetRows } from './financeCategoryBudget'
 import { computeCashPosition } from './financeReservedBills'
@@ -26,6 +27,7 @@ export interface PurchaseCheckInput
   saldoInicial: number
   reservedBills: ReservedBill[]
   cards: VirtualCard[]
+  moodProfile?: MoodProfile
 }
 
 export interface PurchaseVerdict
@@ -161,6 +163,7 @@ export function buildLocalPurchaseVerdict(input: PurchaseCheckInput, ref = new D
     compraProposta: input.valor,
     diasAteFimMes: ctx.diasRestantes,
     limiteCartaoDisponivel,
+    moodProfile: input.moodProfile,
   })
 
   let tone: PurchaseVerdictTone = base.tone === 'wait' ? 'wait' : base.tone

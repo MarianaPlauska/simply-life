@@ -1,123 +1,171 @@
-import { useState } from 'react';
-import { User, Mail, Camera, Shield, Bell, Moon, Keyboard, Monitor, Save } from 'lucide-react';
-import { toast } from 'sonner';
-import { useTaskStore } from '../../store/useTaskStore';
-import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard';
+import { useEffect, useState } from 'react'
+import { User, Mail, Camera, Shield, Bell, Moon, Keyboard, Monitor, Save, LogOut } from 'lucide-react'
+import { toast } from 'sonner'
+import { useTaskStore } from '../../store/useTaskStore'
+import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard'
+import { ProfileAxelHero } from '../gamification/ProfileAxelHero'
+import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
+import { MonthlyStreakShieldCard } from '../gamification/MonthlyStreakShieldCard'
+import { ProfileAchievementsGrid } from '../gamification/ProfileAchievementsGrid'
+import { AxelRewardShop } from '../gamification/AxelRewardShop'
+import { AxelCosmeticsLibrary } from '../gamification/AxelCosmeticsLibrary'
+import { InviteFriendPanel } from '../social/InviteFriendPanel'
+import { FriendCircleCard } from '../social/FriendCircleCard'
+import {
+  AXEL_BTN_PRIMARY,
+  AXEL_BORDERLESS_PANEL,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
 
-export function ProfileView() {
-  const userProfile = useTaskStore((s) => s.userProfile);
-  const updateProfile = useTaskStore((s) => s.updateProfile);
-  const logout = useTaskStore((s) => s.logout);
+export function ProfileView()
+{
+  const userProfile = useTaskStore((s) => s.userProfile)
+  const updateProfile = useTaskStore((s) => s.updateProfile)
+  const logout = useTaskStore((s) => s.logout)
+  const fetchAchievements = useTaskStore((s) => s.fetchAchievements)
+  const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
+  const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
 
-  const [nome, setNome] = useState(userProfile.nome);
-  const [email, setEmail] = useState(userProfile.email);
-  const [saved, setSaved] = useState(false);
+  const [nome, setNome] = useState(userProfile.nome)
+  const [email, setEmail] = useState(userProfile.email)
+  const [saved, setSaved] = useState(false)
 
-  const handleSave = () => {
-    updateProfile({ nome, email });
-    setSaved(true);
-    toast.success('Perfil atualizado');
-    setTimeout(() => setSaved(false), 2000);
-  };
+  useEffect(() =>
+  {
+    syncStreakCalendarDay()
+    void fetchAchievements?.()
+    void fetchGamificacaoStats?.()
+  }, [syncStreakCalendarDay, fetchAchievements, fetchGamificacaoStats])
+
+  const handleSave = () =>
+  {
+    updateProfile({ nome, email })
+    setSaved(true)
+    toast.success('Perfil atualizado')
+    setTimeout(() => setSaved(false), 2000)
+  }
 
   return (
-    <div className="max-w-3xl mx-auto pb-16 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Meu Perfil</h1>
-        <p className="text-[13px] text-zinc-500 mt-1">Gerencie suas informacoes pessoais e preferencias</p>
-      </div>
+    <div className="max-w-3xl mx-auto pb-16 space-y-4 sm:space-y-5">
+      <header>
+        <p className="sl-eyebrow">Identidade</p>
+        <h1 className={`text-2xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
+          Meu perfil
+        </h1>
+        <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          Progresso, conquistas e conta — tudo no visual AXEL
+        </p>
+      </header>
 
-      {/* Avatar + Name */}
-      <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-6">
-        <div className="flex items-center gap-5">
-          <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-zinc-800 border-2 border-zinc-700/50 flex items-center justify-center">
-              <User className="w-8 h-8 text-zinc-500" aria-hidden="true" />
+      <ProfileAxelHero />
+      <FriendCircleCard />
+      <InviteFriendPanel />
+      <WeeklyEpisodeCard />
+      <MonthlyStreakShieldCard />
+      <OperadorOfensivaCard />
+      <ProfileAchievementsGrid />
+      <AxelCosmeticsLibrary />
+      <AxelRewardShop />
+
+      <section className={AXEL_BORDERLESS_PANEL}>
+        <div className="flex items-center gap-4">
+          <div className="relative shrink-0">
+            <div className="w-16 h-16 rounded-sl bg-chrome border border-line flex items-center justify-center">
+              <User className="w-7 h-7 text-ink-muted" aria-hidden />
             </div>
             <button
-              className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-zinc-800 border border-zinc-700/50 text-zinc-400 hover:text-white transition-colors"
+              type="button"
+              className="absolute -bottom-1 -right-1 p-1.5 rounded-sl bg-card border border-line text-ink-muted hover:text-ink transition-colors"
               aria-label="Alterar foto de perfil"
             >
               <Camera className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold text-white">{userProfile.nome || 'Usuario'}</h2>
-            <p className="text-[13px] text-zinc-500">{userProfile.email || 'email@exemplo.com'}</p>
+          <div className="min-w-0">
+            <h2 className={`text-base font-display ${AXEL_TEXT_PRIMARY}`}>
+              {userProfile.nome || 'Convidado'}
+            </h2>
+            <p className={`text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
+              {userProfile.email || '—'}
+            </p>
           </div>
         </div>
       </section>
 
-      <OperadorOfensivaCard />
-
-      {/* Edit Fields */}
-      <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-6 space-y-5">
-        <h3 className="text-[13px] font-semibold text-zinc-200 flex items-center gap-2">
-          <Shield className="w-4 h-4 text-zinc-500" aria-hidden="true" />
-          Informacoes da Conta
+      <section className={`${AXEL_BORDERLESS_PANEL} space-y-5`}>
+        <h3 className={`text-[13px] font-medium flex items-center gap-2 ${AXEL_TEXT_PRIMARY}`}>
+          <Shield size={14} className="text-ink-muted" />
+          Informações da conta
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="profile-nome" className="block text-[12px] font-medium text-zinc-400 mb-1.5">Nome</label>
+            <label htmlFor="profile-nome" className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
+              Nome
+            </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" aria-hidden="true" />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
               <input
                 id="profile-nome"
                 type="text"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
-                className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-xl pl-10 pr-4 py-2.5 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-500/30 transition"
+                className="w-full bg-chrome border border-line rounded-sl pl-10 pr-4 py-2.5 text-[13px] text-ink outline-none focus:border-accent/50 transition-colors"
               />
             </div>
           </div>
           <div>
-            <label htmlFor="profile-email" className="block text-[12px] font-medium text-zinc-400 mb-1.5">Email</label>
+            <label htmlFor="profile-email" className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
+              E-mail
+            </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" aria-hidden="true" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
               <input
                 id="profile-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-xl pl-10 pr-4 py-2.5 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-500/30 transition"
+                className="w-full bg-chrome border border-line rounded-sl pl-10 pr-4 py-2.5 text-[13px] text-ink outline-none focus:border-accent/50 transition-colors"
               />
             </div>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={handleSave}
-          className="flex items-center gap-2 px-4 py-2 text-[12px] font-medium bg-white text-zinc-900 rounded-lg hover:bg-zinc-200 transition-colors"
+          className={`inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
         >
           <Save className="w-3.5 h-3.5" />
-          {saved ? 'Salvo!' : 'Salvar alteracoes'}
+          {saved ? 'Salvo' : 'Salvar alterações'}
         </button>
       </section>
 
-      {/* Quick Preferences */}
-      <section className="rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-6 space-y-4">
-        <h3 className="text-[13px] font-semibold text-zinc-200">Preferencias Rapidas</h3>
-        <div className="space-y-0 divide-y divide-zinc-800/30">
-          <PreferenceRow icon={Bell} label="Notificacoes" description="Alertas de tarefas e lembretes" />
-          <PreferenceRow icon={Moon} label="Modo Escuro" description="Sempre ativo neste tema" defaultOn />
-          <PreferenceRow icon={Keyboard} label="Atalhos de Teclado" description="Ctrl+K busca, Ctrl+N nova nota" defaultOn />
-          <PreferenceRow icon={Monitor} label="Animacoes Reduzidas" description="Reduz movimentos para acessibilidade" />
+      <section className={AXEL_BORDERLESS_PANEL}>
+        <h3 className={`text-[13px] font-medium mb-3 ${AXEL_TEXT_PRIMARY}`}>
+          Preferências rápidas
+        </h3>
+        <div className="divide-y divide-line">
+          <PreferenceRow icon={Bell} label="Notificações" description="Tarefas e lembretes" />
+          <PreferenceRow icon={Moon} label="Tema escuro" description="Instrumento AXEL ativo" defaultOn />
+          <PreferenceRow icon={Keyboard} label="Atalhos" description="⌘K captura rápida" defaultOn />
+          <PreferenceRow icon={Monitor} label="Movimento reduzido" description="Acessibilidade" />
         </div>
       </section>
 
-      {/* Danger Zone */}
-      <section className="rounded-xl border border-red-900/30 bg-red-500/[0.02] p-6">
-        <h3 className="text-[13px] font-semibold text-red-400 mb-3">Zona de Perigo</h3>
+      <section className="rounded-sl border border-urgente/30 bg-urgente/5 p-4">
         <button
+          type="button"
           onClick={logout}
-          className="px-4 py-2 text-[12px] font-medium text-red-400 border border-red-800/40 rounded-lg hover:bg-red-500/10 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 font-mono text-[10px] uppercase tracking-wide text-urgente border border-urgente/40 rounded-sl hover:bg-urgente/10 transition-colors"
         >
-          Sair da Conta
+          <LogOut size={14} />
+          Sair da conta
         </button>
       </section>
     </div>
-  );
+  )
 }
 
 function PreferenceRow({
@@ -126,34 +174,37 @@ function PreferenceRow({
   description,
   defaultOn = false,
 }: {
-  icon: React.ElementType;
-  label: string;
-  description: string;
-  defaultOn?: boolean;
-}) {
-  const [enabled, setEnabled] = useState(defaultOn);
+  icon: React.ElementType
+  label: string
+  description: string
+  defaultOn?: boolean
+})
+{
+  const [enabled, setEnabled] = useState(defaultOn)
+
   return (
-    <div className="flex items-center justify-between py-3.5">
-      <div className="flex items-center gap-3">
-        <Icon className="w-4 h-4 text-zinc-500" aria-hidden="true" />
+    <div className="flex items-center justify-between py-3.5 gap-4">
+      <div className="flex items-center gap-3 min-w-0">
+        <Icon className="w-4 h-4 text-ink-muted shrink-0" />
         <div>
-          <p className="text-[13px] font-medium text-zinc-200">{label}</p>
-          <p className="text-[11px] text-zinc-600">{description}</p>
+          <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>{label}</p>
+          <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{description}</p>
         </div>
       </div>
       <button
+        type="button"
         role="switch"
         aria-checked={enabled}
         aria-label={`${label}: ${enabled ? 'ativado' : 'desativado'}`}
         onClick={() => setEnabled((v) => !v)}
-        className={`relative w-9 h-5 rounded-full transition-colors ${enabled ? 'bg-violet-500' : 'bg-zinc-700'}`}
+        className={`relative w-9 h-5 rounded-sl shrink-0 transition-colors ${enabled ? 'bg-accent' : 'bg-chrome border border-line'}`}
       >
         <span
-          className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+          className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-sl bg-white transition-transform ${
             enabled ? 'translate-x-4' : 'translate-x-0'
           }`}
         />
       </button>
     </div>
-  );
+  )
 }
