@@ -1,8 +1,8 @@
-// GET/POST/DELETE /api/push-subscribe — VAPID + registro de subscription
+// Handler — VAPID + registro push_subscriptions
 
-import { getSupabaseAdmin } from './_lib/supabaseAdmin.js';
-import { getUserFromBearer, corsJson } from './_lib/supabaseUser.js';
-import { getVapidPublicKey, isWebPushConfigured } from './_lib/webPush.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
+import { getUserFromBearer, corsJson } from '../../supabaseUser.js';
+import { getVapidPublicKey, isWebPushConfigured } from '../../webPush.js';
 
 export default async function handler(req, res)
 {

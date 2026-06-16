@@ -18,6 +18,7 @@
   },
   "rewrites": [
     { "source": "/api/webhook-ingest", "destination": "/api/webhooks/m2m" },
+    { "source": "/api/push-subscribe", "destination": "/api/webhooks/push-subscribe" },
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],

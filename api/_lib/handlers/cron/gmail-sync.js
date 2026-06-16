@@ -1,11 +1,10 @@
-// GET /api/cron/gmail-sync — sync periódico (Vercel Cron)
-// Protegido por CRON_SECRET no header Authorization: Bearer <secret>
+// Handler — sync Gmail (OAuth + IMAP)
 
-import { getSupabaseAdmin } from '../_lib/supabaseAdmin.js';
-import { resolveGoogleAccessToken } from '../_lib/googleOAuth.js';
-import { fetchUnreadEmails } from '../_lib/gmailClient.js';
-import { fetchUnreadViaImap } from '../_lib/gmailImap.js';
-import { ingestGmailBatch } from '../_lib/gmailIngestRunner.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
+import { resolveGoogleAccessToken } from '../../googleOAuth.js';
+import { fetchUnreadEmails } from '../../gmailClient.js';
+import { fetchUnreadViaImap } from '../../gmailImap.js';
+import { ingestGmailBatch } from '../../gmailIngestRunner.js';
 
 export default async function handler(req, res)
 {

@@ -1,14 +1,13 @@
-// GET /api/cron/push-bills — envia push de boletos ≤48h (Vercel Cron)
-// Authorization: Bearer CRON_SECRET
+// Handler — push de boletos ≤48h
 
-import { getSupabaseAdmin } from '../_lib/supabaseAdmin.js';
+import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import {
   buildUpcomingBillsServer,
   billsForPushWindow,
   billDeliveryKey,
   formatBillPushPayload,
-} from '../_lib/financeUpcomingBillsServer.js';
-import { sendWebPush, isWebPushConfigured, isExpiredSubscriptionError } from '../_lib/webPush.js';
+} from '../../financeUpcomingBillsServer.js';
+import { sendWebPush, isWebPushConfigured, isExpiredSubscriptionError } from '../../webPush.js';
 
 export default async function handler(req, res)
 {
