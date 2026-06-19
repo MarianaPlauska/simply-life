@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import type { TarefaUnificada } from '../../types'
 import { STATUS_CONFIG } from '../../constants/kanbanConfig'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { DueDateChip } from './DueDateChip'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 
 type GanttZoom = 7 | 14 | 30
@@ -152,7 +153,40 @@ export function GanttView({ tarefas, onSelectTarefa }: GanttViewProps)
           Nenhuma tarefa pendente com prazo. Defina datas no planejador ou use a aba Lista.
         </p>
       ) : (
-        <div className="border border-line rounded-sl bg-card overflow-hidden flex flex-col min-h-0 max-h-[calc(100vh-320px)]">
+        <>
+          <div className="md:hidden space-y-2">
+            {comPrazo.map((t) =>
+            {
+              const cfg = STATUS_CONFIG[t.status]
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => onSelectTarefa(t)}
+                  className="w-full text-left rounded-sl border border-line bg-card px-3 py-3 flex items-start gap-3 hover:bg-chrome/30 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm truncate ${AXEL_TEXT_PRIMARY}`}>
+                      {cleanTitleForDisplay(t.titulo)}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 mt-2">
+                      <DueDateChip date={t.data_vencimento} compact />
+                      {cfg && (
+                        <span className={`font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-sm ${cfg.bg} ${cfg.color}`}>
+                          {cfg.label}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+            <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
+              {comPrazo.length} com prazo · vista simplificada no celular
+            </p>
+          </div>
+
+          <div className="hidden md:flex border border-line rounded-sl bg-card overflow-hidden flex-col min-h-0 max-h-[calc(100vh-320px)]">
           <div className="overflow-auto custom-scrollbar flex-1 min-h-0">
             <div style={{ minWidth: LABEL_COL + timelineWidth }}>
               {/* cabeçalho de dias */}
@@ -262,6 +296,7 @@ export function GanttView({ tarefas, onSelectTarefa }: GanttViewProps)
             {comPrazo.length} com prazo · {dayCount} dias visíveis · sem prazo não aparece aqui
           </p>
         </div>
+        </>
       )}
     </div>
   )

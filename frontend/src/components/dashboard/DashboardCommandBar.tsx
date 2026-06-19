@@ -49,7 +49,7 @@ function KpiCell({ label, value, hint, variant = 'default', onClick }: KpiCellPr
       <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
         {label}
       </p>
-      <p className={`text-lg sm:text-xl font-display tabular-nums mt-1 leading-none ${valueClass}`}>
+      <p className={`text-base sm:text-lg font-display tabular-nums mt-1 leading-none ${valueClass}`}>
         {value}
       </p>
       {hint && (
@@ -122,7 +122,7 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 border border-line rounded-sl bg-card overflow-hidden">
+        <div className="grid grid-cols-2 sm:grid-cols-4 border border-line rounded-sl bg-card overflow-hidden">
           <KpiCell
             label="Execução"
             value={String(pendentes)}
@@ -130,6 +130,28 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
             variant={criticas > 0 ? 'urgent' : 'default'}
             onClick={() => navigate('/kanban')}
           />
+          <KpiCell
+            label="Ofensiva"
+            value={String(streakCount)}
+            hint={isStreakSafeToday() ? 'Segura hoje' : 'Tarefa ou humor'}
+            variant={isStreakSafeToday() ? 'ok' : 'default'}
+            onClick={() => navigate('/kanban?panel=executar')}
+          />
+          <KpiCell
+            label="Hidratação"
+            value={`${aguaPct}%`}
+            hint={`${aguaCopos}/${aguaMeta} copos`}
+            variant={aguaOk ? 'ok' : 'default'}
+            onClick={() => navigate('/saude#hidratacao')}
+          />
+          <KpiCell
+            label="Saldo"
+            value={fmtBRL(saldo)}
+            hint="mensal"
+            onClick={() => navigate('/financeiro')}
+          />
+        </div>
+        <div className="hidden lg:grid grid-cols-4 border border-line rounded-sl bg-card overflow-hidden mt-2">
           <KpiCell
             label="Prazo hoje"
             value={String(dueBuckets.hoje.length)}
@@ -145,30 +167,10 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
             onClick={() => navigate('/kanban?bucket=vencido')}
           />
           <KpiCell
-            label="Ofensiva"
-            value={String(streakCount)}
-            hint={isStreakSafeToday() ? 'Segura hoje' : 'Tarefa ou humor'}
-            variant={isStreakSafeToday() ? 'ok' : 'default'}
-            onClick={() => navigate('/kanban?panel=executar')}
-          />
-          <KpiCell
-            label="Hidratação"
-            value={`${aguaPct}%`}
-            hint={`${aguaCopos}/${aguaMeta} copos`}
-            variant={aguaOk ? 'ok' : aguaPct >= 50 ? 'default' : 'default'}
-            onClick={() => navigate('/saude#hidratacao')}
-          />
-          <KpiCell
             label="Concluídas"
             value={String(concluidas)}
             hint="ciclo atual"
             variant="ok"
-          />
-          <KpiCell
-            label="Saldo"
-            value={fmtBRL(saldo)}
-            hint="mensal"
-            onClick={() => navigate('/financeiro')}
           />
           <KpiCell
             label="Alertas"

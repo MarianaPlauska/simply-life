@@ -90,6 +90,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true, // falha ao invés de incrementar a porta
   },
+  optimizeDeps: {
+    include: ['recharts', 'canvas-confetti', 'react', 'react-dom', 'react-router-dom'],
+  },
   build: {
     rollupOptions: {
       output: {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { User, Mail, Camera, Shield, Bell, Moon, Keyboard, Monitor, Save, LogOut } from 'lucide-react'
+import { User, Mail, Camera, Bell, Moon, Keyboard, Monitor, Save, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard'
@@ -11,6 +11,7 @@ import { AxelRewardShop } from '../gamification/AxelRewardShop'
 import { AxelCosmeticsLibrary } from '../gamification/AxelCosmeticsLibrary'
 import { InviteFriendPanel } from '../social/InviteFriendPanel'
 import { FriendCircleCard } from '../social/FriendCircleCard'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_BORDERLESS_PANEL,
@@ -26,6 +27,8 @@ export function ProfileView()
   const fetchAchievements = useTaskStore((s) => s.fetchAchievements)
   const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
   const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
+  const streakCount = useTaskStore((s) => s.streakCount)
+  const userStats = useTaskStore((s) => s.userStats)
 
   const [nome, setNome] = useState(userProfile.nome)
   const [email, setEmail] = useState(userProfile.email)
@@ -47,112 +50,137 @@ export function ProfileView()
   }
 
   return (
-    <div className="max-w-3xl mx-auto pb-16 space-y-4 sm:space-y-5">
+    <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-16 space-y-3 sm:space-y-4">
       <header>
         <p className="sl-eyebrow">Identidade</p>
         <h1 className={`text-2xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
           Meu perfil
         </h1>
         <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-          Progresso, conquistas e conta — tudo no visual AXEL
+          Toque em cada bloco para ver detalhes
         </p>
       </header>
 
       <ProfileAxelHero />
-      <FriendCircleCard />
-      <InviteFriendPanel />
-      <WeeklyEpisodeCard />
-      <MonthlyStreakShieldCard />
-      <OperadorOfensivaCard />
-      <ProfileAchievementsGrid />
-      <AxelCosmeticsLibrary />
-      <AxelRewardShop />
 
-      <section className={AXEL_BORDERLESS_PANEL}>
-        <div className="flex items-center gap-4">
-          <div className="relative shrink-0">
-            <div className="w-16 h-16 rounded-sl bg-chrome border border-line flex items-center justify-center">
-              <User className="w-7 h-7 text-ink-muted" aria-hidden />
+      <DashboardCollapsible title="Social" subtitle="Círculo de amigos e convites">
+        <FriendCircleCard />
+        <InviteFriendPanel />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible
+        title="Episódio da semana"
+        subtitle="Resumo dos últimos 7 dias"
+      >
+        <WeeklyEpisodeCard />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible
+        title="Escudos de ofensiva"
+        subtitle={`${streakCount} dia(s) de sequência`}
+      >
+        <MonthlyStreakShieldCard />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible
+        title="Momentum AXEL"
+        subtitle={`Nv ${userStats?.level ?? 1} · ofensiva e foco`}
+      >
+        <OperadorOfensivaCard />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible title="Conquistas" subtitle="Badges e missões">
+        <ProfileAchievementsGrid />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible title="Coleção AXEL" subtitle="Cores, molduras e cosméticos">
+        <AxelCosmeticsLibrary />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible
+        title="Loja AXEL"
+        subtitle="Resgatar escudos e cosméticos"
+      >
+        <AxelRewardShop />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible title="Conta" subtitle={userProfile.email || 'Dados pessoais'}>
+        <section className={`${AXEL_BORDERLESS_PANEL} border-0 p-0`}>
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative shrink-0">
+              <div className="w-16 h-16 rounded-sl bg-chrome border border-line flex items-center justify-center">
+                <User className="w-7 h-7 text-ink-muted" aria-hidden />
+              </div>
+              <button
+                type="button"
+                className="absolute -bottom-1 -right-1 p-1.5 rounded-sl bg-card border border-line text-ink-muted hover:text-ink transition-colors"
+                aria-label="Alterar foto de perfil"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <button
-              type="button"
-              className="absolute -bottom-1 -right-1 p-1.5 rounded-sl bg-card border border-line text-ink-muted hover:text-ink transition-colors"
-              aria-label="Alterar foto de perfil"
-            >
-              <Camera className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <div className="min-w-0">
-            <h2 className={`text-base font-display ${AXEL_TEXT_PRIMARY}`}>
-              {userProfile.nome || 'Convidado'}
-            </h2>
-            <p className={`text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
-              {userProfile.email || '—'}
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className={`${AXEL_BORDERLESS_PANEL} space-y-5`}>
-        <h3 className={`text-[13px] font-medium flex items-center gap-2 ${AXEL_TEXT_PRIMARY}`}>
-          <Shield size={14} className="text-ink-muted" />
-          Informações da conta
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="profile-nome" className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
-              Nome
-            </label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
-              <input
-                id="profile-nome"
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                className="w-full bg-chrome border border-line rounded-sl pl-10 pr-4 py-2.5 text-[13px] text-ink outline-none focus:border-accent/50 transition-colors"
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="profile-email" className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
-              E-mail
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
-              <input
-                id="profile-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-chrome border border-line rounded-sl pl-10 pr-4 py-2.5 text-[13px] text-ink outline-none focus:border-accent/50 transition-colors"
-              />
+            <div className="min-w-0">
+              <h2 className={`text-base font-display ${AXEL_TEXT_PRIMARY}`}>
+                {userProfile.nome || 'Convidado'}
+              </h2>
+              <p className={`text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
+                {userProfile.email || '—'}
+              </p>
             </div>
           </div>
-        </div>
 
-        <button
-          type="button"
-          onClick={handleSave}
-          className={`inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
-        >
-          <Save className="w-3.5 h-3.5" />
-          {saved ? 'Salvo' : 'Salvar alterações'}
-        </button>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="profile-nome" className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
+                Nome
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
+                <input
+                  id="profile-nome"
+                  type="text"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  className="w-full bg-chrome border border-line rounded-sl pl-10 pr-4 py-2.5 text-[13px] text-ink outline-none focus:border-accent/50 transition-colors"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="profile-email" className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
+                E-mail
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted" />
+                <input
+                  id="profile-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-chrome border border-line rounded-sl pl-10 pr-4 py-2.5 text-[13px] text-ink outline-none focus:border-accent/50 transition-colors"
+                />
+              </div>
+            </div>
+          </div>
 
-      <section className={AXEL_BORDERLESS_PANEL}>
-        <h3 className={`text-[13px] font-medium mb-3 ${AXEL_TEXT_PRIMARY}`}>
-          Preferências rápidas
-        </h3>
+          <button
+            type="button"
+            onClick={handleSave}
+            className={`mt-4 inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[10px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
+          >
+            <Save className="w-3.5 h-3.5" />
+            {saved ? 'Salvo' : 'Salvar alterações'}
+          </button>
+        </section>
+      </DashboardCollapsible>
+
+      <DashboardCollapsible title="Preferências rápidas" subtitle="Notificações e acessibilidade">
         <div className="divide-y divide-line">
           <PreferenceRow icon={Bell} label="Notificações" description="Tarefas e lembretes" />
           <PreferenceRow icon={Moon} label="Tema escuro" description="Instrumento AXEL ativo" defaultOn />
           <PreferenceRow icon={Keyboard} label="Atalhos" description="⌘K captura rápida" defaultOn />
           <PreferenceRow icon={Monitor} label="Movimento reduzido" description="Acessibilidade" />
         </div>
-      </section>
+      </DashboardCollapsible>
 
       <section className="rounded-sl border border-urgente/30 bg-urgente/5 p-4">
         <button

@@ -15,15 +15,19 @@ interface DueBucketBoardProps
 {
   tarefas: TarefaUnificada[]
   executionQueueIds: Set<number>
+  executingId: number | null
   activeId: number | null
   onOpen: (task: TarefaUnificada) => void
+  onStartExecute?: (task: TarefaUnificada) => void
 }
 
 export function DueBucketBoard({
   tarefas,
   executionQueueIds,
+  executingId,
   activeId,
   onOpen,
+  onStartExecute,
 }: DueBucketBoardProps)
 {
   const buckets = useMemo(() => bucketByDueDate(tarefas), [tarefas])
@@ -78,7 +82,9 @@ export function DueBucketBoard({
                 allTasks={tarefas}
                 isDragging={activeId === t.id}
                 inExecutionQueue={executionQueueIds.has(t.id)}
+                isExecuting={executingId === t.id}
                 onOpen={() => onOpen(t)}
+                onStartExecute={onStartExecute}
               />
             )}
           />
@@ -121,7 +127,9 @@ export function DueBucketBoard({
                 allTasks={tarefas}
                 isDragging={activeId === t.id}
                 inExecutionQueue={executionQueueIds.has(t.id)}
+                isExecuting={executingId === t.id}
                 onOpen={() => onOpen(t)}
+                onStartExecute={onStartExecute}
               />
             )}
           />

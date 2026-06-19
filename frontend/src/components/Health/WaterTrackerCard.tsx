@@ -1,29 +1,38 @@
 import { useMemo } from 'react'
-import { Droplets, Plus } from 'lucide-react'
+import { Droplets, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AGUA_PRESET } from '../../constants/healthPresets'
 import { isAguaRitualComplete } from '../../lib/healthRitual'
 import { WaterCupGrid } from './WaterCupGrid'
 import {
+  DEFAULT_ML_POR_COPO,
+  metaMl,
+  mlPorCopo,
+  registrosMl,
+  totalMlHoje,
+} from '../../lib/waterHydration'
+import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Hidratação — copos como interação principal, calmo para uso diário
-
 export function WaterTrackerCard()
 {
   const habitos = useTaskStore((s) => s.habitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
-  const setHabitoProgress = useTaskStore((s) => s.setHabitoProgress)
-  const incrementHabito = useTaskStore((s) => s.incrementHabito)
+  const setAguaRegistros = useTaskStore((s) => s.setAguaRegistros)
+  const updateHabitoConfig = useTaskStore((s) => s.updateHabitoConfig)
   const updateHabitoMeta = useTaskStore((s) => s.updateHabitoMeta)
 
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
-  const current = agua?.progresso_atual ?? 0
+  const entries = useMemo(() => registrosMl(agua), [agua])
+  const current = entries.length
   const goal = agua?.meta_diaria ?? 8
+  const defaultMl = mlPorCopo(agua)
+  const totalMl = totalMlHoje(agua)
+  const metaTotalMl = metaMl(agua)
   const displayGoal = Math.max(goal, current)
   const extra = Math.max(0, current - goal)
   const done = current >= goal && goal > 0
@@ -36,19 +45,25 @@ export function WaterTrackerCard()
     toast.success('Meta de água ativada — 8 copos por dia')
   }
 
-  const handleSetCups = async (next: number) =>
+  const persistEntries = async (next: number[]) =>
   {
     const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
     if (!ensured) return
-    await setHabitoProgress(ensured.id, next)
+    await setAguaRegistros(ensured.id, next)
   }
 
   const handleQuickAdd = async () =>
   {
     if (!agua) return
     const wasBeyond = current >= goal
-    await incrementHabito(agua.id)
-    toast.success(wasBeyond ? '+1 copo extra' : '+1 copo', { duration: 1500 })
+    await persistEntries([...entries, defaultMl])
+    toast.success(wasBeyond ? `+${defaultMl} ml extra` : `+${defaultMl} ml`, { duration: 1500 })
+  }
+
+  const handleClear = async () =>
+  {
+    await persistEntries([])
+    toast.message('Água de hoje zerada')
   }
 
   return (
@@ -61,15 +76,16 @@ export function WaterTrackerCard()
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <Droplets className="w-4 h-4 text-sky-400 shrink-0" strokeWidth={1.75} />
-              <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-sky-300/90">
+              <Droplets className="w-4 h-4 text-accent shrink-0" strokeWidth={1.75} />
+              <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
                 Hidratação
               </h2>
             </div>
             <p className={`text-2xl sm:text-3xl font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
-              {current}
+              {totalMl}
+              <span className="text-base sm:text-lg text-ink-muted font-normal"> ml</span>
               <span className="text-base sm:text-lg text-ink-muted font-normal">
-                {' / '}{goal} copos
+                {' · '}{current}/{goal} copos
                 {extra > 0 && (
                   <span className="text-sky-300"> +{extra}</span>
                 )}
@@ -78,18 +94,30 @@ export function WaterTrackerCard()
             <p className={`text-[12px] sm:text-[13px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
               {done
                 ? extra > 0
-                  ? 'Meta batida — continue registrando se quiser.'
-                  : 'Meta do dia completa — pode adicionar copos extras.'
+                  ? `Meta batida — ${totalMl} ml hoje.`
+                  : `Meta do dia — ${totalMl} / ${metaTotalMl} ml.`
                 : ritualOk
-                  ? 'Ritual ok (80%) — siga no seu ritmo, sem pressa.'
+                  ? `Ritual ok (80%) — ${totalMl} ml.`
                   : restante === 1
-                    ? 'Falta 1 copo. Toque no copo ou use o atalho abaixo.'
-                    : 'Toque nos copos para registrar. Linha tracejada = ritual (80%).'}
+                    ? `Falta 1 copo · ${totalMl} ml.`
+                    : `${restante} copos restantes · ${totalMl} ml.`}
             </p>
           </div>
           {agua && (
-            <label className="shrink-0 flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted">
-              Meta
+            <div className="shrink-0 flex items-start gap-2">
+              {current > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void handleClear()}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line text-ink-muted hover:text-atencao hover:border-atencao/40 transition-colors"
+                  title="Zerar água de hoje"
+                  aria-label="Zerar água de hoje"
+                >
+                  <X size={15} strokeWidth={2} />
+                </button>
+              )}
+              <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted">
+              Meta copos
               <input
                 type="number"
                 min={4}
@@ -99,6 +127,7 @@ export function WaterTrackerCard()
                 className="w-12 bg-chrome border border-line rounded-sl px-1 py-0.5 text-ink text-center text-[11px]"
               />
             </label>
+            </div>
           )}
         </div>
       </div>
@@ -115,10 +144,12 @@ export function WaterTrackerCard()
         ) : (
           <>
             <WaterCupGrid
-              current={current}
+              entries={entries}
               goal={displayGoal}
               baseGoal={goal}
-              onSet={(n) => void handleSetCups(n)}
+              defaultMl={defaultMl}
+              onEntriesChange={(n) => void persistEntries(n)}
+              onDefaultMlChange={(ml) => void updateHabitoConfig(agua.id, { ml_por_copo: ml })}
             />
 
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between pt-1">
@@ -130,10 +161,10 @@ export function WaterTrackerCard()
                 }`}
               >
                 <Plus size={16} strokeWidth={2} />
-                {done ? '+1 extra' : '+1 copo'}
+                {done ? `+${defaultMl} ml extra` : `+${defaultMl} ml`}
               </button>
               <p className="text-[11px] text-ink-muted text-center sm:text-right leading-relaxed">
-                Novo dia zera o contador automaticamente.
+                Padrão {defaultMl || DEFAULT_ML_POR_COPO} ml · novo dia zera o contador.
               </p>
             </div>
           </>

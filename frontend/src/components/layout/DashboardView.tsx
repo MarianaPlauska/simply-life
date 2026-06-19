@@ -1,33 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, Fragment } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
-import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
 import { Skeleton } from '../dashboard/DashboardPrimitives'
-import { HolisticAnalyticsSection } from '../dashboard/HolisticAnalyticsSection'
-import { DashboardCriticalTasksPreview } from '../dashboard/DashboardCriticalTasksPreview'
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
 import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
-import { SystemStatePanel } from '../dashboard/SystemStatePanel'
-import { WaterWaveCard } from '../dashboard/WaterWaveCard'
 import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
-import { WellbeingDashboardCard } from '../wellbeing/WellbeingDashboardCard'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
-import { FinancasTabelaDensa } from '../dashboard/FinancasTabelaDensa'
-import { DashboardFinanceMoodStrip } from '../dashboard/DashboardFinanceMoodStrip'
-import { DashboardFinanceMonthGoal } from '../dashboard/DashboardFinanceMonthGoal'
-import { FinanceDailyBriefCard } from '../Finance/overview/FinanceDailyBriefCard'
-import { CardQuickSpendStrip } from '../Finance/CardQuickSpendStrip'
-import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
-import { FinanceBillsAlertCard } from '../dashboard/FinanceBillsAlertCard'
-import { DashboardHeroPanel } from '../dashboard/DashboardHeroPanel'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
-import type { DashboardPriority } from '../../lib/userWorkspacePrefs'
-
-// Dashboard enxuto — ofensiva + foco no topo; ordem por preferência do wizard
+import { DashboardQuickWidget } from '../dashboard/DashboardQuickWidget'
+import { DashboardAnalyticsPanel } from '../dashboard/DashboardAnalyticsPanel'
+import { resolveDashboardWidgets } from '../../lib/dashboardWidgets'
 
 function getGreeting(): string
 {
@@ -38,16 +24,9 @@ function getGreeting(): string
   return 'Boa noite'
 }
 
-const BLOCK_ORDER: Record<DashboardPriority, ('health' | 'tasks' | 'finance')[]> = {
-  finance: ['finance', 'tasks', 'health'],
-  tasks: ['tasks', 'health', 'finance'],
-  health: ['health', 'tasks', 'finance'],
-}
-
 export function DashboardView()
 {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { startTask } = useStartTaskExecution()
   const storeTarefas = useTaskStore((s) => s.tarefas)
 
   const fetchDashboard = useTaskStore((s) => s.fetchDashboard)
@@ -93,7 +72,13 @@ export function DashboardView()
     || (workspacePrefs.display_name || userProfile?.nome || '').split(' ')[0]
     || 'Convidado'
 
-  const sectionOrder = BLOCK_ORDER[workspacePrefs.dashboard_priority] ?? BLOCK_ORDER.tasks
+  const quickWidgets = useMemo(
+    () => resolveDashboardWidgets(
+      workspacePrefs.dashboard_quick_widgets,
+      workspacePrefs.dashboard_priority ?? 'tasks',
+    ),
+    [workspacePrefs.dashboard_quick_widgets, workspacePrefs.dashboard_priority],
+  )
 
   const taskIdParam = searchParams.get('task')
   const selectedTask = useMemo(() =>
@@ -110,23 +95,10 @@ export function DashboardView()
     return resolveTemporalHorizon(selectedTask)
   }, [selectedTask])
 
-  const openTaskDrawer = useCallback((taskId: number) =>
-  {
-    setSearchParams({ task: String(taskId) })
-  }, [setSearchParams])
-
   const closeTaskDrawer = useCallback(() =>
   {
     setSearchParams({})
   }, [setSearchParams])
-
-  const executeFromDashboard = useCallback((taskId: number) =>
-  {
-    const task = storeTarefas.find((t) => t.id === taskId)
-    if (!task) return
-    openTaskDrawer(taskId)
-    void startTask(task)
-  }, [storeTarefas, openTaskDrawer, startTask])
 
   if (loading && !resumo)
   {
@@ -150,95 +122,28 @@ export function DashboardView()
 
       <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4">
         <StreakEveningBanner />
+        <HealthRitualStrip />
 
-        <DashboardHeroPanel
-          onOpenTask={openTaskDrawer}
-          onExecuteTask={executeFromDashboard}
-        />
+        {quickWidgets.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+            {quickWidgets.map((id) => (
+              <DashboardQuickWidget key={id} id={id} />
+            ))}
+          </div>
+        )}
 
-        <CardQuickSpendStrip variant="dashboard" prominent />
-
-        <WeeklyEpisodeCard embedded />
-
-        {sectionOrder.map((block) =>
-        {
-          if (block === 'health')
-          {
-            return (
-              <Fragment key="health">
-                <HealthRitualStrip />
-                <DashboardCollapsible
-                  title="Rotina rápida"
-                  subtitle="Água e humor — o restante fica em Saúde"
-                  defaultOpen
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
-                    <div id="dashboard-water" className="min-w-0 flex scroll-mt-20">
-                      <WaterWaveCard hero className="flex-1" />
-                    </div>
-                    <div className="min-w-0 flex">
-                      <WellbeingDashboardCard />
-                    </div>
-                  </div>
-                </DashboardCollapsible>
-              </Fragment>
-            )
-          }
-
-          if (block === 'tasks')
-          {
-            return (
-              <DashboardCollapsible
-                key="tasks"
-                section="01"
-                title="Comando"
-                subtitle="Tarefas críticas e carga do sistema"
-                defaultOpen
-              >
-                <div className="grid grid-cols-12 gap-3 items-stretch">
-                  <div className="col-span-12 xl:col-span-8 min-w-0">
-                    <DashboardCriticalTasksPreview />
-                  </div>
-                  <div className="col-span-12 xl:col-span-4 min-w-0">
-                    <SystemStatePanel />
-                  </div>
-                </div>
-              </DashboardCollapsible>
-            )
-          }
-
-          return (
-            <Fragment key="finance">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-stretch">
-                <DashboardFinanceMoodStrip />
-                <DashboardFinanceMonthGoal />
-              </div>
-              <DashboardCollapsible
-                section="02"
-                title="Finanças detalhadas"
-                subtitle="Faturas, resumo e movimentação"
-              >
-                <div className="flex flex-col gap-3">
-                  <FinanceBillsAlertCard />
-                  <FinanceDailyBriefCard compact />
-                  <FinancasTabelaDensa embedded />
-                </div>
-              </DashboardCollapsible>
-            </Fragment>
-          )
-        })}
+        <DashboardAnalyticsPanel />
 
         <DashboardCollapsible
           title="Mais"
-          subtitle="Módulos · inteligência · auditoria · analytics"
+          subtitle="Módulos · integrações · atividade"
         >
           <div className="flex flex-col gap-3">
-            <DashboardModulesRegistry />
+            <DashboardModulesRegistry excludeIds={['exec', 'fin', 'saude']} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               <InboxIACard embedded />
               <AtividadeRecenteCard embedded />
             </div>
-            <HolisticAnalyticsSection borderless />
           </div>
         </DashboardCollapsible>
 

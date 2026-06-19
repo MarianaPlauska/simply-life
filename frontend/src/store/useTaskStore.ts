@@ -2,6 +2,9 @@
 // cada slice fica em store/slices/*.ts com ~100-150 linhas
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { normalizePinnedModules } from './slices/uiSlice';
+import { applyColorScheme } from '../utils/applyColorScheme';
+import { localTodayIso, resetHabitosParaHoje } from '../lib/healthDayBoundary';
 
 import { createUISlice, type UISlice } from './slices/uiSlice';
 import { createAuthSlice, type AuthSlice } from './slices/authSlice';
@@ -127,9 +130,23 @@ export const useTaskStore = create<TaskStore>()(
         personalVelocityFactor: state.personalVelocityFactor,
         velocitySamplesByTag: state.velocitySamplesByTag,
       }),
-      onRehydrateStorage: () => () =>
+      onRehydrateStorage: () => (state) =>
       {
-        // supabase auth gerencia sessão automaticamente
+        if (!state) return
+        const acc = state.accessibility as { colorScheme?: string } | undefined
+        if (acc?.colorScheme === 'sepia')
+        {
+          acc.colorScheme = 'light'
+          applyColorScheme('light')
+        }
+        if (Array.isArray(state.pinnedModules))
+        {
+          state.pinnedModules = normalizePinnedModules(state.pinnedModules as string[])
+        }
+        if (Array.isArray(state.habitos) && state.habitos.length > 0)
+        {
+          state.habitos = resetHabitosParaHoje(state.habitos, localTodayIso())
+        }
       },
     }
   )

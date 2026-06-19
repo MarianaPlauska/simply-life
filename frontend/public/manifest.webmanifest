@@ -1,0 +1,25 @@
+{
+  "name": "Simply-Life OS",
+  "short_name": "Simply-Life",
+  "description": "Seu sistema operacional pessoal. Gerencie tarefas, finanças, saúde e produtividade em um só lugar.",
+  "lang": "pt-BR",
+  "start_url": "/",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "theme_color": "#141312",
+  "background_color": "#141312",
+  "categories": ["productivity", "lifestyle", "finance"],
+  "icons": [
+    { "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "pwa-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Finanças", "short_name": "Finanças", "url": "/financeiro", "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }] },
+    { "name": "Kanban", "short_name": "Kanban", "url": "/kanban", "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }] },
+    { "name": "Dashboard", "short_name": "Início", "url": "/", "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }] }
+  ]
+}

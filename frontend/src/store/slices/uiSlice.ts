@@ -3,10 +3,17 @@ import type { StateCreator } from 'zustand';
 import type { ActiveView, TimerConfig, AccessibilitySettings, ColorScheme } from '../storeTypes';
 import { applyColorScheme } from '../../utils/applyColorScheme';
 
-export const MAX_PINNED_MODULES = 4;
+/** Dashboard fixo + até 2 atalhos no header */
+export function normalizePinnedModules(modules: string[]): string[]
+{
+  const extras = modules.filter((m) => m !== PINNED_DASHBOARD_ID).slice(0, MAX_PINNED_MODULES - 1);
+  return [PINNED_DASHBOARD_ID, ...extras];
+}
+
+export const MAX_PINNED_MODULES = 3;
+export const PINNED_DASHBOARD_ID = 'dashboard';
 
 export const PINNABLE_VIEWS: { id: string; label: string }[] = [
-  { id: 'dashboard', label: 'Dashboard' },
   { id: 'kanban', label: 'Kanban' },
   { id: 'saude', label: 'Saúde' },
   { id: 'financeiro', label: 'Finanças' },
@@ -33,6 +40,8 @@ export interface UISlice {
   isQuickCaptureOpen: boolean;
   isFinanceQuickCaptureOpen: boolean;
   financeQuickCaptureSeed: string;
+  /** Drawer lateral Novo lançamento (gasto / receita / investimento) */
+  isNewTransactionModalOpen: boolean;
   isCommandPaletteOpen: boolean;
   timerConfig: TimerConfig;
   interactionScore: Record<string, number>;
@@ -46,6 +55,7 @@ export interface UISlice {
   setQuickCaptureOpen: (isOpen: boolean) => void;
   setFinanceQuickCaptureOpen: (isOpen: boolean) => void;
   setFinanceQuickCaptureSeed: (text: string) => void;
+  setNewTransactionModalOpen: (isOpen: boolean) => void;
   setCommandPaletteOpen: (isOpen: boolean) => void;
   setTimerConfig: (key: keyof TimerConfig, value: number) => void;
   registerInteraction: (moduleId: string) => void;
@@ -84,21 +94,22 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   isQuickCaptureOpen: false,
   isFinanceQuickCaptureOpen: false,
   financeQuickCaptureSeed: '',
+  isNewTransactionModalOpen: false,
   isCommandPaletteOpen: false,
   timerConfig: { pomodoroTime: 25, shortBreak: 5, longBreak: 15 },
   interactionScore: {},
   sidebarCollapsed: false,
   mobileSidebarOpen: false,
   scoreDiario: 0,
-  pinnedModules: ['dashboard', 'kanban'],
+  pinnedModules: normalizePinnedModules(['dashboard', 'kanban']),
   accessibility: {
-    fontSize: 14,
+    fontSize: 16,
     highContrast: false,
     reducedMotion: false,
     focusVisible: true,
     soundFeedback: false,
     keyboardShortcuts: true,
-    colorScheme: 'dark',
+    colorScheme: 'light',
   },
   keywords: [] as string[],
 
@@ -106,6 +117,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   setQuickCaptureOpen: (isOpen) => set({ isQuickCaptureOpen: isOpen }),
   setFinanceQuickCaptureOpen: (isOpen) => set({ isFinanceQuickCaptureOpen: isOpen }),
   setFinanceQuickCaptureSeed: (text) => set({ financeQuickCaptureSeed: text }),
+  setNewTransactionModalOpen: (isOpen) => set({ isNewTransactionModalOpen: isOpen }),
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
 
   setTimerConfig: (key, value) =>
@@ -132,13 +144,16 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
 
   togglePin: (moduleId) =>
   {
+    if (moduleId === PINNED_DASHBOARD_ID) return;
     set((state) =>
     {
       const has = state.pinnedModules.includes(moduleId);
       if (has)
       {
         return {
-          pinnedModules: state.pinnedModules.filter((m) => m !== moduleId),
+          pinnedModules: normalizePinnedModules(
+            state.pinnedModules.filter((m) => m !== moduleId),
+          ),
         };
       }
       if (state.pinnedModules.length >= MAX_PINNED_MODULES)
@@ -146,7 +161,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
         return state;
       }
       return {
-        pinnedModules: [...state.pinnedModules, moduleId],
+        pinnedModules: normalizePinnedModules([...state.pinnedModules, moduleId]),
       };
     });
   },
@@ -157,11 +172,14 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
 
   toggleColorScheme: () =>
   {
-    const next: ColorScheme = get().accessibility.colorScheme === 'dark' ? 'light' : 'dark';
+    const order: ColorScheme[] = ['light', 'dark']
+    const current = get().accessibility.colorScheme
+    const idx = order.indexOf(current)
+    const next = order[(idx + 1) % order.length]
     set((state) => ({
       accessibility: { ...state.accessibility, colorScheme: next },
-    }));
-    applyColorScheme(next);
+    }))
+    applyColorScheme(next)
   },
 
   setAccessibility: (key, value) =>
@@ -172,6 +190,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
     if (key === 'fontSize') document.documentElement.style.fontSize = `${value}px`;
     if (key === 'highContrast') document.documentElement.classList.toggle('high-contrast', value as boolean);
     if (key === 'reducedMotion') document.documentElement.classList.toggle('reduce-motion', value as boolean);
+    if (key === 'focusVisible') document.documentElement.classList.toggle('focus-enhanced', value as boolean);
     if (key === 'colorScheme') applyColorScheme(value as ColorScheme);
   },
 

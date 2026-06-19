@@ -11,6 +11,7 @@ import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
+import { AxelSystemGuide } from '../axel/AxelSystemGuide';
 
 /* ── Tipos ────────────────────────────────────────────────── */
 type SettingsTab = 'geral' | 'ia' | 'aparencia' | 'notificacoes' | 'seguranca';
@@ -268,6 +269,16 @@ export function PreferencesView() {
             </select>
           </SettingRow>
         </div>
+      </SectionCard>
+
+      <SectionCard>
+        <SectionHeader
+          icon={Info}
+          title="Como o sistema funciona"
+          subtitle="Prioridade, prazos, notificações e conclusão de tarefas."
+          iconColor="text-blue-400"
+        />
+        <AxelSystemGuide compact />
       </SectionCard>
     </div>
   );

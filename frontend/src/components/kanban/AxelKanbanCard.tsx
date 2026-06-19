@@ -4,11 +4,13 @@ import {
   Archive,
   ArrowUpRight,
   Calendar,
+  CheckCircle2,
   ListChecks,
   Lock,
   Play,
   Timer,
 } from 'lucide-react'
+import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
 import { getProjectTag } from '../../lib/contextRationale'
@@ -253,11 +255,22 @@ export function AxelKanbanCard({
         <div
           className={[
             'flex items-center gap-1 border-t border-line px-2 py-1.5',
-            'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity',
-            isTimerHere || featured ? 'opacity-100' : '',
+            'opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity',
+            isTimerHere || featured ? 'md:opacity-100' : '',
           ].join(' ')}
           onClick={(e) => e.stopPropagation()}
         >
+          {status !== 'concluida' && tarefa.id !== 0 && (
+            <button
+              type="button"
+              onClick={() => void axelCompleteTask(taskForRules)}
+              className="inline-flex items-center justify-center p-1.5 text-ink-muted hover:text-concluido transition-colors shrink-0"
+              aria-label="Concluir tarefa"
+              title="Concluir"
+            >
+              <CheckCircle2 size={14} strokeWidth={1.75} />
+            </button>
+          )}
           {canStart && !isTimerHere && (
             <button
               type="button"

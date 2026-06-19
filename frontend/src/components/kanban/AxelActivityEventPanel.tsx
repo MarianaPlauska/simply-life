@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AlertCircle, CheckCircle, Link2 } from 'lucide-react'
+import { ACTIVITY_EVENT_META } from './axelActivityIcons'
 import { useTaskStore } from '../../store/useTaskStore'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import type { TarefaUnificada } from '../../types'
@@ -65,7 +65,7 @@ export function AxelActivityEventPanel({
     }
 
     onLog(
-      `Progress Update — fase atual: ${nextMeta.phase} (${nextMeta.label}). Anterior: ${current.phase} (${current.label}).`,
+      `Andamento — fase: ${nextMeta.phase} (${nextMeta.label}). Anterior: ${current.phase} (${current.label}).`,
       'progress',
     )
     setMode('idle')
@@ -74,7 +74,7 @@ export function AxelActivityEventPanel({
   const submitBlocker = () =>
   {
     const note = blockerNote.trim() || 'Bloqueio registrado sem detalhe adicional.'
-    onLog(`Log Blocker — ${note}`, 'blocker')
+    onLog(`Bloqueio — ${note}`, 'blocker')
     setBlockerNote('')
     setMode('idle')
   }
@@ -83,7 +83,7 @@ export function AxelActivityEventPanel({
   {
     const dep = others.find((t) => t.id === depTaskId)
     const label = dep ? dep.titulo : 'tarefa não especificada'
-    onLog(`Link Dependency — vinculado a: ${label}`, 'dependency')
+    onLog(`Dependência vinculada: ${label}`, 'dependency')
     setDepTaskId('')
     setMode('idle')
   }
@@ -91,30 +91,22 @@ export function AxelActivityEventPanel({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setMode(mode === 'blocker' ? 'idle' : 'blocker')}
-          className="inline-flex items-center gap-1.5 h-8 text-[11px] border border-white/5 bg-[#13141F] hover:bg-[#0B0C14] text-zinc-400 hover:text-zinc-200 px-2.5 rounded-md transition-colors"
-        >
-          <AlertCircle size={16} strokeWidth={1.5} className="text-amber-400" />
-          Log Blocker
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode(mode === 'progress' ? 'idle' : 'progress')}
-          className="inline-flex items-center gap-1.5 h-8 text-[11px] border border-white/5 bg-[#13141F] hover:bg-[#0B0C14] text-zinc-400 hover:text-zinc-200 px-2.5 rounded-md transition-colors"
-        >
-          <CheckCircle size={16} strokeWidth={1.5} className="text-emerald-400" />
-          Progress Update
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode(mode === 'dependency' ? 'idle' : 'dependency')}
-          className="inline-flex items-center gap-1.5 h-8 text-[11px] border border-white/5 bg-[#13141F] hover:bg-[#0B0C14] text-zinc-400 hover:text-zinc-200 px-2.5 rounded-md transition-colors"
-        >
-          <Link2 size={16} strokeWidth={1.5} className="text-sky-400" />
-          Link Dependency
-        </button>
+        {(['blocker', 'progress', 'dependency'] as const).map((kind) =>
+        {
+          const meta = ACTIVITY_EVENT_META[kind]
+          const Icon = meta.Icon
+          return (
+            <button
+              key={kind}
+              type="button"
+              onClick={() => setMode(mode === kind ? 'idle' : kind)}
+              className="inline-flex items-center gap-1.5 h-8 text-[11px] border border-white/5 bg-[#13141F] hover:bg-[#0B0C14] text-zinc-400 hover:text-zinc-200 px-2.5 rounded-md transition-colors"
+            >
+              <Icon size={16} strokeWidth={1.5} className={meta.color} />
+              {meta.label}
+            </button>
+          )
+        })}
       </div>
 
       {mode === 'progress' && (

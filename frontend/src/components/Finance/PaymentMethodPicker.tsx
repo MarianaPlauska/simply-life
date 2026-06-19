@@ -1,34 +1,16 @@
-import {
-  ArrowLeftRight,
-  Banknote,
-  CreditCard,
-  FileText,
-  MoreHorizontal,
-  QrCode,
-  Wallet,
-} from 'lucide-react'
+import { CreditCard, Wallet } from 'lucide-react'
 import type { VirtualCard } from '../../store/storeTypes'
 import { cardChipClass } from '../../lib/financeCardTheme'
 import {
-  EXPENSE_CASH_METHODS,
-  INCOME_METHODS,
-  PAYMENT_METHOD_LABELS,
-  type FinancePaymentMethod,
+  ACCOUNT_PAYMENT_SELECTION,
+  isCardPaymentSelection,
 } from '../../lib/financePaymentMethod'
 import {
   AXEL_FILTER_PILL_ACTIVE,
   AXEL_FILTER_PILL_IDLE,
+  AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
-
-const CASH_ICONS: Record<string, typeof QrCode> = {
-  pix: QrCode,
-  debito: Wallet,
-  dinheiro: Banknote,
-  boleto: FileText,
-  ted: ArrowLeftRight,
-  outro: MoreHorizontal,
-}
 
 interface PaymentMethodPickerProps
 {
@@ -38,6 +20,8 @@ interface PaymentMethodPickerProps
   variant?: 'despesa' | 'receita'
 }
 
+// Conta corrente (padrão) ou cartão cadastrado — sem PIX/débito/boleto separados
+
 export function PaymentMethodPicker({
   cards,
   value,
@@ -46,45 +30,46 @@ export function PaymentMethodPicker({
 }: PaymentMethodPickerProps)
 {
   const activeCards = cards.filter((c) => c.status === 'ativo')
-  const cashMethods = variant === 'receita' ? INCOME_METHODS : EXPENSE_CASH_METHODS
+  const contaSelected = value === ACCOUNT_PAYMENT_SELECTION
+    || !isCardPaymentSelection(value, cards)
 
-  const pillClass = (active: boolean) =>
-    `inline-flex items-center justify-center gap-1.5 min-h-[40px] px-3 rounded-sl font-mono text-[10px] uppercase ${
-      active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-    }`
+  if (variant === 'receita')
+  {
+    return (
+      <div className="flex items-start gap-2.5 rounded-sl border border-line bg-chrome/40 px-3 py-2.5">
+        <Wallet size={16} className="text-concluido shrink-0 mt-0.5" />
+        <div className="min-w-0">
+          <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>Conta corrente</p>
+          <p className={`text-[10px] mt-0.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            O valor entra no saldo disponível. Receitas não vão para cartão.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-3">
       <div>
         <p className={`font-mono text-[9px] uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
-          {variant === 'receita' ? 'Conta que recebeu' : 'Conta / dinheiro'}
+          Pagar com
         </p>
         <p className={`text-[10px] mb-2 ${AXEL_TEXT_SECONDARY}`}>
-          {variant === 'receita'
-            ? 'Onde o dinheiro caiu — soma ao saldo.'
-            : 'Desconta da conta corrente na hora.'}
+          Sem cartão selecionado, desconta da conta corrente (PIX, débito, dinheiro…).
         </p>
-        <div className="flex flex-wrap gap-1.5">
-          {cashMethods.map((method) =>
-          {
-            const Icon = CASH_ICONS[method] ?? Wallet
-            const active = value === method
-            return (
-              <button
-                key={method}
-                type="button"
-                onClick={() => onChange(method)}
-                className={pillClass(active)}
-              >
-                <Icon size={12} />
-                {PAYMENT_METHOD_LABELS[method as FinancePaymentMethod]}
-              </button>
-            )
-          })}
-        </div>
+        <button
+          type="button"
+          onClick={() => onChange(ACCOUNT_PAYMENT_SELECTION)}
+          className={`w-full min-h-[44px] justify-start inline-flex items-center gap-2 px-3 rounded-sl border font-mono text-[11px] ${
+            contaSelected ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+          }`}
+        >
+          <Wallet size={14} className="shrink-0 opacity-80" />
+          <span>Conta corrente</span>
+        </button>
       </div>
 
-      {variant === 'despesa' && activeCards.length > 0 && (
+      {activeCards.length > 0 && (
         <div>
           <p className={`font-mono text-[9px] uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
             Cartão de crédito

@@ -4,8 +4,8 @@ self.addEventListener('push', (event) =>
   let payload = {
     title: 'Simply-Life',
     body: 'Você tem um lembrete',
-    url: '/financeiro?aba=faturas',
-    tag: 'simply-life-bill',
+    url: '/',
+    tag: 'simply-life',
   }
 
   try
@@ -32,7 +32,7 @@ self.addEventListener('push', (event) =>
 self.addEventListener('notificationclick', (event) =>
 {
   event.notification.close()
-  const url = event.notification.data?.url || '/financeiro?aba=faturas'
+  const url = event.notification.data?.url || '/'
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) =>

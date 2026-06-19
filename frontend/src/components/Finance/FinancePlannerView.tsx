@@ -40,7 +40,6 @@ import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner';
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 import { clampFinanceMonthOffset } from '../../lib/financeMonthOutlook';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
-import { NewTransactionModal } from './NewTransactionModal';
 import { NewGoalModal } from './NewGoalModal';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -76,7 +75,7 @@ export function FinancePlannerView() {
     setNavGroup(target.group);
     setLeafTab(target.sub);
   };
-  const [showModal, setShowModal] = useState(false);
+  const setNewTransactionOpen = useTaskStore((s) => s.setNewTransactionModalOpen);
   const [showCatModal, setShowCatModal] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
@@ -268,7 +267,7 @@ export function FinancePlannerView() {
       activeTab={navGroup}
       onTabChange={(id) => goToGroup(id as PlannerGroup)}
       onManageCategories={() => setShowCatModal(true)}
-      onNewTransaction={() => setShowModal(true)}
+      onNewTransaction={() => setNewTransactionOpen(true)}
     >
       {subTabs && (
         <FinanceSectionNav
@@ -383,7 +382,7 @@ export function FinancePlannerView() {
           onPeriodChange={setPeriodConfig}
           onPeriodShift={(dir) => setPeriodConfig((c) => shiftPeriodConfig(c, dir))}
           activeCategories={activeCategories}
-          onNewTransaction={() => setShowModal(true)}
+          onNewTransaction={() => setNewTransactionOpen(true)}
         />
       )}
 
@@ -435,8 +434,6 @@ export function FinancePlannerView() {
       {activeLeaf === 'contas-fixas' && (
         <ContasFixasTab />
       )}
-
-      <NewTransactionModal isOpen={showModal} onClose={() => setShowModal(false)} />
 
       <NewGoalModal isOpen={showGoalModal} onClose={() => setShowGoalModal(false)} />
 

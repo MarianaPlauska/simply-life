@@ -3,7 +3,6 @@ import { toast } from 'sonner'
 import { Pencil, Settings2 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { ExpensePreset } from '../../lib/financeExpensePresets'
-import { DEFAULT_EXPENSE_PAYMENT } from '../../lib/financePaymentMethod'
 import { FinancePresetEditor } from './FinancePresetEditor'
 import {
   AXEL_FILTER_PILL_ACTIVE,
@@ -46,7 +45,7 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
       categoria_id: preset.categoria_id ?? cat?.id,
       data: new Date().toISOString().slice(0, 10),
       status_pagamento: preset.status_pagamento,
-      forma_pagamento: preset.forma_pagamento ?? (preset.card_id ? 'cartao' : DEFAULT_EXPENSE_PAYMENT),
+      forma_pagamento: preset.forma_pagamento ?? (preset.card_id ? 'cartao' : 'debito'),
       card_id: preset.card_id,
     })
 

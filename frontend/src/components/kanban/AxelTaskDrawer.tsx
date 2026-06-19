@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
-import { X, Plus, Pin, CalendarClock, CheckCircle2 } from 'lucide-react'
+import { X, Plus, Pin, CalendarClock, CheckCircle2, Trash2 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { useTaskActivityLog } from '../../hooks/useTaskActivityLog'
+import { useTaskActivityLog, migrateTaskActivityLog, appendTaskActivityLog } from '../../hooks/useTaskActivityLog'
+import { useDraftActivityLog } from '../../hooks/useDraftActivityLog'
 import { useLocalSubtasks } from '../../hooks/useLocalSubtasks'
 import { AxelAiContextBreakdown } from './AxelAiContextBreakdown'
 import { AxelAiDecisionLog } from './AxelAiDecisionLog'
@@ -16,18 +18,33 @@ import { AxelDrawerQuickInput } from './AxelDrawerQuickInput'
 import { ActivityEventIcon } from './axelActivityIcons'
 import type { ActivityEventKind } from '../../hooks/useTaskActivityLog'
 import { createEmptyTaskDraft } from '../../lib/axelDrawerDraft'
+import {
+  clearTaskCreateDraft,
+  loadTaskCreateDraft,
+  saveTaskCreateDraft,
+} from '../../lib/taskCreateDraft'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
-import { calcSubtaskProgress, resolveEffectiveSubtasks } from '../../lib/subtaskProgress'
-import { getProjectTag } from '../../lib/contextRationale'
+import { calcSubtaskProgress, clearLocalSubtasks, resolveEffectiveSubtasks } from '../../lib/subtaskProgress'
 import { HORIZON_LABELS, type TemporalHorizon } from '../../lib/temporalHorizon'
-import { AXEL_BTN_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AxelDrawerOrganizationSection, manualPriorityToDb, type ManualPriority } from './AxelDrawerOrganizationSection'
+import { setTaskContexto, createContexto } from '../../lib/taskContextService'
+import { loadTaskDrawerPrefs, saveTaskDrawerPrefs } from '../../lib/taskDrawerPrefs'
+import { AXEL_BTN_PRIMARY, AXEL_DRAWER_FOOTER_PB_MOBILE, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { toggleExecutionPin, isExecutionPinned } from '../../lib/kanbanExecutionPrefs'
-import type { TarefaUnificada } from '../../types'
+import type { Subtarefa, TarefaUnificada } from '../../types'
 
-// Drawer — coluna única, título sempre visível, modo criação, rodapé fixo
+const CREATE_SUBTASK_SENTINEL = -1
+
+function startOfRegistrationDay(iso?: string | null): string
+{
+  const d = iso ? new Date(iso) : new Date()
+  if (Number.isNaN(d.getTime())) return new Date().toISOString()
+  d.setHours(9, 0, 0, 0)
+  return d.toISOString()
+}
 
 const DRAWER_SHELL =
-  'relative w-full sm:w-[42vw] max-w-2xl h-screen flex flex-col overflow-hidden bg-card border-l border-line'
+  'relative w-full sm:w-[42vw] max-w-2xl h-[100dvh] flex flex-col overflow-hidden bg-card border-l border-line shadow-2xl'
 
 interface AxelTaskDrawerProps
 {
@@ -52,10 +69,12 @@ export function AxelTaskDrawer({
   const updateTarefa = useTaskStore((s) => s.updateTarefa)
   const createSubtarefa = useTaskStore((s) => s.createSubtarefa)
   const updateSubtarefa = useTaskStore((s) => s.updateSubtarefa)
+  const deleteSubtarefa = useTaskStore((s) => s.deleteSubtarefa)
   const getDeadlineProposal = useTaskStore((s) => s.getDeadlineProposal)
   const acceptDeadlineProposal = useTaskStore((s) => s.acceptDeadlineProposal)
   const rejectDeadlineProposal = useTaskStore((s) => s.rejectDeadlineProposal)
   const pushAiDecision = useTaskStore((s) => s.pushAiDecision)
+  const addLabelToTarefa = useTaskStore((s) => s.addLabelToTarefa)
 
   const draftBase = tarefaProp ?? createEmptyTaskDraft()
   const live = useTaskStore((s) =>
@@ -65,8 +84,8 @@ export function AxelTaskDrawer({
   })
 
   const serverSubs = live.subtarefas ?? []
-  const { subs, isLocal, addSub, toggleSub } = useLocalSubtasks(
-    isCreatingNew ? -1 : live.id,
+  const { subs: persistedSubs, isLocal, addSub, toggleSub, removeSub } = useLocalSubtasks(
+    isCreatingNew ? CREATE_SUBTASK_SENTINEL : live.id,
     serverSubs,
   )
 
@@ -75,14 +94,24 @@ export function AxelTaskDrawer({
     isCreatingNew ? '' : (live.descricao || live.notas_locais || ''),
   )
   const [newSub, setNewSub] = useState('')
+  const [draftSubs, setDraftSubs] = useState<Subtarefa[]>([])
   const [deadline, setDeadline] = useState<string | null>(
     isCreatingNew ? null : live.data_vencimento,
   )
+  const [semPrazo, setSemPrazo] = useState(false)
+  const [plannedStart, setPlannedStart] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [pinned, setPinned] = useState(() =>
     tarefaProp ? isExecutionPinned(tarefaProp.id) : false,
   )
   const [proposalLoading, setProposalLoading] = useState(false)
+  const [manualPriority, setManualPriority] = useState<ManualPriority>('normal')
+  const [draftContexto, setDraftContexto] = useState<{ id?: number; titulo: string; cor: string } | null>(null)
+  const [draftLabels, setDraftLabels] = useState<TarefaUnificada['labels']>([])
+  const [draftRestored, setDraftRestored] = useState(false)
+  const draftHydratedRef = useRef(false)
+
+  const subs = isCreatingNew ? draftSubs : persistedSubs
 
   const deadlineProposal = !isCreatingNew && live.id > 0
     ? getDeadlineProposal(live.id)
@@ -108,18 +137,178 @@ export function AxelTaskDrawer({
   const titleRef = useRef<HTMLInputElement>(null)
   const logScrollRef = useRef<HTMLDivElement>(null)
 
-  const tag = isCreatingNew ? 'NOVA' : getProjectTag(live)
+  useDraftActivityLog({
+    enabled: isCreatingNew,
+    draftRestored,
+    onLog: addEntry,
+    state: {
+      title: titleDraft,
+      desc: descDraft,
+      deadline,
+      semPrazo,
+      plannedStart,
+      manualPriority,
+      draftSubsCount: draftSubs.length,
+    },
+  })
+
+  useEffect(() =>
+  {
+    logScrollRef.current?.scrollTo({ top: logScrollRef.current.scrollHeight, behavior: 'smooth' })
+  }, [entries.length])
+
   const subsDone = subs.filter((s) => s.concluida).length
   const canPersistServer = !isCreatingNew && live.id > 0
   const inProgress = !isCreatingNew && live.status === 'em_progresso'
+
+  useEffect(() =>
+  {
+    if (isCreatingNew) titleRef.current?.focus()
+  }, [isCreatingNew])
+
+  useEffect(() =>
+  {
+    if (!isCreatingNew || draftHydratedRef.current) return
+    draftHydratedRef.current = true
+
+    const saved = loadTaskCreateDraft()
+    if (!saved)
+    {
+      clearLocalSubtasks(CREATE_SUBTASK_SENTINEL)
+      setDraftSubs([])
+      return
+    }
+
+    const hasContent = Boolean(
+      saved.title.trim()
+      || saved.desc.trim()
+      || saved.deadline
+      || saved.semPrazo
+      || saved.plannedStart
+      || saved.draftContexto
+      || saved.draftLabels.length > 0
+      || saved.draftSubs.length > 0,
+    )
+    if (!hasContent)
+    {
+      clearLocalSubtasks(CREATE_SUBTASK_SENTINEL)
+      return
+    }
+
+    setTitleDraft(saved.title)
+    setDescDraft(saved.desc)
+    setSemPrazo(saved.semPrazo)
+    setDeadline(saved.semPrazo ? null : saved.deadline)
+    setPlannedStart(saved.plannedStart)
+    setManualPriority(saved.manualPriority)
+    setDraftContexto(saved.draftContexto)
+    setDraftLabels(saved.draftLabels)
+    setDraftSubs(saved.draftSubs)
+    setDraftRestored(true)
+  }, [isCreatingNew])
+
+  const buildDraftPayload = () => ({
+    title: titleDraft,
+    desc: descDraft,
+    deadline: semPrazo ? null : deadline,
+    semPrazo,
+    plannedStart,
+    manualPriority,
+    draftContexto,
+    draftLabels: draftLabels ?? [],
+    draftSubs,
+    temporalHorizon,
+  })
+
+  const draftHasContent = () => Boolean(
+    titleDraft.trim()
+    || descDraft.trim()
+    || semPrazo
+    || deadline
+    || plannedStart
+    || draftContexto
+    || (draftLabels?.length ?? 0) > 0
+    || draftSubs.length > 0,
+  )
+
+  useEffect(() =>
+  {
+    if (!isCreatingNew) return
+
+    const timer = window.setTimeout(() =>
+    {
+      if (!draftHasContent())
+      {
+        clearTaskCreateDraft()
+        return
+      }
+      saveTaskCreateDraft(buildDraftPayload())
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [
+    isCreatingNew,
+    titleDraft,
+    descDraft,
+    deadline,
+    semPrazo,
+    plannedStart,
+    manualPriority,
+    draftContexto,
+    draftLabels,
+    draftSubs,
+    temporalHorizon,
+  ])
+
+  const flushDraftAndClose = () =>
+  {
+    if (isCreatingNew && draftHasContent())
+    {
+      saveTaskCreateDraft(buildDraftPayload())
+      toast.message('Rascunho guardado — continue quando quiser')
+    }
+    onClose()
+  }
+
+  const handleManualPriorityChange = (p: ManualPriority) =>
+  {
+    setManualPriority(p)
+    if (p === 'alta' && !plannedStart)
+    {
+      const base = isCreatingNew ? null : live.created_at
+      handlePlannedStartChange(startOfRegistrationDay(base))
+    }
+  }
+
+  const handleDiscardDraft = () =>
+  {
+    clearTaskCreateDraft()
+    clearLocalSubtasks(CREATE_SUBTASK_SENTINEL)
+    setTitleDraft('')
+    setDescDraft('')
+    setDeadline(null)
+    setSemPrazo(false)
+    setPlannedStart(null)
+    setManualPriority('normal')
+    setDraftContexto(null)
+    setDraftLabels([])
+    setDraftSubs([])
+    setDraftRestored(false)
+    toast.message('Rascunho descartado')
+  }
 
   const scorePreviewTask: TarefaUnificada = {
     ...live,
     titulo: titleDraft,
     descricao: descDraft,
     notas_locais: descDraft,
-    data_vencimento: deadline,
+    data_vencimento: semPrazo ? null : deadline,
     subtarefas: subs,
+    labels: isCreatingNew ? draftLabels : live.labels,
+    contexto: isCreatingNew
+      ? (draftContexto ?? undefined)
+      : live.contexto,
+    prioridade: manualPriorityToDb(manualPriority),
   }
 
   useEffect(() =>
@@ -134,14 +323,33 @@ export function AxelTaskDrawer({
 
   useEffect(() =>
   {
-    if (isCreatingNew) titleRef.current?.focus()
-  }, [isCreatingNew])
+    if (isCreatingNew) return
+    if (live.prioridade === 'alta' || live.prioridade === 'critica') setManualPriority('alta')
+    else if (live.prioridade === 'baixa') setManualPriority('quando_der')
+    else setManualPriority('normal')
+  }, [isCreatingNew, live.id, live.prioridade])
+
+  useEffect(() =>
+  {
+    if (isCreatingNew || !live.id) return
+    const prefs = loadTaskDrawerPrefs(live.id)
+    setPlannedStart(prefs.dataInicioPlanejada)
+  }, [isCreatingNew, live.id])
+
+  const handlePlannedStartChange = (iso: string | null) =>
+  {
+    setPlannedStart(iso)
+    if (!isCreatingNew && live.id > 0)
+    {
+      saveTaskDrawerPrefs(live.id, { dataInicioPlanejada: iso })
+    }
+  }
 
   useEffect(() =>
   {
     const onKey = (e: KeyboardEvent) =>
     {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') flushDraftAndClose()
     }
     window.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
@@ -150,7 +358,7 @@ export function AxelTaskDrawer({
       window.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
     }
-  }, [onClose])
+  }, [onClose, isCreatingNew, titleDraft, descDraft, deadline, semPrazo, plannedStart, draftContexto, draftLabels, draftSubs])
 
   const handleComplete = () =>
   {
@@ -207,9 +415,28 @@ export function AxelTaskDrawer({
 
   const handleAddSub = async () =>
   {
-    if (!newSub.trim()) return
-    if (isCreatingNew || isLocal) addSub(newSub.trim())
-    else if (canPersistServer) await createSubtarefa(live.id, newSub.trim())
+    const titulo = newSub.trim()
+    if (!titulo) return
+    if (isCreatingNew)
+    {
+      setDraftSubs((prev) => [
+        ...prev,
+        {
+          id: -Date.now() - prev.length,
+          titulo,
+          concluida: false,
+          ordem: prev.length,
+        },
+      ])
+    }
+    else if (isLocal)
+    {
+      addSub(titulo)
+    }
+    else if (canPersistServer)
+    {
+      await createSubtarefa(live.id, titulo)
+    }
     setNewSub('')
   }
 
@@ -221,9 +448,36 @@ export function AxelTaskDrawer({
     void axelCompleteTask({ ...live, subtarefas: nextSubs })
   }
 
+  const handleDeleteSub = async (subId: number) =>
+  {
+    if (isCreatingNew)
+    {
+      setDraftSubs((prev) => prev.filter((s) => s.id !== subId))
+      return
+    }
+    if (isLocal)
+    {
+      removeSub(subId)
+      return
+    }
+    if (canPersistServer)
+    {
+      await deleteSubtarefa(subId, live.id)
+    }
+  }
+
   const handleToggleSub = async (subId: number, checked: boolean) =>
   {
-    if (isCreatingNew || isLocal)
+    if (isCreatingNew)
+    {
+      const next = draftSubs.map((s) =>
+        s.id === subId ? { ...s, concluida: !checked } : s,
+      )
+      setDraftSubs(next)
+      maybeCompleteByChecklist(next)
+      return
+    }
+    if (isLocal)
     {
       const next = subs.map((s) =>
         s.id === subId ? { ...s, concluida: !checked } : s,
@@ -251,6 +505,11 @@ export function AxelTaskDrawer({
       titleRef.current?.focus()
       return
     }
+    if (!semPrazo && !deadline)
+    {
+      toast.error('Defina um prazo ou marque «Sem prazo definido»')
+      return
+    }
     setSubmitting(true)
     try
     {
@@ -258,7 +517,50 @@ export function AxelTaskDrawer({
       const created = useTaskStore.getState().tarefas[0]
       if (created)
       {
+        const prioridade = manualPriorityToDb(manualPriority)
+        if (prioridade !== created.prioridade)
+        {
+          await updateTarefa(created.id, { prioridade })
+        }
+        if (!semPrazo && deadline)
+        {
+          await updateTarefa(created.id, { data_vencimento: deadline })
+        }
+
+        let inicio = plannedStart
+        if (manualPriority === 'alta' && !inicio)
+        {
+          inicio = startOfRegistrationDay(created.created_at)
+        }
+        if (inicio)
+        {
+          saveTaskDrawerPrefs(created.id, { dataInicioPlanejada: inicio })
+        }
+
+        if (draftContexto)
+        {
+          const ctxRow = draftContexto.id
+            ? { id: draftContexto.id, titulo: draftContexto.titulo, cor: draftContexto.cor }
+            : await createContexto(draftContexto.titulo, draftContexto.cor)
+          if (ctxRow)
+          {
+            await setTaskContexto(created.id, ctxRow)
+          }
+        }
+        for (const label of draftLabels)
+        {
+          await addLabelToTarefa(created.id, label.id)
+        }
+        for (const sub of draftSubs)
+        {
+          await createSubtarefa(created.id, sub.titulo)
+        }
+        migrateTaskActivityLog(-1, created.id)
+        appendTaskActivityLog(created.id, 'Demanda criada e salva', 'progress')
         toast.success('Demanda criada')
+        clearTaskCreateDraft()
+        clearLocalSubtasks(CREATE_SUBTASK_SENTINEL)
+        setDraftSubs([])
         onCreated?.(created)
         onClose()
       }
@@ -273,47 +575,47 @@ export function AxelTaskDrawer({
     }
   }
 
-  return (
-    <div className="fixed inset-0 z-[80] flex justify-end font-display" role="dialog" aria-modal="true">
+  const drawer = (
+    <div className="fixed inset-0 z-[100] flex justify-end font-display" role="dialog" aria-modal="true">
       <button
         type="button"
         className="absolute inset-0 bg-black/50"
-        onClick={onClose}
+        onClick={flushDraftAndClose}
         aria-label="Fechar painel"
       />
 
       <aside className={DRAWER_SHELL}>
-        <div className="shrink-0 flex items-center justify-between gap-2 px-5 py-2 border-b border-line bg-chrome/40">
+        <div className="shrink-0 sticky top-0 z-10 flex items-center justify-between gap-2 px-5 py-2.5 border-b border-line bg-card">
           <div className="flex flex-wrap items-center gap-1.5 min-w-0">
-            <span className="font-mono text-[10px] uppercase tracking-wide text-accent px-1.5 py-0.5 rounded-sl border border-line">
-              {tag}
-            </span>
-            <span className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-              {HORIZON_LABELS[temporalHorizon]}
-            </span>
-            {isCreatingNew && (
-              <span className="font-mono text-[10px] uppercase text-accent px-1.5 py-0.5 rounded-sl border border-accent/30">
+            {isCreatingNew ? (
+              <span className="font-mono text-[10px] uppercase text-accent">
                 Nova demanda
               </span>
-            )}
-            {inProgress && (
-              <span className="font-mono text-[10px] uppercase text-accent px-1.5 py-0.5 rounded-sl border border-accent/30">
-                Em progresso
-              </span>
+            ) : (
+              <>
+                <span className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  {HORIZON_LABELS[temporalHorizon]}
+                </span>
+                {inProgress && (
+                  <span className="font-mono text-[10px] uppercase text-accent px-1.5 py-0.5 rounded-sl border border-accent/30">
+                    Em progresso
+                  </span>
+                )}
+              </>
             )}
           </div>
           <button
             type="button"
-            onClick={onClose}
-            className="p-1 rounded-sl text-ink-muted hover:text-ink shrink-0"
+            onClick={flushDraftAndClose}
+            className="p-2 -mr-1 rounded-sl text-ink-muted hover:text-ink hover:bg-chrome shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Fechar"
           >
-            <X size={16} strokeWidth={1.5} />
+            <X size={18} strokeWidth={1.5} />
           </button>
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
-          <div className="flex flex-col gap-5 w-full px-5 py-4 min-w-0">
+          <div className="flex flex-col gap-5 w-full px-5 pt-6 pb-5 sm:pt-8 min-w-0">
             <input
               ref={titleRef}
               value={titleDraft}
@@ -324,12 +626,22 @@ export function AxelTaskDrawer({
               aria-label="Título da tarefa"
             />
 
+            {isCreatingNew && draftRestored && (
+              <p className="text-[11px] text-ink-muted font-mono -mt-2">
+                Rascunho restaurado — continue ou descarte no rodapé.
+              </p>
+            )}
+
             <AxelDrawerDetailsStrip
               tarefa={scorePreviewTask}
               deadline={deadline}
+              semPrazo={isCreatingNew ? semPrazo : !deadline}
+              onSemPrazoChange={isCreatingNew ? setSemPrazo : undefined}
               canPersist={canPersistServer}
               isCreatingNew={isCreatingNew}
               onDeadlineChange={setDeadline}
+              plannedStart={plannedStart}
+              onPlannedStartChange={handlePlannedStartChange}
             />
 
             {deadlineProposal && (
@@ -410,8 +722,8 @@ export function AxelTaskDrawer({
 
               <ul className="mb-2 min-w-0">
                 {subs.map((sub) => (
-                  <li key={sub.id}>
-                    <label className="flex items-center gap-3 py-1.5 cursor-pointer min-w-0">
+                  <li key={sub.id} className="group flex items-center gap-1 min-w-0">
+                    <label className="flex items-center gap-3 py-1.5 cursor-pointer min-w-0 flex-1">
                       <input
                         type="checkbox"
                         checked={sub.concluida}
@@ -426,42 +738,119 @@ export function AxelTaskDrawer({
                         {sub.titulo}
                       </span>
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => void handleDeleteSub(sub.id)}
+                      className="p-1.5 rounded-sl text-ink-muted hover:text-urgente opacity-60 group-hover:opacity-100 shrink-0"
+                      aria-label={`Remover ${sub.titulo}`}
+                    >
+                      <Trash2 size={14} strokeWidth={1.5} />
+                    </button>
                   </li>
                 ))}
               </ul>
 
-              <input
-                value={newSub}
-                onChange={(e) => setNewSub(e.target.value)}
-                onKeyDown={(e) =>
-                {
-                  if (e.key === 'Enter') void handleAddSub()
-                }}
-                placeholder="Nova sub-etapa…"
-                className="w-full min-w-0 box-border text-sm border border-line rounded-sl px-2.5 py-1.5 text-ink bg-transparent outline-none focus:border-accent/40 focus:ring-0"
-              />
-              <button
-                type="button"
-                onClick={() => void handleAddSub()}
-                className="mt-1.5 inline-flex items-center gap-1 text-xs text-ink-muted hover:text-accent"
-              >
-                <Plus size={14} strokeWidth={1.5} />
-                Adicionar sub-etapa
-              </button>
+              <div className="flex gap-2 min-w-0">
+                <input
+                  value={newSub}
+                  onChange={(e) => setNewSub(e.target.value)}
+                  onKeyDown={(e) =>
+                  {
+                    if (e.key === 'Enter') void handleAddSub()
+                  }}
+                  placeholder="Nova sub-etapa…"
+                  className="flex-1 min-w-0 box-border text-sm border border-line rounded-sl px-2.5 py-1.5 text-ink bg-transparent outline-none focus:border-accent/40 focus:ring-0"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleAddSub()}
+                  disabled={!newSub.trim()}
+                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line text-ink-muted hover:text-accent hover:border-accent/40 disabled:opacity-40 transition-colors"
+                  title="Adicionar sub-etapa"
+                  aria-label="Adicionar sub-etapa"
+                >
+                  <Plus size={16} strokeWidth={1.5} />
+                </button>
+              </div>
             </section>
+
+            <AxelDrawerOrganizationSection
+              tarefa={scorePreviewTask}
+              allTasks={allTasks}
+              canPersist={canPersistServer}
+              isCreatingNew={isCreatingNew}
+              manualPriority={manualPriority}
+              onManualPriorityChange={handleManualPriorityChange}
+              draftContexto={draftContexto}
+              onDraftContextoChange={setDraftContexto}
+              draftLabels={draftLabels}
+              onDraftLabelsChange={setDraftLabels}
+            />
           </div>
         </div>
 
-        <footer className="shrink-0 border-t border-line bg-card px-5 py-3 min-w-0">
+        <footer className={`shrink-0 border-t border-line bg-card px-5 pt-3 ${AXEL_DRAWER_FOOTER_PB_MOBILE}`}>
           {isCreatingNew ? (
-            <button
-              type="button"
-              disabled={submitting || !titleDraft.trim()}
-              onClick={() => void handleCreateDemand()}
-              className={`w-full h-10 text-sm font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
-            >
-              {submitting ? 'Criando…' : 'Criar Demanda'}
-            </button>
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted mb-2">
+                  Histórico do rascunho
+                </h3>
+                <div
+                  ref={logScrollRef}
+                  className="max-h-[120px] overflow-y-auto custom-scrollbar space-y-1.5 min-w-0"
+                >
+                  {entries.length === 0 && (
+                    <p className="text-xs text-ink-muted py-1">
+                      Alterações em título, prazo e checklist aparecem aqui.
+                    </p>
+                  )}
+                  {entries.map((e) => (
+                    <div
+                      key={e.id}
+                      className="flex items-start gap-2 py-1 border-b border-line last:border-0 min-w-0"
+                    >
+                      {e.kind && (
+                        <ActivityEventIcon kind={e.kind as ActivityEventKind} size={14} />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-ink-muted leading-snug break-words">{e.text}</p>
+                        <time className="text-[10px] font-mono text-ink-muted tabular-nums">
+                          {new Date(e.createdAt).toLocaleString('pt-BR', {
+                            day: '2-digit',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </time>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2">
+                  <AxelDrawerQuickInput
+                    onSubmit={(text) => addEntry(text, 'rascunho')}
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                disabled={submitting || !titleDraft.trim()}
+                onClick={() => void handleCreateDemand()}
+                className={`w-full h-10 text-sm font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
+              >
+                {submitting ? 'Criando…' : 'Criar Demanda'}
+              </button>
+              {(draftRestored || draftHasContent()) && (
+                <button
+                  type="button"
+                  onClick={handleDiscardDraft}
+                  className="w-full py-2 text-[11px] font-mono uppercase text-ink-muted hover:text-atencao transition-colors"
+                >
+                  Descartar rascunho
+                </button>
+              )}
+            </div>
           ) : (
             <>
               <div className="flex flex-wrap gap-2 mb-3">
@@ -547,4 +936,6 @@ export function AxelTaskDrawer({
       </aside>
     </div>
   )
+
+  return createPortal(drawer, document.body)
 }

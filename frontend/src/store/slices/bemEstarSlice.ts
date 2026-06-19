@@ -8,6 +8,9 @@ import type { GamificacaoSlice } from './gamificacaoSlice'
 import type { SaudeSlice } from './saudeSlice'
 import type { TarefasSlice } from './tarefasSlice'
 import type { FinanceiroSlice } from './financeiroSlice'
+import type { UserPrefsSlice } from './userPrefsSlice'
+import { wellbeingHiddenUntilIso } from '../../lib/axelCareRotation'
+import { isNovoDiaDeSaude, localTodayIso } from '../../lib/healthDayBoundary'
 import type { HabitoDiario } from '../storeTypes'
 
 // ── types ────────────────────────────────────────────────────
@@ -88,7 +91,7 @@ export interface BemEstarSlice
 
 function hoje(): string
 {
-  return new Date().toISOString().split('T')[0]
+  return localTodayIso()
 }
 
 const PROMPTS = [
@@ -120,6 +123,7 @@ async function refreshHumorRanges(set: (partial: Partial<BemEstarSlice> | ((s: B
 }
 
 type BemEstarStore = BemEstarSlice &
+  Pick<UserPrefsSlice, 'patchWorkspacePrefs' | 'workspacePrefs'> &
   Pick<AxelStreakSlice, 'focusMinutesByDate' | 'recordWellbeingForStreak'> &
   Pick<GamificacaoSlice, 'addXP' | 'incrementQuestProgress'> &
   Pick<SaudeSlice, 'habitos'> &
@@ -187,6 +191,20 @@ function sumFocoSemana(
   return total
 }
 
+function mapHumorRow(row: Record<string, unknown>): HumorRegistro
+{
+  return {
+    id: row.id as number,
+    data: String(row.data ?? ''),
+    humor: Number(row.humor ?? 0),
+    emoji: row.emoji != null ? String(row.emoji) : null,
+    nota: row.nota != null ? String(row.nota) : null,
+    energia: row.energia != null ? Number(row.energia) : null,
+    contexto: Array.isArray(row.contexto) ? row.contexto.map(String) : null,
+    created_at: row.created_at != null ? String(row.created_at) : undefined,
+  }
+}
+
 export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSlice> = (set, get) => ({
   humorHoje: null,
   humorHojeLista: [],
@@ -202,31 +220,86 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
 
   registrarHumor: async (humor, emoji, nota, opts) =>
   {
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid)
+    {
+      const { toast } = await import('sonner')
+      toast.error('Faça login para registrar seu humor')
+      return null
+    }
+
+    const dia = hoje()
+    const isFirstToday = get().humorHojeLista.length === 0
+    const row: Record<string, unknown> = {
+      user_id: uid,
+      data: dia,
+      humor,
+      emoji,
+      nota: nota || null,
+    }
+    if (opts?.energia) row.energia = opts.energia
+    if (opts?.contexto?.length) row.contexto = opts.contexto
+
+    const optimisticId = -Date.now()
+    const optimistic: HumorRegistro = {
+      id: optimisticId,
+      data: dia,
+      humor,
+      emoji,
+      nota: nota || null,
+      created_at: new Date().toISOString(),
+      energia: opts?.energia ?? null,
+      contexto: opts?.contexto ?? null,
+    }
+
+    set((s) =>
+    {
+      const lista = [...s.humorHojeLista, optimistic]
+      return { humorHojeLista: lista, humorHoje: ultimoRegistro(lista) }
+    })
+
     try
     {
-      const uid = (await supabase.auth.getUser()).data.user?.id
-      if (!uid) return null
+      let saved: HumorRegistro | null = null
 
-      const row: Record<string, unknown> = {
-        user_id: uid,
-        data: hoje(),
-        humor,
-        emoji,
-        nota: nota || null,
-      }
-      if (opts?.energia) row.energia = opts.energia
-      if (opts?.contexto?.length) row.contexto = opts.contexto
-
-      const { data, error } = await supabase
+      const inserted = await supabase
         .from('diario_humor')
         .insert(row)
         .select()
         .single()
-      if (error) throw error
+
+      if (inserted.error)
+      {
+        // Schema antigo: 1 registro/dia — atualiza em vez de falhar
+        if (inserted.error.code === '23505')
+        {
+          const updated = await supabase
+            .from('diario_humor')
+            .update({ humor, emoji, nota: nota || null, energia: opts?.energia ?? null })
+            .eq('user_id', uid)
+            .eq('data', dia)
+            .select()
+            .single()
+          if (updated.error) throw updated.error
+          saved = mapHumorRow(updated.data as Record<string, unknown>)
+        }
+        else
+        {
+          throw inserted.error
+        }
+      }
+      else
+      {
+        saved = mapHumorRow(inserted.data as Record<string, unknown>)
+      }
+
+      if (!saved) throw new Error('Resposta vazia ao salvar humor')
 
       set((s) =>
       {
-        const lista = [...s.humorHojeLista, data]
+        const lista = s.humorHojeLista
+          .filter((r) => r.id !== optimisticId)
+          .concat(saved as HumorRegistro)
         return { humorHojeLista: lista, humorHoje: ultimoRegistro(lista) }
       })
 
@@ -237,11 +310,29 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       if (anyGet.addXP) await anyGet.addXP('saude', 8)
       if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('bem-estar', 1)
 
-      return data
+      // Primeiro humor do dia — oculta card no dashboard por 12h (persistido no Supabase)
+      if (isFirstToday && anyGet.patchWorkspacePrefs)
+      {
+        await anyGet.patchWorkspacePrefs({
+          wellbeing_dashboard_hidden_until: wellbeingHiddenUntilIso(),
+        })
+      }
+
+      return saved
     }
     catch (e)
     {
       console.error('registrarHumor:', e)
+      set((s) =>
+      {
+        const lista = s.humorHojeLista.filter((r) => r.id !== optimisticId)
+        return { humorHojeLista: lista, humorHoje: ultimoRegistro(lista) }
+      })
+      const { toast } = await import('sonner')
+      const msg = e && typeof e === 'object' && 'message' in e
+        ? String((e as { message: string }).message)
+        : 'Erro ao salvar'
+      toast.error('Não foi possível registrar o humor', { description: msg })
       return null
     }
   },
@@ -319,9 +410,20 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
   {
     try
     {
+      const dia = hoje()
+
+      if (isNovoDiaDeSaude(dia))
+      {
+        const anyGet = get() as BemEstarStore
+        if (anyGet.patchWorkspacePrefs && anyGet.workspacePrefs.wellbeing_dashboard_hidden_until)
+        {
+          await anyGet.patchWorkspacePrefs({ wellbeing_dashboard_hidden_until: null })
+        }
+        set({ humorHojeLista: [], humorHoje: null })
+      }
+
       const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
       const trintaDias = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
-      const dia = hoje()
 
       const [{ data: hojeRows }, { data: semana }, { data: mes }] = await Promise.all([
         supabase.from('diario_humor').select('*').eq('data', dia).order('created_at'),

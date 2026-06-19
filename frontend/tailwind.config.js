@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Instrumento — paleta quente, um único acento cobre
+        // Instrumento — tokens semânticos
         fundo: 'var(--sl-canvas)',
         card: 'var(--sl-surface)',
         chrome: 'var(--sl-chrome)',

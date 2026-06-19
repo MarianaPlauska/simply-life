@@ -32,8 +32,8 @@ export function PinnedNavEditor()
     const has = pinnedModules.includes(id)
     if (!has && pinnedModules.length >= MAX_PINNED_MODULES)
     {
-      toast.message(`Máximo de ${MAX_PINNED_MODULES} páginas fixas`, {
-        description: 'Desfixe uma para adicionar outra.',
+      toast.message(`Máximo de ${MAX_PINNED_MODULES - 1} atalhos além do Dashboard`, {
+        description: 'Desfixe um para adicionar outro.',
       })
       return
     }
@@ -41,14 +41,14 @@ export function PinnedNavEditor()
   }
 
   return (
-    <div ref={ref} className="relative hidden sm:block">
+    <div ref={ref} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="p-2 rounded-sl border border-line bg-chrome hover:bg-elevated text-ink-muted hover:text-ink transition-colors"
         aria-label="Fixar páginas no topo"
         aria-expanded={open}
-        title="Fixar até 4 páginas principais"
+        title="Fixar até 2 páginas além do Dashboard"
       >
         <Pin className="w-3.5 h-3.5" />
       </button>
@@ -58,10 +58,16 @@ export function PinnedNavEditor()
           <div className="px-3 py-2 border-b border-line">
             <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Páginas fixas</p>
             <p className={`text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              {pinnedModules.length}/{MAX_PINNED_MODULES} no topo
+              Dashboard fixo · {Math.max(0, pinnedModules.length - 1)}/{MAX_PINNED_MODULES - 1} atalhos
             </p>
           </div>
           <ul className="max-h-64 overflow-y-auto py-1">
+            <li>
+              <div className={`w-full flex items-center justify-between gap-2 px-3 py-2 text-[12px] ${AXEL_TEXT_PRIMARY}`}>
+                <span>Dashboard</span>
+                <Check className="w-3.5 h-3.5 text-accent shrink-0" aria-hidden />
+              </div>
+            </li>
             {PINNABLE_VIEWS.map(({ id, label }) =>
             {
               const pinned = pinnedModules.includes(id)

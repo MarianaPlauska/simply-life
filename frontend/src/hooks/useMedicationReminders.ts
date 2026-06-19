@@ -2,10 +2,11 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../store/useTaskStore'
 import { buildDosesHoje, proximaDosePendente, mensagemGentilDose } from '../lib/medicamentosSchedule'
+import { showHealthNotification } from '../lib/healthNotifications'
 
 const REMINDER_INTERVAL_MS = 5 * 60 * 1000
 
-/** Lembretes gentis de medicamento — espelho do sync financeiro no AppLayout */
+/** Lembretes de medicamento — toast in-app + notificação SW quando permitido */
 export function useMedicationReminders(enabled = true): void
 {
   const medicamentos = useTaskStore((s) => s.medicamentos)
@@ -36,9 +37,22 @@ export function useMedicationReminders(enabled = true): void
       if (last && now - Number(last) < REMINDER_INTERVAL_MS) return
 
       sessionStorage.setItem(key, String(now))
-      toast.info('AXEL · Medicamento', {
-        description: mensagemGentilDose(pendente),
-        duration: 6000,
+      const body = mensagemGentilDose(pendente)
+
+      void showHealthNotification({
+        title: 'AXEL · Medicamento',
+        body,
+        url: '/saude#medicamentos',
+        tag: key,
+      }).then((pushed) =>
+      {
+        if (!pushed)
+        {
+          toast.info('AXEL · Medicamento', {
+            description: body,
+            duration: 6000,
+          })
+        }
       })
     }
 

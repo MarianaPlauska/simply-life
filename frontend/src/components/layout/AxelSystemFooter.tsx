@@ -15,7 +15,7 @@ export function AxelSystemFooter({ className = '' }: AxelSystemFooterProps)
       aria-label="Status do sistema"
     >
       <p className={`font-mono text-[10px] uppercase tracking-[0.12em] text-left ${AXEL_TEXT_SECONDARY}`}>
-        Simply-Life OS · v1.0 · sincronizado
+        Simply-Life · com o AXEL ao seu lado
       </p>
     </footer>
   )

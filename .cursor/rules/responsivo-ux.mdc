@@ -1,0 +1,28 @@
+---
+description: Engenharia sênior — web + mobile, menos é mais, acessibilidade
+alwaysApply: true
+---
+
+# UX e engenharia — Simply-Life
+
+## Mentalidade
+
+Pensar como engenheiro sênior em produtos grandes que funcionam na **web e no mobile** (PWA). Toda feature nova deve ser **responsiva** desde o primeiro commit.
+
+## Responsivo
+
+- Mobile-first: toque ≥ 44px, `safe-area-inset`, scroll horizontal só quando necessário.
+- Breakpoints: empilhar no mobile; side-by-side a partir de `sm`/`md` conforme o conteúdo.
+- Evitar densidade excessiva no viewport pequeno — priorizar o essencial acima da dobra.
+
+## Menos é mais
+
+- Dashboard e telas de entrada: mostrar o **essencial bem feito**, não todos os módulos de uma vez.
+- Detalhes e analytics ficam em seções recolhíveis ou em rotas dedicadas.
+- Cada ação rápida deve **funcionar de verdade** (persistir, feedback visual, toast em erro).
+
+## Acessibilidade visual
+
+- Contraste legível: evitar cinza muito escuro sobre preto; `text-ink-muted` deve ser legível.
+- Tipografia mínima confortável (~15–16px base); labels pequenas não abaixo de 11px em mobile.
+- Manter o tom AXEL (âmbar/cobre) ao ajustar cores.

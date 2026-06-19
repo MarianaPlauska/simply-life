@@ -1,7 +1,7 @@
 import { AlertTriangle, CalendarDays, CalendarRange, CircleDashed, Sun } from 'lucide-react'
 import { DUE_BUCKET_LABELS, type DueBucket } from '../../lib/dueBucket'
 
-// Navegação compacta entre faixas de prazo — sem repetir o mapa explicativo
+// Navegação compacta entre faixas de prazo — grade sem scroll horizontal
 
 interface DueBucketMapProps
 {
@@ -15,6 +15,14 @@ const NAV_BUCKETS: DueBucket[] = [
   'proxima_semana',
   'sem_prazo',
 ]
+
+const BUCKET_SHORT: Partial<Record<DueBucket, string>> = {
+  vencido: 'Atraso',
+  hoje: 'Hoje',
+  esta_semana: 'Semana',
+  proxima_semana: 'Próx.',
+  sem_prazo: 'Sem data',
+}
 
 const BUCKET_CHIP: Record<DueBucket, { Icon: typeof Sun; active: string; idle: string }> = {
   vencido: {
@@ -60,29 +68,32 @@ export function DueBucketMap({ counts }: DueBucketMapProps)
 
   return (
     <nav
-      className="sticky top-0 z-10 px-3 py-2 border-b border-line bg-card/95 backdrop-blur-sm"
+      className="sticky top-0 z-10 px-2 sm:px-3 py-2 border-b border-line bg-card/95 backdrop-blur-sm"
       aria-label="Ir para faixa de prazo"
     >
-      <div className="flex gap-1.5 overflow-x-auto custom-scrollbar pb-0.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
         {visible.map((bucket) =>
         {
           const ui = BUCKET_CHIP[bucket]
           const Icon = ui.Icon
           const count = counts[bucket]
           const hasItems = count > 0
+          const label = BUCKET_SHORT[bucket] ?? DUE_BUCKET_LABELS[bucket]
 
           return (
             <button
               key={bucket}
               type="button"
               onClick={() => scrollToBucket(bucket)}
-              className={`inline-flex items-center gap-1.5 shrink-0 px-2.5 py-1.5 rounded-sl border font-mono text-[10px] uppercase tracking-wide transition-colors hover:opacity-90 ${
+              className={`inline-flex items-center justify-between gap-1 w-full min-w-0 px-2 py-1.5 rounded-sl border font-mono text-[10px] uppercase tracking-wide transition-colors hover:opacity-90 ${
                 hasItems ? ui.active : ui.idle
               }`}
             >
-              <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
-              <span className="truncate max-w-[7rem]">{DUE_BUCKET_LABELS[bucket]}</span>
-              <span className="font-display text-sm tabular-nums leading-none">{count}</span>
+              <span className="inline-flex items-center gap-1 min-w-0">
+                <Icon className="w-3 h-3 shrink-0" strokeWidth={1.75} aria-hidden />
+                <span className="truncate">{label}</span>
+              </span>
+              <span className="font-display text-sm tabular-nums leading-none shrink-0">{count}</span>
             </button>
           )
         })}

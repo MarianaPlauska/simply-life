@@ -53,9 +53,29 @@ export interface Despesa {
   data: string;
 }
 
+export type MedicamentoCategoria =
+  | 'pressao'
+  | 'antidepressivo'
+  | 'vitamina'
+  | 'dor'
+  | 'cronico'
+  | 'outro'
+
+export type MedicamentoPeriodo = 'manha' | 'tarde' | 'noite'
+
 export interface MedicamentoConfig {
   horarios?: string[];
+  periodos?: MedicamentoPeriodo[];
+  dosagem?: string;
+  categoria?: MedicamentoCategoria;
+  uso_diario?: boolean;
   notas?: string;
+  /** 0=dom … 6=sáb — vazio = todos os dias */
+  dias_semana?: number[];
+  inicio_tratamento?: string;
+  fim_tratamento?: string;
+  /** null = contínuo */
+  duracao_dias?: number | null;
 }
 
 export interface MedicamentoTomada {
@@ -209,10 +229,11 @@ export interface FinancialGoal {
 export interface HabitoDiarioConfig {
   incremento?: number;
   meta_minutos?: number;
-  /** Data (YYYY-MM-DD) do último progresso — reset diário */
   ultima_data?: string;
-  /** Plano semanal de treino — chave: seg, ter, qua... */
   plano_semana?: Record<string, { titulo: string; meta_minutos: number }>;
+  /** Hidratação — ml por unidade padrão e registro variável do dia */
+  ml_por_copo?: number;
+  registros_ml?: number[];
 }
 
 export interface HabitoDiario {

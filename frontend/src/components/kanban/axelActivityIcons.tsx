@@ -5,9 +5,11 @@ export const ACTIVITY_EVENT_META: Record<
   ActivityEventKind,
   { label: string; Icon: LucideIcon; color: string }
 > = {
-  blocker: { label: 'Log Blocker', Icon: AlertCircle, color: 'text-amber-400' },
-  progress: { label: 'Progress Update', Icon: CheckCircle, color: 'text-emerald-400' },
-  dependency: { label: 'Link Dependency', Icon: Link2, color: 'text-sky-400' },
+  // rascunho — eventos automáticos na criação da demanda
+  blocker: { label: 'Registrar bloqueio', Icon: AlertCircle, color: 'text-amber-400' },
+  progress: { label: 'Atualizar andamento', Icon: CheckCircle, color: 'text-emerald-400' },
+  dependency: { label: 'Vincular dependência', Icon: Link2, color: 'text-sky-400' },
+  rascunho: { label: 'Rascunho', Icon: CheckCircle, color: 'text-ink-muted' },
 }
 
 export function ActivityEventIcon({

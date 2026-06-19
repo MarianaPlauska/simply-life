@@ -1,6 +1,7 @@
 // slice do dashboard — resumo, notificações, preferências via supabase
 import type { StateCreator } from 'zustand'
 import type { DashboardResumo, Notificacao } from '../storeTypes'
+import { normalizeNotificacao } from '../../lib/notificacaoUtils'
 import { supabase } from '../../lib/supabase'
 import type { UISlice } from './uiSlice'
 
@@ -64,7 +65,8 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
         .select('*')
         .order('criado_em', { ascending: false })
       if (error) throw error
-      set({ notificacoes: data || [] })
+      const rows = (data ?? []) as Record<string, unknown>[]
+      set({ notificacoes: rows.map(normalizeNotificacao) })
     }
     catch (e) { console.error('fetchNotificacoes:', e) }
   },

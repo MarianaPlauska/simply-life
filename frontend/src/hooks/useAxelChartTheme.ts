@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
 
-// Paleta Recharts — tons quentes alinhados ao acento cobre
+// Paleta Recharts — ocre nos modos claros (papel creme); cobre no escuro
 
 export function useAxelChartTheme()
 {
@@ -10,19 +10,19 @@ export function useAxelChartTheme()
 
   return useMemo(() =>
   {
-    const axisStroke = isDarkMode ? '#6B6560' : '#9C9890'
-    const gridStroke = isDarkMode ? '#2E2C28' : '#E8E4DB'
-    const refStroke = isDarkMode ? '#6B6560' : '#D8D3C8'
-    const tickFill = isDarkMode ? '#9C9890' : '#6B6560'
-    const legendColor = isDarkMode ? '#9C9890' : '#6B6560'
-    const openLineStroke = isDarkMode ? '#6B6560' : '#9C9890'
-    const exerciseFill = isDarkMode ? '#232220' : '#EDE9E0'
-    const exerciseStroke = isDarkMode ? '#C17F3A' : '#9A5B1A'
+    const axisStroke = isDarkMode ? '#6B6560' : '#8B7D6B'
+    const gridStroke = isDarkMode ? '#2E2C28' : '#E8DFC8'
+    const refStroke = isDarkMode ? '#6B6560' : '#C9B896'
+    const tickFill = isDarkMode ? '#9C9890' : '#1A1A1A'
+    const legendColor = isDarkMode ? '#9C9890' : '#1A1A1A'
+    const openLineStroke = isDarkMode ? '#6B6560' : '#8B7D6B'
+    const exerciseFill = isDarkMode ? '#232220' : '#F5EDD6'
+    const exerciseStroke = isDarkMode ? '#C17F3A' : '#8B6317'
 
-    const accent = isDarkMode ? '#C17F3A' : '#9A5B1A'
+    const accent = isDarkMode ? '#C17F3A' : '#5C4A32'
 
-    const waterBar = isDarkMode ? '#C17F3A' : '#9A5B1A'
-    const waterBarMuted = isDarkMode ? '#8A5A2E' : '#C4A574'
+    const waterBar = isDarkMode ? '#C17F3A' : '#5C4A32'
+    const waterBarMuted = isDarkMode ? '#8A5A2E' : '#C9A96E'
 
     return {
       isDarkMode,

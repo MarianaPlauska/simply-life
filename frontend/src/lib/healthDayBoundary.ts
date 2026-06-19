@@ -7,9 +7,10 @@ const STORAGE_KEY = 'simply-life:health-day-iso'
 export function localTodayIso(): string
 {
   const d = new Date()
-  const off = d.getTimezoneOffset()
-  const local = new Date(d.getTime() - off * 60 * 1000)
-  return local.toISOString().slice(0, 10)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
 }
 
 export function readStoredHealthDay(): string | null
@@ -33,9 +34,21 @@ export function writeStoredHealthDay(iso: string): void
   catch { /* quota */ }
 }
 
-function configComData(config: HabitoDiarioConfig | undefined, today: string): HabitoDiarioConfig
+/** Config após virada do dia — zera registros de água mas mantém ml_por_copo e demais prefs */
+export function configAposResetDiario(
+  config: HabitoDiarioConfig | undefined,
+  today: string,
+  tipo?: string,
+): HabitoDiarioConfig
 {
-  return { ...(config ?? {}), ultima_data: today }
+  const next: HabitoDiarioConfig = { ...(config ?? {}), ultima_data: today }
+
+  if (tipo === 'agua' || (config?.registros_ml && config.registros_ml.length > 0))
+  {
+    next.registros_ml = []
+  }
+
+  return next
 }
 
 /** Hábito precisa zerar se a última data salva não é hoje */
@@ -56,7 +69,7 @@ export function resetHabitosParaHoje(habitos: HabitoDiario[], today: string): Ha
     return {
       ...h,
       progresso_atual: 0,
-      config: configComData(h.config, today),
+      config: configAposResetDiario(h.config, today, h.tipo),
     }
   })
 }

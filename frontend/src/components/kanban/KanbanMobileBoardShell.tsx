@@ -96,11 +96,13 @@ export function KanbanMobileBoardShell({
       </div>
 
       <div
-        className="lg:hidden flex-1 min-h-[360px] flex flex-col min-w-0 border border-line rounded-sl bg-card overflow-hidden touch-pan-y"
+        className="lg:hidden shrink-0 flex flex-col min-w-0 border border-line rounded-sl bg-card overflow-hidden touch-pan-y max-h-[min(420px,calc(100dvh-14rem))]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {tab === 'executar' ? executar : prazo}
+        <div className="flex flex-col min-h-0 overflow-hidden">
+          {tab === 'executar' ? executar : prazo}
+        </div>
       </div>
 
       {onAddTask && (

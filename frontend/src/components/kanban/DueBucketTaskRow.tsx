@@ -1,9 +1,9 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { Lock } from 'lucide-react'
+import { GripVertical, Lock, Play } from 'lucide-react'
 import { DueDateChip } from './DueDateChip'
 import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
-import { formatTaskRef, urgencyDotClass, urgencyScoreClass } from '../../lib/kanbanVisual'
+import { formatTaskRef } from '../../lib/kanbanVisual'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -12,22 +12,26 @@ interface DueBucketTaskRowProps
   tarefa: TarefaUnificada
   allTasks: TarefaUnificada[]
   inExecutionQueue?: boolean
+  isExecuting?: boolean
   isDragging?: boolean
   onOpen: () => void
+  onStartExecute?: (task: TarefaUnificada) => void
 }
 
 export function DueBucketTaskRow({
   tarefa,
   allTasks,
   inExecutionQueue = false,
+  isExecuting = false,
   isDragging = false,
   onOpen,
+  onStartExecute,
 }: DueBucketTaskRowProps)
 {
   const blocked = isTaskDependencyBlocked(tarefa, allTasks)
-  const score = tarefa.score_urgencia ?? 0
+  const canExecute = !blocked && tarefa.status !== 'concluida' && tarefa.id !== 0
 
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform } = useDraggable({
     id: tarefa.id,
     disabled: blocked,
   })
@@ -40,53 +44,72 @@ export function DueBucketTaskRow({
     <article
       ref={setNodeRef}
       style={style}
-      {...(blocked ? {} : listeners)}
-      {...(blocked ? {} : attributes)}
-      onClick={() => !blocked && onOpen()}
-      onKeyDown={(e) =>
-      {
-        if (blocked) return
-        if (e.key === 'Enter' || e.key === ' ')
-        {
-          e.preventDefault()
-          onOpen()
-        }
-      }}
-      role="button"
-      tabIndex={blocked ? -1 : 0}
       className={[
-        'group flex items-center gap-2 px-2.5 py-2 rounded-sl border border-line bg-elevated',
-        'hover:border-ink-muted/50 hover:bg-card transition-colors text-left w-full',
-        blocked ? 'opacity-45 cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
+        'group flex items-center gap-1.5 px-2 py-2 rounded-sl border text-left w-full transition-colors',
+        isExecuting
+          ? 'border-accent bg-accent/15 ring-1 ring-accent/40 shadow-sm'
+          : inExecutionQueue
+            ? 'border-accent/35 bg-accent/8'
+            : 'border-line bg-elevated hover:border-ink-muted/50 hover:bg-card',
+        blocked ? 'opacity-45' : '',
         isDragging ? 'opacity-50' : '',
-        inExecutionQueue ? 'ring-1 ring-accent/30' : '',
       ].join(' ')}
     >
-      <span
-        className={`w-1.5 h-1.5 rounded-full shrink-0 ${urgencyDotClass(score)}`}
-        aria-hidden
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-[13px] leading-snug text-ink line-clamp-1">
-          {cleanTitleForDisplay(tarefa.titulo)}
-        </p>
-        <p className="font-mono text-[9px] text-ink-muted mt-0.5 truncate">
-          {formatTaskRef(tarefa.id)}
-        </p>
-      </div>
-      <div className="shrink-0 flex items-center gap-1.5">
-        <DueDateChip date={tarefa.data_vencimento} compact />
-        {inExecutionQueue && (
-          <span className="font-mono text-[8px] uppercase text-accent border border-accent/25 px-1 rounded-sm">
-            Fila
-          </span>
+      {!blocked && (
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          {...listeners}
+          {...attributes}
+          onClick={(e) => e.stopPropagation()}
+          className="shrink-0 p-1 -ml-0.5 rounded-sl text-ink-muted hover:text-ink cursor-grab active:cursor-grabbing touch-none"
+          aria-label="Arrastar tarefa"
+        >
+          <GripVertical size={14} strokeWidth={1.75} />
+        </button>
+      )}
+
+      <button
+        type="button"
+        onClick={() => !blocked && onOpen()}
+        disabled={blocked}
+        className="flex-1 min-w-0 flex items-center gap-2 text-left"
+      >
+        <div className="flex-1 min-w-0">
+          <p className={`text-[13px] leading-snug line-clamp-1 ${isExecuting ? 'text-accent font-medium' : 'text-ink'}`}>
+            {cleanTitleForDisplay(tarefa.titulo)}
+          </p>
+          <p className="font-mono text-[9px] text-ink-muted mt-0.5 truncate">
+            {formatTaskRef(tarefa.id)}
+            {isExecuting && (
+              <span className="text-accent ml-1.5 uppercase">· em foco</span>
+            )}
+            {!isExecuting && inExecutionQueue && (
+              <span className="text-accent/80 ml-1.5 uppercase">· na fila</span>
+            )}
+          </p>
+        </div>
+      </button>
+
+      <div className="shrink-0 flex items-center gap-1">
+        {canExecute && onStartExecute && !isExecuting && (
+          <button
+            type="button"
+            onClick={(e) =>
+            {
+              e.stopPropagation()
+              onStartExecute(tarefa)
+            }}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-sl border border-accent/35 bg-accent/10 text-accent hover:bg-accent/20 transition-colors shrink-0"
+            aria-label="Executar agora"
+            title="Executar agora"
+          >
+            <Play size={14} strokeWidth={1.75} fill="currentColor" />
+          </button>
         )}
-        {blocked ? (
+        <DueDateChip date={tarefa.data_vencimento} compact />
+        {blocked && (
           <Lock size={12} className="text-ink-muted" aria-label="Bloqueada" />
-        ) : (
-          <span className={`font-mono text-[10px] tabular-nums ${urgencyScoreClass(score)}`}>
-            {score}
-          </span>
         )}
       </div>
     </article>

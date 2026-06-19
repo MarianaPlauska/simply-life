@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Code2, Mail, MessageSquare, CalendarDays, HardDrive, Globe, Check, ChevronDown, ChevronUp, Key, Link2, Timer, Minus, Plus, Accessibility, Monitor, Palette, Bell, Keyboard, MousePointer, Eye, Database, Shield, Volume2, Brain, Tag, Save, Loader2, ExternalLink, Unlink, ShoppingBag } from 'lucide-react';
+import { Code2, Mail, MessageSquare, CalendarDays, HardDrive, Globe, Check, ChevronDown, ChevronUp, Key, Link2, Timer, Minus, Plus, Accessibility, Monitor, Bell, Database, Shield, Brain, Tag, Save, Loader2, ExternalLink, Unlink, ShoppingBag } from 'lucide-react';
 import { AxelRewardShop } from '../gamification/AxelRewardShop';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
-import type { AccessibilitySettings } from '../../store/useTaskStore';
 import { WebhookJarvisSection } from './WebhookJarvisSection';
 import { AxelOnboardingWizard } from './AxelOnboardingWizard';
 import { GmailImapSection } from './GmailImapSection';
+import { AccessibilityPanel } from '../dashboard/AccessibilityQuickMenu';
 
 type SettingsTab = 'integracoes' | 'webhook' | 'foco' | 'gamificacao' | 'acessibilidade' | 'ia' | 'sistema';
 
@@ -238,33 +238,6 @@ function TimerSetting({ label, description, value, onChange }: { label: string; 
   );
 }
 
-function ConnectedToggleRow({ icon: Icon, label, description, storeKey }: { icon: React.ElementType; label: string; description: string; storeKey: keyof AccessibilitySettings }) {
-  const value = useTaskStore((s) => s.accessibility[storeKey]);
-  const setAccessibility = useTaskStore((s) => s.setAccessibility);
-  const enabled = Boolean(value);
-
-  return (
-    <div className="flex items-center justify-between py-4">
-      <div className="flex items-center gap-3">
-        <Icon className="w-4 h-4 text-zinc-500" aria-hidden="true" />
-        <div>
-          <p className="text-[13px] font-medium text-white">{label}</p>
-          <p className="text-[11px] text-zinc-500 mt-0.5">{description}</p>
-        </div>
-      </div>
-      <button
-        role="switch"
-        aria-checked={enabled}
-        aria-label={`${label}: ${enabled ? 'ativado' : 'desativado'}`}
-        onClick={() => setAccessibility(storeKey, !enabled)}
-        className={`relative w-9 h-5 rounded-full transition-colors ${enabled ? 'bg-violet-500' : 'bg-zinc-700'}`}
-      >
-        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${enabled ? 'translate-x-4' : 'translate-x-0'}`} />
-      </button>
-    </div>
-  );
-}
-
 /* Reusable toggle row for non-store settings */
 function ToggleRow({ icon: Icon, label, description, defaultOn = false }: { icon: React.ElementType; label: string; description: string; defaultOn?: boolean }) {
   const [enabled, setEnabled] = useState(defaultOn);
@@ -294,8 +267,6 @@ export function SettingsView() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('integracoes');
   const timerConfig = useTaskStore((s) => s.timerConfig);
   const setTimerConfig = useTaskStore((s) => s.setTimerConfig);
-  const accessibility = useTaskStore((s) => s.accessibility);
-  const setAccessibility = useTaskStore((s) => s.setAccessibility);
   const keywords = useTaskStore((s) => s.keywords);
   const saveKeywords = useTaskStore((s) => s.saveKeywords);
   const fetchPreferencias = useTaskStore((s) => s.fetchPreferencias);
@@ -494,35 +465,12 @@ export function SettingsView() {
           {activeTab === 'acessibilidade' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white">Acessibilidade</h2>
-                <p className="text-xs text-zinc-500 mt-1">Ajustes para tornar o Simply-Life acessivel e confortavel para todos.</p>
+                <h2 className="text-lg font-display text-ink">Acessibilidade</h2>
+                <p className="text-xs text-ink-muted mt-1">
+                  Papel creme estilo Kindle, texto preto forte e alto contraste.
+                </p>
               </div>
-              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl px-6 divide-y divide-zinc-800/30">
-                <ConnectedToggleRow icon={Eye} label="Alto Contraste" description="Aumenta contraste entre texto e fundo" storeKey="highContrast" />
-                <ConnectedToggleRow icon={MousePointer} label="Foco Visivel Aprimorado" description="Indicador de foco maior para navegacao por teclado" storeKey="focusVisible" />
-                <ConnectedToggleRow icon={Palette} label="Animacoes Reduzidas" description="Remove transicoes e animacoes de movimento" storeKey="reducedMotion" />
-                <ConnectedToggleRow icon={Volume2} label="Sons de Feedback" description="Audio ao completar tarefas e acoes" storeKey="soundFeedback" />
-                <ConnectedToggleRow icon={Keyboard} label="Atalhos de Teclado" description="Ctrl+K busca, Ctrl+N nota, Esc fechar" storeKey="keyboardShortcuts" />
-              </div>
-              <div className="mt-6 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-6">
-                <h3 className="text-[13px] font-semibold text-zinc-200 mb-1">Tamanho do Texto</h3>
-                <p className="text-[11px] text-zinc-500 mb-4">Ajusta o tamanho base de toda a interface ({accessibility.fontSize}px)</p>
-                <div className="flex items-center gap-4">
-                  <span className="text-[12px] text-zinc-500">A</span>
-                  <input
-                    type="range"
-                    min={12}
-                    max={20}
-                    step={1}
-                    value={accessibility.fontSize}
-                    onChange={(e) => setAccessibility('fontSize', Number(e.target.value))}
-                    className="flex-1 accent-violet-500"
-                    aria-label="Tamanho do texto base"
-                  />
-                  <span className="text-[18px] text-zinc-300 font-medium">A</span>
-                  <span className="text-[13px] text-violet-400 font-mono font-bold w-10 text-right">{accessibility.fontSize}px</span>
-                </div>
-              </div>
+              <AccessibilityPanel variant="page" />
             </div>
           )}
 

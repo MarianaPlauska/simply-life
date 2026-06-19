@@ -34,7 +34,6 @@ export function DashboardCriticalTasksPreview()
 
   return (
     <DashboardPanel
-      section="01"
       title="Execução"
       subtitle={`Top ${PREVIEW_LIMIT} · motor de urgência`}
       action={<DashboardPanelLink label="Kanban →" onClick={() => navigate('/kanban')} />}
@@ -78,3 +77,5 @@ export function DashboardCriticalTasksPreview()
     </DashboardPanel>
   )
 }
+
+export default DashboardCriticalTasksPreview

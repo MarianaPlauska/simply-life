@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 import type { ActiveCosmetics } from './axelCosmetics'
 import { DEFAULT_ACTIVE_COSMETICS } from './axelCosmetics'
 import type { AvatarStyleId } from './axelAvatarPresets'
+import type { DashboardWidgetId } from './dashboardWidgets'
 
 // Preferências de workspace — wizard, cor, ordem, privacidade social
 
@@ -18,6 +19,8 @@ export interface UserWorkspacePrefs
   mascot_mood: MascotMoodPref
   avatar_style: AvatarStyleId
   dashboard_priority: DashboardPriority
+  /** Até 3 atalhos de cadastro rápido no dashboard */
+  dashboard_quick_widgets?: DashboardWidgetId[]
   month_goal_amount: number | null
   ai_coach_enabled: boolean
   unlocked_cosmetics: string[]
@@ -27,11 +30,15 @@ export interface UserWorkspacePrefs
     show_level: boolean
     show_episode: boolean
   }
+  /** Índice de rotação das frases AXEL — sincronizado via Supabase */
+  axel_care_rotation?: Record<string, number>
+  /** Oculta card de humor no dashboard até este instante (ISO) — regra: +12h após 1º registro do dia */
+  wellbeing_dashboard_hidden_until?: string | null
 }
 
 export const ACCENT_PALETTES: Record<AccentId, { label: string; light: string; dark: string; hover: string }> = {
-  copper: { label: 'Cobre', light: '#9A5B1A', dark: '#C17F3A', hover: '#D4924A' },
-  sky: { label: 'Céu', light: '#1D6FA4', dark: '#38A3E8', hover: '#5BB8F0' },
+  copper: { label: 'Cobre', light: '#C17F3A', dark: '#C17F3A', hover: '#D4924A' },
+  sky: { label: 'Céu', light: '#1D6FA4', dark: '#38A3E8', hover: '#155A85' },
   forest: { label: 'Floresta', light: '#3D6B4F', dark: '#4A7C59', hover: '#5C9468' },
   violet: { label: 'Violeta', light: '#5B4B8A', dark: '#8B7CF6', hover: '#A394F8' },
 }
@@ -53,6 +60,8 @@ export const DEFAULT_WORKSPACE_PREFS: UserWorkspacePrefs = {
     show_level: true,
     show_episode: true,
   },
+  axel_care_rotation: {},
+  wellbeing_dashboard_hidden_until: null,
 }
 
 const LOCAL_KEY_PREFIX = 'simply-life-workspace-prefs'
@@ -132,6 +141,10 @@ function mergePrefs(raw: Partial<UserWorkspacePrefs> | null | undefined): UserWo
       ...DEFAULT_ACTIVE_COSMETICS,
       ...(raw?.active_cosmetics ?? {}),
     },
+    axel_care_rotation: raw?.axel_care_rotation ?? DEFAULT_WORKSPACE_PREFS.axel_care_rotation,
+    wellbeing_dashboard_hidden_until:
+      raw?.wellbeing_dashboard_hidden_until ?? DEFAULT_WORKSPACE_PREFS.wellbeing_dashboard_hidden_until,
+    dashboard_quick_widgets: raw?.dashboard_quick_widgets,
   }
 }
 

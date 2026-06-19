@@ -45,13 +45,7 @@ export async function registerPushSubscription(): Promise<boolean>
     return false
   }
 
-  let permission = Notification.permission
-  if (permission === 'default')
-  {
-    permission = await Notification.requestPermission()
-  }
-
-  if (permission !== 'granted')
+  if (Notification.permission !== 'granted')
   {
     return false
   }

@@ -2,29 +2,15 @@ import { useMemo } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { resolveAxelReaction } from '../../lib/axelMascotReaction'
 import { resolveProfileBadge } from '../../lib/axelCosmetics'
+import { iniciaisDe } from '../../lib/axelAvatarPresets'
 import { FinanceMoodMascot } from '../Finance/spreadsheet/FinanceMoodMascot'
+import { AxelCompanionAvatar } from '../Onboarding/AxelCompanionAvatar'
 import { computeGamificationProfile } from '../../lib/gamificationProfile'
 import {
-  AXEL_AVATAR,
-  AXEL_AVATAR_INITIALS,
   AXEL_BORDERLESS_PANEL,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
-
-function iniciaisDe(nome: string): string
-{
-  const partes = nome.trim().split(/\s+/).filter(Boolean)
-  if (partes.length >= 2)
-  {
-    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase()
-  }
-  if (partes.length === 1 && partes[0].length >= 2)
-  {
-    return partes[0].slice(0, 2).toUpperCase()
-  }
-  return 'SL'
-}
 
 function arquetipo(level: number): string
 {
@@ -34,7 +20,7 @@ function arquetipo(level: number): string
   return 'Recruta'
 }
 
-// Hero do perfil — mascote reage a humor + ofensiva
+// Hero do perfil — companheiro escolhido + mascote de humor
 
 export function ProfileAxelHero()
 {
@@ -61,8 +47,9 @@ export function ProfileAxelHero()
     [streakCount, isStreakSafeToday, humorMedio, humorHojeLista.length],
   )
 
-  const iniciais = iniciaisDe(userProfile?.nome || 'Convidado')
-  const firstName = userProfile?.nome?.split(' ')[0] || 'Convidado'
+  const nome = userProfile?.nome || 'Convidado'
+  const iniciais = iniciaisDe(nome) || 'SL'
+  const firstName = nome.split(' ')[0] || 'Convidado'
   const badge = resolveProfileBadge(
     workspacePrefs.active_cosmetics.badge,
     { level: profile.level, streakCount },
@@ -76,18 +63,22 @@ export function ProfileAxelHero()
 
   return (
     <section
-      className={`${AXEL_BORDERLESS_PANEL} overflow-hidden bg-gradient-to-br from-accent/8 via-card to-card border-l-[3px] border-l-accent ${auraClass}`}
+      className={`${AXEL_BORDERLESS_PANEL} overflow-hidden ${auraClass}`}
       aria-label="Perfil e mascote AXEL"
     >
       <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
         <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className={`relative w-16 h-16 shrink-0 ${AXEL_AVATAR}`}>
-            <span className={AXEL_AVATAR_INITIALS}>{iniciais}</span>
+          <div className="relative shrink-0">
+            <AxelCompanionAvatar
+              style={workspacePrefs.avatar_style}
+              initials={iniciais}
+              size={80}
+            />
             <span className="absolute -bottom-1 -right-1 font-mono text-[9px] px-1.5 py-0.5 rounded-sl bg-accent text-white border border-line">
               {profile.level}
             </span>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <h2 className={`text-xl font-display truncate ${AXEL_TEXT_PRIMARY}`}>
               {firstName}
               {badge && (
@@ -97,7 +88,7 @@ export function ProfileAxelHero()
             <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
               {arquetipo(profile.level)} · {profile.xpInLevel}/{profile.xpToNextLevel} XP
             </p>
-            <p className={`text-[11px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[11px] sm:text-[12px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
               {reaction.message}
             </p>
           </div>
@@ -107,7 +98,7 @@ export function ProfileAxelHero()
           mood={reaction.mood}
           headline={reaction.headline}
           size="lg"
-          className="sm:mr-2"
+          className="shrink-0 self-end sm:self-center sm:mr-2"
         />
       </div>
     </section>

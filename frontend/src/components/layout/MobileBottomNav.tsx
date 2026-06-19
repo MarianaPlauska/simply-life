@@ -62,8 +62,8 @@ export function MobileBottomNav()
             aria-label={label}
             className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-3 min-h-[56px] transition-colors border-t-2 ${
               active
-                ? 'text-accent border-accent -mt-px'
-                : 'text-ink-muted border-transparent hover:text-ink'
+                ? 'text-ink font-semibold border-ink -mt-px'
+                : 'text-ink border-transparent hover:opacity-80'
             }`}
           >
             <Icon className="w-5 h-5" strokeWidth={active ? 2 : 1.5} />

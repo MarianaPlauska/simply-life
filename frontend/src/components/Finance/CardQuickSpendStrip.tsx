@@ -97,14 +97,33 @@ export function CardQuickSpendStrip({
   useEffect(() =>
   {
     const last = loadLastCardQuickSubtypeId()
-    if (last) setSubtypeId(last)
-  }, [])
+    if (last)
+    {
+      setSubtypeId(last)
+      return
+    }
+    if (isDashboard && CARD_QUICK_SUBTYPES.length > 0)
+    {
+      setSubtypeId(CARD_QUICK_SUBTYPES[0].id)
+    }
+  }, [isDashboard])
+
+  const ensureSubtype = (): string | null =>
+  {
+    if (subtypeId) return subtypeId
+    const fallback = CARD_QUICK_SUBTYPES[0]?.id ?? null
+    if (fallback)
+    {
+      setSubtypeId(fallback)
+      saveLastCardQuickSubtypeId(fallback)
+    }
+    return fallback
+  }
 
   const selected = activeCards.find((c) => c.id === cardId) ?? null
   const isOutro = subtypeId === 'outro'
-
-  const resolveSubtype = (): CardQuickSubtype | null =>
-    CARD_QUICK_SUBTYPES.find((s) => s.id === subtypeId) ?? null
+  const fallbackSubtypeId = CARD_QUICK_SUBTYPES[0]?.id ?? null
+  const effectiveSubtypeId = subtypeId ?? fallbackSubtypeId
 
   const handleSubtypeSelect = (st: CardQuickSubtype) =>
   {
@@ -119,7 +138,7 @@ export function CardQuickSpendStrip({
 
   const parseValor = () => parseFloat(valor.replace(',', '.'))
 
-  const handleSpend = async () =>
+  const handleSpend = async (valorOverride?: number) =>
   {
     if (!selected)
     {
@@ -127,21 +146,22 @@ export function CardQuickSpendStrip({
       return
     }
 
-    const subtype = resolveSubtype()
+    const activeSubtypeId = ensureSubtype()
+    const subtype = CARD_QUICK_SUBTYPES.find((s) => s.id === activeSubtypeId) ?? null
     if (!subtype)
     {
       toast.error('Escolha o tipo do gasto')
       return
     }
 
-    const desc = isOutro ? customDesc.trim() : subtype.label
+    const desc = subtype.id === 'outro' ? customDesc.trim() : subtype.label
     if (!desc)
     {
       toast.error('Descreva o gasto')
       return
     }
 
-    const val = parseValor()
+    const val = valorOverride ?? parseValor()
     if (Number.isNaN(val) || val <= 0)
     {
       toast.error('Informe o valor')
@@ -183,7 +203,22 @@ export function CardQuickSpendStrip({
   const cycle = selected ? getBillingCycle(selected) : null
   const invoiceTotal = selected ? sumOpenInvoiceSpend(transactions, selected) : 0
   const usagePct = selected ? cardLimitUsagePct(transactions, selected) : 0
-  const canLaunch = subtypeId && (isOutro ? customDesc.trim() : true) && parseValor() > 0
+  const canLaunch = Boolean(
+    effectiveSubtypeId
+    && (effectiveSubtypeId === 'outro' ? customDesc.trim() : true)
+    && parseValor() > 0,
+  )
+
+  const handleAmountTap = (amt: number) =>
+  {
+    setValor(String(amt))
+    if (isDashboard)
+    {
+      void handleSpend(amt)
+      return
+    }
+    window.requestAnimationFrame(() => valorRef.current?.focus())
+  }
   const amountHints = isDashboard ? CARD_QUICK_AMOUNT_HINTS_COMPACT : CARD_QUICK_AMOUNT_HINTS
 
   const formBody = selected && (
@@ -248,11 +283,7 @@ export function CardQuickSpendStrip({
           <button
             key={amt}
             type="button"
-            onClick={() =>
-            {
-              setValor(String(amt))
-              window.requestAnimationFrame(() => valorRef.current?.focus())
-            }}
+            onClick={() => handleAmountTap(amt)}
             className={`shrink-0 px-2 py-1 rounded-sl font-mono text-[10px] tabular-nums min-h-[32px] border ${
               parseValor() === amt
                 ? AXEL_FILTER_PILL_ACTIVE

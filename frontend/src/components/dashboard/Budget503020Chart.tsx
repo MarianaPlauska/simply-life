@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { computeRule503020, filterTransactionsForMonth } from '../../utils/rule503020'
-import { AXEL_PROGRESS } from '../../constants/axelSurfaces'
 
-// Mini gráfico de barras — meta vs real da regra 50-30-20 (dados reais)
+// Mini gráfico de barras — meta vs real da regra 50-30-20 (tokens do sistema)
 
 interface BudgetCategory
 {
@@ -11,7 +10,7 @@ interface BudgetCategory
   label: string
   meta: number
   real: number
-  barClass: string
+  realVar: '--sl-chart-real-a' | '--sl-chart-real-b' | '--sl-chart-real-c'
 }
 
 const BAR_MAX_H = 56
@@ -29,21 +28,21 @@ function buildCategories(
       label: 'Nec.',
       meta: META.nec,
       real: pctNecessidades,
-      barClass: 'bg-gradient-to-t from-indigo-600 to-indigo-400',
+      realVar: '--sl-chart-real-a',
     },
     {
       id: 'des',
       label: 'Des.',
       meta: META.des,
       real: pctDesejos,
-      barClass: 'bg-gradient-to-t from-purple-600 to-purple-400',
+      realVar: '--sl-chart-real-b',
     },
     {
       id: 'res',
       label: 'Res.',
       meta: META.res,
       real: pctPoupanca,
-      barClass: 'bg-gradient-to-t from-violet-700 to-violet-500',
+      realVar: '--sl-chart-real-c',
     },
   ]
 }
@@ -90,19 +89,26 @@ export function Budget503020Chart()
             <div key={cat.id} className="flex-1 flex flex-col items-center min-w-0">
               <div className="flex items-end justify-center gap-1.5 h-[56px] w-full">
                 <div
-                  className="w-[38%] max-w-[14px] rounded-t-sm bg-zinc-200 border border-zinc-300 dark:bg-zinc-800/90 dark:border-zinc-700/50"
-                  style={{ height: metaH }}
+                  className="w-[38%] max-w-[14px] rounded-t-sm border"
+                  style={{
+                    height: metaH,
+                    backgroundColor: 'var(--sl-chart-meta)',
+                    borderColor: 'var(--sl-chart-meta-border)',
+                  }}
                   title={`Meta ${cat.meta}%`}
                   aria-hidden="true"
                 />
                 <div
-                  className={`w-[38%] max-w-[14px] rounded-t-sm ${cat.barClass}`}
-                  style={{ height: realH }}
+                  className="w-[38%] max-w-[14px] rounded-t-sm"
+                  style={{
+                    height: realH,
+                    backgroundColor: `var(${cat.realVar})`,
+                  }}
                   title={`Real ${cat.real.toFixed(0)}%`}
                   aria-hidden="true"
                 />
               </div>
-              <span className="mt-2 text-[10px] text-zinc-500 tabular-nums truncate w-full text-center">
+              <span className="mt-2 text-[10px] text-ink-muted tabular-nums truncate w-full text-center">
                 {cat.label}
               </span>
             </div>
@@ -110,13 +116,19 @@ export function Budget503020Chart()
         })}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-zinc-600 tracking-tight">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-ink-muted tracking-tight">
         <span className="inline-flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-sm bg-zinc-200 border border-zinc-300 dark:bg-zinc-800 dark:border-zinc-700/50" />
+          <span
+            className="w-2 h-2 rounded-sm border"
+            style={{
+              backgroundColor: 'var(--sl-chart-meta)',
+              borderColor: 'var(--sl-chart-meta-border)',
+            }}
+          />
           Meta
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-sm ${AXEL_PROGRESS}`} />
+          <span className="w-2 h-2 rounded-sm bg-accent" />
           Gasto real
         </span>
         {chartCategories.map((cat) => (

@@ -26,6 +26,10 @@ export const AXEL_HEADER_ACTION =
 export const AXEL_MAIN_PB_MOBILE =
   'pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))] md:pb-8'
 
+/** Rodapé de drawer/modal acima da bottom nav no mobile */
+export const AXEL_DRAWER_FOOTER_PB_MOBILE =
+  'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))] md:pb-3'
+
 /** Respiro superior abaixo do header global */
 export const AXEL_MAIN_PT =
   'pt-4 sm:pt-5 md:pt-6'
@@ -49,7 +53,7 @@ export const AXEL_RAIL_BLOCK = 'py-4 last:pb-0'
 
 /** Título de seção — mono editorial */
 export const AXEL_SECTION_TITLE =
-  'font-mono text-[10px] uppercase tracking-[0.14em] font-medium text-ink-muted'
+  'font-mono text-[11px] uppercase tracking-[0.1em] font-semibold text-ink'
 
 /** Divisor interno de listas */
 export const AXEL_LINE = 'border-b border-line'
@@ -75,7 +79,7 @@ export const AXEL_AVATAR =
   'w-14 h-14 shrink-0 rounded-sl flex items-center justify-center bg-chrome border border-line'
 
 export const AXEL_AVATAR_INITIALS =
-  'text-xl font-mono font-semibold text-accent select-none'
+  'text-xl font-mono font-semibold text-ink select-none'
 
 /** @deprecated use AXEL_AVATAR */
 export const AXEL_AVATAR_RING = AXEL_AVATAR

@@ -8,23 +8,26 @@ import { reportWebVitals } from './utils/webVitals'
 import { registerSW } from 'virtual:pwa-register'
 import { toast } from 'sonner'
 
-// registra service worker — auto-update com toast de notificação
-registerSW({
-  onNeedRefresh ()
-  {
-    toast('Nova versão disponível!', {
-      action: {
-        label: 'Atualizar',
-        onClick: () => window.location.reload(),
-      },
-      duration: Infinity,
-    });
-  },
-  onOfflineReady ()
-  {
-    toast.success('App pronto para uso offline!');
-  },
-});
+// Service worker só em produção — evita workbox no dev (cache Vite instável)
+if (import.meta.env.PROD)
+{
+  registerSW({
+    onNeedRefresh ()
+    {
+      toast('Nova versão disponível!', {
+        action: {
+          label: 'Atualizar',
+          onClick: () => window.location.reload(),
+        },
+        duration: Infinity,
+      });
+    },
+    onOfflineReady ()
+    {
+      toast.success('App pronto para uso offline!');
+    },
+  });
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

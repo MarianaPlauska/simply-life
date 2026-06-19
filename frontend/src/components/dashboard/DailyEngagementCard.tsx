@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Flame, Target, ChevronRight, Check, Circle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { buildOffensiveChecklist } from '../../lib/offensiveToday'
+import { AxelCareMoment, useAxelCareMomentKey } from '../axel/AxelCareMoment'
 import { AXEL_PROGRESS, AXEL_PROGRESS_THICK, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 // Loop diário — ofensiva + missão (Duolingo-style: 1 ação salva o dia)
@@ -23,6 +24,16 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
   const userQuests = useTaskStore((s) => s.userQuests)
   const fetchQuests = useTaskStore((s) => s.fetchQuests)
   const userStats = useTaskStore((s) => s.userStats)
+  const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
+  const userProfile = useTaskStore((s) => s.userProfile)
+  const { key: streakCareKey, trigger: triggerStreakCare } = useAxelCareMomentKey()
+  const [showStreakCare, setShowStreakCare] = useState(false)
+  const wasSafeRef = useRef(false)
+
+  const displayName = workspacePrefs.axel_calls_you
+    || workspacePrefs.display_name
+    || userProfile?.nome
+    || ''
 
   useEffect(() =>
   {
@@ -35,6 +46,16 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
     hasWellbeingToday,
     streakCount,
   )
+
+  useEffect(() =>
+  {
+    if (!wasSafeRef.current && offensive.safe)
+    {
+      setShowStreakCare(true)
+      triggerStreakCare()
+    }
+    wasSafeRef.current = offensive.safe
+  }, [offensive.safe, triggerStreakCare])
 
   const dailyQuest = userQuests.find((q) => q.tipo === 'diaria' && !q.concluida)
     ?? userQuests.find((q) => !q.concluida)
@@ -57,21 +78,22 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
       id: 'wellbeing',
       label: 'Humor / ritual',
       done: offensive.wellbeingDone,
-      path: '/saude#bem_estar',
+      path: '/#dashboard-wellbeing',
     },
   ]
 
   if (variant === 'strip')
   {
     return (
+      <>
       <div
-        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 px-3 sm:px-4 py-3 bg-orange-500/[0.04]"
+        className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 px-3 sm:px-4 py-3 border-b border-line"
         aria-label="Ofensiva diária"
       >
         <div className="flex items-center gap-2.5 shrink-0">
-          <div className={`p-1.5 rounded-sl ${offensive.safe ? 'bg-orange-500/20' : 'bg-chrome/50'}`}>
+          <div className={`p-1.5 rounded-sl ${offensive.safe ? 'bg-accent-muted' : 'bg-chrome'}`}>
             <Flame
-              className={`w-5 h-5 ${offensive.safe ? 'text-orange-500' : 'text-ink-muted'}`}
+              className={`w-5 h-5 ${offensive.safe ? 'text-accent' : 'text-ink-muted'}`}
               strokeWidth={1.75}
             />
           </div>
@@ -124,6 +146,17 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
           </div>
         </div>
       </div>
+      {showStreakCare && (
+        <AxelCareMoment
+          key={streakCareKey}
+          avatarStyle={workspacePrefs.avatar_style}
+          displayName={displayName}
+          streak
+          className="mx-3 mb-2"
+          onDone={() => setShowStreakCare(false)}
+        />
+      )}
+      </>
     )
   }
 

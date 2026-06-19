@@ -29,6 +29,30 @@ export function notifySubtasksChanged(taskId: number): void
   )
 }
 
+/** Remove checklist local — rascunho de criação ou tarefa mock */
+export function clearLocalSubtasks(taskId?: number): void
+{
+  try
+  {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return
+    const all = JSON.parse(raw) as Record<string, Subtarefa[]>
+    if (taskId !== undefined)
+    {
+      delete all[String(taskId)]
+    }
+    else
+    {
+      for (const key of Object.keys(all))
+      {
+        if (Number(key) <= 0) delete all[key]
+      }
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all))
+  }
+  catch { /* ignore */ }
+}
+
 export function calcSubtaskProgress(subs: Subtarefa[]): number
 {
   if (subs.length === 0) return 0

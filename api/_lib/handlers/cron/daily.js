@@ -2,6 +2,7 @@
 
 import gmailSync from './gmail-sync.js';
 import pushBills from './push-bills.js';
+import pushHealth from './push-health.js';
 
 function invokeHandler(handler, req)
 {
@@ -44,10 +45,12 @@ export default async function handler(req, res)
 
   const gmail = await invokeHandler(gmailSync, req);
   const push = await invokeHandler(pushBills, req);
+  const health = await invokeHandler(pushHealth, req);
 
   return res.status(200).json({
     status: 'ok',
     gmail: gmail.data,
     push: push.data,
+    health: health.data,
   });
 }

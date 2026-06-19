@@ -7,7 +7,7 @@ export type TemporalHorizon = 'hoje' | 'semana' | 'backlog'
 export const HORIZON_LABELS: Record<TemporalHorizon, string> = {
   hoje: 'Hoje',
   semana: 'Esta Semana',
-  backlog: 'Backlog / Próximo',
+  backlog: 'Backlog',
 }
 
 function startOfDay(d: Date): Date

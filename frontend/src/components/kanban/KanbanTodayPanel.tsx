@@ -1,7 +1,6 @@
 import { useDroppable } from '@dnd-kit/core'
-import { Plus } from 'lucide-react'
+import { ListOrdered } from 'lucide-react'
 import type { LoadBalanceEntry } from '../../lib/adaptiveOrchestration'
-import { urgencyScoreClass } from '../../lib/kanbanVisual'
 import { AXEL_KANBAN_DROPZONE, AXEL_KANBAN_EXEC_COLUMN } from '../../constants/axelKanbanTheme'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { KanbanTaskDetailStrip } from './KanbanTaskDetailStrip'
@@ -22,7 +21,7 @@ interface KanbanTodayPanelProps
   onSelect: (id: number) => void
   onOpen: (task: TarefaUnificada) => void
   onExecute: () => void
-  onAddTask: () => void
+  onEditQueue: () => void
   onReorganize?: () => void
 }
 
@@ -39,20 +38,19 @@ export function KanbanTodayPanel({
   onSelect,
   onOpen,
   onExecute,
-  onAddTask,
+  onEditQueue,
   onReorganize,
 }: KanbanTodayPanelProps)
 {
   const { setNodeRef, isOver } = useDroppable({ id: 'hoje' })
   const overWip = totalCount > WIP_LIMIT
-  const scoreSum = tasks.reduce((s, t) => s + (t.score_urgencia ?? 0), 0)
 
   return (
     <section
       ref={setNodeRef}
       aria-labelledby="kanban-today-panel"
       className={[
-        'flex flex-col w-full min-h-0 overflow-hidden',
+        'flex flex-col w-full min-h-0 overflow-hidden lg:flex-1 lg:min-h-0 lg:h-full',
         AXEL_KANBAN_EXEC_COLUMN,
         'border-b lg:border-b-0 lg:border-r border-line bg-chrome/20',
         isOver ? 'bg-accent-muted/25 ring-1 ring-inset ring-accent/30' : '',
@@ -73,11 +71,12 @@ export function KanbanTodayPanel({
               </span>
               <button
                 type="button"
-                onClick={onAddTask}
+                onClick={onEditQueue}
                 className="p-1 rounded-sl text-ink-muted hover:text-accent hover:bg-chrome shrink-0 transition-colors"
-                aria-label="Nova tarefa na fila de execução"
+                aria-label="Editar fila Executar agora"
+                title="Editar fila"
               >
-                <Plus size={14} strokeWidth={1.5} />
+                <ListOrdered size={14} strokeWidth={1.5} />
               </button>
             </div>
             <p className={`font-mono text-[9px] mt-0.5 leading-snug ${AXEL_TEXT_SECONDARY}`}>
@@ -94,7 +93,7 @@ export function KanbanTodayPanel({
               {isOver ? 'Soltar aqui' : 'Nada priorizado'}
             </p>
             <p className={`text-[11px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-              Arraste da coluna Prazo → ou use o botão acima
+              Arraste da coluna Prazo → ou edite a fila pelo ícone acima
             </p>
             {onReorganize && !isOver && (
               <button
@@ -110,7 +109,6 @@ export function KanbanTodayPanel({
           <ol className="divide-y divide-line">
             {tasks.map((t, idx) =>
             {
-              const score = t.score_urgencia ?? 0
               const selected = selectedId === t.id
               const executing = executingId === t.id
               const snoozed = loadBalance?.get(t.id)?.snoozed
@@ -123,28 +121,30 @@ export function KanbanTodayPanel({
                     onDoubleClick={() => onOpen(t)}
                     className={[
                       'w-full text-left px-3 py-2 transition-colors',
-                      selected
-                        ? 'bg-accent-muted/50 border-l-[3px] border-l-accent'
-                        : 'border-l-[3px] border-l-transparent hover:bg-chrome/60',
+                      executing
+                        ? 'bg-accent/20 border-l-[3px] border-l-accent ring-1 ring-inset ring-accent/25'
+                        : selected
+                          ? 'bg-accent-muted/50 border-l-[3px] border-l-accent'
+                          : 'border-l-[3px] border-l-transparent hover:bg-chrome/60',
                       snoozed ? 'opacity-60' : '',
                     ].join(' ')}
                   >
                     <div className="flex items-start gap-2.5">
-                      <span className="font-mono text-[10px] text-accent tabular-nums w-5 shrink-0">
+                      <span className={`font-mono text-[10px] tabular-nums w-5 shrink-0 ${
+                        executing ? 'text-accent font-semibold' : 'text-accent'
+                      }`}>
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] leading-snug line-clamp-2 text-ink">
+                        <p className={`text-[12px] leading-snug line-clamp-2 ${
+                          executing ? 'text-accent font-medium' : 'text-ink'
+                        }`}>
                           {cleanTitleForDisplay(t.titulo)}
                         </p>
-                        <p className={`font-mono text-[9px] tabular-nums mt-0.5 ${urgencyScoreClass(score)}`}>
-                          {score} pts
-                          {executing && (
-                            <span className="text-accent ml-1.5 uppercase text-[8px]">foco</span>
-                          )}
-                          {snoozed && (
-                            <span className="text-ink-muted ml-1.5 uppercase text-[8px]">adiada</span>
-                          )}
+                        <p className={`font-mono text-[9px] mt-0.5 uppercase tracking-wide ${
+                          executing ? 'text-accent' : AXEL_TEXT_SECONDARY
+                        }`}>
+                          {executing ? 'Em foco agora' : snoozed ? 'Adiada' : 'Na fila'}
                         </p>
                         {selected && (t.urgency_reason ?? t.score_reason) && (
                           <p className={`text-[10px] mt-1 leading-snug line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
@@ -163,7 +163,7 @@ export function KanbanTodayPanel({
 
       {tasks.length > 0 && (
         <p className={`shrink-0 px-4 py-1.5 font-mono text-[10px] tabular-nums border-t border-line ${AXEL_TEXT_SECONDARY}`}>
-          Σ {scoreSum} pts na fila ativa
+          {tasks.length} na fila ativa
         </p>
       )}
 

@@ -1,6 +1,13 @@
 // Avatares do wizard — iniciais ou companheiros SVG (sem API externa)
 
-export type AvatarStyleId = 'initials' | 'companion_owl' | 'companion_fox' | 'companion_bloom'
+export type AvatarStyleId =
+  | 'initials'
+  | 'companion_owl'
+  | 'companion_fox'
+  | 'companion_bloom'
+  | 'companion_bear'
+  | 'companion_cat'
+  | 'companion_bunny'
 
 export interface AvatarPreset
 {
@@ -14,6 +21,9 @@ export const AVATAR_PRESETS: AvatarPreset[] = [
   { id: 'companion_owl', label: 'Coruja', hint: 'Calma e foco' },
   { id: 'companion_fox', label: 'Raposa', hint: 'Esperta e leve' },
   { id: 'companion_bloom', label: 'Flor', hint: 'Leve e positiva' },
+  { id: 'companion_bear', label: 'Urso', hint: 'Acolhedor' },
+  { id: 'companion_cat', label: 'Gato', hint: 'Independente' },
+  { id: 'companion_bunny', label: 'Coelho', hint: 'Suave e gentil' },
 ]
 
 export function iniciaisDe(nome: string): string

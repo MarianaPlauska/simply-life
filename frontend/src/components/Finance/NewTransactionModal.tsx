@@ -284,13 +284,13 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     <>
       <button
         type="button"
-        className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm"
         onClick={resetAndClose}
         aria-label="Fechar"
       />
 
       <div
-        className="fixed inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto z-50 flex flex-col w-full sm:max-w-md max-h-[min(92vh,100dvh)] sm:max-h-none sm:h-full border border-line bg-card shadow-2xl rounded-t-sl sm:rounded-none"
+        className="fixed inset-x-0 bottom-0 sm:inset-y-0 sm:right-0 sm:left-auto z-[70] flex flex-col w-full sm:max-w-md max-h-[min(92vh,100dvh)] sm:max-h-none sm:h-full border border-line bg-card shadow-2xl rounded-t-sl sm:rounded-none"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -439,16 +439,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           </div>
 
           {form.tipo === 'receita' && (
-            <>
-            <div className="space-y-2">
-              <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Recebeu via</label>
-              <PaymentMethodPicker
-                cards={cards}
-                value={form.payment}
-                onChange={(payment) => setForm({ ...form, payment })}
-                variant="receita"
-              />
-            </div>
             <div className="space-y-2">
               <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 Origem (opcional)
@@ -463,7 +453,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 onRemoveCategory={(id) => void handleRemoveCategory(id)}
               />
             </div>
-            </>
           )}
 
           {form.tipo === 'despesa' && (
@@ -486,7 +475,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
               </div>
 
               <div className="space-y-2">
-                <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Pagar com</label>
                 <PaymentMethodPicker
                   cards={cards}
                   value={form.payment}
@@ -498,9 +486,9 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                     Abate o limite do cartão — sincronizado com seus cartões cadastrados.
                   </p>
                 )}
-                {!isCardPaymentSelection(form.payment, cards) && form.payment === 'pix' && (
+                {!isCardPaymentSelection(form.payment, cards) && modo === 'imediato' && (
                   <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                    PIX — desconta da conta corrente na hora.
+                    Desconta da conta corrente na hora.
                   </p>
                 )}
               </div>
@@ -586,35 +574,25 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
         </div>
 
         {phase === 'form' && (
-        <div className="shrink-0 border-t border-line px-4 sm:px-6 py-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] space-y-2">
+        <div className="shrink-0 border-t border-line bg-card shadow-[0_-8px_24px_rgba(0,0,0,0.08)] px-4 sm:px-6 py-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-2">
+          <button
+            type="button"
+            onClick={() => void handleAdd()}
+            disabled={!form.descricao.trim() || !form.valor}
+            className={`w-full py-3.5 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
+          >
+            Salvar {saveLabel}
+          </button>
           {needsAxelCheck() && (
             <button
               type="button"
               onClick={() => void runAxelCheck()}
               disabled={!form.descricao.trim() || !form.valor}
-              className="w-full py-3 font-mono text-[11px] uppercase rounded-sl border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-white transition-colors disabled:opacity-40"
+              className="w-full py-2.5 font-mono text-[10px] uppercase rounded-sl border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-white transition-colors disabled:opacity-40"
             >
-              Perguntar ao Axel
+              Consultar Axel antes de gastar
             </button>
           )}
-          <button
-            type="button"
-            onClick={() =>
-            {
-              if (needsAxelCheck())
-              {
-                void runAxelCheck()
-              }
-              else
-              {
-                void handleAdd()
-              }
-            }}
-            disabled={!form.descricao.trim() || !form.valor}
-            className={`w-full py-3 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
-          >
-            {needsAxelCheck() ? 'Salvar e consultar Axel' : `Salvar ${saveLabel}`}
-          </button>
         </div>
         )}
       </div>

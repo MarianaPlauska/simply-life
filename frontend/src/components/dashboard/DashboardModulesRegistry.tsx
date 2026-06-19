@@ -20,7 +20,13 @@ interface Modulo
   status: 'ok' | 'warn' | 'idle'
 }
 
-export function DashboardModulesRegistry()
+interface DashboardModulesRegistryProps
+{
+  /** IDs a ocultar — evita repetir módulos já no dashboard */
+  excludeIds?: string[]
+}
+
+export function DashboardModulesRegistry({ excludeIds = [] }: DashboardModulesRegistryProps)
 {
   const navigate = useNavigate()
   const resumo = useTaskStore((s) => s.dashboardResumo)
@@ -95,6 +101,13 @@ export function DashboardModulesRegistry()
     },
   ]
 
+  const visible = modulos.filter((m) => !excludeIds.includes(m.id))
+
+  if (visible.length === 0)
+  {
+    return null
+  }
+
   const statusDot = (s: Modulo['status']) =>
   {
     if (s === 'warn') return 'bg-atencao'
@@ -103,14 +116,16 @@ export function DashboardModulesRegistry()
   }
 
   return (
-    <div className="border border-line rounded-sl bg-card overflow-hidden">
-      <div className="px-4 py-2 border-b border-line bg-chrome/50">
+    <div className="sl-panel overflow-hidden">
+      <div className="px-4 py-2 border-b border-line">
         <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-muted">
-          Escopo do sistema · 6 pilares operacionais
+          Escopo do sistema
         </p>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 divide-y sm:divide-y-0 sm:divide-x divide-line">
-        {modulos.map((m) =>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-line ${
+        visible.length <= 3 ? 'xl:grid-cols-3' : 'xl:grid-cols-6'
+      }`}>
+        {visible.map((m) =>
         {
           const Icon = m.Icon
           return (

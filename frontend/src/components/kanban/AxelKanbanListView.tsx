@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, CheckCircle2 } from 'lucide-react'
+import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { getProjectTag } from '../../lib/contextRationale'
 import {
   AXEL_FILTER_PILL_ACTIVE,
@@ -28,8 +29,7 @@ import type { TemporalHorizon } from '../../lib/temporalHorizon'
 
 type SortKey = 'title' | 'project' | 'bucket' | 'score' | 'due' | 'status'
 type SortDir = 'asc' | 'desc'
-type BucketFilter = 'all' | DueBucket
-type StatusFilter = 'ativas' | 'concluidas' | 'todas'
+type ListFilter = 'ativas' | 'concluidas' | 'urgente' | 'semana' | 'todas'
 
 interface AxelKanbanListViewProps
 {
@@ -57,6 +57,59 @@ const STATUS_SORT: Record<string, number> = {
 function cleanTitle(titulo: string): string
 {
   return titulo.replace(/\[(AXEL|FRONTEND|CORE|HUB|API|UX|BACKEND|Urgente)\]\s*/gi, '').trim()
+}
+
+function ListMobileCard({
+  tarefa,
+  onOpen,
+}: {
+  tarefa: TarefaUnificada
+  onOpen: (t: TarefaUnificada) => void
+})
+{
+  const score = tarefa.score_urgencia ?? 0
+  const bucket = resolveDueBucket(tarefa)
+  const tag = getProjectTag(tarefa)
+  const { done, total } = useSubtaskProgress(tarefa.id, tarefa.subtarefas)
+
+  return (
+    <article
+      className={`rounded-sl border border-line bg-card p-3 space-y-2 ${urgencyStripeClass(score)}`}
+    >
+      <button
+        type="button"
+        onClick={() => onOpen(tarefa)}
+        className="w-full text-left min-w-0"
+      >
+        <p className={`text-sm font-display truncate ${AXEL_TEXT_PRIMARY}`}>
+          {cleanTitle(tarefa.titulo)}
+        </p>
+        <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[10px] font-mono">
+          <span className={AXEL_TEXT_SECONDARY}>{DUE_BUCKET_LABELS[bucket]}</span>
+          <DueDateChip date={tarefa.data_vencimento} compact />
+          <span className={`tabular-nums ${urgencyScoreClass(score)}`} title="Prioridade calculada pelo AXEL">
+            P{tarefa.score_urgencia ?? 0}
+          </span>
+          {total > 0 && (
+            <span className={AXEL_TEXT_SECONDARY}>{done}/{total}</span>
+          )}
+        </div>
+        <p className={`text-[10px] mt-1 uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+          {tag} · {tarefa.status.replace('_', ' ')}
+        </p>
+      </button>
+      {tarefa.status !== 'concluida' && tarefa.id !== 0 && (
+        <button
+          type="button"
+          onClick={() => void axelCompleteTask(tarefa)}
+          className="w-full flex items-center justify-center gap-1.5 py-2 rounded-sl border border-line text-[11px] font-mono uppercase tracking-wide text-ink-muted hover:text-concluido hover:border-concluido/40 transition-colors"
+        >
+          <CheckCircle2 size={14} strokeWidth={1.75} />
+          Concluir
+        </button>
+      )}
+    </article>
+  )
 }
 
 function ListProgressCell({ tarefa }: { tarefa: TarefaUnificada })
@@ -112,16 +165,10 @@ function SortHeader({
   )
 }
 
-const BUCKET_FILTERS: { id: BucketFilter; label: string }[] = [
-  { id: 'all', label: 'Todas' },
-  { id: 'vencido', label: 'Atrasadas' },
-  { id: 'hoje', label: 'Hoje' },
-  { id: 'esta_semana', label: 'Semana' },
-  { id: 'sem_prazo', label: 'Sem data' },
-]
-
-const STATUS_FILTERS: { id: StatusFilter; label: string }[] = [
+const LIST_FILTERS: { id: ListFilter; label: string }[] = [
   { id: 'ativas', label: 'Ativas' },
+  { id: 'urgente', label: 'Urgentes' },
+  { id: 'semana', label: 'Semana' },
   { id: 'concluidas', label: 'Concluídas' },
   { id: 'todas', label: 'Todas' },
 ]
@@ -157,8 +204,7 @@ export function AxelKanbanListView({
 {
   const [sortKey, setSortKey] = useState<SortKey>('score')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
-  const [bucketFilter, setBucketFilter] = useState<BucketFilter>('all')
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ativas')
+  const [listFilter, setListFilter] = useState<ListFilter>('ativas')
   const [projectFilter, setProjectFilter] = useState<string>('all')
 
   const projectOptions = useMemo(() =>
@@ -175,16 +221,18 @@ export function AxelKanbanListView({
   {
     return tarefas.filter((t) =>
     {
-      if (statusFilter === 'ativas' && t.status === 'concluida') return false
-      if (statusFilter === 'concluidas' && t.status !== 'concluida') return false
+      const bucket = resolveDueBucket(t)
 
-      if (bucketFilter !== 'all' && resolveDueBucket(t) !== bucketFilter) return false
+      if (listFilter === 'ativas' && t.status === 'concluida') return false
+      if (listFilter === 'concluidas' && t.status !== 'concluida') return false
+      if (listFilter === 'urgente' && bucket !== 'vencido' && bucket !== 'hoje') return false
+      if (listFilter === 'semana' && bucket !== 'esta_semana' && bucket !== 'proxima_semana') return false
 
       if (projectFilter !== 'all' && getProjectTag(t) !== projectFilter) return false
 
       return true
     })
-  }, [tarefas, bucketFilter, statusFilter, projectFilter])
+  }, [tarefas, listFilter, projectFilter])
 
   const handleSort = (key: SortKey) =>
   {
@@ -233,33 +281,23 @@ export function AxelKanbanListView({
   return (
     <div className={`flex-1 min-h-0 flex flex-col gap-2 ${AXEL_KANBAN_TABLE}`}>
       <div className="shrink-0 flex flex-col gap-2 px-1">
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filtrar por faixa">
-          {BUCKET_FILTERS.map((f) => (
+        <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto scrollbar-none" role="group" aria-label="Filtrar lista">
+          {LIST_FILTERS.map((f) => (
             <FilterChip
               key={f.id}
               label={f.label}
-              active={bucketFilter === f.id}
-              onClick={() => setBucketFilter(f.id)}
-            />
-          ))}
-        </div>
-        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filtrar por status">
-          {STATUS_FILTERS.map((f) => (
-            <FilterChip
-              key={f.id}
-              label={f.label}
-              active={statusFilter === f.id}
-              onClick={() => setStatusFilter(f.id)}
+              active={listFilter === f.id}
+              onClick={() => setListFilter(f.id)}
             />
           ))}
           {projectOptions.length > 1 && (
             <select
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
-              aria-label="Filtrar por projeto"
-              className="ml-auto font-mono text-[10px] uppercase tracking-wide border border-line rounded-sl bg-card px-2 py-1 text-ink-muted"
+              aria-label="Filtrar por pasta ou projeto"
+              className="ml-auto font-mono text-[10px] uppercase tracking-wide border border-line rounded-sl bg-card px-2 py-1 text-ink-muted max-w-[9rem] truncate"
             >
-              <option value="all">Todos projetos</option>
+              <option value="all">Todas pastas</option>
               {projectOptions.map((p) => (
                 <option key={p} value={p}>{p}</option>
               ))}
@@ -271,26 +309,38 @@ export function AxelKanbanListView({
         </p>
       </div>
 
-      <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-340px)] flex-1 min-h-0">
-        <table className="w-full min-w-[960px] text-left border-collapse">
+      <div className="md:hidden overflow-y-auto max-h-[calc(100dvh-16rem)] flex-1 min-h-0 space-y-2 px-0.5">
+        {sorted.length === 0 ? (
+          <p className={`py-12 text-center text-sm ${AXEL_TEXT_SECONDARY}`}>
+            Nenhuma tarefa no pipeline.
+          </p>
+        ) : (
+          sorted.map((t) => (
+            <ListMobileCard key={t.id} tarefa={t} onOpen={onOpen} />
+          ))
+        )}
+      </div>
+
+      <div className="hidden md:block overflow-y-auto max-h-[calc(100vh-340px)] flex-1 min-h-0">
+        <table className="w-full text-left border-collapse">
           <thead className="sticky top-0 z-10 bg-card border-b border-line">
             <tr>
               <th className="px-4 py-2.5">
                 <SortHeader label="Tarefa" sortKey="title" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
               </th>
-              <th className="px-4 py-2.5">
+              <th className="hidden md:table-cell px-4 py-2.5">
                 <SortHeader label="Projeto" sortKey="project" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
               </th>
               <th className="px-4 py-2.5">
                 <SortHeader label="Faixa" sortKey="bucket" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
               </th>
-              <th className="px-4 py-2.5">
-                <SortHeader label="Score" sortKey="score" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
+              <th className="hidden lg:table-cell px-4 py-2.5">
+                <SortHeader label="Prioridade" sortKey="score" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
               </th>
               <th className="px-4 py-2.5">
                 <SortHeader label="Prazo" sortKey="due" activeKey={sortKey} dir={sortDir} onSort={handleSort} />
               </th>
-              <th className="px-4 py-2.5">
+              <th className="hidden lg:table-cell px-4 py-2.5">
                 <span className={`font-mono text-[9px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
                   Checklist
                 </span>
@@ -323,7 +373,7 @@ export function AxelKanbanListView({
                   <td className={`px-4 py-2 text-sm max-w-[280px] truncate ${AXEL_TEXT_PRIMARY}`}>
                     {cleanTitle(t.titulo)}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="hidden md:table-cell px-4 py-2">
                     <span className={`font-mono text-[10px] uppercase tracking-wider ${AXEL_TEXT_SECONDARY}`}>
                       {tag}
                     </span>
@@ -331,15 +381,18 @@ export function AxelKanbanListView({
                   <td className={`px-4 py-2 text-[11px] ${AXEL_TEXT_SECONDARY}`}>
                     {DUE_BUCKET_LABELS[bucket]}
                   </td>
-                  <td className="px-4 py-2">
-                    <span className={`text-xs font-mono tabular-nums ${urgencyScoreClass(score)}`}>
+                  <td className="hidden lg:table-cell px-4 py-2">
+                    <span
+                      className={`text-xs font-mono tabular-nums ${urgencyScoreClass(score)}`}
+                      title="Prioridade AXEL — maior = mais urgente na fila"
+                    >
                       {score}
                     </span>
                   </td>
                   <td className="px-4 py-2">
                     <DueDateChip date={t.data_vencimento} compact />
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="hidden lg:table-cell px-4 py-2">
                     <ListProgressCell tarefa={t} />
                   </td>
                   <td className={`px-4 py-2 text-[11px] capitalize ${AXEL_TEXT_SECONDARY}`}>

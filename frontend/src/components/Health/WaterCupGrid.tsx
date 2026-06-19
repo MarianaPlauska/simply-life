@@ -1,15 +1,15 @@
-import { useMemo, useId } from 'react'
+import { useMemo, useId, useState } from 'react'
 import { isAguaRitualComplete } from '../../lib/healthRitual'
-
-// Grade de copos — interação principal de hidratação (toque no copo)
+import { isGarrafa, ML_OPCOES } from '../../lib/waterHydration'
 
 interface WaterCupGridProps
 {
-  current: number
+  entries: number[]
   goal: number
-  /** Meta real (ritual 80%); se omitida, usa `goal` */
   baseGoal?: number
-  onSet: (next: number) => void
+  defaultMl: number
+  onEntriesChange: (next: number[]) => void
+  onDefaultMlChange?: (ml: number) => void
   disabled?: boolean
   compact?: boolean
 }
@@ -17,105 +17,224 @@ interface WaterCupGridProps
 function CupSvg({ filled, ritualLine, gradId }: { filled: boolean; ritualLine: boolean; gradId: string })
 {
   return (
-    <svg
-      viewBox="0 0 40 52"
-      className="w-full h-full drop-shadow-sm"
-      aria-hidden
-    >
+    <svg viewBox="0 0 40 52" className="w-full h-full drop-shadow-sm" aria-hidden>
       <defs>
         <linearGradient id={gradId} x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor="rgb(14 165 233 / 0.95)" />
-          <stop offset="100%" stopColor="rgb(56 189 248 / 0.75)" />
+          <stop offset="0%" stopColor="var(--sl-water-fill, var(--sl-accent))" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="var(--sl-water-fill-end, var(--sl-accent-hover))" stopOpacity="0.75" />
         </linearGradient>
       </defs>
       <path
         d="M10 6 h20 l-3 40 a4 4 0 0 1-4 3.5 H17 a4 4 0 0 1-4-3.5 Z"
-        className={`transition-colors duration-300 ${
-          filled ? '' : 'fill-chrome/40'
-        }`}
-        fill={filled ? `url(#${gradId})` : undefined}
-        stroke="currentColor"
+        fill={filled ? `url(#${gradId})` : 'var(--sl-chrome)'}
+        stroke="var(--sl-border)"
         strokeWidth="1.5"
         strokeLinejoin="round"
+        className="transition-colors duration-300"
       />
       {filled && (
-        <ellipse cx="20" cy="14" rx="7" ry="2" fill="rgb(186 230 253 / 0.45)" />
+        <ellipse cx="20" cy="14" rx="7" ry="2" fill="var(--sl-elevated)" opacity="0.45" />
       )}
       {ritualLine && !filled && (
-        <line x1="8" y1="42" x2="32" y2="42" stroke="rgb(56 189 248 / 0.35)" strokeWidth="1" strokeDasharray="3 2" />
+        <line
+          x1="8"
+          y1="42"
+          x2="32"
+          y2="42"
+          stroke="var(--sl-accent)"
+          strokeWidth="1"
+          strokeDasharray="3 2"
+          opacity="0.4"
+        />
       )}
     </svg>
   )
 }
 
-export function WaterCupGrid({ current, goal, baseGoal, onSet, disabled = false, compact = false }: WaterCupGridProps)
+function BottleSvg({ filled, gradId }: { filled: boolean; gradId: string })
+{
+  return (
+    <svg viewBox="0 0 40 52" className="w-full h-full drop-shadow-sm" aria-hidden>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="var(--sl-water-fill, var(--sl-accent))" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="var(--sl-water-fill-end, var(--sl-accent-hover))" stopOpacity="0.75" />
+        </linearGradient>
+      </defs>
+      <rect x="14" y="4" width="12" height="6" rx="2" fill="var(--sl-border)" />
+      <path
+        d="M12 10 h16 l-2 38 a5 5 0 0 1-5 4 H19 a5 5 0 0 1-5-4 Z"
+        fill={filled ? `url(#${gradId})` : 'var(--sl-chrome)'}
+        stroke="var(--sl-border)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      {filled && (
+        <rect x="15" y="22" width="10" height="14" rx="2" fill="var(--sl-elevated)" opacity="0.35" />
+      )}
+    </svg>
+  )
+}
+
+export function WaterCupGrid({
+  entries,
+  goal,
+  baseGoal,
+  defaultMl,
+  onEntriesChange,
+  onDefaultMlChange,
+  disabled = false,
+  compact = false,
+}: WaterCupGridProps)
 {
   const baseId = useId()
   const metaGoal = baseGoal ?? goal
-  const ritualThreshold = useMemo(
-    () => Math.ceil(metaGoal * 0.8),
-    [metaGoal],
-  )
+  const ritualThreshold = useMemo(() => Math.ceil(metaGoal * 0.8), [metaGoal])
+  const current = entries.length
+  const cupCount = Math.min(Math.max(goal, metaGoal, current + 1), 12)
+  const cols = cupCount <= 6 ? cupCount : 4
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
-  const cupCount = Math.min(Math.max(goal, metaGoal), 12)
-  const cols = cupCount <= 6 ? cupCount : cupCount <= 8 ? 4 : 4
-
-  const handleCup = (index: number) =>
+  const handleSlot = (index: number) =>
   {
     if (disabled) return
-    const target = index + 1
-    if (current === target)
+    if (index < entries.length)
     {
-      onSet(index)
+      if (editingIndex === index)
+      {
+        setEditingIndex(null)
+        return
+      }
+      setEditingIndex(index)
       return
     }
-    onSet(target)
+    onEntriesChange([...entries, defaultMl])
+    setEditingIndex(null)
+  }
+
+  const removeEntry = (index: number) =>
+  {
+    onEntriesChange(entries.filter((_, i) => i !== index))
+    setEditingIndex(null)
+  }
+
+  const setEntryMl = (index: number, ml: number) =>
+  {
+    const next = [...entries]
+    next[index] = ml
+    onEntriesChange(next)
+    setEditingIndex(null)
   }
 
   return (
-    <div
-      className={`grid gap-2 ${compact ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}
-      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-      role="group"
-      aria-label={`${current} de ${metaGoal} copos`}
-    >
-      {Array.from({ length: cupCount }, (_, i) =>
-      {
-        const filled = i < current
-        const isRitualCup = i + 1 === ritualThreshold
-        const ritualOk = isAguaRitualComplete(current, metaGoal)
-        const isExtraCup = i >= metaGoal
+    <div className="space-y-2">
+      {onDefaultMlChange && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="font-mono text-[9px] uppercase text-ink-muted">Padrão</span>
+          {ML_OPCOES.map((ml) => (
+            <button
+              key={ml}
+              type="button"
+              disabled={disabled}
+              onClick={() => onDefaultMlChange(ml)}
+              className={`px-2 py-0.5 rounded-sl font-mono text-[9px] border transition-colors ${
+                defaultMl === ml
+                  ? 'border-accent/40 bg-accent-muted text-ink'
+                  : 'border-line text-ink-muted hover:text-ink'
+              }`}
+            >
+              {ml}ml
+            </button>
+          ))}
+        </div>
+      )}
 
-        return (
+      <div
+        className={`grid gap-2 ${compact ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        role="group"
+        aria-label={`${current} de ${metaGoal} — ${entries.reduce((a, b) => a + b, 0)} ml`}
+      >
+        {Array.from({ length: cupCount }, (_, i) =>
+        {
+          const filled = i < entries.length
+          const ml = filled ? entries[i] : defaultMl
+          const garrafa = isGarrafa(ml)
+          const isRitualCup = i + 1 === ritualThreshold
+          const ritualOk = isAguaRitualComplete(current, metaGoal)
+          const isExtraCup = i >= metaGoal
+
+          return (
+            <button
+              key={i}
+              type="button"
+              disabled={disabled}
+              onClick={() => handleSlot(i)}
+              className={[
+                'relative flex flex-col items-center justify-end rounded-sl transition-all',
+                compact ? 'p-1 min-h-[52px]' : 'p-1.5 sm:p-2 min-h-[64px] sm:min-h-[72px]',
+                'border border-transparent hover:border-accent/25 hover:bg-accent-muted/30',
+                isExtraCup ? 'border-dashed border-accent/20' : '',
+                editingIndex === i ? 'ring-1 ring-accent/40 bg-accent-muted/20' : '',
+                'active:scale-95 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
+                filled ? 'text-accent' : 'text-ink-muted',
+              ].join(' ')}
+              aria-label={
+                filled
+                  ? `${garrafa ? 'Garrafa' : 'Copo'} ${i + 1} — ${ml} ml — toque para editar`
+                  : `Vazio — toque para adicionar ${defaultMl} ml`
+              }
+              aria-pressed={filled}
+            >
+              {garrafa ? (
+                <BottleSvg filled={filled} gradId={`${baseId}-bottle-${i}`} />
+              ) : (
+                <CupSvg
+                  filled={filled}
+                  ritualLine={isRitualCup && !ritualOk}
+                  gradId={`${baseId}-cup-${i}`}
+                />
+              )}
+              {filled && (
+                <span className="font-mono text-[8px] tabular-nums mt-0.5 text-ink-muted">
+                  {ml}ml
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {editingIndex !== null && entries[editingIndex] !== undefined && (
+        <div className="rounded-sl border border-line bg-chrome/60 p-2 space-y-2">
+          <p className="font-mono text-[9px] uppercase text-ink-muted">
+            Quantidade · item {editingIndex + 1}
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {ML_OPCOES.map((ml) => (
+              <button
+                key={ml}
+                type="button"
+                onClick={() => setEntryMl(editingIndex, ml)}
+                className={`px-2 py-1 rounded-sl font-mono text-[9px] border ${
+                  entries[editingIndex] === ml
+                    ? 'border-accent/40 bg-accent-muted'
+                    : 'border-line hover:bg-elevated'
+                }`}
+              >
+                {ml}ml
+              </button>
+            ))}
+          </div>
           <button
-            key={i}
             type="button"
-            disabled={disabled}
-            onClick={() => handleCup(i)}
-            className={[
-              'relative flex flex-col items-center justify-end rounded-sl transition-all',
-              compact ? 'p-1 min-h-[52px]' : 'p-1.5 sm:p-2 min-h-[64px] sm:min-h-[72px]',
-              'border border-transparent hover:border-sky-500/30 hover:bg-sky-500/5',
-              isExtraCup ? 'border-dashed border-sky-500/20' : '',
-              'active:scale-95 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-400',
-              filled ? 'text-sky-300' : 'text-ink-muted',
-            ].join(' ')}
-            aria-label={
-              filled
-                ? `Copo ${i + 1} bebido — toque para desfazer`
-                : `Copo ${i + 1} vazio — toque para marcar`
-            }
-            aria-pressed={filled}
+            onClick={() => removeEntry(editingIndex)}
+            className="text-[10px] font-mono uppercase text-urgente hover:underline"
           >
-            <CupSvg filled={filled} ritualLine={isRitualCup && !ritualOk} gradId={`${baseId}-cup-${i}`} />
-            {!compact && (
-              <span className="font-mono text-[9px] tabular-nums mt-0.5 text-ink-muted">
-                {i + 1}
-              </span>
-            )}
+            Remover
           </button>
-        )
-      })}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,19 +1,25 @@
 import { useEffect, useRef } from 'react'
 import { registerPushSubscription } from '../lib/pushSubscription'
 import { useTaskStore } from '../store/useTaskStore'
+import { isSetupComplete } from '../lib/userWorkspacePrefs'
 
 const REGISTERED_KEY = 'simply-life-push-registered'
 
-/** Registra subscription Web Push no servidor — alertas de boleto via cron */
+/** Sincroniza subscription Web Push quando permissão já concedida */
 export function usePushSubscription(enabled = true): void
 {
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn)
+  const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
+  const workspacePrefsLoaded = useTaskStore((s) => s.workspacePrefsLoaded)
   const attempted = useRef(false)
 
   useEffect(() =>
   {
-    if (!enabled || !isLoggedIn || attempted.current) return
-    if (typeof window === 'undefined') return
+    if (!enabled || !isLoggedIn || !workspacePrefsLoaded) return
+    if (!isSetupComplete(workspacePrefs)) return
+    if (attempted.current) return
+    if (typeof window === 'undefined' || !('Notification' in window)) return
+    if (Notification.permission !== 'granted') return
 
     attempted.current = true
 
@@ -29,8 +35,8 @@ export function usePushSubscription(enabled = true): void
       }
       catch
       {
-        /* permissão negada ou VAPID ausente */
+        /* VAPID ausente */
       }
     })()
-  }, [enabled, isLoggedIn])
+  }, [enabled, isLoggedIn, workspacePrefs, workspacePrefsLoaded])
 }

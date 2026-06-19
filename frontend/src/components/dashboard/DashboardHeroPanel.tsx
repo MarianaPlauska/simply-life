@@ -1,7 +1,9 @@
 import { DailyEngagementCard } from './DailyEngagementCard'
 import { DashboardAxelFocus } from './DashboardAxelFocus'
+import { useTaskStore } from '../../store/useTaskStore'
+import { buildOffensiveChecklist } from '../../lib/offensiveToday'
 
-// Hero do dashboard — ofensiva + main quest no mesmo card (sem vazio lateral)
+// Hero do dashboard — ofensiva + main quest no mesmo painel
 
 interface DashboardHeroPanelProps
 {
@@ -11,9 +13,19 @@ interface DashboardHeroPanelProps
 
 export function DashboardHeroPanel({ onOpenTask, onExecuteTask }: DashboardHeroPanelProps)
 {
+  const streakCount = useTaskStore((s) => s.streakCount)
+  const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
+  const hasWellbeingToday = useTaskStore((s) => s.hasWellbeingToday)
+
+  const offensive = buildOffensiveChecklist(
+    hasCompletedTaskToday,
+    hasWellbeingToday,
+    streakCount,
+  )
+
   return (
     <section
-      className="rounded-sl border border-line bg-card overflow-hidden"
+      className={`sl-panel overflow-hidden ${!offensive.safe ? 'sl-panel-emphasis' : ''}`}
       aria-label="Foco do dia"
     >
       <DailyEngagementCard variant="strip" />

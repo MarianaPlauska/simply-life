@@ -1,9 +1,12 @@
-import { useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { HeartPulse, Droplets, Pill, Check, Circle } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
+import { AGUA_PRESET } from '../../constants/healthPresets'
 import { buildHealthRitual, ritualHeadline, type RitualItemId } from '../../lib/healthRitual'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
+import { AxelCareNudge } from '../axel/AxelCareNudge'
+import type { MoodLevel } from '../../lib/axelCareMessages'
 
 const ICONS: Record<RitualItemId, typeof HeartPulse> = {
   humor: HeartPulse,
@@ -14,6 +17,7 @@ const ICONS: Record<RitualItemId, typeof HeartPulse> = {
 export function HealthRitualStrip()
 {
   const navigate = useNavigate()
+  const location = useLocation()
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const medicamentoTomadas = useTaskStore((s) => s.medicamentoTomadas)
@@ -23,6 +27,19 @@ export function HealthRitualStrip()
   const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje)
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
+  const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
+  const incrementHabito = useTaskStore((s) => s.incrementHabito)
+  const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
+  const userProfile = useTaskStore((s) => s.userProfile)
+  const prevDoneRef = useRef<Record<RitualItemId, boolean>>({ humor: false, agua: false, medicamentos: false })
+  const ritualHydratedRef = useRef(false)
+  const [celebrateMood, setCelebrateMood] = useState<MoodLevel | null>(null)
+  const [celebrateKey, setCelebrateKey] = useState(0)
+
+  const displayName = workspacePrefs.axel_calls_you
+    || workspacePrefs.display_name
+    || userProfile?.nome
+    || ''
 
   useEffect(() =>
   {
@@ -42,6 +59,23 @@ export function HealthRitualStrip()
       medicamentosTomados: dose.tomados,
     })
   }, [humorHojeLista.length, aguaCopos, aguaMeta, medicamentos, medicamentoTomadas, habitos])
+
+  useEffect(() =>
+  {
+    for (const item of snapshot.items)
+    {
+      if (!item.applies) continue
+      const wasDone = prevDoneRef.current[item.id]
+      if (ritualHydratedRef.current && !wasDone && item.done)
+      {
+        setCelebrateMood(5)
+        setCelebrateKey((k) => k + 1)
+        break
+      }
+      prevDoneRef.current[item.id] = item.done
+    }
+    ritualHydratedRef.current = true
+  }, [snapshot.items])
 
   const isStreakSafeToday = useTaskStore((s) => s.isStreakSafeToday)
   const recordWellbeingForStreak = useTaskStore((s) => s.recordWellbeingForStreak)
@@ -65,10 +99,48 @@ export function HealthRitualStrip()
 
   const headline = ritualHeadline(snapshot)
 
+  const scrollOnDashboard = (itemId: RitualItemId) =>
+  {
+    if (location.pathname !== '/') return false
+    const targetId = itemId === 'humor'
+      ? 'dashboard-wellbeing'
+      : itemId === 'agua'
+        ? 'dashboard-water'
+        : null
+    if (!targetId) return false
+    const el = document.getElementById(targetId)
+    if (!el) return false
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return true
+  }
+
+  const quickAguaOnDashboard = async () =>
+  {
+    const aguaHab = habitos.find((h) => h.tipo === 'agua')
+    const ensured = aguaHab ?? await ensureHealthHabit(AGUA_PRESET)
+    if (ensured)
+    {
+      await incrementHabito(ensured.id)
+    }
+  }
+
+  const handleRitualTap = (item: { id: RitualItemId; path: string }) =>
+  {
+    if (item.id === 'agua' && location.pathname === '/' && !snapshot.items.find((i) => i.id === 'agua')?.done)
+    {
+      void quickAguaOnDashboard()
+      return
+    }
+    if (!scrollOnDashboard(item.id))
+    {
+      navigate(item.path)
+    }
+  }
+
   return (
     <div
       className={`sl-panel px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3 ${
-        !snapshot.moodLoggedToday ? 'ring-1 ring-accent/25' : ''
+        !snapshot.moodLoggedToday ? 'sl-panel-emphasis' : ''
       }`}
     >
       <div className="flex-1 min-w-0">
@@ -81,6 +153,16 @@ export function HealthRitualStrip()
           </span>
         </div>
         <p className="text-[13px] text-ink leading-snug">{headline}</p>
+        {celebrateMood !== null && (
+          <AxelCareNudge
+            key={celebrateKey}
+            avatarStyle={workspacePrefs.avatar_style}
+            displayName={displayName}
+            moodLevel={celebrateMood}
+            className="mt-2"
+            onDone={() => setCelebrateMood(null)}
+          />
+        )}
         <p className="text-[11px] text-ink-muted mt-0.5">
           Tudo fica guardado no seu perfil — só você vê.
         </p>
@@ -95,7 +177,7 @@ export function HealthRitualStrip()
             <button
               key={item.id}
               type="button"
-              onClick={() => navigate(item.path)}
+              onClick={() => handleRitualTap(item)}
               title={item.detail}
               className={`
                 flex items-center gap-1.5 px-2.5 py-1.5 rounded-sl border text-[11px] transition-colors

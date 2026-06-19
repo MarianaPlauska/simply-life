@@ -7,6 +7,7 @@ import { AxelSystemFooter } from './AxelSystemFooter'
 import { QuickCaptureModal } from '../Anotacoes/QuickCaptureModal'
 import { CommandPalette } from '../ui/CommandPalette'
 import { OnboardingChecklist } from '../Onboarding/OnboardingChecklist'
+import { AxelSystemGuideIntro } from '../axel/AxelSystemGuideIntro'
 import { MedicationLockOverlay } from '../ui/MedicationLockOverlay'
 import { BurnoutAura } from '../ui/BurnoutAura'
 import { CelebrationOverlay } from '../gamification/CelebrationOverlay'
@@ -17,8 +18,12 @@ import { useFinanceBillKanbanSync } from '../../hooks/useFinanceBillKanbanSync'
 import { useMedicationReminders } from '../../hooks/useMedicationReminders'
 import { usePwaBillNotifications } from '../../hooks/usePwaBillNotifications'
 import { usePushSubscription } from '../../hooks/usePushSubscription'
+import { useHealthPushNotifications } from '../../hooks/useHealthPushNotifications'
+import { useHealthDayRollover } from '../../hooks/useHealthDayRollover'
 import { PwaInstallBanner } from './PwaInstallBanner'
+import { NotificationPermissionPrompt } from './NotificationPermissionPrompt'
 import { FinanceQuickCaptureModal } from '../Finance/FinanceQuickCaptureModal'
+import { NewTransactionModal } from '../Finance/NewTransactionModal'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
 
 // Layout global — sidebar, header, conteúdo (flex-1) e footer sticky
@@ -32,6 +37,19 @@ function PageLoader()
   )
 }
 
+function GlobalNewTransactionModal()
+{
+  const isOpen = useTaskStore((s) => s.isNewTransactionModalOpen)
+  const setOpen = useTaskStore((s) => s.setNewTransactionModalOpen)
+
+  return (
+    <NewTransactionModal
+      isOpen={isOpen}
+      onClose={() => setOpen(false)}
+    />
+  )
+}
+
 export function AppLayout()
 {
   const mainRef = useRef<HTMLElement>(null)
@@ -41,7 +59,9 @@ export function AppLayout()
   useFinanceBillKanbanSync()
   useMedicationReminders()
   usePushSubscription()
+  useHealthPushNotifications()
   usePwaBillNotifications()
+  useHealthDayRollover()
 
   const reconcileCosmeticUnlocks = useTaskStore((s) => s.reconcileCosmeticUnlocks)
   const userStats = useTaskStore((s) => s.userStats)
@@ -64,6 +84,7 @@ export function AppLayout()
   }, [fetchMedicamentos, fetchHabitos, fetchTarefas])
 
   const isAcademy = location.pathname === '/foco'
+  const isKanban = location.pathname.startsWith('/kanban')
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
   const hideChrome = zenFocusActive && !isAcademy
 
@@ -74,9 +95,12 @@ export function AppLayout()
       <CelebrationOverlay />
       <QuickCaptureModal />
       <FinanceQuickCaptureModal />
+      <GlobalNewTransactionModal />
       <CommandPalette />
       <OnboardingChecklist />
+      <AxelSystemGuideIntro />
       <PwaInstallBanner />
+      <NotificationPermissionPrompt />
       {!isAcademy && !hideChrome && <MobileBottomNav />}
 
       <div className={`min-h-screen flex flex-col w-full ${isAcademy ? 'bg-black text-white' : AXEL_CANVAS}`}>
@@ -95,7 +119,9 @@ export function AppLayout()
                 </Suspense>
               </div>
               {!isAcademy && !hideChrome && (
-                <AxelSystemFooter className="mt-auto shrink-0 pb-[calc(1rem+5.75rem+env(safe-area-inset-bottom,0px))] md:pb-4" />
+                <AxelSystemFooter
+                  className={`mt-auto shrink-0 ${isKanban ? 'hidden md:block' : ''} pb-[calc(1rem+5.75rem+env(safe-area-inset-bottom,0px))] md:pb-4`}
+                />
               )}
             </main>
           </div>

@@ -34,8 +34,11 @@ export const INCOME_METHODS: FinancePaymentMethod[] = [
   'outro',
 ]
 
-export const DEFAULT_EXPENSE_PAYMENT: FinancePaymentMethod = 'pix'
-export const DEFAULT_INCOME_PAYMENT: FinancePaymentMethod = 'pix'
+/** Valor do picker para conta corrente (sem cartão) */
+export const ACCOUNT_PAYMENT_SELECTION = 'conta'
+
+export const DEFAULT_EXPENSE_PAYMENT = ACCOUNT_PAYMENT_SELECTION
+export const DEFAULT_INCOME_PAYMENT = ACCOUNT_PAYMENT_SELECTION
 
 export function isCardPaymentSelection(
   selection: string,
@@ -79,8 +82,13 @@ export function paymentMethodLabel(t: Transaction): string
 export function resolvePaymentFromSelection(
   selection: string,
   cards: VirtualCard[],
-): { card_id?: string; forma_pagamento: FinancePaymentMethod }
+): { card_id?: string; forma_pagamento?: FinancePaymentMethod }
 {
+  if (selection === ACCOUNT_PAYMENT_SELECTION)
+  {
+    return { forma_pagamento: 'debito' }
+  }
+
   if (isCardPaymentSelection(selection, cards))
   {
     return { card_id: selection, forma_pagamento: 'cartao' }
@@ -92,7 +100,7 @@ export function resolvePaymentFromSelection(
     return { forma_pagamento: method }
   }
 
-  return { forma_pagamento: DEFAULT_EXPENSE_PAYMENT }
+  return { forma_pagamento: 'debito' }
 }
 
 /** Valor inicial do picker a partir de uma transação */
@@ -103,5 +111,5 @@ export function paymentPickerValue(t: Transaction): string
     return t.card_id
   }
 
-  return t.forma_pagamento ?? inferPaymentMethod(t)
+  return ACCOUNT_PAYMENT_SELECTION
 }

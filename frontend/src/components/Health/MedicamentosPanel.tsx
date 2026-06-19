@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Pill, Plus, Clock, X, Check, History } from 'lucide-react'
+import { Pill, Plus, Clock, X, Check, History, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { EmptyState } from '../ui/EmptyState'
@@ -10,6 +10,7 @@ import {
   mensagemGentilDose,
   proximaDosePendente,
 } from '../../lib/medicamentosSchedule'
+import { MedicamentosBulkPanel } from './MedicamentosBulkPanel'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 // Medicamentos — horários, lembrete gentil do AXEL e log de tomadas
@@ -19,10 +20,12 @@ export function MedicamentosPanel()
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const medicamentoTomadas = useTaskStore((s) => s.medicamentoTomadas)
   const addMedicamento = useTaskStore((s) => s.addMedicamento)
+  const removeMedicamento = useTaskStore((s) => s.removeMedicamento)
   const registrarTomadaMedicamento = useTaskStore((s) => s.registrarTomadaMedicamento)
   const concluirHabito = useTaskStore((s) => s.concluirHabito)
 
   const [showForm, setShowForm] = useState(false)
+  const [savingMed, setSavingMed] = useState(false)
   const [form, setForm] = useState({ nome: '', horarios: '08:00, 20:00' })
 
   const doses = useMemo(
@@ -36,6 +39,7 @@ export function MedicamentosPanel()
 
   const handleAdd = async () =>
   {
+    if (savingMed) return
     const horarios = form.horarios
       .split(/[,;]+/)
       .map((h) => h.trim())
@@ -45,14 +49,29 @@ export function MedicamentosPanel()
       toast.error('Informe nome e pelo menos um horário (ex: 08:00, 20:00)')
       return
     }
-    await addMedicamento({
-      nome: form.nome.trim(),
-      horario: horarios[0],
-      horarios,
-    })
-    setForm({ nome: '', horarios: '08:00, 20:00' })
-    setShowForm(false)
-    toast.success('Medicamento cadastrado — o AXEL acompanha os horários')
+    setSavingMed(true)
+    try
+    {
+      await addMedicamento({
+        nome: form.nome.trim(),
+        horario: horarios[0],
+        horarios,
+      })
+      setForm({ nome: '', horarios: '08:00, 20:00' })
+      setShowForm(false)
+      toast.success('Medicamento cadastrado — o AXEL acompanha os horários')
+    }
+    finally
+    {
+      setSavingMed(false)
+    }
+  }
+
+  const handleRemove = async (id: number, nome: string) =>
+  {
+    if (!window.confirm(`Remover "${nome}" da sua lista?`)) return
+    await removeMedicamento(id)
+    toast.success('Medicamento removido')
   }
 
   const handleTomar = async (medicamentoId: number, horario: string) =>
@@ -124,8 +143,9 @@ export function MedicamentosPanel()
             <div className="flex gap-2">
               <button
                 type="button"
+                disabled={savingMed}
                 onClick={() => void handleAdd()}
-                className="flex-1 py-2.5 rounded-sl bg-accent text-white font-mono text-[11px] uppercase min-h-[44px]"
+                className="flex-1 py-2.5 rounded-sl bg-accent text-white font-mono text-[11px] uppercase min-h-[44px] disabled:opacity-50"
               >
                 Salvar
               </button>
@@ -241,9 +261,19 @@ export function MedicamentosPanel()
                 <li key={med.id} className="px-4 py-3 flex flex-col gap-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>{med.nome}</span>
-                    {ok && (
-                      <span className="font-mono text-[9px] uppercase text-concluido">Completo hoje</span>
-                    )}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {ok && (
+                        <span className="font-mono text-[9px] uppercase text-concluido">Completo hoje</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void handleRemove(med.id, med.nome)}
+                        className="p-1.5 rounded-sl text-ink-muted hover:text-urgente hover:bg-urgente/10 min-h-[36px] min-w-[36px] flex items-center justify-center"
+                        aria-label={`Remover ${med.nome}`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                   <p className="text-[11px] text-ink-muted">
                     {slots.join(' · ')}
@@ -255,6 +285,7 @@ export function MedicamentosPanel()
           </ul>
         </section>
       )}
+      <MedicamentosBulkPanel variant="full" />
     </div>
   )
 }

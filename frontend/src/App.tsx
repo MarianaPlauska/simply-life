@@ -12,6 +12,7 @@ import { ResetPasswordView } from './components/Auth/ResetPasswordView'
 import { AxelSetupWizard } from './components/Onboarding/AxelSetupWizard'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { useTaskStore, type ActiveView } from './store/useTaskStore'
+import { applyColorScheme } from './utils/applyColorScheme'
 import { AppLayout } from './components/layout/AppLayout'
 import { Briefcase, Rocket } from 'lucide-react'
 
@@ -40,10 +41,10 @@ function useAccessibilityInit()
     document.documentElement.style.fontSize = `${a.fontSize}px`
     document.documentElement.classList.toggle('high-contrast', a.highContrast)
     document.documentElement.classList.toggle('reduce-motion', a.reducedMotion)
-    document.documentElement.classList.toggle('dark', a.colorScheme === 'dark')
-    document.documentElement.style.colorScheme = a.colorScheme
+    document.documentElement.classList.toggle('focus-enhanced', a.focusVisible)
+    applyColorScheme(a.colorScheme)
     applyWorkspaceTheme()
-  }, [a.fontSize, a.highContrast, a.reducedMotion, a.colorScheme, applyWorkspaceTheme])
+  }, [a.fontSize, a.highContrast, a.reducedMotion, a.colorScheme, a.focusVisible, applyWorkspaceTheme])
 }
 
 function PlaceholderView({ title, subtitle, icon: Icon }: { title: string; subtitle: string; icon?: React.ElementType })
@@ -186,7 +187,7 @@ function App()
 
   return (
     <>
-      <Toaster theme={colorScheme} position="bottom-right" richColors />
+      <Toaster theme={colorScheme === 'dark' ? 'dark' : 'light'} position="bottom-right" richColors />
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/reset-password" element={<ResetPasswordView />} />

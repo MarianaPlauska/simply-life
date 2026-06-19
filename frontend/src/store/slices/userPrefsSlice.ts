@@ -5,6 +5,7 @@ import {
   DEFAULT_WORKSPACE_PREFS,
   type UserWorkspacePrefs,
 } from '../../lib/userWorkspacePrefs'
+import { hydrateAxelCareRotation } from '../../lib/axelCareRotation'
 import { applyAccentTheme } from '../../lib/applyAccentTheme'
 import {
   accentIdFromCosmetic,
@@ -61,6 +62,7 @@ export const createUserPrefsSlice: StateCreator<PrefsStore, [], [], UserPrefsSli
   fetchWorkspacePrefs: async () =>
   {
     const prefs = await loadWorkspacePrefs()
+    hydrateAxelCareRotation(prefs.axel_care_rotation)
     set({ workspacePrefs: prefs, workspacePrefsLoaded: true })
     get().applyWorkspaceTheme()
     await get().reconcileCosmeticUnlocks()
@@ -76,8 +78,8 @@ export const createUserPrefsSlice: StateCreator<PrefsStore, [], [], UserPrefsSli
 
   applyWorkspaceTheme: () =>
   {
-    const scheme = get().accessibility.colorScheme === 'light' ? 'light' : 'dark'
-    applyAccentTheme(get().workspacePrefs.accent, scheme)
+    const cs = get().accessibility.colorScheme
+    applyAccentTheme(get().workspacePrefs.accent, cs === 'dark' ? 'dark' : 'light')
   },
 
   reconcileCosmeticUnlocks: async () =>

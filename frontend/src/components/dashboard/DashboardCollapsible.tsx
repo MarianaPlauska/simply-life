@@ -2,7 +2,6 @@ import { ChevronDown } from 'lucide-react'
 import type { ReactNode } from 'react'
 import {
   AXEL_TEXT_PRIMARY,
-  AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
 interface DashboardCollapsibleProps
@@ -40,35 +39,35 @@ export function DashboardCollapsible({
 {
   return (
     <details
-      className={`group ${borderless ? '' : 'rounded-sl border border-line bg-card'} ${className}`}
+      className={`group sl-panel overflow-hidden ${borderless ? 'border-0' : ''} ${className}`}
       {...(defaultOpen ? { open: true } : {})}
     >
-      <summary className="flex items-center gap-2 p-2.5 sm:p-3 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+      <summary className="flex items-center gap-2 p-3 sm:p-4 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
         {icon}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               {section && (
-                <span className="font-mono text-[10px] text-accent tabular-nums shrink-0">
+                <span className="font-mono text-[11px] text-ink tabular-nums shrink-0">
                   {section}
                 </span>
               )}
-              <p className={`text-[12px] sm:text-sm font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
+              <p className={`text-sm sm:text-base font-semibold truncate ${AXEL_TEXT_PRIMARY}`}>
                 {title}
               </p>
             </div>
             {trailing}
           </div>
           {subtitle && (
-            <p className={`font-mono text-[9px] sm:text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[13px] sm:text-sm mt-1 font-medium ${AXEL_TEXT_PRIMARY}`}>
               {subtitle}
             </p>
           )}
           {summaryExtra}
         </div>
         <ChevronDown
-          size={16}
-          className="text-ink-muted shrink-0 transition-transform group-open:rotate-180"
+          size={18}
+          className="text-ink shrink-0 transition-transform group-open:rotate-180"
           aria-hidden
         />
       </summary>

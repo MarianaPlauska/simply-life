@@ -10,6 +10,13 @@ import {
   type MascotMoodPref,
   isSetupComplete,
 } from '../../lib/userWorkspacePrefs'
+import {
+  DASHBOARD_WIDGET_CATALOG,
+  defaultWidgetsForPriority,
+  toggleWidgetSelection,
+  type DashboardWidgetId,
+  MAX_DASHBOARD_WIDGETS,
+} from '../../lib/dashboardWidgets'
 import { iniciaisDe, type AvatarStyleId } from '../../lib/axelAvatarPresets'
 import { applyAccentTheme } from '../../lib/applyAccentTheme'
 import { canUseAccent } from '../../lib/axelPrivileges'
@@ -19,7 +26,7 @@ import { AxelAvatarPicker } from './AxelAvatarPicker'
 import { AxelCompanionAvatar } from './AxelCompanionAvatar'
 import { AXEL_BTN_PRIMARY, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-const STEPS = ['Identidade', 'Cor & mascote', 'Prioridade', 'Quase lá'] as const
+const STEPS = ['Identidade', 'Cor & mascote', 'Atalhos', 'Quase lá'] as const
 
 const WIZARD_XP = 15
 const BONUS_XP = 10
@@ -68,6 +75,9 @@ export function AxelSetupWizard()
   const [accent, setAccent] = useState<AccentId>('copper')
   const [mascotMood, setMascotMood] = useState<MascotMoodPref>('calm')
   const [priority, setPriority] = useState<DashboardPriority>('tasks')
+  const [selectedWidgets, setSelectedWidgets] = useState<DashboardWidgetId[]>(
+    () => defaultWidgetsForPriority('tasks'),
+  )
   const [quickStart, setQuickStart] = useState<QuickStartMode>('skip')
   const [monthGoal, setMonthGoal] = useState('')
   const [taskTitle, setTaskTitle] = useState('')
@@ -100,6 +110,7 @@ export function AxelSetupWizard()
   const canNext = (): boolean =>
   {
     if (step === 0) return displayName.trim().length >= 2
+    if (step === 2) return selectedWidgets.length > 0
     return true
   }
 
@@ -119,6 +130,7 @@ export function AxelSetupWizard()
         mascot_mood: mascotMood,
         avatar_style: avatarStyle,
         dashboard_priority: priority,
+        dashboard_quick_widgets: selectedWidgets,
         month_goal_amount: quickStart === 'month' && parseFloat(monthGoal.replace(',', '.')) > 0
           ? parseFloat(monthGoal.replace(',', '.'))
           : null,
@@ -305,21 +317,70 @@ export function AxelSetupWizard()
           {step === 2 && (
             <div className="space-y-2 md:space-y-3">
               <p className={`text-[12px] md:text-sm leading-snug mb-2 md:mb-3 ${AXEL_TEXT_SECONDARY}`}>
-                O que fica no topo do celular?
+                Escolha até {MAX_DASHBOARD_WIDGETS} atalhos de cadastro rápido. O restante fica nas páginas de cada módulo.
               </p>
-              {PRIORITY_OPTIONS.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setPriority(opt.id)}
-                  className={`w-full p-3 md:p-4 rounded-sl border text-left ${
-                    priority === opt.id ? 'border-accent bg-accent/8' : 'border-line'
-                  }`}
-                >
-                  <p className="text-[13px] md:text-base font-medium text-ink">{opt.label}</p>
-                  <p className="text-[11px] md:text-sm text-ink-muted mt-0.5">{opt.hint}</p>
-                </button>
-              ))}
+              <p className="font-mono text-[9px] uppercase text-ink-muted">
+                {selectedWidgets.length}/{MAX_DASHBOARD_WIDGETS} selecionados
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {DASHBOARD_WIDGET_CATALOG.map((opt) =>
+                {
+                  const on = selectedWidgets.includes(opt.id)
+                  const full = !on && selectedWidgets.length >= MAX_DASHBOARD_WIDGETS
+                  const lockedFinance = priority === 'finance' && opt.id === 'finance_brief' && on
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      disabled={full || lockedFinance}
+                      onClick={() =>
+                      {
+                        if (lockedFinance)
+                        {
+                          return
+                        }
+                        if (priority === 'finance' && opt.id === 'finance_brief' && on)
+                        {
+                          return
+                        }
+                        setSelectedWidgets((prev) => toggleWidgetSelection(prev, opt.id))
+                      }}
+                      className={`p-3 rounded-sl border text-left transition-colors ${
+                        on ? 'border-accent bg-accent/8' : 'border-line'
+                      } ${full || lockedFinance ? 'opacity-40' : ''}`}
+                    >
+                      <p className="text-[13px] font-medium text-ink">
+                        {opt.label}
+                        {lockedFinance && (
+                          <span className="ml-1.5 font-mono text-[9px] uppercase text-ink-muted">fixo</span>
+                        )}
+                      </p>
+                      <p className="text-[11px] text-ink-muted mt-0.5">{opt.hint}</p>
+                    </button>
+                  )
+                })}
+              </div>
+              <p className={`text-[11px] ${AXEL_TEXT_SECONDARY} pt-1`}>
+                Foco geral (opcional):
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {PRIORITY_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() =>
+                    {
+                      setPriority(opt.id)
+                      setSelectedWidgets(defaultWidgetsForPriority(opt.id))
+                    }}
+                    className={`px-2.5 py-1 rounded-sl border text-[11px] ${
+                      priority === opt.id ? 'border-accent bg-accent-muted' : 'border-line text-ink-muted'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
