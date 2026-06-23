@@ -51,7 +51,7 @@ function KpiCell({
           : AXEL_TEXT_PRIMARY
 
   return (
-    <div className="px-4 py-3 border-r border-line last:border-r-0 min-w-[88px] flex-1">
+    <div className="px-3 py-2 sm:px-4 sm:py-3 border-r border-white/[0.04] last:border-r-0 min-w-[72px] sm:min-w-[88px] flex-1">
       <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
         {label}
       </p>

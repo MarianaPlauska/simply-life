@@ -4,7 +4,7 @@ import { ACCENT_PALETTES, type AccentId } from './userWorkspacePrefs'
 
 export function applyAccentTheme(accent: AccentId, colorScheme: 'light' | 'dark'): void
 {
-  const palette = ACCENT_PALETTES[accent] ?? ACCENT_PALETTES.copper
+  const palette = ACCENT_PALETTES[accent] ?? ACCENT_PALETTES.meridian
   const main = colorScheme === 'dark' ? palette.dark : palette.light
   const hover = palette.hover
   const root = document.documentElement

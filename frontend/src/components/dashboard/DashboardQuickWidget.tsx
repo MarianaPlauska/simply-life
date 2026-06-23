@@ -10,11 +10,7 @@ export function DashboardQuickWidget({ id }: { id: DashboardWidgetId })
   switch (id)
   {
     case 'wellbeing':
-      return (
-        <div id="dashboard-wellbeing" className="scroll-mt-20 min-w-0">
-          <WellbeingDashboardCard />
-        </div>
-      )
+      return <WellbeingDashboardCard />
     case 'water':
       return (
         <div id="dashboard-water" className="scroll-mt-20 min-w-0">

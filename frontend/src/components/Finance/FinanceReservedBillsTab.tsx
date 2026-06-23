@@ -20,6 +20,8 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
+const todayIso = () => new Date().toISOString().slice(0, 10)
+
 export function FinanceReservedBillsTab()
 {
   const cards = useTaskStore((s) => s.cards)
@@ -34,7 +36,7 @@ export function FinanceReservedBillsTab()
   const [showForm, setShowForm] = useState(false)
   const [titulo, setTitulo] = useState('')
   const [valor, setValor] = useState('')
-  const [vencimento, setVencimento] = useState('')
+  const [vencimento, setVencimento] = useState(todayIso)
   const [payment, setPayment] = useState<'cash' | string>('cash')
   const [spendBillId, setSpendBillId] = useState<number | null>(null)
   const [spendVal, setSpendVal] = useState('')
@@ -123,7 +125,7 @@ export function FinanceReservedBillsTab()
 
     setTitulo('')
     setValor('')
-    setVencimento('')
+    setVencimento(todayIso())
     setPayment('cash')
     setShowForm(false)
     toast.success('Fatura reservada — valor bloqueado do disponível')
@@ -132,7 +134,7 @@ export function FinanceReservedBillsTab()
   return (
     <div className="space-y-4">
       <section className={AXEL_BORDERLESS_PANEL}>
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-3">
+        <header className="mb-3">
           <div className="flex items-start gap-2 min-w-0">
             <CalendarClock size={14} className="text-accent shrink-0 mt-0.5" />
             <div className="min-w-0">
@@ -144,14 +146,6 @@ export function FinanceReservedBillsTab()
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setShowForm((s) => !s)}
-            className={`inline-flex items-center justify-center gap-1 min-h-[44px] px-4 py-2 font-mono text-[10px] uppercase w-full sm:w-auto ${AXEL_BTN_PRIMARY}`}
-          >
-            <Plus size={12} />
-            Nova fatura
-          </button>
         </header>
 
         {isDemoData && (
@@ -190,6 +184,7 @@ export function FinanceReservedBillsTab()
                 value={vencimento}
                 onChange={(e) => setVencimento(e.target.value)}
                 className="border border-line rounded-sl bg-card px-3 py-2 text-sm font-mono"
+                aria-label="Data do consumo ou vencimento"
               />
             </div>
             <div>
@@ -236,6 +231,22 @@ export function FinanceReservedBillsTab()
           </ul>
         )}
       </section>
+
+      {!showForm && (
+        <button
+          type="button"
+          onClick={() =>
+          {
+            setVencimento(todayIso())
+            setShowForm(true)
+          }}
+          className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-3 z-40 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 font-mono text-[10px] uppercase tracking-wide shadow-lg ${AXEL_BTN_PRIMARY}`}
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Nova fatura</span>
+          <span className="sm:hidden">Novo</span>
+        </button>
+      )}
     </div>
   )
 }

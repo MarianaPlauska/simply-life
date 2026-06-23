@@ -6,7 +6,8 @@ import { applyColorScheme } from '../../utils/applyColorScheme';
 /** Dashboard fixo + até 2 atalhos no header */
 export function normalizePinnedModules(modules: string[]): string[]
 {
-  const extras = modules.filter((m) => m !== PINNED_DASHBOARD_ID).slice(0, MAX_PINNED_MODULES - 1);
+  const migrated = modules.map((m) => (m === 'foco' ? 'saude' : m));
+  const extras = migrated.filter((m) => m !== PINNED_DASHBOARD_ID).slice(0, MAX_PINNED_MODULES - 1);
   return [PINNED_DASHBOARD_ID, ...extras];
 }
 
@@ -19,7 +20,6 @@ export const PINNABLE_VIEWS: { id: string; label: string }[] = [
   { id: 'financeiro', label: 'Finanças' },
   { id: 'anotacoes', label: 'Anotações' },
   { id: 'calendario', label: 'Calendário' },
-  { id: 'foco', label: 'Modo Academia' },
   { id: 'superhuman', label: 'Foco Superhumano' },
   { id: 'inteligencia', label: 'Inbox IA' },
   { id: 'configuracoes', label: 'Configurações' },
@@ -103,7 +103,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   scoreDiario: 0,
   pinnedModules: normalizePinnedModules(['dashboard', 'kanban']),
   accessibility: {
-    fontSize: 16,
+    fontSize: 18,
     highContrast: false,
     reducedMotion: false,
     focusVisible: true,

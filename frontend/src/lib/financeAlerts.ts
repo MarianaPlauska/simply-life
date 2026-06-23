@@ -3,6 +3,7 @@ import {
   type CategoryBudgetRow,
 } from './financeCategoryBudget'
 import { daysUntilDue, resolveBillVisualStatus } from './financeBillVisual'
+import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
 import { estimateMonthlySavings, projectFinancialGoal } from './financeGoalProjection'
 import type {
   BudgetLimit,
@@ -155,7 +156,7 @@ function fixedBillAlerts(contas: ContaFixa[]): FinanceAlert[]
 
   for (const conta of contas)
   {
-    if (!conta.ativa) continue
+    if (!contaFixaEfetivamenteAtiva(conta)) continue
 
     const days = daysUntilMonthDay(conta.dia_vencimento)
     if (days > 5) continue

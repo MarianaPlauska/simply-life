@@ -9,8 +9,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
-  "theme_color": "#141312",
-  "background_color": "#141312",
+  "theme_color": "#12161C",
+  "background_color": "#12161C",
   "categories": ["productivity", "lifestyle", "finance"],
   "icons": [
     { "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png" },

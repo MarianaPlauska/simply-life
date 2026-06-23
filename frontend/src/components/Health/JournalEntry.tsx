@@ -2,8 +2,13 @@ import { useState } from 'react';
 import { BookOpen, Send, Check, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
+import {
+  AXEL_BTN_PRIMARY_COMPACT,
+  AXEL_FIELD_INPUT,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces';
 
-/* prompts de fallback caso a api não responda */
 const FALLBACK_PROMPTS = [
   'Como você está se sentindo agora?',
   'O que te deixou grato hoje?',
@@ -27,94 +32,75 @@ export function JournalEntry()
 
   const handleSubmit = async () =>
   {
-    if ( !conteudo.trim() ) return;
+    if (!conteudo.trim()) return;
     setSalvando(true);
     await criarEntradaDiario(conteudo.trim(), promptAtual);
-    toast.success('Entrada de diário salva!', { description: 'Bom trabalho cuidando da sua mente.' });
+    toast.success('Reflexão guardada no diário');
     setConteudo('');
     setSalvando(false);
   };
 
-  const rotatePrompt = () =>
-  {
-    setPromptIdx((i) => i + 1);
-  };
-
   return (
-    <section className="h-full rounded-xl border border-zinc-800/50 bg-zinc-900/50 backdrop-blur-md p-5 space-y-4
-                        shadow-[0_-1px_0_rgba(251,113,133,0.15),0_0_30px_rgba(244,63,94,0.04)]
-                        hover:border-rose-500/20 transition-colors duration-300">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <BookOpen className="w-4 h-4 text-rose-400" />
-          <h2 className="text-[13px] font-semibold bg-gradient-to-r from-rose-300 to-rose-500 bg-clip-text text-transparent">
-            Diário Pessoal
+    <section className="sl-panel p-4 sm:p-5 space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-accent shrink-0" />
+          <h2 className={`font-display text-base ${AXEL_TEXT_PRIMARY}`}>
+            Escrever reflexão
           </h2>
         </div>
         {jaEscreveu && (
-          <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
-            <Check className="w-3 h-3" />Escreveu hoje
+          <span className="flex items-center gap-1 text-[10px] text-concluido font-medium">
+            <Check className="w-3 h-3" />
+            Hoje
           </span>
         )}
       </div>
 
-      {/* caixa com o prompt do dia */}
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800/30 border border-rose-900/20">
-        <span className="text-[12px] text-zinc-400 italic flex-1">“{promptAtual}”</span>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-sl bg-chrome/50 border border-line">
+        <span className={`text-[12px] italic flex-1 ${AXEL_TEXT_SECONDARY}`}>“{promptAtual}”</span>
         <button
-          onClick={rotatePrompt}
-          className="p-1 rounded hover:bg-zinc-700/40 text-zinc-500 hover:text-zinc-300 transition-colors"
+          type="button"
+          onClick={() => setPromptIdx((i) => i + 1)}
+          className="p-1 rounded-sl hover:bg-chrome text-ink-muted hover:text-ink transition-colors"
           title="Trocar prompt"
         >
           <RefreshCw className="w-3 h-3" />
         </button>
       </div>
 
-      {/* mostrar entrada existente */}
       {jaEscreveu ? (
-        <div className="space-y-2">
-          <div className="rounded-lg bg-zinc-800/20 border border-zinc-800/30 p-3">
-            <p className="text-[12px] text-zinc-300 leading-relaxed whitespace-pre-wrap">
-              {entradaHoje?.conteudo}
-            </p>
-            {entradaHoje?.prompt_usado && (
-              <p className="text-[10px] text-zinc-600 mt-2 italic">
-                Prompt: "{entradaHoje.prompt_usado}"
-              </p>
-            )}
-          </div>
+        <div className="rounded-sl border border-line bg-chrome/30 p-3">
+          <p className={`text-[12px] leading-relaxed whitespace-pre-wrap ${AXEL_TEXT_PRIMARY}`}>
+            {entradaHoje?.conteudo}
+          </p>
         </div>
       ) : (
-        /* textarea para nova entrada */
-        <div className="space-y-3">
+        <div className="space-y-2">
           <textarea
-            placeholder="Escreva livremente..."
+            placeholder="Escreva livremente…"
             value={conteudo}
             onChange={(e) => setConteudo(e.target.value)}
             rows={4}
-            className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-lg px-3 py-2.5
-                       text-[13px] text-white placeholder:text-zinc-600 leading-relaxed
-                       outline-none focus:ring-1 focus:ring-rose-500/30 transition-all
-                       resize-none"
+            className={`w-full resize-none min-h-[88px] ${AXEL_FIELD_INPUT}`}
           />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] text-zinc-600">
-              {conteudo.length > 0 ? `${conteudo.length} caracteres` : 'Mínimo 1 caractere'}
-            </span>
+          <div className="flex items-center justify-end">
             <button
-              onClick={handleSubmit}
+              type="button"
+              onClick={() => void handleSubmit()}
               disabled={salvando || !conteudo.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium
-                         bg-rose-600/90 text-white rounded-lg
-                         hover:bg-rose-500 transition-colors
-                         disabled:opacity-40 disabled:cursor-not-allowed"
+              className={`inline-flex items-center gap-1.5 px-4 py-2 disabled:opacity-40 ${AXEL_BTN_PRIMARY_COMPACT}`}
             >
               <Send className="w-3.5 h-3.5" />
-              {salvando ? 'Salvando...' : 'Salvar'}
+              {salvando ? 'Salvando…' : 'Salvar'}
             </button>
           </div>
         </div>
       )}
+
+      <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+        Aparece na aba Diário em “Seus registros”.
+      </p>
     </section>
   );
 }

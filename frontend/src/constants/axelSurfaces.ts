@@ -1,4 +1,4 @@
-// Tokens Instrumento — editorial, cantos retos, acento cobre único
+// Tokens — grafite neutro, densidade alta no Kanban
 
 /** Fundo do conteúdo central */
 export const AXEL_CANVAS = 'bg-fundo text-ink'
@@ -20,7 +20,7 @@ export const AXEL_FOOTER_PLANE =
 
 /** Botão de ação rápida no header */
 export const AXEL_HEADER_ACTION =
-  'p-2.5 rounded-sl bg-chrome hover:bg-elevated border border-line transition-colors text-ink-muted hover:text-ink'
+  'p-2.5 rounded-sl bg-chrome hover:bg-elevated border border-line shadow-sl transition-colors text-ink-muted hover:text-ink'
 
 /** Padding inferior do main — barra mobile + safe area iOS */
 export const AXEL_MAIN_PB_MOBILE =
@@ -34,63 +34,171 @@ export const AXEL_DRAWER_FOOTER_PB_MOBILE =
 export const AXEL_MAIN_PT =
   'pt-4 sm:pt-5 md:pt-6'
 
-/** Painel com borda fina — sem glassmorphism */
-export const AXEL_BORDERLESS_PANEL =
-  'rounded-sl bg-card border border-line p-4'
+/** Painel Bento — branco puro sobre fundo cinza */
+export const AXEL_BENTO_PANEL = 'sl-panel'
+
+/** Chip / micro-botão em painel — branco no claro, superfície no escuro */
+export const AXEL_BENTO_CHIP =
+  'bg-card border border-line rounded-sl transition-colors hover:bg-chrome/80'
+
+/** Shell de segmentos (Gasto/Receita, etc.) */
+export const AXEL_SEG_SHELL =
+  'p-0.5 rounded-sl bg-chrome/70 dark:bg-chrome'
+
+/** Input compacto em formulários financeiros */
+export const AXEL_FIELD_INPUT =
+  'border border-line rounded-sl bg-card px-3 py-2 text-sm text-ink placeholder:text-ink-muted outline-none focus:border-accent/40'
 
 /** Card analytics */
-export const AXEL_ANALYTICS_CARD = AXEL_BORDERLESS_PANEL
+export const AXEL_ANALYTICS_CARD = `${AXEL_BENTO_PANEL} p-3 sm:p-4`
 
-/** Card premium Kanban */
+/** @deprecated use AXEL_BENTO_PANEL */
+export const AXEL_BORDERLESS_PANEL = AXEL_ANALYTICS_CARD
+
+/** Card premium Kanban — compacto no mobile */
 export const AXEL_KANBAN_CARD =
-  'rounded-sl bg-card border border-line p-3 transition-colors hover:border-ink-muted/40 cursor-pointer'
+  'rounded-lg bg-card border border-line shadow-sl p-2.5 sm:p-3 transition-all duration-200 hover:shadow-sl-lg cursor-pointer'
 
-/** Ilha visual suave @deprecated prefer AXEL_BORDERLESS_PANEL */
+/** @deprecated prefer AXEL_BORDERLESS_PANEL */
 export const AXEL_SOFT_CARD = AXEL_BORDERLESS_PANEL
 
 /** Bloco da rail lateral */
 export const AXEL_RAIL_BLOCK = 'py-4 last:pb-0'
 
-/** Título de seção — mono editorial */
+/** Título de seção */
 export const AXEL_SECTION_TITLE =
-  'font-mono text-[11px] uppercase tracking-[0.1em] font-semibold text-ink'
+  'font-sans text-sm font-semibold tracking-tight text-ink'
 
 /** Divisor interno de listas */
-export const AXEL_LINE = 'border-b border-line'
+export const AXEL_LINE = 'border-b border-line/80'
 
-/** Barra de progresso — acento sólido, sem gradiente */
-export const AXEL_PROGRESS = 'bg-accent'
+/** Barra de progresso */
+export const AXEL_PROGRESS = 'bg-accent rounded-pill'
 
-/** Barra de progresso grossa — métricas de saúde */
-export const AXEL_PROGRESS_THICK = 'h-2 rounded-sl overflow-hidden bg-chrome'
+/** Barra de progresso grossa */
+export const AXEL_PROGRESS_THICK = 'h-2 rounded-pill overflow-hidden bg-chrome'
 
-/** Pílula de filtro temporal — retangular */
+/** Badge de status — legível em claro e escuro */
+export const AXEL_STATUS_BADGE =
+  'inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border ' +
+  'bg-zinc-100 text-zinc-600 border-zinc-200/60 dark:bg-zinc-800/50 dark:text-zinc-300 dark:border-white/8'
+
+export const AXEL_STATUS_BADGE_WARN =
+  'inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border ' +
+  'bg-amber-50 text-amber-800 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-500/20'
+
+export const AXEL_STATUS_BADGE_URGENT =
+  'inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border ' +
+  'bg-red-50 text-red-700 border-red-200/60 dark:bg-red-950/40 dark:text-red-300 dark:border-red-500/20'
+
+/** Bloco de metadados em cards mobile */
+export const AXEL_CARD_META =
+  'mt-2 rounded-md bg-chrome/80 dark:bg-chrome/40 px-2.5 py-2 space-y-1 border border-line'
+
+/** Alternador de vista — tátil no claro */
+export const AXEL_VIEW_SWITCHER_SHELL =
+  'inline-flex items-center gap-0.5 p-0.5 rounded-lg border border-line bg-chrome/80 ' +
+  'dark:border-white/[0.08] dark:bg-chrome'
+
+export const AXEL_VIEW_TAB_ACTIVE =
+  'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-sans font-semibold transition-colors ' +
+  'bg-card text-ink shadow-sm border border-line/80 ' +
+  'dark:bg-zinc-700/80 dark:text-zinc-100 dark:border-white/[0.12] dark:shadow-none'
+
+export const AXEL_VIEW_TAB_IDLE =
+  'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-sans font-medium transition-colors ' +
+  'text-ink-muted hover:text-ink hover:bg-chrome/60 border border-transparent ' +
+  'dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40'
+
+/** Pílula de filtro — formato cápsula */
 export const AXEL_FILTER_PILL =
-  'px-3 py-1.5 rounded-sl text-[12px] font-medium transition-colors border font-mono'
+  'px-3.5 py-1.5 rounded-pill text-[13px] font-medium transition-colors border font-sans'
 
 export const AXEL_FILTER_PILL_ACTIVE =
-  `${AXEL_FILTER_PILL} bg-accent-muted border-accent/40 text-accent`
+  `${AXEL_FILTER_PILL} bg-accent-muted border-accent/30 text-accent shadow-sm`
 
 export const AXEL_FILTER_PILL_IDLE =
-  `${AXEL_FILTER_PILL} bg-transparent border-transparent text-ink-muted hover:bg-chrome`
+  `${AXEL_FILTER_PILL} bg-transparent border-transparent text-ink-muted hover:bg-chrome/70 hover:text-ink hover:border-line ` +
+  'dark:text-ink-muted dark:hover:bg-chrome dark:hover:text-ink dark:hover:border-line'
 
-/** Avatar tipográfico — sem glow nem gradiente */
+/** Segmento compacto — modais e formulários densos */
+export const AXEL_SEG =
+  'inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-sl font-mono text-[10px] uppercase tracking-wide transition-colors'
+
+export const AXEL_SEG_ACTIVE =
+  `${AXEL_SEG} bg-accent-muted text-accent border border-accent/30 min-h-[30px]`
+
+export const AXEL_SEG_IDLE =
+  `${AXEL_SEG} text-ink-muted border border-transparent ` +
+  'hover:bg-chrome/70 hover:text-ink dark:hover:bg-chrome dark:hover:text-ink min-h-[30px]'
+
+/** Nav principal (Início / Movimentos / Contas) — único nível com caixa accent */
+export const AXEL_NAV_MAIN_ACTIVE =
+  'bg-accent-muted text-accent border border-accent/30'
+
+export const AXEL_NAV_MAIN_IDLE =
+  'text-ink-muted border border-transparent hover:bg-chrome hover:text-ink'
+
+/** Sub-nav (Diário / Lista / Cartões) — texto + sublinhado, sem caixa */
+export const AXEL_NAV_SUB =
+  'shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors border-b-2'
+
+export const AXEL_NAV_SUB_ACTIVE =
+  `${AXEL_NAV_SUB} border-accent text-accent font-semibold`
+
+export const AXEL_NAV_SUB_IDLE =
+  `${AXEL_NAV_SUB} border-transparent text-ink-muted hover:text-ink hover:border-line`
+
+/** Chips de dia no diário — compactos */
+export const AXEL_DAY_CHIP =
+  'shrink-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded-md font-mono text-[9px] uppercase tracking-wide transition-colors min-h-[22px]'
+
+export const AXEL_DAY_CHIP_ACTIVE =
+  `${AXEL_DAY_CHIP} text-accent font-semibold bg-accent/10 ring-1 ring-accent/25`
+
+export const AXEL_DAY_CHIP_IDLE =
+  `${AXEL_DAY_CHIP} text-ink-muted hover:text-ink hover:bg-chrome/60`
+
+/** Segmentos em formulário (Gasto/Receita, categorias) — branco dentro do shell */
+export const AXEL_FORM_SEG_ACTIVE =
+  `${AXEL_SEG} bg-card dark:bg-card text-ink shadow-sm border border-line/70 min-h-[30px]`
+
+export const AXEL_FORM_SEG_IDLE =
+  `${AXEL_SEG_IDLE}`
+
+/** Categoria selecionada no lançamento — destaque sutil */
+export const AXEL_CHIP_SELECT_ACTIVE =
+  `${AXEL_SEG} bg-accent/8 text-ink ring-1 ring-accent/35 min-h-[30px]`
+
+export const AXEL_CHIP_SELECT_IDLE = AXEL_FORM_SEG_IDLE
+
+/** Filtros da lista de lançamentos — sublinhado, sem caixa accent */
+export const AXEL_LIST_FILTER =
+  'shrink-0 px-2 py-1 font-mono text-[10px] uppercase tracking-wide transition-colors border-b-2 whitespace-nowrap'
+
+export const AXEL_LIST_FILTER_ACTIVE =
+  `${AXEL_LIST_FILTER} border-ink/45 text-ink font-semibold`
+
+export const AXEL_LIST_FILTER_IDLE =
+  `${AXEL_LIST_FILTER} border-transparent text-ink-muted hover:text-ink hover:border-line`
+
+/** Avatar tipográfico */
 export const AXEL_AVATAR =
-  'w-14 h-14 shrink-0 rounded-sl flex items-center justify-center bg-chrome border border-line'
+  'w-14 h-14 shrink-0 rounded-sl-lg flex items-center justify-center bg-chrome border border-line shadow-sl'
 
 export const AXEL_AVATAR_INITIALS =
-  'text-xl font-mono font-semibold text-ink select-none'
+  'text-xl font-sans font-semibold tracking-tight text-ink select-none'
 
 /** @deprecated use AXEL_AVATAR */
 export const AXEL_AVATAR_RING = AXEL_AVATAR
 
-/** Item de nav ativo */
+/** Item de nav ativo — faixa lateral arredondada */
 export const AXEL_NAV_ACTIVE =
-  'text-ink bg-accent-muted border-l-2 border-accent'
+  'text-ink bg-accent-muted border-l-[3px] border-accent rounded-r-sl-sm'
 
 /** Item de nav inativo */
 export const AXEL_NAV_IDLE =
-  'text-ink-muted border-l-2 border-transparent hover:bg-chrome hover:text-ink'
+  'text-ink-muted border-l-[3px] border-transparent hover:bg-chrome hover:text-ink rounded-r-sl-sm'
 
 /** Alvo de toque mínimo (iOS HIG) */
 export const AXEL_TOUCH_ROW = 'min-h-[44px] py-3'
@@ -98,28 +206,32 @@ export const AXEL_TOUCH_ROW = 'min-h-[44px] py-3'
 /** Gap vertical mobile */
 export const AXEL_STACK_GAP = 'gap-6'
 
-/** Botão primário */
+/** Botão primário — cápsula, alto contraste */
 export const AXEL_BTN_PRIMARY =
-  'bg-accent hover:bg-accent-hover text-white font-medium rounded-sl transition-colors'
+  'bg-accent hover:bg-accent-hover text-white font-bold rounded-pill shadow-sm transition-all hover:shadow-md'
+
+/** Botão primário compacto — modais e formulários */
+export const AXEL_BTN_PRIMARY_COMPACT =
+  'bg-accent hover:bg-accent-hover text-white font-bold rounded-sl shadow-sm transition-colors text-[9px] font-mono uppercase tracking-wide'
 
 /** Link discreto */
 export const AXEL_LINK =
   'text-ink-muted hover:text-accent transition-colors'
 
-/** Linha interativa (listas, tabelas) */
+/** Linha interativa */
 export const AXEL_ROW_HOVER =
-  'hover:bg-chrome transition-colors'
+  'hover:bg-chrome/80 transition-colors'
 
 /** Menu suspenso */
 export const AXEL_DROPDOWN =
-  'bg-card border border-line rounded-sl shadow-sm overflow-hidden'
+  'bg-card border border-line rounded-sl-lg shadow-sl-lg overflow-hidden'
 
 /** Número KPI grande */
 export const AXEL_DISPLAY_STAT =
-  'text-2xl font-display tabular-nums text-ink'
+  'text-2xl font-sans font-semibold tabular-nums text-ink tracking-tight'
 
 /** Separador de seção no dashboard */
-export const AXEL_SECTION_DIVIDER = 'border-t border-line pt-8'
+export const AXEL_SECTION_DIVIDER = 'border-t border-line/80 pt-8'
 
 /** @deprecated use AXEL_SOFT_CARD */
 export const AXEL_SURFACE = AXEL_SOFT_CARD

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { AlertCircle, Lock, Eye, EyeOff, Zap, CheckCircle2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
+import { AxelLoader } from '../ui/AxelLoader'
 
 export function ResetPasswordView ()
 {
@@ -76,7 +77,7 @@ export function ResetPasswordView ()
   {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-950">
-        <div className="w-8 h-8 rounded-full border-2 border-zinc-700 border-t-violet-500 animate-spin" />
+        <AxelLoader />
       </div>
     )
   }

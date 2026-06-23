@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { ExpensePreset } from '../../lib/financeExpensePresets'
 import { createPresetId } from '../../lib/financeExpensePresets'
+import { resolvePresetIcon } from '../../lib/financePresetIcons'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_ROW_HOVER,
@@ -24,7 +25,6 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
 
   const [draft, setDraft] = useState({
     label: '',
-    emoji: '💸',
     valor: '',
     categoria_id: '' as string,
     status_pagamento: 'pago' as 'pago' | 'pendente',
@@ -33,7 +33,6 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editDraft, setEditDraft] = useState({
     label: '',
-    emoji: '',
     valor: '',
   })
 
@@ -54,7 +53,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
       {
         id: createPresetId(),
         label: draft.label.trim(),
-        emoji: draft.emoji || '💸',
+        icon: 'wallet',
         valor: val && !Number.isNaN(val) ? val : undefined,
         categoria_id: catId,
         categoria: cat?.nome,
@@ -63,7 +62,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
     ]
 
     saveExpensePresets(next)
-    setDraft({ label: '', emoji: '💸', valor: '', categoria_id: '', status_pagamento: 'pago' })
+    setDraft({ label: '', valor: '', categoria_id: '', status_pagamento: 'pago' })
     toast.success('Atalho adicionado')
   }
 
@@ -72,7 +71,6 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
     setEditingId(p.id)
     setEditDraft({
       label: p.label,
-      emoji: p.emoji ?? '💸',
       valor: p.valor != null ? String(p.valor) : '',
     })
   }
@@ -96,7 +94,6 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
       return {
         ...p,
         label: editDraft.label.trim(),
-        emoji: editDraft.emoji || '💸',
         valor: val && !Number.isNaN(val) && val > 0 ? val : undefined,
       }
     })
@@ -136,16 +133,10 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
         <div className="p-4 space-y-4 overflow-y-auto flex-1">
           <div className="grid grid-cols-12 gap-2">
             <input
-              value={draft.emoji}
-              onChange={(e) => setDraft({ ...draft, emoji: e.target.value.slice(0, 2) })}
-              className="col-span-2 border border-line rounded-sl bg-chrome px-2 py-2 text-center text-lg"
-              aria-label="Emoji"
-            />
-            <input
               value={draft.label}
               onChange={(e) => setDraft({ ...draft, label: e.target.value })}
               placeholder="Nome — ex: Padaria"
-              className="col-span-6 border border-line rounded-sl bg-chrome px-3 py-2 text-sm text-ink"
+              className="col-span-8 border border-line rounded-sl bg-chrome px-3 py-2 text-sm text-ink"
             />
             <input
               value={draft.valor}
@@ -198,14 +189,9 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
                     <div className="space-y-2">
                       <div className="grid grid-cols-12 gap-2">
                         <input
-                          value={editDraft.emoji}
-                          onChange={(e) => setEditDraft({ ...editDraft, emoji: e.target.value.slice(0, 2) })}
-                          className="col-span-2 border border-line rounded-sl bg-chrome px-1 py-1.5 text-center"
-                        />
-                        <input
                           value={editDraft.label}
                           onChange={(e) => setEditDraft({ ...editDraft, label: e.target.value })}
-                          className="col-span-6 border border-line rounded-sl bg-chrome px-2 py-1.5 text-sm text-ink"
+                          className="col-span-8 border border-line rounded-sl bg-chrome px-2 py-1.5 text-sm text-ink"
                         />
                         <input
                           value={editDraft.valor}
@@ -235,7 +221,11 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
                     </div>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <span className="text-lg w-8 text-center">{p.emoji ?? '💸'}</span>
+                      {(() =>
+                      {
+                        const Icon = resolvePresetIcon(p)
+                        return <Icon size={16} className="text-ink-muted shrink-0 w-8" />
+                      })()}
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm truncate ${AXEL_TEXT_PRIMARY}`}>{p.label}</p>
                         <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>

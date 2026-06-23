@@ -5,6 +5,7 @@ import { X, Plus, Pin, CalendarClock, CheckCircle2, Trash2 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useTaskActivityLog, migrateTaskActivityLog, appendTaskActivityLog } from '../../hooks/useTaskActivityLog'
 import { useDraftActivityLog } from '../../hooks/useDraftActivityLog'
+import { usePersistedTaskActivityLog } from '../../hooks/usePersistedTaskActivityLog'
 import { useLocalSubtasks } from '../../hooks/useLocalSubtasks'
 import { AxelAiContextBreakdown } from './AxelAiContextBreakdown'
 import { AxelAiDecisionLog } from './AxelAiDecisionLog'
@@ -44,7 +45,7 @@ function startOfRegistrationDay(iso?: string | null): string
 }
 
 const DRAWER_SHELL =
-  'relative w-full sm:w-[42vw] max-w-2xl h-[100dvh] flex flex-col overflow-hidden bg-card border-l border-line shadow-2xl'
+  'relative w-full sm:w-[42vw] max-w-2xl h-[100dvh] flex flex-col overflow-hidden bg-card border-l border-white/[0.05] shadow-2xl'
 
 interface AxelTaskDrawerProps
 {
@@ -75,6 +76,7 @@ export function AxelTaskDrawer({
   const rejectDeadlineProposal = useTaskStore((s) => s.rejectDeadlineProposal)
   const pushAiDecision = useTaskStore((s) => s.pushAiDecision)
   const addLabelToTarefa = useTaskStore((s) => s.addLabelToTarefa)
+  const refreshTaskEstimateFromTask = useTaskStore((s) => s.refreshTaskEstimateFromTask)
 
   const draftBase = tarefaProp ?? createEmptyTaskDraft()
   const live = useTaskStore((s) =>
@@ -118,6 +120,7 @@ export function AxelTaskDrawer({
     : null
 
   const taskIdForLog = isCreatingNew ? -1 : live.id
+  const canPersistServer = !isCreatingNew && live.id > 0
 
   useEffect(() =>
   {
@@ -152,14 +155,59 @@ export function AxelTaskDrawer({
     },
   })
 
+  usePersistedTaskActivityLog({
+    enabled: canPersistServer,
+    onLog: addEntry,
+    state: {
+      deadline,
+      semPrazo: !deadline,
+      plannedStart,
+      manualPriority,
+    },
+  })
+
+  useEffect(() =>
+  {
+    if (isCreatingNew || !canPersistServer) return
+    if ((live.data_vencimento ?? null) === deadline) return
+
+    const timer = window.setTimeout(() =>
+    {
+      void updateTarefa(live.id, { data_vencimento: deadline })
+    }, 400)
+
+    return () => clearTimeout(timer)
+  }, [deadline, isCreatingNew, canPersistServer, live.id, live.data_vencimento, updateTarefa])
+
   useEffect(() =>
   {
     logScrollRef.current?.scrollTo({ top: logScrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [entries.length])
 
   const subsDone = subs.filter((s) => s.concluida).length
-  const canPersistServer = !isCreatingNew && live.id > 0
   const inProgress = !isCreatingNew && live.status === 'em_progresso'
+
+  useEffect(() =>
+  {
+    if (isCreatingNew || !live.id) return
+    void refreshTaskEstimateFromTask(
+      { ...live, subtarefas: subs },
+      entries.length,
+    )
+  }, [
+    isCreatingNew,
+    live.id,
+    subs.length,
+    subsDone,
+    entries.length,
+    refreshTaskEstimateFromTask,
+    live.titulo,
+    live.prioridade,
+    live.notas_locais,
+    live.descricao,
+    subs,
+    live,
+  ])
 
   useEffect(() =>
   {
@@ -401,6 +449,7 @@ export function AxelTaskDrawer({
     if (next && next !== live.titulo && canPersistServer)
     {
       await updateTarefa(live.id, { titulo: next })
+      addEntry(`Título atualizado: «${next.slice(0, 80)}»`, 'progress')
     }
   }
 
@@ -409,7 +458,12 @@ export function AxelTaskDrawer({
     if (isCreatingNew) return
     if (canPersistServer)
     {
-      await updateTarefa(live.id, { notas_locais: descDraft.trim() || '' })
+      const next = descDraft.trim() || ''
+      if (next !== (live.notas_locais || live.descricao || '').trim())
+      {
+        await updateTarefa(live.id, { notas_locais: next })
+        addEntry('Descrição atualizada', 'progress')
+      }
     }
   }
 
@@ -663,6 +717,7 @@ export function AxelTaskDrawer({
                     void updateTarefa(live.id, { data_vencimento: accepted.proposedDue })
                       .then(() =>
                       {
+                        addEntry(`Prazo aceito: ${accepted.proposedDue ? new Date(accepted.proposedDue).toLocaleString('pt-BR', { day: '2-digit', month: 'short' }) : '—'}`, 'progress')
                         pushAiDecision(`Prazo aceito · ${live.titulo.slice(0, 40)}`)
                         toast.success('Novo prazo aplicado')
                       })

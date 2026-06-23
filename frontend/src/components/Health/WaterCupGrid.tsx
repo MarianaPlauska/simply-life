@@ -1,6 +1,11 @@
 import { useMemo, useId, useState } from 'react'
-import { isAguaRitualComplete } from '../../lib/healthRitual'
-import { isGarrafa, ML_OPCOES } from '../../lib/waterHydration'
+import { isGarrafa } from '../../lib/waterHydration'
+import {
+  aguaRitualMetaCopos,
+  aguaRitualPercentLabel,
+  isAguaRitualComplete,
+} from '../../lib/healthRitual'
+import { WaterDefaultMlControls, WaterEntryMlEditor } from './WaterHydrationControls'
 
 interface WaterCupGridProps
 {
@@ -8,13 +13,16 @@ interface WaterCupGridProps
   goal: number
   baseGoal?: number
   defaultMl: number
+  mlPresets: number[]
   onEntriesChange: (next: number[]) => void
   onDefaultMlChange?: (ml: number) => void
+  onAddMlPreset?: (ml: number) => void
+  onRemoveMlPreset?: (ml: number) => void
   disabled?: boolean
   compact?: boolean
 }
 
-function CupSvg({ filled, ritualLine, gradId }: { filled: boolean; ritualLine: boolean; gradId: string })
+function CupSvg({ filled, gradId }: { filled: boolean; gradId: string })
 {
   return (
     <svg viewBox="0 0 40 52" className="w-full h-full drop-shadow-sm" aria-hidden>
@@ -34,18 +42,6 @@ function CupSvg({ filled, ritualLine, gradId }: { filled: boolean; ritualLine: b
       />
       {filled && (
         <ellipse cx="20" cy="14" rx="7" ry="2" fill="var(--sl-elevated)" opacity="0.45" />
-      )}
-      {ritualLine && !filled && (
-        <line
-          x1="8"
-          y1="42"
-          x2="32"
-          y2="42"
-          stroke="var(--sl-accent)"
-          strokeWidth="1"
-          strokeDasharray="3 2"
-          opacity="0.4"
-        />
       )}
     </svg>
   )
@@ -81,15 +77,19 @@ export function WaterCupGrid({
   goal,
   baseGoal,
   defaultMl,
+  mlPresets,
   onEntriesChange,
   onDefaultMlChange,
+  onAddMlPreset,
+  onRemoveMlPreset,
   disabled = false,
   compact = false,
 }: WaterCupGridProps)
 {
   const baseId = useId()
   const metaGoal = baseGoal ?? goal
-  const ritualThreshold = useMemo(() => Math.ceil(metaGoal * 0.8), [metaGoal])
+  const ritualCups = useMemo(() => aguaRitualMetaCopos(metaGoal), [metaGoal])
+  const ritualPct = aguaRitualPercentLabel()
   const current = entries.length
   const cupCount = Math.min(Math.max(goal, metaGoal, current + 1), 12)
   const cols = cupCount <= 6 ? cupCount : 4
@@ -100,12 +100,7 @@ export function WaterCupGrid({
     if (disabled) return
     if (index < entries.length)
     {
-      if (editingIndex === index)
-      {
-        setEditingIndex(null)
-        return
-      }
-      setEditingIndex(index)
+      setEditingIndex(index === editingIndex ? null : index)
       return
     }
     onEntriesChange([...entries, defaultMl])
@@ -129,24 +124,14 @@ export function WaterCupGrid({
   return (
     <div className="space-y-2">
       {onDefaultMlChange && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="font-mono text-[9px] uppercase text-ink-muted">Padrão</span>
-          {ML_OPCOES.map((ml) => (
-            <button
-              key={ml}
-              type="button"
-              disabled={disabled}
-              onClick={() => onDefaultMlChange(ml)}
-              className={`px-2 py-0.5 rounded-sl font-mono text-[9px] border transition-colors ${
-                defaultMl === ml
-                  ? 'border-accent/40 bg-accent-muted text-ink'
-                  : 'border-line text-ink-muted hover:text-ink'
-              }`}
-            >
-              {ml}ml
-            </button>
-          ))}
-        </div>
+        <WaterDefaultMlControls
+          defaultMl={defaultMl}
+          presets={mlPresets}
+          onDefaultChange={onDefaultMlChange}
+          onAddPreset={onAddMlPreset}
+          onRemovePreset={onRemoveMlPreset}
+          disabled={disabled}
+        />
       )}
 
       <div
@@ -160,8 +145,6 @@ export function WaterCupGrid({
           const filled = i < entries.length
           const ml = filled ? entries[i] : defaultMl
           const garrafa = isGarrafa(ml)
-          const isRitualCup = i + 1 === ritualThreshold
-          const ritualOk = isAguaRitualComplete(current, metaGoal)
           const isExtraCup = i >= metaGoal
 
           return (
@@ -189,11 +172,7 @@ export function WaterCupGrid({
               {garrafa ? (
                 <BottleSvg filled={filled} gradId={`${baseId}-bottle-${i}`} />
               ) : (
-                <CupSvg
-                  filled={filled}
-                  ritualLine={isRitualCup && !ritualOk}
-                  gradId={`${baseId}-cup-${i}`}
-                />
+                <CupSvg filled={filled} gradId={`${baseId}-cup-${i}`} />
               )}
               {filled && (
                 <span className="font-mono text-[8px] tabular-nums mt-0.5 text-ink-muted">
@@ -205,35 +184,27 @@ export function WaterCupGrid({
         })}
       </div>
 
+      {metaGoal > 0 && (
+        <p className="font-mono text-[9px] text-ink-muted leading-relaxed">
+          {isAguaRitualComplete(current, metaGoal)
+            ? current >= metaGoal
+              ? 'Meta de hidratação completa hoje.'
+              : `Ritual do dia ok (${ritualPct} da meta) · faltam ${metaGoal - current} copo${metaGoal - current !== 1 ? 's' : ''} para a meta cheia.`
+            : current >= ritualCups
+              ? `Quase lá — ritual em ${ritualPct} da meta (${ritualCups} copo${ritualCups !== 1 ? 's' : ''}).`
+              : `Ritual do dia: ${ritualCups} copo${ritualCups !== 1 ? 's' : ''} (${ritualPct} da meta) · você está em ${current}/${ritualCups}.`}
+        </p>
+      )}
+
       {editingIndex !== null && entries[editingIndex] !== undefined && (
-        <div className="rounded-sl border border-line bg-chrome/60 p-2 space-y-2">
-          <p className="font-mono text-[9px] uppercase text-ink-muted">
-            Quantidade · item {editingIndex + 1}
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {ML_OPCOES.map((ml) => (
-              <button
-                key={ml}
-                type="button"
-                onClick={() => setEntryMl(editingIndex, ml)}
-                className={`px-2 py-1 rounded-sl font-mono text-[9px] border ${
-                  entries[editingIndex] === ml
-                    ? 'border-accent/40 bg-accent-muted'
-                    : 'border-line hover:bg-elevated'
-                }`}
-              >
-                {ml}ml
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => removeEntry(editingIndex)}
-            className="text-[10px] font-mono uppercase text-urgente hover:underline"
-          >
-            Remover
-          </button>
-        </div>
+        <WaterEntryMlEditor
+          index={editingIndex}
+          currentMl={entries[editingIndex]}
+          presets={mlPresets}
+          onApply={(ml) => setEntryMl(editingIndex, ml)}
+          onRemove={() => removeEntry(editingIndex)}
+          disabled={disabled}
+        />
       )}
     </div>
   )

@@ -3,7 +3,6 @@ import { Plus, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { buildFinanceDailyBrief } from '../../../lib/financeDailyBrief'
-import { CardQuickSpendStrip } from '../CardQuickSpendStrip'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY,
@@ -29,11 +28,6 @@ export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCard
   const cards = useTaskStore((s) => s.cards)
   const categories = useTaskStore((s) => s.categories)
   const budgetLimits = useTaskStore((s) => s.budgetLimits)
-
-  const hasActiveCards = useMemo(
-    () => cards.some((c) => c.status === 'ativo'),
-    [cards],
-  )
 
   const brief = useMemo(
     () => buildFinanceDailyBrief({
@@ -92,10 +86,6 @@ export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCard
           </button>
         </div>
       </section>
-
-      {hasActiveCards && (
-        <CardQuickSpendStrip variant="dashboard" prominent />
-      )}
     </div>
   )
 }

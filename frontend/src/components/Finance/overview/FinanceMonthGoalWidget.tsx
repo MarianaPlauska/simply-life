@@ -71,6 +71,7 @@ export function FinanceMonthGoalWidget({
 
   const remove = () =>
   {
+    if (!confirm('Remover a meta de poupança deste mês? Você pode definir outra depois.')) return
     clearMonthSavingsGoal()
     setGoal(null)
     setEditing(false)
@@ -177,7 +178,8 @@ export function FinanceMonthGoalWidget({
             type="button"
             onClick={remove}
             className="p-1 rounded-sl hover:bg-chrome/40"
-            aria-label="Remover meta"
+            aria-label="Remover meta deste mês"
+            title="Remove só a meta atual — pode definir outra depois"
           >
             <X size={12} className="text-ink-muted" />
           </button>

@@ -28,7 +28,7 @@ export function AxelPageBack({ className = '' }: AxelPageBackProps)
       title="Voltar"
     >
       <ChevronLeft className="w-4 h-4" />
-      <span className="hidden sm:inline font-mono text-[10px] uppercase tracking-wide">Voltar</span>
+      <span className="hidden md:inline font-mono text-[10px] uppercase tracking-wide">Voltar</span>
     </button>
   )
 }

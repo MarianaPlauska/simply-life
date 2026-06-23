@@ -1,7 +1,8 @@
 import { CalendarDays, ChartGantt, LayoutGrid, List } from 'lucide-react'
 import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_VIEW_SWITCHER_SHELL,
+  AXEL_VIEW_TAB_ACTIVE,
+  AXEL_VIEW_TAB_IDLE,
 } from '../../constants/axelSurfaces'
 
 export type KanbanViewMode = 'board' | 'list' | 'calendar' | 'gantt'
@@ -23,7 +24,7 @@ export function KanbanViewSwitcher({ mode, onChange }: KanbanViewSwitcherProps)
 {
   return (
     <div
-      className="inline-flex items-center gap-0.5 p-0.5 rounded-sl border border-line bg-chrome"
+      className={AXEL_VIEW_SWITCHER_SHELL}
       role="tablist"
       aria-label="Modo de visualização"
     >
@@ -38,9 +39,7 @@ export function KanbanViewSwitcher({ mode, onChange }: KanbanViewSwitcherProps)
             role="tab"
             aria-selected={active}
             onClick={() => onChange(m.id)}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sl text-[11px] font-mono transition-colors ${
-              active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-            }`}
+            className={active ? AXEL_VIEW_TAB_ACTIVE : AXEL_VIEW_TAB_IDLE}
           >
             <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} />
             <span className="hidden sm:inline">{m.label}</span>

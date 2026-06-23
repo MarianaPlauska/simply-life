@@ -13,7 +13,7 @@ import {
 
 function FriendMiniCard({ friend, myStreak }: { friend: FriendPublicCard; myStreak: number })
 {
-  const accent = ACCENT_PALETTES[(friend.accent as AccentId) ?? 'copper'] ?? ACCENT_PALETTES.copper
+  const accent = ACCENT_PALETTES[(friend.accent as AccentId) ?? 'meridian'] ?? ACCENT_PALETTES.meridian
   const savedTogether = myStreak >= 7 && friend.streak_count >= 7
 
   return (

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { syncFinanceDueNotifications } from '../lib/financeDueNotifications'
 import { syncFinanceDailyBrief } from '../lib/financeDailyBriefSync'
+import { dismissNotificacoesRuido } from '../lib/dismissNotificacoesRuido'
 import {
   buildAutoPostTransaction,
   isContaFixaDueToday,
@@ -105,7 +106,7 @@ export function useFinanceSystemSync(): void
           reservedBills: fresh.reservedBills,
         })
 
-        const briefCreated = await syncFinanceDailyBrief({
+        await syncFinanceDailyBrief({
           transactions: fresh.transactions,
           saldoInicial: fresh.cashAccount.saldo_inicial,
           reservedBills: fresh.reservedBills,
@@ -119,11 +120,13 @@ export function useFinanceSystemSync(): void
 
         await fetchNotificacoes()
 
-        const unreadFinance = useTaskStore.getState().notificacoes.filter(
-          (n) => !n.lida && n.tipo === 'financeiro',
-        ).length
+        const dismissed = await dismissNotificacoesRuido(useTaskStore.getState().notificacoes)
+        if (dismissed > 0 && !cancelled)
+        {
+          await fetchNotificacoes()
+        }
 
-        if (dueResult.created > 0 || briefCreated || unreadFinance > 0)
+        if (dueResult.created > 0)
         {
           pulseSino(SINO_DESTAQUE_MS)
         }

@@ -15,7 +15,7 @@ export const ONBOARDING_STEPS = [
   { id: 'add_expense',       label: 'Registrar uma despesa',   path: '/financeiro' },
   { id: 'register_mood',     label: 'Registrar como está hoje', path: '/saude#bem_estar' },
   { id: 'add_habit',         label: 'Registrar um hábito',     path: '/saude' },
-  { id: 'activate_focus',    label: 'Ativar modo foco',        path: '/foco' },
+  { id: 'activate_focus',    label: 'Iniciar um treino',       path: '/saude#academia' },
   { id: 'customize_sidebar', label: 'Personalizar sidebar',    path: '/configuracoes' },
 ] as const;
 

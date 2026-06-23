@@ -1,14 +1,17 @@
 import type { RecurringIncome } from '../store/storeTypes'
+import {
+  getActiveStorageUserId,
+  readScopedJson,
+  writeScopedJson,
+} from './userScopedStorage'
 
 const STORAGE_KEY = 'simply-life-finance-recurring-income'
 
-export function loadRecurringIncomesLocal(): RecurringIncome[]
+export function loadRecurringIncomesLocal(userId?: string | null): RecurringIncome[]
 {
   try
   {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as RecurringIncome[]
+    const parsed = readScopedJson<RecurringIncome[]>(STORAGE_KEY, userId ?? getActiveStorageUserId())
     return Array.isArray(parsed) ? parsed : []
   }
   catch
@@ -17,9 +20,9 @@ export function loadRecurringIncomesLocal(): RecurringIncome[]
   }
 }
 
-export function persistRecurringIncomesLocal(items: RecurringIncome[]): void
+export function persistRecurringIncomesLocal(items: RecurringIncome[], userId?: string | null): void
 {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  writeScopedJson(STORAGE_KEY, items, userId ?? getActiveStorageUserId())
 }
 
 export function isMockRecurringIncomeId(id: number): boolean

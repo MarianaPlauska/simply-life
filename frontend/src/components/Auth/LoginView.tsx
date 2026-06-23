@@ -7,6 +7,7 @@ import { useTaskStore } from '../../store/useTaskStore';
 import { AuthInput } from '../ui/AuthInput';
 import { AuthButton } from '../ui/AuthButton';
 import { TabToggle } from '../ui/TabToggle';
+import { AxelLoader } from '../ui/AxelLoader';
 import { getAuthCallbackUrl, supabase } from '../../lib/supabase';
 import { resolvePostAuthPath } from '../../lib/postAuthRoute';
 import { LoginHero } from './LoginHero';
@@ -568,7 +569,7 @@ function LoggedInRedirect()
   {
     return (
       <div className="flex items-center justify-center h-screen bg-fundo">
-        <div className="w-8 h-8 rounded-sl border-2 border-line border-t-accent animate-spin" />
+        <AxelLoader />
       </div>
     );
   }

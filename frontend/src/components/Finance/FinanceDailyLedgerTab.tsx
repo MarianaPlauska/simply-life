@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Plus, Sparkles } from 'lucide-react'
+import { Plus, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
   adviseSpend,
@@ -13,23 +13,24 @@ import {
 } from '../../lib/financeLedger'
 import { computeCashPosition } from '../../lib/financeReservedBills'
 import { CategoryPicker } from './CategoryPicker'
+import { FinanceCategories } from './FinanceCategories'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
 import {
   DEFAULT_EXPENSE_PAYMENT,
   DEFAULT_INCOME_PAYMENT,
-  isCardPaymentSelection,
   paymentMethodLabel,
   resolvePaymentFromSelection,
 } from '../../lib/financePaymentMethod'
-import { FinanceSpendingCharts } from './FinanceSpendingCharts'
 import { FinanceQuickPresets } from './FinanceQuickPresets'
-import { FinanceMonthKpisRow } from './overview/FinanceMonthKpisRow'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import {
-  AXEL_BTN_PRIMARY,
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_BTN_PRIMARY_COMPACT,
+  AXEL_BENTO_PANEL,
+  AXEL_FIELD_INPUT,
   AXEL_ROW_HOVER,
+  AXEL_FORM_SEG_ACTIVE,
+  AXEL_FORM_SEG_IDLE,
+  AXEL_SEG_SHELL,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -44,24 +45,20 @@ const STATUS_LABEL: Record<string, string> = {
   agendado: 'Agendado',
 }
 
-function buildRecentDayKeys(count: number): string[]
+function shiftDayKey(key: string, delta: number): string
 {
-  const keys: string[] = []
-  const d = new Date()
-  for (let i = 0; i < count; i++)
-  {
-    const copy = new Date(d)
-    copy.setDate(d.getDate() - i)
-    keys.push(copy.toISOString().slice(0, 10))
-  }
-  return keys
+  const d = new Date(`${key}T12:00:00`)
+  d.setDate(d.getDate() + delta)
+  return d.toISOString().slice(0, 10)
 }
 
-function dayChipLabel(key: string, todayKey: string): string
+function formatDayHeading(dayKey: string): string
 {
-  if (key === todayKey) return 'Hoje'
-  const d = new Date(`${key}T12:00:00`)
-  return d.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric' })
+  return new Date(`${dayKey}T12:00:00`).toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
 }
 
 interface FinanceDailyLedgerTabProps
@@ -74,23 +71,24 @@ interface FinanceDailyLedgerTabProps
 export function FinanceDailyLedgerTab({
   transactions,
   activeCategories,
-  monthTransactions,
 }: FinanceDailyLedgerTabProps)
 {
   const addTransaction = useTaskStore((s) => s.addTransaction)
+  const addCategory = useTaskStore((s) => s.addCategory)
+  const removeCategory = useTaskStore((s) => s.removeCategory)
   const cards = useTaskStore((s) => s.cards)
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const reservedBills = useTaskStore((s) => s.reservedBills)
 
   const todayKey = new Date().toISOString().slice(0, 10)
-  const recentDays = useMemo(() => buildRecentDayKeys(7), [todayKey])
   const [dayKey, setDayKey] = useState(todayKey)
   const [quickDesc, setQuickDesc] = useState('')
   const [quickVal, setQuickVal] = useState('')
   const [quickCatId, setQuickCatId] = useState<number | ''>('')
-  const [quickStatus, setQuickStatus] = useState<'pago' | 'pendente'>('pago')
   const [quickTipo, setQuickTipo] = useState<'despesa' | 'receita'>('despesa')
   const [quickPayment, setQuickPayment] = useState<string>(DEFAULT_EXPENSE_PAYMENT)
+  const [showCatModal, setShowCatModal] = useState(false)
+  const [catModalParentId, setCatModalParentId] = useState<number | null>(null)
 
   const dayTx = useMemo(
     () => filterTransactionsByDay(transactions, dayKey),
@@ -165,7 +163,7 @@ export function FinanceDailyLedgerTab({
       categoria: quickTipo === 'receita' ? '-' : (cat?.nome ?? 'outros'),
       categoria_id: quickTipo === 'despesa' ? (quickCatId || undefined) : undefined,
       data: dayKey,
-      status_pagamento: isCard ? 'pago' : quickStatus,
+      status_pagamento: 'pago',
       forma_pagamento: paymentResolved.forma_pagamento,
       card_id: cardId,
     })
@@ -174,29 +172,59 @@ export function FinanceDailyLedgerTab({
     setQuickVal('')
     const msg = isCard
       ? 'Lançado no cartão'
-      : quickStatus === 'pago'
-        ? 'Lançado — descontou da conta corrente'
-        : 'Lançado como pendente'
+      : 'Lançado — descontou da conta corrente'
     toast.success(msg)
   }
 
-  const monthReceita = useMemo(
-    () => monthTransactions.filter((t) => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0),
-    [monthTransactions],
-  )
-
-  const monthDespesas = useMemo(
-    () => monthTransactions.filter((t) => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0),
-    [monthTransactions],
-  )
-
   const formattedDay = transactionDayKey(dayKey).split('-').reverse().join('/')
+
+  const openCategories = (parentId: number | null = null) =>
+  {
+    setCatModalParentId(parentId)
+    setShowCatModal(true)
+  }
+
+  const handleRemoveCategory = async (id: number) =>
+  {
+    await removeCategory(id)
+    if (quickCatId === id) setQuickCatId('')
+    toast.success('Categoria removida')
+  }
+
+  const handleQuickAddCategory = async (nome: string) =>
+  {
+    await addCategory({
+      nome,
+      cor: '#6366f1',
+      icone: 'Wallet',
+      tipo: 'despesa',
+      grupo: 'geral',
+    })
+    toast.success(`Categoria "${nome}" criada`)
+  }
 
   const entryForm = (
     <>
-      <div className="space-y-2">
+      {quickTipo === 'despesa' && (
+        <div className="space-y-1.5">
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Categoria</p>
+          <CategoryPicker
+            categories={activeCategories}
+            value={quickCatId}
+            onChange={setQuickCatId}
+            compact
+            onAddCategory={() => openCategories(null)}
+            onAddSubcategory={(parentId) => openCategories(parentId)}
+            onRemoveCategory={(id) => void handleRemoveCategory(id)}
+            onQuickAddCategory={handleQuickAddCategory}
+            onManageCategories={() => openCategories(null)}
+          />
+        </div>
+      )}
+
+      <div className="space-y-1.5 mt-5 pt-4 border-t border-line/60">
         <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>O que é?</p>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className={`grid grid-cols-2 gap-0.5 ${AXEL_SEG_SHELL}`}>
           {(['despesa', 'receita'] as const).map((t) => (
             <button
               key={t}
@@ -206,9 +234,7 @@ export function FinanceDailyLedgerTab({
                 setQuickTipo(t)
                 setQuickPayment(t === 'receita' ? DEFAULT_INCOME_PAYMENT : DEFAULT_EXPENSE_PAYMENT)
               }}
-              className={`py-1.5 rounded-sl font-mono text-[10px] uppercase ${
-                quickTipo === t ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-              }`}
+              className={quickTipo === t ? AXEL_FORM_SEG_ACTIVE : AXEL_FORM_SEG_IDLE}
             >
               {t === 'despesa' ? 'Gasto' : 'Receita'}
             </button>
@@ -218,27 +244,8 @@ export function FinanceDailyLedgerTab({
 
       {quickTipo === 'receita' && (
         <p className={`text-[10px] rounded-sl border border-concluido/30 bg-concluido/8 px-2 py-1 ${AXEL_TEXT_SECONDARY}`}>
-          Hora extra? Use <strong className="text-ink">Lançamento</strong> → Receita → tipo de entrada.
+          Hora extra? Use <strong className="text-ink">Lançamento</strong> → Receita.
         </p>
-      )}
-
-      {quickTipo === 'despesa' && !isCardPaymentSelection(quickPayment, cards) && (
-        <div className="space-y-1.5">
-          <div className="grid grid-cols-2 gap-1.5">
-            {(['pago', 'pendente'] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setQuickStatus(s)}
-                className={`py-1.5 rounded-sl font-mono text-[10px] uppercase ${
-                  quickStatus === s ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-                }`}
-              >
-                {s === 'pago' ? 'Desconta agora' : 'Só anotar'}
-              </button>
-            ))}
-          </div>
-        </div>
       )}
 
       <PaymentMethodPicker
@@ -248,193 +255,211 @@ export function FinanceDailyLedgerTab({
         variant={quickTipo === 'receita' ? 'receita' : 'despesa'}
       />
 
-      {quickTipo === 'despesa' && (
-        <CategoryPicker
-          categories={activeCategories}
-          value={quickCatId}
-          onChange={setQuickCatId}
-          compact
-        />
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-        <input
-          value={quickDesc}
-          onChange={(e) => setQuickDesc(e.target.value)}
-          placeholder="Descrição"
-          className="sm:col-span-6 border border-line rounded-sl bg-chrome px-2.5 py-2 text-sm text-ink"
-        />
-        <input
-          value={quickVal}
-          onChange={(e) => setQuickVal(e.target.value)}
-          placeholder="Valor"
-          inputMode="decimal"
-          className="sm:col-span-3 border border-line rounded-sl bg-chrome px-2.5 py-2 text-sm font-mono text-ink"
-        />
-        <button
-          type="button"
-          onClick={() => void handleQuickAdd()}
-          className={`sm:col-span-3 inline-flex items-center justify-center gap-1 min-h-[40px] font-mono text-[10px] uppercase ${AXEL_BTN_PRIMARY}`}
-        >
-          <Plus size={14} />
-          Lançar
-        </button>
+      <div className="space-y-2 pt-1 border-t border-line">
+        <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Valor do lançamento</p>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            value={quickDesc}
+            onChange={(e) => setQuickDesc(e.target.value)}
+            placeholder="Descrição"
+            className={`flex-1 min-w-0 ${AXEL_FIELD_INPUT}`}
+          />
+          <div className="flex gap-2 sm:w-auto w-full">
+            <input
+              value={quickVal}
+              onChange={(e) => setQuickVal(e.target.value)}
+              placeholder="R$"
+              inputMode="decimal"
+              className={`w-full sm:w-28 font-mono ${AXEL_FIELD_INPUT}`}
+            />
+            <button
+              type="button"
+              onClick={() => void handleQuickAdd()}
+              className={`shrink-0 inline-flex items-center justify-center gap-1 px-4 py-2 ${AXEL_BTN_PRIMARY_COMPACT}`}
+            >
+              <Plus size={13} strokeWidth={2} />
+              Lançar
+            </button>
+          </div>
+        </div>
       </div>
     </>
   )
 
-  return (
-    <div className="space-y-3">
-      <FinanceMonthKpisRow
-        saldoDisponivel={cashPosition.saldoDisponivel}
-        receita={monthReceita}
-        despesas={monthDespesas}
-        saldoMes={monthReceita - monthDespesas}
-        compact
-      />
+  const categoryModal = showCatModal ? (
+    <FinanceCategories
+      defaultParentId={catModalParentId}
+      onClose={() => setShowCatModal(false)}
+    />
+  ) : null
 
-      <FinanceSpendingCharts
-        transactions={transactions}
-        activeCategories={activeCategories}
-        compact
-      />
+  const dayListSection = (
+    <section className={AXEL_BENTO_PANEL}>
+      <header className="flex items-center justify-between px-3 py-2.5 border-b border-line">
+        <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+          {formattedDay} · {dayTx.length} item{dayTx.length !== 1 ? 's' : ''}
+        </p>
+        <p className={`font-mono text-[10px] tabular-nums ${dayNet >= 0 ? 'text-concluido' : 'text-urgente'}`}>
+          {dayNet >= 0 ? '+' : ''}{fmt(dayNet)}
+        </p>
+      </header>
 
-      <section className="rounded-sl border border-line bg-card p-2 md:p-3">
-        <FinanceQuickPresets />
-      </section>
-
-      <div className="flex gap-1 overflow-x-auto scrollbar-none pb-0.5">
-        {recentDays.map((key) =>
+      <ul className="md:hidden divide-y divide-line">
+        {dayTx.length === 0 && (
+          <li className={`px-3 py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+            Nada registrado neste dia
+          </li>
+        )}
+        {dayTx.map((t) =>
         {
-          const active = key === dayKey
+          const cat = t.categoria_id
+            ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
+            : t.categoria
+          const status = t.status_pagamento ?? 'pendente'
           return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setDayKey(key)}
-              className={`shrink-0 px-3 py-2 rounded-sl font-mono text-[10px] uppercase ${
-                active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-              }`}
-            >
-              {dayChipLabel(key, todayKey)}
-            </button>
+            <li key={t.id} className={`px-3 py-3 flex items-start justify-between gap-3 ${AXEL_ROW_HOVER}`}>
+              <div className="min-w-0 flex-1">
+                <p className={`text-[13px] font-medium break-words ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
+                <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                  {cat ?? '—'}
+                  {' · '}
+                  {paymentMethodLabel(t)}
+                  {status !== 'pago' && ` · ${STATUS_LABEL[status] ?? status}`}
+                </p>
+              </div>
+              <span className={`font-mono tabular-nums shrink-0 text-[13px] ${
+                t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
+              }`}>
+                {t.tipo === 'receita' ? '+' : '-'}{fmt(t.valor)}
+              </span>
+            </li>
           )
         })}
-        <input
-          type="date"
-          value={dayKey}
-          onChange={(e) => setDayKey(e.target.value)}
-          className="shrink-0 font-mono text-[10px] border border-line rounded-sl bg-chrome px-2 py-2 text-ink"
-          aria-label="Escolher data"
-        />
+      </ul>
+
+      <div className="hidden md:block overflow-hidden">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-chrome/80 border-b border-line">
+            <tr>
+              <th className={`px-3 py-2 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Descrição</th>
+              <th className={`px-3 py-2 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Categoria</th>
+              <th className={`px-3 py-2 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Pagamento</th>
+              <th className={`px-3 py-2 font-mono text-[9px] uppercase text-right ${AXEL_TEXT_SECONDARY}`}>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {dayTx.length === 0 && (
+              <tr>
+                <td colSpan={4} className={`px-3 py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+                  Nada registrado neste dia
+                </td>
+              </tr>
+            )}
+            {dayTx.map((t) =>
+            {
+              const cat = t.categoria_id
+                ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
+                : t.categoria
+              const status = t.status_pagamento ?? 'pendente'
+              return (
+                <tr key={t.id} className={`border-b border-line/60 ${AXEL_ROW_HOVER}`}>
+                  <td className={`px-3 py-2 ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</td>
+                  <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>{cat ?? '—'}</td>
+                  <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                    {paymentMethodLabel(t)}
+                    {status !== 'pago' && (
+                      <span className="text-ink-muted ml-1">· {STATUS_LABEL[status] ?? status}</span>
+                    )}
+                  </td>
+                  <td className={`px-3 py-2 text-right font-mono tabular-nums ${
+                    t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
+                  }`}>
+                    {t.tipo === 'receita' ? '+' : '-'}{fmt(t.valor)}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
+    </section>
+  )
+
+  return (
+    <div className="space-y-3">
+      {categoryModal}
+      <section className={`${AXEL_BENTO_PANEL} p-3`}>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setDayKey((k) => shiftDayKey(k, -1))}
+            className="p-2 rounded-sl border border-line hover:bg-chrome text-ink-muted shrink-0"
+            aria-label="Dia anterior"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="flex-1 min-w-0 text-center px-1">
+            <p className={`font-display text-sm capitalize ${AXEL_TEXT_PRIMARY}`}>
+              {isToday(dayKey) ? 'Hoje' : formatDayHeading(dayKey)}
+            </p>
+            {isToday(dayKey) ? (
+              <p className={`font-mono text-[10px] capitalize mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                {formatDayHeading(dayKey)}
+              </p>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDayKey(todayKey)}
+                className="font-mono text-[10px] uppercase text-accent hover:underline mt-0.5"
+              >
+                Voltar para hoje
+              </button>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => setDayKey((k) => shiftDayKey(k, 1))}
+            className="p-2 rounded-sl border border-line hover:bg-chrome text-ink-muted shrink-0"
+            aria-label="Próximo dia"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+        <label className={`block mt-2.5 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+          Outra data
+          <input
+            type="date"
+            value={dayKey}
+            onChange={(e) => setDayKey(e.target.value)}
+            className={`mt-1 w-full ${AXEL_FIELD_INPUT} py-2 text-sm`}
+            aria-label="Escolher data"
+          />
+        </label>
+      </section>
+
+      {dayListSection}
 
       <DashboardCollapsible
         title="Lançar neste dia"
         subtitle={`${isToday(dayKey) ? 'Hoje' : formattedDay} · dia ${dayNet >= 0 ? '+' : ''}${fmt(dayNet)}`}
         defaultOpen
+        className={AXEL_BENTO_PANEL}
         bodyClassName="space-y-2.5"
       >
         {entryForm}
       </DashboardCollapsible>
 
-      <div className={`rounded-sl border p-2.5 text-[10px] ${adviceToneClass}`}>
+      <section className={`${AXEL_BENTO_PANEL} p-2 md:p-3`}>
+        <FinanceQuickPresets />
+      </section>
+
+      <div className={`rounded-sl p-2.5 text-[10px] ${adviceToneClass}`}>
         <div className="flex items-center gap-1.5">
           <Sparkles size={11} className="text-accent" />
           <span className={`font-mono text-[8px] uppercase ${AXEL_TEXT_SECONDARY}`}>AXEL</span>
           <span className={AXEL_TEXT_PRIMARY}>{advice.headline}</span>
         </div>
       </div>
-
-      <section>
-        <header className="flex items-center justify-between mb-1.5">
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-            {formattedDay} · {dayTx.length} item{dayTx.length !== 1 ? 's' : ''}
-          </p>
-          <p className={`font-mono text-[10px] tabular-nums ${dayNet >= 0 ? 'text-concluido' : 'text-urgente'}`}>
-            {dayNet >= 0 ? '+' : ''}{fmt(dayNet)}
-          </p>
-        </header>
-
-        <ul className="md:hidden border border-line rounded-sl divide-y divide-line">
-          {dayTx.length === 0 && (
-            <li className={`px-3 py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-              Nada registrado neste dia
-            </li>
-          )}
-          {dayTx.map((t) =>
-          {
-            const cat = t.categoria_id
-              ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
-              : t.categoria
-            const status = t.status_pagamento ?? 'pendente'
-            return (
-              <li key={t.id} className={`px-3 py-3 flex items-start justify-between gap-3 ${AXEL_ROW_HOVER}`}>
-                <div className="min-w-0 flex-1">
-                  <p className={`text-[13px] font-medium break-words ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
-                  <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-                    {cat ?? '—'}
-                    {' · '}
-                    {paymentMethodLabel(t)}
-                    {status !== 'pago' && ` · ${STATUS_LABEL[status] ?? status}`}
-                  </p>
-                </div>
-                <span className={`font-mono tabular-nums shrink-0 text-[13px] ${
-                  t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
-                }`}>
-                  {t.tipo === 'receita' ? '+' : '-'}{fmt(t.valor)}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-
-        <div className="hidden md:block border border-line rounded-sl overflow-hidden">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-chrome border-b border-line">
-              <tr>
-                <th className={`px-3 py-2 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Descrição</th>
-                <th className={`px-3 py-2 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Categoria</th>
-                <th className={`px-3 py-2 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Pagamento</th>
-                <th className={`px-3 py-2 font-mono text-[9px] uppercase text-right ${AXEL_TEXT_SECONDARY}`}>Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dayTx.length === 0 && (
-                <tr>
-                  <td colSpan={4} className={`px-3 py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-                    Nada registrado neste dia
-                  </td>
-                </tr>
-              )}
-              {dayTx.map((t) =>
-              {
-                const cat = t.categoria_id
-                  ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
-                  : t.categoria
-                const status = t.status_pagamento ?? 'pendente'
-                return (
-                  <tr key={t.id} className={`border-b border-line ${AXEL_ROW_HOVER}`}>
-                    <td className={`px-3 py-2 ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</td>
-                    <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>{cat ?? '—'}</td>
-                    <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                      {paymentMethodLabel(t)}
-                      {status !== 'pago' && (
-                        <span className="text-ink-muted ml-1">· {STATUS_LABEL[status] ?? status}</span>
-                      )}
-                    </td>
-                    <td className={`px-3 py-2 text-right font-mono tabular-nums ${
-                      t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
-                    }`}>
-                      {t.tipo === 'receita' ? '+' : '-'}{fmt(t.valor)}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
   )
 }

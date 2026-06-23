@@ -6,9 +6,9 @@ import { AddCardForm } from './AddCardForm'
 import { CreditCardVisual } from './CreditCardVisual'
 import { CardInvoicePanel } from './CardInvoicePanel'
 import { CardInvoiceDrawer } from './CardInvoiceDrawer'
-import { CashflowForecast } from './CashflowForecast'
 import { getBillingCycle, getInvoiceTransactions } from '../../lib/financeCardCycle'
-import { sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
+import { getCardExtratoTransactions, sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
+import { cardTemCicloFatura, cardUsaExtrato } from '../../lib/financeCardModalidade'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
@@ -27,6 +27,7 @@ export function VirtualCardsTab({
 }: VirtualCardsTabProps)
 {
   const cards = useTaskStore((s) => s.cards)
+  const fetchCards = useTaskStore((s) => s.fetchCards)
   const transactions = useTaskStore((s) => s.transactions)
   const categories = useTaskStore((s) => s.categories)
   const toggleCardStatus = useTaskStore((s) => s.toggleCardStatus)
@@ -35,6 +36,24 @@ export function VirtualCardsTab({
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(cards[0]?.id ?? null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  useEffect(() =>
+  {
+    void fetchCards()
+  }, [fetchCards])
+
+  useEffect(() =>
+  {
+    if (cards.length === 0)
+    {
+      setSelectedId(null)
+      return
+    }
+    if (!selectedId || !cards.some((c) => c.id === selectedId))
+    {
+      setSelectedId(cards[cards.length - 1].id)
+    }
+  }, [cards, selectedId])
 
   useEffect(() =>
   {
@@ -53,7 +72,9 @@ export function VirtualCardsTab({
     return cards.map((card) =>
     {
       const cycle = getBillingCycle(card)
-      const invoiceTx = getInvoiceTransactions(transactions, card.id, cycle)
+      const invoiceTx = cardTemCicloFatura(card.modalidade)
+        ? getInvoiceTransactions(transactions, card.id, cycle)
+        : getCardExtratoTransactions(transactions, card.id)
       const invoiceTotal = sumOpenInvoiceSpend(transactions, card)
       return { card, cycle, invoiceTx, invoiceTotal }
     })
@@ -71,52 +92,40 @@ export function VirtualCardsTab({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-            Cartões de crédito
-          </p>
-          <p className={`text-[12px] sm:text-sm mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-            Toque no cartão para ver a fatura individual
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setShowAddForm((v) => !v)}
-          className={`inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-4 py-2.5 w-full sm:w-auto ${AXEL_BTN_PRIMARY}`}
-        >
-          <Plus size={14} />
-          Novo cartão
-        </button>
+      <div className="min-w-0">
+        <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+          Cartões e benefícios
+        </p>
+        <p className={`text-[12px] sm:text-sm mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
+          Deslize para ver todos · toque para selecionar
+        </p>
       </div>
 
       {showAddForm && (
         <AddCardForm onClose={() => setShowAddForm(false)} />
       )}
 
-      {cards.length === 0 ? (
+      {!showAddForm && (
+        cards.length === 0 ? (
         <div className="border border-dashed border-line rounded-sl py-12 sm:py-16 text-center px-4">
           <p className={`text-sm ${AXEL_TEXT_SECONDARY}`}>Nenhum cartão cadastrado</p>
-          <button
-            type="button"
-            onClick={() => setShowAddForm(true)}
-            className="mt-3 font-mono text-[10px] uppercase text-accent hover:underline min-h-[44px] px-4"
-          >
-            Adicionar primeiro cartão
-          </button>
+          <p className={`text-[11px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
+            Toque em <strong className="text-ink">Novo cartão</strong> no canto inferior.
+          </p>
         </div>
-      ) : (
+        ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 w-full">
+          <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2 -mx-1 px-1 snap-x snap-mandatory">
             {cardData.map(({ card, cycle, invoiceTotal }) => (
-              <CreditCardVisual
-                key={card.id}
-                card={card}
-                cycle={cycle}
-                invoiceTotal={invoiceTotal}
-                selected={selected?.id === card.id}
-                onClick={() => openFatura(card.id)}
-              />
+              <div key={card.id} className="snap-center shrink-0 w-[min(88vw,280px)] sm:w-[260px]">
+                <CreditCardVisual
+                  card={card}
+                  cycle={cycle}
+                  invoiceTotal={invoiceTotal}
+                  selected={selected?.id === card.id}
+                  onClick={() => openFatura(card.id)}
+                />
+              </div>
             ))}
           </div>
 
@@ -125,7 +134,7 @@ export function VirtualCardsTab({
               <div className="flex flex-wrap gap-2 items-center">
                 <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                   <FileText size={12} />
-                  Fatura selecionada · {selectedData.card.nome}
+                  {cardUsaExtrato(selectedData.card.modalidade) ? 'Extrato' : 'Fatura'} · {selectedData.card.nome}
                 </span>
                 <button
                   type="button"
@@ -173,9 +182,10 @@ export function VirtualCardsTab({
             </div>
           )}
         </>
+        )
       )}
 
-      {selectedData && (
+      {!showAddForm && selectedData && (
         <CardInvoiceDrawer
           open={drawerOpen}
           card={selectedData.card}
@@ -187,9 +197,17 @@ export function VirtualCardsTab({
         />
       )}
 
-      <div className="border-t border-line pt-4 sm:pt-6">
-        <CashflowForecast />
-      </div>
+      {!showAddForm && (
+        <button
+          type="button"
+          onClick={() => setShowAddForm(true)}
+          className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-3 z-40 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 font-mono text-[10px] uppercase tracking-wide shadow-lg ${AXEL_BTN_PRIMARY}`}
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Novo cartão</span>
+          <span className="sm:hidden">Novo</span>
+        </button>
+      )}
     </div>
   )
 }

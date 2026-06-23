@@ -13,13 +13,13 @@ export interface FinanceChartTheme
 }
 
 const FALLBACK_DARK: FinanceChartTheme = {
-  receita: '#4A7C59',
-  despesa: '#C44D4D',
-  accent: '#C17F3A',
-  grid: '#2E2C28',
-  tick: '#9C9890',
-  card: '#232220',
-  line: '#2E2C28',
+  receita: '#48BB78',
+  despesa: '#F56565',
+  accent: '#38B2AC',
+  grid: '#2A3340',
+  tick: '#94A3B8',
+  card: '#222A35',
+  line: '#3D4A5C',
 }
 
 function readCssVar(name: string, fallback: string): string

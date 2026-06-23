@@ -30,10 +30,10 @@ interface DueBucketSectionProps
 }
 
 const TONE_CLASS: Record<string, string> = {
-  urgente: 'text-urgente border-urgente/40 bg-urgente/5',
-  atencao: 'text-atencao border-atencao/40 bg-atencao/5',
-  accent: 'text-sky-400 border-sky-500/30 bg-sky-500/5',
-  muted: 'text-ink-muted border-line bg-chrome/15',
+  urgente: 'text-red-300/90 border-white/[0.04] bg-zinc-900/40',
+  atencao: 'text-amber-300/90 border-white/[0.04] bg-zinc-900/40',
+  accent: 'text-zinc-300 border-white/[0.04] bg-zinc-900/40',
+  muted: 'text-zinc-500 border-white/[0.04] bg-zinc-900/30',
 }
 
 const BUCKET_ICON: Record<DueBucket, typeof Sun> = {
@@ -46,10 +46,10 @@ const BUCKET_ICON: Record<DueBucket, typeof Sun> = {
 }
 
 const SECTION_SHELL: Record<string, string> = {
-  urgente: 'bg-urgente/[0.04]',
-  atencao: 'bg-atencao/[0.04]',
-  accent: 'bg-sky-500/[0.04]',
-  muted: 'bg-chrome/30',
+  urgente: 'bg-zinc-900/20',
+  atencao: 'bg-zinc-900/15',
+  accent: 'bg-zinc-900/10',
+  muted: 'bg-chrome/20',
 }
 
 export function DueBucketSection({
@@ -79,14 +79,14 @@ export function DueBucketSection({
       ref={droppable ? setNodeRef : undefined}
       aria-labelledby={`due-bucket-${bucket}`}
       className={[
-        'border-b border-line last:border-b-0 scroll-mt-12',
+        'border-b border-white/[0.04] last:border-b-0 scroll-mt-12',
         shell,
         droppable && isOver ? 'ring-2 ring-inset ring-accent/30' : '',
       ].join(' ')}
     >
       <header
         id={`due-bucket-${bucket}`}
-        className={`shrink-0 px-3 py-2.5 border-b border-line/60 ${tone}`}
+        className={`shrink-0 px-2.5 py-2 border-b border-white/[0.04] ${tone}`}
       >
         <div className="flex items-center gap-2">
           {collapsible && (

@@ -167,7 +167,7 @@ export function AxelKanbanCard({
       )}
 
       {/* Cabeçalho do card */}
-      <div className={`flex items-center gap-2 px-3 min-w-0 ${featured ? 'pt-3 pb-1' : 'pt-2.5 pb-1'}`}>
+      <div className={`flex items-center gap-2 px-2.5 min-w-0 ${featured ? 'pt-2 pb-0.5' : 'pt-2 pb-0.5'}`}>
         {queueRank != null && (
           <span className="font-mono text-[10px] text-accent tabular-nums shrink-0">
             {String(queueRank).padStart(2, '0')}
@@ -185,7 +185,7 @@ export function AxelKanbanCard({
         </span>
         <div className="ml-auto flex items-center gap-1.5 shrink-0">
           {inExecutionQueue && (
-            <span className="font-mono text-[9px] uppercase tracking-wider text-accent border border-accent/30 px-1 rounded-sm">
+            <span className="bg-zinc-800/60 text-zinc-300 border border-white/5 text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded">
               Exec
             </span>
           )}
@@ -207,8 +207,8 @@ export function AxelKanbanCard({
       </div>
 
       {/* Título — hierarquia principal */}
-      <div className={`px-3 min-w-0 ${featured ? 'pb-2' : 'pb-2'}`}>
-        <p className={`font-display leading-snug line-clamp-2 text-ink tracking-[-0.01em] ${featured ? 'text-[15px]' : 'text-[13px]'}`}>
+      <div className="px-2.5 min-w-0 pb-1.5">
+        <p className={`font-sans font-medium leading-snug line-clamp-2 text-ink tracking-tight ${featured ? 'text-[14px]' : 'text-[13px]'}`}>
           {cleanTitleForDisplay(tarefa.titulo)}
         </p>
         {featured && (tarefa.urgency_reason ?? tarefa.score_reason) && (
@@ -224,7 +224,7 @@ export function AxelKanbanCard({
       </div>
 
       {/* Propriedades + progresso */}
-      <div className="px-3 pb-2.5 flex flex-col gap-1.5">
+      <div className="px-2.5 pb-2 flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2 font-mono text-[10px] tabular-nums">
           <span className={urgencyScoreClass(score)}>{score} pts</span>
           {total > 0 && (

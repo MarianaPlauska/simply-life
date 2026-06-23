@@ -17,6 +17,14 @@ import {
   type DashboardWidgetId,
   MAX_DASHBOARD_WIDGETS,
 } from '../../lib/dashboardWidgets'
+import {
+  MOBILE_NAV_HOME_ID,
+  MOBILE_NAV_OPTIONAL_CATALOG,
+  MAX_MOBILE_NAV_OPTIONAL,
+  defaultMobileNavForPriority,
+  toggleMobileNavModule,
+  type MobileNavModuleId,
+} from '../../lib/mobileBottomNav'
 import { iniciaisDe, type AvatarStyleId } from '../../lib/axelAvatarPresets'
 import { applyAccentTheme } from '../../lib/applyAccentTheme'
 import { canUseAccent } from '../../lib/axelPrivileges'
@@ -72,11 +80,14 @@ export function AxelSetupWizard()
   const [displayName, setDisplayName] = useState('')
   const [axelCallsYou, setAxelCallsYou] = useState('')
   const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('initials')
-  const [accent, setAccent] = useState<AccentId>('copper')
+  const [accent, setAccent] = useState<AccentId>('meridian')
   const [mascotMood, setMascotMood] = useState<MascotMoodPref>('calm')
   const [priority, setPriority] = useState<DashboardPriority>('tasks')
   const [selectedWidgets, setSelectedWidgets] = useState<DashboardWidgetId[]>(
     () => defaultWidgetsForPriority('tasks'),
+  )
+  const [mobileNavModules, setMobileNavModules] = useState<MobileNavModuleId[]>(
+    () => defaultMobileNavForPriority('tasks'),
   )
   const [quickStart, setQuickStart] = useState<QuickStartMode>('skip')
   const [monthGoal, setMonthGoal] = useState('')
@@ -110,7 +121,11 @@ export function AxelSetupWizard()
   const canNext = (): boolean =>
   {
     if (step === 0) return displayName.trim().length >= 2
-    if (step === 2) return selectedWidgets.length > 0
+    if (step === 2)
+    {
+      return selectedWidgets.length > 0
+        && mobileNavModules.filter((m) => m !== MOBILE_NAV_HOME_ID).length >= 1
+    }
     return true
   }
 
@@ -131,6 +146,7 @@ export function AxelSetupWizard()
         avatar_style: avatarStyle,
         dashboard_priority: priority,
         dashboard_quick_widgets: selectedWidgets,
+        mobile_bottom_nav: mobileNavModules,
         month_goal_amount: quickStart === 'month' && parseFloat(monthGoal.replace(',', '.')) > 0
           ? parseFloat(monthGoal.replace(',', '.'))
           : null,
@@ -315,10 +331,47 @@ export function AxelSetupWizard()
           )}
 
           {step === 2 && (
-            <div className="space-y-2 md:space-y-3">
-              <p className={`text-[12px] md:text-sm leading-snug mb-2 md:mb-3 ${AXEL_TEXT_SECONDARY}`}>
-                Escolha até {MAX_DASHBOARD_WIDGETS} atalhos de cadastro rápido. O restante fica nas páginas de cada módulo.
-              </p>
+            <div className="space-y-4 md:space-y-5">
+              <section className="space-y-2 md:space-y-3">
+                <p className={`text-[12px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
+                  Na barra inferior do celular, <span className="text-ink font-medium">Home</span> fica sempre fixo.
+                  Escolha até {MAX_MOBILE_NAV_OPTIONAL} módulos para navegar rápido.
+                </p>
+                <div className="flex items-center gap-2 rounded-sl border border-accent/25 bg-accent/8 px-3 py-2">
+                  <span className="font-mono text-[9px] uppercase text-ink-muted">Fixo</span>
+                  <span className="text-[13px] font-medium text-ink">Home</span>
+                </div>
+                <p className="font-mono text-[9px] uppercase text-ink-muted">
+                  {mobileNavModules.filter((m) => m !== MOBILE_NAV_HOME_ID).length}/{MAX_MOBILE_NAV_OPTIONAL} módulos
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {MOBILE_NAV_OPTIONAL_CATALOG.map((opt) =>
+                  {
+                    const on = mobileNavModules.includes(opt.id)
+                    const full = !on
+                      && mobileNavModules.filter((m) => m !== MOBILE_NAV_HOME_ID).length >= MAX_MOBILE_NAV_OPTIONAL
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        disabled={full}
+                        onClick={() => setMobileNavModules((prev) => toggleMobileNavModule(prev, opt.id))}
+                        className={`p-3 rounded-sl border text-left transition-colors ${
+                          on ? 'border-accent bg-accent/8' : 'border-line'
+                        } ${full ? 'opacity-40' : ''}`}
+                      >
+                        <p className="text-[13px] font-medium text-ink">{opt.label}</p>
+                        <p className="text-[11px] text-ink-muted mt-0.5">{opt.hint}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </section>
+
+              <section className="space-y-2 md:space-y-3 pt-1 border-t border-line">
+                <p className={`text-[12px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
+                  Escolha até {MAX_DASHBOARD_WIDGETS} atalhos de cadastro rápido no dashboard.
+                </p>
               <p className="font-mono text-[9px] uppercase text-ink-muted">
                 {selectedWidgets.length}/{MAX_DASHBOARD_WIDGETS} selecionados
               </p>
@@ -372,6 +425,7 @@ export function AxelSetupWizard()
                     {
                       setPriority(opt.id)
                       setSelectedWidgets(defaultWidgetsForPriority(opt.id))
+                      setMobileNavModules(defaultMobileNavForPriority(opt.id))
                     }}
                     className={`px-2.5 py-1 rounded-sl border text-[11px] ${
                       priority === opt.id ? 'border-accent bg-accent-muted' : 'border-line text-ink-muted'
@@ -381,6 +435,7 @@ export function AxelSetupWizard()
                   </button>
                 ))}
               </div>
+              </section>
             </div>
           )}
 

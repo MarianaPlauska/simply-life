@@ -14,7 +14,13 @@ import {
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-export function FinanceReconciliationCard()
+interface FinanceReconciliationCardProps
+{
+  /** Dentro do painel de conta corrente — sem card duplicado */
+  embedded?: boolean
+}
+
+export function FinanceReconciliationCard({ embedded = false }: FinanceReconciliationCardProps)
 {
   const transactions = useTaskStore((s) => s.transactions)
   const cashAccount = useTaskStore((s) => s.cashAccount)
@@ -50,27 +56,47 @@ export function FinanceReconciliationCard()
   }
 
   const shell = snap.alinhado
-    ? 'border-l-concluido from-concluido/8'
+    ? embedded
+      ? ''
+      : 'border-l-concluido from-concluido/8'
     : snap.saldoBanco != null
-      ? 'border-l-atencao from-atencao/10'
-      : 'border-l-accent from-accent/8'
+      ? embedded
+        ? ''
+        : 'border-l-atencao from-atencao/10'
+      : embedded
+        ? ''
+        : 'border-l-accent from-accent/8'
+
+  const Wrapper = embedded ? 'div' : 'section'
+  const wrapperClass = embedded
+    ? 'space-y-3'
+    : `${AXEL_BORDERLESS_PANEL} border-l-[3px] bg-gradient-to-br to-transparent ${shell}`
 
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} border-l-[3px] bg-gradient-to-br to-transparent ${shell}`}>
-      <header className="flex items-start justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2">
-          <Building2 size={14} className="text-accent" />
-          <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-            Reconciliar com o banco
-          </p>
-        </div>
-        {snap.alinhado && (
-          <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-concluido">
-            <CheckCircle2 size={11} />
-            Conferido
-          </span>
-        )}
-      </header>
+    <Wrapper className={wrapperClass}>
+      {!embedded && (
+        <header className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2">
+            <Building2 size={14} className="text-accent" />
+            <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+              Reconciliar com o banco
+            </p>
+          </div>
+          {snap.alinhado && (
+            <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-concluido">
+              <CheckCircle2 size={11} />
+              Conferido
+            </span>
+          )}
+        </header>
+      )}
+
+      {embedded && snap.alinhado && (
+        <p className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-concluido mb-2">
+          <CheckCircle2 size={11} />
+          Saldo conferido com o banco
+        </p>
+      )}
 
       <div className="flex items-start gap-3">
         <div className="shrink-0 w-8 h-8 rounded-sl border border-line bg-chrome/50 flex items-center justify-center">
@@ -133,6 +159,6 @@ export function FinanceReconciliationCard()
           {snap.saldoBanco != null ? 'Atualizar saldo do banco' : 'Informar saldo do banco'}
         </button>
       )}
-    </section>
+    </Wrapper>
   )
 }

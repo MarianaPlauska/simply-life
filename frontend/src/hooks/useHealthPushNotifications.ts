@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
-import { buildDosesHoje, proximaDosePendente, mensagemGentilDose } from '../lib/medicamentosSchedule'
-import { showHealthNotification } from '../lib/healthNotifications'
 import { isWellbeingDashboardHidden } from '../lib/axelCareRotation'
+import { showHealthNotification } from '../lib/healthNotifications'
 import { useTaskStore } from '../store/useTaskStore'
 
 const CHECK_MS = 2 * 60 * 1000
@@ -39,8 +38,6 @@ function markSent(key: string): void
 export function useHealthPushNotifications(enabled = true): void
 {
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn)
-  const medicamentos = useTaskStore((s) => s.medicamentos)
-  const medicamentoTomadas = useTaskStore((s) => s.medicamentoTomadas)
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
 
@@ -52,25 +49,6 @@ export function useHealthPushNotifications(enabled = true): void
 
     const check = () =>
     {
-      const doses = buildDosesHoje(medicamentos, medicamentoTomadas)
-      const pendente = proximaDosePendente(doses)
-      if (pendente)
-      {
-        const key = storageKey('med', `${pendente.medicamentoId}-${pendente.horario}`)
-        if (!wasRecentlySent(key))
-        {
-          void showHealthNotification({
-            title: 'AXEL · Medicamento',
-            body: mensagemGentilDose(pendente),
-            url: '/saude#medicamentos',
-            tag: key,
-          }).then((ok) =>
-          {
-            if (ok) markSent(key)
-          })
-        }
-      }
-
       const hiddenUntil = workspacePrefs.wellbeing_dashboard_hidden_until
       const snoozed = isWellbeingDashboardHidden(hiddenUntil)
       if (humorHojeLista.length === 0 && !snoozed)
@@ -102,8 +80,6 @@ export function useHealthPushNotifications(enabled = true): void
   }, [
     enabled,
     isLoggedIn,
-    medicamentos,
-    medicamentoTomadas,
     humorHojeLista.length,
     workspacePrefs.wellbeing_dashboard_hidden_until,
   ])

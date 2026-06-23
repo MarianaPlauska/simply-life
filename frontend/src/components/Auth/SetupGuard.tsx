@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { isSetupComplete } from '../../lib/userWorkspacePrefs'
+import { AxelLoader } from '../ui/AxelLoader'
 
 /** Redireciona para /setup até o wizard "Montar seu AXEL" estar completo */
 export function SetupGuard({ children }: { children: React.ReactNode })
@@ -13,7 +14,7 @@ export function SetupGuard({ children }: { children: React.ReactNode })
   {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-fundo gap-3">
-        <div className="w-8 h-8 rounded-sl border-2 border-line border-t-accent animate-spin" />
+        <AxelLoader />
         <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
           Carregando seu espaço…
         </p>

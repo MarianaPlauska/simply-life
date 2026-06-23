@@ -18,7 +18,7 @@ export function WorkoutTrackerCard()
     <section className="rounded-sl border border-line bg-card overflow-hidden">
       <button
         type="button"
-        onClick={() => navigate('/foco')}
+        onClick={() => navigate('/saude#academia')}
         className="w-full flex items-center justify-between gap-3 px-4 py-4 sm:px-5 sm:py-5 min-h-[72px] text-left hover:bg-chrome/30 transition-colors active:scale-[0.99]"
       >
         <div className="flex items-start gap-3 min-w-0">
@@ -27,10 +27,10 @@ export function WorkoutTrackerCard()
           </div>
           <div className="min-w-0">
             <h2 className={`text-[14px] font-display font-medium ${AXEL_TEXT_PRIMARY}`}>
-              Modo Academia
+              Academia
             </h2>
             <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              Cronômetro grande · check-in com uma mão · flow state
+              Cronômetro, séries e evolução de carga
             </p>
             {(emAndamento || concluidas > 0) && (
               <p className="flex items-center gap-1.5 mt-2 font-mono text-[10px] text-ink-muted">

@@ -27,33 +27,33 @@ const BUCKET_SHORT: Partial<Record<DueBucket, string>> = {
 const BUCKET_CHIP: Record<DueBucket, { Icon: typeof Sun; active: string; idle: string }> = {
   vencido: {
     Icon: AlertTriangle,
-    active: 'border-urgente/50 bg-urgente/15 text-urgente',
-    idle: 'border-line bg-chrome/20 text-ink-muted',
+    active: 'border-white/10 bg-zinc-800/70 text-red-300/90',
+    idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
   hoje: {
     Icon: Sun,
-    active: 'border-atencao/50 bg-atencao/15 text-atencao',
-    idle: 'border-line bg-chrome/20 text-ink-muted',
+    active: 'border-white/10 bg-zinc-800/70 text-amber-300/90',
+    idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
   esta_semana: {
     Icon: CalendarDays,
-    active: 'border-sky-500/45 bg-sky-500/15 text-sky-400',
-    idle: 'border-line bg-chrome/20 text-ink-muted',
+    active: 'border-white/10 bg-zinc-800/70 text-zinc-300',
+    idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
   proxima_semana: {
     Icon: CalendarRange,
-    active: 'border-accent/40 bg-accent-muted/30 text-accent',
-    idle: 'border-line bg-chrome/20 text-ink-muted',
+    active: 'border-white/10 bg-zinc-800/70 text-zinc-300',
+    idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
   sem_prazo: {
     Icon: CircleDashed,
-    active: 'border-line bg-elevated text-ink',
-    idle: 'border-line bg-chrome/20 text-ink-muted',
+    active: 'border-white/10 bg-zinc-800/70 text-zinc-300',
+    idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
   concluido: {
     Icon: CircleDashed,
-    active: 'border-line bg-elevated text-ink',
-    idle: 'border-line bg-chrome/20 text-ink-muted',
+    active: 'border-white/10 bg-zinc-800/70 text-zinc-300',
+    idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
 }
 
@@ -68,7 +68,7 @@ export function DueBucketMap({ counts }: DueBucketMapProps)
 
   return (
     <nav
-      className="sticky top-0 z-10 px-2 sm:px-3 py-2 border-b border-line bg-card/95 backdrop-blur-sm"
+      className="sticky top-0 z-10 px-2 py-1.5 border-b border-white/[0.04] bg-card/95 backdrop-blur-sm"
       aria-label="Ir para faixa de prazo"
     >
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
@@ -85,7 +85,7 @@ export function DueBucketMap({ counts }: DueBucketMapProps)
               key={bucket}
               type="button"
               onClick={() => scrollToBucket(bucket)}
-              className={`inline-flex items-center justify-between gap-1 w-full min-w-0 px-2 py-1.5 rounded-sl border font-mono text-[10px] uppercase tracking-wide transition-colors hover:opacity-90 ${
+              className={`inline-flex items-center justify-between gap-1 w-full min-w-0 px-2 py-1 rounded-md border font-mono text-[10px] uppercase tracking-wide transition-colors hover:opacity-90 ${
                 hasItems ? ui.active : ui.idle
               }`}
             >
@@ -93,7 +93,7 @@ export function DueBucketMap({ counts }: DueBucketMapProps)
                 <Icon className="w-3 h-3 shrink-0" strokeWidth={1.75} aria-hidden />
                 <span className="truncate">{label}</span>
               </span>
-              <span className="font-display text-sm tabular-nums leading-none shrink-0">{count}</span>
+              <span className="font-mono text-xs tabular-nums leading-none shrink-0">{count}</span>
             </button>
           )
         })}

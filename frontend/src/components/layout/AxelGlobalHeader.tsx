@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { countUrgentDeadlines } from '../../lib/axelAlerts'
-import { countAlertasHeader, isNotificacaoLida } from '../../lib/notificacaoUtils'
+import { countOverdueTasks, countUrgentDeadlines } from '../../lib/axelAlerts'
+import { countAlertasHeader, listNotificacoesAcionaveis } from '../../lib/notificacaoUtils'
 import { useNavigate } from 'react-router-dom'
 import { AxelStreakPopover } from './AxelStreakPopover'
 import { MobileSidebarDrawer } from './MobileSidebarDrawer'
@@ -22,7 +22,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-import { normalizePinnedModules } from '../../store/slices/uiSlice'
+import { normalizePinnedModules, PINNED_DASHBOARD_ID } from '../../store/slices/uiSlice'
 
 // Header global AXEL — navegação, notificações e acessibilidade em todas as páginas
 
@@ -30,7 +30,6 @@ const VIEW_TO_PATH: Record<string, string> = {
   dashboard: '/',
   kanban: '/kanban',
   anotacoes: '/anotacoes',
-  foco: '/foco',
   configuracoes: '/configuracoes',
   superhuman: '/superhuman',
   financeiro: '/financeiro',
@@ -49,7 +48,6 @@ const VIEW_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
   kanban: 'Kanban',
   anotacoes: 'Anotações',
-  foco: 'Modo Academia',
   configuracoes: 'Configurações',
   superhuman: 'Foco Superhumano',
   financeiro: 'Finanças',
@@ -90,7 +88,8 @@ export function AxelGlobalHeader()
   )
 
   const isPinnedActive = pinnedModules.includes(activeView)
-  const showBreadcrumbPage = !isPinnedActive
+  // Com atalhos fixos, o título da página fica no conteúdo — evita 3+ rótulos no header
+  const showBreadcrumbPage = !isPinnedActive && pinnedModules.length === 0
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
@@ -103,11 +102,11 @@ export function AxelGlobalHeader()
     [notificacoes, tarefas],
   )
   const urgentDeadlineCount = useMemo(
-    () => countUrgentDeadlines(tarefas),
+    () => countUrgentDeadlines(tarefas) + countOverdueTasks(tarefas),
     [tarefas],
   )
   const unreadNotifCount = useMemo(
-    () => notificacoes.filter((n) => !isNotificacaoLida(n.lida)).length,
+    () => listNotificacoesAcionaveis(notificacoes).length,
     [notificacoes],
   )
 
@@ -141,9 +140,9 @@ export function AxelGlobalHeader()
   return (
     <>
       <MobileSidebarDrawer />
-      <header className={`shrink-0 w-full border-b border-line relative z-50 ${AXEL_CHROME_PLANE}`}>
-      <div className="px-3 sm:px-4 md:px-6 lg:px-8 h-14 flex items-center justify-between gap-2 sm:gap-4">
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 min-w-0">
+      <header className={`shrink-0 w-full border-b border-line relative z-50 overflow-visible ${AXEL_CHROME_PLANE}`}>
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 min-h-14 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 sm:gap-x-3">
+        <div className="flex items-center gap-0.5 sm:gap-1 min-w-0 justify-self-start">
           <button
             type="button"
             onClick={() =>
@@ -166,39 +165,71 @@ export function AxelGlobalHeader()
           <AxelPageBack />
           {showBreadcrumbPage && (
             <>
-              <span className={`font-mono text-[11px] uppercase tracking-wider hidden sm:inline ${AXEL_TEXT_SECONDARY}`}>Simply-Life</span>
-              <span className="text-ink-muted hidden sm:inline">/</span>
-              <span className={`text-[13px] sm:text-[14px] font-display truncate ${AXEL_TEXT_PRIMARY}`}>
+              <span className={`font-mono text-[11px] uppercase tracking-wider hidden md:inline ${AXEL_TEXT_SECONDARY}`}>Simply-Life</span>
+              <span className="text-ink-muted hidden md:inline">/</span>
+              <span className={`text-[13px] sm:text-[14px] font-display truncate max-w-[7rem] sm:max-w-[12rem] md:max-w-none ${AXEL_TEXT_PRIMARY}`}>
                 {VIEW_LABELS[activeView] || activeView}
               </span>
             </>
           )}
         </div>
 
-        {pinnedModules.length > 0 && (
-          <nav className="flex items-center gap-0.5 sm:gap-1 flex-1 justify-center min-w-0 max-w-[50vw] sm:max-w-xl overflow-x-auto scrollbar-none px-1">
+        {pinnedModules.length > 0 || !isPinnedActive ? (
+          <nav
+            className="flex items-center justify-center gap-0.5 sm:gap-1 justify-self-center min-w-0 max-w-full overflow-x-auto scrollbar-none px-0.5"
+            aria-label="Atalhos fixos"
+          >
             {pinnedModules.map((moduleId) =>
             {
+              if (moduleId === PINNED_DASHBOARD_ID)
+              {
+                return (
+                  <button
+                    key={moduleId}
+                    type="button"
+                    onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
+                    className={`relative hidden sm:inline-flex px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono transition-colors whitespace-nowrap border shrink-0 ${
+                      activeView === moduleId
+                        ? 'text-ink bg-accent-muted border-accent/30'
+                        : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
+                    }`}
+                  >
+                    {VIEW_LABELS[moduleId] || moduleId}
+                  </button>
+                )
+              }
+
               const isActive = activeView === moduleId
+              const label = VIEW_LABELS[moduleId] || moduleId
               return (
                 <button
                   key={moduleId}
                   type="button"
                   onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
-                  className={`relative px-2 sm:px-3 py-1.5 rounded-sl text-[11px] sm:text-[12px] font-mono transition-colors whitespace-nowrap border shrink-0 ${
+                  className={`relative px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono transition-colors whitespace-nowrap border shrink-0 ${
                     isActive
                       ? 'text-ink bg-accent-muted border-accent/30'
                       : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
                   }`}
                 >
-                  {VIEW_LABELS[moduleId] || moduleId}
+                  {label}
                 </button>
               )
             })}
+            {!isPinnedActive && (
+              <span
+                className="px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono whitespace-nowrap border shrink-0 text-ink bg-accent-muted border-accent/30"
+                aria-current="page"
+              >
+                {VIEW_LABELS[activeView] || activeView}
+              </span>
+            )}
           </nav>
+        ) : (
+          <div aria-hidden />
         )}
 
-        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 min-w-0 justify-self-end">
           <PinnedNavEditor />
           <div className="hidden lg:flex items-center gap-2 bg-chrome border border-line rounded-sl px-3 py-1.5">
             <Search className="w-3.5 h-3.5 text-ink-muted" />

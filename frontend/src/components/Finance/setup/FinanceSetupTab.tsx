@@ -3,7 +3,6 @@ import { Check, CreditCard, Pencil, Receipt, Settings2, Wallet } from 'lucide-re
 import { toast } from 'sonner'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { FinanceCashAccountCard } from '../FinanceCashAccountCard'
-import { FinanceReconciliationCard } from '../overview/FinanceReconciliationCard'
 import { FinanceImportExportPanel } from '../FinanceImportExportPanel'
 import { CARD_CHIP_STYLES } from '../../../lib/financeCardTheme'
 import type { VirtualCard } from '../../../store/storeTypes'
@@ -99,8 +98,6 @@ export function FinanceSetupTab({
         reservaRestante={reservaRestante}
         saldoProjetadoDisponivel={saldoProjetadoDisponivel}
       />
-
-      <FinanceReconciliationCard />
 
       <section className={AXEL_BORDERLESS_PANEL}>
         <header className="flex items-center justify-between gap-2 mb-3">

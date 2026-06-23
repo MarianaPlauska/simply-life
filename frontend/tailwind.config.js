@@ -8,7 +8,6 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Instrumento — tokens semânticos
         fundo: 'var(--sl-canvas)',
         card: 'var(--sl-surface)',
         chrome: 'var(--sl-chrome)',
@@ -27,11 +26,18 @@ export default {
       },
       borderRadius: {
         sl: 'var(--sl-radius)',
+        'sl-sm': 'var(--sl-radius-sm)',
+        'sl-lg': 'var(--sl-radius-lg)',
+        pill: 'var(--sl-radius-pill)',
+      },
+      boxShadow: {
+        sl: 'var(--sl-shadow)',
+        'sl-lg': 'var(--sl-shadow-lg)',
       },
       fontFamily: {
-        sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'],
-        display: ['Newsreader', 'Georgia', '"Times New Roman"', 'serif'],
-        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
     },
   },

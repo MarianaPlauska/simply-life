@@ -4,6 +4,25 @@ import type { TarefaUnificada } from '../types'
 
 const HOUR_MS = 3_600_000
 
+export function getOverdueTasks(tarefas: TarefaUnificada[]): TarefaUnificada[]
+{
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+
+  return tarefas.filter((t) =>
+  {
+    if (t.status === 'concluida' || !t.data_vencimento) return false
+    const due = new Date(t.data_vencimento)
+    if (Number.isNaN(due.getTime())) return false
+    return due.getTime() < todayStart.getTime()
+  })
+}
+
+export function countOverdueTasks(tarefas: TarefaUnificada[]): number
+{
+  return getOverdueTasks(tarefas).length
+}
+
 export function countUrgentDeadlines(tarefas: TarefaUnificada[]): number
 {
   const now = Date.now()

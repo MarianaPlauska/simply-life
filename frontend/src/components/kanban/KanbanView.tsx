@@ -610,24 +610,21 @@ export function KanbanView()
       <div className={AXEL_KANBAN_GLOW} aria-hidden />
 
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
-        <div className="shrink-0 px-3 sm:px-5 lg:px-7 pt-2 sm:pt-4 pb-1 sm:pb-2 flex flex-col gap-1.5 sm:gap-2 max-w-[1680px] mx-auto w-full">
-          <header className="shrink-0 flex items-center justify-between gap-2 pb-1 sm:pb-2 border-b border-line">
-            <h1 className="text-lg sm:text-2xl font-display tracking-tight text-ink leading-tight">
+        <div className="shrink-0 max-w-[1680px] mx-auto w-full px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-2 flex flex-col gap-2.5 sm:gap-3 border-b border-white/[0.05]">
+          <div className="flex items-center justify-between gap-3 min-w-0">
+            <h1 className="text-base sm:text-xl font-sans font-semibold tracking-tight text-ink leading-tight truncate">
               Execução
             </h1>
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setGruposOpen(true)}
-                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-sl border border-line text-ink-muted hover:text-ink hover:bg-chrome font-mono text-[10px] uppercase tracking-wide"
+                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md border border-white/[0.05] text-ink-muted hover:text-ink hover:bg-chrome font-mono text-[10px] uppercase tracking-wide"
                 aria-label="Ver pastas e flags"
               >
                 <FolderOpen className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Grupos</span>
               </button>
-              <div className="hidden sm:block">
-                <KanbanViewSwitcher mode={viewMode} onChange={handleViewModeChange} />
-              </div>
               <button
                 type="button"
                 onClick={() => openCreateDrawer('backlog')}
@@ -636,8 +633,9 @@ export function KanbanView()
                 Nova demanda
               </button>
             </div>
-          </header>
-          <div className="sm:hidden overflow-x-auto scrollbar-none -mx-1 px-1">
+          </div>
+
+          <div className="flex justify-center sm:justify-start">
             <KanbanViewSwitcher mode={viewMode} onChange={handleViewModeChange} />
           </div>
 
@@ -696,7 +694,7 @@ export function KanbanView()
         )}
 
         {viewMode === 'gantt' && (
-          <div className="flex-1 min-h-0 border border-line rounded-sl bg-card overflow-auto">
+          <div className="flex-1 min-h-0 border border-white/[0.04] rounded-lg bg-card overflow-auto">
             <GanttView tarefas={tarefas} onSelectTarefa={handleOpen} />
           </div>
         )}

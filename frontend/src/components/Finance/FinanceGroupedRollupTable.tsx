@@ -17,12 +17,15 @@ interface FinanceGroupedRollupTableProps
   transactions: Transaction[]
   activeCategories: Category[]
   periodLabel: string
+  /** Dentro de collapsible — sem painel nem título duplicado */
+  embedded?: boolean
 }
 
 export function FinanceGroupedRollupTable({
   transactions,
   activeCategories,
   periodLabel,
+  embedded = false,
 }: FinanceGroupedRollupTableProps)
 {
   const rows = useMemo(
@@ -43,13 +46,15 @@ export function FinanceGroupedRollupTable({
   }, [rows])
 
   return (
-    <section className={AXEL_BORDERLESS_PANEL}>
-      <div className="pb-3 border-b border-line mb-3">
-        <h2 className={AXEL_SECTION_TITLE}>Por grupo · {periodLabel}</h2>
-        <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-          Casa · Contas · Organizações futuras · Geral
-        </p>
-      </div>
+    <section className={embedded ? '' : AXEL_BORDERLESS_PANEL}>
+      {!embedded && (
+        <div className="pb-3 border-b border-line mb-3">
+          <h2 className={AXEL_SECTION_TITLE}>Por grupo · {periodLabel}</h2>
+          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            Casa · Contas · Organizações futuras · Geral
+          </p>
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <p className={`text-[12px] py-8 text-center ${AXEL_TEXT_SECONDARY}`}>

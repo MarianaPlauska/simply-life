@@ -1,12 +1,19 @@
-// Atalhos de gasto — lançamento em 1 clique (persistência local)
-// Valores padrão vazios: o usuário define em Gerenciar ou ao lançar
+// Atalhos de gasto — lançamento em 1 clique (persistência local por usuário)
 
 import type { FinancePaymentMethod } from '../store/storeTypes'
+import {
+  getActiveStorageUserId,
+  readScopedJson,
+  writeScopedJson,
+} from './userScopedStorage'
 
 export interface ExpensePreset
 {
   id: string
   label: string
+  /** Chave do ícone Lucide — ver financePresetIcons */
+  icon?: string
+  /** @deprecated migrado para icon */
   emoji?: string
   valor?: number
   categoria_id?: number
@@ -19,25 +26,23 @@ export interface ExpensePreset
 const STORAGE_KEY = 'simply-life-finance-presets'
 
 export const DEFAULT_EXPENSE_PRESETS: ExpensePreset[] = [
-  { id: 'preset-pix', label: 'PIX', emoji: '⚡', categoria: 'outros', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-uber', label: 'Uber / 99', emoji: '🚗', categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-almoco', label: 'Almoço', emoji: '🍽️', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-cafe', label: 'Café', emoji: '☕', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-mercado', label: 'Mercado', emoji: '🛒', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-farmacia', label: 'Farmácia', emoji: '💊', categoria: 'saude', status_pagamento: 'pago', forma_pagamento: 'pix' },
-  { id: 'preset-assinatura', label: 'Assinatura', emoji: '📱', categoria: 'internet', status_pagamento: 'pendente', forma_pagamento: 'boleto' },
-  { id: 'preset-gasolina', label: 'Combustível', emoji: '⛽', categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'debito' },
-  { id: 'preset-lazer', label: 'Lazer', emoji: '🎬', categoria: 'lazer', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-pix', label: 'PIX', icon: 'qr-code', categoria: 'outros', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-uber', label: 'Uber / 99', icon: 'car', categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-almoco', label: 'Almoço', icon: 'utensils', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-cafe', label: 'Café', icon: 'coffee', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-mercado', label: 'Mercado', icon: 'shopping-cart', categoria: 'alimentacao', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-farmacia', label: 'Farmácia', icon: 'pill', categoria: 'saude', status_pagamento: 'pago', forma_pagamento: 'pix' },
+  { id: 'preset-assinatura', label: 'Assinatura', icon: 'smartphone', categoria: 'internet', status_pagamento: 'pendente', forma_pagamento: 'boleto' },
+  { id: 'preset-gasolina', label: 'Combustível', icon: 'fuel', categoria: 'transporte', status_pagamento: 'pago', forma_pagamento: 'debito' },
+  { id: 'preset-lazer', label: 'Lazer', icon: 'clapperboard', categoria: 'lazer', status_pagamento: 'pago', forma_pagamento: 'pix' },
 ]
 
-export function loadExpensePresets(): ExpensePreset[]
+export function loadExpensePresets(userId?: string | null): ExpensePreset[]
 {
   try
   {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return [...DEFAULT_EXPENSE_PRESETS]
-    const parsed = JSON.parse(raw) as ExpensePreset[]
-    if (!Array.isArray(parsed) || parsed.length === 0)
+    const parsed = readScopedJson<ExpensePreset[]>(STORAGE_KEY, userId ?? getActiveStorageUserId())
+    if (!parsed || !Array.isArray(parsed) || parsed.length === 0)
     {
       return [...DEFAULT_EXPENSE_PRESETS]
     }
@@ -49,9 +54,9 @@ export function loadExpensePresets(): ExpensePreset[]
   }
 }
 
-export function persistExpensePresets(presets: ExpensePreset[]): void
+export function persistExpensePresets(presets: ExpensePreset[], userId?: string | null): void
 {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(presets))
+  writeScopedJson(STORAGE_KEY, presets, userId ?? getActiveStorageUserId())
 }
 
 export function createPresetId(): string

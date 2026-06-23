@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import {
   Plus, FileText, Pin, Search, AlignLeft, Trash2, X,
-  Briefcase, User, Lightbulb, HeartPulse, BookOpen, Maximize2,
+  BookOpen, Bell, ListChecks, Maximize2,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { RichTextEditor } from '../ui/RichTextEditor';
@@ -10,11 +10,19 @@ import { EmptyState } from '../ui/EmptyState';
 /* -- Category system -- */
 const CATEGORIAS = [
   { id: 'all', label: 'Todas', icon: BookOpen, text: 'text-zinc-400', bg: 'bg-zinc-500/10' },
-  { id: 'trabalho', label: 'Trabalho', icon: Briefcase, text: 'text-blue-400', bg: 'bg-blue-500/10' },
-  { id: 'pessoal', label: 'Pessoal', icon: User, text: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { id: 'ideias', label: 'Ideias', icon: Lightbulb, text: 'text-amber-400', bg: 'bg-amber-500/10' },
-  { id: 'saude', label: 'Saúde', icon: HeartPulse, text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+  { id: 'diario', label: 'Diário', icon: BookOpen, text: 'text-violet-400', bg: 'bg-violet-500/10' },
+  { id: 'lembrete', label: 'Lembretes', icon: Bell, text: 'text-amber-400', bg: 'bg-amber-500/10' },
+  { id: 'lista', label: 'Listas', icon: ListChecks, text: 'text-sky-400', bg: 'bg-sky-500/10' },
 ] as const;
+
+function normalizarCategoria(raw?: string | null): string
+{
+  if (raw === 'lembrete' || raw === 'lista' || raw === 'diario')
+  {
+    return raw;
+  }
+  return 'diario';
+}
 
 const CAT_MAP = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c]));
 
@@ -40,7 +48,7 @@ export function AnotacoesView() {
   const filteredNotes = useMemo(() => {
     let notes = anotacoes;
     if (activeCategory !== 'all') {
-      notes = notes.filter((n) => (n.categoria || 'pessoal') === activeCategory);
+      notes = notes.filter((n) => normalizarCategoria(n.categoria) === activeCategory);
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -56,7 +64,7 @@ export function AnotacoesView() {
   const selectedNote = anotacoes.find((n) => n.id === selectedId);
   const wordCount = selectedNote ? selectedNote.conteudo.split(/\s+/).filter(Boolean).length : 0;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
-  const noteCat = CAT_MAP[selectedNote?.categoria || 'pessoal'] || CAT_MAP['pessoal'];
+  const noteCat = CAT_MAP[normalizarCategoria(selectedNote?.categoria)] || CAT_MAP['diario'];
   const NoteCatIcon = noteCat.icon;
 
   return (
@@ -67,7 +75,7 @@ export function AnotacoesView() {
         <aside className="w-72 shrink-0 bg-zinc-900/30 border-r border-zinc-800/30 flex flex-col" aria-label="Lista de anotações">
           <div className="px-4 pt-4 pb-2">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[13px] font-semibold text-zinc-200">Segundo Cérebro</h2>
+              <h2 className="text-[13px] font-semibold text-zinc-200">Anotações</h2>
               <button
                 onClick={() => setQuickCaptureOpen(true)}
                 className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
@@ -125,7 +133,7 @@ export function AnotacoesView() {
             )}
             {filteredNotes.map((nota) => {
               const isActive = selectedId === nota.id;
-              const cat = CAT_MAP[nota.categoria || 'pessoal'] || CAT_MAP['pessoal'];
+              const cat = CAT_MAP[normalizarCategoria(nota.categoria)] || CAT_MAP['diario'];
               const CatIcon = cat.icon;
               return (
                 <button

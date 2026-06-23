@@ -17,7 +17,8 @@ import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurf
 
 interface MedicamentosBulkPanelProps
 {
-  variant?: 'compact' | 'full'
+  variant?: 'compact' | 'full' | 'cadastro'
+  showAdvanced?: boolean
 }
 
 interface DraftMed
@@ -51,7 +52,10 @@ const EMPTY_DRAFT = (): DraftMed => ({
 
 // Cadastro estruturado — períodos, dosagem e tipo para alertas do AXEL
 
-export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPanelProps)
+export function MedicamentosBulkPanel({
+  variant = 'full',
+  showAdvanced = true,
+}: MedicamentosBulkPanelProps)
 {
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const addMedicamentosBulk = useTaskStore((s) => s.addMedicamentosBulk)
@@ -63,6 +67,7 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
   const [saving, setSaving] = useState(false)
 
   const compact = variant === 'compact'
+  const cadastro = variant === 'cadastro'
 
   const PERIODO_ICON: Record<MedicamentoPeriodo, typeof Sun> = {
     manha: Sun,
@@ -124,6 +129,55 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
     setDraft(EMPTY_DRAFT())
   }
 
+  const draftToItem = (item: DraftMed) =>
+  {
+    const horarios = horariosFromPeriodos(item.periodos, item.horarios)
+    return {
+      nome: item.dosagem ? `${item.nome} ${item.dosagem}` : item.nome,
+      horario: horarios[0],
+      horarios,
+      config: {
+        horarios,
+        periodos: item.periodos,
+        dosagem: item.dosagem || undefined,
+        categoria: item.categoria,
+        uso_diario: item.usoDiario,
+        dias_semana: item.diasSemana.length ? item.diasSemana : undefined,
+        inicio_tratamento: item.inicioTratamento || undefined,
+        fim_tratamento: item.fimTratamento || undefined,
+        duracao_dias: item.duracaoDias,
+      },
+    }
+  }
+
+  const handleSaveDraft = async () =>
+  {
+    if (!draft.nome.trim())
+    {
+      toast.error('Informe o nome do medicamento')
+      return
+    }
+    if (draft.periodos.length === 0)
+    {
+      toast.error('Escolha ao menos um período')
+      return
+    }
+    setSaving(true)
+    try
+    {
+      const n = await addMedicamentosBulk([draftToItem({ ...draft, nome: draft.nome.trim() })])
+      if (n > 0)
+      {
+        toast.success('Medicamento salvo — lembrete no horário configurado')
+        setDraft(EMPTY_DRAFT())
+      }
+    }
+    finally
+    {
+      setSaving(false)
+    }
+  }
+
   const queuePreview = useMemo(() =>
     queue.map((item) =>
     {
@@ -135,22 +189,7 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
 
   const handleSaveAll = async () =>
   {
-    const items = queuePreview.map((item) => ({
-      nome: item.dosagem ? `${item.nome} ${item.dosagem}` : item.nome,
-      horario: item.horarios[0],
-      horarios: item.horarios,
-      config: {
-        horarios: item.horarios,
-        periodos: item.periodos,
-        dosagem: item.dosagem || undefined,
-        categoria: item.categoria,
-        uso_diario: item.usoDiario,
-        dias_semana: item.diasSemana.length ? item.diasSemana : undefined,
-        inicio_tratamento: item.inicioTratamento || undefined,
-        fim_tratamento: item.fimTratamento || undefined,
-        duracao_dias: item.duracaoDias,
-      },
-    }))
+    const items = queuePreview.map((item) => draftToItem(item))
 
     if (items.length === 0)
     {
@@ -200,17 +239,21 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
   }
 
   return (
-    <div className={`space-y-3 ${compact ? '' : 'mt-4'}`}>
+    <div className={`space-y-3 ${compact || cadastro ? '' : 'mt-4'}`}>
       <div className="sl-panel p-3 sm:p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <Pill className="w-4 h-4 text-accent shrink-0" />
-          <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>
-            Cadastrar medicamentos
-          </p>
-        </div>
-        <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-          Uso diário com horários por período — o AXEL aprende e lembra na hora certa.
-        </p>
+        {!cadastro && (
+          <>
+            <div className="flex items-center gap-2">
+              <Pill className="w-4 h-4 text-accent shrink-0" />
+              <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>
+                Cadastrar medicamentos
+              </p>
+            </div>
+            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+              Uso diário com horários por período — o AXEL aprende e lembra na hora certa.
+            </p>
+          </>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <input
@@ -227,31 +270,6 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
             onChange={(e) => setDraft((d) => ({ ...d, dosagem: e.target.value }))}
             className="bg-chrome border border-line rounded-sl px-3 py-2 text-[13px] text-ink min-h-[44px]"
           />
-        </div>
-
-        <div>
-          <p className="font-mono text-[9px] uppercase text-ink-muted mb-1.5">Tipo</p>
-          <div className="flex flex-wrap gap-1.5">
-            {MED_CATEGORIAS.map((cat) =>
-            {
-              const on = draft.categoria === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  title={cat.hint}
-                  onClick={() => setDraft((d) => ({ ...d, categoria: cat.id }))}
-                  className={`px-2 py-1 rounded-sl font-mono text-[9px] uppercase border transition-colors ${
-                    on
-                      ? 'border-accent/50 bg-accent-muted text-accent'
-                      : 'border-line text-ink-muted hover:text-ink'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              )
-            })}
-          </div>
         </div>
 
         <div>
@@ -307,6 +325,33 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
             })}
           </div>
         )}
+
+        {showAdvanced && (
+          <>
+        <div>
+          <p className="font-mono text-[9px] uppercase text-ink-muted mb-1.5">Tipo</p>
+          <div className="flex flex-wrap gap-1.5">
+            {MED_CATEGORIAS.map((cat) =>
+            {
+              const on = draft.categoria === cat.id
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  title={cat.hint}
+                  onClick={() => setDraft((d) => ({ ...d, categoria: cat.id }))}
+                  className={`px-2 py-1 rounded-sl font-mono text-[9px] uppercase border transition-colors ${
+                    on
+                      ? 'border-accent/50 bg-accent-muted text-accent'
+                      : 'border-line text-ink-muted hover:text-ink'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <label className="flex items-center gap-2 text-[12px] text-ink cursor-pointer">
           <input
@@ -402,14 +447,17 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
             })}
           </div>
         </div>
+          </>
+        )}
 
         <button
           type="button"
-          onClick={addToQueue}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-sl border border-line text-ink font-mono text-[10px] uppercase min-h-[44px] hover:bg-chrome"
+          disabled={saving}
+          onClick={() => void (cadastro ? handleSaveDraft() : addToQueue())}
+          className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-sl border border-line text-ink font-mono text-[10px] uppercase min-h-[44px] hover:bg-chrome disabled:opacity-50"
         >
           <Plus className="w-3.5 h-3.5" />
-          Adicionar à lista
+          {cadastro ? 'Salvar medicamento' : 'Adicionar à lista'}
         </button>
       </div>
 
@@ -460,7 +508,7 @@ export function MedicamentosBulkPanel({ variant = 'full' }: MedicamentosBulkPane
         </div>
       )}
 
-      {medicamentos.length > 0 && (
+      {medicamentos.length > 0 && !cadastro && (
         <div className="sl-panel overflow-hidden">
           <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line">
             <p className={`text-[11px] font-mono uppercase ${AXEL_TEXT_SECONDARY}`}>

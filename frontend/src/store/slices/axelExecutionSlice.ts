@@ -1,4 +1,6 @@
 import type { StateCreator } from 'zustand'
+import { applyVelocityToEstimate } from '../../lib/adaptiveOrchestration'
+import type { TarefaUnificada } from '../../types'
 
 // Execution Engine — timer, estimativas e tempo real acumulado
 
@@ -37,6 +39,11 @@ export interface AxelExecutionSlice
   taskEstimates: Record<number, number>
   taskElapsedSeconds: Record<number, number>
   setTaskEstimate: (taskId: number, minutes: number) => void
+  refreshTaskEstimateFromTask: (
+    task: TarefaUnificada,
+    activityEntryCount?: number,
+    options?: { difficultySignal?: boolean },
+  ) => Promise<void>
   startExecution: (taskId: number, estimateMinutes: number) => void
   stopExecution: () => void
   getTaskElapsedSeconds: (taskId: number) => number
@@ -49,6 +56,8 @@ type ExecutionStore = AxelExecutionSlice & {
     estimateMinutes: number,
     actualMinutes: number,
   ) => void
+  personalVelocityFactor: number
+  pushAiDecision: (message: string) => void
   tarefas: Array<{ id: number; titulo: string }>
 }
 
@@ -90,6 +99,48 @@ export const createAxelExecutionSlice: StateCreator<
         saveJsonRecord(ESTIMATES_KEY, flat)
         return { taskEstimates: next }
       })
+    },
+
+    refreshTaskEstimateFromTask: async (task, activityEntryCount = 0, options) =>
+    {
+      if (!task.id) return
+
+      const elapsedMin = Math.floor(get().getTaskElapsedSeconds(task.id) / 60)
+      const { resolveTaskEstimate } = await import('../../services/axelTaskEstimateService')
+      const resolved = await resolveTaskEstimate(
+        task,
+        activityEntryCount,
+        elapsedMin,
+        options?.difficultySignal ?? false,
+      )
+
+      const factor = get().personalVelocityFactor ?? 1
+      const adjusted = applyVelocityToEstimate(resolved.estimate_minutes, factor)
+      const current = get().taskEstimates[task.id] ?? 0
+      const next = Math.max(current, adjusted)
+
+      if (next <= current && !options?.difficultySignal) return
+
+      const finalEstimate = Math.max(next, current)
+      get().setTaskEstimate(task.id, finalEstimate)
+
+      const ex = get().execution
+      if (ex?.taskId === task.id)
+      {
+        set({ execution: { ...ex, estimateMinutes: finalEstimate } })
+      }
+
+      if (finalEstimate > current || resolved.source === 'groq')
+      {
+        const prefix = resolved.source === 'groq'
+          ? 'IA · '
+          : resolved.iaDisponivel === false
+            ? 'Local (IA não configurada no servidor) · '
+            : 'Local · '
+        get().pushAiDecision(
+          `${prefix}Estimativa ${finalEstimate} min — ${resolved.reasoning}`,
+        )
+      }
     },
 
     startExecution: (taskId, estimateMinutes) =>

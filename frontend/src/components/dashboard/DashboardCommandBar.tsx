@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { bucketByDueDate } from '../../lib/dueBucket'
-import { isAguaRitualComplete } from '../../lib/healthRitual'
+import { aguaDisplaySnapshot } from '../../lib/healthRitual'
+import { countAlertasHeader } from '../../lib/notificacaoUtils'
 import {
   AXEL_CHROME_PLANE,
-  AXEL_DISPLAY_STAT,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
-  AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
 // Barra de comando — KPIs densos + pulso do dia em uma faixa
@@ -42,18 +41,18 @@ function KpiCell({ label, value, hint, variant = 'default', onClick }: KpiCellPr
     <Tag
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`px-3 sm:px-4 py-3 border-r border-line last:border-r-0 min-w-0 text-left ${
+      className={`p-3 sm:px-4 sm:py-3 border-r border-line last:border-r-0 min-w-0 text-left ${
         onClick ? `${AXEL_ROW_HOVER} w-full` : ''
       }`}
     >
-      <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
+      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
         {label}
       </p>
-      <p className={`text-base sm:text-lg font-display tabular-nums mt-1 leading-none ${valueClass}`}>
+      <p className={`text-base sm:text-lg font-sans font-semibold tracking-tight tabular-nums mt-1 leading-none ${valueClass}`}>
         {value}
       </p>
       {hint && (
-        <p className={`font-mono text-[10px] mt-1 truncate ${AXEL_TEXT_SECONDARY}`}>{hint}</p>
+        <p className="font-mono text-[10px] mt-1 truncate text-zinc-500 dark:text-zinc-400">{hint}</p>
       )}
     </Tag>
   )
@@ -68,6 +67,7 @@ interface DashboardCommandBarProps
 export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBarProps)
 {
   const navigate = useNavigate()
+  const notificacoes = useTaskStore((s) => s.notificacoes)
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const storeTarefas = useTaskStore((s) => s.tarefas)
   const habitos = useTaskStore((s) => s.habitos)
@@ -89,8 +89,7 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
   const agua = habitos.find((h) => h.tipo === 'agua')
   const aguaCopos = agua?.progresso_atual ?? 0
   const aguaMeta = agua?.meta_diaria ?? 8
-  const aguaPct = aguaMeta > 0 ? Math.round((aguaCopos / aguaMeta) * 100) : 0
-  const aguaOk = isAguaRitualComplete(aguaCopos, aguaMeta)
+  const aguaSnap = aguaDisplaySnapshot(aguaCopos, aguaMeta)
 
   const pendentes = resumo?.tarefas_pendentes
     ?? tarefas.filter((t) => t.status !== 'concluida').length
@@ -99,7 +98,8 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
   const concluidas = resumo?.tarefas_concluidas
     ?? tarefas.filter((t) => t.status === 'concluida').length
   const saldo = resumo?.saldo_mes ?? 0
-  const notifs = resumo?.notificacoes_nao_lidas ?? 0
+  const alertasTotal = countAlertasHeader(notificacoes, tarefas)
+  const atrasadas = dueBuckets.vencido.length
 
   const now = new Date()
   const dateLine = now.toLocaleDateString('pt-BR', {
@@ -114,10 +114,10 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
       <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full">
         <div className="mb-3 sm:mb-4">
           <p className="sl-eyebrow">Centro de comando</p>
-          <h1 className={`${AXEL_DISPLAY_STAT} text-xl sm:text-2xl md:text-3xl mt-1`}>
+          <h1 className="font-sans font-semibold tracking-tight text-xl md:text-3xl text-zinc-900 dark:text-zinc-100 mt-1">
             {greeting}, {firstName}
           </h1>
-          <p className={`font-mono text-[11px] capitalize mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className="text-xs sm:text-sm capitalize mt-1 text-zinc-500 dark:text-zinc-400">
             {dateLine}
           </p>
         </div>
@@ -126,9 +126,9 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
           <KpiCell
             label="Execução"
             value={String(pendentes)}
-            hint={`${criticas} crítica${criticas !== 1 ? 's' : ''}`}
-            variant={criticas > 0 ? 'urgent' : 'default'}
-            onClick={() => navigate('/kanban')}
+            hint={atrasadas > 0 ? `${atrasadas} atrasada${atrasadas !== 1 ? 's' : ''}` : `${criticas} crítica${criticas !== 1 ? 's' : ''}`}
+            variant={atrasadas > 0 || criticas > 0 ? 'urgent' : 'default'}
+            onClick={() => navigate(atrasadas > 0 ? '/kanban?bucket=vencido' : '/kanban')}
           />
           <KpiCell
             label="Ofensiva"
@@ -139,9 +139,9 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
           />
           <KpiCell
             label="Hidratação"
-            value={`${aguaPct}%`}
-            hint={`${aguaCopos}/${aguaMeta} copos`}
-            variant={aguaOk ? 'ok' : 'default'}
+            value={`${aguaSnap.ritualPct}%`}
+            hint={`${aguaSnap.copos}/${aguaSnap.ritualCopos} copos`}
+            variant={aguaSnap.ritualOk ? 'ok' : 'default'}
             onClick={() => navigate('/saude#hidratacao')}
           />
           <KpiCell
@@ -174,9 +174,9 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
           />
           <KpiCell
             label="Alertas"
-            value={String(notifs)}
-            hint="não lidos"
-            variant={notifs > 0 ? 'urgent' : 'default'}
+            value={String(alertasTotal)}
+            hint="não lidos + prazos"
+            variant={alertasTotal > 0 ? 'urgent' : 'default'}
           />
         </div>
       </div>

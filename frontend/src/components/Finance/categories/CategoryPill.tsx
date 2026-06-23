@@ -1,8 +1,8 @@
 import { X } from 'lucide-react'
 import { FinanceCategoryIcon } from '../financeCategoryIcons'
 import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_CHIP_SELECT_ACTIVE,
+  AXEL_CHIP_SELECT_IDLE,
 } from '../../../constants/axelSurfaces'
 import type { Category } from '../../../store/storeTypes'
 
@@ -28,9 +28,7 @@ export function CategoryPill({
       <button
         type="button"
         onClick={onSelect}
-        className={`inline-flex items-center gap-1.5 max-w-full ${
-          active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-        }`}
+        className={`max-w-full ${active ? AXEL_CHIP_SELECT_ACTIVE : AXEL_CHIP_SELECT_IDLE}`}
       >
         {showIcon && (
           <FinanceCategoryIcon
@@ -39,7 +37,7 @@ export function CategoryPill({
             style={{ color: category.cor }}
           />
         )}
-        <span className="truncate max-w-[100px] sm:max-w-[140px]">{category.nome}</span>
+        <span className="truncate max-w-[88px] sm:max-w-[120px]">{category.nome}</span>
       </button>
       {onRemove && (
         <button

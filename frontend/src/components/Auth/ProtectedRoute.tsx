@@ -2,6 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useTaskStore } from '../../store/useTaskStore';
 import { useEffect, useState } from 'react';
 import { getSessionWithTimeout, isLocalGuestUser } from '../../lib/authSession';
+import { AxelLoader } from '../ui/AxelLoader';
 
 export function ProtectedRoute({ children }: { children: React.ReactNode })
 {
@@ -76,7 +77,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
   {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-fundo gap-3">
-        <div className="w-8 h-8 rounded-sl border-2 border-line border-t-accent animate-spin" />
+        <AxelLoader />
         <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
           Verificando sessão…
         </p>

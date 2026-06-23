@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  Droplets, HeartPulse, Pill, Beef, Dumbbell, ChevronRight,
+  Droplets, HeartPulse, Pill, Beef,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { buildHealthRitual, ritualHeadline, isAguaRitualComplete } from '../../lib/healthRitual'
+import { buildHealthRitual, ritualHeadline, isAguaRitualComplete, aguaDisplaySnapshot } from '../../lib/healthRitual'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { HealthQuickTile } from './HealthQuickTile'
@@ -18,7 +17,6 @@ interface HealthTodayPanelProps
 
 export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
 {
-  const navigate = useNavigate()
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const medicamentoTomadas = useTaskStore((s) => s.medicamentoTomadas)
@@ -45,6 +43,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
 
   const headline = ritualHeadline(snapshot)
   const aguaOk = isAguaRitualComplete(aguaCopos, aguaMeta)
+  const aguaSnap = aguaDisplaySnapshot(aguaCopos, aguaMeta)
   const proteinaPct = proteina && proteina.meta_diaria > 0
     ? Math.min(100, Math.round((proteina.progresso_atual / proteina.meta_diaria) * 100))
     : 0
@@ -110,8 +109,8 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
         <HealthQuickTile
           icon={Droplets}
           label="Água"
-          value={`${aguaCopos}/${aguaMeta}`}
-          sub={aguaOk ? 'Ritual ok' : 'Toque para registrar'}
+          value={`${aguaSnap.copos}/${aguaSnap.ritualCopos}`}
+          sub={aguaOk ? 'Ritual ok' : `${aguaSnap.ritualPct}% do ritual`}
           tone="sky"
           done={aguaOk}
           onClick={() => onSelectTab('hidratacao')}
@@ -144,21 +143,6 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
           onClick={() => onSelectTab('alimentacao')}
         />
       </div>
-
-      <button
-        type="button"
-        onClick={() => navigate('/foco')}
-        className="w-full flex items-center justify-between gap-3 rounded-sl border border-line bg-card px-4 py-3.5 min-h-[52px] text-left hover:bg-chrome/40 transition-colors active:scale-[0.99]"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <Dumbbell className="w-4 h-4 text-ink-muted shrink-0" />
-          <div>
-            <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>Modo Academia</p>
-            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>Treino com cronômetro e foco</p>
-          </div>
-        </div>
-        <ChevronRight className="w-4 h-4 text-ink-muted shrink-0" />
-      </button>
 
       <p className="text-[11px] text-ink-muted text-center leading-relaxed px-2">
         Vitalidade conecta com Kanban e Dashboard — medicamentos atrasados sobem na fila do AXEL.

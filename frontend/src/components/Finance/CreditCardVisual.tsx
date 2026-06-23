@@ -1,10 +1,13 @@
 import type { VirtualCard } from '../../store/storeTypes'
 import type { BillingCycle } from '../../lib/financeCardCycle'
 import { invoiceUsagePct } from '../../lib/financeCardCycle'
+import { cardModalidadeLabel, cardTemCicloFatura, cardUsaExtrato } from '../../lib/financeCardModalidade'
 import {
-  AXEL_PROGRESS,
-  AXEL_PROGRESS_THICK,
-} from '../../constants/axelSurfaces'
+  CARD_USAGE_BAR_CLASS,
+  CARD_USAGE_TEXT_CLASS,
+  resolveCardUsageTone,
+} from '../../lib/financeBalanceTone'
+import { AXEL_PROGRESS_THICK } from '../../constants/axelSurfaces'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -36,6 +39,11 @@ export function CreditCardVisual({
 {
   const usage = invoiceUsagePct(invoiceTotal, card.limite)
   const available = Math.max(0, card.limite - invoiceTotal)
+  const usageTone = resolveCardUsageTone(usage)
+  const barTone = CARD_USAGE_BAR_CLASS[usageTone]
+  const pctTone = CARD_USAGE_TEXT_CLASS[usageTone]
+  const temFatura = cardTemCicloFatura(card.modalidade)
+  const usaExtrato = cardUsaExtrato(card.modalidade)
   const blocked = card.status === 'bloqueado'
   const Tag = onClick ? 'button' : 'div'
 
@@ -54,7 +62,11 @@ export function CreditCardVisual({
           <div className="min-w-0">
             <p className="font-display text-sm text-white truncate">{card.nome}</p>
             <p className="font-mono text-[9px] uppercase tracking-wider mt-0.5 text-white/60">
-              {card.bandeira === 'visa' ? 'Visa' : 'Mastercard'} · {card.titular}
+              {cardModalidadeLabel(card.modalidade)}
+              {(card.modalidade ?? 'credito') === 'credito' || (card.modalidade ?? 'credito') === 'debito'
+                ? ` · ${card.bandeira === 'visa' ? 'Visa' : 'Mastercard'}`
+                : ''}
+              {' · '}{card.titular}
             </p>
           </div>
           {blocked && (
@@ -72,31 +84,42 @@ export function CreditCardVisual({
         <div className="relative z-10 space-y-1.5">
           <div className="flex justify-between items-end gap-2">
             <div>
-              <p className="font-mono text-[8px] uppercase tracking-wide text-white/55">Fatura aberta</p>
+              <p className="font-mono text-[8px] uppercase tracking-wide text-white/55">
+                {temFatura ? 'Fatura aberta' : usaExtrato ? 'Extrato' : 'Usado'}
+              </p>
               <p className="font-display text-lg tabular-nums text-white leading-none">{fmt(invoiceTotal)}</p>
             </div>
             <div className="text-right">
               <p className="font-mono text-[8px] uppercase text-white/55">Disponível</p>
-              <p className="font-mono text-[11px] tabular-nums text-white">{fmt(available)}</p>
+              <p className={`font-mono text-[11px] tabular-nums ${available <= 0 ? 'text-urgente' : 'text-white'}`}>
+                {fmt(available)}
+              </p>
             </div>
           </div>
 
-          <div className={AXEL_PROGRESS_THICK}>
+          <div className="flex justify-between items-center gap-2 font-mono text-[9px]">
+            <span className="text-white/55">{usage.toFixed(0)}% usado</span>
+            <span className={pctTone}>
+              {usageTone === 'exhausted' ? 'Esgotado' : `${100 - Math.round(usage)}% livre`}
+            </span>
+          </div>
+
+          <div className={`${AXEL_PROGRESS_THICK} bg-white/15`}>
             <div
-              className={`h-full rounded-sl ${AXEL_PROGRESS} ${
-                usage >= 90 ? '!bg-urgente' : usage >= 70 ? '!bg-atencao' : ''
-              }`}
-              style={{ width: `${usage}%` }}
+              className={`h-full rounded-sl transition-all duration-300 ${barTone}`}
+              style={{ width: `${Math.max(usage > 0 ? 2 : 0, usage)}%` }}
             />
           </div>
 
-          <div className="flex justify-between font-mono text-[9px] text-white/55">
-            <span>Fecha {cycle.end.split('-').reverse().join('/')}</span>
-            <span>Vence {cycle.dueDate.split('-').reverse().join('/')}</span>
-          </div>
+          {temFatura && (
+            <div className="flex justify-between font-mono text-[9px] text-white/55">
+              <span>Fecha {cycle.end.split('-').reverse().join('/')}</span>
+              <span>Vence {cycle.dueDate.split('-').reverse().join('/')}</span>
+            </div>
+          )}
           {onClick && (
             <p className="font-mono text-[8px] uppercase text-white/70 text-center pt-0.5">
-              Toque para ver fatura
+              {usaExtrato ? 'Toque para ver extrato' : 'Toque para ver fatura'}
             </p>
           )}
         </div>

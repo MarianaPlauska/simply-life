@@ -3,7 +3,6 @@ import type { StateCreator } from 'zustand'
 import type { UserProfile } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
 import { getSessionWithTimeout, isLocalGuestUser } from '../../lib/authSession'
-import { DEFAULT_WORKSPACE_PREFS } from '../../lib/userWorkspacePrefs'
 import type { UserPrefsSlice } from './userPrefsSlice'
 
 export interface AuthSlice
@@ -35,12 +34,10 @@ export const createAuthSlice: StateCreator<AuthSlice & UserPrefsSlice, [], [], A
   logout: async () =>
   {
     await supabase.auth.signOut()
+    const { switchUserSession } = await import('../resetUserSession')
+    await switchUserSession(null)
     set({
-      isLoggedIn: false,
-      userId: '',
       userProfile: { nome: '', email: '', avatar: '' },
-      workspacePrefs: { ...DEFAULT_WORKSPACE_PREFS },
-      workspacePrefsLoaded: false,
     })
   },
 

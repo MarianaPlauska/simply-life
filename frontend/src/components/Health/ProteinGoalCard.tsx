@@ -1,43 +1,41 @@
 import { useMemo } from 'react'
-import { Beef, Plus, Minus } from 'lucide-react'
+import { Beef, Minus, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { PROTEINA_PRESET } from '../../constants/healthPresets'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-// Meta de proteína — alinhado ao design AXEL, reset diário automático
-
 export function ProteinGoalCard()
 {
   const habitos = useTaskStore((s) => s.habitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
-  const incrementHabito = useTaskStore((s) => s.incrementHabito)
+  const incrementHabitoBy = useTaskStore((s) => s.incrementHabitoBy)
   const decrementHabito = useTaskStore((s) => s.decrementHabito)
   const updateHabitoMeta = useTaskStore((s) => s.updateHabitoMeta)
+  const setHabitoProgress = useTaskStore((s) => s.setHabitoProgress)
 
   const proteina = useMemo(() => habitos.find((h) => h.tipo === 'proteina'), [habitos])
   const step = proteina?.config?.incremento ?? 10
   const current = proteina?.progresso_atual ?? 0
-  const goal = proteina?.meta_diaria ?? 120
+  const goal = proteina?.meta_diaria ?? PROTEINA_PRESET.meta_diaria
   const pct = goal > 0 ? Math.min(100, (current / goal) * 100) : 0
-  const done = proteina ? current >= goal : false
+  const done = current >= goal && goal > 0
 
-  const handleActivate = async () =>
+  const ensureProteina = async () =>
   {
-    await ensureHealthHabit(PROTEINA_PRESET)
-    toast.success('Meta de proteína ativada — 120g/dia')
+    return proteina ?? await ensureHealthHabit(PROTEINA_PRESET)
   }
 
   const handleAdd = async () =>
   {
-    const ensured = proteina ?? await ensureHealthHabit(PROTEINA_PRESET)
-    if (!ensured) return
-    if (ensured.progresso_atual >= ensured.meta_diaria)
+    const h = await ensureProteina()
+    if (!h) return
+    if (h.progresso_atual >= h.meta_diaria)
     {
       toast.info('Meta de proteína já atingida!')
       return
     }
-    await incrementHabito(ensured.id)
+    await incrementHabitoBy(h.id, step)
     toast.success(`+${step}g de proteína`, { duration: 1500 })
   }
 
@@ -45,6 +43,22 @@ export function ProteinGoalCard()
   {
     if (!proteina || current <= 0) return
     await decrementHabito(proteina.id)
+  }
+
+  const handleMeta = async (raw: string) =>
+  {
+    const h = await ensureProteina()
+    if (!h) return
+    const next = Math.max(50, parseInt(raw, 10) || goal)
+    await updateHabitoMeta(h.id, next)
+  }
+
+  const handleTotalManual = async (raw: string) =>
+  {
+    const h = await ensureProteina()
+    if (!h) return
+    const next = Math.max(0, parseInt(raw, 10) || 0)
+    await setHabitoProgress(h.id, next)
   }
 
   return (
@@ -55,18 +69,24 @@ export function ProteinGoalCard()
           <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-amber-300/90">
             Proteína
           </h2>
-          {proteina && (
-            <span className={`ml-auto font-mono text-[11px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
-              {current}/{goal}g
-            </span>
-          )}
+          <span className={`ml-auto font-mono text-[11px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+            {current}/{goal}g
+          </span>
         </div>
-        <p className={`text-2xl font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
-          {current}
-          <span className="text-base text-ink-muted font-normal"> / {goal}g</span>
-        </p>
+        <div className="flex items-baseline gap-2">
+          <input
+            type="number"
+            min={0}
+            max={500}
+            value={current || ''}
+            onChange={(e) => void handleTotalManual(e.target.value)}
+            className={`w-20 bg-transparent text-2xl font-display tabular-nums ${AXEL_TEXT_PRIMARY} outline-none border-b border-transparent focus:border-line`}
+            aria-label="Total de proteína hoje em gramas"
+          />
+          <span className="text-base text-ink-muted font-normal">/ {goal}g</span>
+        </div>
         <p className={`text-[12px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
-          {done ? 'Meta do dia completa.' : `${Math.round(pct)}% — registre por porção, sem pressa.`}
+          {done ? 'Meta do dia completa.' : `${Math.round(pct)}% — use as refeições abaixo ou ajuste manual.`}
         </p>
         <div className="h-1.5 rounded-sl bg-chrome overflow-hidden mt-3" aria-hidden>
           <div
@@ -77,53 +97,41 @@ export function ProteinGoalCard()
       </div>
 
       <div className="p-4 sm:p-5 space-y-3">
-        {!proteina ? (
+        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
           <button
             type="button"
-            onClick={() => void handleActivate()}
-            className="w-full py-3.5 rounded-sl border border-amber-500/25 bg-amber-500/10 text-amber-200 font-mono text-[11px] uppercase tracking-wide hover:bg-amber-500/15 transition-colors"
+            onClick={() => void handleUndo()}
+            disabled={current <= 0}
+            className="flex items-center justify-center gap-1 py-2.5 rounded-sl border border-line bg-chrome/30 text-ink-muted hover:text-ink disabled:opacity-30 font-mono text-[10px] uppercase"
           >
-            Ativar meta de proteína (120g)
+            <Minus size={14} />
+            −{step}g
           </button>
-        ) : (
-          <>
-            <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
-              <button
-                type="button"
-                onClick={() => void handleUndo()}
-                disabled={current <= 0}
-                className="flex items-center justify-center gap-1 py-2.5 rounded-sl border border-line bg-chrome/30 text-ink-muted hover:text-ink disabled:opacity-30 font-mono text-[10px] uppercase"
-              >
-                <Minus size={14} />
-                Desfazer
-              </button>
-              <button
-                type="button"
-                onClick={() => void handleAdd()}
-                disabled={done}
-                className="flex items-center justify-center gap-2 py-3 px-4 rounded-sl border border-amber-500/30 bg-amber-500/10 text-amber-200 font-mono text-[11px] uppercase tracking-wide hover:bg-amber-500/15 disabled:opacity-40 transition-colors active:scale-[0.98]"
-              >
-                <Plus size={16} />
-                +{step}g
-              </button>
-              <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted justify-self-end">
-                Meta
-                <input
-                  type="number"
-                  min={50}
-                  max={300}
-                  step={10}
-                  value={goal}
-                  onChange={(e) => updateHabitoMeta(proteina.id, Math.max(50, parseInt(e.target.value, 10) || 120))}
-                  className="w-14 bg-chrome border border-line rounded-sl px-1 py-0.5 text-ink text-center text-[11px]"
-                />
-              </label>
-            </div>
-            <p className="text-[11px] text-ink-muted text-center leading-relaxed">
-              Contador zera automaticamente a cada novo dia.
-            </p>
-          </>
-        )}
+          <button
+            type="button"
+            onClick={() => void handleAdd()}
+            disabled={done}
+            className="flex items-center justify-center gap-2 py-3 px-4 rounded-sl border border-amber-500/30 bg-amber-500/10 text-amber-200 font-mono text-[11px] uppercase tracking-wide hover:bg-amber-500/15 disabled:opacity-40 transition-colors active:scale-[0.98]"
+          >
+            <Plus size={16} />
+            +{step}g
+          </button>
+          <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted justify-self-end">
+            Meta/dia
+            <input
+              type="number"
+              min={50}
+              max={300}
+              step={5}
+              value={goal}
+              onChange={(e) => void handleMeta(e.target.value)}
+              className="w-16 bg-chrome border border-line rounded-sl px-1 py-0.5 text-ink text-center text-[11px]"
+            />
+          </label>
+        </div>
+        <p className="text-[11px] text-ink-muted text-center leading-relaxed">
+          Contador zera a cada novo dia. Refeições somam automaticamente.
+        </p>
       </div>
     </section>
   )

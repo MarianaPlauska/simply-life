@@ -5,8 +5,10 @@ import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
 import { Skeleton } from '../dashboard/DashboardPrimitives'
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
+import { DashboardOverdueAlert } from '../dashboard/DashboardOverdueAlert'
 import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
 import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
+import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
@@ -72,12 +74,27 @@ export function DashboardView()
     || (workspacePrefs.display_name || userProfile?.nome || '').split(' ')[0]
     || 'Convidado'
 
+  const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
+  const wellbeingPending = humorHojeLista.length === 0
+
   const quickWidgets = useMemo(
-    () => resolveDashboardWidgets(
+    () =>
+    {
+      const widgets = resolveDashboardWidgets(
+        workspacePrefs.dashboard_quick_widgets,
+        workspacePrefs.dashboard_priority ?? 'tasks',
+      )
+      if (wellbeingPending)
+      {
+        return widgets.filter((id) => id !== 'wellbeing')
+      }
+      return widgets
+    },
+    [
       workspacePrefs.dashboard_quick_widgets,
-      workspacePrefs.dashboard_priority ?? 'tasks',
-    ),
-    [workspacePrefs.dashboard_quick_widgets, workspacePrefs.dashboard_priority],
+      workspacePrefs.dashboard_priority,
+      wellbeingPending,
+    ],
   )
 
   const taskIdParam = searchParams.get('task')
@@ -121,7 +138,16 @@ export function DashboardView()
       <DashboardCommandBar greeting={greeting} firstName={firstName} />
 
       <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4">
+        {wellbeingPending && (
+          <div className="order-first shrink-0">
+            <DashboardQuickWidget id="wellbeing" />
+          </div>
+        )}
+        <div id="dashboard-wellbeing" className="scroll-mt-20 min-w-0">
+          <AxelPostMoodCare />
+        </div>
         <StreakEveningBanner />
+        <DashboardOverdueAlert />
         <HealthRitualStrip />
 
         {quickWidgets.length > 0 && (

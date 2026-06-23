@@ -1,7 +1,7 @@
 import type { ColorScheme } from '../store/storeTypes'
 
 const THEME_COLOR: Record<ColorScheme, string> = {
-  dark: '#1A1917',
+  dark: '#1D2029',
   light: '#F4F4F2',
 }
 

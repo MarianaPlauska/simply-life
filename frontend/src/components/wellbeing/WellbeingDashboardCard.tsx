@@ -4,14 +4,12 @@ import { HeartPulse } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { MoodQuickPicker } from './MoodQuickPicker'
 import { buildMoodOrchestrationContext } from '../../lib/moodOrchestration'
-import { AxelCareNudge } from '../axel/AxelCareNudge'
-import { useAxelCareMomentKey } from '../axel/AxelCareMoment'
-import type { MoodLevel } from '../../lib/axelCareMessages'
 import {
   isWellbeingCheckInDue,
   isWellbeingDashboardHidden,
   wellbeingHiddenUntilIso,
 } from '../../lib/axelCareRotation'
+import { isAxelMoodCareActive } from '../../lib/axelMoodCare'
 
 export function WellbeingDashboardCard()
 {
@@ -26,24 +24,18 @@ export function WellbeingDashboardCard()
   const completeOnboardingStep = useTaskStore((s) => s.completeOnboardingStep)
   const patchWorkspacePrefs = useTaskStore((s) => s.patchWorkspacePrefs)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
-  const userProfile = useTaskStore((s) => s.userProfile)
-  const { key: careKey, trigger: triggerCare } = useAxelCareMomentKey()
-  const [careMood, setCareMood] = useState<MoodLevel | null>(null)
   const [notaAgora, setNotaAgora] = useState('')
   const [pendingMood, setPendingMood] = useState<{ value: number; label: string } | null>(null)
   const [notaDia, setNotaDia] = useState('')
   const [salvandoNota, setSalvandoNota] = useState(false)
 
-  const displayName = workspacePrefs.axel_calls_you
-    || workspacePrefs.display_name
-    || userProfile?.nome
-    || ''
-
   const hiddenUntil = workspacePrefs.wellbeing_dashboard_hidden_until
+  const axelMoodCare = useTaskStore((s) => s.axelMoodCare)
   const temRegistroHoje = humorHojeLista.length > 0
   const ultimo = humorHojeLista[humorHojeLista.length - 1] ?? null
   const snoozed = temRegistroHoje && isWellbeingDashboardHidden(hiddenUntil)
   const checkInDue = isWellbeingCheckInDue(hiddenUntil, temRegistroHoje)
+  const axelMoodCareActive = isAxelMoodCareActive(axelMoodCare)
 
   useEffect(() =>
   {
@@ -84,9 +76,14 @@ export function WellbeingDashboardCard()
       {
         pushAiDecision(moodCtx.axelNote)
       }
-      setCareMood(value as MoodLevel)
       setNotaAgora('')
-      triggerCare()
+      requestAnimationFrame(() =>
+      {
+        document.getElementById('dashboard-wellbeing')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
     }
     finally
     {
@@ -113,7 +110,12 @@ export function WellbeingDashboardCard()
     }
   }
 
-  if (snoozed || (temRegistroHoje && !hiddenUntil))
+  if (snoozed && !axelMoodCareActive)
+  {
+    return null
+  }
+
+  if (temRegistroHoje && !hiddenUntil && !checkInDue && !axelMoodCareActive)
   {
     return null
   }
@@ -172,17 +174,6 @@ export function WellbeingDashboardCard()
           </h3>
         </div>
       </div>
-
-      {careMood !== null && (
-        <AxelCareNudge
-          key={careKey}
-          avatarStyle={workspacePrefs.avatar_style}
-          displayName={displayName}
-          moodLevel={careMood}
-          className="mb-3"
-          onDone={() => setCareMood(null)}
-        />
-      )}
 
       <MoodQuickPicker
         disabled={saving}

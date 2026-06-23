@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { ListOrdered } from 'lucide-react'
 import type { LoadBalanceEntry } from '../../lib/adaptiveOrchestration'
 import { AXEL_KANBAN_DROPZONE, AXEL_KANBAN_EXEC_COLUMN } from '../../constants/axelKanbanTheme'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_STATUS_BADGE, AXEL_STATUS_BADGE_WARN } from '../../constants/axelSurfaces'
 import { KanbanTaskDetailStrip } from './KanbanTaskDetailStrip'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
@@ -52,21 +52,21 @@ export function KanbanTodayPanel({
       className={[
         'flex flex-col w-full min-h-0 overflow-hidden lg:flex-1 lg:min-h-0 lg:h-full',
         AXEL_KANBAN_EXEC_COLUMN,
-        'border-b lg:border-b-0 lg:border-r border-line bg-chrome/20',
+        'border-b lg:border-b-0 lg:border-r border-white/[0.04] bg-chrome/20',
         isOver ? 'bg-accent-muted/25 ring-1 ring-inset ring-accent/30' : '',
       ].join(' ')}
     >
       <header
         id="kanban-today-panel"
-        className="shrink-0 px-3 pt-3 pb-2 border-b border-line border-t-2 border-t-accent"
+        className="shrink-0 px-2.5 pt-2 pb-1.5 border-b border-white/[0.04] bg-chrome/30"
       >
         <div className="flex items-start gap-2">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_PRIMARY}`}>
+              <h2 className="font-sans text-sm font-semibold tracking-tight text-ink">
                 Executar agora
               </h2>
-              <span className={`font-mono text-[11px] tabular-nums ml-auto ${overWip ? 'text-atencao' : AXEL_TEXT_SECONDARY}`}>
+              <span className={`font-mono text-[10px] tabular-nums ml-auto ${overWip ? AXEL_STATUS_BADGE_WARN : AXEL_STATUS_BADGE}`}>
                 {totalCount} / {WIP_LIMIT}
               </span>
               <button
@@ -79,7 +79,7 @@ export function KanbanTodayPanel({
                 <ListOrdered size={14} strokeWidth={1.5} />
               </button>
             </div>
-            <p className={`font-mono text-[9px] mt-0.5 leading-snug ${AXEL_TEXT_SECONDARY}`}>
+            <p className="text-[11px] mt-0.5 leading-snug text-zinc-500 font-mono">
               Fila curta · máx. {WIP_LIMIT}
             </p>
           </div>
@@ -88,11 +88,11 @@ export function KanbanTodayPanel({
 
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
         {tasks.length === 0 ? (
-          <div className={`mx-2 my-2 px-3 py-4 text-center ${AXEL_KANBAN_DROPZONE} ${isOver ? 'border-accent/50 text-accent' : ''}`}>
+          <div className={`mx-2 my-1.5 px-2.5 py-3 text-center ${AXEL_KANBAN_DROPZONE} ${isOver ? 'border-accent/40 text-accent' : ''}`}>
             <p className="font-mono text-[10px] uppercase tracking-[0.12em]">
               {isOver ? 'Soltar aqui' : 'Nada priorizado'}
             </p>
-            <p className={`text-[11px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            <p className="text-[11px] mt-1.5 leading-relaxed text-zinc-500 font-mono">
               Arraste da coluna Prazo → ou edite a fila pelo ícone acima
             </p>
             {onReorganize && !isOver && (
@@ -106,7 +106,7 @@ export function KanbanTodayPanel({
             )}
           </div>
         ) : (
-          <ol className="divide-y divide-line">
+          <ol className="divide-y divide-white/[0.04]">
             {tasks.map((t, idx) =>
             {
               const selected = selectedId === t.id
@@ -120,12 +120,12 @@ export function KanbanTodayPanel({
                     onClick={() => onSelect(t.id)}
                     onDoubleClick={() => onOpen(t)}
                     className={[
-                      'w-full text-left px-3 py-2 transition-colors',
+                      'w-full text-left px-2.5 py-1.5 transition-colors',
                       executing
-                        ? 'bg-accent/20 border-l-[3px] border-l-accent ring-1 ring-inset ring-accent/25'
+                        ? 'bg-accent/10 border-l-[2px] border-l-accent'
                         : selected
-                          ? 'bg-accent-muted/50 border-l-[3px] border-l-accent'
-                          : 'border-l-[3px] border-l-transparent hover:bg-chrome/60',
+                          ? 'bg-accent/5 border-l-[2px] border-l-accent/70'
+                          : 'border-l-[2px] border-l-transparent hover:bg-chrome/50 dark:hover:bg-zinc-800/30',
                       snoozed ? 'opacity-60' : '',
                     ].join(' ')}
                   >
@@ -142,12 +142,18 @@ export function KanbanTodayPanel({
                           {cleanTitleForDisplay(t.titulo)}
                         </p>
                         <p className={`font-mono text-[9px] mt-0.5 uppercase tracking-wide ${
-                          executing ? 'text-accent' : AXEL_TEXT_SECONDARY
+                          executing ? 'text-accent' : ''
                         }`}>
-                          {executing ? 'Em foco agora' : snoozed ? 'Adiada' : 'Na fila'}
+                          {executing ? (
+                            <span className={AXEL_STATUS_BADGE_WARN}>Em foco</span>
+                          ) : snoozed ? (
+                            <span className={AXEL_STATUS_BADGE}>Adiada</span>
+                          ) : (
+                            <span className={AXEL_STATUS_BADGE}>Na fila</span>
+                          )}
                         </p>
                         {selected && (t.urgency_reason ?? t.score_reason) && (
-                          <p className={`text-[10px] mt-1 leading-snug line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
+                          <p className="text-[10px] mt-1 leading-snug line-clamp-2 text-zinc-500 font-mono">
                             {t.urgency_reason ?? t.score_reason}
                           </p>
                         )}
@@ -162,7 +168,7 @@ export function KanbanTodayPanel({
       </div>
 
       {tasks.length > 0 && (
-        <p className={`shrink-0 px-4 py-1.5 font-mono text-[10px] tabular-nums border-t border-line ${AXEL_TEXT_SECONDARY}`}>
+        <p className="shrink-0 px-2.5 py-1 font-mono text-[11px] text-zinc-500 tabular-nums border-t border-white/[0.04]">
           {tasks.length} na fila ativa
         </p>
       )}

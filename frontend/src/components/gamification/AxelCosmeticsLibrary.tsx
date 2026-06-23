@@ -35,6 +35,7 @@ function isEquipped(
   if (category === 'accent')
   {
     const map: Record<string, string> = {
+      accent_meridian: 'meridian',
       accent_copper: 'copper',
       accent_sky: 'sky',
       accent_forest: 'forest',

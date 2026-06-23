@@ -9,6 +9,7 @@ export type PlannerLeafTab =
   | 'tabela'
   | 'planilha'
   | 'config'
+  | 'conta'
   | 'cartoes'
   | 'faturas'
   | 'contas-fixas'
@@ -42,7 +43,7 @@ export const FINANCE_SUB_TABS: Record<Exclude<PlannerGroup, 'inicio'>, FinanceSu
     { id: 'planilha', label: 'Planilha' },
   ],
   contas: [
-    { id: 'config', label: 'Configurar' },
+    { id: 'conta', label: 'Conta' },
     { id: 'cartoes', label: 'Cartões' },
     { id: 'faturas', label: 'Faturas' },
     { id: 'contas-fixas', label: 'Fixas' },
@@ -55,7 +56,7 @@ export const FINANCE_SUB_TABS: Record<Exclude<PlannerGroup, 'inicio'>, FinanceSu
 
 const DEFAULT_SUB: Record<Exclude<PlannerGroup, 'inicio'>, PlannerLeafTab> = {
   movimentos: 'diario',
-  contas: 'config',
+  contas: 'conta',
   analise: 'visao-geral',
 }
 
@@ -65,6 +66,7 @@ const LEAF_TO_GROUP: Record<PlannerLeafTab, PlannerGroup> = {
   tabela: 'movimentos',
   planilha: 'movimentos',
   config: 'contas',
+  conta: 'contas',
   cartoes: 'contas',
   faturas: 'contas',
   'contas-fixas': 'contas',
@@ -86,6 +88,8 @@ export function defaultSubForGroup(group: PlannerGroup): PlannerLeafTab | null
 export function resolveLeafTab(group: PlannerGroup, sub: PlannerLeafTab | null): PlannerLeafTab
 {
   if (group === 'inicio') return 'inicio'
+  // Legado: aba Configurar virou Conta
+  if (sub === 'config') return 'conta'
   if (sub && LEAF_TO_GROUP[sub] === group) return sub
   return DEFAULT_SUB[group]
 }

@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Flame, Search, User, SlidersHorizontal, LogOut, Bell, CheckCheck, Info, Heart, ListTodo, Wallet2 } from 'lucide-react';
+import { listNotificacoesAcionaveis } from '../../lib/notificacaoUtils';
 import { useTaskStore } from '../../store/useTaskStore';
 
 // Mapa view -> rota — header precisa navegar de verdade (nao so setActiveView)
 const VIEW_TO_PATH: Record<string, string> = {
-  dashboard: '/', kanban: '/kanban', anotacoes: '/anotacoes', foco: '/foco',
+  dashboard: '/', kanban: '/kanban', anotacoes: '/anotacoes',
   configuracoes: '/configuracoes', superhuman: '/superhuman', financeiro: '/financeiro',
   saude: '/saude', inteligencia: '/inteligencia', carreira: '/carreira',
   preferencias: '/preferencias', planner: '/planner', calendario: '/calendario',
@@ -16,7 +17,6 @@ const VIEW_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
   kanban: 'Kanban',
   anotacoes: 'Anotacoes',
-  foco: 'Modo Foco',
   configuracoes: 'Configuracoes',
   superhuman: 'Agenda',
   financeiro: 'Financeiro',
@@ -42,7 +42,7 @@ export function GlassHeader() {
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes);
   const markNotificacaoRead = useTaskStore((s) => s.markNotificacaoRead);
   const markAllNotificacoesRead = useTaskStore((s) => s.markAllNotificacoesRead);
-  const unreadCount = notificacoes.filter((n) => !n.lida).length;
+  const unreadCount = listNotificacoesAcionaveis(notificacoes).length;
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Clock, Gift, Zap, Wallet } from 'lucide-react'
+import { Clock, Zap, Wallet } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   computeOvertimePay,
   computeOvertimeRates,
@@ -18,7 +19,7 @@ import {
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-export type ReceitaEntradaKind = 'normal' | 'hora-extra' | 'freelance' | 'bonus' | 'outro'
+export type ReceitaEntradaKind = 'normal' | 'hora-extra' | 'freelance' | 'outro'
 export type ReceitaCreditoQuando = 'agora' | 'proximo-mes'
 
 export interface ReceitaEntradaPatch
@@ -102,10 +103,13 @@ export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSection
   const projecaoComEste = heJaLancadasMes + (overtimePreview?.total ?? 0)
   const projecaoMesTotal = receitasMes + (overtimePreview?.total ?? 0)
 
+  const overtimeDescription = (preview: NonNullable<typeof overtimePreview>) =>
+    `Hora extra CLT · ${preview.decimalHours}h · ${preview.label}`
+
   const syncOvertimeToForm = (preview: NonNullable<typeof overtimePreview>) =>
   {
     onPatch({
-      descricao: `[extra:hora-extra] ${preview.decimalHours}h · ${preview.label}`,
+      descricao: overtimeDescription(preview),
       valor: preview.total.toFixed(2).replace('.', ','),
       data: resolveCreditDate(creditoQuando),
       creditoQuando,
@@ -133,25 +137,40 @@ export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSection
 
     const labels: Record<Exclude<ReceitaEntradaKind, 'normal' | 'hora-extra'>, string> = {
       freelance: '[extra:freelance] Freelance',
-      bonus: '[extra:bonus] Bônus',
       outro: '[extra:outro] Renda extra',
     }
 
-    if (next !== 'hora-extra')
+    if (next === 'hora-extra')
     {
-      onPatch({ descricao: labels[next], valor: '' })
+      onPatch({
+        descricao: '',
+        valor: '',
+        data: resolveCreditDate(creditoQuando),
+        creditoQuando,
+      })
+      return
     }
+
+    onPatch({ descricao: labels[next], valor: '' })
   }
 
   const applyOvertime = () =>
   {
     if (!overtimePreview) return
     onPatch({
-      descricao: `[extra:hora-extra] ${overtimePreview.decimalHours}h · ${overtimePreview.label}`,
+      descricao: overtimeDescription(overtimePreview),
       valor: overtimePreview.total.toFixed(2).replace('.', ','),
       data: resolveCreditDate(creditoQuando),
       creditoQuando,
     })
+    toast.success(
+      `${fmt(overtimePreview.total)} no valor — salve o lançamento abaixo`,
+      {
+        description: creditoQuando === 'proximo-mes'
+          ? 'Agendado para o dia 1º do próximo mês.'
+          : 'Entra no caixa deste mês.',
+      },
+    )
   }
 
   const applyCreditoQuando = (when: ReceitaCreditoQuando) =>
@@ -164,7 +183,6 @@ export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSection
     { id: 'normal', label: 'Valor livre', hint: 'PIX, salário, qualquer valor', icon: Wallet },
     { id: 'hora-extra', label: 'Hora extra CLT', hint: 'Calcula com salário ÷ 220', icon: Clock },
     { id: 'freelance', label: 'Freelance', hint: 'Trabalho avulso', icon: Zap },
-    { id: 'bonus', label: 'Bônus', hint: 'Gratificação, PLR', icon: Gift },
     { id: 'outro', label: 'Outro extra', hint: 'Venda, reembolso…', icon: Wallet },
   ]
 
@@ -221,7 +239,7 @@ export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSection
                     saveIncomeProfile(gross)
                   }
                 }}
-                className="px-2 py-2 rounded-sl border border-line font-mono text-[9px] uppercase text-ink-muted hover:bg-chrome"
+                className="px-3 py-2 rounded-sl border border-line font-mono text-[10px] uppercase font-medium text-ink bg-card shadow-sm hover:bg-chrome hover:border-ink/15 transition-colors shrink-0"
               >
                 Salvar
               </button>
@@ -316,7 +334,7 @@ export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSection
             disabled={!overtimePreview}
             className="w-full py-2 rounded-sl bg-concluido/90 hover:bg-concluido text-white font-mono text-[10px] uppercase disabled:opacity-40"
           >
-            Confirmar valor no formulário
+            Confirmar valor e preencher lançamento
           </button>
         </div>
       )}

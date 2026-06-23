@@ -1,8 +1,5 @@
 import { ChevronDown } from 'lucide-react'
 import type { ReactNode } from 'react'
-import {
-  AXEL_TEXT_PRIMARY,
-} from '../../constants/axelSurfaces'
 
 interface DashboardCollapsibleProps
 {
@@ -52,14 +49,14 @@ export function DashboardCollapsible({
                   {section}
                 </span>
               )}
-              <p className={`text-sm sm:text-base font-semibold truncate ${AXEL_TEXT_PRIMARY}`}>
+              <p className="text-sm sm:text-base font-semibold truncate text-ink">
                 {title}
               </p>
             </div>
             {trailing}
           </div>
           {subtitle && (
-            <p className={`text-[13px] sm:text-sm mt-1 font-medium ${AXEL_TEXT_PRIMARY}`}>
+            <p className="text-[13px] sm:text-sm mt-1 font-medium text-ink-muted">
               {subtitle}
             </p>
           )}

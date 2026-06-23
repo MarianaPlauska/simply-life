@@ -23,6 +23,17 @@ export async function syncFinanceDailyBrief(input: {
   if (wasDailyBriefSentToday()) return false
 
   const brief = buildFinanceDailyBrief(input)
+
+  const precisaAvisar = brief.saldoDisponivel < 0
+    || brief.contasProximas > 0
+    || brief.categoriasEmAlerta.length > 0
+
+  if (!precisaAvisar)
+  {
+    markDailyBriefSent()
+    return false
+  }
+
   const uid = (await supabase.auth.getUser()).data.user?.id
   if (!uid) return false
 

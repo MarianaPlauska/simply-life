@@ -1,8 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
   X,
-  CheckCircle2,
-  CalendarClock,
   TrendingUp,
   PiggyBank,
 } from 'lucide-react'
@@ -19,9 +17,9 @@ import {
   resolvePaymentFromSelection,
 } from '../../lib/financePaymentMethod'
 import {
-  AXEL_BTN_PRIMARY,
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_BTN_PRIMARY_COMPACT,
+  AXEL_SEG_ACTIVE,
+  AXEL_SEG_IDLE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -99,7 +97,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const handleRemoveCategory = async (id: number) =>
   {
-    if (!confirm('Remover esta categoria?')) return
     await removeCategory(id)
     if (form.categoria_id === id)
     {
@@ -272,13 +269,21 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     form.categoria_id !== '' ? form.categoria_id : undefined,
   )
 
-  const saveLabel = form.tipo === 'receita'
-    ? 'receita'
+  const saveHint = form.tipo === 'receita'
+    ? 'Receita'
     : form.tipo === 'investimento'
-      ? 'investimento'
+      ? 'Investimento'
       : modo === 'futuro'
-        ? 'conta futura'
-        : 'gasto'
+        ? 'Conta futura'
+        : 'Gasto'
+
+  const paymentHint = form.tipo === 'despesa'
+    ? modo === 'futuro'
+      ? 'Agendado — aparece em próximas contas, sem descontar o saldo agora.'
+      : isCardPaymentSelection(form.payment, cards)
+        ? 'Abate o limite do cartão — entra na fatura.'
+        : 'Desconta da conta corrente na hora (PIX, débito, dinheiro…).'
+    : undefined
 
   return (
     <>
@@ -332,15 +337,13 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             />
           ) : (
           <>
-          <div className="grid grid-cols-3 gap-1 p-1 rounded-sl border border-line bg-chrome/40">
+          <div className="grid grid-cols-3 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40">
             {(['despesa', 'receita', 'investimento'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setTipo(t)}
-                className={`py-2 px-1 rounded-sl font-mono text-[9px] sm:text-[10px] uppercase ${
-                  form.tipo === t ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-                }`}
+                className={form.tipo === t ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
               >
                 {TIPO_LABELS[t]}
               </button>
@@ -348,24 +351,20 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           </div>
 
           {form.tipo === 'despesa' && (
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Quando</p>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-2 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40">
                 <button
                   type="button"
                   onClick={() => setModo('imediato')}
-                  className={`py-2 px-2 rounded-sl font-mono text-[10px] uppercase ${
-                    modo === 'imediato' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-                  }`}
+                  className={modo === 'imediato' ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
                 >
                   Já gastei
                 </button>
                 <button
                   type="button"
                   onClick={() => setModo('futuro')}
-                  className={`py-2 px-2 rounded-sl font-mono text-[10px] uppercase ${
-                    modo === 'futuro' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-                  }`}
+                  className={modo === 'futuro' ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
                 >
                   Conta futura
                 </button>
@@ -382,24 +381,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                   : 'Soma ao saldo da conta corrente agora.'}
               </span>
             </div>
-          )}
-
-          {form.tipo === 'receita' && (
-            <FinanceExtraIncomeSection
-              onPatch={(patch) =>
-              {
-                setForm((f) => ({
-                  ...f,
-                  ...(patch.descricao !== undefined ? { descricao: patch.descricao } : {}),
-                  ...(patch.valor !== undefined ? { valor: patch.valor } : {}),
-                  ...(patch.data !== undefined ? { data: patch.data } : {}),
-                }))
-                if (patch.creditoQuando)
-                {
-                  setReceitaCreditoQuando(patch.creditoQuando)
-                }
-              }}
-            />
           )}
 
           {form.tipo === 'investimento' && (
@@ -439,6 +420,24 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           </div>
 
           {form.tipo === 'receita' && (
+            <FinanceExtraIncomeSection
+              onPatch={(patch) =>
+              {
+                setForm((f) => ({
+                  ...f,
+                  ...(patch.descricao !== undefined ? { descricao: patch.descricao } : {}),
+                  ...(patch.valor !== undefined ? { valor: patch.valor } : {}),
+                  ...(patch.data !== undefined ? { data: patch.data } : {}),
+                }))
+                if (patch.creditoQuando)
+                {
+                  setReceitaCreditoQuando(patch.creditoQuando)
+                }
+              }}
+            />
+          )}
+
+          {form.tipo === 'receita' && (
             <div className="space-y-2">
               <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 Origem (opcional)
@@ -450,6 +449,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 onChange={(id) => setForm({ ...form, categoria_id: id })}
                 compact
                 onAddCategory={() => openCategories(null)}
+                onManageCategories={() => openCategories(null)}
                 onRemoveCategory={(id) => void handleRemoveCategory(id)}
               />
             </div>
@@ -470,6 +470,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                   compact
                   onAddCategory={() => openCategories(null)}
                   onAddSubcategory={(parentId) => openCategories(parentId)}
+                  onManageCategories={() => openCategories(null)}
                   onRemoveCategory={(id) => void handleRemoveCategory(id)}
                 />
               </div>
@@ -480,31 +481,24 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                   value={form.payment}
                   onChange={(payment) => setForm({ ...form, payment })}
                   variant="despesa"
+                  hint={
+                    form.fatura_reserva_id !== ''
+                      ? `${paymentHint} Valor abate da reserva da fatura.`
+                      : paymentHint
+                  }
                 />
-                {isCardPaymentSelection(form.payment, cards) && modo === 'imediato' && (
-                  <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                    Abate o limite do cartão — sincronizado com seus cartões cadastrados.
-                  </p>
-                )}
-                {!isCardPaymentSelection(form.payment, cards) && modo === 'imediato' && (
-                  <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                    Desconta da conta corrente na hora.
-                  </p>
-                )}
               </div>
 
               {openBills.length > 0 && (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                     Abater de fatura reservada (opcional)
                   </label>
-                  <div className="flex flex-wrap gap-1.5">
+                  <div className="flex flex-wrap gap-1">
                     <button
                       type="button"
                       onClick={() => setForm({ ...form, fatura_reserva_id: '' })}
-                      className={`uppercase max-w-full truncate ${
-                        form.fatura_reserva_id === '' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-                      }`}
+                      className={form.fatura_reserva_id === '' ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
                     >
                       Nenhuma
                     </button>
@@ -513,8 +507,8 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                         key={b.id}
                         type="button"
                         onClick={() => setForm({ ...form, fatura_reserva_id: b.id })}
-                        className={`uppercase max-w-full truncate ${
-                          form.fatura_reserva_id === b.id ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                        className={`max-w-full truncate ${
+                          form.fatura_reserva_id === b.id ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE
                         }`}
                       >
                         {b.titulo}
@@ -523,22 +517,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                   </div>
                 </div>
               )}
-
-              <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] ${
-                modo === 'futuro'
-                  ? 'border-atencao/35 bg-atencao/10 text-atencao'
-                  : 'border-concluido/35 bg-concluido/10 text-concluido'
-              }`}>
-                {modo === 'futuro' ? <CalendarClock size={14} className="shrink-0" /> : <CheckCircle2 size={14} className="shrink-0" />}
-                <span>
-                  {modo === 'futuro'
-                    ? 'Agendado — aparece em próximas contas.'
-                    : isCardPaymentSelection(form.payment, cards)
-                      ? 'Pago no cartão — abate a fatura.'
-                      : 'Pago — desconta da conta corrente.'}
-                  {form.fatura_reserva_id !== '' && ' · Valor abate da reserva da fatura.'}
-                </span>
-              </div>
             </>
           )}
 
@@ -553,6 +531,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 onChange={(id) => setForm({ ...form, categoria_id: id })}
                 compact
                 onAddCategory={() => openCategories(null)}
+                onManageCategories={() => openCategories(null)}
                 onRemoveCategory={(id) => void handleRemoveCategory(id)}
               />
             </div>
@@ -574,23 +553,27 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
         </div>
 
         {phase === 'form' && (
-        <div className="shrink-0 border-t border-line bg-card shadow-[0_-8px_24px_rgba(0,0,0,0.08)] px-4 sm:px-6 py-4 pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:pb-4 space-y-2">
+        <div className="shrink-0 border-t border-line bg-card shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 sm:px-6 pt-2.5 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:pb-3 flex flex-col gap-2">
           <button
             type="button"
             onClick={() => void handleAdd()}
             disabled={!form.descricao.trim() || !form.valor}
-            className={`w-full py-3.5 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
+            title={`Salvar ${saveHint.toLowerCase()}`}
+            className={`w-full py-1.5 px-3 ${AXEL_BTN_PRIMARY_COMPACT} disabled:opacity-40`}
           >
-            Salvar {saveLabel}
+            Salvar
           </button>
+          <p className={`text-center font-mono text-[8px] uppercase tracking-wide -mt-1 ${AXEL_TEXT_SECONDARY}`}>
+            {saveHint}
+          </p>
           {needsAxelCheck() && (
             <button
               type="button"
               onClick={() => void runAxelCheck()}
               disabled={!form.descricao.trim() || !form.valor}
-              className="w-full py-2.5 font-mono text-[10px] uppercase rounded-sl border border-accent/40 bg-accent/10 text-accent hover:bg-accent hover:text-white transition-colors disabled:opacity-40"
+              className="w-full py-1.5 font-mono text-[9px] uppercase rounded-sl border border-line text-ink-muted hover:border-accent/40 hover:text-accent transition-colors disabled:opacity-40"
             >
-              Consultar Axel antes de gastar
+              Consultar Axel
             </button>
           )}
         </div>

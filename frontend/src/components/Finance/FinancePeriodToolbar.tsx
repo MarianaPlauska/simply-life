@@ -1,7 +1,9 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_FIELD_INPUT,
+  AXEL_FORM_SEG_ACTIVE,
+  AXEL_FORM_SEG_IDLE,
+  AXEL_SEG_SHELL,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import type { FinancePeriodConfig, FinancePeriodMode, ResolvedFinancePeriod } from '../../lib/financePeriodFilter'
@@ -31,13 +33,13 @@ export function FinancePeriodToolbar({
   return (
     <div className="space-y-2">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex flex-wrap gap-1 w-full">
+        <div className={`flex flex-wrap gap-0.5 w-full sm:w-auto ${AXEL_SEG_SHELL}`}>
           {MODES.map((m) => (
             <button
               key={m.id}
               type="button"
               onClick={() => onChange({ ...config, mode: m.id })}
-              className={`shrink-0 ${config.mode === m.id ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE}`}
+              className={config.mode === m.id ? AXEL_FORM_SEG_ACTIVE : AXEL_FORM_SEG_IDLE}
             >
               {m.label}
             </button>
@@ -68,13 +70,13 @@ export function FinancePeriodToolbar({
       </div>
 
       {config.mode === 'quinzena' && (
-        <div className="flex gap-1">
+        <div className={`inline-flex gap-0.5 ${AXEL_SEG_SHELL}`}>
           {([1, 2] as const).map((part) => (
             <button
               key={part}
               type="button"
               onClick={() => onChange({ ...config, quinzenaPart: part })}
-              className={config.quinzenaPart === part ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE}
+              className={config.quinzenaPart === part ? AXEL_FORM_SEG_ACTIVE : AXEL_FORM_SEG_IDLE}
             >
               {part}ª quinzena
             </button>
@@ -90,7 +92,7 @@ export function FinancePeriodToolbar({
               type="date"
               value={config.customStart}
               onChange={(e) => onChange({ ...config, customStart: e.target.value })}
-              className="ml-1.5 bg-chrome border border-line rounded-sl px-2 py-1 text-[11px] text-ink font-mono"
+              className={`ml-1.5 ${AXEL_FIELD_INPUT} px-2 py-1 text-[11px] font-mono`}
             />
           </label>
           <label className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
@@ -99,7 +101,7 @@ export function FinancePeriodToolbar({
               type="date"
               value={config.customEnd}
               onChange={(e) => onChange({ ...config, customEnd: e.target.value })}
-              className="ml-1.5 bg-chrome border border-line rounded-sl px-2 py-1 text-[11px] text-ink font-mono"
+              className={`ml-1.5 ${AXEL_FIELD_INPUT} px-2 py-1 text-[11px] font-mono`}
             />
           </label>
         </div>

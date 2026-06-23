@@ -1,7 +1,7 @@
-import { CATEGORY_GRUPO_LABELS } from './financeDefaultCategories'
+import { CATEGORY_GRUPO_LABELS, CATEGORY_GRUPO_ORDER } from './financeDefaultCategories'
 import type { Category, CategoryGrupo, Transaction } from '../store/storeTypes'
 
-const GRUPO_ORDER: CategoryGrupo[] = ['casa', 'contas', 'futuro', 'geral']
+const GRUPO_ORDER = CATEGORY_GRUPO_ORDER
 
 export interface GrupoCategoryLine
 {

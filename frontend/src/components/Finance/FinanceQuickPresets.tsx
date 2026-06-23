@@ -3,10 +3,10 @@ import { toast } from 'sonner'
 import { Pencil, Settings2 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { ExpensePreset } from '../../lib/financeExpensePresets'
+import { resolvePresetIcon, resolvePresetColor } from '../../lib/financePresetIcons'
 import { FinancePresetEditor } from './FinancePresetEditor'
 import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_ROW_HOVER,
+  AXEL_SEG_IDLE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -97,30 +97,35 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
         </button>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1.5">
-        {presets.map((p) => (
+      <div className="flex flex-wrap gap-1">
+        {presets.map((p) =>
+        {
+          const Icon = resolvePresetIcon(p)
+          const color = resolvePresetColor(p, categories)
+          return (
           <button
             key={p.id}
             type="button"
             onClick={() => handlePresetClick(p)}
-            className={`group relative flex flex-col items-start gap-0.5 p-2 md:py-1.5 md:px-2 rounded-sl border border-line bg-card text-left min-h-[56px] md:min-h-0 ${AXEL_ROW_HOVER}`}
+            className={`group relative max-w-full inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-sl font-mono text-[10px] uppercase tracking-wide transition-colors min-h-[30px] ${AXEL_SEG_IDLE}`}
           >
-            <span className="text-base md:text-sm leading-none">{p.emoji ?? '💸'}</span>
-            <span className={`text-[11px] md:text-[10px] font-medium leading-tight line-clamp-2 ${AXEL_TEXT_PRIMARY}`}>
+            <Icon size={12} className="w-3 h-3 shrink-0" style={{ color }} strokeWidth={2} />
+            <span className="truncate max-w-[88px] sm:max-w-[120px] font-medium normal-case text-[11px]">
               {p.label}
             </span>
             {p.valor != null && p.valor > 0 && (
-              <span className="font-mono text-[9px] tabular-nums text-accent">
+              <span className="font-mono text-[9px] tabular-nums text-accent normal-case">
                 {fmt(p.valor)}
               </span>
             )}
             <Pencil
               size={10}
-              className="absolute top-1.5 right-1.5 text-ink-muted opacity-0 group-hover:opacity-100 md:opacity-60"
+              className="absolute top-1 right-1 text-ink-muted opacity-0 group-hover:opacity-100"
               aria-hidden
             />
           </button>
-        ))}
+          )
+        })}
       </div>
 
       {pending && (
@@ -132,8 +137,14 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
             aria-label="Cancelar"
           />
           <div className="relative border border-line rounded-sl bg-card p-4 w-full max-w-xs shadow-xl">
-            <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>
-              {pending.emoji} {pending.label}
+            <p className={`text-sm font-medium flex items-center gap-2 ${AXEL_TEXT_PRIMARY}`}>
+              {(() =>
+              {
+                const Icon = resolvePresetIcon(pending)
+                const color = resolvePresetColor(pending, categories)
+                return <Icon size={16} className="w-4 h-4 shrink-0" style={{ color }} />
+              })()}
+              {pending.label}
             </p>
             <p className={`text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               Ajuste o valor antes de lançar
@@ -161,7 +172,7 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
             <button
               type="button"
               onClick={confirmPending}
-              className={`mt-3 w-full py-2.5 font-mono text-[10px] uppercase ${AXEL_FILTER_PILL_ACTIVE}`}
+              className={`mt-3 w-full py-2 font-mono text-[10px] uppercase bg-accent hover:bg-accent-hover text-white font-bold rounded-sl`}
             >
               Lançar
             </button>

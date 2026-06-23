@@ -1,10 +1,10 @@
 import type { MouseEvent } from 'react'
-import { Check, CheckCheck, Clock, Info, Heart, ListTodo, Wallet2 } from 'lucide-react'
+import { Check, CheckCheck, Clock, Info, Heart, ListTodo, Wallet2, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { Notificacao } from '../../store/storeTypes'
 import { resolveNotificationAction } from '../../lib/notificationRoutes'
-import { isNotificacaoLida, listPrazosUrgentes } from '../../lib/notificacaoUtils'
+import { isNotificacaoLida, listNotificacoesAcionaveis, listPrazosUrgentes, listTarefasAtrasadas } from '../../lib/notificacaoUtils'
 import { formatDueMeta } from '../../lib/temporalHorizon'
 import {
   AXEL_TEXT_PRIMARY,
@@ -39,9 +39,17 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
   const markNotificacaoRead = useTaskStore((s) => s.markNotificacaoRead)
   const markAllNotificacoesRead = useTaskStore((s) => s.markAllNotificacoesRead)
 
+  const tarefasAtrasadas = listTarefasAtrasadas(tarefas)
   const prazosUrgentes = listPrazosUrgentes(tarefas)
-  const unreadCount = notificacoes.filter((n) => !isNotificacaoLida(n.lida)).length
+  const notificacoesPendentes = listNotificacoesAcionaveis(notificacoes)
+  const unreadCount = notificacoesPendentes.length
   const hasDismissible = unreadCount > 0
+
+  const goOverdueTask = (taskId: number) =>
+  {
+    onClose()
+    navigate(`/kanban?bucket=vencido&task=${taskId}`)
+  }
 
   const goResolve = (n: Notificacao) =>
   {
@@ -64,7 +72,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
     void markNotificacaoRead(id)
   }
 
-  const empty = prazosUrgentes.length === 0 && notificacoes.length === 0
+  const empty = tarefasAtrasadas.length === 0 && prazosUrgentes.length === 0 && notificacoesPendentes.length === 0
 
   return (
     <div className="absolute right-0 top-10 w-[min(100vw-1.5rem,20rem)] rounded-sl border border-line bg-card shadow-lg overflow-hidden z-[100]">
@@ -88,6 +96,40 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
           </div>
         ) : (
           <>
+            {tarefasAtrasadas.map(({ task }) =>
+            {
+              const due = formatDueMeta(task.data_vencimento)
+              return (
+                <div
+                  key={`atraso-${task.id}`}
+                  className="flex items-stretch border-b border-line bg-urgente/10"
+                >
+                  <button
+                    type="button"
+                    onClick={() => goOverdueTask(task.id)}
+                    className="flex-1 min-w-0 flex items-start text-left hover:bg-chrome/50 transition-colors"
+                    title="Abrir tarefa atrasada"
+                  >
+                    <div className="w-[3px] self-stretch shrink-0 bg-urgente" />
+                    <div className="flex items-start gap-2.5 px-3 py-2.5 flex-1 min-w-0">
+                      <AlertTriangle className="w-3.5 h-3.5 text-urgente mt-0.5 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-[12px] truncate font-medium ${AXEL_TEXT_PRIMARY}`}>
+                          Atrasada · {task.titulo}
+                        </div>
+                        <div className={`text-[11px] truncate ${AXEL_TEXT_SECONDARY}`}>
+                          {due ? `Venceu ${due}` : 'Prazo passou'}
+                        </div>
+                        <span className="font-mono text-[9px] text-urgente mt-0.5 inline-block">
+                          Resolver no Kanban →
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )
+            })}
+
             {prazosUrgentes.map(({ task }) =>
             {
               const due = formatDueMeta(task.data_vencimento)
@@ -122,7 +164,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
               )
             })}
 
-            {notificacoes.slice(0, 12).map((n) =>
+            {notificacoesPendentes.slice(0, 12).map((n) =>
             {
               const lida = isNotificacaoLida(n.lida)
               const TipoIcon = tipoIcon(n)
@@ -173,7 +215,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
           </>
         )}
       </div>
-      {prazosUrgentes.length > 0 && (
+      {(tarefasAtrasadas.length > 0 || prazosUrgentes.length > 0) && (
         <p className="px-3 py-2 border-t border-line font-mono text-[9px] text-ink-muted">
           Alertas de prazo ficam até você concluir a tarefa.
         </p>

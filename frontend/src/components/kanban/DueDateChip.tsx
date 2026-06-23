@@ -25,7 +25,7 @@ export function DueDateChip({ date, compact = false }: DueDateChipProps)
   {
     return (
       <span
-        className={`inline-flex items-center gap-0.5 font-mono text-[9px] tabular-nums px-1 py-0.5 rounded-sm border ${toneClass}`}
+        className={`inline-flex items-center gap-0.5 font-mono tabular-nums ${toneClass}`}
         title={date ? new Date(date).toLocaleString('pt-BR') : undefined}
       >
         {meta.label}
@@ -35,7 +35,7 @@ export function DueDateChip({ date, compact = false }: DueDateChipProps)
 
   return (
     <span
-      className={`inline-flex items-center gap-1 font-mono text-[10px] tabular-nums px-1.5 py-0.5 rounded-sl border ${toneClass}`}
+      className={`inline-flex items-center gap-1 font-mono tabular-nums ${toneClass}`}
       title={date ? new Date(date).toLocaleString('pt-BR') : undefined}
     >
       <Calendar size={10} strokeWidth={1.5} aria-hidden />

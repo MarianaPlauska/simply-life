@@ -1,38 +1,41 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Pill, Droplets, Dumbbell, Beef, HeartPulse, Sparkles,
-  Plus, Trash2, Minus, BookOpen, Moon, Brain, Sun,
+  Plus, Trash2, Minus, BookOpen, Moon, Brain, Sun, Sparkles, HeartPulse, LayoutGrid,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { HabitoDiario } from '../../store/useTaskStore'
-import { MoodTracker } from './MoodTracker'
-import { JournalEntry } from './JournalEntry'
+import { buildHealthRitual } from '../../lib/healthRitual'
+import { countDoseProgress } from '../../lib/medicamentosSchedule'
+import {
+  parseHealthRoute,
+  healthSectionHash,
+  cuidadosTabHash,
+  type HealthSection,
+  type CuidadosTab,
+} from '../../lib/healthRoute'
+import { HealthDiaryTab } from './HealthDiaryTab'
 import { WeeklyReviewCard } from './WeeklyReviewCard'
 import { BemEstarWelcomePanel } from '../wellbeing/BemEstarWelcomePanel'
-import { WaterTrackerCard } from './WaterTrackerCard'
-import { ProteinGoalCard } from './ProteinGoalCard'
-import { WorkoutPlannerCard } from './WorkoutPlannerCard'
-import { MedicamentosPanel } from './MedicamentosPanel'
 import { HealthTodayPanel } from './HealthTodayPanel'
-import { HealthMealsQuickLog } from './HealthMealsQuickLog'
+import { HealthCuidadosPanel } from './HealthCuidadosPanel'
+import { healthHeaderSubtitle } from './healthSectionMeta'
 import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT } from '../../constants/axelSurfaces'
 
-// HealthView — hub mobile-first: aba "Hoje" + seções com alvos de toque amplos
+// HealthView — hub com 4 seções + subabas em Cuidados
 
-type HealthTab = 'hoje' | 'hidratacao' | 'alimentacao' | 'academia' | 'medicamentos' | 'bem_estar'
-
-const TABS: { id: HealthTab; label: string; short: string; Icon: typeof Droplets; color: string }[] = [
-  { id: 'hoje',          label: 'Hoje',          short: 'Hoje',  Icon: Sun,        color: 'text-accent'      },
-  { id: 'hidratacao',    label: 'Hidratação',    short: 'Água',  Icon: Droplets,   color: 'text-sky-400'     },
-  { id: 'alimentacao',   label: 'Alimentação',   short: 'Comida', Icon: Beef,       color: 'text-amber-400'  },
-  { id: 'academia',      label: 'Academia',      short: 'Treino', Icon: Dumbbell,   color: 'text-ink'        },
-  { id: 'medicamentos',  label: 'Medicamentos',  short: 'Meds',  Icon: Pill,       color: 'text-teal-400'    },
-  { id: 'bem_estar',     label: 'Bem-estar',     short: 'Humor', Icon: HeartPulse, color: 'text-rose-400'   },
+const SECTIONS: {
+  id: HealthSection
+  label: string
+  short: string
+  Icon: typeof Sun
+}[] = [
+  { id: 'hoje', label: 'Hoje', short: 'Hoje', Icon: Sun },
+  { id: 'cuidados', label: 'Cuidados', short: 'Cuidados', Icon: LayoutGrid },
+  { id: 'diario', label: 'Diário', short: 'Diário', Icon: BookOpen },
+  { id: 'bem_estar', label: 'Bem-estar', short: 'Humor', Icon: HeartPulse },
 ]
-
-const VALID_TABS = new Set<string>(TABS.map((t) => t.id))
 
 const ICON_MAP: Record<string, React.ElementType> = {
   sono: Moon, leitura: BookOpen, meditacao: Brain, customizado: Sparkles,
@@ -46,41 +49,60 @@ const PRESET_HABITOS = [
 
 const CORE_HEALTH = new Set(['agua', 'proteina', 'treino'])
 
-function parseTabFromHash(hash: string): HealthTab
-{
-  const raw = hash.replace('#', '')
-  if (raw && VALID_TABS.has(raw))
-  {
-    return raw as HealthTab
-  }
-  return 'hoje'
-}
-
 export function HealthView()
 {
   const location = useLocation()
   const navigate = useNavigate()
-  const [tab, setTab] = useState<HealthTab>(() => parseTabFromHash(location.hash))
+  const initial = parseHealthRoute(location.hash)
+  const [section, setSection] = useState<HealthSection>(initial.section)
+  const [cuidadosTab, setCuidadosTab] = useState<CuidadosTab>(initial.cuidados)
 
-  const selectTab = useCallback((id: HealthTab) =>
+  const selectSection = useCallback((id: HealthSection) =>
   {
-    setTab(id)
-    navigate(`/saude#${id}`, { replace: true })
+    setSection(id)
+    const hash = healthSectionHash(id, cuidadosTab)
+    navigate(`/saude#${hash}`, { replace: true })
+  }, [navigate, cuidadosTab])
+
+  const selectCuidadosTab = useCallback((tab: CuidadosTab) =>
+  {
+    setSection('cuidados')
+    setCuidadosTab(tab)
+    navigate(`/saude#${cuidadosTabHash(tab)}`, { replace: true })
   }, [navigate])
+
+  const goFromToday = useCallback((target: string) =>
+  {
+    if (target === 'bem_estar')
+    {
+      selectSection('bem_estar')
+      return
+    }
+    if (target === 'hidratacao' || target === 'alimentacao' || target === 'academia' || target === 'medicamentos')
+    {
+      selectCuidadosTab(target)
+    }
+  }, [selectSection, selectCuidadosTab])
 
   useEffect(() =>
   {
-    const fromHash = parseTabFromHash(location.hash)
-    if (fromHash !== tab)
+    const route = parseHealthRoute(location.hash)
+    if (route.section !== section)
     {
-      setTab(fromHash)
+      setSection(route.section)
     }
-  }, [location.hash, tab])
+    if (route.cuidados !== cuidadosTab)
+    {
+      setCuidadosTab(route.cuidados)
+    }
+  }, [location.hash, section, cuidadosTab])
 
   const medicamentos = useTaskStore((s) => s.medicamentos)
+  const medicamentoTomadas = useTaskStore((s) => s.medicamentoTomadas)
+  const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
+  const habitos = useTaskStore((s) => s.habitos)
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
   const fetchMedicamentoTomadas = useTaskStore((s) => s.fetchMedicamentoTomadas)
-  const habitos = useTaskStore((s) => s.habitos)
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
   const fetchHabitosStreaks = useTaskStore((s) => s.fetchHabitosStreaks)
   const fetchSessaoTreinoAtiva = useTaskStore((s) => s.fetchSessaoTreinoAtiva)
@@ -95,6 +117,7 @@ export function HealthView()
   const fetchHumorMes = useTaskStore((s) => s.fetchHumorMes)
   const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje)
   const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia)
+  const fetchEntradasRecentes = useTaskStore((s) => s.fetchEntradasRecentes)
 
   useEffect(() =>
   {
@@ -109,14 +132,32 @@ export function HealthView()
     fetchHumorMes()
     fetchDiarioHoje()
     fetchPromptDoDia()
+    fetchEntradasRecentes(60)
   }, [
     fetchMedicamentos, fetchMedicamentoTomadas, fetchHabitos, fetchHabitosStreaks, fetchSessaoTreinoAtiva, fetchSessoesTreinoHoje,
-    fetchHumorHoje, fetchHumorSemana, fetchHumorMes, fetchDiarioHoje, fetchPromptDoDia,
+    fetchHumorHoje, fetchHumorSemana, fetchHumorMes, fetchDiarioHoje, fetchPromptDoDia, fetchEntradasRecentes,
   ])
 
   const habitosGerais = useMemo(() => habitos.filter((h) => !CORE_HEALTH.has(h.tipo)), [habitos])
-  const totalMeds = medicamentos.length
-  const medsTomados = medicamentos.filter((m) => m.tomado).length
+
+  const ritualSnapshot = useMemo(() =>
+  {
+    const agua = habitos.find((h) => h.tipo === 'agua')
+    const doseProgress = countDoseProgress(medicamentos, medicamentoTomadas)
+    return buildHealthRitual({
+      humorHojeCount: humorHojeLista.length,
+      aguaCopos: agua?.progresso_atual ?? 0,
+      aguaMeta: agua?.meta_diaria ?? 8,
+      medicamentosTotal: doseProgress.total || medicamentos.length,
+      medicamentosTomados: doseProgress.tomados,
+    })
+  }, [habitos, humorHojeLista.length, medicamentos, medicamentoTomadas])
+
+  const headerLine = healthHeaderSubtitle(section, cuidadosTab, {
+    ritualPct: ritualSnapshot.percent,
+    ritualDone: ritualSnapshot.doneCount,
+    ritualTotal: ritualSnapshot.totalApplicable,
+  })
 
   return (
     <div className={`w-full min-h-0 flex flex-col ${AXEL_CANVAS} ${AXEL_MAIN_PT} ${AXEL_MAIN_PB_MOBILE}`}>
@@ -130,32 +171,32 @@ export function HealthView()
               Vitalidade no seu ritmo — conectada ao Kanban, Dashboard e AXEL.
             </p>
           </div>
-          <p className="font-mono text-[10px] text-ink-muted tabular-nums">
-            {medsTomados}/{totalMeds} medicamentos · ritual zera a cada novo dia
+          <p className="font-mono text-[10px] text-ink-muted tabular-nums leading-relaxed">
+            {headerLine}
           </p>
         </header>
 
         <nav
-          className="mt-3 -mx-1"
+          className="mt-3"
           aria-label="Seções de saúde"
         >
-          <div className="flex gap-1 overflow-x-auto scrollbar-none pb-1">
-            {TABS.map(({ id, label, short, Icon, color }) =>
+          <div className="flex gap-1 p-1 rounded-sl bg-chrome border border-line">
+            {SECTIONS.map(({ id, label, short, Icon }) =>
             {
-              const active = tab === id
+              const active = section === id
               return (
                 <button
                   key={id}
                   type="button"
-                  onClick={() => selectTab(id)}
+                  onClick={() => selectSection(id)}
                   className={[
-                    'flex items-center gap-1.5 px-3 py-2 rounded-sl text-[11px] font-mono whitespace-nowrap shrink-0 transition-colors',
+                    'flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-sl text-[11px] font-mono whitespace-nowrap transition-colors min-h-[44px]',
                     active
-                      ? 'bg-accent-muted text-ink border border-accent/30'
-                      : 'text-ink-muted border border-transparent hover:bg-chrome hover:text-ink',
+                      ? 'bg-card text-ink border border-line shadow-sm'
+                      : 'text-ink-muted border border-transparent hover:text-ink',
                   ].join(' ')}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${active ? color : ''}`} />
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${active && id === 'bem_estar' ? 'text-rose-400' : active ? 'text-accent' : ''}`} />
                   <span className="sm:hidden">{short}</span>
                   <span className="hidden sm:inline">{label}</span>
                 </button>
@@ -165,44 +206,21 @@ export function HealthView()
         </nav>
 
         <div className="flex-1 py-4 sm:py-5 space-y-4 sm:space-y-5 min-h-0">
-          {tab === 'hoje' && (
-            <HealthTodayPanel onSelectTab={(t) => selectTab(t as HealthTab)} />
+          {section === 'hoje' && (
+            <HealthTodayPanel onSelectTab={goFromToday} />
           )}
 
-          {tab === 'hidratacao' && (
-            <section className="w-full">
-              <WaterTrackerCard />
-            </section>
+          {section === 'cuidados' && (
+            <HealthCuidadosPanel active={cuidadosTab} onSelect={selectCuidadosTab} />
           )}
 
-          {tab === 'alimentacao' && (
-            <section className="grid grid-cols-1 gap-4 w-full">
-              <ProteinGoalCard />
-              <HealthMealsQuickLog />
-            </section>
+          {section === 'diario' && (
+            <HealthDiaryTab />
           )}
 
-          {tab === 'academia' && (
-            <section className="space-y-4">
-              <WorkoutPlannerCard />
-              <HabitosExtras
-                habitos={habitosGerais.filter((h) => h.tipo === 'exercicio' || h.tipo === 'customizado')}
-                onAdd={addHabito} onInc={incrementHabito} onDec={decrementHabito}
-                onDel={deleteHabito} onConcluir={concluirHabito}
-                preset={[]}
-              />
-            </section>
-          )}
-
-          {tab === 'medicamentos' && (
-            <MedicamentosPanel />
-          )}
-
-          {tab === 'bem_estar' && (
+          {section === 'bem_estar' && (
             <section className="space-y-4">
               <BemEstarWelcomePanel />
-              <MoodTracker />
-              <JournalEntry />
               <WeeklyReviewCard />
               <HabitosExtras
                 habitos={habitosGerais.filter((h) => h.tipo !== 'exercicio')}

@@ -62,7 +62,17 @@ function AvatarFrame({
   )
 }
 
-/** Olhos no mesmo estilo da coruja — círculos com pupilas */
+const AVATAR_PLATE = 'var(--sl-surface, #FFFFFF)'
+const AVATAR_PLATE_STROKE = 'var(--sl-border-subtle, rgba(228,228,231,0.55))'
+
+function AvatarPlate()
+{
+  return (
+    <>
+      <rect width="64" height="64" rx="14" fill={AVATAR_PLATE} stroke={AVATAR_PLATE_STROKE} strokeWidth="1" />
+    </>
+  )
+}
 function OwlEyes({ leftX, rightX, y, r = 4 }: { leftX: number; rightX: number; y: number; r?: number })
 {
   const pupil = r * 0.45
@@ -120,8 +130,8 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   {
     return (
       <svg {...svgProps}>
-        <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(193,127,58,0.15))" />
-        <ellipse cx="32" cy="38" rx="21" ry="18" fill="#C17F3A" />
+        <AvatarPlate />
+        <ellipse cx="32" cy="38" rx="21" ry="18" fill="#38B2AC" />
         <ellipse cx="32" cy="40" rx="14" ry="11" fill="#D4924A" opacity="0.55" />
         <OwlEyes leftX={24} rightX={40} y={30} r={3.5} />
         <path d="M32 37 L28 43 L36 43 Z" fill="#E8A84A" />
@@ -135,10 +145,10 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   {
     return (
       <svg {...svgProps}>
-        <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(193,127,58,0.14))" />
+        <AvatarPlate />
         {/* orelhas */}
-        <path d="M17 30 L22 14 L28 28 Z" fill="#C17F3A" />
-        <path d="M47 30 L42 14 L36 28 Z" fill="#C17F3A" />
+        <path d="M17 30 L22 14 L28 28 Z" fill="#38B2AC" />
+        <path d="M47 30 L42 14 L36 28 Z" fill="#38B2AC" />
         <path d="M19 28 L23 17 L27 27 Z" fill="#F5E6D3" opacity="0.85" />
         <path d="M45 28 L41 17 L37 27 Z" fill="#F5E6D3" opacity="0.85" />
         {/* cabeça */}
@@ -160,7 +170,7 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   {
     return (
       <svg {...svgProps}>
-        <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(74,124,89,0.14))" />
+        <AvatarPlate />
         <ellipse cx="32" cy="18" rx="7" ry="10" fill="#6B9E78" opacity="0.9" />
         <ellipse cx="32" cy="46" rx="7" ry="10" fill="#6B9E78" opacity="0.9" />
         <ellipse cx="16" cy="32" rx="10" ry="7" fill="#5C9468" opacity="0.9" />
@@ -183,12 +193,12 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   {
     return (
       <svg {...svgProps}>
-        <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(193,127,58,0.15))" />
+        <AvatarPlate />
         <circle cx="18" cy="22" r="9" fill="#A66B2A" />
         <circle cx="46" cy="22" r="9" fill="#A66B2A" />
-        <circle cx="18" cy="22" r="5.5" fill="#C17F3A" />
-        <circle cx="46" cy="22" r="5.5" fill="#C17F3A" />
-        <ellipse cx="32" cy="38" rx="22" ry="19" fill="#C17F3A" />
+        <circle cx="18" cy="22" r="5.5" fill="#38B2AC" />
+        <circle cx="46" cy="22" r="5.5" fill="#38B2AC" />
+        <ellipse cx="32" cy="38" rx="22" ry="19" fill="#38B2AC" />
         <ellipse cx="32" cy="42" rx="14" ry="11" fill="#D4924A" opacity="0.55" />
         <OwlEyes leftX={24} rightX={40} y={32} r={3.5} />
         <ellipse cx="32" cy="41" rx="4" ry="3" fill="#2A2520" />
@@ -201,7 +211,7 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   {
     return (
       <svg {...svgProps}>
-        <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(193,127,58,0.12))" />
+        <AvatarPlate />
         <path d="M14 34 L18 16 L26 30 Z" fill="#8B7355" />
         <path d="M50 34 L46 16 L38 30 Z" fill="#8B7355" />
         <ellipse cx="32" cy="38" rx="20" ry="17" fill="#B8956A" />
@@ -219,7 +229,7 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   {
     return (
       <svg {...svgProps}>
-        <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(193,127,58,0.13))" />
+        <AvatarPlate />
         <ellipse cx="22" cy="18" rx="6" ry="14" fill="#E8D4C4" />
         <ellipse cx="42" cy="18" rx="6" ry="14" fill="#E8D4C4" />
         <ellipse cx="22" cy="18" rx="3.5" ry="10" fill="#F5E6D3" opacity="0.8" />
@@ -236,8 +246,8 @@ function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGEleme
   // fallback coruja
   return (
     <svg {...svgProps}>
-      <rect width="64" height="64" rx="14" fill="var(--sl-accent-muted, rgba(193,127,58,0.15))" />
-      <ellipse cx="32" cy="38" rx="21" ry="18" fill="#C17F3A" />
+      <AvatarPlate />
+      <ellipse cx="32" cy="38" rx="21" ry="18" fill="#38B2AC" />
       <ellipse cx="32" cy="40" rx="14" ry="11" fill="#D4924A" opacity="0.55" />
       <OwlEyes leftX={24} rightX={40} y={30} r={3.5} />
       <path d="M32 37 L28 43 L36 43 Z" fill="#E8A84A" />

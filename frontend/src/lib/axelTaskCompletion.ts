@@ -52,41 +52,33 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
 
   if (streakQualified && incremented)
   {
-    const streakLabel = `Ofensiva ${streakCount} ${streakCount === 1 ? 'dia' : 'dias'}!`
-    const mq = isMainQuestTask(tarefa.id) ? ` · Main Quest +${mainQuestBonusXp(baseXp)} XP` : ''
-    toast.success(`+${FOCUS_XP_BONUS} XP | ${streakLabel}`, {
-      duration: 3200,
+    const streakLabel = streakCount === 1 ? '1 dia de ofensiva' : `${streakCount} dias de ofensiva`
+    const mq = isMainQuestTask(tarefa.id) ? ' · Missão principal concluída' : ''
+    toast.success(`Tarefa concluída · +${FOCUS_XP_BONUS} XP`, {
+      duration: 5500,
       position: 'bottom-right',
       className: 'font-mono text-sm',
-      description: `Prova de trabalho validada${mq}`,
+      description: `Ofensiva atualizada (${streakLabel})${mq}`,
     })
     return
   }
 
   if (streakQualified)
   {
-    toast.success(`+${FOCUS_XP_BONUS} XP | Ofensiva mantida!`, {
-      duration: 2800,
+    toast.success(`Tarefa concluída · +${FOCUS_XP_BONUS} XP`, {
+      duration: 5000,
       position: 'bottom-right',
       className: 'font-mono text-sm',
+      description: 'Ofensiva do dia mantida — bom trabalho.',
     })
     return
   }
 
-  const hints: string[] = []
-  if (!proof.scoreOk) hints.push(`score > 70 (atual ${Math.round(score)})`)
-  if (!proof.focusOk)
-  {
-    hints.push(
-      `timer ≥ 15 min ou estimativa cumprida (${proof.focusMinutesOnTask} min registrados)`,
-    )
-  }
-
-  toast.success(`+${FOCUS_XP_BONUS} XP | Tarefa concluída`, {
-    duration: 3600,
+  toast.success(`Tarefa concluída · +${FOCUS_XP_BONUS} XP`, {
+    duration: 5000,
     position: 'bottom-right',
     className: 'font-mono text-sm',
-    description: `Sem ofensiva: ${hints.join(' · ')}`,
+    description: 'Para contar na ofensiva: foque pelo menos 15 min na tarefa ou cumpra o tempo estimado.',
   })
 }
 
@@ -97,14 +89,14 @@ export function showFocusRewardToast(earlyFinish: boolean): void
 
   toast.success(
     earlyFinish
-      ? `+${FOCUS_XP_BONUS} XP | Sessão registrada`
-      : `+${FOCUS_XP_BONUS} XP | Sessão de foco registrada`,
+      ? `Sessão registrada · +${FOCUS_XP_BONUS} XP`
+      : `Sessão de foco · +${FOCUS_XP_BONUS} XP`,
     {
-      duration: 2800,
+      duration: 5000,
       position: 'bottom-right',
       description: streakActive
-        ? 'Bônus por concluir antes do estimado'
-        : 'Minutos contam no heatmap',
+        ? 'Você concluiu antes do tempo estimado.'
+        : 'Os minutos entram no seu histórico de foco.',
       className: 'font-mono text-sm',
     },
   )

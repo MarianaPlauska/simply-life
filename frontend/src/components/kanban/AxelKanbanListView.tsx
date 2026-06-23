@@ -3,10 +3,18 @@ import { ArrowDown, ArrowUp, ArrowUpDown, CheckCircle2 } from 'lucide-react'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { getProjectTag } from '../../lib/contextRationale'
 import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_CARD_META,
+  AXEL_PROGRESS,
+  AXEL_PROGRESS_THICK,
+  AXEL_ROW_HOVER,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+  AXEL_VIEW_SWITCHER_SHELL,
+  AXEL_VIEW_TAB_ACTIVE,
+  AXEL_VIEW_TAB_IDLE,
 } from '../../constants/axelSurfaces'
 import { useSubtaskProgress } from '../../lib/subtaskProgress'
+import { formatDaysRemaining } from '../../lib/daysRemaining'
 import {
   DUE_BUCKET_LABELS,
   resolveDueBucket,
@@ -15,13 +23,6 @@ import {
 import { urgencyScoreClass, urgencyStripeClass } from '../../lib/kanbanVisual'
 import { DueDateChip } from './DueDateChip'
 import { AXEL_KANBAN_TABLE } from '../../constants/axelKanbanTheme'
-import {
-  AXEL_PROGRESS,
-  AXEL_PROGRESS_THICK,
-  AXEL_ROW_HOVER,
-  AXEL_TEXT_PRIMARY,
-  AXEL_TEXT_SECONDARY,
-} from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 import type { TemporalHorizon } from '../../lib/temporalHorizon'
 
@@ -59,6 +60,24 @@ function cleanTitle(titulo: string): string
   return titulo.replace(/\[(AXEL|FRONTEND|CORE|HUB|API|UX|BACKEND|Urgente)\]\s*/gi, '').trim()
 }
 
+const BUCKET_SHORT: Record<DueBucket, string> = {
+  vencido: 'Atrasada',
+  hoje: 'Hoje',
+  esta_semana: 'Esta semana',
+  proxima_semana: 'Próx. semanas',
+  sem_prazo: 'Sem prazo',
+  concluido: 'Concluída',
+}
+
+function priorityHumanLabel(score: number): string
+{
+  if (score >= 90) return 'Crítica'
+  if (score >= 75) return 'Alta'
+  if (score >= 50) return 'Média'
+  if (score > 0) return 'Baixa'
+  return 'Normal'
+}
+
 function ListMobileCard({
   tarefa,
   onOpen,
@@ -71,30 +90,49 @@ function ListMobileCard({
   const bucket = resolveDueBucket(tarefa)
   const tag = getProjectTag(tarefa)
   const { done, total } = useSubtaskProgress(tarefa.id, tarefa.subtarefas)
+  const dueMeta = formatDaysRemaining(tarefa.data_vencimento)
+  const prazoLabel = tarefa.data_vencimento ? dueMeta.label : BUCKET_SHORT[bucket]
 
   return (
     <article
-      className={`rounded-sl border border-line bg-card p-3 space-y-2 ${urgencyStripeClass(score)}`}
+      className={`rounded-lg border border-line bg-card shadow-sl p-2.5 space-y-1.5 ${urgencyStripeClass(score)}`}
     >
       <button
         type="button"
         onClick={() => onOpen(tarefa)}
         className="w-full text-left min-w-0"
       >
-        <p className={`text-sm font-display truncate ${AXEL_TEXT_PRIMARY}`}>
+        <p className="text-sm font-sans font-medium text-zinc-800 dark:text-ink truncate">
           {cleanTitle(tarefa.titulo)}
         </p>
-        <div className="flex flex-wrap items-center gap-2 mt-1.5 text-[10px] font-mono">
-          <span className={AXEL_TEXT_SECONDARY}>{DUE_BUCKET_LABELS[bucket]}</span>
-          <DueDateChip date={tarefa.data_vencimento} compact />
-          <span className={`tabular-nums ${urgencyScoreClass(score)}`} title="Prioridade calculada pelo AXEL">
-            P{tarefa.score_urgencia ?? 0}
-          </span>
+
+        <div className={AXEL_CARD_META}>
+          <div className="flex items-center justify-between gap-2 text-[11px]">
+            <span className="text-zinc-500">Prazo</span>
+            <span className="text-zinc-800 dark:text-ink font-medium tabular-nums">{prazoLabel}</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 text-[11px]">
+            <span className="text-zinc-500">Prioridade</span>
+            <span className={`font-medium ${urgencyScoreClass(score)}`}>
+              {priorityHumanLabel(score)}
+              {score > 0 && (
+                <span className="text-zinc-400 dark:text-zinc-500 font-normal ml-1">
+                  ({score})
+                </span>
+              )}
+            </span>
+          </div>
           {total > 0 && (
-            <span className={AXEL_TEXT_SECONDARY}>{done}/{total}</span>
+            <div className="flex items-center justify-between gap-2 text-[11px]">
+              <span className="text-zinc-500">Subtarefas</span>
+              <span className="text-zinc-800 dark:text-ink font-medium tabular-nums">
+                {done} de {total} feitas
+              </span>
+            </div>
           )}
         </div>
-        <p className={`text-[10px] mt-1 uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+
+        <p className="text-[11px] mt-1.5 text-zinc-500 capitalize">
           {tag} · {tarefa.status.replace('_', ' ')}
         </p>
       </button>
@@ -187,9 +225,7 @@ function FilterChip({
     <button
       type="button"
       onClick={onClick}
-      className={`px-2.5 py-1 rounded-sl font-mono text-[10px] uppercase tracking-wide transition-colors ${
-        active ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
-      }`}
+      className={active ? AXEL_VIEW_TAB_ACTIVE : AXEL_VIEW_TAB_IDLE}
     >
       {label}
     </button>
@@ -281,7 +317,7 @@ export function AxelKanbanListView({
   return (
     <div className={`flex-1 min-h-0 flex flex-col gap-2 ${AXEL_KANBAN_TABLE}`}>
       <div className="shrink-0 flex flex-col gap-2 px-1">
-        <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto scrollbar-none" role="group" aria-label="Filtrar lista">
+        <div className={`${AXEL_VIEW_SWITCHER_SHELL} w-full sm:w-auto overflow-x-auto scrollbar-none`} role="group" aria-label="Filtrar lista">
           {LIST_FILTERS.map((f) => (
             <FilterChip
               key={f.id}
@@ -290,12 +326,14 @@ export function AxelKanbanListView({
               onClick={() => setListFilter(f.id)}
             />
           ))}
+        </div>
+        <div className="flex items-center justify-between gap-2">
           {projectOptions.length > 1 && (
             <select
               value={projectFilter}
               onChange={(e) => setProjectFilter(e.target.value)}
               aria-label="Filtrar por pasta ou projeto"
-              className="ml-auto font-mono text-[10px] uppercase tracking-wide border border-line rounded-sl bg-card px-2 py-1 text-ink-muted max-w-[9rem] truncate"
+              className="font-mono text-[10px] border border-white/[0.05] rounded-md bg-chrome px-2 py-1.5 text-zinc-500 max-w-[10rem] truncate"
             >
               <option value="all">Todas pastas</option>
               {projectOptions.map((p) => (
@@ -303,10 +341,10 @@ export function AxelKanbanListView({
               ))}
             </select>
           )}
+          <p className="font-mono text-[10px] text-zinc-500 ml-auto tabular-nums">
+            {filtered.length} de {tarefas.length}
+          </p>
         </div>
-        <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-          {filtered.length} de {tarefas.length} tarefas
-        </p>
       </div>
 
       <div className="md:hidden overflow-y-auto max-h-[calc(100dvh-16rem)] flex-1 min-h-0 space-y-2 px-0.5">

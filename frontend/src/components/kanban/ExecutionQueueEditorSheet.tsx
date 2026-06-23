@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronDown, ChevronUp, ListOrdered, Minus, Plus, X } from 'lucide-react'
+import { AXEL_STATUS_BADGE_WARN } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -93,85 +94,94 @@ export function ExecutionQueueEditorSheet({
 
   return (
     <div
-      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-[120] flex items-end sm:items-center justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Editar fila Executar agora"
     >
-      <button type="button" className="absolute inset-0 bg-black/50" onClick={syncClose} aria-label="Fechar" />
-      <div className="relative w-full sm:max-w-md max-h-[85dvh] overflow-hidden rounded-t-sl sm:rounded-sl border border-line bg-card shadow-xl flex flex-col">
-        <header className="shrink-0 flex items-center justify-between gap-2 px-4 py-3 border-b border-line">
+      <button type="button" className="absolute inset-0 bg-black/60 backdrop-blur-[2px]" onClick={syncClose} aria-label="Fechar" />
+      <div
+        className="relative w-full sm:max-w-md flex flex-col overflow-hidden rounded-t-xl sm:rounded-xl border border-white/[0.06] bg-card shadow-2xl max-h-[min(72dvh,calc(100dvh-6rem))] sm:max-h-[85dvh] mb-[calc(4.25rem+env(safe-area-inset-bottom,0px))] sm:mb-0"
+      >
+        <header className="shrink-0 flex items-center justify-between gap-2 px-4 py-3 border-b border-white/[0.04] bg-chrome/30">
           <div className="flex items-center gap-2 min-w-0">
-            <ListOrdered size={16} className="text-accent shrink-0" />
-            <h2 className="font-mono text-[11px] uppercase tracking-wider text-ink truncate">
-              Editar Executar agora
+            <ListOrdered size={16} className="text-accent shrink-0" strokeWidth={1.75} />
+            <h2 className="font-sans text-sm font-semibold tracking-tight text-ink truncate">
+              Editar fila
             </h2>
           </div>
-          <button type="button" onClick={syncClose} className="p-2 rounded-sl text-ink-muted hover:text-ink" aria-label="Fechar">
-            <X size={16} />
+          <button
+            type="button"
+            onClick={syncClose}
+            className="p-2 rounded-md text-zinc-500 hover:text-ink hover:bg-chrome min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Fechar"
+          >
+            <X size={18} strokeWidth={1.75} />
           </button>
         </header>
 
-        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-4 space-y-4">
-          <p className="text-[12px] text-ink-muted leading-relaxed">
+        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 py-3 space-y-4">
+          <p className="text-[11px] text-zinc-500 font-mono leading-relaxed">
             Reordene, remova ou adicione tarefas. Máximo {WIP_LIMIT} na fila.
           </p>
 
           <section>
-            <h3 className="font-mono text-[10px] uppercase tracking-wider text-ink-muted mb-2">
+            <h3 className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
               Na fila ({ordered.length}/{WIP_LIMIT})
             </h3>
             {ordered.length === 0 ? (
-              <p className="text-sm text-ink-muted py-2">Nenhuma tarefa — adicione abaixo.</p>
+              <p className="text-sm text-zinc-500 py-2">Nenhuma tarefa — adicione abaixo.</p>
             ) : (
-              <ul className="space-y-1.5">
+              <ul className="space-y-2">
                 {ordered.map((t, idx) =>
                 {
                   const executing = executingId === t.id
                   return (
                     <li
                       key={t.id}
-                      className={`flex items-center gap-2 rounded-sl border px-2 py-2 ${
+                      className={`flex items-center gap-2 rounded-lg border px-2.5 py-2.5 ${
                         executing
-                          ? 'border-accent bg-accent/15 ring-1 ring-accent/35'
-                          : 'border-line bg-chrome/20'
+                          ? 'border-accent/30 bg-accent/10'
+                          : 'border-white/[0.05] bg-chrome/30'
                       }`}
                     >
-                      <span className="font-mono text-[10px] text-accent w-5 shrink-0 tabular-nums">
+                      <span className="font-mono text-[10px] text-zinc-500 w-5 shrink-0 tabular-nums">
                         {String(idx + 1).padStart(2, '0')}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[12px] text-ink truncate">{cleanTitleForDisplay(t.titulo)}</p>
+                        <p className="text-[13px] text-ink leading-snug line-clamp-2">
+                          {cleanTitleForDisplay(t.titulo)}
+                        </p>
                         {executing && (
-                          <p className="font-mono text-[9px] uppercase text-accent mt-0.5">Em foco agora</p>
+                          <span className={`${AXEL_STATUS_BADGE_WARN} mt-1`}>Em foco</span>
                         )}
                       </div>
-                      <div className="flex items-center gap-0.5 shrink-0">
+                      <div className="flex flex-col sm:flex-row items-center gap-0.5 shrink-0">
                         <button
                           type="button"
                           disabled={idx === 0}
                           onClick={() => move(t.id, 'up')}
-                          className="p-1.5 rounded-sl text-ink-muted hover:text-ink disabled:opacity-30"
+                          className="p-2 rounded-md text-zinc-500 hover:text-ink hover:bg-chrome disabled:opacity-30 min-w-[36px] min-h-[36px] flex items-center justify-center"
                           aria-label="Subir"
                         >
-                          <ChevronUp size={14} />
+                          <ChevronUp size={16} strokeWidth={1.75} />
                         </button>
                         <button
                           type="button"
                           disabled={idx === ordered.length - 1}
                           onClick={() => move(t.id, 'down')}
-                          className="p-1.5 rounded-sl text-ink-muted hover:text-ink disabled:opacity-30"
+                          className="p-2 rounded-md text-zinc-500 hover:text-ink hover:bg-chrome disabled:opacity-30 min-w-[36px] min-h-[36px] flex items-center justify-center"
                           aria-label="Descer"
                         >
-                          <ChevronDown size={14} />
+                          <ChevronDown size={16} strokeWidth={1.75} />
                         </button>
                         <button
                           type="button"
                           onClick={() => removeTask(t)}
-                          className="p-1.5 rounded-sl text-ink-muted hover:text-urgente"
+                          className="p-2 rounded-md text-zinc-500 hover:text-urgente hover:bg-chrome min-w-[36px] min-h-[36px] flex items-center justify-center"
                           aria-label="Remover da fila"
                         >
-                          <Minus size={14} />
+                          <Minus size={16} strokeWidth={1.75} />
                         </button>
                       </div>
                     </li>
@@ -183,19 +193,19 @@ export function ExecutionQueueEditorSheet({
 
           {candidates.length > 0 && ordered.length < WIP_LIMIT && (
             <section>
-              <h3 className="font-mono text-[10px] uppercase tracking-wider text-ink-muted mb-2">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500 mb-2">
                 Adicionar à fila
               </h3>
-              <ul className="space-y-1 max-h-40 overflow-y-auto custom-scrollbar">
+              <ul className="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar">
                 {candidates.slice(0, 12).map((t) => (
                   <li key={t.id}>
                     <button
                       type="button"
                       onClick={() => addTask(t)}
-                      className="w-full flex items-center gap-2 text-left px-2 py-2 rounded-sl border border-line hover:bg-chrome/40 transition-colors"
+                      className="w-full flex items-center gap-2 text-left px-2.5 py-2.5 rounded-lg border border-white/[0.05] hover:bg-chrome/50 transition-colors min-h-[44px]"
                     >
-                      <Plus size={14} className="text-accent shrink-0" />
-                      <span className="text-[12px] text-ink truncate">{cleanTitleForDisplay(t.titulo)}</span>
+                      <Plus size={14} className="text-accent shrink-0" strokeWidth={1.75} />
+                      <span className="text-[13px] text-ink line-clamp-2">{cleanTitleForDisplay(t.titulo)}</span>
                     </button>
                   </li>
                 ))}

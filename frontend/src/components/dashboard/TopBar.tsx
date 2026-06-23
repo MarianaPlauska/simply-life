@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Cloud, Bell } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AccessibilityQuickMenu } from './AccessibilityQuickMenu'
+import { listNotificacoesAcionaveis } from '../../lib/notificacaoUtils'
 import { AXEL_HEADER_ACTION, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 // TopBar — ações rápidas (acessibilidade primeiro), clima e notificações
@@ -50,7 +51,7 @@ export function TopBar()
     )
   }, [])
 
-  const unread = notificacoes.filter((n) => !n.lida).length
+  const unread = listNotificacoesAcionaveis(notificacoes).length
 
   return (
     <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">

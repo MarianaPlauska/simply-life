@@ -14,10 +14,10 @@ const MONTH_NAMES = [
 ]
 
 /** Quantos meses à frente o planner permite navegar */
-export const FINANCE_MAX_FUTURE_OFFSET = 12
+export const FINANCE_MAX_FUTURE_OFFSET = 5
 
 /** Quantos meses no passado o planner permite navegar */
-export const FINANCE_MAX_PAST_OFFSET = 60
+export const FINANCE_MAX_PAST_OFFSET = 5
 
 export interface OutlookLineItem
 {
@@ -254,15 +254,72 @@ export function resolveChainedSaldoPartida(
   return running
 }
 
-export function clampFinanceMonthOffset(offset: number): number
+export interface FinanceMonthNavBounds
 {
-  return Math.max(-FINANCE_MAX_PAST_OFFSET, Math.min(FINANCE_MAX_FUTURE_OFFSET, offset))
+  minOffset: number
+  maxOffset: number
 }
 
-export function canShiftFinanceMonth(offset: number, direction: -1 | 1): boolean
+/** Limites de navegação mensal conforme dados reais (sem tx → só mês atual). */
+export function getFinanceMonthNavBounds(
+  transactions: Transaction[],
+  ref = new Date(),
+): FinanceMonthNavBounds
+{
+  if (transactions.length === 0)
+  {
+    return {
+      minOffset: -FINANCE_MAX_PAST_OFFSET,
+      maxOffset: FINANCE_MAX_FUTURE_OFFSET,
+    }
+  }
+
+  const cy = ref.getFullYear()
+  const cm = ref.getMonth()
+  let ey = cy
+  let em = cm
+
+  for (const t of transactions)
+  {
+    const d = new Date(`${t.data}T12:00:00`)
+    if (d.getFullYear() < ey || (d.getFullYear() === ey && d.getMonth() < em))
+    {
+      ey = d.getFullYear()
+      em = d.getMonth()
+    }
+  }
+
+  const monthsBack = (cy - ey) * 12 + (cm - em)
+  const minOffset = monthsBack === 0
+    ? 0
+    : -Math.min(FINANCE_MAX_PAST_OFFSET, monthsBack)
+
+  return {
+    minOffset,
+    maxOffset: FINANCE_MAX_FUTURE_OFFSET,
+  }
+}
+
+export function clampFinanceMonthOffset(
+  offset: number,
+  bounds?: FinanceMonthNavBounds,
+): number
+{
+  const min = bounds?.minOffset ?? -FINANCE_MAX_PAST_OFFSET
+  const max = bounds?.maxOffset ?? FINANCE_MAX_FUTURE_OFFSET
+  return Math.max(min, Math.min(max, offset))
+}
+
+export function canShiftFinanceMonth(
+  offset: number,
+  direction: -1 | 1,
+  bounds?: FinanceMonthNavBounds,
+): boolean
 {
   const next = offset + direction
-  return next >= -FINANCE_MAX_PAST_OFFSET && next <= FINANCE_MAX_FUTURE_OFFSET
+  const min = bounds?.minOffset ?? -FINANCE_MAX_PAST_OFFSET
+  const max = bounds?.maxOffset ?? FINANCE_MAX_FUTURE_OFFSET
+  return next >= min && next <= max
 }
 
 /** Previsão de um mês — real (passado/atual) ou futuro (compromissos + recorrentes) */

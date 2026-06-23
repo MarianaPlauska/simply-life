@@ -1,4 +1,9 @@
 import { cardLimitUsagePct, sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
+import {
+  CARD_USAGE_BAR_CLASS,
+  CARD_USAGE_TEXT_CLASS,
+  resolveCardUsageToneFromSpend,
+} from '../../lib/financeBalanceTone'
 import type { Transaction, VirtualCard } from '../../store/storeTypes'
 import {
   AXEL_PROGRESS_THICK,
@@ -21,7 +26,9 @@ export function CardSpendProgress({ card, transactions, compact = false }: CardS
   const pct = cardLimitUsagePct(transactions, card)
   const available = Math.max(0, card.limite - spent)
 
-  const barTone = pct >= 90 ? 'bg-urgente' : pct >= 70 ? 'bg-atencao' : 'bg-accent'
+  const usageTone = resolveCardUsageToneFromSpend(spent, card.limite)
+  const barTone = CARD_USAGE_BAR_CLASS[usageTone]
+  const pctTone = CARD_USAGE_TEXT_CLASS[usageTone]
 
   return (
     <div className={compact ? 'space-y-1' : 'space-y-1.5'}>
@@ -29,8 +36,8 @@ export function CardSpendProgress({ card, transactions, compact = false }: CardS
         <span className={AXEL_TEXT_SECONDARY}>
           {fmt(spent)} de {fmt(card.limite)}
         </span>
-        <span className={pct >= 90 ? 'text-urgente' : pct >= 70 ? 'text-atencao' : 'text-ink-muted'}>
-          {pct.toFixed(0)}%
+        <span className={pctTone}>
+          {usageTone === 'exhausted' ? '100%' : `${pct.toFixed(0)}%`}
         </span>
       </div>
       <div className={AXEL_PROGRESS_THICK}>

@@ -11,15 +11,16 @@ import { AuthCallbackView } from './components/Auth/AuthCallbackView'
 import { ResetPasswordView } from './components/Auth/ResetPasswordView'
 import { AxelSetupWizard } from './components/Onboarding/AxelSetupWizard'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
+import { AxelLoader } from './components/ui/AxelLoader'
 import { useTaskStore, type ActiveView } from './store/useTaskStore'
 import { applyColorScheme } from './utils/applyColorScheme'
 import { AppLayout } from './components/layout/AppLayout'
 import { Briefcase, Rocket } from 'lucide-react'
+import { useUserSessionIsolation } from './hooks/useUserSessionIsolation'
 
 const DashboardView = lazy(() => import('./components/layout/DashboardView').then((m) => ({ default: m.DashboardView })))
 const KanbanView = lazy(() => import('./components/kanban/KanbanView').then((m) => ({ default: m.KanbanView })))
 const AnotacoesView = lazy(() => import('./components/Anotacoes/AnotacoesView').then((m) => ({ default: m.AnotacoesView })))
-const AcademyModeView = lazy(() => import('./components/Health/AcademyModeView').then((m) => ({ default: m.AcademyModeView })))
 const FocusImmersiveOverlay = lazy(() => import('./components/FocusModeView').then((m) => ({ default: m.FocusImmersiveOverlay })))
 const SettingsView = lazy(() => import('./components/Settings/SettingsView').then((m) => ({ default: m.SettingsView })))
 const HealthView = lazy(() => import('./components/Health/HealthView').then((m) => ({ default: m.HealthView })))
@@ -68,7 +69,6 @@ const ROUTE_MAP: Record<string, ActiveView> = {
   '/kanban':        'kanban',
   '/kanban/board':  'kanban',
   '/anotacoes':     'anotacoes',
-  '/foco':          'foco',
   '/configuracoes': 'configuracoes',
   '/financeiro':    'financeiro',
   '/saude':         'saude',
@@ -150,7 +150,7 @@ function AppShell()
           } />
           <Route path="kanban/board" element={<Navigate to="/kanban" replace />} />
           <Route path="anotacoes" element={<ErrorBoundary fallbackTitle="Erro nas Anotações"><AnotacoesView /></ErrorBoundary>} />
-          <Route path="foco" element={<ErrorBoundary fallbackTitle="Erro no Modo Academia"><AcademyModeView /></ErrorBoundary>} />
+          <Route path="foco" element={<Navigate to="/saude#academia" replace />} />
           <Route path="configuracoes" element={<ErrorBoundary fallbackTitle="Erro nas Configurações"><SettingsView /></ErrorBoundary>} />
           <Route path="financeiro" element={<ErrorBoundary fallbackTitle="Erro no Financeiro"><FinancePlannerView /></ErrorBoundary>} />
           <Route path="saude" element={<ErrorBoundary fallbackTitle="Erro na Saúde"><HealthView /></ErrorBoundary>} />
@@ -176,18 +176,25 @@ function AppShell()
 function App()
 {
   useAccessibilityInit()
-  const checkSession = useTaskStore((s) => s.checkSession)
+  useUserSessionIsolation()
   const fetchWorkspacePrefs = useTaskStore((s) => s.fetchWorkspacePrefs)
   const colorScheme = useTaskStore((s) => s.accessibility.colorScheme)
 
   useEffect(() =>
   {
-    void checkSession().then(() => fetchWorkspacePrefs())
-  }, [checkSession, fetchWorkspacePrefs])
+    void fetchWorkspacePrefs()
+  }, [fetchWorkspacePrefs])
 
   return (
     <>
-      <Toaster theme={colorScheme === 'dark' ? 'dark' : 'light'} position="bottom-right" richColors />
+      <Toaster
+        theme={colorScheme === 'dark' ? 'dark' : 'light'}
+        position="bottom-right"
+        richColors
+        duration={5000}
+        closeButton
+        visibleToasts={2}
+      />
       <Routes>
         <Route path="/login" element={<LoginView />} />
         <Route path="/reset-password" element={<ResetPasswordView />} />
@@ -211,7 +218,7 @@ function App()
             </Suspense>
             <Suspense fallback={
               <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-fundo gap-3">
-                <div className="w-8 h-8 rounded-sl border-2 border-line border-t-accent animate-spin" />
+                <AxelLoader />
                 <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
                   Carregando…
                 </p>

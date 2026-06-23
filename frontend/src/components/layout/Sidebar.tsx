@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   LayoutDashboard, KanbanSquare, CalendarDays, StickyNote, SlidersHorizontal,
   Wallet, HardDrive, PanelLeftClose, PanelLeft, Settings,
-  Zap, Webhook, PlugZap, Inbox, Crosshair, GraduationCap, HeartPulse,
+  Zap, Webhook, PlugZap, Inbox, HeartPulse,
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore'
@@ -43,7 +43,6 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Mais',
     items: [
       { id: 'superhuman', label: 'Foco Superhumano', icon: Zap, moduleKey: 'superhuman', path: '/superhuman' },
-      { id: 'foco', label: 'Modo Academia', icon: GraduationCap, moduleKey: 'foco', path: '/foco' },
       { id: 'calendario', label: 'Calendário', icon: CalendarDays, moduleKey: 'calendario', path: '/calendario' },
     ],
   },
@@ -97,28 +96,10 @@ export function Sidebar()
   const userProfile = useTaskStore((s) => s.userProfile)
   const userStats = useTaskStore((s) => s.userStats)
 
-  const [academiaMode, setAcademiaMode] = useState(location.pathname === '/foco')
-
   const iniciais = useMemo(
     () => iniciaisDe(userProfile?.nome || 'Convidado'),
     [userProfile?.nome],
   )
-
-  const handleAcademiaToggle = () =>
-  {
-    const next = !academiaMode
-    setAcademiaMode(next)
-    if (next)
-    {
-      document.documentElement.setAttribute('data-academy-mode', 'true')
-      navigate('/foco')
-    }
-    else
-    {
-      document.documentElement.removeAttribute('data-academy-mode')
-      if (location.pathname === '/foco') navigate('/')
-    }
-  }
 
   const handleNav = (item: NavItem) =>
   {
@@ -227,23 +208,6 @@ export function Sidebar()
             </div>
           </div>
         </button>
-
-        <div className="flex items-center justify-between px-1 py-1">
-          <div className="flex items-center gap-2 text-[11px] text-ink-muted">
-            <Crosshair className="w-3 h-3" />
-            Modo Academia
-          </div>
-          <button
-            onClick={handleAcademiaToggle}
-            className={`relative w-7 h-3.5 rounded-sl transition-colors ${academiaMode ? 'bg-accent' : 'bg-chrome border border-line'}`}
-            role="switch"
-            aria-checked={academiaMode}
-          >
-            <span
-              className={`absolute top-0.5 w-2.5 h-2.5 rounded-sl transition-transform ${academiaMode ? 'translate-x-3.5 bg-white' : 'translate-x-0.5 bg-ink-muted'}`}
-            />
-          </button>
-        </div>
       </div>
     </aside>
   )

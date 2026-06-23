@@ -1,10 +1,11 @@
 // store principal — combina todos os slices
 // cada slice fica em store/slices/*.ts com ~100-150 linhas
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import { normalizePinnedModules } from './slices/uiSlice';
 import { applyColorScheme } from '../utils/applyColorScheme';
 import { localTodayIso, resetHabitosParaHoje } from '../lib/healthDayBoundary';
+import { getActiveStorageUserId, getPersistStorageKey } from '../lib/userScopedStorage';
 
 import { createUISlice, type UISlice } from './slices/uiSlice';
 import { createAuthSlice, type AuthSlice } from './slices/authSlice';
@@ -97,6 +98,17 @@ export const useTaskStore = create<TaskStore>()(
     }),
     {
       name: 'simply-life-store',
+      storage: createJSONStorage(() => ({
+        getItem: () => localStorage.getItem(getPersistStorageKey(getActiveStorageUserId())),
+        setItem: (_name, value) =>
+        {
+          localStorage.setItem(getPersistStorageKey(getActiveStorageUserId()), value)
+        },
+        removeItem: () =>
+        {
+          localStorage.removeItem(getPersistStorageKey(getActiveStorageUserId()))
+        },
+      })),
       partialize: (state) => ({
         interactionScore: state.interactionScore,
         sidebarCollapsed: state.sidebarCollapsed,

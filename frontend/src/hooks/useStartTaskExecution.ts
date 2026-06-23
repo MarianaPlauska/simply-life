@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
+import { resolveTaskEstimate } from '../services/axelTaskEstimateService'
 import type { TarefaUnificada } from '../types'
 
 // Iniciar execução — timer + status em progresso (card ou drawer)
@@ -17,7 +18,12 @@ export function useStartTaskExecution()
   {
     if (!tarefa.id || tarefa.status === 'concluida') return
 
-    const estimate = getAdjustedEstimateMinutes(tarefa.id, tarefa.titulo)
+    const resolved = await resolveTaskEstimate(tarefa)
+    const estimate = getAdjustedEstimateMinutes(
+      tarefa.id,
+      tarefa.titulo,
+      resolved.estimate_minutes,
+    )
     startExecution(tarefa.id, estimate)
     moveTask(tarefa.id, 'em_progresso')
 
@@ -30,7 +36,14 @@ export function useStartTaskExecution()
       patchTarefaLocal(tarefa.id, { status: 'em_progresso' })
     }
 
-    pushAiDecision('Sessão de foco iniciada — contexto preservado no quadro.')
+    const iaTag = resolved.source === 'groq'
+      ? 'IA · '
+      : resolved.iaDisponivel === false
+        ? 'Local (configure GROQ_API_KEY no servidor) · '
+        : 'Local · '
+    pushAiDecision(
+      `${iaTag}Foco iniciado (~${estimate} min) — ${resolved.reasoning}`,
+    )
   }, [
     startExecution,
     getAdjustedEstimateMinutes,

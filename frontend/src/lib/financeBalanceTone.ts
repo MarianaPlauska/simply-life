@@ -36,16 +36,46 @@ export function resolveCashTone(
   return 'ok'
 }
 
-/** Limite do cartão — uso da fatura vs limite total */
+/** Limite do cartão — uso da fatura vs limite total (legado → BalanceTone) */
 export function resolveLimitTone(spent: number, limit: number): BalanceTone
+{
+  const tone = resolveCardUsageToneFromSpend(spent, limit)
+  if (tone === 'exhausted' || tone === 'danger') return 'danger'
+  if (tone === 'caution') return 'caution'
+  return 'ok'
+}
+
+export type CardUsageTone = 'ok' | 'caution' | 'danger' | 'exhausted'
+
+/** Verde até 50%, amarelo até 88%, vermelho até 99%, preto em 100% */
+export function resolveCardUsageTone(pctUsed: number): CardUsageTone
+{
+  if (pctUsed >= 100) return 'exhausted'
+  if (pctUsed >= 88) return 'danger'
+  if (pctUsed >= 50) return 'caution'
+  return 'ok'
+}
+
+export function resolveCardUsageToneFromSpend(spent: number, limit: number): CardUsageTone
 {
   if (limit <= 0)
   {
-    return spent > 0 ? 'danger' : 'ok'
+    return spent > 0 ? 'exhausted' : 'ok'
   }
+  const pct = (spent / limit) * 100
+  return resolveCardUsageTone(pct)
+}
 
-  const pctUsed = spent / limit
-  if (pctUsed >= 1 || spent > limit) return 'danger'
-  if (pctUsed >= 0.75) return 'caution'
-  return 'ok'
+export const CARD_USAGE_BAR_CLASS: Record<CardUsageTone, string> = {
+  ok: 'bg-concluido',
+  caution: 'bg-atencao',
+  danger: 'bg-urgente',
+  exhausted: 'bg-zinc-950',
+}
+
+export const CARD_USAGE_TEXT_CLASS: Record<CardUsageTone, string> = {
+  ok: 'text-concluido',
+  caution: 'text-atencao',
+  danger: 'text-urgente',
+  exhausted: 'text-zinc-900 dark:text-zinc-200',
 }

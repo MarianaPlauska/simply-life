@@ -12,6 +12,13 @@ import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import { AxelSystemGuide } from '../axel/AxelSystemGuide';
+import {
+  MOBILE_NAV_HOME_ID,
+  MOBILE_NAV_OPTIONAL_CATALOG,
+  MAX_MOBILE_NAV_OPTIONAL,
+  toggleMobileNavModule,
+  type MobileNavModuleId,
+} from '../../lib/mobileBottomNav';
 
 /* ── Tipos ────────────────────────────────────────────────── */
 type SettingsTab = 'geral' | 'ia' | 'aparencia' | 'notificacoes' | 'seguranca';
@@ -109,6 +116,8 @@ export function PreferencesView() {
   const saveKeywords = useTaskStore((s) => s.saveKeywords);
   const accessibility = useTaskStore((s) => s.accessibility);
   const setAccessibility = useTaskStore((s) => s.setAccessibility);
+  const workspacePrefs = useTaskStore((s) => s.workspacePrefs);
+  const patchWorkspacePrefs = useTaskStore((s) => s.patchWorkspacePrefs);
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
   const [inputValue, setInputValue] = useState('');
@@ -180,6 +189,24 @@ export function PreferencesView() {
     );
   };
 
+  const mobileNavModules = workspacePrefs.mobile_bottom_nav ?? ['home', 'kanban', 'financeiro', 'saude'];
+
+  const toggleMobileNav = async (id: MobileNavModuleId) =>
+  {
+    if (id === MOBILE_NAV_HOME_ID)
+    {
+      return;
+    }
+    const next = toggleMobileNavModule(mobileNavModules, id);
+    if (next.join(',') === mobileNavModules.join(','))
+    {
+      toast.info('Escolha pelo menos um módulo além do Home');
+      return;
+    }
+    await patchWorkspacePrefs({ mobile_bottom_nav: next });
+    toast.success('Barra inferior atualizada');
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -245,6 +272,48 @@ export function PreferencesView() {
                   <p className="text-[11px] text-zinc-600 mt-0.5">{desc}</p>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      </SectionCard>
+
+      <SectionCard>
+        <SectionHeader
+          icon={Smartphone}
+          title="Barra inferior (mobile)"
+          subtitle="Home fica sempre visível. Escolha até 3 módulos para acesso rápido no celular."
+          iconColor="text-violet-400"
+        />
+        <div className="flex items-center gap-2 rounded-xl border border-violet-500/20 bg-violet-500/5 px-3 py-2 mb-3">
+          <span className="font-mono text-[10px] uppercase text-zinc-500">Fixo</span>
+          <span className="text-[13px] font-medium text-white">Home</span>
+        </div>
+        <p className="font-mono text-[10px] uppercase text-zinc-500 mb-3">
+          {mobileNavModules.filter((m) => m !== MOBILE_NAV_HOME_ID).length}/{MAX_MOBILE_NAV_OPTIONAL} módulos
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {MOBILE_NAV_OPTIONAL_CATALOG.map((opt) =>
+          {
+            const active = mobileNavModules.includes(opt.id);
+            const full = !active
+              && mobileNavModules.filter((m) => m !== MOBILE_NAV_HOME_ID).length >= MAX_MOBILE_NAV_OPTIONAL;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                disabled={full}
+                onClick={() => void toggleMobileNav(opt.id)}
+                className={`p-4 rounded-xl border text-left transition-all ${
+                  active
+                    ? 'bg-violet-500/10 border-violet-500/25 ring-1 ring-violet-500/15'
+                    : 'bg-zinc-800/20 border-zinc-800/40 hover:border-zinc-700/50'
+                } ${full ? 'opacity-40 cursor-not-allowed' : ''}`}
+              >
+                <span className={`text-[13px] font-medium ${active ? 'text-white' : 'text-zinc-400'}`}>
+                  {opt.label}
+                </span>
+                <p className="text-[11px] text-zinc-600 mt-0.5">{opt.hint}</p>
+              </button>
             );
           })}
         </div>

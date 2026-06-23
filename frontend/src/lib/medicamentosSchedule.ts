@@ -60,6 +60,26 @@ export function tomadaParaDose(
   ) ?? null
 }
 
+function medicamentoAtivoHoje(med: Medicamento, today: string, dayOfWeek: number): boolean
+{
+  const dias = med.config?.dias_semana ?? []
+  if (dias.length > 0 && !dias.includes(dayOfWeek))
+  {
+    return false
+  }
+  const inicio = med.config?.inicio_tratamento
+  if (inicio && today < inicio)
+  {
+    return false
+  }
+  const fim = med.config?.fim_tratamento
+  if (fim && today > fim)
+  {
+    return false
+  }
+  return true
+}
+
 export function medicamentoCompletoHoje(med: Medicamento, tomadas: MedicamentoTomada[], today = localTodayIso()): boolean
 {
   const slots = horariosDoMedicamento(med)
@@ -83,10 +103,15 @@ export function buildDosesHoje(
 {
   const nowMin = now.getHours() * 60 + now.getMinutes()
   const today = localTodayIso()
+  const dayOfWeek = now.getDay()
   const doses: DoseHoje[] = []
 
   for (const med of medicamentos)
   {
+    if (!medicamentoAtivoHoje(med, today, dayOfWeek))
+    {
+      continue
+    }
     for (const horario of horariosDoMedicamento(med))
     {
       const minutos = parseHorarioMin(horario)

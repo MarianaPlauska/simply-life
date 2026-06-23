@@ -10,7 +10,6 @@ import {
 import { useFinancePlannerInit } from '../../hooks/useFinancePlannerInit';
 import { computeCashPosition } from '../../lib/financeReservedBills';
 import { useFinanceDueNotifications } from '../../hooks/useFinanceDueNotifications';
-import { FinanceSetupTab } from './setup/FinanceSetupTab';
 import {
   FINANCE_MAIN_TABS,
   FINANCE_SUB_TABS,
@@ -38,8 +37,9 @@ import { FinanceSpreadsheetTab } from './FinanceSpreadsheetTab';
 import { FinanceHomeTab } from './FinanceHomeTab';
 import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner';
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
-import { clampFinanceMonthOffset } from '../../lib/financeMonthOutlook';
+import { clampFinanceMonthOffset, getFinanceMonthNavBounds } from '../../lib/financeMonthOutlook';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
+import { FinanceCashTab } from './FinanceCashTab';
 import { NewGoalModal } from './NewGoalModal';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -168,11 +168,6 @@ export function FinancePlannerView() {
     });
   }, [transactions, monthOffset]);
 
-  const recentTx = useMemo(
-    () => [...transactions].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 5),
-    [transactions],
-  );
-
   const receita = monthTx.filter((t) => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
   const despesas = monthTx.filter((t) => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
   const saldo = receita - despesas;
@@ -248,6 +243,16 @@ export function FinancePlannerView() {
     [transactions, cashAccount.saldo_inicial, reservedBills],
   );
 
+  const monthBounds = useMemo(
+    () => getFinanceMonthNavBounds(transactions),
+    [transactions],
+  );
+
+  useEffect(() =>
+  {
+    setMonthOffset((m) => clampFinanceMonthOffset(m, monthBounds));
+  }, [monthBounds]);
+
   const handleSaveBudget = (catId: number, name: string) => {
     const val = parseFloat(editVal);
     if (isNaN(val) || val < 0) return;
@@ -261,13 +266,20 @@ export function FinancePlannerView() {
     <FinancePlannerShell
       monthLabel={monthLabel}
       monthOffset={monthOffset}
-      onMonthPrev={() => setMonthOffset((m) => clampFinanceMonthOffset(m - 1))}
-      onMonthNext={() => setMonthOffset((m) => clampFinanceMonthOffset(m + 1))}
+      monthBounds={monthBounds}
+      onMonthSelect={(o) => setMonthOffset(clampFinanceMonthOffset(o, monthBounds))}
       tabs={FINANCE_MAIN_TABS}
       activeTab={navGroup}
       onTabChange={(id) => goToGroup(id as PlannerGroup)}
       onManageCategories={() => setShowCatModal(true)}
       onNewTransaction={() => setNewTransactionOpen(true)}
+      showNewTransactionFab={
+        navGroup !== 'analise'
+        && activeLeaf !== 'diario'
+        && activeLeaf !== 'cartoes'
+        && activeLeaf !== 'faturas'
+        && activeLeaf !== 'contas-fixas'
+      }
     >
       {subTabs && (
         <FinanceSectionNav
@@ -299,50 +311,34 @@ export function FinancePlannerView() {
         </div>
       )}
 
-      <div className="mb-3">
-        <FinanceGlobalMoodBanner
-          monthLabel={monthLabel}
-          monthOffset={monthOffset}
-          monthTransactions={monthTx}
-          allTransactions={transactions}
-          saldoInicial={cashAccount.saldo_inicial}
-        />
-      </div>
+      {activeLeaf === 'visao-geral' && (
+        <div className="mb-3">
+          <FinanceGlobalMoodBanner
+            monthLabel={monthLabel}
+            monthOffset={monthOffset}
+            monthTransactions={monthTx}
+            allTransactions={transactions}
+            saldoInicial={cashAccount.saldo_inicial}
+          />
+        </div>
+      )}
 
       {activeLeaf === 'inicio' && (
         <FinanceHomeTab
           monthLabel={monthLabel}
           monthOffset={monthOffset}
-          onSetLimits={() => goToLeaf('visao-geral')}
-          onConfigure={() => goToLeaf('config')}
           receita={receita}
           despesas={despesas}
           saldo={saldo}
           transactions={transactions}
           monthTransactions={monthTx}
-          recentTransactions={recentTx}
-          activeCategories={activeCategories}
-          pieChartData={pieChartData}
-          areaChartData={areaChartData}
           onNavigate={(t) => goToLeaf(t as PlannerLeafTab)}
         />
       )}
 
-      {activeLeaf === 'config' && (
-        <FinanceSetupTab
-          onNavigate={(t) => goToLeaf(t)}
-          saldoDisponivel={cashPosition.saldoDisponivel}
-          saldoCorrente={cashPosition.saldoCorrente}
-          reservaRestante={cashPosition.reservaRestante}
-          saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
-        />
-      )}
-
-      {/* ═══════ VISÃO GERAL ═══════ */}
       {activeLeaf === 'visao-geral' && (
         <FinanceOverviewTab
           monthOffset={monthOffset}
-          onOpenNextMonth={() => setMonthOffset((m) => clampFinanceMonthOffset(m + 1))}
           receita={receita}
           despesas={despesas}
           saldo={saldo}
@@ -419,6 +415,15 @@ export function FinancePlannerView() {
       )}
 
       {/* ═══════ CARTÕES & CAIXA ═══════ */}
+      {activeLeaf === 'conta' && (
+        <FinanceCashTab
+          saldoDisponivel={cashPosition.saldoDisponivel}
+          saldoCorrente={cashPosition.saldoCorrente}
+          reservaRestante={cashPosition.reservaRestante}
+          saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
+        />
+      )}
+
       {activeLeaf === 'cartoes' && (
         <VirtualCardsTab
           initialCardId={deepLinkCardId}

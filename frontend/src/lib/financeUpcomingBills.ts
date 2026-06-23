@@ -2,6 +2,7 @@ import type { ContaFixa, ReservedBill, Transaction, VirtualCard } from '../store
 import { billRemaining } from './financeReservedBills'
 import { isBillDismissed } from './financeBillDismiss'
 import { isContaFixaPostedThisMonth } from './financeRecurringPost'
+import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
 import { getBillingCycle, getInvoiceTransactions, sumInvoice } from './financeCardCycle'
 import { transactionDayKey } from './financeLedger'
 
@@ -92,7 +93,7 @@ export function buildUpcomingBills(
     if (keep(candidate)) bills.push(candidate)
   }
 
-  for (const conta of options.contasFixas.filter((c) => c.ativa))
+  for (const conta of options.contasFixas.filter((c) => contaFixaEfetivamenteAtiva(c, reference)))
   {
     if (isContaFixaPostedThisMonth(conta.id, options.transactions, reference)) continue
 

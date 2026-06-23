@@ -13,7 +13,7 @@ import type { TarefaUnificada } from '../../types'
 // Cores pré-definidas para pasta e flags (máx. 5 flags por tarefa)
 
 export const DRAWER_FLAG_COLORS = [
-  '#C17F3A',
+  '#38B2AC',
   '#4A7C59',
   '#5B7FA6',
   '#9B2C2C',

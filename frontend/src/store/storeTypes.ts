@@ -33,7 +33,14 @@ export interface TimerConfig {
   longBreak: number;
 }
 
-export type CategoryGrupo = 'casa' | 'contas' | 'futuro' | 'geral';
+export type CategoryGrupo =
+  | 'casa'
+  | 'contas'
+  | 'futuro'
+  | 'lazer'
+  | 'streaming'
+  | 'importantes'
+  | 'geral';
 
 export interface Category {
   id: number;
@@ -112,6 +119,8 @@ export interface AccessibilitySettings {
   colorScheme: ColorScheme;
 }
 
+export type CardModalidade = 'credito' | 'debito' | 'vr' | 'alimentacao';
+
 export interface VirtualCard
 {
   id: string;
@@ -123,6 +132,7 @@ export interface VirtualCard
   limite: number;
   dia_vencimento?: number;
   dia_fechamento?: number;
+  modalidade?: CardModalidade;
   tipo_gradiente: 'purple' | 'obsidian' | 'sunset' | 'ocean' | 'mint';
   bandeira: 'visa' | 'mastercard';
   status: 'ativo' | 'bloqueado';
@@ -135,6 +145,9 @@ export interface ContaFixa
   valor: number;
   dia_vencimento: number;
   categoria: string;
+  categoria_id?: number | null;
+  duracao_meses?: number | null;
+  data_inicio?: string | null;
   ativa: boolean;
 }
 
@@ -231,9 +244,17 @@ export interface HabitoDiarioConfig {
   meta_minutos?: number;
   ultima_data?: string;
   plano_semana?: Record<string, { titulo: string; meta_minutos: number }>;
+  /** Plano por data ISO (YYYY-MM-DD) — sobrescreve a semana naquele dia */
+  plano_por_data?: Record<string, { titulo: string; meta_minutos: number }>;
   /** Hidratação — ml por unidade padrão e registro variável do dia */
   ml_por_copo?: number;
+  /** Atalhos de ml personalizados (além dos padrões do app) */
+  ml_presets?: number[];
+  /** Valores padrão do app que o usuário removeu dos atalhos */
+  ml_ocultos?: number[];
   registros_ml?: number[];
+  /** Proteína — gramas registradas por refeição no dia */
+  proteina_por_refeicao?: Record<string, number>;
 }
 
 export interface HabitoDiario {

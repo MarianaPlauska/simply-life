@@ -45,12 +45,12 @@ export function DueBucketTaskRow({
       ref={setNodeRef}
       style={style}
       className={[
-        'group flex items-center gap-1.5 px-2 py-2 rounded-sl border text-left w-full transition-colors',
+        'group flex items-center gap-1 px-2 py-1.5 rounded-md border text-left w-full transition-colors',
         isExecuting
-          ? 'border-accent bg-accent/15 ring-1 ring-accent/40 shadow-sm'
+          ? 'border-accent/30 bg-accent/10 ring-1 ring-accent/25'
           : inExecutionQueue
-            ? 'border-accent/35 bg-accent/8'
-            : 'border-line bg-elevated hover:border-ink-muted/50 hover:bg-card',
+            ? 'border-white/[0.06] bg-zinc-900/40'
+            : 'border-white/[0.04] bg-elevated hover:border-white/[0.08] hover:bg-card',
         blocked ? 'opacity-45' : '',
         isDragging ? 'opacity-50' : '',
       ].join(' ')}

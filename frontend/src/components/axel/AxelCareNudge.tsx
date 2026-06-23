@@ -1,18 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AxelCompanionAvatar } from '../Onboarding/AxelCompanionAvatar'
 import type { AvatarStyleId } from '../../lib/axelAvatarPresets'
 import { iniciaisDe } from '../../lib/axelAvatarPresets'
 import type { MoodLevel } from '../../lib/axelCareMessages'
 import { pickMoodCareMessage, pickStreakCareMessage } from '../../lib/axelCareMessages'
+import { releaseAxelCareNudge, tryClaimAxelCareNudge } from '../../lib/axelCareNudgeGate'
 
 interface AxelCareNudgeProps
 {
   avatarStyle: AvatarStyleId
   displayName?: string
   moodLevel?: MoodLevel
+  message?: string
   streak?: boolean
   durationMs?: number
+  /** Mensagem pós-humor — ignora o gate global e permanece o tempo inteiro */
+  bypassGate?: boolean
   onDone?: () => void
   className?: string
 }
@@ -22,31 +26,63 @@ export function AxelCareNudge({
   avatarStyle,
   displayName,
   moodLevel,
+  message: messageOverride,
   streak = false,
   durationMs = 4000,
+  bypassGate = false,
   onDone,
   className = '',
 }: AxelCareNudgeProps)
 {
-  const [visible, setVisible] = useState(true)
-  const message = streak
+  const [visible, setVisible] = useState(() =>
+    bypassGate || tryClaimAxelCareNudge(durationMs))
+  const doneRef = useRef(false)
+  const message = messageOverride ?? (streak
     ? pickStreakCareMessage()
-    : pickMoodCareMessage(moodLevel ?? 3)
+    : pickMoodCareMessage(moodLevel ?? 3))
   const reaction = streak || (moodLevel ?? 3) >= 4
     ? 'celebrate'
     : (moodLevel ?? 3) <= 1
       ? 'listen'
       : 'care'
 
+  const finish = () =>
+  {
+    if (doneRef.current) return
+    doneRef.current = true
+    if (!bypassGate)
+    {
+      releaseAxelCareNudge()
+    }
+    onDone?.()
+  }
+
   useEffect(() =>
   {
+    if (bypassGate)
+    {
+      tryClaimAxelCareNudge(durationMs)
+    }
+  }, [bypassGate, durationMs])
+
+  useEffect(() =>
+  {
+    if (!visible)
+    {
+      finish()
+      return
+    }
     const t = window.setTimeout(() =>
     {
       setVisible(false)
-      onDone?.()
+      finish()
     }, durationMs)
-    return () => window.clearTimeout(t)
-  }, [durationMs, onDone])
+    return () =>
+    {
+      window.clearTimeout(t)
+      if (!doneRef.current && !bypassGate) releaseAxelCareNudge()
+    }
+  }, [durationMs, visible, bypassGate])
 
   const initials = iniciaisDe(displayName ?? '')
 

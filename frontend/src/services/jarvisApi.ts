@@ -196,3 +196,36 @@ export async function ingestTasksIA(params: {
   if (!res.ok) throw new Error(`ingest-tasks: ${res.status}`);
   return res.json();
 }
+
+export interface TaskEstimateIAResponse
+{
+  estimate_minutes: number
+  extension_days: number
+  reasoning: string
+  confidence: number
+  source: 'local' | 'groq'
+  iaDisponivel: boolean
+}
+
+/** AXEL — estimativa de esforço e extensão de prazo (Groq/Gemini no servidor) */
+export async function fetchTaskEstimateIA(params: {
+  titulo: string
+  descricao?: string
+  prioridade?: string
+  status?: string
+  subtarefas?: Array<{ titulo: string; concluida: boolean }>
+  activityEntryCount?: number
+  elapsedFocusMinutes?: number
+  difficultySignal?: boolean
+  score_urgencia?: number
+}): Promise<TaskEstimateIAResponse>
+{
+  const res = await fetch(`${API_BASE}/task-estimate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  })
+
+  if (!res.ok) throw new Error(`task-estimate: ${res.status}`)
+  return res.json()
+}

@@ -3,17 +3,12 @@ import { SmilePlus, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { MoodQuickPicker } from '../wellbeing/MoodQuickPicker';
-import { MoodDayTimeline } from '../wellbeing/MoodDayTimeline';
-import { MoodWeekSparkline } from '../wellbeing/MoodWeekSparkline';
-import { MoodMonthHeatmap } from '../wellbeing/MoodMonthHeatmap';
 import { MOOD_CONTEXT_TAGS } from '../../lib/moodConstants';
 import { mediaHumor } from '../../lib/moodInsights';
 
 export function MoodTracker()
 {
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista);
-  const humorSemanaAgregado = useTaskStore((s) => s.humorSemanaAgregado);
-  const humorMesAgregado = useTaskStore((s) => s.humorMesAgregado);
   const registrarHumor = useTaskStore((s) => s.registrarHumor);
   const completeOnboardingStep = useTaskStore((s) => s.completeOnboardingStep);
 
@@ -92,10 +87,6 @@ export function MoodTracker()
         onChange={(e) => setNota(e.target.value)}
         className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[13px] text-ink placeholder:text-ink-muted outline-none focus:border-accent transition-colors"
       />
-
-      <MoodDayTimeline entries={humorHojeLista} />
-      <MoodWeekSparkline dias={humorSemanaAgregado} />
-      <MoodMonthHeatmap agregados={humorMesAgregado} />
     </section>
   );
 }

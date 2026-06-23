@@ -66,8 +66,16 @@ export function formatDaysRemaining(
 }
 
 export const DAYS_REMAINING_TONE_CLASS: Record<DaysRemainingMeta['tone'], string> = {
-  urgente: 'text-urgente border-urgente/35 bg-urgente/10',
-  atencao: 'text-atencao border-atencao/35 bg-atencao/10',
-  proximo: 'text-accent border-accent/25 bg-accent-muted/30',
-  muted: 'text-ink-muted border-line bg-chrome/20',
+  urgente:
+    'text-[10px] font-medium px-2 py-0.5 rounded border ' +
+    'bg-red-50 text-red-700 border-red-200/60 dark:bg-red-950/40 dark:text-red-300 dark:border-red-500/20',
+  atencao:
+    'text-[10px] font-medium px-2 py-0.5 rounded border ' +
+    'bg-amber-50 text-amber-800 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-500/20',
+  proximo:
+    'text-[10px] font-medium px-2 py-0.5 rounded border ' +
+    'bg-zinc-100 text-zinc-600 border-zinc-200/60 dark:bg-zinc-800/50 dark:text-zinc-300 dark:border-white/8',
+  muted:
+    'text-[10px] font-medium px-2 py-0.5 rounded border ' +
+    'bg-zinc-100 text-zinc-500 border-zinc-200/50 dark:bg-zinc-800/50 dark:text-zinc-400 dark:border-white/8',
 }

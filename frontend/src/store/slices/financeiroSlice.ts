@@ -26,7 +26,11 @@ import {
   nextBillStatus,
 } from '../../lib/financeReservedBills'
 import { dedupeCategories, missingSeedNames } from '../../lib/financeCategoryDedupe'
-import { cardLimitUsagePct, sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
+import {
+  cardLimitUsagePct,
+  sumOpenInvoiceSpend,
+  validateCardSpend,
+} from '../../lib/financeCardSpend'
 import {
   isMockReservedBillId,
   isMockReservedBillItemId,
@@ -42,6 +46,8 @@ import {
   type ExpensePreset,
 } from '../../lib/financeExpensePresets'
 import { DEFAULT_CATEGORY_SEEDS } from '../../lib/financeDefaultCategories'
+import { recoverCardsFromPersist } from '../../lib/recoverLegacyPersist'
+import { syncLocalCardsToServer } from '../../lib/financeCardRecovery'
 
 interface DatabaseDespesa
 {
@@ -81,6 +87,7 @@ export interface FinanceiroSlice
   fetchCategories: () => Promise<void>
   seedDefaultCategories: () => Promise<void>
   addCategory: (c: Omit<Category, 'id'>) => Promise<void>
+  updateCategory: (id: number, patch: Partial<Pick<Category, 'nome' | 'cor' | 'icone' | 'grupo'>>) => Promise<void>
   removeCategory: (id: number) => Promise<void>
   fetchBudgets: () => Promise<void>
   setBudgetLimit: (categoria: string, limite: number, categoria_id?: number) => Promise<void>
@@ -88,7 +95,7 @@ export interface FinanceiroSlice
   addGoal: (g: Omit<FinancialGoal, 'id'>) => Promise<void>
   updateGoalProgress: (id: number, valor: number) => Promise<void>
   fetchCards: () => Promise<void>
-  addCard: (card: Omit<VirtualCard, 'id'>) => Promise<void>
+  addCard: (card: Omit<VirtualCard, 'id'>) => Promise<boolean>
   removeCard: (id: string) => Promise<void>
   toggleCardStatus: (id: string) => Promise<void>
   updateCardLimit: (id: string, limite: number) => Promise<void>
@@ -173,10 +180,10 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     { categoria: 'compras', limite: 500 },
   ],
   cards: [],
-  cashAccount: loadCashAccountLocal(),
+  cashAccount: { saldo_inicial: 0 },
   reservedBills: [],
   reservedBillItems: [],
-  recurringIncomes: loadRecurringIncomesLocal(),
+  recurringIncomes: [],
   expensePresets: [...DEFAULT_EXPENSE_PRESETS],
 
   hydrateExpensePresets: () =>
@@ -261,6 +268,20 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
   addTransaction: async (t) =>
   {
+    if (t.card_id && t.tipo === 'despesa')
+    {
+      const card = get().cards.find((c) => c.id === t.card_id)
+      if (card)
+      {
+        const check = validateCardSpend(get().transactions, card, t.valor)
+        if (!check.ok)
+        {
+          toast.error(check.message ?? 'Saldo insuficiente no cartão')
+          return
+        }
+      }
+    }
+
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid)
     {
@@ -319,7 +340,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             ...s.transactions,
           ]
 
-          // Alerta de limite — fatura aberta do cartão
+          // Alerta de limite — só quando crítico (≥95%); barra no cartão cobre o resto
           if (t.card_id && t.tipo === 'despesa')
           {
             const card = s.cards.find((c) => c.id === t.card_id)
@@ -327,21 +348,15 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             {
               const usagePct = cardLimitUsagePct(newTransactions, card)
               const currentSpent = sumOpenInvoiceSpend(newTransactions, card)
-              if (usagePct >= 80)
+              if (usagePct >= 95)
               {
-                const urgency = usagePct >= 95 ? 'critica' : 'normal'
-                const title = usagePct >= 95 ? 'Limite de Cartão Crítico' : 'Uso de Cartão Elevado'
-                const msg = usagePct >= 95
-                  ? `Alerta crítico: O cartão "${card.nome}" atingiu ${usagePct.toFixed(0)}% do limite (${currentSpent.toFixed(2)} de ${card.limite.toFixed(2)}).`
-                  : `Aviso: O cartão "${card.nome}" atingiu ${usagePct.toFixed(0)}% do limite (${currentSpent.toFixed(2)} de ${card.limite.toFixed(2)}).`
-
                 supabase.from('notificacoes').insert({
                   user_id: uid,
                   tipo: 'financeiro',
-                  titulo: title,
-                  mensagem: msg,
-                  urgencia: urgency,
-                  score_urgencia: usagePct >= 95 ? 95 : 80,
+                  titulo: 'Limite de cartão crítico',
+                  mensagem: `O cartão "${card.nome}" atingiu ${usagePct.toFixed(0)}% do limite (${currentSpent.toFixed(2)} de ${card.limite.toFixed(2)}).`,
+                  urgencia: 'critica',
+                  score_urgencia: 95,
                   lida: 0,
                 }).then(({ error: notifError }) =>
                 {
@@ -469,6 +484,23 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     if (data) set((s) => ({ categories: [...s.categories, data] }))
   },
 
+  updateCategory: async (id, patch) =>
+  {
+    const { data, error } = await supabase
+      .from('fin_categorias')
+      .update(patch)
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    if (data)
+    {
+      set((s) => ({
+        categories: s.categories.map((c) => (c.id === id ? { ...c, ...data } : c)),
+      }))
+    }
+  },
+
   removeCategory: async (id) =>
   {
     const { error } = await supabase.from('fin_categorias').delete().eq('id', id)
@@ -574,34 +606,56 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
   fetchCards: async () =>
   {
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid)
+    {
+      set({ cards: [] })
+      return
+    }
+
+    let remote: VirtualCard[] = []
+
     try
     {
       const { data, error } = await supabase
         .from('fin_cartoes')
         .select('*')
+        .eq('user_id', uid)
         .order('created_at', { ascending: true })
       if (error) throw error
-      
-      if (data && data.length > 0)
-      {
-        set({ cards: data as VirtualCard[] })
-      }
-      else
-      {
-        set({ cards: [] })
-      }
+      remote = (data as VirtualCard[]) || []
     }
-    catch (e) { console.error('fetchCards error:', e) }
+    catch (e)
+    {
+      console.error('fetchCards error:', e)
+    }
+
+    const recovered = recoverCardsFromPersist(uid)
+    const remoteIds = new Set(remote.map((c) => c.id))
+    const localOnly = recovered.filter((c) => !remoteIds.has(c.id))
+    const merged = [...remote, ...localOnly]
+
+    set({ cards: merged })
+
+    if (localOnly.length > 0)
+    {
+      const synced = await syncLocalCardsToServer(uid, localOnly)
+      const syncedIds = new Set(synced.map((c) => c.id))
+      set((s) => ({
+        cards: [
+          ...remote,
+          ...synced,
+          ...localOnly.filter((c) => !syncedIds.has(c.id)),
+        ],
+      }))
+    }
   },
 
   addCard: async (card) =>
   {
-    const uid = (await supabase.auth.getUser()).data.user?.id
-    if (!uid) return
-    const newId = 'card_' + Date.now()
-    const newCard = {
+    const newId = `card_${Date.now()}`
+    const fullCard: VirtualCard = {
       id: newId,
-      user_id: uid,
       nome: card.nome,
       titular: card.titular,
       numero: card.numero,
@@ -610,24 +664,87 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       limite: card.limite,
       dia_vencimento: card.dia_vencimento,
       dia_fechamento: card.dia_fechamento,
+      modalidade: card.modalidade ?? 'credito',
       tipo_gradiente: card.tipo_gradiente,
       bandeira: card.bandeira,
       status: card.status,
     }
+
+    // Atualiza na hora — não depende do Supabase para aparecer na UI
+    set((s) => ({ cards: [...s.cards, fullCard] }))
+
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid)
+    {
+      return true
+    }
+
+    const buildRow = (withModalidade: boolean) =>
+    {
+      const row: Record<string, unknown> = {
+        id: newId,
+        user_id: uid,
+        nome: card.nome,
+        titular: card.titular,
+        numero: card.numero,
+        validade: card.validade,
+        cvv: card.cvv,
+        limite: card.limite,
+        dia_vencimento: card.dia_vencimento ?? null,
+        dia_fechamento: card.dia_fechamento ?? null,
+        tipo_gradiente: card.tipo_gradiente,
+        bandeira: card.bandeira,
+        status: card.status,
+      }
+      if (withModalidade)
+      {
+        row.modalidade = card.modalidade ?? 'credito'
+      }
+      return row
+    }
+
+    const isModalidadeColumnMissing = (err: { message?: string; code?: string }) =>
+    {
+      const msg = (err.message ?? '').toLowerCase()
+      return msg.includes('modalidade') || err.code === 'PGRST204'
+    }
+
     try
     {
-      const { data, error } = await supabase
+      let result = await supabase
         .from('fin_cartoes')
-        .insert(newCard)
+        .insert(buildRow(true))
         .select()
         .single()
-      if (error) throw error
-      if (data)
+
+      if (result.error && isModalidadeColumnMissing(result.error))
       {
-        set((s) => ({ cards: [...s.cards, data as VirtualCard] }))
+        result = await supabase
+          .from('fin_cartoes')
+          .insert(buildRow(false))
+          .select()
+          .single()
       }
+
+      if (result.error) throw result.error
+
+      if (result.data)
+      {
+        set((s) => ({
+          cards: s.cards.map((c) =>
+            c.id === newId ? { ...fullCard, ...(result.data as VirtualCard) } : c,
+          ),
+        }))
+      }
+
+      return true
     }
-    catch (e) { console.error('addCard db error:', e) }
+    catch (e)
+    {
+      console.error('addCard db error:', e)
+      // Cartão permanece no estado local
+      return true
+    }
   },
 
   removeCard: async (id) =>

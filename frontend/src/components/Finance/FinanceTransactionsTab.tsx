@@ -6,12 +6,15 @@ import {
 } from 'lucide-react'
 import { FinancePeriodToolbar } from './FinancePeriodToolbar'
 import { FinanceGroupedRollupTable } from './FinanceGroupedRollupTable'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { CATEGORY_GRUPO_LABELS } from '../../lib/financeDefaultCategories'
 import { filterTransactionsByGrupo, GRUPO_ORDER } from '../../lib/financeGroupRollup'
 import { resolveFinancePeriod, type FinancePeriodConfig } from '../../lib/financePeriodFilter'
 import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
+  AXEL_BENTO_PANEL,
+  AXEL_FIELD_INPUT,
+  AXEL_LIST_FILTER_ACTIVE,
+  AXEL_LIST_FILTER_IDLE,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
@@ -42,6 +45,14 @@ function fmt(value: number)
 function fmtDate(iso: string)
 {
   return new Date(iso + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+}
+
+function balancePair(t: Transaction, accumulated: Map<number, number>)
+{
+  const delta = t.tipo === 'receita' ? t.valor : -t.valor
+  const after = accumulated.get(t.id) ?? 0
+  const before = after - delta
+  return { before, after }
 }
 
 type SortKey = 'data' | 'descricao' | 'categoria' | 'valor' | 'status'
@@ -80,7 +91,6 @@ export function FinanceTransactionsTab({
   const [sortKey, setSortKey] = useState<SortKey>('data')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [filterGrupo, setFilterGrupo] = useState<CategoryGrupo | 'all'>('all')
-  const [showGrupos, setShowGrupos] = useState(false)
 
   const resolvedPeriod = useMemo(
     () => resolveFinancePeriod(periodConfig),
@@ -150,10 +160,6 @@ export function FinanceTransactionsTab({
     return map
   }, [rows])
 
-  const totalReceita = filteredTx.filter((t) => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0)
-  const totalDespesa = filteredTx.filter((t) => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0)
-  const saldo = totalReceita - totalDespesa
-
   const toggleSort = (k: SortKey) =>
   {
     if (sortKey === k)
@@ -186,22 +192,27 @@ export function FinanceTransactionsTab({
         setFilterStatus={setFilterStatus}
         filterGrupo={filterGrupo}
         setFilterGrupo={setFilterGrupo}
-        showGrupos={showGrupos}
-        setShowGrupos={setShowGrupos}
       />
 
-      {showGrupos && (
+      <DashboardCollapsible
+        title="Resumo por grupo"
+        subtitle={periodLabel}
+        defaultOpen={false}
+        className={AXEL_BENTO_PANEL}
+        bodyClassName="pt-0"
+      >
         <FinanceGroupedRollupTable
+          embedded
           transactions={filteredTx}
           activeCategories={activeCategories}
           periodLabel={periodLabel}
         />
-      )}
+      </DashboardCollapsible>
 
       {/* Lista mobile */}
       <ul className="md:hidden border border-line rounded-sl divide-y divide-line">
         {rows.length === 0 && (
-          <li className="py-12 text-center text-[12px] text-zinc-600 px-4">
+          <li className={`py-12 text-center text-[12px] px-4 ${AXEL_TEXT_SECONDARY}`}>
             Nenhum lançamento para os filtros atuais.
           </li>
         )}
@@ -212,14 +223,14 @@ export function FinanceTransactionsTab({
           const statusKey = (t.status_pagamento || 'pendente') as keyof typeof STATUS_CONFIG
           const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pendente
           const StatusIcon = status.icon
-          const acc = accumulated.get(t.id) ?? 0
+          const { before, after } = balancePair(t, accumulated)
 
           return (
             <li key={t.id} className={`px-3 py-3 space-y-2 ${AXEL_ROW_HOVER}`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] text-zinc-200 break-words">{t.descricao}</p>
-                  <p className="font-mono text-[10px] text-zinc-500 mt-0.5">
+                  <p className={`text-[13px] break-words ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
+                  <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
                     {fmtDate(t.data)}
                     {' · '}
                     {paymentMethodLabel(t)}
@@ -228,7 +239,7 @@ export function FinanceTransactionsTab({
                   </p>
                 </div>
                 <span className={`font-mono tabular-nums font-semibold shrink-0 text-[13px] ${
-                  isRec ? 'text-emerald-400' : 'text-zinc-200'
+                  isRec ? 'text-concluido' : AXEL_TEXT_PRIMARY
                 }`}>
                   {isRec ? '+' : '−'}{fmt(t.valor)}
                 </span>
@@ -239,13 +250,17 @@ export function FinanceTransactionsTab({
                   {status.label}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className={`font-mono tabular-nums text-[10px] ${acc >= 0 ? 'text-zinc-400' : 'text-rose-400'}`}>
-                    Saldo {fmt(acc)}
+                  <span className={`font-mono tabular-nums text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                    {fmt(before)}
+                    <span className="mx-1 opacity-60">→</span>
+                    <span className={after >= 0 ? AXEL_TEXT_PRIMARY : 'text-urgente'}>
+                      {fmt(after)}
+                    </span>
                   </span>
                   <button
                     type="button"
                     onClick={() => removeTransaction(t.id)}
-                    className="p-2 text-zinc-600 hover:text-rose-400 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                    className="p-2 text-ink-muted hover:text-urgente min-w-[40px] min-h-[40px] flex items-center justify-center"
                     aria-label="Remover lançamento"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -267,7 +282,7 @@ export function FinanceTransactionsTab({
               <Th onClick={() => toggleSort('categoria')} active={sortKey === 'categoria'} dir={sortDir} width="w-[140px]">Categoria</Th>
               <Th onClick={() => toggleSort('status')} active={sortKey === 'status'} dir={sortDir} width="w-[88px]">Status</Th>
               <Th onClick={() => toggleSort('valor')} active={sortKey === 'valor'} dir={sortDir} width="w-[110px]" align="right">Valor</Th>
-              <Th width="w-[110px]" align="right">Saldo</Th>
+              <Th width="w-[130px]" align="right">Extrato</Th>
               <Th width="w-[28px]"></Th>
             </tr>
           </thead>
@@ -280,7 +295,7 @@ export function FinanceTransactionsTab({
               const statusKey = (t.status_pagamento || 'pendente') as keyof typeof STATUS_CONFIG
               const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pendente
               const StatusIcon = status.icon
-              const acc = accumulated.get(t.id) ?? 0
+              const { before, after } = balancePair(t, accumulated)
 
               return (
                 <tr
@@ -289,33 +304,35 @@ export function FinanceTransactionsTab({
                     i % 2 === 0 ? '' : 'bg-chrome/30'
                   }`}
                 >
-                  <Td className="text-zinc-500 tabular-nums font-mono text-[11px]">{fmtDate(t.data)}</Td>
+                  <Td className={`tabular-nums font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>{fmtDate(t.data)}</Td>
                   <Td>
                     <div
                       className="w-5 h-5 flex items-center justify-center"
-                      style={{ color: isRec ? '#34d399' : (cat?.cor || '#71717a') }}
+                      style={{ color: isRec ? 'var(--sl-concluido, #10b981)' : (cat?.cor || undefined) }}
                     >
                       <CatIcon className="w-3.5 h-3.5" />
                     </div>
                   </Td>
-                  <Td className="text-zinc-200 truncate">{t.descricao}</Td>
-                  <Td className="text-zinc-500">{isRec ? 'Receita' : (cat?.nome || '-')}</Td>
+                  <Td className={`truncate ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</Td>
+                  <Td className={AXEL_TEXT_SECONDARY}>{isRec ? 'Receita' : (cat?.nome || '-')}</Td>
                   <Td>
                     <span className={`inline-flex items-center gap-1 text-[10.5px] font-medium ${status.text}`}>
                       <StatusIcon className="w-3 h-3" />
                       {status.label}
                     </span>
                   </Td>
-                  <Td align="right" className={`font-mono tabular-nums font-semibold ${isRec ? 'text-emerald-400' : 'text-zinc-200'}`}>
+                  <Td align="right" className={`font-mono tabular-nums font-semibold ${isRec ? 'text-concluido' : AXEL_TEXT_PRIMARY}`}>
                     {isRec ? '+' : '−'}{fmt(t.valor)}
                   </Td>
-                  <Td align="right" className={`font-mono tabular-nums text-[11px] ${acc >= 0 ? 'text-zinc-400' : 'text-rose-400'}`}>
-                    {fmt(acc)}
+                  <Td align="right" className={`font-mono tabular-nums text-[10.5px] ${AXEL_TEXT_SECONDARY}`}>
+                    <span>{fmt(before)}</span>
+                    <span className="mx-0.5 opacity-50">→</span>
+                    <span className={after >= 0 ? AXEL_TEXT_PRIMARY : 'text-urgente'}>{fmt(after)}</span>
                   </Td>
                   <Td>
                     <button
                       onClick={() => removeTransaction(t.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-zinc-600 hover:text-rose-400"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-ink-muted hover:text-urgente"
                       aria-label="Remover lançamento"
                     >
                       <Trash2 className="w-3 h-3" />
@@ -326,7 +343,7 @@ export function FinanceTransactionsTab({
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-16 text-center text-[12px] text-zinc-600">
+                <td colSpan={8} className={`py-16 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
                   Nenhum lançamento para os filtros atuais.
                 </td>
               </tr>
@@ -335,16 +352,10 @@ export function FinanceTransactionsTab({
         </table>
       </div>
 
-      {/* RODAPE — totalizadores estilo Bloomberg */}
-      <footer className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-[11px] pt-1">
-        <span className="text-zinc-500 font-mono tabular-nums">
+      <footer className="text-[11px] pt-1">
+        <span className={`font-mono tabular-nums ${AXEL_TEXT_SECONDARY}`}>
           {rows.length} de {filteredTx.length} lançamentos
         </span>
-        <div className="flex flex-wrap items-center gap-3 sm:gap-6 font-mono tabular-nums">
-          <Total label="Entradas" value={`+${fmt(totalReceita)}`} color="text-emerald-400" />
-          <Total label="Saídas"   value={`−${fmt(totalDespesa)}`} color="text-rose-400" />
-          <Total label="Saldo"    value={fmt(saldo)} color={saldo >= 0 ? 'text-emerald-400' : 'text-rose-400'} highlight />
-        </div>
       </footer>
     </div>
   )
@@ -367,14 +378,14 @@ function Th({ children, width, align = 'left', onClick, active, dir }: ThProps)
   return (
     <th
       onClick={onClick}
-      className={`${width || ''} text-[9.5px] font-bold uppercase tracking-[0.18em] text-zinc-600 py-2 px-2 ${
+      className={`${width || ''} text-[9.5px] font-bold uppercase tracking-[0.18em] py-2 px-2 ${AXEL_TEXT_SECONDARY} ${
         align === 'right' ? 'text-right' : 'text-left'
-      } ${onClick ? 'cursor-pointer hover:text-zinc-300 select-none' : ''}`}
+      } ${onClick ? 'cursor-pointer hover:text-ink select-none' : ''}`}
     >
       <span className="inline-flex items-center gap-1">
         {children}
         {onClick && (
-          <ArrowUpDown className={`w-2.5 h-2.5 ${active ? (dir === 'asc' ? 'text-violet-400' : 'text-violet-400 rotate-180') : 'opacity-30'}`} />
+          <ArrowUpDown className={`w-2.5 h-2.5 ${active ? (dir === 'asc' ? 'text-accent' : 'text-accent rotate-180') : 'opacity-30'}`} />
         )}
       </span>
     </th>
@@ -397,24 +408,6 @@ function Td({ children, className, align = 'left' }: TdProps)
   )
 }
 
-interface TotalProps
-{
-  label: string
-  value: string
-  color: string
-  highlight?: boolean
-}
-
-function Total({ label, value, color, highlight }: TotalProps)
-{
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className="text-[9.5px] uppercase tracking-wider text-zinc-600">{label}</span>
-      <span className={`${color} ${highlight ? 'text-[13px]' : 'text-[11.5px]'} font-bold`}>{value}</span>
-    </span>
-  )
-}
-
 // ─── toolbar de filtros + busca ────────────────────────────
 
 interface ToolbarProps
@@ -428,8 +421,6 @@ interface ToolbarProps
   setFilterStatus: (status: string) => void
   filterGrupo: CategoryGrupo | 'all'
   setFilterGrupo: (g: CategoryGrupo | 'all') => void
-  showGrupos: boolean
-  setShowGrupos: (v: boolean) => void
 }
 
 function Toolbar({
@@ -442,35 +433,23 @@ function Toolbar({
   setFilterStatus,
   filterGrupo,
   setFilterGrupo,
-  showGrupos,
-  setShowGrupos,
 }: ToolbarProps)
 {
   return (
-    <div className="flex flex-col gap-3 pb-2">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2 bg-card border border-line rounded-sl px-2 py-1.5 w-full sm:max-w-xs min-h-[44px]">
-          <Search className={`w-3 h-3 ${AXEL_TEXT_SECONDARY}`} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar lançamento..."
-            className={`bg-transparent text-[12px] placeholder:text-ink-muted outline-none w-full ${AXEL_TEXT_PRIMARY}`}
-          />
-        </div>
-
-        <button
-          type="button"
-          onClick={() => setShowGrupos(!showGrupos)}
-          className={showGrupos ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE}
-        >
-          Resumo por grupo
-        </button>
+    <section className={`${AXEL_BENTO_PANEL} p-3 space-y-3`}>
+      <div className={`flex items-center gap-2 min-h-[44px] ${AXEL_FIELD_INPUT} py-1.5`}>
+        <Search className={`w-3.5 h-3.5 shrink-0 ${AXEL_TEXT_SECONDARY}`} />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar lançamento..."
+          className={`bg-transparent text-[12px] placeholder:text-ink-muted outline-none w-full ${AXEL_TEXT_PRIMARY}`}
+        />
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+      <FilterRow label="Grupo">
         <FilterChip active={filterGrupo === 'all'} onClick={() => setFilterGrupo('all')}>
-          Todos grupos
+          Todos
         </FilterChip>
         {GRUPO_ORDER.map((g) => (
           <FilterChip
@@ -481,42 +460,56 @@ function Toolbar({
             {CATEGORY_GRUPO_LABELS[g]}
           </FilterChip>
         ))}
-      </div>
+      </FilterRow>
 
-      <div className="flex items-center gap-3 overflow-x-auto scrollbar-none">
-        {/* categoria */}
-        <div className="flex gap-1 shrink-0">
-          <FilterChip active={filterCat === 'all'} onClick={() => setFilterCat('all')}>
-            Tudo
+      <FilterRow label="Categoria">
+        <FilterChip active={filterCat === 'all'} onClick={() => setFilterCat('all')}>
+          Todas
+        </FilterChip>
+        <FilterChip active={filterCat === 'receita'} onClick={() => setFilterCat('receita')}>
+          Receitas
+        </FilterChip>
+        {activeCategories.slice(0, 8).map((cat) => (
+          <FilterChip
+            key={cat.id}
+            active={filterCat === String(cat.id)}
+            onClick={() => setFilterCat(String(cat.id))}
+          >
+            {cat.nome}
           </FilterChip>
-          <FilterChip active={filterCat === 'receita'} onClick={() => setFilterCat('receita')} color="emerald">
-            Receitas
+        ))}
+      </FilterRow>
+
+      <FilterRow label="Status">
+        {(['all', 'pago', 'pendente', 'agendado'] as const).map((st) => (
+          <FilterChip
+            key={st}
+            active={filterStatus === st}
+            onClick={() => setFilterStatus(st)}
+          >
+            {st === 'all' ? 'Todos' : STATUS_CONFIG[st].label}
           </FilterChip>
-          {activeCategories.slice(0, 6).map((cat) => (
-            <FilterChip
-              key={cat.id}
-              active={filterCat === String(cat.id)}
-              onClick={() => setFilterCat(String(cat.id))}
-            >
-              {cat.nome}
-            </FilterChip>
-          ))}
-        </div>
+        ))}
+      </FilterRow>
+    </section>
+  )
+}
 
-        <div className="h-4 w-px bg-line" />
+interface FilterRowProps
+{
+  label: string
+  children: React.ReactNode
+}
 
-        {/* status */}
-        <div className="flex gap-1 shrink-0">
-          {(['all', 'pago', 'pendente', 'agendado'] as const).map((st) => (
-            <FilterChip
-              key={st}
-              active={filterStatus === st}
-              onClick={() => setFilterStatus(st)}
-            >
-              {st === 'all' ? 'Status' : STATUS_CONFIG[st].label}
-            </FilterChip>
-          ))}
-        </div>
+function FilterRow({ label, children }: FilterRowProps)
+{
+  return (
+    <div className="space-y-1.5">
+      <p className={`font-mono text-[9px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+        {label}
+      </p>
+      <div className="flex flex-wrap gap-x-2 gap-y-1 overflow-x-auto scrollbar-none -mx-0.5">
+        {children}
       </div>
     </div>
   )
@@ -527,22 +520,16 @@ interface FilterChipProps
   active: boolean
   onClick: () => void
   children: React.ReactNode
-  color?: 'emerald' | 'violet'
 }
 
 function FilterChip({ active, onClick, children }: FilterChipProps)
 {
-  if (active)
-  {
-    return (
-      <button type="button" onClick={onClick} className={AXEL_FILTER_PILL_ACTIVE}>
-        {children}
-      </button>
-    )
-  }
-
   return (
-    <button type="button" onClick={onClick} className={AXEL_FILTER_PILL_IDLE}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={active ? AXEL_LIST_FILTER_ACTIVE : AXEL_LIST_FILTER_IDLE}
+    >
       {children}
     </button>
   )

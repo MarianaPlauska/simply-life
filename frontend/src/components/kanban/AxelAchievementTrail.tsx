@@ -29,7 +29,7 @@ export function AxelAchievementTrail()
           </span>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x -mx-1 px-1">
           {entries.map((entry) => (
               <article
                 key={entry.id}

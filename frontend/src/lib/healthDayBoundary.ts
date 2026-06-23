@@ -1,4 +1,5 @@
 import type { HabitoDiario, HabitoDiarioConfig } from '../store/storeTypes'
+import { readScopedJson, scopedStorageKey, writeScopedJson } from './userScopedStorage'
 
 // Data local do usuário (YYYY-MM-DD) — base para reset diário de saúde
 
@@ -15,23 +16,64 @@ export function localTodayIso(): string
 
 export function readStoredHealthDay(): string | null
 {
-  try
-  {
-    return localStorage.getItem(STORAGE_KEY)
-  }
-  catch
-  {
-    return null
-  }
+  return readScopedJson<string>(STORAGE_KEY)
 }
 
 export function writeStoredHealthDay(iso: string): void
 {
-  try
+  writeScopedJson(STORAGE_KEY, iso)
+}
+
+/** IDs locais (Date.now) ainda não sincronizados com o Supabase */
+export function isPhantomHabitId(id: number): boolean
+{
+  return id > 1_000_000_000_000
+}
+
+/** Evita que fetch remoto apague progresso otimista do dia atual */
+export function mergeHabitosAfterFetch(
+  local: HabitoDiario[],
+  remote: HabitoDiario[],
+  today: string,
+): HabitoDiario[]
+{
+  const resetRemote = resetHabitosParaHoje(remote, today)
+  const localOnly = local.filter(
+    (h) => isPhantomHabitId(h.id) && !resetRemote.some((r) => r.tipo === h.tipo),
+  )
+
+  const merged = resetRemote.map((remoteH) =>
   {
-    localStorage.setItem(STORAGE_KEY, iso)
-  }
-  catch { /* quota */ }
+    const localH = local.find((l) => l.id === remoteH.id || l.tipo === remoteH.tipo)
+    if (!localH)
+    {
+      return remoteH
+    }
+
+    const localToday = localH.config?.ultima_data === today
+    const remoteToday = remoteH.config?.ultima_data === today
+    const localMl = localH.config?.registros_ml?.length ?? 0
+    const remoteMl = remoteH.config?.registros_ml?.length ?? 0
+
+    if (
+      localToday
+      && (
+        !remoteToday
+        || localH.progresso_atual > remoteH.progresso_atual
+        || localMl > remoteMl
+        || (localH.config?.ml_por_copo && localH.config.ml_por_copo !== remoteH.config?.ml_por_copo)
+        || (localH.config?.ml_presets?.length && JSON.stringify(localH.config.ml_presets) !== JSON.stringify(remoteH.config?.ml_presets))
+        || (localH.config?.ml_ocultos?.length && JSON.stringify(localH.config.ml_ocultos) !== JSON.stringify(remoteH.config?.ml_ocultos))
+      )
+    )
+    {
+      return { ...localH, id: remoteH.id }
+    }
+
+    return remoteH
+  })
+
+  return [...merged, ...localOnly]
 }
 
 /** Config após virada do dia — zera registros de água mas mantém ml_por_copo e demais prefs */
@@ -46,6 +88,11 @@ export function configAposResetDiario(
   if (tipo === 'agua' || (config?.registros_ml && config.registros_ml.length > 0))
   {
     next.registros_ml = []
+  }
+
+  if (tipo === 'proteina')
+  {
+    next.proteina_por_refeicao = {}
   }
 
   return next
@@ -76,5 +123,26 @@ export function resetHabitosParaHoje(habitos: HabitoDiario[], today: string): Ha
 
 export function isNovoDiaDeSaude(today: string): boolean
 {
-  return readStoredHealthDay() !== today
+  const stored = readStoredHealthDay()
+  if (stored === today)
+  {
+    return false
+  }
+  // Migra chave legada global para escopo por usuário
+  try
+  {
+    const legacy = localStorage.getItem(STORAGE_KEY)
+    if (legacy === today)
+    {
+      writeStoredHealthDay(today)
+      return false
+    }
+  }
+  catch { /* quota */ }
+  return stored !== today
+}
+
+export function waterPrefsStorageKey(): string
+{
+  return scopedStorageKey('simply-life:water-prefs')
 }

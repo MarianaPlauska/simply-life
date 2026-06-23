@@ -8,11 +8,18 @@ import {
   configAposResetDiario,
   habitoPrecisaReset,
   isNovoDiaDeSaude,
+  isPhantomHabitId,
   localTodayIso,
-  resetHabitosParaHoje,
+  mergeHabitosAfterFetch,
   writeStoredHealthDay,
 } from '../../lib/healthDayBoundary'
-import { upsertHabitHistorico } from '../../lib/habitHistorico'
+import { persistLocalMlPorCopo } from '../../lib/waterHydration'
+import {
+  appendHistoricoCarga,
+  mergeAcademyConfig,
+  type AcademyTreinoConfig,
+} from '../../lib/academyWorkouts'
+import { TREINO_PRESET } from '../../constants/healthPresets'
 import {
   medicamentoCompletoHoje,
   tomadaParaDose,
@@ -64,6 +71,17 @@ function mapSessao(row: Record<string, unknown>): SessaoTreino
   }
 }
 
+async function ensureTreinoRecord(get: () => SaudeSlice): Promise<HabitoDiario | null>
+{
+  const existente = get().habitos.find((h) => h.tipo === 'treino')
+  if (existente && !isPhantomHabitId(existente.id))
+  {
+    return existente
+  }
+  await get().ensureHealthHabit(TREINO_PRESET)
+  return get().habitos.find((h) => h.tipo === 'treino') ?? null
+}
+
 export interface SaudeSlice
 {
   medicamentos: Medicamento[]
@@ -72,6 +90,7 @@ export interface SaudeSlice
   habitosStreaks: HabitoStreak[]
   sessaoTreinoAtiva: SessaoTreino | null
   sessoesTreinoHoje: SessaoTreino[]
+  sessoesTreinoMes: SessaoTreino[]
   fetchMedicamentos: () => Promise<void>
   fetchMedicamentoTomadas: () => Promise<void>
   addMedicamento: (med: {
@@ -91,6 +110,8 @@ export interface SaudeSlice
   toggleMedicamento: (id: number) => Promise<void>
   registrarTomadaMedicamento: (medicamentoId: number, horarioPrevisto: string) => Promise<void>
   updateTreinoPlanoSemana: (plano: HabitoDiarioConfig['plano_semana']) => Promise<void>
+  updateAcademyTreinoConfig: (patch: Partial<AcademyTreinoConfig>) => Promise<void>
+  registrarSerieAcademia: (exercicioId: string, pesoKg: number, reps: number) => Promise<void>
   fetchHabitos: () => Promise<void>
   addHabito: (h: {
     tipo: string
@@ -117,6 +138,7 @@ export interface SaudeSlice
   fetchHabitosStreaks: () => Promise<void>
   fetchSessaoTreinoAtiva: () => Promise<void>
   fetchSessoesTreinoHoje: () => Promise<void>
+  fetchSessoesTreinoMes: () => Promise<void>
   addTreinoHabito: (tipoTreino: string, metaMinutos: number) => Promise<void>
   iniciarTreino: (habitoId: number, tipoTreino: string, metaMinutos: number) => Promise<void>
   finalizarTreino: (sessaoId: number) => Promise<void>
@@ -197,6 +219,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   habitosStreaks: [] as HabitoStreak[],
   sessaoTreinoAtiva: null,
   sessoesTreinoHoje: [],
+  sessoesTreinoMes: [],
 
   fetchMedicamentoTomadas: async () =>
   {
@@ -435,7 +458,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
   updateTreinoPlanoSemana: async (plano) =>
   {
-    const treino = get().habitos.find((h) => h.tipo === 'treino')
+    const treino = await ensureTreinoRecord(get)
     if (!treino) return
     const config = { ...(treino.config ?? {}), plano_semana: plano }
     set((s) => ({
@@ -446,6 +469,57 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       await supabase.from('habitos_diarios').update({ config }).eq('id', treino.id)
     }
     catch { /* offline */ }
+  },
+
+  updateAcademyTreinoConfig: async (patch) =>
+  {
+    const treino = await ensureTreinoRecord(get)
+    if (!treino) return
+    const atual = mergeAcademyConfig(treino.config as AcademyTreinoConfig)
+    const merged: AcademyTreinoConfig = {
+      ...atual,
+      ...patch,
+      exercicios_por_dia: patch.exercicios_por_dia
+        ? { ...atual.exercicios_por_dia, ...patch.exercicios_por_dia }
+        : atual.exercicios_por_dia,
+      exercicios_por_data: patch.exercicios_por_data
+        ? { ...atual.exercicios_por_data, ...patch.exercicios_por_data }
+        : atual.exercicios_por_data,
+      plano_por_data: patch.plano_por_data
+        ? { ...atual.plano_por_data, ...patch.plano_por_data }
+        : atual.plano_por_data,
+      historico_cargas: patch.historico_cargas
+        ? { ...atual.historico_cargas, ...patch.historico_cargas }
+        : atual.historico_cargas,
+      exercicios_customizados: patch.exercicios_customizados
+        ? [...(atual.exercicios_customizados ?? []), ...patch.exercicios_customizados.filter(
+          (c) => !(atual.exercicios_customizados ?? []).some((e) => e.id === c.id),
+        )]
+        : atual.exercicios_customizados,
+    }
+    const config = { ...(treino.config ?? {}), ...merged }
+    set((s) => ({
+      habitos: s.habitos.map((h) => h.id === treino.id ? { ...h, config } : h),
+    }))
+    try
+    {
+      await supabase.from('habitos_diarios').update({ config }).eq('id', treino.id)
+    }
+    catch { /* offline */ }
+  },
+
+  registrarSerieAcademia: async (exercicioId, pesoKg, reps) =>
+  {
+    const treino = get().habitos.find((h) => h.tipo === 'treino')
+    if (!treino) return
+    const atual = mergeAcademyConfig(treino.config as AcademyTreinoConfig)
+    const historico_cargas = appendHistoricoCarga(
+      atual.historico_cargas ?? {},
+      exercicioId,
+      pesoKg,
+      reps,
+    )
+    await get().updateAcademyTreinoConfig({ historico_cargas })
   },
 
   toggleMedicamento: async (id) =>
@@ -521,7 +595,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   fetchHabitos: async () =>
   {
     const today = localTodayIso()
-    set((s) => ({ habitos: resetHabitosParaHoje(s.habitos, today) }))
+    const localBefore = get().habitos
 
     try
     {
@@ -530,12 +604,11 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         .from('habitos_diarios')
         .select('*')
       if (error) throw error
-      const today = localTodayIso()
       const mapped = (data || []).map((row) => mapHabito(row as Record<string, unknown>))
-      const habitos = resetHabitosParaHoje(mapped, today)
+      const habitos = mergeHabitosAfterFetch(localBefore, mapped, today)
       set({ habitos })
 
-      if (isNovoDiaDeSaude(today) || habitos.some((h, i) => h.progresso_atual !== mapped[i]?.progresso_atual))
+      if (isNovoDiaDeSaude(today))
       {
         writeStoredHealthDay(today)
       }
@@ -595,7 +668,14 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   ensureHealthHabit: async (preset) =>
   {
     const existing = get().habitos.find((h) => h.tipo === preset.tipo)
-    if (existing) return existing
+    if (existing && !isPhantomHabitId(existing.id))
+    {
+      return existing
+    }
+    if (existing && isPhantomHabitId(existing.id))
+    {
+      set((s) => ({ habitos: s.habitos.filter((h) => h.id !== existing.id) }))
+    }
     await get().addHabito(preset)
     await get().fetchHabitos()
     return get().habitos.find((h) => h.tipo === preset.tipo) ?? null
@@ -739,24 +819,70 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
   updateHabitoConfig: async (id, patch) =>
   {
-    const before = get().habitos.find((h) => h.id === id)
+    let before = get().habitos.find((h) => h.id === id)
+    if (!before && patch.ml_por_copo)
+    {
+      persistLocalMlPorCopo(patch.ml_por_copo)
+      return
+    }
     if (!before) return
+
+    if (isPhantomHabitId(id))
+    {
+      const ensured = await get().ensureHealthHabit({
+        tipo: before.tipo,
+        nome_exibicao: before.nome_exibicao,
+        meta_diaria: before.meta_diaria,
+        unidade: before.unidade,
+        config: before.config,
+      })
+      if (!ensured) return
+      before = ensured
+      id = ensured.id
+    }
+
     const config = { ...(before.config ?? {}), ...patch }
+    if (patch.ml_por_copo)
+    {
+      persistLocalMlPorCopo(patch.ml_por_copo)
+    }
     set((s) => ({
       habitos: s.habitos.map((h) => (h.id === id ? { ...h, config } : h)),
     }))
     try
     {
-      await supabase.from('habitos_diarios').update({ config }).eq('id', id)
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      const query = supabase.from('habitos_diarios').update({ config }).eq('id', id)
+      const { error } = uid ? await query.eq('user_id', uid) : await query
+      if (error) throw error
     }
-    catch { /* offline */ }
+    catch (e)
+    {
+      console.error('updateHabitoConfig:', e)
+      const { toast } = await import('sonner')
+      toast.error('Não foi possível salvar a preferência de água')
+    }
   },
 
   setAguaRegistros: async (id, registros_ml) =>
   {
     const today = localTodayIso()
-    const before = get().habitos.find((h) => h.id === id)
+    let before = get().habitos.find((h) => h.id === id)
     if (!before) return
+
+    if (isPhantomHabitId(id))
+    {
+      const ensured = await get().ensureHealthHabit({
+        tipo: 'agua',
+        nome_exibicao: before.nome_exibicao,
+        meta_diaria: before.meta_diaria,
+        unidade: before.unidade,
+        config: before.config,
+      })
+      if (!ensured) return
+      before = ensured
+      id = ensured.id
+    }
 
     const next = Math.max(0, registros_ml.length)
     const wasDone = before.progresso_atual >= before.meta_diaria
@@ -774,10 +900,15 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
     try
     {
-      await supabase
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      const query = supabase
         .from('habitos_diarios')
         .update({ progresso_atual: next, config })
         .eq('id', id)
+      const { error } = uid ? await query.eq('user_id', uid) : await query
+      if (error) throw error
+
+      writeStoredHealthDay(today)
 
       if (!wasDone && next >= before.meta_diaria)
       {
@@ -785,7 +916,13 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         await grantHabitoXp(get as () => SaudeSlice & Record<string, unknown>, 'meta de água')
       }
     }
-    catch { /* offline */ }
+    catch (e)
+    {
+      console.error('setAguaRegistros:', e)
+      const { toast } = await import('sonner')
+      toast.error('Não foi possível salvar a água — tente de novo')
+      await get().fetchHabitos()
+    }
   },
 
   deleteHabito: async (id) =>
@@ -851,6 +988,38 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     catch (e)
     {
       console.error('fetchSessoesTreinoHoje:', e)
+    }
+  },
+
+  fetchSessoesTreinoMes: async () =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid)
+      {
+        set({ sessoesTreinoMes: [] })
+        return
+      }
+
+      const now = new Date()
+      const inicio = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+      const fim = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString()
+
+      const { data, error } = await supabase
+        .from('sessoes_treino')
+        .select('*')
+        .eq('user_id', uid)
+        .gte('created_at', inicio)
+        .lte('created_at', fim)
+        .order('iniciado_em', { ascending: false })
+
+      if (error) throw error
+      set({ sessoesTreinoMes: (data || []).map((row) => mapSessao(row as Record<string, unknown>)) })
+    }
+    catch (e)
+    {
+      console.error('fetchSessoesTreinoMes:', e)
     }
   },
 
@@ -964,6 +1133,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       }
 
       await get().fetchSessoesTreinoHoje()
+      await get().fetchSessoesTreinoMes()
     }
     catch (e)
     {

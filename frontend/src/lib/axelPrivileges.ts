@@ -25,7 +25,7 @@ export interface PrivilegeStatus
 export function listPrivileges(ctx: PrivilegeContext): PrivilegeStatus[]
 {
   const highlights: { id: string; hint: string }[] = [
-    { id: 'accent_copper', hint: 'Conta criada' },
+    { id: 'accent_meridian', hint: 'Conta criada' },
     { id: 'accent_sky', hint: 'Nível 3' },
     { id: 'badge_operator', hint: 'Nível 5' },
     { id: 'ai_tone_direct', hint: 'Nível 7' },
@@ -52,6 +52,7 @@ export function listPrivileges(ctx: PrivilegeContext): PrivilegeStatus[]
 
 export function canUseAccent(accent: string, ctx: PrivilegeContext): boolean
 {
+  if (accent === 'meridian') return true
   if (accent === 'copper') return true
   if (ctx.level >= 3 && ['sky', 'forest'].includes(accent)) return true
   if (ctx.level >= 6 && accent === 'violet') return true

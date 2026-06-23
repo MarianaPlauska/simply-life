@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { HeartPulse, Droplets, Pill, Check, Circle } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { AGUA_PRESET } from '../../constants/healthPresets'
 import { buildHealthRitual, ritualHeadline, type RitualItemId } from '../../lib/healthRitual'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
 import { AxelCareNudge } from '../axel/AxelCareNudge'
@@ -27,8 +26,6 @@ export function HealthRitualStrip()
   const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje)
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
-  const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
-  const incrementHabito = useTaskStore((s) => s.incrementHabito)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
   const userProfile = useTaskStore((s) => s.userProfile)
   const prevDoneRef = useRef<Record<RitualItemId, boolean>>({ humor: false, agua: false, medicamentos: false })
@@ -66,7 +63,12 @@ export function HealthRitualStrip()
     {
       if (!item.applies) continue
       const wasDone = prevDoneRef.current[item.id]
-      if (ritualHydratedRef.current && !wasDone && item.done)
+      if (
+        item.id !== 'humor'
+        && ritualHydratedRef.current
+        && !wasDone
+        && item.done
+      )
       {
         setCelebrateMood(5)
         setCelebrateKey((k) => k + 1)
@@ -114,27 +116,13 @@ export function HealthRitualStrip()
     return true
   }
 
-  const quickAguaOnDashboard = async () =>
-  {
-    const aguaHab = habitos.find((h) => h.tipo === 'agua')
-    const ensured = aguaHab ?? await ensureHealthHabit(AGUA_PRESET)
-    if (ensured)
-    {
-      await incrementHabito(ensured.id)
-    }
-  }
-
   const handleRitualTap = (item: { id: RitualItemId; path: string }) =>
   {
-    if (item.id === 'agua' && location.pathname === '/' && !snapshot.items.find((i) => i.id === 'agua')?.done)
+    if (scrollOnDashboard(item.id))
     {
-      void quickAguaOnDashboard()
       return
     }
-    if (!scrollOnDashboard(item.id))
-    {
-      navigate(item.path)
-    }
+    navigate(item.path)
   }
 
   return (
@@ -158,7 +146,8 @@ export function HealthRitualStrip()
             key={celebrateKey}
             avatarStyle={workspacePrefs.avatar_style}
             displayName={displayName}
-            moodLevel={celebrateMood}
+            streak
+            durationMs={5000}
             className="mt-2"
             onDone={() => setCelebrateMood(null)}
           />

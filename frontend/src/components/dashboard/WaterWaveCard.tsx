@@ -10,7 +10,10 @@ import {
   DEFAULT_ML_POR_COPO,
   metaMl,
   mlPorCopo,
+  ML_OPCOES,
+  patchMlPresetChange,
   registrosMl,
+  resolveMlPresets,
   totalMlHoje,
 } from '../../lib/waterHydration'
 
@@ -40,6 +43,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
   const current = entries.length
   const goal = agua?.meta_diaria ?? 8
   const defaultMl = mlPorCopo(agua)
+  const mlPresets = useMemo(() => resolveMlPresets(agua), [agua])
   const totalMl = totalMlHoje(agua)
   const metaTotalMl = metaMl(agua)
   const displayGoal = Math.max(goal, current)
@@ -56,8 +60,17 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
 
   const handleDefaultMl = async (ml: number) =>
   {
-    if (!agua) return
-    await updateHabitoConfig(agua.id, { ml_por_copo: ml })
+    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
+    if (!ensured) return
+    await updateHabitoConfig(ensured.id, { ml_por_copo: ml })
+  }
+
+  const patchMlPresets = async (action: 'add' | 'remove', ml: number) =>
+  {
+    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
+    if (!ensured) return
+    const patch = patchMlPresetChange(ensured, action, ml)
+    await updateHabitoConfig(ensured.id, patch)
   }
 
   const handleQuickAdd = async () =>
@@ -130,8 +143,11 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
             goal={displayGoal}
             baseGoal={goal}
             defaultMl={defaultMl}
+            mlPresets={mlPresets}
             onEntriesChange={(n) => void persistEntries(n)}
             onDefaultMlChange={(ml) => void handleDefaultMl(ml)}
+            onAddMlPreset={(ml) => void patchMlPresets('add', ml)}
+            onRemoveMlPreset={(ml) => void patchMlPresets('remove', ml)}
             compact={!hero}
           />
           <button
@@ -152,6 +168,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
             goal={8}
             baseGoal={8}
             defaultMl={DEFAULT_ML_POR_COPO}
+            mlPresets={[...ML_OPCOES]}
             onEntriesChange={() => void ensureHealthHabit(AGUA_PRESET)}
             compact={!hero}
           />

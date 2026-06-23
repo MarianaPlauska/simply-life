@@ -39,8 +39,8 @@ export function fireConfetti(kind: CelebrationKind = 'task'): void
   if (reducedMotion()) return
 
   const palette = kind === 'milestone'
-    ? ['#f97316', '#fbbf24', '#C17F3A', '#22d3ee']
-    : ['#C17F3A', '#9A5B1A', '#22d3ee', '#86efac']
+    ? ['#38B2AC', '#818CF8', '#4FD1C9', '#48BB78']
+    : ['#0D9488', '#6366F1', '#2DD4BF', '#059669']
 
   void confetti({
     particleCount: kind === 'milestone' ? 120 : 48,
@@ -57,10 +57,15 @@ export function celebrateTaskComplete(options: {
   mainQuest?: boolean
 }): void
 {
-  fireConfetti(options.mainQuest ? 'main_quest' : 'task')
-  playCelebrationChime()
+  if (!options.streakIncremented)
+  {
+    return
+  }
 
-  if (options.streakIncremented && options.streakCount)
+  playCelebrationChime()
+  fireConfetti(options.mainQuest ? 'main_quest' : 'streak')
+
+  if (options.streakCount)
   {
     const milestone = STREAK_MILESTONES.find((m) => m === options.streakCount)
     if (milestone)
@@ -69,12 +74,6 @@ export function celebrateTaskComplete(options: {
       window.dispatchEvent(new CustomEvent('axel-milestone', {
         detail: { days: milestone },
       }))
-      return
     }
-  }
-
-  if (options.streakIncremented)
-  {
-    fireConfetti('streak')
   }
 }

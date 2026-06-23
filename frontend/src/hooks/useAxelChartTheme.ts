@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
 
-// Paleta Recharts — ocre nos modos claros (papel creme); cobre no escuro
+// Paleta Recharts — tons Meridian (ardósia + teal)
 
 export function useAxelChartTheme()
 {
@@ -10,19 +10,19 @@ export function useAxelChartTheme()
 
   return useMemo(() =>
   {
-    const axisStroke = isDarkMode ? '#6B6560' : '#8B7D6B'
-    const gridStroke = isDarkMode ? '#2E2C28' : '#E8DFC8'
-    const refStroke = isDarkMode ? '#6B6560' : '#C9B896'
-    const tickFill = isDarkMode ? '#9C9890' : '#1A1A1A'
-    const legendColor = isDarkMode ? '#9C9890' : '#1A1A1A'
-    const openLineStroke = isDarkMode ? '#6B6560' : '#8B7D6B'
-    const exerciseFill = isDarkMode ? '#232220' : '#F5EDD6'
-    const exerciseStroke = isDarkMode ? '#C17F3A' : '#8B6317'
+    const axisStroke = isDarkMode ? '#64748B' : '#94A3B8'
+    const gridStroke = isDarkMode ? '#2A3340' : '#E2E8F0'
+    const refStroke = isDarkMode ? '#64748B' : '#CBD5E1'
+    const tickFill = isDarkMode ? '#94A3B8' : '#334155'
+    const legendColor = isDarkMode ? '#94A3B8' : '#334155'
+    const openLineStroke = isDarkMode ? '#64748B' : '#94A3B8'
+    const exerciseFill = isDarkMode ? '#1A2029' : '#E8ECF2'
+    const exerciseStroke = isDarkMode ? '#38B2AC' : '#0D9488'
 
-    const accent = isDarkMode ? '#C17F3A' : '#5C4A32'
+    const accent = isDarkMode ? '#38B2AC' : '#0D9488'
 
-    const waterBar = isDarkMode ? '#C17F3A' : '#5C4A32'
-    const waterBarMuted = isDarkMode ? '#8A5A2E' : '#C9A96E'
+    const waterBar = isDarkMode ? '#38B2AC' : '#0D9488'
+    const waterBarMuted = isDarkMode ? '#2C7A7B' : '#5EEAD4'
 
     return {
       isDarkMode,
@@ -44,7 +44,7 @@ export function useAxelChartTheme()
       refLine: refStroke,
       legendStyle: { fontSize: 10, paddingTop: 8, color: legendColor },
       productivity: {
-        completed: isDarkMode ? '#C17F3A' : '#9A5B1A',
+        completed: isDarkMode ? '#38B2AC' : '#0F766E',
         open: openLineStroke,
       },
       exercise: {

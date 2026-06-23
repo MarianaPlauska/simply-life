@@ -10,7 +10,9 @@ import type { TarefasSlice } from './tarefasSlice'
 import type { FinanceiroSlice } from './financeiroSlice'
 import type { UserPrefsSlice } from './userPrefsSlice'
 import { wellbeingHiddenUntilIso } from '../../lib/axelCareRotation'
-import { isNovoDiaDeSaude, localTodayIso } from '../../lib/healthDayBoundary'
+import { pickMoodCareMessage, type MoodLevel } from '../../lib/axelCareMessages'
+import { AXEL_MOOD_CARE_DURATION_MS, type AxelMoodCareSession } from '../../lib/axelMoodCare'
+import { isNovoDiaDeSaude, localTodayIso, writeStoredHealthDay } from '../../lib/healthDayBoundary'
 import type { HabitoDiario } from '../storeTypes'
 
 // ── types ────────────────────────────────────────────────────
@@ -25,6 +27,8 @@ export interface HumorRegistro
   contexto?: string[] | null
   created_at?: string
 }
+
+export type DiarioContexto = 'geral' | 'gasto' | 'tarefa' | 'saude'
 
 export interface EntradaDiario
 {
@@ -73,6 +77,9 @@ export interface BemEstarSlice
   weeklyReview: WeeklyReview | null
   correlacao: Correlacao | null
   promptDoDia: string
+  /** Mensagem do AXEL após humor — visível no dashboard por ~1 min */
+  axelMoodCare: AxelMoodCareSession | null
+  clearAxelMoodCare: () => void
 
   registrarHumor: (humor: number, emoji: string, nota: string, opts?: RegistrarHumorOptions) => Promise<HumorRegistro | null>
   atualizarHumorEntry: (id: number, partial: Partial<Pick<HumorRegistro, 'energia' | 'contexto' | 'nota'>>) => Promise<void>
@@ -80,7 +87,7 @@ export interface BemEstarSlice
   fetchHumorSemana: () => Promise<void>
   fetchHumorMes: () => Promise<void>
   fetchHumorResumo: () => Promise<void>
-  criarEntradaDiario: (conteudo: string, prompt: string) => Promise<void>
+  criarEntradaDiario: (conteudo: string, prompt: string, contexto?: DiarioContexto) => Promise<void>
   fetchDiarioHoje: () => Promise<void>
   fetchEntradasRecentes: (dias?: number) => Promise<void>
   deletarEntrada: (id: number) => Promise<void>
@@ -217,6 +224,9 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
   weeklyReview: null,
   correlacao: null,
   promptDoDia: 'Como você está se sentindo agora?',
+  axelMoodCare: null,
+
+  clearAxelMoodCare: () => set({ axelMoodCare: null }),
 
   registrarHumor: async (humor, emoji, nota, opts) =>
   {
@@ -317,6 +327,15 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
           wellbeing_dashboard_hidden_until: wellbeingHiddenUntilIso(),
         })
       }
+
+      const moodLevel = Math.min(5, Math.max(1, humor)) as MoodLevel
+      set({
+        axelMoodCare: {
+          mood: moodLevel,
+          message: pickMoodCareMessage(moodLevel),
+          until: Date.now() + AXEL_MOOD_CARE_DURATION_MS,
+        },
+      })
 
       return saved
     }
@@ -419,7 +438,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
         {
           await anyGet.patchWorkspacePrefs({ wellbeing_dashboard_hidden_until: null })
         }
-        set({ humorHojeLista: [], humorHoje: null })
+        writeStoredHealthDay(dia)
       }
 
       const seteDiasAtras = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
@@ -447,19 +466,23 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
     catch { /* offline */ }
   },
 
-  criarEntradaDiario: async (conteudo, prompt) =>
+  criarEntradaDiario: async (conteudo, prompt, contexto = 'geral') =>
   {
     try
     {
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
+      const promptStored = contexto !== 'geral'
+        ? `[ctx:${contexto}] ${prompt}`
+        : prompt
       const { data, error } = await supabase
         .from('entradas_diario')
-        .insert({ user_id: uid, data: hoje(), conteudo, prompt_usado: prompt })
+        .insert({ user_id: uid, data: hoje(), conteudo, prompt_usado: promptStored })
         .select()
         .single()
       if (error) throw error
       set({ entradaHoje: data })
+      await get().fetchEntradasRecentes(60)
     }
     catch (e) { console.error('criarEntradaDiario:', e) }
   },

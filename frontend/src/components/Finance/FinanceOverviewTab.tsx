@@ -1,18 +1,16 @@
 import { FinanceOverviewCharts } from './FinanceOverviewCharts'
-import { Rule503020Section } from './Rule503020Section'
-import { CashflowForecast } from './CashflowForecast'
 import { FinanceOverviewKpis } from './overview/FinanceOverviewKpis'
 import { FinanceBudgetPanel } from './overview/FinanceBudgetPanel'
 import { FinanceRecurringIncomePanel } from './overview/FinanceRecurringIncomePanel'
 import { FinanceRecentTransactions } from './overview/FinanceRecentTransactions'
 import { FinanceMonthOutlookPanel } from './overview/FinanceMonthOutlookPanel'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import type { Category, Transaction } from '../../store/storeTypes'
 import type { CategoryBudgetRow } from '../../lib/financeCategoryBudget'
 
 interface FinanceOverviewTabProps
 {
   monthOffset?: number
-  onOpenNextMonth?: () => void
   receita: number
   despesas: number
   saldo: number
@@ -36,7 +34,6 @@ interface FinanceOverviewTabProps
 
 export function FinanceOverviewTab({
   monthOffset = 0,
-  onOpenNextMonth,
   receita,
   despesas,
   saldo,
@@ -58,47 +55,11 @@ export function FinanceOverviewTab({
   setTab,
 }: FinanceOverviewTabProps)
 {
-  const isFutureMonth = monthOffset > 0
-
   return (
-    <div className="space-y-4">
-      {isFutureMonth ? (
-        <FinanceMonthOutlookPanel monthOffset={monthOffset} />
-      ) : (
-        <>
-          <FinanceMonthOutlookPanel monthOffset={monthOffset} />
-          {onOpenNextMonth && (
-            <FinanceMonthOutlookPanel
-              monthOffset={monthOffset + 1}
-              compact
-              onOpenMonth={onOpenNextMonth}
-              showComparison={false}
-            />
-          )}
-        </>
-      )}
+    <div className="space-y-3">
+      <FinanceMonthOutlookPanel monthOffset={monthOffset} />
 
-      <FinanceOverviewKpis receita={receita} despesas={despesas} saldo={saldo} />
-
-      <FinanceOverviewCharts
-        saldo={saldo}
-        diffDespesas={diffDespesas}
-        diffDespesasPct={diffDespesasPct}
-        biggestCategory={biggestCategory}
-        categoryTotals={categoryTotals}
-        pieChartData={pieChartData}
-        areaChartData={areaChartData}
-        onViewGoals={() => setTab('metas')}
-      />
-
-      <Rule503020Section
-        receita={receita}
-        despesas={despesas}
-        monthTx={monthTx}
-        activeCategories={activeCategories}
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
         <FinanceBudgetPanel
           rows={budgetRows}
           budgetUsedPct={budgetUsedPct}
@@ -115,9 +76,32 @@ export function FinanceOverviewTab({
         />
       </div>
 
-      <FinanceRecurringIncomePanel activeCategories={activeCategories} />
+      <DashboardCollapsible
+        title="Gráficos e tendências"
+        subtitle="Receitas, gastos e evolução"
+        defaultOpen={false}
+        bodyClassName="space-y-4"
+      >
+        <FinanceOverviewKpis receita={receita} despesas={despesas} saldo={saldo} />
+        <FinanceOverviewCharts
+          saldo={saldo}
+          diffDespesas={diffDespesas}
+          diffDespesasPct={diffDespesasPct}
+          biggestCategory={biggestCategory}
+          categoryTotals={categoryTotals}
+          pieChartData={pieChartData}
+          areaChartData={areaChartData}
+          onViewGoals={() => setTab('metas')}
+        />
+      </DashboardCollapsible>
 
-      <CashflowForecast />
+      <DashboardCollapsible
+        title="Receitas recorrentes"
+        subtitle="Salário e entradas fixas"
+        defaultOpen={false}
+      >
+        <FinanceRecurringIncomePanel activeCategories={activeCategories} />
+      </DashboardCollapsible>
     </div>
   )
 }

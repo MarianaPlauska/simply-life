@@ -16,6 +16,7 @@ export const PROTEINA_PRESET = {
 
 export const DEFAULT_TREINO_MINUTOS = 45;
 
+/** Hábito mínimo de treino — sem plano pré-preenchido */
 export const TREINO_PRESET = {
   tipo: 'treino',
   nome_exibicao: 'Treino',
@@ -23,14 +24,6 @@ export const TREINO_PRESET = {
   unidade: 'sessão',
   config: {
     meta_minutos: DEFAULT_TREINO_MINUTOS,
-    plano_semana: {
-      seg: { titulo: 'Peito e tríceps', meta_minutos: 45 },
-      ter: { titulo: 'Costas e bíceps', meta_minutos: 45 },
-      qua: { titulo: 'Descanso ativo', meta_minutos: 30 },
-      qui: { titulo: 'Pernas', meta_minutos: 50 },
-      sex: { titulo: 'Ombros e core', meta_minutos: 40 },
-      sab: { titulo: 'Cardio leve', meta_minutos: 35 },
-      dom: { titulo: 'Descanso', meta_minutos: 0 },
-    },
+    plano_semana: {},
   },
 } as const;

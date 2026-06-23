@@ -2,7 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Web app mobile — safe area e toque */
+/* ── Simply-Life — grafite neutro + Inter
+   · Fundo profundo sem viés azulado
+   · Cards flutuantes discretos, bordas hairline
+   · Tipografia: Inter + JetBrains Mono
+*/
+
 html {
   -webkit-tap-highlight-color: transparent;
 }
@@ -12,51 +17,80 @@ body {
   min-height: -webkit-fill-available;
 }
 
-/* ── Simply-Life Instrumento — claro: cinza suave + laranja AXEL (mesma família do escuro) ── */
 :root {
-  --sl-canvas: #F4F4F2;
-  --sl-chrome: #ECECEA;
-  --sl-surface: #FFFFFF;
-  --sl-elevated: #FFFFFF;
-  --sl-text: #0A0A09;
-  --sl-text-muted: #353330;
-  --sl-border: #C8C7C4;
-  --sl-border-subtle: #DCDCD9;
-  --sl-accent: #C17F3A;
-  --sl-accent-hover: #D4924A;
-  --sl-accent-muted: rgba(193, 127, 58, 0.14);
-  --sl-urgent: #B83A3A;
-  --sl-attention: #A67C00;
-  --sl-success: #3D6B4F;
-  --sl-radius: 2px;
-  --sl-chart-meta: #FFFFFF;
-  --sl-chart-meta-border: #D0CFCC;
-  --sl-chart-real-a: #C17F3A;
-  --sl-chart-real-b: #A67C00;
-  --sl-chart-real-c: #3D6B4F;
+  --sl-canvas: #EBEAE6;
+  --sl-chrome: #E3E2DE;
+  --sl-surface: #EFEEEB;
+  --sl-elevated: #F3F2EF;
+  --sl-text: #44403C;
+  --sl-text-muted: #78716C;
+  --sl-border: rgba(87, 83, 78, 0.1);
+  --sl-border-subtle: rgba(87, 83, 78, 0.07);
+  --sl-accent: #4F46E5;
+  --sl-accent-hover: #4338CA;
+  --sl-accent-muted: rgba(79, 70, 229, 0.09);
+  --sl-urgent: #DC4C64;
+  --sl-attention: #D97706;
+  --sl-success: #059669;
+  --sl-radius-sm: 10px;
+  --sl-radius: 14px;
+  --sl-radius-lg: 20px;
+  --sl-radius-pill: 9999px;
+  --sl-shadow: 0 1px 2px rgba(28, 25, 23, 0.03), 0 4px 12px -4px rgba(28, 25, 23, 0.05);
+  --sl-shadow-lg: 0 2px 4px rgba(28, 25, 23, 0.04), 0 8px 20px -6px rgba(28, 25, 23, 0.07);
+  --sl-chart-meta: #EFEEEB;
+  --sl-chart-meta-border: rgba(87, 83, 78, 0.1);
+  --sl-chart-real-a: #4F46E5;
+  --sl-chart-real-b: #6366F1;
+  --sl-chart-real-c: #059669;
 }
 
 .dark {
-  /* Tom AXEL — mais claro para leitura confortável */
-  --sl-canvas: #222120;
-  --sl-chrome: #2E2D2A;
-  --sl-surface: #363532;
-  --sl-elevated: #3F3E3A;
-  --sl-text: #F5F3EE;
-  --sl-text-muted: #C4BFB6;
-  --sl-border: #4A4844;
-  --sl-border-subtle: #3A3834;
+  --sl-canvas: #1D2029;
+  --sl-chrome: #232730;
+  --sl-surface: #2A2E38;
+  --sl-elevated: #333844;
+  --sl-text: #E8ECF1;
+  --sl-text-muted: #A8B0BD;
+  --sl-border: rgba(255, 255, 255, 0.08);
+  --sl-border-subtle: rgba(255, 255, 255, 0.06);
   --sl-accent: #C17F3A;
   --sl-accent-hover: #D4924A;
-  --sl-accent-muted: rgba(193, 127, 58, 0.14);
-  --sl-urgent: #C44D4D;
-  --sl-attention: #C9A227;
-  --sl-success: #4A7C59;
-  --sl-chart-meta: #3A3834;
-  --sl-chart-meta-border: #4A4844;
+  --sl-accent-muted: rgba(193, 127, 58, 0.16);
+  --sl-urgent: #F87171;
+  --sl-attention: #FBBF24;
+  --sl-success: #4ADE80;
+  --sl-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 4px 16px rgba(0, 0, 0, 0.25);
+  --sl-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --sl-chart-meta: #333844;
+  --sl-chart-meta-border: rgba(255, 255, 255, 0.08);
   --sl-chart-real-a: #C17F3A;
-  --sl-chart-real-b: #A68B5B;
-  --sl-chart-real-c: #4A7C59;
+  --sl-chart-real-b: #A78BFA;
+  --sl-chart-real-c: #4ADE80;
+}
+
+@keyframes axel-loader-breathe {
+  0%, 100% { opacity: 0.45; transform: scale(0.88); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes axel-loader-ring {
+  0%, 100% { opacity: 0.35; transform: scale(0.92); }
+  50% { opacity: 0.7; transform: scale(1); }
+}
+
+.axel-loader-spark {
+  animation: axel-loader-breathe 1.35s ease-in-out infinite;
+}
+
+.axel-loader-ring {
+  animation: axel-loader-ring 1.35s ease-in-out infinite;
+}
+
+.reduce-motion .axel-loader-spark,
+.reduce-motion .axel-loader-ring {
+  animation: none;
+  opacity: 0.85;
 }
 
 @keyframes axel-care-nod {
@@ -94,26 +128,45 @@ body {
   animation: none;
 }
 
-/* Foco visível aprimorado — navegação por teclado */
+@keyframes axel-nudge-complete {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.45);
+    border-color: rgba(5, 150, 105, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(5, 150, 105, 0.12);
+    border-color: rgba(5, 150, 105, 0.65);
+  }
+}
+
+.animate-axel-nudge-complete {
+  animation: axel-nudge-complete 1.6s ease-in-out infinite;
+}
+
+.reduce-motion .animate-axel-nudge-complete {
+  animation: none;
+}
+
 .focus-enhanced :focus-visible {
   outline: 2px solid var(--sl-accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: var(--sl-radius-sm);
 }
 
 .high-contrast {
   --sl-text: #000000;
-  --sl-text-muted: #000000;
-  --sl-border: #5C4A32;
+  --sl-text-muted: #1a1a1a;
+  --sl-border: #334155;
 }
 
 :root.high-contrast:not(.dark) {
   --sl-canvas: #FFFFFF;
-  --sl-chrome: #F5F5F5;
+  --sl-chrome: #F1F5F9;
   --sl-surface: #FFFFFF;
 }
 
 .dark.high-contrast {
-  --sl-text-muted: #E8E4DC;
+  --sl-text-muted: #CBD5E1;
 }
 
 @layer base {
@@ -121,84 +174,75 @@ body {
     background-color: var(--sl-canvas);
     color: var(--sl-text);
     @apply antialiased min-h-screen font-sans;
-  }
-
-  :root:not(.dark) body {
-    font-weight: 500;
+    font-feature-settings: "ss01", "cv11";
   }
 
   h1, h2, h3 {
-    @apply font-display;
-    font-weight: 500;
-    letter-spacing: -0.02em;
+    @apply font-sans font-semibold tracking-tight;
     color: var(--sl-text);
   }
+
+  h1 { @apply text-xl md:text-3xl; }
+  h2 { @apply text-lg md:text-xl; }
+  h3 { @apply text-base; }
 }
 
 @layer components {
-  /* Rótulo editorial — mono, caixa alta */
+  /* Rótulo de seção — sans, não caixa alta mono */
   .sl-eyebrow {
-    @apply font-mono text-[10px] font-medium uppercase tracking-[0.14em];
+    @apply font-sans text-xs font-semibold tracking-tight;
     color: var(--sl-accent);
   }
 
-  /* Painel com cantos retos e borda fina */
   .sl-panel {
     background-color: var(--sl-surface);
-    border: 1px solid var(--sl-border);
+    border: 1px solid var(--sl-border-subtle);
     border-radius: var(--sl-radius);
+    box-shadow: var(--sl-shadow);
     color: var(--sl-text);
   }
 
-  /* Ênfase editorial — ritual, prioridade, ação pendente */
+  .sl-chip {
+    @apply bg-card border border-line rounded-sl transition-colors;
+  }
+
   .sl-panel-emphasis {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--sl-accent) 28%, transparent);
+    border-color: color-mix(in srgb, var(--sl-accent) 35%, var(--sl-border));
+    box-shadow: var(--sl-shadow), 0 0 0 1px color-mix(in srgb, var(--sl-accent) 12%, transparent);
   }
 
-  /* Linhas de régua sutis no fundo (login / hero) */
+  /* Fundo login — gradiente suave, sem régua */
   .sl-ruled-bg {
-    background-image:
-      linear-gradient(var(--sl-border-subtle) 1px, transparent 1px),
-      linear-gradient(90deg, var(--sl-border-subtle) 1px, transparent 1px);
-    background-size: 48px 48px;
+    background:
+      radial-gradient(ellipse 120% 80% at 10% 0%, color-mix(in srgb, var(--sl-accent) 8%, transparent), transparent 50%),
+      radial-gradient(ellipse 80% 60% at 90% 100%, color-mix(in srgb, var(--sl-chart-real-b) 6%, transparent), transparent 45%),
+      var(--sl-canvas);
   }
 
-  /* Login — brilho sutil no painel e vinheta no grid */
   .sl-login-glow {
-    box-shadow:
-      0 0 0 1px var(--sl-border-subtle),
-      0 24px 48px -12px rgba(15, 23, 42, 0.08);
-  }
-
-  .dark .sl-login-glow {
-    box-shadow:
-      0 0 0 1px var(--sl-border-subtle),
-      0 24px 48px -12px rgba(0, 0, 0, 0.35);
+    box-shadow: var(--sl-shadow-lg);
+    border-radius: var(--sl-radius-lg);
   }
 
   .sl-login-vignette {
-    background: radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, var(--sl-canvas) 100%);
+    background: radial-gradient(ellipse 70% 60% at 50% 40%, transparent 30%, var(--sl-canvas) 100%);
   }
 
-  /* Canvas do Kanban — régua sutil, não compete com o board */
+  /* Kanban — canvas limpo */
   .sl-kanban-canvas {
-    background-image:
-      linear-gradient(var(--sl-border-subtle) 1px, transparent 1px);
-    background-size: 100% 32px;
-    background-position: 0 0;
+    background: var(--sl-canvas);
   }
 }
 
-/* Scrollbar minimalista */
 .scrollbar-thin::-webkit-scrollbar {
-  height: 6px;
+  height: 5px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: var(--sl-border);
-  border-radius: 0;
+  border-radius: var(--sl-radius-pill);
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: var(--sl-text-muted);
@@ -209,20 +253,39 @@ body {
   scrollbar-color: var(--sl-border) transparent;
 }
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--sl-border);
-  border-radius: 0;
+  border-radius: var(--sl-radius-pill);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--sl-text-muted);
 }
 
-/* Accessibility: reduced motion */
+/* Scroll horizontal visível — faixas tipo “Concluídas recentemente” */
+.custom-scrollbar-x {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sl-text-muted) var(--sl-chrome);
+}
+.custom-scrollbar-x::-webkit-scrollbar {
+  height: 6px;
+}
+.custom-scrollbar-x::-webkit-scrollbar-track {
+  background: var(--sl-chrome);
+  border-radius: var(--sl-radius-pill);
+}
+.custom-scrollbar-x::-webkit-scrollbar-thumb {
+  background: var(--sl-text-muted);
+  border-radius: var(--sl-radius-pill);
+}
+.custom-scrollbar-x::-webkit-scrollbar-thumb:hover {
+  background: var(--sl-ink-muted);
+}
+
 .reduce-motion *,
 .reduce-motion *::before,
 .reduce-motion *::after {
@@ -231,7 +294,6 @@ body {
   transition-duration: 0.01ms !important;
 }
 
-/* bounce leve — seta de tendência no weekly review */
 @keyframes bounce-subtle {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(-2px); }
@@ -241,7 +303,6 @@ body {
   animation: bounce-subtle 2s ease-in-out infinite;
 }
 
-/* rastro de conquistas — pop-in ao concluir tarefa */
 @keyframes achievement-pop-in {
   0% {
     opacity: 0;
@@ -257,7 +318,6 @@ body {
   animation: achievement-pop-in 0.25s ease-out;
 }
 
-/* confetti ao completar habito — cores do acento, sem neon */
 @keyframes confetti-pop {
   0%   { opacity: 1; transform: translate(0, 0) scale(1); }
   100% { opacity: 0; transform: translate(var(--cx, 20px), var(--cy, -30px)) scale(0.3); }
@@ -267,9 +327,9 @@ body {
 .habit-done::after {
   content: '';
   position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
   top: 10px;
   right: 12px;
   animation: confetti-pop 0.6s ease-out forwards;
@@ -289,7 +349,6 @@ body {
   animation-delay: 0.08s;
 }
 
-/* animação radar-pulse — ícone do botão de sync gmail */
 @keyframes radar-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(1.1); }
@@ -298,7 +357,6 @@ body {
   animation: radar-pulse 1.2s ease-in-out infinite;
 }
 
-/* ondas de hidratação — WaterWaveCard */
 @keyframes water-wave-drift {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
@@ -329,7 +387,7 @@ body {
 .water-bubble {
   position: absolute;
   border-radius: 9999px;
-  background: rgba(186, 230, 253, 0.35);
+  background: rgba(56, 178, 172, 0.35);
   pointer-events: none;
   animation: water-bubble-rise 4s ease-in infinite;
 }
@@ -337,7 +395,6 @@ body {
 .water-bubble-b { width: 5px; height: 5px; left: 62%; bottom: 18%; animation-delay: 1.2s; }
 .water-bubble-c { width: 6px; height: 6px; left: 44%; bottom: 30%; animation-delay: 2.4s; }
 
-/* acessibilidade — respeita a config do OS para reduzir animações */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -349,7 +406,6 @@ body {
   }
 }
 
-/* impressão — layout limpo sem chrome da interface */
 @media print {
   body {
     background: white !important;

@@ -9,7 +9,9 @@ import {
   DEFAULT_ML_POR_COPO,
   metaMl,
   mlPorCopo,
+  patchMlPresetChange,
   registrosMl,
+  resolveMlPresets,
   totalMlHoje,
 } from '../../lib/waterHydration'
 import {
@@ -31,6 +33,7 @@ export function WaterTrackerCard()
   const current = entries.length
   const goal = agua?.meta_diaria ?? 8
   const defaultMl = mlPorCopo(agua)
+  const mlPresets = useMemo(() => resolveMlPresets(agua), [agua])
   const totalMl = totalMlHoje(agua)
   const metaTotalMl = metaMl(agua)
   const displayGoal = Math.max(goal, current)
@@ -57,7 +60,22 @@ export function WaterTrackerCard()
     if (!agua) return
     const wasBeyond = current >= goal
     await persistEntries([...entries, defaultMl])
-    toast.success(wasBeyond ? `+${defaultMl} ml extra` : `+${defaultMl} ml`, { duration: 1500 })
+    toast.success(wasBeyond ? `+${defaultMl} ml extra` : `+${defaultMl} ml`, { duration: 3500 })
+  }
+
+  const handleDefaultMl = async (ml: number) =>
+  {
+    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
+    if (!ensured) return
+    await updateHabitoConfig(ensured.id, { ml_por_copo: ml })
+  }
+
+  const patchMlPresets = async (action: 'add' | 'remove', ml: number) =>
+  {
+    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
+    if (!ensured) return
+    const patch = patchMlPresetChange(ensured, action, ml)
+    await updateHabitoConfig(ensured.id, patch)
   }
 
   const handleClear = async () =>
@@ -148,8 +166,11 @@ export function WaterTrackerCard()
               goal={displayGoal}
               baseGoal={goal}
               defaultMl={defaultMl}
+              mlPresets={mlPresets}
               onEntriesChange={(n) => void persistEntries(n)}
-              onDefaultMlChange={(ml) => void updateHabitoConfig(agua.id, { ml_por_copo: ml })}
+              onDefaultMlChange={(ml) => void handleDefaultMl(ml)}
+              onAddMlPreset={(ml) => void patchMlPresets('add', ml)}
+              onRemoveMlPreset={(ml) => void patchMlPresets('remove', ml)}
             />
 
             <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between pt-1">
@@ -164,7 +185,7 @@ export function WaterTrackerCard()
                 {done ? `+${defaultMl} ml extra` : `+${defaultMl} ml`}
               </button>
               <p className="text-[11px] text-ink-muted text-center sm:text-right leading-relaxed">
-                Padrão {defaultMl || DEFAULT_ML_POR_COPO} ml · novo dia zera o contador.
+                Padrão {defaultMl || DEFAULT_ML_POR_COPO} ml · toque em copo cheio para editar · Gerenciar para valores customizados.
               </p>
             </div>
           </>

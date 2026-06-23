@@ -3,10 +3,15 @@ import type { ActiveCosmetics } from './axelCosmetics'
 import { DEFAULT_ACTIVE_COSMETICS } from './axelCosmetics'
 import type { AvatarStyleId } from './axelAvatarPresets'
 import type { DashboardWidgetId } from './dashboardWidgets'
+import {
+  defaultMobileNavForPriority,
+  normalizeMobileNavModules,
+  type MobileNavModuleId,
+} from './mobileBottomNav'
 
 // Preferências de workspace — wizard, cor, ordem, privacidade social
 
-export type AccentId = 'copper' | 'sky' | 'forest' | 'violet'
+export type AccentId = 'meridian' | 'copper' | 'sky' | 'forest' | 'violet'
 export type DashboardPriority = 'finance' | 'tasks' | 'health'
 export type MascotMoodPref = 'cheerful' | 'calm' | 'focused'
 
@@ -21,6 +26,8 @@ export interface UserWorkspacePrefs
   dashboard_priority: DashboardPriority
   /** Até 3 atalhos de cadastro rápido no dashboard */
   dashboard_quick_widgets?: DashboardWidgetId[]
+  /** Módulos da barra inferior mobile — Home sempre incluso */
+  mobile_bottom_nav?: MobileNavModuleId[]
   month_goal_amount: number | null
   ai_coach_enabled: boolean
   unlocked_cosmetics: string[]
@@ -37,7 +44,8 @@ export interface UserWorkspacePrefs
 }
 
 export const ACCENT_PALETTES: Record<AccentId, { label: string; light: string; dark: string; hover: string }> = {
-  copper: { label: 'Cobre', light: '#C17F3A', dark: '#C17F3A', hover: '#D4924A' },
+  meridian: { label: 'Meridiano', light: '#0D9488', dark: '#38B2AC', hover: '#2DD4BF' },
+  copper: { label: 'Cobre', light: '#B87333', dark: '#C17F3A', hover: '#D4924A' },
   sky: { label: 'Céu', light: '#1D6FA4', dark: '#38A3E8', hover: '#155A85' },
   forest: { label: 'Floresta', light: '#3D6B4F', dark: '#4A7C59', hover: '#5C9468' },
   violet: { label: 'Violeta', light: '#5B4B8A', dark: '#8B7CF6', hover: '#A394F8' },
@@ -53,7 +61,7 @@ export const DEFAULT_WORKSPACE_PREFS: UserWorkspacePrefs = {
   dashboard_priority: 'tasks',
   month_goal_amount: null,
   ai_coach_enabled: true,
-  unlocked_cosmetics: ['accent_copper', 'mascot_default'],
+  unlocked_cosmetics: ['accent_meridian', 'mascot_default'],
   active_cosmetics: { ...DEFAULT_ACTIVE_COSMETICS },
   privacy: {
     show_streak_to_friends: true,
@@ -145,7 +153,16 @@ function mergePrefs(raw: Partial<UserWorkspacePrefs> | null | undefined): UserWo
     wellbeing_dashboard_hidden_until:
       raw?.wellbeing_dashboard_hidden_until ?? DEFAULT_WORKSPACE_PREFS.wellbeing_dashboard_hidden_until,
     dashboard_quick_widgets: raw?.dashboard_quick_widgets,
+    mobile_bottom_nav: normalizeMobileNavModules(
+      raw?.mobile_bottom_nav,
+      raw?.dashboard_priority ?? DEFAULT_WORKSPACE_PREFS.dashboard_priority,
+    ),
   }
+}
+
+export function defaultMobileBottomNav(priority: DashboardPriority = 'tasks'): MobileNavModuleId[]
+{
+  return defaultMobileNavForPriority(priority)
 }
 
 export function isSetupComplete(prefs: UserWorkspacePrefs | null | undefined): boolean

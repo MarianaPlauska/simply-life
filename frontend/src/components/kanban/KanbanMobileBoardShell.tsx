@@ -1,11 +1,7 @@
 import { useRef, type ReactNode } from 'react'
 import { Plus } from 'lucide-react'
 import { AXEL_KANBAN_WORKSPACE } from '../../constants/axelKanbanTheme'
-import {
-  AXEL_BTN_PRIMARY,
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
-} from '../../constants/axelSurfaces'
+import { AXEL_BTN_PRIMARY, AXEL_VIEW_SWITCHER_SHELL } from '../../constants/axelSurfaces'
 
 export type MobileBoardTab = 'executar' | 'prazo'
 
@@ -21,6 +17,12 @@ interface KanbanMobileBoardShellProps
 }
 
 const SWIPE_THRESHOLD_PX = 48
+
+const MOBILE_TAB_ACTIVE =
+  'bg-white text-zinc-800 shadow-[0_1px_2px_rgba(0,0,0,0.04)] dark:bg-zinc-700/80 dark:text-zinc-100 dark:shadow-none'
+
+const MOBILE_TAB_IDLE =
+  'text-zinc-500 hover:text-zinc-700 hover:bg-white/50 dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40'
 
 export function KanbanMobileBoardShell({
   executar,
@@ -63,9 +65,9 @@ export function KanbanMobileBoardShell({
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col relative">
+    <div className="flex-1 min-h-0 flex flex-col relative mt-1 sm:mt-0">
       <div
-        className="lg:hidden shrink-0 flex border border-line rounded-sl overflow-hidden mb-2"
+        className={`lg:hidden shrink-0 flex rounded-lg overflow-hidden ${AXEL_VIEW_SWITCHER_SHELL}`}
         role="tablist"
         aria-label="Painel do planejador"
       >
@@ -74,29 +76,29 @@ export function KanbanMobileBoardShell({
           role="tab"
           aria-selected={tab === 'executar'}
           onClick={() => onTabChange('executar')}
-          className={`flex-1 py-2.5 font-mono text-[11px] uppercase tracking-wide transition-colors ${
-            tab === 'executar' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 font-sans text-[11px] font-medium transition-colors ${
+            tab === 'executar' ? MOBILE_TAB_ACTIVE : MOBILE_TAB_IDLE
           }`}
         >
           Executar
-          <span className="ml-1.5 tabular-nums opacity-80">{execCount}</span>
+          <span className="tabular-nums opacity-80">{execCount}</span>
         </button>
         <button
           type="button"
           role="tab"
           aria-selected={tab === 'prazo'}
           onClick={() => onTabChange('prazo')}
-          className={`flex-1 py-2.5 font-mono text-[11px] uppercase tracking-wide border-l border-line transition-colors ${
-            tab === 'prazo' ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 font-sans text-[11px] font-medium border-l border-line transition-colors ${
+            tab === 'prazo' ? MOBILE_TAB_ACTIVE : MOBILE_TAB_IDLE
           }`}
         >
           Prazo
-          <span className="ml-1.5 tabular-nums opacity-80">{dueCount}</span>
+          <span className="tabular-nums opacity-80">{dueCount}</span>
         </button>
       </div>
 
       <div
-        className="lg:hidden shrink-0 flex flex-col min-w-0 border border-line rounded-sl bg-card overflow-hidden touch-pan-y max-h-[min(420px,calc(100dvh-14rem))]"
+        className="lg:hidden shrink-0 flex flex-col min-w-0 mt-2.5 border border-line rounded-lg bg-card shadow-sl overflow-hidden touch-pan-y max-h-[min(400px,calc(100dvh-14rem))]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >

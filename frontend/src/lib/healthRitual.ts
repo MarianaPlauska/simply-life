@@ -35,6 +35,51 @@ export function isAguaRitualComplete(copos: number, meta: number): boolean
   return copos / meta >= AGUA_RITUAL_THRESHOLD
 }
 
+/** Copos mínimos para o ritual diário de hidratação (80% da meta) */
+export function aguaRitualMetaCopos(meta: number): number
+{
+  if (meta <= 0)
+  {
+    return 0
+  }
+  return Math.ceil(meta * AGUA_RITUAL_THRESHOLD)
+}
+
+export interface AguaDisplaySnapshot
+{
+  copos: number
+  meta: number
+  ritualCopos: number
+  ritualPct: number
+  metaPct: number
+  ritualOk: boolean
+}
+
+/** KPI unificado — dashboard e Saúde usam a mesma base (ritual 80%) */
+export function aguaDisplaySnapshot(copos: number, meta: number): AguaDisplaySnapshot
+{
+  const ritualCopos = aguaRitualMetaCopos(meta)
+  const ritualPct = ritualCopos > 0
+    ? Math.min(100, Math.round((copos / ritualCopos) * 100))
+    : 0
+  const metaPct = meta > 0
+    ? Math.min(100, Math.round((copos / meta) * 100))
+    : 0
+  return {
+    copos,
+    meta,
+    ritualCopos,
+    ritualPct,
+    metaPct,
+    ritualOk: isAguaRitualComplete(copos, meta),
+  }
+}
+
+export function aguaRitualPercentLabel(): string
+{
+  return `${Math.round(AGUA_RITUAL_THRESHOLD * 100)}%`
+}
+
 export function buildHealthRitual(opts: {
   humorHojeCount: number
   aguaCopos: number
@@ -46,6 +91,7 @@ export function buildHealthRitual(opts: {
   const moodLoggedToday = opts.humorHojeCount > 0
   const aguaRatio = opts.aguaMeta > 0 ? opts.aguaCopos / opts.aguaMeta : 0
   const aguaDone = isAguaRitualComplete(opts.aguaCopos, opts.aguaMeta)
+  const aguaRitual = aguaRitualMetaCopos(opts.aguaMeta)
   const medsApply = opts.medicamentosTotal > 0
   const medsRatio = medsApply ? opts.medicamentosTomados / opts.medicamentosTotal : 0
   const medsDone = !medsApply || opts.medicamentosTomados >= opts.medicamentosTotal
@@ -68,7 +114,9 @@ export function buildHealthRitual(opts: {
       done: aguaDone,
       applies: true,
       progress: Math.min(1, aguaRatio),
-      detail: `${opts.aguaCopos}/${opts.aguaMeta} copos`,
+      detail: aguaRitual > 0
+        ? `${opts.aguaCopos}/${aguaRitual} copos (ritual)`
+        : `${opts.aguaCopos}/${opts.aguaMeta} copos`,
       path: '/saude#hidratacao',
     },
     {
