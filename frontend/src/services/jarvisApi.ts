@@ -1,6 +1,6 @@
-// cliente para as API routes serverless do Vercel (/api/*)
-// todas as chamadas de IA/news passam por aqui pra não expor keys no frontend
+import { supabaseAuthHeaders } from '../lib/supabaseAuthHeaders';
 
+// cliente para as API routes serverless do Vercel (/api/*)
 const API_BASE = '/api';
 
 // processa um evento (e-mail/mensagem) via Groq NLP
@@ -17,9 +17,10 @@ export async function processEventIA(params: {
   keywords_detectadas: string[];
 }>
 {
+  const headers = await supabaseAuthHeaders();
   const res = await fetch(`${API_BASE}/process-event`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify(params),
   });
 
@@ -181,16 +182,16 @@ export async function fetchFinanceCoachIA(params: {
 
 export async function ingestTasksIA(params: {
   items: IngestItem[];
-  user_id: string;
 }): Promise<{
   processed: number;
   results: IngestResult[];
 }>
 {
+  const headers = await supabaseAuthHeaders();
   const res = await fetch(`${API_BASE}/ingest-tasks`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(params),
+    headers,
+    body: JSON.stringify({ items: params.items }),
   });
 
   if (!res.ok) throw new Error(`ingest-tasks: ${res.status}`);

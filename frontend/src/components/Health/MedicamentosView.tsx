@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { CalendarDays, List, Pill } from 'lucide-react'
 import { MedicamentosTodayTab } from './medicamentos/MedicamentosTodayTab'
@@ -47,22 +47,12 @@ export function MedicamentosView()
 {
   const location = useLocation()
   const navigate = useNavigate()
-  const [sub, setSub] = useState<MedicamentosSubTab>(() => parseMedicamentosSubTab(location.hash))
+  const sub = useMemo(() => parseMedicamentosSubTab(location.hash), [location.hash])
 
   const selectSub = useCallback((id: MedicamentosSubTab) =>
   {
-    setSub(id)
     navigate(`/saude#${medicamentosHash(id)}`, { replace: true })
   }, [navigate])
-
-  useEffect(() =>
-  {
-    const fromHash = parseMedicamentosSubTab(location.hash)
-    if (fromHash !== sub)
-    {
-      setSub(fromHash)
-    }
-  }, [location.hash, sub])
 
   return (
     <div className="space-y-4">

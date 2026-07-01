@@ -5,6 +5,7 @@ const SUB_HINTS: Partial<Record<string, string>> = {
   diario: 'Lançar · extrato do dia',
   tabela: 'Buscar e filtrar',
   planilha: 'Painel · anual',
+  extras: 'Futuros e avulsos fora da fatura',
 }
 
 interface FinanceSectionNavProps

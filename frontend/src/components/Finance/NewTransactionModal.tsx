@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   X,
   TrendingUp,
   PiggyBank,
+  Wallet,
+  Eye,
+  EyeOff,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { toast } from 'sonner'
@@ -30,9 +33,11 @@ import {
   FinanceExtraIncomeSection,
   type ReceitaCreditoQuando,
 } from './FinanceExtraIncomeSection'
+import type { NewTransactionModalMode } from '../../lib/newTransactionModalMode'
 
 type LancamentoModo = 'imediato' | 'futuro'
 type LancamentoTipo = 'despesa' | 'receita' | 'investimento'
+type ContaAcao = 'saldo' | 'entrada'
 
 interface NewTransactionModalProps
 {
@@ -54,12 +59,14 @@ const TIPO_HINTS: Record<LancamentoTipo, string> = {
 
 export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProps)
 {
+  const mode = useTaskStore((s) => s.newTransactionModalMode)
   const cards = useTaskStore((s) => s.cards)
   const categories = useTaskStore((s) => s.categories)
   const transactions = useTaskStore((s) => s.transactions)
   const budgetLimits = useTaskStore((s) => s.budgetLimits)
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const addTransaction = useTaskStore((s) => s.addTransaction)
+  const setCashInitialBalance = useTaskStore((s) => s.setCashInitialBalance)
   const removeCategory = useTaskStore((s) => s.removeCategory)
   const registerInteraction = useTaskStore((s) => s.registerInteraction)
   const { loading: checkLoading, verdict, iaAtiva, checkPurchase, reset: resetCheck } = useFinancePurchaseCheck()
@@ -67,13 +74,17 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const [showCatModal, setShowCatModal] = useState(false)
   const [catModalParentId, setCatModalParentId] = useState<number | null>(null)
+  const [showInvestimento, setShowInvestimento] = useState(false)
   const [modo, setModo] = useState<LancamentoModo>('imediato')
   const [phase, setPhase] = useState<'form' | 'axel'>('form')
   const [receitaCreditoQuando, setReceitaCreditoQuando] = useState<ReceitaCreditoQuando>('agora')
+  const [contaAcao, setContaAcao] = useState<ContaAcao>('saldo')
+  const [saldoValor, setSaldoValor] = useState('')
   const reservedBills = useTaskStore((s) => s.reservedBills)
 
   const [form, setForm] = useState({
     descricao: '',
+    observacao: '',
     valor: '',
     tipo: 'despesa' as LancamentoTipo,
     categoria_id: '' as number | '',
@@ -95,6 +106,32 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     [reservedBills],
   )
 
+  const somenteReceita = mode === 'receita' || (mode === 'conta' && contaAcao === 'entrada')
+  const isContaSaldo = mode === 'conta' && contaAcao === 'saldo'
+
+  useEffect(() =>
+  {
+    if (!isOpen) return
+
+    if (mode === 'receita' || mode === 'conta')
+    {
+      setForm((f) => ({
+        ...f,
+        tipo: 'receita',
+        payment: DEFAULT_INCOME_PAYMENT,
+        fatura_reserva_id: '',
+      }))
+      setModo('imediato')
+      setReceitaCreditoQuando('agora')
+    }
+
+    if (mode === 'conta')
+    {
+      setContaAcao('saldo')
+      setSaldoValor(cashAccount.saldo_inicial > 0 ? String(cashAccount.saldo_inicial) : '')
+    }
+  }, [isOpen, mode, cashAccount.saldo_inicial])
+
   const handleRemoveCategory = async (id: number) =>
   {
     await removeCategory(id)
@@ -111,6 +148,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
   {
     setForm({
       descricao: '',
+      observacao: '',
       valor: '',
       tipo: 'despesa',
       categoria_id: '',
@@ -120,7 +158,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     })
     setModo('imediato')
     setReceitaCreditoQuando('agora')
+    setContaAcao('saldo')
+    setSaldoValor('')
     setPhase('form')
+    setShowInvestimento(false)
     resetCheck()
     onClose()
   }
@@ -157,7 +198,42 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const needsAxelCheck = (): boolean =>
   {
+    if (mode !== 'full') return false
     return form.tipo === 'despesa' && modo === 'imediato'
+  }
+
+  const saveSaldoInicial = async () =>
+  {
+    const n = parseFloat(saldoValor.replace(',', '.'))
+    if (Number.isNaN(n) || n < 0)
+    {
+      toast.error('Informe um saldo válido')
+      return
+    }
+    await setCashInitialBalance(n)
+    registerInteraction('financeiro')
+    toast.success('Saldo da conta atualizado')
+    resetAndClose()
+  }
+
+  const modalTitle = (): string =>
+  {
+    if (mode === 'conta') return 'Conta corrente'
+    if (mode === 'receita') return 'Entrada no caixa'
+    return 'Novo lançamento'
+  }
+
+  const modalHint = (): string =>
+  {
+    if (isContaSaldo)
+    {
+      return 'Defina quanto você tem na conta hoje — base para Disponível e Projetado.'
+    }
+    if (somenteReceita)
+    {
+      return 'Registra dinheiro que entrou e atualiza o saldo na hora.'
+    }
+    return TIPO_HINTS[form.tipo]
   }
 
   const runAxelCheck = async () =>
@@ -226,6 +302,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
     await addTransaction({
       descricao: form.descricao.trim(),
+      observacao: form.observacao.trim() || undefined,
       valor: val,
       tipo: form.tipo,
       categoria: form.tipo === 'receita'
@@ -269,13 +346,15 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     form.categoria_id !== '' ? form.categoria_id : undefined,
   )
 
-  const saveHint = form.tipo === 'receita'
-    ? 'Receita'
-    : form.tipo === 'investimento'
-      ? 'Investimento'
-      : modo === 'futuro'
-        ? 'Conta futura'
-        : 'Gasto'
+  const saveHint = isContaSaldo
+    ? 'Saldo da conta'
+    : form.tipo === 'receita'
+      ? 'Receita'
+      : form.tipo === 'investimento'
+        ? 'Investimento'
+        : modo === 'futuro'
+          ? 'Conta futura'
+          : 'Gasto'
 
   const paymentHint = form.tipo === 'despesa'
     ? modo === 'futuro'
@@ -304,10 +383,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
         <div className="shrink-0 flex items-center justify-between px-4 sm:px-6 py-4 border-b border-line">
           <div className="min-w-0 pr-2">
             <h3 id="finance-tx-title" className={`text-sm font-display uppercase tracking-wide ${AXEL_TEXT_PRIMARY}`}>
-              Novo lançamento
+              {modalTitle()}
             </h3>
             <p className={`text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              {TIPO_HINTS[form.tipo]}
+              {modalHint()}
             </p>
           </div>
           <button
@@ -337,20 +416,91 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             />
           ) : (
           <>
-          <div className="grid grid-cols-3 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40">
-            {(['despesa', 'receita', 'investimento'] as const).map((t) => (
+          {mode === 'conta' && (
+            <div className="grid grid-cols-2 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40">
               <button
-                key={t}
                 type="button"
-                onClick={() => setTipo(t)}
-                className={form.tipo === t ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
+                onClick={() => setContaAcao('saldo')}
+                className={contaAcao === 'saldo' ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
               >
-                {TIPO_LABELS[t]}
+                Atualizar saldo
               </button>
-            ))}
-          </div>
+              <button
+                type="button"
+                onClick={() => setContaAcao('entrada')}
+                className={contaAcao === 'entrada' ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
+              >
+                Registrar entrada
+              </button>
+            </div>
+          )}
 
-          {form.tipo === 'despesa' && (
+          {mode === 'full' && (
+          <div className="flex items-stretch gap-1.5">
+            <div className={`grid flex-1 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40 ${
+              showInvestimento ? 'grid-cols-3' : 'grid-cols-2'
+            }`}>
+              {((showInvestimento
+                ? ['despesa', 'receita', 'investimento']
+                : ['despesa', 'receita']) as LancamentoTipo[]).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTipo(t)}
+                  className={form.tipo === t ? AXEL_SEG_ACTIVE : AXEL_SEG_IDLE}
+                >
+                  {TIPO_LABELS[t]}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+              {
+                setShowInvestimento((prev) =>
+                {
+                  const next = !prev
+                  if (!next && form.tipo === 'investimento') setTipo('despesa')
+                  return next
+                })
+              }}
+              className="shrink-0 inline-flex items-center justify-center w-9 rounded-sl border border-line text-ink-muted hover:text-accent hover:border-accent/40 transition-colors"
+              title={showInvestimento ? 'Ocultar investimento' : 'Mostrar investimento (avançado)'}
+              aria-label={showInvestimento ? 'Ocultar investimento' : 'Mostrar investimento'}
+            >
+              {showInvestimento ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+          )}
+
+          {isContaSaldo && (
+            <>
+              <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-accent/35 bg-accent/10 text-ink`}>
+                <Wallet size={14} className="shrink-0 mt-0.5 text-accent" />
+                <span>
+                  Use quando abrir o app ou quiser corrigir o total.
+                  Lançamentos pagos no caixa continuam atualizando o saldo automaticamente.
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  Saldo atual na conta (R$)
+                </label>
+                <input
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  value={saldoValor}
+                  onChange={(e) => setSaldoValor(e.target.value)}
+                  className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono text-ink outline-none focus:border-accent/50"
+                  autoFocus
+                />
+              </div>
+            </>
+          )}
+
+          {!isContaSaldo && (
+          <>
+          {mode === 'full' && form.tipo === 'despesa' && (
             <div className="space-y-1">
               <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Quando</p>
               <div className="grid grid-cols-2 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40">
@@ -372,18 +522,14 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             </div>
           )}
 
-          {form.tipo === 'receita' && (
+          {(form.tipo === 'receita' || somenteReceita) && (
             <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-concluido/35 bg-concluido/10 text-concluido`}>
               <TrendingUp size={14} className="shrink-0 mt-0.5" />
-              <span>
-                {receitaCreditoQuando === 'proximo-mes'
-                  ? 'Agendado para o próximo mês — ainda não entra no saldo de hoje.'
-                  : 'Soma ao saldo da conta corrente agora.'}
-              </span>
+              <span>Soma ao saldo da conta corrente agora.</span>
             </div>
           )}
 
-          {form.tipo === 'investimento' && (
+          {mode === 'full' && form.tipo === 'investimento' && (
             <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-accent/35 bg-accent/10 text-accent`}>
               <PiggyBank size={14} className="shrink-0 mt-0.5" />
               <span>Sai do caixa e vai para poupança/reserva — separado dos gastos do dia a dia.</span>
@@ -419,8 +565,27 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             />
           </div>
 
-          {form.tipo === 'receita' && (
+          {(form.tipo === 'receita' || somenteReceita) && (
+            <div className="space-y-1.5">
+              <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Detalhe (opcional)
+              </label>
+              <textarea
+                rows={2}
+                placeholder="Ex: Salário de junho, PIX do cliente X, hora extra do plantão..."
+                value={form.observacao}
+                onChange={(e) => setForm({ ...form, observacao: e.target.value })}
+                className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm text-ink placeholder:text-ink-muted outline-none focus:border-accent/50 resize-none"
+              />
+              <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                Toque no nome do lançamento depois para ver esta nota na movimentação e na análise.
+              </p>
+            </div>
+          )}
+
+          {(form.tipo === 'receita' || somenteReceita) && (
             <FinanceExtraIncomeSection
+              somenteAgora={somenteReceita}
               onPatch={(patch) =>
               {
                 setForm((f) => ({
@@ -437,7 +602,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             />
           )}
 
-          {form.tipo === 'receita' && (
+          {(form.tipo === 'receita' || somenteReceita) && (
             <div className="space-y-2">
               <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 Origem (opcional)
@@ -455,7 +620,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             </div>
           )}
 
-          {form.tipo === 'despesa' && (
+          {mode === 'full' && form.tipo === 'despesa' && (
             <>
               <div className="space-y-2">
                 <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
@@ -520,7 +685,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
             </>
           )}
 
-          {form.tipo === 'investimento' && (
+          {mode === 'full' && form.tipo === 'investimento' && (
             <div className="space-y-2">
               <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 Destino (opcional)
@@ -550,14 +715,20 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           </div>
           </>
           )}
+          </>
+          )}
         </div>
 
         {phase === 'form' && (
         <div className="shrink-0 border-t border-line bg-card shadow-[0_-4px_16px_rgba(0,0,0,0.06)] px-4 sm:px-6 pt-2.5 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:pb-3 flex flex-col gap-2">
           <button
             type="button"
-            onClick={() => void handleAdd()}
-            disabled={!form.descricao.trim() || !form.valor}
+            onClick={() => void (isContaSaldo ? saveSaldoInicial() : handleAdd())}
+            disabled={
+              isContaSaldo
+                ? !saldoValor.trim()
+                : !form.descricao.trim() || !form.valor
+            }
             title={`Salvar ${saveHint.toLowerCase()}`}
             className={`w-full py-1.5 px-3 ${AXEL_BTN_PRIMARY_COMPACT} disabled:opacity-40`}
           >

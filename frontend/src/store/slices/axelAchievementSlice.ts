@@ -11,6 +11,7 @@ export interface AchievementEntry
   taskId: number
   titulo: string
   focusMinutes: number
+  createdAt: string
   completedAt: string
   pulseNonce: number
 }
@@ -21,7 +22,11 @@ function loadAchievements(): AchievementEntry[]
   {
     const raw = localStorage.getItem(ACHIEVEMENTS_KEY)
     if (!raw) return []
-    return JSON.parse(raw) as AchievementEntry[]
+    const parsed = JSON.parse(raw) as AchievementEntry[]
+    return parsed.map((e) => ({
+      ...e,
+      createdAt: e.createdAt ?? e.completedAt,
+    }))
   }
   catch
   {
@@ -37,7 +42,12 @@ function saveAchievements(entries: AchievementEntry[]): void
 export interface AxelAchievementSlice
 {
   recentAchievements: AchievementEntry[]
-  recordAchievement: (taskId: number, titulo: string, focusMinutes: number) => void
+  recordAchievement: (
+    taskId: number,
+    titulo: string,
+    focusMinutes: number,
+    createdAt?: string | null,
+  ) => void
 }
 
 export const createAxelAchievementSlice: StateCreator<
@@ -48,13 +58,14 @@ export const createAxelAchievementSlice: StateCreator<
 > = (set) => ({
   recentAchievements: loadAchievements(),
 
-  recordAchievement: (taskId, titulo, focusMinutes) =>
+  recordAchievement: (taskId, titulo, focusMinutes, createdAt) =>
   {
     const entry: AchievementEntry = {
       id: `${taskId}-${Date.now()}`,
       taskId,
       titulo,
       focusMinutes: Math.max(1, Math.round(focusMinutes)),
+      createdAt: createdAt ?? new Date().toISOString(),
       completedAt: new Date().toISOString(),
       pulseNonce: Date.now(),
     }

@@ -11,7 +11,7 @@ export const PROTEINA_PRESET = {
   nome_exibicao: 'Proteína',
   meta_diaria: 120,
   unidade: 'g',
-  config: { incremento: 10 },
+  config: { incremento: 10, meta_kcal_diaria: 2000, kcal_hoje: 0 },
 } as const;
 
 export const DEFAULT_TREINO_MINUTOS = 45;

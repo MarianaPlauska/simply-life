@@ -25,10 +25,16 @@ export interface TarefasSlice
   fetchTarefas: () => Promise<void>
   createTarefa: (titulo: string, notas?: string) => Promise<void>
   createFinanceBillTask: (opts: {
+    billId: string
     titulo: string
     notas: string
     vencimento: string
     diasRestantes: number
+  }) => Promise<void>
+  createMedicamentoConsultaTask: (opts: {
+    medicamentoId: number
+    nome: string
+    consultaData: string
   }) => Promise<void>
   updateTarefa: (id: number, dados: {
     titulo?: string
@@ -45,6 +51,7 @@ export interface TarefasSlice
   }) => Promise<void>
   patchTarefaLocal: (id: number, dados: Partial<TarefaUnificada>) => void
   deleteTarefa: (id: number) => Promise<void>
+  cleanupDuplicateBillTasks: () => Promise<number>
   moveTask: (taskId: number, newStatus: string) => void
   simularIngestao: (params: { sender?: string; subject: string; body?: string; origem?: string }) => Promise<void>
   duplicateTarefa: (id: number) => Promise<void>
@@ -146,6 +153,17 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
 
+      const phantomKey = `phantom_fin_bill_${opts.billId}`
+      const { data: existing } = await supabase
+        .from('tarefas_unificadas')
+        .select('id')
+        .eq('user_id', uid)
+        .eq('snippet_100_char', phantomKey)
+        .neq('status', 'concluida')
+        .maybeSingle()
+
+      if (existing) return
+
       const score = opts.diasRestantes <= 0 ? 95 : opts.diasRestantes === 1 ? 88 : opts.diasRestantes === 2 ? 82 : 72
       const prioridade = score >= 85 ? 'alta' : 'media'
 
@@ -155,6 +173,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
           user_id: uid,
           titulo: opts.titulo,
           notas_locais: opts.notas,
+          snippet_100_char: phantomKey,
           score_urgencia: score,
           prioridade,
           origem: 'financeiro',
@@ -169,6 +188,52 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     catch (e) { console.error('createFinanceBillTask:', e) }
   },
 
+  createMedicamentoConsultaTask: async (opts) =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
+      const phantomKey = `phantom_med_consulta_${opts.medicamentoId}_${opts.consultaData}`
+      const { data: existing } = await supabase
+        .from('tarefas_unificadas')
+        .select('id')
+        .eq('user_id', uid)
+        .eq('snippet_100_char', phantomKey)
+        .neq('status', 'concluida')
+        .maybeSingle()
+
+      if (existing) return
+
+      const hoje = new Date()
+      const consulta = new Date(`${opts.consultaData}T12:00:00`)
+      const diasRestantes = Math.round((consulta.getTime() - hoje.getTime()) / 86_400_000)
+      const score = diasRestantes <= 0 ? 90 : diasRestantes <= 3 ? 82 : diasRestantes <= 7 ? 72 : 60
+      const prioridade = score >= 85 ? 'alta' : diasRestantes <= 7 ? 'media' : 'baixa'
+
+      const { data, error } = await supabase
+        .from('tarefas_unificadas')
+        .insert({
+          user_id: uid,
+          titulo: `Consulta — renovar ${opts.nome}`,
+          notas_locais: `Renovar receita de ${opts.nome}. Consulta em ${opts.consultaData}.`,
+          snippet_100_char: phantomKey,
+          score_urgencia: score,
+          prioridade,
+          origem: 'saude',
+          status: 'pendente',
+          data_vencimento: opts.consultaData,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      if (data) set((s) => ({ tarefas: [{ ...data, subtarefas: [], labels: [] }, ...s.tarefas] }))
+    }
+    catch (e) { console.error('createMedicamentoConsultaTask:', e) }
+  },
+
   updateTarefa: async (id, dados) =>
   {
     try
@@ -178,12 +243,28 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       const isCompletedNow = dados.status === 'concluida'
       const isCompleting = isCompletedNow && !wasCompleted
 
-      const { data, error } = await supabase
-        .from('tarefas_unificadas')
-        .update(dados)
-        .eq('id', id)
-        .select()
-        .single()
+      const runUpdate = async (payload: typeof dados) =>
+        supabase
+          .from('tarefas_unificadas')
+          .update(payload)
+          .eq('id', id)
+          .select()
+          .single()
+
+      let { data, error } = await runUpdate(dados)
+
+      // Colunas de orquestração podem não existir até a migration 036
+      if (error?.code === 'PGRST204')
+      {
+        const trimmed = { ...dados }
+        delete trimmed.intent_category
+        delete trimmed.urgency_reason
+        delete trimmed.score_reason
+        const retry = await runUpdate(trimmed)
+        data = retry.data
+        error = retry.error
+      }
+
       if (error) throw error
       if (data)
       {
@@ -216,6 +297,31 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     catch (e) { console.error('deleteTarefa:', e) }
   },
 
+  cleanupDuplicateBillTasks: async () =>
+  {
+    const { duplicateBillTaskIds } = await import('../../lib/financeBillTaskDedup')
+    const ids = duplicateBillTaskIds(get().tarefas)
+    if (ids.length === 0) return 0
+
+    const now = new Date().toISOString()
+    const { error } = await supabase
+      .from('tarefas_unificadas')
+      .update({ deletado_em: now })
+      .in('id', ids)
+
+    if (error)
+    {
+      console.error('cleanupDuplicateBillTasks:', error)
+      throw error
+    }
+
+    set((s) => ({
+      tarefas: s.tarefas.filter((t) => !ids.includes(t.id)),
+    }))
+
+    return ids.length
+  },
+
   moveTask: (taskId, newStatus) =>
   {
     const oldTarefa = get().tarefas.find((t) => t.id === taskId)
@@ -245,7 +351,6 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       if (!uid) return
       const { ingestTasksIA } = await import('../../services/jarvisApi')
       await ingestTasksIA({
-        user_id: uid,
         items: [{
           sender: params.sender || 'Desconhecido',
           subject: params.subject,

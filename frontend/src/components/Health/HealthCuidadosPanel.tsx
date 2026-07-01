@@ -57,39 +57,10 @@ interface HealthCuidadosPanelProps
   onSelect: (tab: CuidadosTab) => void
 }
 
-const OUTROS_CUIDADOS: { id: CuidadosTab; label: string }[] = [
-  { id: 'hidratacao', label: 'Água' },
-  { id: 'alimentacao', label: 'Comida' },
-  { id: 'academia', label: 'Treino' },
-]
-
 export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelProps)
 {
   const sessaoTreinoAtiva = useTaskStore((s) => s.sessaoTreinoAtiva)
   const activeMeta = CUIDADOS_TABS.find((t) => t.id === active) ?? CUIDADOS_TABS[0]
-  const focoMedicamentos = active === 'medicamentos'
-
-  if (focoMedicamentos)
-  {
-    return (
-      <div className="space-y-4">
-        <MedicamentosView />
-        <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-line">
-          <span className="text-[10px] font-mono uppercase text-ink-muted">Outros cuidados</span>
-          {OUTROS_CUIDADOS.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onSelect(id)}
-              className="px-2.5 py-1.5 rounded-sl text-[11px] font-mono text-ink-muted border border-line hover:bg-chrome hover:text-ink transition-colors"
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-4">
@@ -149,6 +120,12 @@ export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelPro
           ) : (
             <AcademyView />
           )}
+        </section>
+      )}
+
+      {active === 'medicamentos' && (
+        <section>
+          <MedicamentosView />
         </section>
       )}
     </div>

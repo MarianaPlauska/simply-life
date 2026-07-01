@@ -33,6 +33,7 @@ interface DraftMed
   inicioTratamento: string
   duracaoDias: number | null
   fimTratamento: string
+  consultaRenovacao: string
 }
 
 const todayIso = () => new Date().toISOString().slice(0, 10)
@@ -48,6 +49,7 @@ const EMPTY_DRAFT = (): DraftMed => ({
   inicioTratamento: todayIso(),
   duracaoDias: null,
   fimTratamento: '',
+  consultaRenovacao: '',
 })
 
 // Cadastro estruturado — períodos, dosagem e tipo para alertas do AXEL
@@ -146,6 +148,7 @@ export function MedicamentosBulkPanel({
         inicio_tratamento: item.inicioTratamento || undefined,
         fim_tratamento: item.fimTratamento || undefined,
         duracao_dias: item.duracaoDias,
+        consulta_renovacao: item.consultaRenovacao || undefined,
       },
     }
   }
@@ -423,6 +426,17 @@ export function MedicamentosBulkPanel({
             />
           </label>
         </div>
+
+        <label className="block">
+          <span className="font-mono text-[9px] uppercase text-ink-muted">Consulta para renovar receita</span>
+          <input
+            type="date"
+            value={draft.consultaRenovacao}
+            onChange={(e) => setDraft((d) => ({ ...d, consultaRenovacao: e.target.value }))}
+            className="mt-0.5 w-full bg-chrome border border-line rounded-sl px-2 py-1 text-[12px] text-ink min-h-[36px]"
+          />
+          <p className="text-[10px] text-ink-muted mt-1">Lembrete na aba Hoje — útil para psiquiatra, cardiologista, etc.</p>
+        </label>
 
         <div>
           <p className="font-mono text-[9px] uppercase text-ink-muted mb-1.5">Duração</p>

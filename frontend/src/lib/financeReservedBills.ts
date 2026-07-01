@@ -1,5 +1,7 @@
-import type { ReservedBill, Transaction } from '../store/storeTypes'
+import type { ContaFixa, ReservedBill, Transaction } from '../store/storeTypes'
 import { summarizeLedger, type LedgerSummary } from './financeLedger'
+import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
+import { isContaFixaPostedThisMonth } from './financeRecurringPost'
 
 export interface ReservationSummary
 {
@@ -15,6 +17,14 @@ export interface CashPosition extends LedgerSummary
   saldoDisponivel: number
   saldoProjetadoDisponivel: number
   reservaRestante: number
+  /** Contas fixas do mês ainda não lançadas — já descontadas do projetado */
+  compromissosFixas: number
+}
+
+export interface CashPositionOptions
+{
+  contasFixas?: ContaFixa[]
+  reference?: Date
 }
 
 export function summarizeReservations(bills: ReservedBill[]): ReservationSummary
@@ -39,21 +49,47 @@ export function summarizeReservations(bills: ReservedBill[]): ReservationSummary
   }
 }
 
+function sumUnpostedContasFixas(
+  contasFixas: ContaFixa[],
+  transactions: Transaction[],
+  reference: Date,
+): number
+{
+  let total = 0
+
+  for (const conta of contasFixas)
+  {
+    if (!contaFixaEfetivamenteAtiva(conta, reference)) continue
+    if (isContaFixaPostedThisMonth(conta.id, transactions, reference)) continue
+    total += conta.valor
+  }
+
+  return total
+}
+
 export function computeCashPosition(
   transactions: Transaction[],
   saldoInicial: number,
   bills: ReservedBill[],
+  options?: CashPositionOptions,
 ): CashPosition
 {
+  const reference = options?.reference ?? new Date()
   const ledger = summarizeLedger(transactions, saldoInicial)
   const res = summarizeReservations(bills)
+  const compromissosFixas = sumUnpostedContasFixas(
+    options?.contasFixas ?? [],
+    transactions,
+    reference,
+  )
 
   return {
     ...ledger,
     saldoInicial,
     reservaRestante: res.totalReservado,
     saldoDisponivel: ledger.saldoCorrente - res.totalReservado,
-    saldoProjetadoDisponivel: ledger.saldoProjetado - res.totalReservado,
+    compromissosFixas,
+    saldoProjetadoDisponivel: ledger.saldoProjetado - res.totalReservado - compromissosFixas,
   }
 }
 

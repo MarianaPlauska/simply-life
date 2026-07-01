@@ -38,6 +38,7 @@ import { AxelTaskDrawer } from './AxelTaskDrawer'
 import { AxelAbsoluteFocusOverlay } from './AxelAbsoluteFocusOverlay'
 import { AxelGruposSheet } from './AxelGruposSheet'
 import { ExecutionQueueEditorSheet } from './ExecutionQueueEditorSheet'
+import { KanbanBillDuplicatesBar } from './KanbanBillDuplicatesBar'
 import { AxelAchievementTrail } from './AxelAchievementTrail'
 import { AxelFlowSuggestionButton } from './AxelFlowSuggestionButton'
 import { computeDailyLoadBalancer } from '../../lib/adaptiveOrchestration'
@@ -638,6 +639,8 @@ export function KanbanView()
           <div className="flex justify-center sm:justify-start">
             <KanbanViewSwitcher mode={viewMode} onChange={handleViewModeChange} />
           </div>
+
+          <KanbanBillDuplicatesBar />
 
           {viewMode === 'board' && (
             <>

@@ -240,7 +240,7 @@ export function AxelGlobalHeader()
 
           <AxelStreakPopover />
 
-          <div ref={notifRef} className="relative">
+          <div ref={notifRef} className="relative z-[200]">
             <button
               type="button"
               onClick={() => { setIsNotifOpen((v) => !v); if (!isNotifOpen) fetchNotificacoes() }}

@@ -2,6 +2,7 @@
 import type { StateCreator } from 'zustand'
 import type { PalavraChave, ProcessarMensagemResult } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
+import { supabaseAuthHeaders } from '../../lib/supabaseAuthHeaders'
 import { syncGmailImap } from '../../lib/gmailImapApi'
 import { syncGmailNow } from '../../lib/googleIntegrationApi'
 
@@ -215,13 +216,13 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
       ]
 
       let tarefasGeradas = 0
+      const authHeaders = await supabaseAuthHeaders()
       for (const email of demoEmails)
       {
         const res = await fetch('/api/ingest-email', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: authHeaders,
           body: JSON.stringify({
-            user_id: user.id,
             ...email,
             user_keywords: keywords,
           }),

@@ -48,6 +48,7 @@ import {
 import { DEFAULT_CATEGORY_SEEDS } from '../../lib/financeDefaultCategories'
 import { recoverCardsFromPersist } from '../../lib/recoverLegacyPersist'
 import { syncLocalCardsToServer } from '../../lib/financeCardRecovery'
+import { mergeTxObservacao, setTxObservacaoLocal } from '../../lib/financeTxObservacao'
 
 interface DatabaseDespesa
 {
@@ -62,6 +63,7 @@ interface DatabaseDespesa
   fatura_reserva_id?: number;
   card_id?: string;
   forma_pagamento?: string;
+  observacao?: string | null;
 }
 
 interface DatabaseOrcamento
@@ -253,6 +255,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
           return {
             ...d,
             descricao: cleanDesc,
+            observacao: mergeTxObservacao(d.id, d.observacao),
             data: d.data_gasto,
             tipo: d.tipo || 'despesa',
             card_id,
@@ -285,33 +288,65 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid)
     {
-      set((s) => ({ transactions: [{ id: Date.now(), ...t }, ...s.transactions] }))
+      const id = Date.now()
+      if (t.observacao?.trim())
+      {
+        setTxObservacaoLocal(id, t.observacao.trim())
+      }
+      set((s) => ({ transactions: [{ id, ...t }, ...s.transactions] }))
       notifyBudgetAlert(get, t)
       return
     }
     try
     {
       const descFinal = t.card_id ? `${t.descricao} [card:${t.card_id}]` : t.descricao
-      const { data, error } = await supabase
+      const observacao = t.observacao?.trim() || null
+      const insertPayload: Record<string, unknown> = {
+        user_id: uid,
+        descricao: descFinal,
+        categoria: t.categoria,
+        categoria_id: t.categoria_id,
+        valor: t.valor,
+        data_gasto: t.data,
+        tipo: t.tipo,
+        status_pagamento: t.status_pagamento || 'pendente',
+        fatura_reserva_id: t.fatura_reserva_id,
+        card_id: t.card_id,
+        forma_pagamento: t.forma_pagamento,
+      }
+      if (observacao) insertPayload.observacao = observacao
+
+      let { data, error } = await supabase
         .from('despesas')
-        .insert({
-          user_id: uid,
-          descricao: descFinal,
-          categoria: t.categoria,
-          categoria_id: t.categoria_id,
-          valor: t.valor,
-          data_gasto: t.data,
-          tipo: t.tipo,
-          status_pagamento: t.status_pagamento || 'pendente',
-          fatura_reserva_id: t.fatura_reserva_id,
-          card_id: t.card_id,
-          forma_pagamento: t.forma_pagamento,
-        })
+        .insert(insertPayload)
         .select()
         .single()
+
+      // Retry sem colunas ausentes no schema remoto (migration pendente)
+      while (error?.code === 'PGRST204')
+      {
+        const missing = error.message?.match(/'(\w+)' column/)?.[1]
+        if (!missing || !(missing in insertPayload))
+        {
+          break
+        }
+        delete insertPayload[missing]
+        const retry = await supabase
+          .from('despesas')
+          .insert(insertPayload)
+          .select()
+          .single()
+        data = retry.data
+        error = retry.error
+      }
+
       if (error) throw error
       if (data)
       {
+        if (observacao && !data.observacao)
+        {
+          setTxObservacaoLocal(data.id, observacao)
+        }
         if (t.fatura_reserva_id)
         {
           await get().recordBillSpend(t.fatura_reserva_id, t.valor)
@@ -331,6 +366,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             {
               ...data,
               descricao: t.descricao,
+              observacao: mergeTxObservacao(data.id, data.observacao ?? observacao),
               data: data.data_gasto,
               tipo: t.tipo,
               card_id: t.card_id,
@@ -676,75 +712,32 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     const uid = (await supabase.auth.getUser()).data.user?.id
     if (!uid)
     {
+      // Sem login: fica só no cache local do dispositivo
       return true
     }
 
-    const buildRow = (withModalidade: boolean) =>
+    const persisted = await persistCardToServer(uid, fullCard)
+
+    if (!persisted.ok)
     {
-      const row: Record<string, unknown> = {
-        id: newId,
-        user_id: uid,
-        nome: card.nome,
-        titular: card.titular,
-        numero: card.numero,
-        validade: card.validade,
-        cvv: card.cvv,
-        limite: card.limite,
-        dia_vencimento: card.dia_vencimento ?? null,
-        dia_fechamento: card.dia_fechamento ?? null,
-        tipo_gradiente: card.tipo_gradiente,
-        bandeira: card.bandeira,
-        status: card.status,
-      }
-      if (withModalidade)
-      {
-        row.modalidade = card.modalidade ?? 'credito'
-      }
-      return row
+      // Não engole o erro: remove o cartão otimista e avisa, para não dar falsa sensação de salvo
+      console.error('addCard db error:', persisted.error)
+      set((s) => ({ cards: s.cards.filter((c) => c.id !== newId) }))
+      const msg = persisted.error?.message ?? 'Erro ao salvar no servidor'
+      toast.error('Cartão não foi salvo', { description: msg })
+      return false
     }
 
-    const isModalidadeColumnMissing = (err: { message?: string; code?: string }) =>
+    if (persisted.data)
     {
-      const msg = (err.message ?? '').toLowerCase()
-      return msg.includes('modalidade') || err.code === 'PGRST204'
+      set((s) => ({
+        cards: s.cards.map((c) =>
+          c.id === newId ? { ...fullCard, ...(persisted.data as VirtualCard) } : c,
+        ),
+      }))
     }
 
-    try
-    {
-      let result = await supabase
-        .from('fin_cartoes')
-        .insert(buildRow(true))
-        .select()
-        .single()
-
-      if (result.error && isModalidadeColumnMissing(result.error))
-      {
-        result = await supabase
-          .from('fin_cartoes')
-          .insert(buildRow(false))
-          .select()
-          .single()
-      }
-
-      if (result.error) throw result.error
-
-      if (result.data)
-      {
-        set((s) => ({
-          cards: s.cards.map((c) =>
-            c.id === newId ? { ...fullCard, ...(result.data as VirtualCard) } : c,
-          ),
-        }))
-      }
-
-      return true
-    }
-    catch (e)
-    {
-      console.error('addCard db error:', e)
-      // Cartão permanece no estado local
-      return true
-    }
+    return true
   },
 
   removeCard: async (id) =>

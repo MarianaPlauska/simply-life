@@ -12,6 +12,7 @@ interface FinanceMonthKpisRowProps
   saldoMes?: number
   balanceToneClass?: string
   compact?: boolean
+  onConfigureSaldo?: () => void
 }
 
 export function FinanceMonthKpisRow({
@@ -21,6 +22,7 @@ export function FinanceMonthKpisRow({
   saldoMes,
   balanceToneClass = 'text-ink',
   compact = false,
+  onConfigureSaldo,
 }: FinanceMonthKpisRowProps)
 {
   const items = [
@@ -53,7 +55,22 @@ export function FinanceMonthKpisRow({
   ]
 
   return (
-    <div className={`grid grid-cols-2 ${items.length > 3 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-2`}>
+    <div className="space-y-2">
+      {saldoDisponivel <= 0 && onConfigureSaldo && (
+        <button
+          type="button"
+          onClick={onConfigureSaldo}
+          className="w-full text-left rounded-sl border border-accent/35 bg-accent/10 px-3 py-2.5 min-h-[44px] hover:bg-accent/15 transition-colors"
+        >
+          <p className="text-[12px] font-medium text-ink">
+            Cadastre o saldo da sua conta
+          </p>
+          <p className="text-[10px] text-ink-muted mt-0.5 font-mono uppercase">
+            Finanças → Contas → Conta → Saldo inicial
+          </p>
+        </button>
+      )}
+      <div className={`grid grid-cols-2 ${items.length > 3 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-2`}>
       {items.map(({ label, value, icon: Icon, tone }) => (
         <div
           key={label}
@@ -68,6 +85,7 @@ export function FinanceMonthKpisRow({
           </p>
         </div>
       ))}
+      </div>
     </div>
   )
 }

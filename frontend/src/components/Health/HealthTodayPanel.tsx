@@ -5,6 +5,7 @@ import {
 import { useTaskStore } from '../../store/useTaskStore'
 import { buildHealthRitual, ritualHeadline, isAguaRitualComplete, aguaDisplaySnapshot } from '../../lib/healthRitual'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
+import { snapshotNutricaoHoje } from '../../lib/healthNutrition'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { HealthQuickTile } from './HealthQuickTile'
 
@@ -47,6 +48,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
   const proteinaPct = proteina && proteina.meta_diaria > 0
     ? Math.min(100, Math.round((proteina.progresso_atual / proteina.meta_diaria) * 100))
     : 0
+  const nut = snapshotNutricaoHoje(habitos)
 
   return (
     <div className="space-y-4">
@@ -137,7 +139,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
           icon={Beef}
           label="Proteína"
           value={proteina ? `${proteina.progresso_atual}g` : 'Ativar'}
-          sub={proteina ? `${proteinaPct}% da meta` : 'Meta diária'}
+          sub={proteina ? `${nut.kcal} kcal · ${proteinaPct}% prot.` : 'Meta diária'}
           tone="amber"
           done={proteina ? proteina.progresso_atual >= proteina.meta_diaria : false}
           onClick={() => onSelectTab('alimentacao')}

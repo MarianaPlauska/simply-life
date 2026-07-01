@@ -1,28 +1,16 @@
 import { useMemo, useState } from 'react'
 import { FinancePeriodToolbar } from './FinancePeriodToolbar'
-import { FinanceGroupedRollupTable } from './FinanceGroupedRollupTable'
-import { FinanceSpreadsheetTable } from './spreadsheet/FinanceSpreadsheetTable'
-import { FinanceSpreadsheetAnnualPanel } from './spreadsheet/FinanceSpreadsheetAnnualPanel'
 import { FinanceSpreadsheetDashboard } from './spreadsheet/FinanceSpreadsheetDashboard'
 import { FinanceExcelSpreadsheet } from './spreadsheet/FinanceExcelSpreadsheet'
 import { resolveFinancePeriod, type FinancePeriodConfig } from '../../lib/financePeriodFilter'
 import {
-  buildAnnualCumulative,
-  buildAnnualKpis,
-  buildMonthlyReceitaDespesa,
-  buildPeriodIncomeBreakdown,
   buildSpreadsheetLedger,
   summarizeSpreadsheetPeriod,
 } from '../../lib/financeSpreadsheetAnalytics'
-import {
-  AXEL_FILTER_PILL_ACTIVE,
-  AXEL_FILTER_PILL_IDLE,
-  AXEL_TEXT_SECONDARY,
-} from '../../constants/axelSurfaces'
-import { useTaskStore } from '../../store/useTaskStore'
 import type { Category, Transaction } from '../../store/storeTypes'
+import { useTaskStore } from '../../store/useTaskStore'
 
-type SheetView = 'painel' | 'excel' | 'extrato' | 'anual'
+type SheetView = 'painel' | 'excel'
 
 interface FinanceSpreadsheetTabProps
 {
@@ -48,12 +36,9 @@ export function FinanceSpreadsheetTab({
 }: FinanceSpreadsheetTabProps)
 {
   const [sheetView, setSheetView] = useState<SheetView>('painel')
-  const [showGrupos, setShowGrupos] = useState(false)
 
   const cards = useTaskStore((s) => s.cards)
   const cashAccount = useTaskStore((s) => s.cashAccount)
-  const recurringIncomes = useTaskStore((s) => s.recurringIncomes)
-  const contasFixas = useTaskStore((s) => s.contasFixas)
 
   const resolvedPeriod = useMemo(
     () => resolveFinancePeriod(periodConfig),
@@ -70,11 +55,6 @@ export function FinanceSpreadsheetTab({
     [periodTransactions, resolvedPeriod.start, allTransactions, cashAccount.saldo_inicial],
   )
 
-  const breakdown = useMemo(
-    () => buildPeriodIncomeBreakdown(periodTransactions, recurringIncomes),
-    [periodTransactions, recurringIncomes],
-  )
-
   const ledger = useMemo(
     () => buildSpreadsheetLedger(
       periodTransactions,
@@ -84,32 +64,9 @@ export function FinanceSpreadsheetTab({
     [periodTransactions, activeCategories, summary.saldoInicio],
   )
 
-  const viewYear = useMemo(() =>
-  {
-    const d = new Date(`${resolvedPeriod.start}T12:00:00`)
-    return d.getFullYear()
-  }, [resolvedPeriod.start])
-
-  const monthly = useMemo(
-    () => buildMonthlyReceitaDespesa(allTransactions, viewYear),
-    [allTransactions, viewYear],
-  )
-
-  const cumulative = useMemo(
-    () => buildAnnualCumulative(allTransactions, viewYear),
-    [allTransactions, viewYear],
-  )
-
-  const annualKpis = useMemo(
-    () => buildAnnualKpis(allTransactions, viewYear, recurringIncomes, contasFixas),
-    [allTransactions, viewYear, recurringIncomes, contasFixas],
-  )
-
   const sheetTabs: { id: SheetView; label: string }[] = [
     { id: 'painel', label: 'Painel' },
     { id: 'excel', label: 'Planilha' },
-    { id: 'extrato', label: 'Extrato' },
-    { id: 'anual', label: 'Anual' },
   ]
 
   return (
@@ -147,7 +104,6 @@ export function FinanceSpreadsheetTab({
         <FinanceSpreadsheetDashboard
           periodLabel={periodLabel}
           summary={summary}
-          breakdown={breakdown}
           onNewTransaction={onNewTransaction}
         />
       )}
@@ -158,43 +114,6 @@ export function FinanceSpreadsheetTab({
           summary={summary}
           rows={ledger}
           cards={cards}
-        />
-      )}
-
-      {sheetView === 'extrato' && (
-        <>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-              Extrato · {periodLabel} · {ledger.length} linha{ledger.length !== 1 ? 's' : ''}
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowGrupos(!showGrupos)}
-              className={showGrupos ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE}
-            >
-              {showGrupos ? 'Ocultar grupos' : 'Ver por grupo'}
-            </button>
-          </div>
-
-          <FinanceSpreadsheetTable rows={ledger} cards={cards} />
-
-          {showGrupos && (
-            <FinanceGroupedRollupTable
-              transactions={periodTransactions}
-              activeCategories={activeCategories}
-              periodLabel={periodLabel}
-            />
-          )}
-        </>
-      )}
-
-      {sheetView === 'anual' && (
-        <FinanceSpreadsheetAnnualPanel
-          year={viewYear}
-          receitaKpi={annualKpis.receita}
-          despesaKpi={annualKpis.despesa}
-          monthly={monthly}
-          cumulative={cumulative}
         />
       )}
     </div>

@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Plus, Lock, Unlock, Trash2, FileText } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AddCardForm } from './AddCardForm'
+import { CardEditForm } from './CardEditForm'
+import { CardSettingsMenu } from './CardSettingsMenu'
 import { CreditCardVisual } from './CreditCardVisual'
 import { CardInvoicePanel } from './CardInvoicePanel'
 import { CardInvoiceDrawer } from './CardInvoiceDrawer'
 import { getBillingCycle, getInvoiceTransactions } from '../../lib/financeCardCycle'
 import { getCardExtratoTransactions, sumOpenInvoiceSpend } from '../../lib/financeCardSpend'
-import { cardTemCicloFatura, cardUsaExtrato } from '../../lib/financeCardModalidade'
+import { cardTemCicloFatura } from '../../lib/financeCardModalidade'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
@@ -36,6 +38,8 @@ export function VirtualCardsTab({
   const [showAddForm, setShowAddForm] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(cards[0]?.id ?? null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [editingCardId, setEditingCardId] = useState<string | null>(null)
+  const [settingsCardId, setSettingsCardId] = useState<string | null>(null)
 
   useEffect(() =>
   {
@@ -84,6 +88,7 @@ export function VirtualCardsTab({
 
   const openFatura = (cardId: string) =>
   {
+    setEditingCardId(null)
     setSelectedId(cardId)
     const isMobile = typeof window !== 'undefined'
       && window.matchMedia('(max-width: 1023px)').matches
@@ -97,7 +102,7 @@ export function VirtualCardsTab({
           Cartões e benefícios
         </p>
         <p className={`text-[12px] sm:text-sm mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-          Deslize para ver todos · toque para selecionar
+          Toque no cartão para ver a fatura · engrenagem para editar
         </p>
       </div>
 
@@ -117,61 +122,66 @@ export function VirtualCardsTab({
         <>
           <div className="flex gap-3 overflow-x-auto scrollbar-none pb-2 -mx-1 px-1 snap-x snap-mandatory">
             {cardData.map(({ card, cycle, invoiceTotal }) => (
-              <div key={card.id} className="snap-center shrink-0 w-[min(88vw,280px)] sm:w-[260px]">
+              <div key={card.id} className="relative snap-center shrink-0 w-[min(88vw,280px)] sm:w-[260px]">
                 <CreditCardVisual
                   card={card}
                   cycle={cycle}
                   invoiceTotal={invoiceTotal}
                   selected={selected?.id === card.id}
                   onClick={() => openFatura(card.id)}
+                  onSettingsClick={() =>
+                  {
+                    setSettingsCardId((prev) => (prev === card.id ? null : card.id))
+                    setSelectedId(card.id)
+                  }}
                 />
+                {settingsCardId === card.id && (
+                  <CardSettingsMenu
+                    card={card}
+                    onClose={() => setSettingsCardId(null)}
+                    onEdit={() =>
+                    {
+                      setSettingsCardId(null)
+                      setEditingCardId(card.id)
+                      setSelectedId(card.id)
+                    }}
+                    onViewInvoice={() =>
+                    {
+                      setSettingsCardId(null)
+                      openFatura(card.id)
+                    }}
+                    onToggleBlock={() =>
+                    {
+                      setSettingsCardId(null)
+                      void toggleCardStatus(card.id)
+                    }}
+                    onDelete={() =>
+                    {
+                      setSettingsCardId(null)
+                      if (confirm('Excluir este cartão?'))
+                      {
+                        removeCard(card.id)
+                        setEditingCardId(null)
+                        setSelectedId(cards.find((c) => c.id !== card.id)?.id ?? null)
+                        toast.success('Cartão removido')
+                      }
+                    }}
+                  />
+                )}
               </div>
             ))}
           </div>
 
-          {selectedData && (
-            <div className="hidden lg:block space-y-3 min-w-0">
-              <div className="flex flex-wrap gap-2 items-center">
-                <span className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-                  <FileText size={12} />
-                  {cardUsaExtrato(selectedData.card.modalidade) ? 'Extrato' : 'Fatura'} · {selectedData.card.nome}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setDrawerOpen(true)}
-                  className="font-mono text-[9px] uppercase text-accent hover:underline"
-                >
-                  Abrir painel lateral
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toggleCardStatus(selectedData.card.id)}
-                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-ink-muted"
-                >
-                  {selectedData.card.status === 'bloqueado' ? (
-                    <><Unlock size={12} /> Desbloquear</>
-                  ) : (
-                    <><Lock size={12} /> Bloquear</>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                  {
-                    if (confirm('Excluir este cartão?'))
-                    {
-                      removeCard(selectedData.card.id)
-                      setSelectedId(cards.find((c) => c.id !== selectedData.card.id)?.id ?? null)
-                      toast.success('Cartão removido')
-                    }
-                  }}
-                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 border border-line rounded-sl hover:bg-chrome text-urgente"
-                >
-                  <Trash2 size={12} />
-                  Excluir
-                </button>
-              </div>
+          {selectedData && editingCardId === selectedData.card.id && (
+            <CardEditForm
+              card={selectedData.card}
+              onDone={() => setEditingCardId(null)}
+              onCancel={() => setEditingCardId(null)}
+            />
+          )}
 
+          {selectedData && (
+            <div className="hidden lg:block min-w-0">
               <CardInvoicePanel
                 card={selectedData.card}
                 cycle={selectedData.cycle}

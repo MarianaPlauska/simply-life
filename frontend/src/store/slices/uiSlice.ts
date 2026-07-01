@@ -1,4 +1,5 @@
-// slice de ui — controla views, sidebar, modais, acessibilidade
+import type { NewTransactionModalMode } from '../../lib/newTransactionModalMode';
+import { DEFAULT_NEW_TX_MODAL_MODE } from '../../lib/newTransactionModalMode';
 import type { StateCreator } from 'zustand';
 import type { ActiveView, TimerConfig, AccessibilitySettings, ColorScheme } from '../storeTypes';
 import { applyColorScheme } from '../../utils/applyColorScheme';
@@ -42,6 +43,7 @@ export interface UISlice {
   financeQuickCaptureSeed: string;
   /** Drawer lateral Novo lançamento (gasto / receita / investimento) */
   isNewTransactionModalOpen: boolean;
+  newTransactionModalMode: NewTransactionModalMode;
   isCommandPaletteOpen: boolean;
   timerConfig: TimerConfig;
   interactionScore: Record<string, number>;
@@ -55,7 +57,7 @@ export interface UISlice {
   setQuickCaptureOpen: (isOpen: boolean) => void;
   setFinanceQuickCaptureOpen: (isOpen: boolean) => void;
   setFinanceQuickCaptureSeed: (text: string) => void;
-  setNewTransactionModalOpen: (isOpen: boolean) => void;
+  setNewTransactionModalOpen: (isOpen: boolean, mode?: NewTransactionModalMode) => void;
   setCommandPaletteOpen: (isOpen: boolean) => void;
   setTimerConfig: (key: keyof TimerConfig, value: number) => void;
   registerInteraction: (moduleId: string) => void;
@@ -95,6 +97,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   isFinanceQuickCaptureOpen: false,
   financeQuickCaptureSeed: '',
   isNewTransactionModalOpen: false,
+  newTransactionModalMode: DEFAULT_NEW_TX_MODAL_MODE,
   isCommandPaletteOpen: false,
   timerConfig: { pomodoroTime: 25, shortBreak: 5, longBreak: 15 },
   interactionScore: {},
@@ -117,7 +120,13 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   setQuickCaptureOpen: (isOpen) => set({ isQuickCaptureOpen: isOpen }),
   setFinanceQuickCaptureOpen: (isOpen) => set({ isFinanceQuickCaptureOpen: isOpen }),
   setFinanceQuickCaptureSeed: (text) => set({ financeQuickCaptureSeed: text }),
-  setNewTransactionModalOpen: (isOpen) => set({ isNewTransactionModalOpen: isOpen }),
+  setNewTransactionModalOpen: (isOpen, mode) =>
+    set({
+      isNewTransactionModalOpen: isOpen,
+      newTransactionModalMode: isOpen
+        ? (mode ?? get().newTransactionModalMode)
+        : DEFAULT_NEW_TX_MODAL_MODE,
+    }),
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
 
   setTimerConfig: (key, value) =>

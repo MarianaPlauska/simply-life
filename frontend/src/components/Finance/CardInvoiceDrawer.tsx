@@ -45,6 +45,14 @@ export function CardInvoiceDrawer({
 
   useEffect(() =>
   {
+    if (open && isMobile)
+    {
+      expand()
+    }
+  }, [open, isMobile, expand])
+
+  useEffect(() =>
+  {
     const mq = window.matchMedia('(max-width: 1023px)')
     const onChange = () => setIsMobile(mq.matches)
     onChange()

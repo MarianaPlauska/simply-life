@@ -35,7 +35,6 @@ import { ContasFixasTab } from './ContasFixasTab';
 import { FinanceDailyLedgerTab } from './FinanceDailyLedgerTab';
 import { FinanceSpreadsheetTab } from './FinanceSpreadsheetTab';
 import { FinanceHomeTab } from './FinanceHomeTab';
-import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner';
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 import { clampFinanceMonthOffset, getFinanceMonthNavBounds } from '../../lib/financeMonthOutlook';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
@@ -53,6 +52,7 @@ export function FinancePlannerView() {
   const updateGoalProgress = useTaskStore((s) => s.updateGoalProgress);
   const cashAccount = useTaskStore((s) => s.cashAccount);
   const reservedBills = useTaskStore((s) => s.reservedBills);
+  const contasFixas = useTaskStore((s) => s.contasFixas);
 
   useFinancePlannerInit();
   useFinanceDueNotifications(true);
@@ -239,8 +239,10 @@ export function FinancePlannerView() {
   }, [categoryTotals, activeCategories]);
 
   const cashPosition = useMemo(
-    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills),
-    [transactions, cashAccount.saldo_inicial, reservedBills],
+    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills, {
+      contasFixas,
+    }),
+    [transactions, cashAccount.saldo_inicial, reservedBills, contasFixas],
   );
 
   const monthBounds = useMemo(
@@ -275,6 +277,7 @@ export function FinancePlannerView() {
       onNewTransaction={() => setNewTransactionOpen(true)}
       showNewTransactionFab={
         navGroup !== 'analise'
+        && navGroup !== 'contas'
         && activeLeaf !== 'diario'
         && activeLeaf !== 'cartoes'
         && activeLeaf !== 'faturas'
@@ -308,18 +311,6 @@ export function FinancePlannerView() {
           <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
             Lançamentos reais do período — compare com o que estava previsto nas fixas e recorrentes.
           </p>
-        </div>
-      )}
-
-      {activeLeaf === 'visao-geral' && (
-        <div className="mb-3">
-          <FinanceGlobalMoodBanner
-            monthLabel={monthLabel}
-            monthOffset={monthOffset}
-            monthTransactions={monthTx}
-            allTransactions={transactions}
-            saldoInicial={cashAccount.saldo_inicial}
-          />
         </div>
       )}
 
@@ -421,6 +412,8 @@ export function FinancePlannerView() {
           saldoCorrente={cashPosition.saldoCorrente}
           reservaRestante={cashPosition.reservaRestante}
           saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
+          compromissosFixas={cashPosition.compromissosFixas}
+          onNewExtraIncome={() => setNewTransactionOpen(true, 'receita')}
         />
       )}
 

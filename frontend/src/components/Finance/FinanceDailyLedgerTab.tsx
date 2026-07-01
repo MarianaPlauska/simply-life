@@ -205,24 +205,7 @@ export function FinanceDailyLedgerTab({
 
   const entryForm = (
     <>
-      {quickTipo === 'despesa' && (
-        <div className="space-y-1.5">
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Categoria</p>
-          <CategoryPicker
-            categories={activeCategories}
-            value={quickCatId}
-            onChange={setQuickCatId}
-            compact
-            onAddCategory={() => openCategories(null)}
-            onAddSubcategory={(parentId) => openCategories(parentId)}
-            onRemoveCategory={(id) => void handleRemoveCategory(id)}
-            onQuickAddCategory={handleQuickAddCategory}
-            onManageCategories={() => openCategories(null)}
-          />
-        </div>
-      )}
-
-      <div className="space-y-1.5 mt-5 pt-4 border-t border-line/60">
+      <div className="space-y-1.5">
         <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>O que é?</p>
         <div className={`grid grid-cols-2 gap-0.5 ${AXEL_SEG_SHELL}`}>
           {(['despesa', 'receita'] as const).map((t) => (
@@ -241,19 +224,6 @@ export function FinanceDailyLedgerTab({
           ))}
         </div>
       </div>
-
-      {quickTipo === 'receita' && (
-        <p className={`text-[10px] rounded-sl border border-concluido/30 bg-concluido/8 px-2 py-1 ${AXEL_TEXT_SECONDARY}`}>
-          Hora extra? Use <strong className="text-ink">Lançamento</strong> → Receita.
-        </p>
-      )}
-
-      <PaymentMethodPicker
-        cards={cards}
-        value={quickPayment}
-        onChange={setQuickPayment}
-        variant={quickTipo === 'receita' ? 'receita' : 'despesa'}
-      />
 
       <div className="space-y-2 pt-1 border-t border-line">
         <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Valor do lançamento</p>
@@ -283,6 +253,36 @@ export function FinanceDailyLedgerTab({
           </div>
         </div>
       </div>
+
+      <PaymentMethodPicker
+        cards={cards}
+        value={quickPayment}
+        onChange={setQuickPayment}
+        variant={quickTipo === 'receita' ? 'receita' : 'despesa'}
+      />
+
+      {quickTipo === 'receita' && (
+        <p className={`text-[10px] rounded-sl border border-concluido/30 bg-concluido/8 px-2 py-1 ${AXEL_TEXT_SECONDARY}`}>
+          Hora extra? Use <strong className="text-ink">Lançamento</strong> → Receita.
+        </p>
+      )}
+
+      {quickTipo === 'despesa' && (
+        <div className="space-y-1.5 pt-2 border-t border-line/60">
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Categoria</p>
+          <CategoryPicker
+            categories={activeCategories}
+            value={quickCatId}
+            onChange={setQuickCatId}
+            compact
+            onAddCategory={() => openCategories(null)}
+            onAddSubcategory={(parentId) => openCategories(parentId)}
+            onRemoveCategory={(id) => void handleRemoveCategory(id)}
+            onQuickAddCategory={handleQuickAddCategory}
+            onManageCategories={() => openCategories(null)}
+          />
+        </div>
+      )}
     </>
   )
 

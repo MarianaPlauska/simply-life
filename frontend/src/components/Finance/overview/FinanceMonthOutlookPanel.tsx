@@ -14,6 +14,7 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
+import { FinanceTxLabel } from './FinanceTxLabel'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -150,7 +151,19 @@ export function FinanceMonthOutlookPanel({
       </div>
 
       {!outlook.isFuture && showComparison && outlook.comparison && !compact && (
-        <ComparisonBlock comparison={outlook.comparison} />
+        <>
+          <ComparisonBlock comparison={outlook.comparison} />
+          {(outlook.receitasItens.length > 0 || outlook.compromissosItens.length > 0) && (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {outlook.receitasItens.length > 0 && (
+                <ItemList title="Receitas lançadas" items={outlook.receitasItens} empty="" positive withNotes />
+              )}
+              {outlook.compromissosItens.length > 0 && (
+                <ItemList title="Despesas lançadas" items={outlook.compromissosItens} empty="" withNotes />
+              )}
+            </div>
+          )}
+        </>
       )}
 
       {!compact && outlook.isFuture && (
@@ -283,11 +296,13 @@ function ItemList({
   items,
   empty,
   positive,
+  withNotes,
 }: {
   title: string
   items: { label: string; valor: number; hint?: string }[]
   empty: string
   positive?: boolean
+  withNotes?: boolean
 })
 {
   return (
@@ -296,17 +311,21 @@ function ItemList({
         {title}
       </p>
       <ul className="divide-y divide-line max-h-[180px] overflow-y-auto">
-        {items.length === 0 && (
+        {items.length === 0 && empty && (
           <li className={`px-3 py-4 text-[11px] text-center ${AXEL_TEXT_SECONDARY}`}>{empty}</li>
         )}
         {items.map((item) => (
           <li
-            key={`${item.label}-${item.valor}`}
+            key={`${item.label}-${item.valor}-${item.hint ?? ''}`}
             className={`flex items-center justify-between gap-2 px-3 py-2 text-[11px] ${AXEL_ROW_HOVER}`}
           >
-            <div className="min-w-0">
-              <p className={`truncate ${AXEL_TEXT_PRIMARY}`}>{item.label}</p>
-              {item.hint && (
+            <div className="min-w-0 flex-1">
+              {withNotes && item.hint ? (
+                <FinanceTxLabel label={item.label} observacao={item.hint} className="text-[11px]" />
+              ) : (
+                <p className={`truncate ${AXEL_TEXT_PRIMARY}`}>{item.label}</p>
+              )}
+              {item.hint && !withNotes && (
                 <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>{item.hint}</p>
               )}
             </div>

@@ -1,6 +1,7 @@
+import { Settings } from 'lucide-react'
 import type { VirtualCard } from '../../store/storeTypes'
 import type { BillingCycle } from '../../lib/financeCardCycle'
-import { invoiceUsagePct } from '../../lib/financeCardCycle'
+import { dueDateFromUserBillingDays, invoiceUsagePct } from '../../lib/financeCardCycle'
 import { cardModalidadeLabel, cardTemCicloFatura, cardUsaExtrato } from '../../lib/financeCardModalidade'
 import {
   CARD_USAGE_BAR_CLASS,
@@ -27,6 +28,7 @@ interface CreditCardVisualProps
   invoiceTotal: number
   selected?: boolean
   onClick?: () => void
+  onSettingsClick?: () => void
 }
 
 export function CreditCardVisual({
@@ -35,6 +37,7 @@ export function CreditCardVisual({
   invoiceTotal,
   selected = false,
   onClick,
+  onSettingsClick,
 }: CreditCardVisualProps)
 {
   const usage = invoiceUsagePct(invoiceTotal, card.limite)
@@ -46,6 +49,9 @@ export function CreditCardVisual({
   const usaExtrato = cardUsaExtrato(card.modalidade)
   const blocked = card.status === 'bloqueado'
   const Tag = onClick ? 'button' : 'div'
+  const billingDates = dueDateFromUserBillingDays(card)
+
+  const fmtBr = (iso: string) => iso.split('-').reverse().join('/')
 
   return (
     <Tag
@@ -57,6 +63,21 @@ export function CreditCardVisual({
     >
       <div className={`relative bg-gradient-to-br ${SKINS[card.tipo_gradiente]} p-4 min-h-[168px] flex flex-col justify-between`}>
         <div className="absolute inset-0 border border-white/5 pointer-events-none rounded-sl" aria-hidden />
+
+        {onSettingsClick && (
+          <button
+            type="button"
+            onClick={(e) =>
+            {
+              e.stopPropagation()
+              onSettingsClick()
+            }}
+            className="absolute top-2 right-2 z-20 inline-flex items-center justify-center w-9 h-9 rounded-sl bg-black/35 border border-white/15 text-white/90 hover:bg-black/50 transition-colors"
+            aria-label={`Configurar cartão ${card.nome}`}
+          >
+            <Settings size={15} strokeWidth={1.75} />
+          </button>
+        )}
 
         <div className="relative z-10 flex items-start justify-between gap-2">
           <div className="min-w-0">
@@ -111,15 +132,15 @@ export function CreditCardVisual({
             />
           </div>
 
-          {temFatura && (
+          {temFatura && billingDates && (
             <div className="flex justify-between font-mono text-[9px] text-white/55">
-              <span>Fecha {cycle.end.split('-').reverse().join('/')}</span>
-              <span>Vence {cycle.dueDate.split('-').reverse().join('/')}</span>
+              <span>Fecha {fmtBr(billingDates.fecha)}</span>
+              <span>Vence {fmtBr(billingDates.vence)}</span>
             </div>
           )}
           {onClick && (
             <p className="font-mono text-[8px] uppercase text-white/70 text-center pt-0.5">
-              {usaExtrato ? 'Toque para ver extrato' : 'Toque para ver fatura'}
+              Toque para ver fatura
             </p>
           )}
         </div>

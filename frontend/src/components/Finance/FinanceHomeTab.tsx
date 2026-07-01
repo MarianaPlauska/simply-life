@@ -3,6 +3,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { computeCashPosition } from '../../lib/financeReservedBills'
 import { resolveCashTone, BALANCE_TONE_TEXT } from '../../lib/financeBalanceTone'
 import { FinanceMonthKpisRow } from './overview/FinanceMonthKpisRow'
+import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner'
 import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -10,8 +11,6 @@ import type { FinanceAlertTab } from '../../lib/financeAlerts'
 import { useFinanceAlerts } from '../../hooks/useFinanceAlerts'
 import { FinanceAlertsPanel } from './goals/FinanceAlertsPanel'
 import { FinanceMonthGoalWidget } from './overview/FinanceMonthGoalWidget'
-import { FinanceHomeQuickNav } from './FinanceHomeQuickNav'
-import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner'
 import type { Transaction } from '../../store/storeTypes'
 import type { PlannerLeafTab } from '../../lib/financePlannerNav'
 
@@ -44,11 +43,14 @@ export function FinanceHomeTab({
   const isFutureMonth = monthOffset > 0
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const reservedBills = useTaskStore((s) => s.reservedBills)
+  const contasFixas = useTaskStore((s) => s.contasFixas)
   const alerts = useFinanceAlerts(monthTransactions)
 
   const position = useMemo(
-    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills),
-    [transactions, cashAccount.saldo_inicial, reservedBills],
+    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills, {
+      contasFixas,
+    }),
+    [transactions, cashAccount.saldo_inicial, reservedBills, contasFixas],
   )
 
   const cashTone = resolveCashTone(position.saldoDisponivel, position.saldoProjetadoDisponivel)
@@ -56,8 +58,6 @@ export function FinanceHomeTab({
 
   return (
     <div className="space-y-3">
-      <FinanceHomeQuickNav onNavigate={onNavigate} />
-
       <FinanceGlobalMoodBanner
         monthLabel={monthLabel}
         monthOffset={monthOffset}
@@ -73,6 +73,7 @@ export function FinanceHomeTab({
         saldoMes={saldo}
         balanceToneClass={BALANCE_TONE_TEXT[cashTone]}
         compact
+        onConfigureSaldo={() => onNavigate('conta')}
       />
 
       <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>

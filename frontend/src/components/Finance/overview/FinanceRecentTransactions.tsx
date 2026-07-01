@@ -7,6 +7,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
 import { FINANCE_CATEGORY_ICONS } from '../financeCategoryIcons'
+import { FinanceTxLabel } from './FinanceTxLabel'
 import type { Category, Transaction } from '../../../store/storeTypes'
 
 const fmt = (v: number) =>
@@ -72,9 +73,7 @@ export function FinanceRecentTransactions({
                 <CatIcon className={`w-3.5 h-3.5 ${isRec ? 'text-concluido' : ''}`} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
-                  {t.descricao}
-                </p>
+                <FinanceTxLabel label={t.descricao} observacao={t.observacao} />
                 <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>{fmtDate(t.data)}</p>
               </div>
               <span className={`text-[12px] font-mono tabular-nums shrink-0 ${

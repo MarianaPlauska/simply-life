@@ -1,7 +1,8 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Lock, Play } from 'lucide-react'
+import { CheckCircle2, GripVertical, Lock, Play } from 'lucide-react'
 import { DueDateChip } from './DueDateChip'
+import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
 import { formatTaskRef } from '../../lib/kanbanVisual'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
@@ -92,6 +93,21 @@ export function DueBucketTaskRow({
       </button>
 
       <div className="shrink-0 flex items-center gap-1">
+        {canExecute && (
+          <button
+            type="button"
+            onClick={(e) =>
+            {
+              e.stopPropagation()
+              void axelCompleteTask(tarefa)
+            }}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-sl border border-concluido/30 bg-concluido/10 text-concluido hover:bg-concluido/20 transition-colors shrink-0"
+            aria-label="Concluir tarefa"
+            title="Concluir"
+          >
+            <CheckCircle2 size={14} strokeWidth={1.75} />
+          </button>
+        )}
         {canExecute && onStartExecute && !isExecuting && (
           <button
             type="button"

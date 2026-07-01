@@ -125,7 +125,10 @@ export const useTaskStore = create<TaskStore>()(
         userId: state.userId,
         onboardingSteps: state.onboardingSteps,
         onboardingDismissed: state.onboardingDismissed,
-        cards: state.cards,
+        cards: state.cards.map((card) => ({
+          ...card,
+          cvv: '',
+        })),
         contasFixas: state.contasFixas,
         streakCount: state.streakCount,
         lastActiveDate: state.lastActiveDate,

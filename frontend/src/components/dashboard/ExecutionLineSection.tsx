@@ -189,7 +189,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
             className={`inline-flex items-center gap-1 transition-colors ${AXEL_TEXT_SECONDARY} hover:text-zinc-800 dark:hover:text-zinc-300`}
           >
             <Plus className="w-3.5 h-3.5" />
-            Captura
+            Nova entrada
           </button>
         </div>
       </header>
@@ -202,7 +202,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
             onClick={() => setQuickCaptureOpen(true)}
             className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 underline-offset-2 hover:underline"
           >
-            Capturar
+            Adicionar tarefa
           </button>
         </p>
       ) : (

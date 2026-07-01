@@ -91,6 +91,8 @@ interface ActualMonthSlice
   receitas: number
   despesas: number
   saldo: number
+  receitaItens: OutlookLineItem[]
+  despesaItens: OutlookLineItem[]
 }
 
 function targetMonthDate(monthOffset: number, ref = new Date()): Date
@@ -196,17 +198,25 @@ function computeActualMonthSlice(
 ): ActualMonthSlice
 {
   const monthTx = transactions.filter((t) => isInMonth(t.data, year, month))
-  const receitas = monthTx
-    .filter((t) => t.tipo === 'receita')
-    .reduce((s, t) => s + t.valor, 0)
-  const despesas = monthTx
-    .filter((t) => t.tipo === 'despesa' || t.tipo === 'investimento')
-    .reduce((s, t) => s + t.valor, 0)
+  const receitaTx = monthTx.filter((t) => t.tipo === 'receita')
+  const despesaTx = monthTx.filter((t) => t.tipo === 'despesa' || t.tipo === 'investimento')
+  const receitas = receitaTx.reduce((s, t) => s + t.valor, 0)
+  const despesas = despesaTx.reduce((s, t) => s + t.valor, 0)
 
   return {
     receitas,
     despesas,
     saldo: receitas - despesas,
+    receitaItens: receitaTx.map((t) => ({
+      label: t.descricao,
+      valor: t.valor,
+      hint: t.observacao?.trim() || undefined,
+    })),
+    despesaItens: despesaTx.map((t) => ({
+      label: t.descricao,
+      valor: t.valor,
+      hint: t.observacao?.trim() || undefined,
+    })),
   }
 }
 
@@ -362,12 +372,16 @@ export function buildMonthOutlook(
     saldoPartida = position.saldoDisponivel
     receitasPrevistas = actual.receitas
     compromissos = actual.despesas
-    receitasItens = actual.receitas > 0
-      ? [{ label: 'Receitas lançadas', valor: actual.receitas }]
-      : []
-    compromissosItens = actual.despesas > 0
-      ? [{ label: 'Despesas lançadas', valor: actual.despesas }]
-      : []
+    receitasItens = actual.receitaItens.length > 0
+      ? actual.receitaItens
+      : actual.receitas > 0
+        ? [{ label: 'Receitas lançadas', valor: actual.receitas }]
+        : []
+    compromissosItens = actual.despesaItens.length > 0
+      ? actual.despesaItens
+      : actual.despesas > 0
+        ? [{ label: 'Despesas lançadas', valor: actual.despesas }]
+        : []
 
     saldoAposCompromissos = actual.saldo
     sobraParaGastar = actual.saldo

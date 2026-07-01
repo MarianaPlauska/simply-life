@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from './supabaseAdmin.js';
+import { applyCors } from './cors.js';
 
 /**
  * Resolve usuário Supabase a partir do Bearer token.
@@ -27,9 +28,10 @@ export async function getUserFromBearer(req)
   return data.user;
 }
 
-export function corsJson(res)
+export function corsJson(res, req)
 {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  applyCors(req, res, {
+    methods: 'GET, POST, DELETE, OPTIONS',
+    headers: 'Content-Type, Authorization',
+  });
 }

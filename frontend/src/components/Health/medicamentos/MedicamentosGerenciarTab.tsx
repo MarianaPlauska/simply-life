@@ -79,6 +79,7 @@ export function MedicamentosGerenciarTab({ onGoCadastrar }: MedicamentosGerencia
         description="Adicione medicamentos na aba Cadastrar."
         actionLabel="Cadastrar"
         onAction={onGoCadastrar}
+        tone="teal"
       />
     )
   }

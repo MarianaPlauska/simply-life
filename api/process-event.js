@@ -1,19 +1,44 @@
-// POST /api/process-event
-// Recebe um evento raw e retorna resumo + score + ação sugerida via Google Gemini
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+// POST /api/process-event — triagem de evento via IA (servidor)
+// Exige JWT Supabase
+
+import { applyCors } from './_lib/cors.js';
+import { getUserFromBearer } from './_lib/supabaseUser.js';
+
+export default async function handler(req, res)
+{
+  applyCors(req, res, {
+    methods: 'POST, OPTIONS',
+    headers: 'Content-Type, Authorization',
+  });
+
+  if (req.method === 'OPTIONS')
+  {
+    return res.status(204).end();
+  }
+
+  if (req.method !== 'POST')
+  {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const user = await getUserFromBearer(req);
+  if (!user)
+  {
+    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' });
   }
 
   const { sender, subject, body, userKeywords } = req.body;
 
-  if (!subject && !body) {
+  if (!subject && !body)
+  {
     return res.status(400).json({ error: 'subject ou body obrigatório' });
   }
 
-  try {
+  try
+  {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.GROQ_API_KEY;
-    if (!apiKey) {
+    if (!apiKey)
+    {
       throw new Error('Chave de API do Gemini não configurada. Configure GEMINI_API_KEY nas variáveis de ambiente.');
     }
 
@@ -53,22 +78,23 @@ Corpo: ${(body || '').substring(0, 1000)}`;
           contents: [
             {
               role: 'user',
-              parts: [{ text: userPrompt }]
-            }
+              parts: [{ text: userPrompt }],
+            },
           ],
           systemInstruction: {
-            parts: [{ text: systemInstruction }]
+            parts: [{ text: systemInstruction }],
           },
           generationConfig: {
             temperature: 0.1,
             maxOutputTokens: 500,
-            responseMimeType: 'application/json'
-          }
-        })
-      }
+            responseMimeType: 'application/json',
+          },
+        }),
+      },
     );
 
-    if (!response.ok) {
+    if (!response.ok)
+    {
       const errText = await response.text();
       throw new Error(`Erro na API do Gemini (${response.status}): ${errText}`);
     }
@@ -77,9 +103,12 @@ Corpo: ${(body || '').substring(0, 1000)}`;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
 
     let result;
-    try {
+    try
+    {
       result = JSON.parse(text.trim());
-    } catch {
+    }
+    catch
+    {
       result = {
         resumo: `Mensagem de ${sender || 'alguém'}: ${(subject || body || '').substring(0, 100)}`,
         idioma_detectado: 'pt',
@@ -90,7 +119,9 @@ Corpo: ${(body || '').substring(0, 1000)}`;
     }
 
     return res.status(200).json(result);
-  } catch (err) {
+  }
+  catch (err)
+  {
     console.error('Gemini Triagem error:', err);
     return res.status(500).json({ error: 'Falha no processamento da IA com Gemini', details: err.message });
   }

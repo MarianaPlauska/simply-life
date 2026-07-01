@@ -4,6 +4,7 @@ import {
   BookOpen, Bell, ListChecks, Maximize2,
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
+import { sanitizeNoteHtml } from '../../lib/sanitizeHtml';
 import { RichTextEditor } from '../ui/RichTextEditor';
 import { EmptyState } from '../ui/EmptyState';
 
@@ -277,7 +278,7 @@ export function AnotacoesView() {
               <article className="prose prose-invert prose-lg max-w-none">
                 <div
                   className="text-[17px] leading-[2] text-zinc-200 font-[Georgia,_serif] selection:bg-violet-500/30"
-                  dangerouslySetInnerHTML={{ __html: selectedNote.conteudo }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeNoteHtml(selectedNote.conteudo) }}
                 />
               </article>
             </div>

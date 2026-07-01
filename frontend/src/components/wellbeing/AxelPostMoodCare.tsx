@@ -28,6 +28,18 @@ export function AxelPostMoodCare()
     clearAxelMoodCare()
   }, [session, active, clearAxelMoodCare])
 
+  // Garante remoção no deadline mesmo sem re-render do componente
+  useEffect(() =>
+  {
+    if (!session)
+    {
+      return
+    }
+    const restante = Math.max(0, session.until - Date.now())
+    const t = window.setTimeout(() => clearAxelMoodCare(), restante)
+    return () => window.clearTimeout(t)
+  }, [session, clearAxelMoodCare])
+
   if (!active || !session)
   {
     return null

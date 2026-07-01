@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { Notificacao } from '../../store/storeTypes'
 import { resolveNotificationAction } from '../../lib/notificationRoutes'
-import { isNotificacaoLida, listNotificacoesAcionaveis, listPrazosUrgentes, listTarefasAtrasadas } from '../../lib/notificacaoUtils'
+import { isNotificacaoLida, listNotificacoesAcionaveis, listPrazosUrgentes, listTarefasAtrasadas, filterNotificacoesSemPrazoDuplicado } from '../../lib/notificacaoUtils'
 import { formatDueMeta } from '../../lib/temporalHorizon'
 import {
   AXEL_TEXT_PRIMARY,
@@ -41,7 +41,10 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
 
   const tarefasAtrasadas = listTarefasAtrasadas(tarefas)
   const prazosUrgentes = listPrazosUrgentes(tarefas)
-  const notificacoesPendentes = listNotificacoesAcionaveis(notificacoes)
+  const notificacoesPendentes = filterNotificacoesSemPrazoDuplicado(
+    listNotificacoesAcionaveis(notificacoes),
+    prazosUrgentes,
+  )
   const unreadCount = notificacoesPendentes.length
   const hasDismissible = unreadCount > 0
 
@@ -75,7 +78,13 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
   const empty = tarefasAtrasadas.length === 0 && prazosUrgentes.length === 0 && notificacoesPendentes.length === 0
 
   return (
-    <div className="absolute right-0 top-10 w-[min(100vw-1.5rem,20rem)] rounded-sl border border-line bg-card shadow-lg overflow-hidden z-[100]">
+    <div
+      className={[
+        'z-[200] rounded-sl border border-line bg-card shadow-lg overflow-hidden',
+        'fixed left-3 right-3 top-[calc(env(safe-area-inset-top,0px)+3.5rem)]',
+        'sm:absolute sm:left-auto sm:right-0 sm:top-10 sm:w-80 sm:max-w-[min(100vw-1.5rem,20rem)]',
+      ].join(' ')}
+    >
       <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line bg-chrome/40">
         <span className={`text-[12px] font-semibold ${AXEL_TEXT_PRIMARY}`}>Notificações</span>
         {hasDismissible && (

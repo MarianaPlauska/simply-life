@@ -144,6 +144,8 @@ export function PreferencesView() {
     fetchPreferencias().finally(() => setLoaded(true));
   }, [fetchPreferencias, registerInteraction]);
 
+  const visibleTabs = TABS;
+
   /* ── Keyword actions ────────────────────────────────────── */
   const removeKeyword = (word: string) => {
     saveKeywords(storeKeywords.filter((k) => k !== word));
@@ -648,7 +650,7 @@ export function PreferencesView() {
       <div className="flex gap-8">
         {/* Sidebar tabs */}
         <nav className="w-56 shrink-0 space-y-1 sticky top-4 self-start">
-          {TABS.map((tab) => {
+          {visibleTabs.map((tab) => {
             const active = activeTab === tab.id;
             return (
               <button

@@ -262,10 +262,20 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       contexto: opts?.contexto ?? null,
     }
 
+    // Mensagem do AXEL aparece na hora (otimista) — visível por no máx. 1 min
+    const moodLevelOtimista = Math.min(5, Math.max(1, humor)) as MoodLevel
     set((s) =>
     {
       const lista = [...s.humorHojeLista, optimistic]
-      return { humorHojeLista: lista, humorHoje: ultimoRegistro(lista) }
+      return {
+        humorHojeLista: lista,
+        humorHoje: ultimoRegistro(lista),
+        axelMoodCare: {
+          mood: moodLevelOtimista,
+          message: pickMoodCareMessage(moodLevelOtimista),
+          until: Date.now() + AXEL_MOOD_CARE_DURATION_MS,
+        },
+      }
     })
 
     try
@@ -328,15 +338,6 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
         })
       }
 
-      const moodLevel = Math.min(5, Math.max(1, humor)) as MoodLevel
-      set({
-        axelMoodCare: {
-          mood: moodLevel,
-          message: pickMoodCareMessage(moodLevel),
-          until: Date.now() + AXEL_MOOD_CARE_DURATION_MS,
-        },
-      })
-
       return saved
     }
     catch (e)
@@ -345,7 +346,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       set((s) =>
       {
         const lista = s.humorHojeLista.filter((r) => r.id !== optimisticId)
-        return { humorHojeLista: lista, humorHoje: ultimoRegistro(lista) }
+        return { humorHojeLista: lista, humorHoje: ultimoRegistro(lista), axelMoodCare: null }
       })
       const { toast } = await import('sonner')
       const msg = e && typeof e === 'object' && 'message' in e

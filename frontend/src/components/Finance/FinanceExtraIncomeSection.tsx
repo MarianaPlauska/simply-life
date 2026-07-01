@@ -33,6 +33,8 @@ export interface ReceitaEntradaPatch
 interface FinanceExtraIncomeSectionProps
 {
   onPatch: (patch: ReceitaEntradaPatch) => void
+  /** Oculta crédito no próximo mês — só entra no saldo agora */
+  somenteAgora?: boolean
 }
 
 function resolveCreditDate(when: ReceitaCreditoQuando): string
@@ -48,7 +50,7 @@ function resolveCreditDate(when: ReceitaCreditoQuando): string
 
 // Seção de renda extra — usada no drawer Novo lançamento (aba Receita)
 
-export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSectionProps)
+export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: FinanceExtraIncomeSectionProps)
 {
   const transactions = useTaskStore((s) => s.transactions)
   const recurringIncomes = useTaskStore((s) => s.recurringIncomes)
@@ -345,7 +347,7 @@ export function FinanceExtraIncomeSection({ onPatch }: FinanceExtraIncomeSection
         </p>
       )}
 
-      {kind !== 'normal' && (
+      {kind !== 'normal' && !somenteAgora && (
         <div className="space-y-1.5 pt-2 border-t border-line/60">
           <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Quando creditar</p>
           <div className="grid grid-cols-2 gap-1.5">

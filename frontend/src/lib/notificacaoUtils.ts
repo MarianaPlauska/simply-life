@@ -31,7 +31,22 @@ export function isNotificacaoAcionavel(n: Notificacao): boolean
 
 export function listNotificacoesAcionaveis(notificacoes: Notificacao[]): Notificacao[]
 {
-  return notificacoes.filter(isNotificacaoAcionavel)
+  const seen = new Map<string, Notificacao>()
+
+  for (const n of notificacoes)
+  {
+    if (!isNotificacaoAcionavel(n)) continue
+
+    const key = `${n.titulo.trim().toLowerCase()}|${(n.mensagem ?? '').trim().toLowerCase()}`
+    const prev = seen.get(key)
+    if (!prev || n.id > prev.id)
+    {
+      seen.set(key, n)
+    }
+  }
+
+  return Array.from(seen.values())
+    .sort((a, b) => new Date(b.criado_em).getTime() - new Date(a.criado_em).getTime())
 }
 
 export function normalizeNotificacao(row: Record<string, unknown>): Notificacao
@@ -62,14 +77,61 @@ export interface TarefaAtrasadaItem
 
 export function listTarefasAtrasadas(tarefas: TarefaUnificada[]): TarefaAtrasadaItem[]
 {
-  return getOverdueTasks(tarefas)
-    .sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0))
-    .map((task) => ({ kind: 'tarefa_atrasada' as const, task }))
+  const seen = new Set<number>()
+  const items: TarefaAtrasadaItem[] = []
+
+  for (const task of getOverdueTasks(tarefas)
+    .sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0)))
+  {
+    if (seen.has(task.id)) continue
+    seen.add(task.id)
+    items.push({ kind: 'tarefa_atrasada', task })
+  }
+
+  return items
 }
 
 export function listPrazosUrgentes(tarefas: TarefaUnificada[]): PrazoUrgenteItem[]
 {
-  return getUrgentDeadlineTasks(tarefas).map((task) => ({ kind: 'prazo_24h' as const, task }))
+  const seen = new Set<number>()
+  const items: PrazoUrgenteItem[] = []
+
+  for (const task of getUrgentDeadlineTasks(tarefas))
+  {
+    if (seen.has(task.id)) continue
+    seen.add(task.id)
+    items.push({ kind: 'prazo_24h', task })
+  }
+
+  return items
+}
+
+/** Evita financeiro duplicado quando já há alerta de prazo da mesma conta/tarefa */
+export function filterNotificacoesSemPrazoDuplicado(
+  notificacoes: Notificacao[],
+  prazos: PrazoUrgenteItem[],
+): Notificacao[]
+{
+  if (prazos.length === 0) return notificacoes
+
+  const titulosPrazo = prazos.map(({ task }) => task.titulo.trim().toLowerCase())
+
+  return notificacoes.filter((n) =>
+  {
+    if (n.tipo !== 'financeiro') return true
+
+    const label = n.titulo
+      .replace(/^conta (em \d+ dia\(s\)|vence hoje) · /i, '')
+      .trim()
+      .toLowerCase()
+
+    if (!label) return true
+
+    return !titulosPrazo.some((taskTitle) =>
+      taskTitle.includes(label)
+      || label.includes(taskTitle.replace(/\[boleto\]\s*/i, '').trim()),
+    )
+  })
 }
 
 export function countAlertasHeader(notificacoes: Notificacao[], tarefas: TarefaUnificada[]): number

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import {
   LayoutDashboard, KanbanSquare, CalendarDays, StickyNote, SlidersHorizontal,
   Wallet, HardDrive, PanelLeftClose, PanelLeft, Settings,
-  Zap, Webhook, PlugZap, Inbox, HeartPulse,
+  Zap, Webhook, PlugZap, Inbox, HeartPulse, Search,
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore'
@@ -92,7 +92,7 @@ export function Sidebar()
   const sidebarCollapsed = useTaskStore((s) => s.sidebarCollapsed)
   const toggleSidebar = useTaskStore((s) => s.toggleSidebar)
   const registerInteraction = useTaskStore((s) => s.registerInteraction)
-  const setQuickCaptureOpen = useTaskStore((s) => s.setQuickCaptureOpen)
+  const setCommandPaletteOpen = useTaskStore((s) => s.setCommandPaletteOpen)
   const userProfile = useTaskStore((s) => s.userProfile)
   const userStats = useTaskStore((s) => s.userStats)
 
@@ -151,12 +151,14 @@ export function Sidebar()
 
       <div className="px-4 mb-3">
         <button
-          onClick={() => setQuickCaptureOpen(true)}
-          className={`w-full flex items-center justify-center gap-2 px-3 py-2 text-[11px] font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
+          type="button"
+          onClick={() => setCommandPaletteOpen(true)}
+          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 text-[12px] font-medium ${AXEL_BTN_PRIMARY}`}
+          title="Tarefa, nota, gasto ou ir a qualquer módulo"
         >
-          <Zap className="w-3 h-3 opacity-80" />
-          Captura
-          <span className="text-[10px] ml-1 opacity-70">⌘K</span>
+          <Search className="w-3.5 h-3.5 opacity-90" aria-hidden />
+          <span>Criar ou buscar</span>
+          <span className="font-mono text-[10px] opacity-70">⌘K</span>
         </button>
       </div>
 

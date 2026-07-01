@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CalendarClock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -13,6 +13,7 @@ import {
 import { itemsForBill } from '../../lib/financeBillItems'
 import { ReservedBillCard } from './reserved-bills/ReservedBillCard'
 import { ReservedBillsSummaryBar } from './reserved-bills/ReservedBillsSummaryBar'
+import { UpcomingPayablesSection } from './UpcomingPayablesSection'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
 import {
   AXEL_BORDERLESS_PANEL,
@@ -42,6 +43,7 @@ export function FinanceReservedBillsTab()
   const [spendVal, setSpendVal] = useState('')
   const [filter, setFilter] = useState<BillFilterKey>('todas')
   const [expandedIds, setExpandedIds] = useState<Set<number>>(() => new Set())
+  const [summaryExpanded, setSummaryExpanded] = useState(false)
 
   const abertas = useMemo(
     () => reservedBills.filter((b) => b.status === 'aberta'),
@@ -73,29 +75,7 @@ export function FinanceReservedBillsTab()
     [reservedBills],
   )
 
-  // Abre automaticamente faturas urgentes na primeira carga
-  useEffect(() =>
-  {
-    if (abertas.length === 0) return
-
-    setExpandedIds((prev) =>
-    {
-      if (prev.size > 0) return prev
-      const urgent = new Set<number>()
-      for (const bill of abertas)
-      {
-        const items = itemsForBill(reservedBillItems, bill.id)
-        const status = resolveBillVisualStatus(bill, items)
-        if (status === 'urgente' || status === 'vencendo')
-        {
-          urgent.add(bill.id)
-        }
-      }
-      if (urgent.size === 0 && abertas[0]) urgent.add(abertas[0].id)
-      return urgent
-    })
-  }, [abertas, reservedBillItems])
-
+  // Reservas ficam recolhidas por padrão — usuário expande quando precisar
   const toggleExpanded = (id: number) =>
   {
     setExpandedIds((prev) =>
@@ -133,16 +113,28 @@ export function FinanceReservedBillsTab()
 
   return (
     <div className="space-y-4">
+      <header className="space-y-1">
+        <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+          Contas a pagar
+        </p>
+        <p className={`text-[12px] leading-snug ${AXEL_TEXT_SECONDARY}`}>
+          Faturas de cartão, PIX, boletos e outras contas avulsas — com lembrete antes do vencimento.
+          Recorrentes mensais ficam em <strong className="text-ink">Fixas</strong>.
+        </p>
+      </header>
+
+      <UpcomingPayablesSection />
+
       <section className={AXEL_BORDERLESS_PANEL}>
         <header className="mb-3">
           <div className="flex items-start gap-2 min-w-0">
             <CalendarClock size={14} className="text-accent shrink-0 mt-0.5" />
             <div className="min-w-0">
               <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-                Faturas reservadas
+                Reservas com valor separado
               </p>
               <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-                Toque para expandir discriminantes
+                Bloqueia do disponível — ideal para fatura grande ou parcelas
               </p>
             </div>
           </div>
@@ -160,6 +152,9 @@ export function FinanceReservedBillsTab()
             filter={filter}
             onFilterChange={setFilter}
             visibleCount={visibleBills.length}
+            compact={abertas.length > 0}
+            expanded={summaryExpanded}
+            onToggleExpanded={() => setSummaryExpanded((v) => !v)}
           />
         )}
 
@@ -205,6 +200,10 @@ export function FinanceReservedBillsTab()
           <p className={`py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
             Nenhuma fatura reservada — crie uma para separar o dinheiro
           </p>
+        ) : !summaryExpanded ? (
+          <p className={`pb-2 text-center text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+            Toque acima para ver filtros e detalhes de cada reserva
+          </p>
         ) : visibleBills.length === 0 ? (
           <p className={`py-6 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
             Nenhuma fatura neste filtro — tente outra aba
@@ -243,7 +242,7 @@ export function FinanceReservedBillsTab()
           className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-3 z-40 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 font-mono text-[10px] uppercase tracking-wide shadow-lg ${AXEL_BTN_PRIMARY}`}
         >
           <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">Nova fatura</span>
+          <span className="hidden sm:inline">Nova reserva</span>
           <span className="sm:hidden">Novo</span>
         </button>
       )}

@@ -9,7 +9,6 @@ import {
   isWellbeingDashboardHidden,
   wellbeingHiddenUntilIso,
 } from '../../lib/axelCareRotation'
-import { isAxelMoodCareActive } from '../../lib/axelMoodCare'
 
 export function WellbeingDashboardCard()
 {
@@ -30,12 +29,10 @@ export function WellbeingDashboardCard()
   const [salvandoNota, setSalvandoNota] = useState(false)
 
   const hiddenUntil = workspacePrefs.wellbeing_dashboard_hidden_until
-  const axelMoodCare = useTaskStore((s) => s.axelMoodCare)
   const temRegistroHoje = humorHojeLista.length > 0
   const ultimo = humorHojeLista[humorHojeLista.length - 1] ?? null
   const snoozed = temRegistroHoje && isWellbeingDashboardHidden(hiddenUntil)
   const checkInDue = isWellbeingCheckInDue(hiddenUntil, temRegistroHoje)
-  const axelMoodCareActive = isAxelMoodCareActive(axelMoodCare)
 
   useEffect(() =>
   {
@@ -110,12 +107,13 @@ export function WellbeingDashboardCard()
     }
   }
 
-  if (snoozed && !axelMoodCareActive)
+  // Humor registrado some na hora — a mensagem do AXEL aparece no painel separado (AxelPostMoodCare)
+  if (snoozed)
   {
     return null
   }
 
-  if (temRegistroHoje && !hiddenUntil && !checkInDue && !axelMoodCareActive)
+  if (temRegistroHoje && !checkInDue)
   {
     return null
   }

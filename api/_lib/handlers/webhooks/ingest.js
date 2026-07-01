@@ -1,18 +1,16 @@
 // POST /api/webhooks/ingest — ingestão universal com orquestração de urgência antes do insert
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
-import { verifyWebhookSignature } from '../../webhookAuth.js';
+import { resolveWebhookPlainSecret } from '../../resolveWebhookAuth.js';
 import { orchestrateIngestPayload } from '../../urgencyOrchestrator.js';
 import { ensureProjectLabel, linkLabelToTask } from '../../projectLabels.js';
 import { insertTriagedTask } from '../../insertTriagedTask.js';
-
-const FALLBACK_SECRET = process.env.WEBHOOK_INGEST_SECRET || '';
 
 function cors(res)
 {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Signature');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Webhook-Signature, X-Webhook-Secret');
 }
 
 /**
@@ -79,21 +77,10 @@ export default async function handler(req, res)
 
   const { userId, items } = normalized;
 
-  let secret = FALLBACK_SECRET;
-  const { data: secretRow } = await supabase
-    .from('user_webhook_secrets')
-    .select('secret')
-    .eq('user_id', userId)
-    .maybeSingle();
-  if (secretRow?.secret) secret = secretRow.secret;
-
-  if (secret)
+  const auth = await resolveWebhookPlainSecret(supabase, userId, req, bodyRaw);
+  if (!auth.ok)
   {
-    const sig = req.headers['x-webhook-signature'] || '';
-    if (!verifyWebhookSignature(bodyRaw, sig, secret))
-    {
-      return res.status(401).json({ error: 'Assinatura HMAC inválida' });
-    }
+    return res.status(auth.status).json({ error: auth.error });
   }
 
   const results = [];

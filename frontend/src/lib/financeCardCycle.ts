@@ -42,16 +42,73 @@ export function resolveClosingDay(card: VirtualCard): number
   return 1
 }
 
-export function resolveDueDay(card: VirtualCard): number
+/** Dia de vencimento cadastrado pelo usuário — sem inferência */
+export function resolveDueDay(card: VirtualCard): number | null
 {
-  return clampClosingDay(card.dia_vencimento ?? 10)
+  if (card.dia_vencimento == null) return null
+  return clampClosingDay(card.dia_vencimento)
+}
+
+/** Próxima data civil para um dia do mês (ex.: fechamento dia 11) */
+export function nextCalendarDateForDay(dayOfMonth: number, reference = new Date()): string
+{
+  const day = clampClosingDay(dayOfMonth)
+  const y = reference.getFullYear()
+  const m = reference.getMonth()
+  const today = reference.getDate()
+
+  let endYear = y
+  let endMonth = m
+
+  if (today > day)
+  {
+    endMonth += 1
+    if (endMonth > 11)
+    {
+      endMonth = 0
+      endYear += 1
+    }
+  }
+
+  return fmtDay(new Date(endYear, endMonth, day))
+}
+
+/** Vencimento da fatura fechada em cycleEnd (mesmo mês se dueDay > closingDay) */
+export function resolveDueDateForCycleEnd(cycleEnd: Date, closingDay: number, dueDay: number): Date
+{
+  const y = cycleEnd.getFullYear()
+  const m = cycleEnd.getMonth()
+
+  if (dueDay > closingDay)
+  {
+    return new Date(y, m, dueDay)
+  }
+
+  return new Date(y, m + 1, dueDay)
+}
+
+/** Vencimento a partir da próxima data de fechamento e dos dias cadastrados */
+export function dueDateFromUserBillingDays(
+  card: VirtualCard,
+  reference = new Date(),
+): { fecha: string; vence: string } | null
+{
+  if (card.dia_fechamento == null || card.dia_vencimento == null) return null
+
+  const closingDay = clampClosingDay(card.dia_fechamento)
+  const dueDay = clampClosingDay(card.dia_vencimento)
+  const fecha = nextCalendarDateForDay(closingDay, reference)
+  const cycleEnd = new Date(`${fecha}T12:00:00`)
+  const vence = fmtDay(resolveDueDateForCycleEnd(cycleEnd, closingDay, dueDay))
+
+  return { fecha, vence }
 }
 
 /** Fatura aberta ou última fechada conforme data de referência */
 export function getBillingCycle(card: VirtualCard, reference = new Date()): BillingCycle
 {
   const closingDay = resolveClosingDay(card)
-  const dueDay = resolveDueDay(card)
+  const dueDay = resolveDueDay(card) ?? closingDay
   const y = reference.getFullYear()
   const m = reference.getMonth()
   const day = reference.getDate()
@@ -71,12 +128,7 @@ export function getBillingCycle(card: VirtualCard, reference = new Date()): Bill
 
   const cycleEnd = new Date(endYear, endMonth, closingDay)
   const cycleStart = new Date(endYear, endMonth - 1, closingDay + 1)
-
-  let due = new Date(cycleEnd.getFullYear(), cycleEnd.getMonth(), dueDay)
-  if (due.getTime() <= cycleEnd.getTime())
-  {
-    due = new Date(cycleEnd.getFullYear(), cycleEnd.getMonth() + 1, dueDay)
-  }
+  const due = resolveDueDateForCycleEnd(cycleEnd, closingDay, dueDay)
 
   const refMs = new Date(y, m, day).getTime()
   const isOpen = refMs <= cycleEnd.getTime() && refMs >= cycleStart.getTime()

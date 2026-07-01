@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { User, Mail, Camera, Bell, Moon, Keyboard, Monitor, Save, LogOut } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
+import { fetchIsAdmin } from '../../lib/adminUsers'
 import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard'
 import { ProfileAxelHero } from '../gamification/ProfileAxelHero'
 import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
@@ -12,6 +13,8 @@ import { AxelCosmeticsLibrary } from '../gamification/AxelCosmeticsLibrary'
 import { InviteFriendPanel } from '../social/InviteFriendPanel'
 import { FriendCircleCard } from '../social/FriendCircleCard'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
+import { ProfileAdminUsersPanel } from './ProfileAdminUsersPanel'
+import { MfaEnrollPanel } from './MfaEnrollPanel'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_BORDERLESS_PANEL,
@@ -33,6 +36,7 @@ export function ProfileView()
   const [nome, setNome] = useState(userProfile.nome)
   const [email, setEmail] = useState(userProfile.email)
   const [saved, setSaved] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() =>
   {
@@ -40,6 +44,16 @@ export function ProfileView()
     void fetchAchievements?.()
     void fetchGamificacaoStats?.()
   }, [syncStreakCalendarDay, fetchAchievements, fetchGamificacaoStats])
+
+  useEffect(() =>
+  {
+    let ativo = true
+    void fetchIsAdmin().then((admin) =>
+    {
+      if (ativo) setIsAdmin(admin)
+    })
+    return () => { ativo = false }
+  }, [])
 
   const handleSave = () =>
   {
@@ -173,11 +187,23 @@ export function ProfileView()
         </section>
       </DashboardCollapsible>
 
+      {isAdmin && (
+        <DashboardCollapsible title="Usuários" subtitle="Administração do sistema">
+          <ProfileAdminUsersPanel />
+        </DashboardCollapsible>
+      )}
+
+      {isAdmin && (
+        <DashboardCollapsible title="Segurança admin" subtitle="Autenticação em dois fatores (TOTP)">
+          <MfaEnrollPanel />
+        </DashboardCollapsible>
+      )}
+
       <DashboardCollapsible title="Preferências rápidas" subtitle="Notificações e acessibilidade">
         <div className="divide-y divide-line">
           <PreferenceRow icon={Bell} label="Notificações" description="Tarefas e lembretes" />
           <PreferenceRow icon={Moon} label="Tema escuro" description="Instrumento AXEL ativo" defaultOn />
-          <PreferenceRow icon={Keyboard} label="Atalhos" description="⌘K captura rápida" defaultOn />
+          <PreferenceRow icon={Keyboard} label="Atalhos" description="⌘K abre criar ou buscar" defaultOn />
           <PreferenceRow icon={Monitor} label="Movimento reduzido" description="Acessibilidade" />
         </div>
       </DashboardCollapsible>

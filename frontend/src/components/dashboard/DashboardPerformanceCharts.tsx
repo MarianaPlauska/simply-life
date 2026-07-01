@@ -73,9 +73,9 @@ export function DashboardPerformanceCharts()
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <article className="rounded-sl border border-line p-3 bg-card">
           <p className="text-[12px] font-medium text-ink mb-2">Humor (1–5)</p>
-          <div style={{ height: CHART_HEIGHT - 40 }}>
+          <div className="min-h-[140px] min-w-0 w-full" style={{ height: CHART_HEIGHT - 40 }}>
             {hasMood ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={140}>
                 <BarChart data={moodChart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <CartesianGrid {...theme.grid} />
                   <XAxis dataKey="label" {...theme.axis} />
@@ -102,9 +102,9 @@ export function DashboardPerformanceCharts()
 
         <article className="rounded-sl border border-line p-3 bg-card">
           <p className="text-[12px] font-medium text-ink mb-2">Tarefas concluídas</p>
-          <div style={{ height: CHART_HEIGHT - 40 }}>
+          <div className="min-h-[140px] min-w-0 w-full" style={{ height: CHART_HEIGHT - 40 }}>
             {hasTasks ? (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={140}>
                 <BarChart data={taskChart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                   <CartesianGrid {...theme.grid} />
                   <XAxis dataKey="label" {...theme.axis} />

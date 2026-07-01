@@ -1,5 +1,6 @@
 import type { TarefaUnificada } from '../types'
 import type { UrgencyScoreEntry } from './urgencyEngine'
+import { supabaseAuthHeaders } from './supabaseAuthHeaders'
 
 // Cliente da API de orquestração — IA no servidor (chaves não vão ao browser)
 
@@ -62,9 +63,10 @@ export async function fetchOrchestrateScores(
 
   try
   {
+    const headers = await supabaseAuthHeaders()
     const res = await fetch('/api/orchestrate-tasks', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ tasks: buildOrchestratePayload(active) }),
     })
 

@@ -145,7 +145,6 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
       if (!uid) return
       const { ingestTasksIA } = await import('../../services/jarvisApi')
       const response = await ingestTasksIA({
-        user_id: uid,
         items: [{
           sender: params.sender || 'Desconhecido',
           subject: params.subject,

@@ -6,7 +6,7 @@ import { getVapidPublicKey, isWebPushConfigured } from '../../webPush.js';
 
 export default async function handler(req, res)
 {
-  corsJson(res);
+  corsJson(res, req);
 
   if (req.method === 'OPTIONS')
   {

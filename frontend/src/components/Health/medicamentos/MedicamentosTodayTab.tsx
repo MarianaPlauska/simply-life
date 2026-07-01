@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Check, Clock, Pill } from 'lucide-react'
+import { Check, Clock, Pill, CalendarClock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { EmptyState } from '../../ui/EmptyState'
@@ -29,6 +29,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
   )
 
   const proxima = useMemo(() => proximaDosePendente(doses), [doses])
+  const alertas = useMemo(() => buildMedicamentosAlertas(medicamentos), [medicamentos])
   const tomadasHoje = doses.filter((d) => d.status === 'tomado').length
   const totalDoses = doses.length
 
@@ -42,6 +43,30 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
   return (
     <div className="space-y-4">
       <MedicamentosNotificationBanner />
+
+      {alertas.length > 0 && (
+        <section className="rounded-sl border border-amber-500/25 bg-amber-500/5 p-4 space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <CalendarClock className="w-4 h-4 text-amber-400 shrink-0" />
+              <p className="text-[12px] font-semibold text-ink">Renovação e consultas</p>
+            </div>
+            <a
+              href="/kanban"
+              className="text-[10px] font-mono uppercase text-accent hover:underline shrink-0"
+            >
+              Ver Kanban
+            </a>
+          </div>
+          <ul className="space-y-1.5">
+            {alertas.slice(0, 4).map((a) => (
+              <li key={`${a.medicamentoId}-${a.tipo}`} className={`text-[11px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+                {a.mensagem}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {proxima && (
         <section className="rounded-sl border border-teal-500/25 bg-teal-500/5 p-4">
@@ -82,6 +107,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
               description="Cadastre nome e horários na aba Cadastrar. Cada dose pode gerar lembrete no horário."
               actionLabel="Ir para Cadastrar"
               onAction={onGoCadastrar}
+              tone="teal"
             />
           </div>
         ) : doses.length === 0 ? (

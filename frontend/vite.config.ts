@@ -1,12 +1,56 @@
-import { defineConfig } from 'vitest/config'
+import { defineConfig, type Plugin } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vite.dev/config/
+
+/** Evita 404 no dev quando a API serverless não está rodando */
+function devOrchestrateMock(): Plugin
+{
+  return {
+    name: 'dev-orchestrate-mock',
+    apply: 'serve',
+    configureServer(server)
+    {
+      server.middlewares.use('/api/orchestrate-tasks', (req, res, next) =>
+      {
+        if (req.method !== 'GET' && req.method !== 'POST')
+        {
+          next()
+          return
+        }
+
+        res.setHeader('Content-Type', 'application/json')
+
+        if (req.method === 'GET')
+        {
+          res.end(JSON.stringify({
+            intelligence: 'local_only',
+            providers: { groq: false, gemini: false },
+          }))
+          return
+        }
+
+        let body = ''
+        req.on('data', (chunk) => { body += chunk })
+        req.on('end', () =>
+        {
+          res.end(JSON.stringify({
+            scores: [],
+            source: 'mock',
+            intelligence: 'local',
+          }))
+        })
+      })
+    },
+  }
+}
+
 export default defineConfig({
   plugins: [
     react(),
+    devOrchestrateMock(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'og-image.png'],

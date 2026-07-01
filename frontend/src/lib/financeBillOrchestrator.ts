@@ -61,6 +61,11 @@ export function getUpcomingBills(input: GetUpcomingBillsInput): UpcomingBill[]
   })
 }
 
+export function billPhantomKey(billId: string): string
+{
+  return `phantom_fin_bill_${billId}`
+}
+
 export function billTaskTitle(bill: UpcomingBill): string
 {
   const valor = bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -69,11 +74,42 @@ export function billTaskTitle(bill: UpcomingBill): string
 
 export function billTaskNotes(bill: UpcomingBill): string
 {
-  return `Vence em ${bill.vencimento} (${bill.diasRestantes}d). Criado pelo AXEL Finanças.`
+  if (bill.diasRestantes === 0)
+  {
+    return `Vence hoje (${bill.vencimento}). Ref: ${bill.id}. Criado pelo AXEL Finanças.`
+  }
+  if (bill.diasRestantes === 1)
+  {
+    return `Vence amanhã (${bill.vencimento}). Ref: ${bill.id}. Criado pelo AXEL Finanças.`
+  }
+  return `Vence em ${bill.vencimento} (${bill.diasRestantes}d). Ref: ${bill.id}. Criado pelo AXEL Finanças.`
 }
 
-export function taskMatchesBill(titulo: string, bill: UpcomingBill): boolean
+/** Entra no Kanban no dia do vencimento ou 1 dia antes, no mês corrente */
+export function isBillKanbanEligible(bill: UpcomingBill, reference = new Date()): boolean
 {
+  if (bill.diasRestantes !== 0 && bill.diasRestantes !== 1) return false
+
+  const due = new Date(`${bill.vencimento}T12:00:00`)
+  if (Number.isNaN(due.getTime())) return false
+
+  return due.getMonth() === reference.getMonth()
+    && due.getFullYear() === reference.getFullYear()
+}
+
+export function taskMatchesBill(
+  titulo: string,
+  bill: UpcomingBill,
+  snippet?: string | null,
+  notas?: string | null,
+): boolean
+{
+  if (snippet === billPhantomKey(bill.id)) return true
+  if (notas?.includes(bill.id)) return true
+
   const t = titulo.toLowerCase()
-  return t.includes('[boleto]') && t.includes(bill.id)
+  const nome = bill.nome.toLowerCase()
+  if (!t.includes('[boleto]') && !t.includes('boleto')) return false
+
+  return t.includes(nome)
 }

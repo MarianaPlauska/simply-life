@@ -1,0 +1,140 @@
+import { useMemo } from 'react'
+import { CalendarClock, Plus, Receipt } from 'lucide-react'
+import { useTaskStore } from '../../store/useTaskStore'
+import { transactionDayKey } from '../../lib/financeLedger'
+import {
+  AXEL_BORDERLESS_PANEL,
+  AXEL_BTN_PRIMARY,
+  AXEL_SECTION_TITLE,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+} from '../../constants/axelSurfaces'
+
+const fmt = (v: number) =>
+  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+const fmtBr = (iso: string) =>
+{
+  const key = transactionDayKey(iso)
+  return key.split('-').reverse().join('/')
+}
+
+interface FinanceExtrasTabProps
+{
+  onNewTransaction: () => void
+  embedded?: boolean
+}
+
+/** Gastos avulsos e futuros — fora da fatura do cartão */
+export function FinanceExtrasTab({ onNewTransaction, embedded = false }: FinanceExtrasTabProps)
+{
+  const transactions = useTaskStore((s) => s.transactions)
+  const markTransactionPaid = useTaskStore((s) => s.markTransactionPaid)
+
+  const extras = useMemo(() =>
+  {
+    return transactions
+      .filter((t) =>
+      {
+        if (t.tipo !== 'despesa') return false
+        const status = t.status_pagamento ?? 'pendente'
+        if (status !== 'agendado' && status !== 'pendente') return false
+        // Fatura reservada tem aba própria
+        if (t.fatura_reserva_id != null) return false
+        return true
+      })
+      .sort((a, b) => transactionDayKey(a.data).localeCompare(transactionDayKey(b.data)))
+  }, [transactions])
+
+  const total = useMemo(
+    () => extras.reduce((s, t) => s + t.valor, 0),
+    [extras],
+  )
+
+  return (
+    <div className={embedded ? 'pt-2 border-t border-line' : 'space-y-4'}>
+      <header className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 ${embedded ? 'mb-3' : ''}`}>
+        <div>
+          <h2 className={embedded ? 'font-sans text-sm font-semibold tracking-tight text-ink' : AXEL_SECTION_TITLE}>
+            Extras
+          </h2>
+          <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+            Contas futuras e avulsos fora da fatura do cartão.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onNewTransaction}
+            className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] ${AXEL_BTN_PRIMARY}`}
+          >
+            <Plus className="w-4 h-4" />
+            Nova entrada
+          </button>
+        </div>
+      </header>
+
+      <div className={`${AXEL_BORDERLESS_PANEL} flex items-center justify-between gap-3`}>
+        <div>
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Total previsto</p>
+          <p className={`text-xl font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>{fmt(total)}</p>
+        </div>
+        <p className={`text-[11px] text-right max-w-[12rem] ${AXEL_TEXT_SECONDARY}`}>
+          {extras.length} lançamento{extras.length !== 1 ? 's' : ''} pendente{extras.length !== 1 ? 's' : ''} ou agendado{extras.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {extras.length === 0 ? (
+        <div className="rounded-sl border border-dashed border-line py-12 text-center px-4">
+          <Receipt className="w-7 h-7 text-ink-muted mx-auto mb-2" aria-hidden />
+          <p className={`text-[13px] ${AXEL_TEXT_PRIMARY}`}>Nenhum gasto extra</p>
+          <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+            Registre em Novo lançamento → Conta futura.
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {extras.map((t) =>
+          {
+            const status = t.status_pagamento ?? 'pendente'
+            return (
+              <li
+                key={t.id}
+                className="flex items-center gap-3 py-2.5 px-3 rounded-sl border border-line bg-chrome/30"
+              >
+                <div className="w-9 h-9 rounded-sl bg-card border border-line flex items-center justify-center shrink-0">
+                  <CalendarClock className="w-4 h-4 text-accent" aria-hidden />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
+                    {t.descricao}
+                  </p>
+                  <p className={`text-[10px] font-mono ${AXEL_TEXT_SECONDARY}`}>
+                    {fmtBr(t.data)}
+                    {' · '}
+                    {status === 'agendado' ? 'Agendado' : 'Pendente'}
+                    {t.card_id ? ' · Cartão' : ' · Conta corrente'}
+                  </p>
+                </div>
+                <div className="text-right shrink-0 space-y-1">
+                  <p className="font-mono text-[13px] tabular-nums text-urgente">
+                    −{fmt(t.valor)}
+                  </p>
+                  {status !== 'pago' && (
+                    <button
+                      type="button"
+                      onClick={() => void markTransactionPaid(t.id)}
+                      className="font-mono text-[9px] uppercase text-accent hover:underline"
+                    >
+                      Marcar pago
+                    </button>
+                  )}
+                </div>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>
+  )
+}

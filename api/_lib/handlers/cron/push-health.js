@@ -17,6 +17,22 @@ function localTodayIso(now = new Date())
   return `${y}-${m}-${d}`;
 }
 
+function diasEntre(hoje, alvo)
+{
+  const a = new Date(`${hoje}T12:00:00`);
+  const b = new Date(`${alvo}T12:00:00`);
+  return Math.round((b.getTime() - a.getTime()) / 86_400_000);
+}
+
+const CONSULTA_PUSH_DIAS = [7, 3, 1, 0];
+
+function mensagemConsultaPush(nome, consulta, dias)
+{
+  if (dias === 0) return `Consulta hoje para renovar ${nome}.`;
+  if (dias === 1) return `Amanhã: consulta para renovar ${nome}.`;
+  return `Em ${dias} dias (${consulta}): renovar receita de ${nome}.`;
+}
+
 export default async function handler(req, res)
 {
   if (req.method !== 'GET' && req.method !== 'POST')
@@ -71,6 +87,7 @@ export default async function handler(req, res)
     {
       let medSent = 0;
       let wellbeingSent = 0;
+      let consultaSent = 0;
 
       const [{ data: medicamentos }, { data: tomadas }, { data: medDelivered }] = await Promise.all([
         supabase.from('medicamentos').select('*').eq('user_id', userId),
@@ -118,6 +135,53 @@ export default async function handler(req, res)
             });
             medSent += 1;
           }
+        }
+      }
+
+      for (const med of medicamentos || [])
+      {
+        const cfg = typeof med.config === 'object' && med.config !== null ? med.config : {};
+        const consulta = cfg.consulta_renovacao;
+        if (!consulta) continue;
+
+        const dias = diasEntre(today, consulta);
+        if (!CONSULTA_PUSH_DIAS.includes(dias)) continue;
+
+        const consultaKey = `consulta:${med.id}:${consulta}:d${dias}`;
+        if (medDeliveredSet.has(consultaKey)) continue;
+
+        const payload = {
+          title: 'AXEL · Consulta médica',
+          body: mensagemConsultaPush(med.nome, consulta, dias),
+          url: '/kanban',
+          tag: consultaKey,
+        };
+
+        let anyOk = false;
+        for (const subRow of userSubs)
+        {
+          try
+          {
+            await sendWebPush(subRow, payload);
+            anyOk = true;
+          }
+          catch (err)
+          {
+            if (isExpiredSubscriptionError(err))
+            {
+              await supabase.from('push_subscriptions').delete().eq('id', subRow.id);
+            }
+          }
+        }
+
+        if (anyOk)
+        {
+          await supabase.from('push_medication_deliveries').upsert({
+            user_id: userId,
+            dose_key: consultaKey,
+            sent_at: now.toISOString(),
+          });
+          consultaSent += 1;
         }
       }
 
@@ -172,7 +236,7 @@ export default async function handler(req, res)
         }
       }
 
-      summary.push({ user_id: userId, medSent, wellbeingSent });
+      summary.push({ user_id: userId, medSent, consultaSent, wellbeingSent });
     }
     catch (err)
     {

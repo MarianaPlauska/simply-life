@@ -1,28 +1,32 @@
 // POST /api/ingest-email — e-mail único ou lote com Groq estruturado
+// Exige JWT Supabase — user_id vem do token, nunca do body
 
 import { getSupabaseAdmin } from './_lib/supabaseAdmin.js'
+import { getUserFromBearer } from './_lib/supabaseUser.js'
+import { applyCors } from './_lib/cors.js'
 import { parseEmailWithAI, heuristicEmailParse } from './_lib/emailGroqParser.js'
 import { insertTriagedTask } from './_lib/insertTriagedTask.js'
 
-function cors(res)
-{
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-}
-
 export default async function handler(req, res)
 {
-  cors(res)
+  applyCors(req, res, {
+    methods: 'POST, OPTIONS',
+    headers: 'Content-Type, Authorization',
+  })
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+
+  const user = await getUserFromBearer(req)
+  if (!user)
+  {
+    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' })
+  }
 
   const supabase = getSupabaseAdmin()
   if (!supabase) return res.status(500).json({ error: 'Supabase não configurado' })
 
+  const userId = user.id
   const body = req.body ?? {}
-  const userId = body.user_id
-  if (!userId) return res.status(400).json({ error: 'user_id obrigatório' })
 
   const emails = Array.isArray(body.emails)
     ? body.emails

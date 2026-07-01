@@ -73,109 +73,14 @@ interface PhantomTomada
 /* ── Vencimentos Financeiros ──────────────────────── */
 
 export async function checkVencimentosFinanceiros(
-  userId: string,
-  cards: PhantomCard[],
-  contasFixas: PhantomContaFixa[],
+  _userId: string,
+  _cards: PhantomCard[],
+  _contasFixas: PhantomContaFixa[],
 ): Promise<number>
 {
-  let created = 0;
-
-  // Check card due dates
-  for (const card of cards)
-  {
-    if (!card.dia_vencimento) continue;
-    const daysUntil = getDaysUntilDue(card.dia_vencimento);
-
-    if (daysUntil <= 3)
-    {
-      const phantomKey = `phantom_fin_card_${card.id}`;
-      // Check if phantom already exists
-      const { data: existing } = await supabase
-        .from('tarefas_unificadas')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('snippet_100_char', phantomKey)
-        .eq('status', 'pendente')
-        .maybeSingle();
-
-      if (!existing)
-      {
-        const prioridade = daysUntil <= 1 ? 'critica' : 'alta';
-        const scoreUrgencia = daysUntil === 0 ? 110 : daysUntil === 1 ? 95 : 75;
-        const diaTxt = daysUntil === 0
-          ? 'vence hoje'
-          : daysUntil === 1
-            ? 'vence amanhã'
-            : `vence em ${daysUntil} dias`;
-
-        const { error } = await supabase
-          .from('tarefas_unificadas')
-          .insert({
-            user_id: userId,
-            titulo: `💳 Fatura ${card.nome} ${diaTxt}`,
-            descricao: `Fatura do cartão ${card.nome} com limite de R$ ${card.limite.toLocaleString('pt-BR')}. Dia de vencimento: ${card.dia_vencimento}.`,
-            snippet_100_char: phantomKey,
-            score_urgencia: scoreUrgencia,
-            status: 'pendente',
-            prioridade,
-            origem: 'financeiro',
-          });
-
-        if (!error) created++;
-      }
-    }
-  }
-
-  // Check fixed bills
-  for (const conta of contasFixas)
-  {
-    if (!conta.ativa) continue;
-    const daysUntil = getDaysUntilDue(conta.dia_vencimento);
-
-    if (daysUntil <= 3)
-    {
-      const phantomKey = `phantom_fin_conta_${conta.id}`;
-      const { data: existing } = await supabase
-        .from('tarefas_unificadas')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('snippet_100_char', phantomKey)
-        .eq('status', 'pendente')
-        .maybeSingle();
-
-      if (!existing)
-      {
-        const prioridade = daysUntil <= 1 ? 'critica' : 'alta';
-        const scoreUrgencia = daysUntil === 0 ? 105 : daysUntil === 1 ? 90 : 70;
-        const diaTxt = daysUntil === 0
-          ? 'vence hoje'
-          : daysUntil === 1
-            ? 'vence amanhã'
-            : `vence em ${daysUntil} dias`;
-        const valorFmt = conta.valor.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        });
-
-        const { error } = await supabase
-          .from('tarefas_unificadas')
-          .insert({
-            user_id: userId,
-            titulo: `📄 ${conta.nome} ${diaTxt} — ${valorFmt}`,
-            descricao: `Conta fixa: ${conta.nome}. Valor: ${valorFmt}. Vencimento dia ${conta.dia_vencimento}.`,
-            snippet_100_char: phantomKey,
-            score_urgencia: scoreUrgencia,
-            status: 'pendente',
-            prioridade,
-            origem: 'financeiro',
-          });
-
-        if (!error) created++;
-      }
-    }
-  }
-
-  return created;
+  // Boletos e faturas no Kanban são criados por useFinanceBillKanbanSync
+  // (1 dia antes, mesmo mês, chave phantom_fin_bill_*).
+  return 0;
 }
 
 /* ── Medicamentos Pendentes ───────────────────────── */

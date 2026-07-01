@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useMemo, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Plus, Trash2, Minus, BookOpen, Moon, Brain, Sun, Sparkles, HeartPulse, LayoutGrid,
@@ -20,6 +20,7 @@ import { WeeklyReviewCard } from './WeeklyReviewCard'
 import { BemEstarWelcomePanel } from '../wellbeing/BemEstarWelcomePanel'
 import { HealthTodayPanel } from './HealthTodayPanel'
 import { HealthCuidadosPanel } from './HealthCuidadosPanel'
+import { HealthNutritionStrip } from './HealthNutritionStrip'
 import { healthHeaderSubtitle } from './healthSectionMeta'
 import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT } from '../../constants/axelSurfaces'
 
@@ -53,21 +54,18 @@ export function HealthView()
 {
   const location = useLocation()
   const navigate = useNavigate()
-  const initial = parseHealthRoute(location.hash)
-  const [section, setSection] = useState<HealthSection>(initial.section)
-  const [cuidadosTab, setCuidadosTab] = useState<CuidadosTab>(initial.cuidados)
+  const route = useMemo(() => parseHealthRoute(location.hash), [location.hash])
+  const section = route.section
+  const cuidadosTab = route.cuidados
 
   const selectSection = useCallback((id: HealthSection) =>
   {
-    setSection(id)
     const hash = healthSectionHash(id, cuidadosTab)
     navigate(`/saude#${hash}`, { replace: true })
   }, [navigate, cuidadosTab])
 
   const selectCuidadosTab = useCallback((tab: CuidadosTab) =>
   {
-    setSection('cuidados')
-    setCuidadosTab(tab)
     navigate(`/saude#${cuidadosTabHash(tab)}`, { replace: true })
   }, [navigate])
 
@@ -75,27 +73,14 @@ export function HealthView()
   {
     if (target === 'bem_estar')
     {
-      selectSection('bem_estar')
+      navigate('/saude#bem-estar', { replace: true })
       return
     }
     if (target === 'hidratacao' || target === 'alimentacao' || target === 'academia' || target === 'medicamentos')
     {
-      selectCuidadosTab(target)
+      navigate(`/saude#${cuidadosTabHash(target as CuidadosTab)}`, { replace: true })
     }
-  }, [selectSection, selectCuidadosTab])
-
-  useEffect(() =>
-  {
-    const route = parseHealthRoute(location.hash)
-    if (route.section !== section)
-    {
-      setSection(route.section)
-    }
-    if (route.cuidados !== cuidadosTab)
-    {
-      setCuidadosTab(route.cuidados)
-    }
-  }, [location.hash, section, cuidadosTab])
+  }, [navigate])
 
   const medicamentos = useTaskStore((s) => s.medicamentos)
   const medicamentoTomadas = useTaskStore((s) => s.medicamentoTomadas)
@@ -119,24 +104,56 @@ export function HealthView()
   const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia)
   const fetchEntradasRecentes = useTaskStore((s) => s.fetchEntradasRecentes)
 
+  // Dados leves — ritual e header em qualquer aba
   useEffect(() =>
   {
     fetchMedicamentos()
     fetchMedicamentoTomadas()
     fetchHabitos()
+  }, [fetchMedicamentos, fetchMedicamentoTomadas, fetchHabitos])
+
+  useEffect(() =>
+  {
+    if (section !== 'hoje')
+    {
+      return
+    }
+    fetchHumorHoje()
+    fetchHabitosStreaks()
+  }, [section, fetchHumorHoje, fetchHabitosStreaks])
+
+  useEffect(() =>
+  {
+    if (section !== 'cuidados')
+    {
+      return
+    }
     fetchHabitosStreaks()
     fetchSessaoTreinoAtiva()
     fetchSessoesTreinoHoje()
+  }, [section, fetchHabitosStreaks, fetchSessaoTreinoAtiva, fetchSessoesTreinoHoje])
+
+  useEffect(() =>
+  {
+    if (section !== 'bem_estar')
+    {
+      return
+    }
     fetchHumorHoje()
     fetchHumorSemana()
     fetchHumorMes()
+  }, [section, fetchHumorHoje, fetchHumorSemana, fetchHumorMes])
+
+  useEffect(() =>
+  {
+    if (section !== 'diario')
+    {
+      return
+    }
     fetchDiarioHoje()
     fetchPromptDoDia()
     fetchEntradasRecentes(60)
-  }, [
-    fetchMedicamentos, fetchMedicamentoTomadas, fetchHabitos, fetchHabitosStreaks, fetchSessaoTreinoAtiva, fetchSessoesTreinoHoje,
-    fetchHumorHoje, fetchHumorSemana, fetchHumorMes, fetchDiarioHoje, fetchPromptDoDia, fetchEntradasRecentes,
-  ])
+  }, [section, fetchDiarioHoje, fetchPromptDoDia, fetchEntradasRecentes])
 
   const habitosGerais = useMemo(() => habitos.filter((h) => !CORE_HEALTH.has(h.tipo)), [habitos])
 
@@ -174,6 +191,7 @@ export function HealthView()
           <p className="font-mono text-[10px] text-ink-muted tabular-nums leading-relaxed">
             {headerLine}
           </p>
+          <HealthNutritionStrip />
         </header>
 
         <nav

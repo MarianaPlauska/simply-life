@@ -1,8 +1,9 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { Beef, Minus, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { PROTEINA_PRESET } from '../../constants/healthPresets'
+import { snapshotNutricaoHoje, kcalFromProteinGrams } from '../../lib/healthNutrition'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 export function ProteinGoalCard()
@@ -13,18 +14,52 @@ export function ProteinGoalCard()
   const decrementHabito = useTaskStore((s) => s.decrementHabito)
   const updateHabitoMeta = useTaskStore((s) => s.updateHabitoMeta)
   const setHabitoProgress = useTaskStore((s) => s.setHabitoProgress)
+  const patchHabitoConfig = useTaskStore((s) => s.updateHabitoConfig)
 
   const proteina = useMemo(() => habitos.find((h) => h.tipo === 'proteina'), [habitos])
   const step = proteina?.config?.incremento ?? 10
   const current = proteina?.progresso_atual ?? 0
   const goal = proteina?.meta_diaria ?? PROTEINA_PRESET.meta_diaria
+  const [metaDraft, setMetaDraft] = useState(String(goal))
+  const metaInputRef = useRef<HTMLInputElement>(null)
   const pct = goal > 0 ? Math.min(100, (current / goal) * 100) : 0
   const done = current >= goal && goal > 0
 
-  const ensureProteina = async () =>
+  const nut = snapshotNutricaoHoje(habitos)
+  const metaKcal = nut.metaKcal
+  const [metaKcalDraft, setMetaKcalDraft] = useState(String(metaKcal))
+  const metaKcalRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() =>
+  {
+    if (document.activeElement !== metaKcalRef.current)
+    {
+      setMetaKcalDraft(String(metaKcal))
+    }
+  }, [metaKcal])
+
+  const commitMetaKcal = async () =>
+  {
+    const h = await ensureProteina()
+    if (!h) return
+    const next = Math.min(4000, Math.max(1200, parseInt(metaKcalDraft, 10) || metaKcal))
+    setMetaKcalDraft(String(next))
+    await patchHabitoConfig(h.id, { meta_kcal_diaria: next })
+    toast.success(`Meta energia: ${next} kcal`)
+  }
+
+  const ensureProteina = useCallback(async () =>
   {
     return proteina ?? await ensureHealthHabit(PROTEINA_PRESET)
-  }
+  }, [proteina, ensureHealthHabit])
+
+  useEffect(() =>
+  {
+    if (document.activeElement !== metaInputRef.current)
+    {
+      setMetaDraft(String(goal))
+    }
+  }, [goal])
 
   const handleAdd = async () =>
   {
@@ -36,6 +71,8 @@ export function ProteinGoalCard()
       return
     }
     await incrementHabitoBy(h.id, step)
+    const kcalNow = typeof h.config?.kcal_hoje === 'number' ? h.config.kcal_hoje : 0
+    await patchHabitoConfig(h.id, { kcal_hoje: kcalNow + kcalFromProteinGrams(step) })
     toast.success(`+${step}g de proteína`, { duration: 1500 })
   }
 
@@ -45,12 +82,17 @@ export function ProteinGoalCard()
     await decrementHabito(proteina.id)
   }
 
-  const handleMeta = async (raw: string) =>
+  const commitMeta = async () =>
   {
     const h = await ensureProteina()
     if (!h) return
-    const next = Math.max(50, parseInt(raw, 10) || goal)
-    await updateHabitoMeta(h.id, next)
+    const next = Math.min(300, Math.max(50, parseInt(metaDraft, 10) || goal))
+    setMetaDraft(String(next))
+    if (next !== h.meta_diaria)
+    {
+      await updateHabitoMeta(h.id, next)
+      toast.success(`Meta diária: ${next}g`)
+    }
   }
 
   const handleTotalManual = async (raw: string) =>
@@ -70,7 +112,7 @@ export function ProteinGoalCard()
             Proteína
           </h2>
           <span className={`ml-auto font-mono text-[11px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
-            {current}/{goal}g
+            {current}/{goal}g · {nut.kcal} kcal
           </span>
         </div>
         <div className="flex items-baseline gap-2">
@@ -86,7 +128,7 @@ export function ProteinGoalCard()
           <span className="text-base text-ink-muted font-normal">/ {goal}g</span>
         </div>
         <p className={`text-[12px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
-          {done ? 'Meta do dia completa.' : `${Math.round(pct)}% — use as refeições abaixo ou ajuste manual.`}
+          {done ? 'Meta do dia completa.' : `${Math.round(pct)}% — registre refeições abaixo ou ajuste manual.`}
         </p>
         <div className="h-1.5 rounded-sl bg-chrome overflow-hidden mt-3" aria-hidden>
           <div
@@ -102,7 +144,7 @@ export function ProteinGoalCard()
             type="button"
             onClick={() => void handleUndo()}
             disabled={current <= 0}
-            className="flex items-center justify-center gap-1 py-2.5 rounded-sl border border-line bg-chrome/30 text-ink-muted hover:text-ink disabled:opacity-30 font-mono text-[10px] uppercase"
+            className="flex items-center justify-center gap-1 py-2.5 rounded-sl border border-line bg-chrome/30 text-ink-muted hover:text-ink disabled:opacity-30 font-mono text-[10px] uppercase min-h-[44px]"
           >
             <Minus size={14} />
             −{step}g
@@ -111,26 +153,46 @@ export function ProteinGoalCard()
             type="button"
             onClick={() => void handleAdd()}
             disabled={done}
-            className="flex items-center justify-center gap-2 py-3 px-4 rounded-sl border border-amber-500/30 bg-amber-500/10 text-amber-200 font-mono text-[11px] uppercase tracking-wide hover:bg-amber-500/15 disabled:opacity-40 transition-colors active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 py-3 px-4 rounded-sl border border-amber-500/30 bg-amber-500/10 text-amber-200 font-mono text-[11px] uppercase tracking-wide hover:bg-amber-500/15 disabled:opacity-40 transition-colors active:scale-[0.98] min-h-[44px]"
           >
             <Plus size={16} />
             +{step}g
           </button>
-          <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted justify-self-end">
-            Meta/dia
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="flex flex-col gap-1 font-mono text-[10px] text-ink-muted">
+            Meta proteína (g)
             <input
+              ref={metaInputRef}
               type="number"
               min={50}
               max={300}
               step={5}
-              value={goal}
-              onChange={(e) => void handleMeta(e.target.value)}
-              className="w-16 bg-chrome border border-line rounded-sl px-1 py-0.5 text-ink text-center text-[11px]"
+              value={metaDraft}
+              onChange={(e) => setMetaDraft(e.target.value)}
+              onBlur={() => void commitMeta()}
+              onKeyDown={(e) => { if (e.key === 'Enter') void commitMeta() }}
+              className="w-full bg-chrome border border-line rounded-sl px-2 py-1.5 text-ink text-center text-[12px] min-h-[40px]"
+            />
+          </label>
+          <label className="flex flex-col gap-1 font-mono text-[10px] text-ink-muted">
+            Meta energia (kcal)
+            <input
+              ref={metaKcalRef}
+              type="number"
+              min={1200}
+              max={4000}
+              step={50}
+              value={metaKcalDraft}
+              onChange={(e) => setMetaKcalDraft(e.target.value)}
+              onBlur={() => void commitMetaKcal()}
+              onKeyDown={(e) => { if (e.key === 'Enter') void commitMetaKcal() }}
+              className="w-full bg-chrome border border-line rounded-sl px-2 py-1.5 text-ink text-center text-[12px] min-h-[40px]"
             />
           </label>
         </div>
-        <p className="text-[11px] text-ink-muted text-center leading-relaxed">
-          Contador zera a cada novo dia. Refeições somam automaticamente.
+        <p className="text-[11px] text-ink-muted text-center leading-relaxed mt-3">
+          Metas salvam ao sair do campo. Contadores zeram a cada novo dia.
         </p>
       </div>
     </section>

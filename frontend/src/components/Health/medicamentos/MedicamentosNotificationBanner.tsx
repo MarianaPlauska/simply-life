@@ -1,7 +1,7 @@
 import { Bell, BellOff, Check } from 'lucide-react'
-import { registerPushSubscription } from '../../lib/pushSubscription'
-import { requestNotificationPermission } from '../../lib/healthNotifications'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { registerPushSubscription } from '../../../lib/pushSubscription'
+import { requestNotificationPermission } from '../../../lib/healthNotifications'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 
 interface MedicamentosNotificationBannerProps
 {

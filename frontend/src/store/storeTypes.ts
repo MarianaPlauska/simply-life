@@ -83,6 +83,8 @@ export interface MedicamentoConfig {
   fim_tratamento?: string;
   /** null = contínuo */
   duracao_dias?: number | null;
+  /** Data da consulta para renovar receita (ISO YYYY-MM-DD) */
+  consulta_renovacao?: string;
 }
 
 export interface MedicamentoTomada {
@@ -164,6 +166,8 @@ export interface Transaction
 {
   id: number;
   descricao: string;
+  /** Nota explicativa — o que é aquele dinheiro (tooltip na lista) */
+  observacao?: string | null;
   categoria: string; // Legado
   categoria_id?: number;
   valor: number;
@@ -255,6 +259,19 @@ export interface HabitoDiarioConfig {
   registros_ml?: number[];
   /** Proteína — gramas registradas por refeição no dia */
   proteina_por_refeicao?: Record<string, number>;
+  /** Kcal consumidas hoje (estimativa) */
+  kcal_hoje?: number;
+  /** Meta diária de kcal */
+  meta_kcal_diaria?: number;
+  /** Diário textual do que comeu (estimativa de proteína) */
+  refeicoes_texto_log?: Array<{
+    refeicao: string;
+    texto: string;
+    gramas: number;
+    hora: string;
+    kcal?: number;
+    matches?: string[];
+  }>;
 }
 
 export interface HabitoDiario {

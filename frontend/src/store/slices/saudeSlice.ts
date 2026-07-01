@@ -328,6 +328,23 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
           if (s.medicamentos.some((m) => m.id === mapped.id)) return s
           return { medicamentos: [...s.medicamentos, mapped] }
         })
+
+        const consultaData = config.consulta_renovacao
+        if (consultaData)
+        {
+          const store = get as () => { createMedicamentoConsultaTask: (o: {
+            medicamentoId: number
+            nome: string
+            consultaData: string
+          }) => Promise<void> }
+          await store().createMedicamentoConsultaTask({
+            medicamentoId: mapped.id,
+            nome: med.nome,
+            consultaData,
+          })
+          const { toast } = await import('sonner')
+          toast.success('Consulta adicionada ao Kanban', { duration: 2200 })
+        }
       }
     }
     catch (e)

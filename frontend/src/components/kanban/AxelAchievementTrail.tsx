@@ -1,9 +1,34 @@
-import { Check } from 'lucide-react'
+import { Calendar, Check, Clock } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_CHROME_PLANE } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 
 // Rastro de conquistas — faixa inferior editorial
+
+function fmtDate(iso: string | undefined): string
+{
+  if (!iso) return '—'
+  const d = new Date(iso.includes('T') ? iso : `${iso}T12:00:00`)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+function fmtRelative(iso: string): string
+{
+  const done = new Date(iso)
+  const diffMs = Date.now() - done.getTime()
+  const mins = Math.floor(diffMs / 60_000)
+  if (mins < 60) return `${Math.max(1, mins)}m`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}d`
+  return fmtDate(iso)
+}
 
 export function AxelAchievementTrail()
 {
@@ -29,25 +54,43 @@ export function AxelAchievementTrail()
           </span>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x -mx-1 px-1">
-          {entries.map((entry) => (
-              <article
-                key={entry.id}
-                className="achievement-pop-in shrink-0 h-11 min-w-[240px] max-w-[280px] flex items-center gap-2.5 px-3 rounded-sl border border-line bg-card"
-                title={cleanTitleForDisplay(entry.titulo)}
-              >
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sl bg-concluido/10 border border-concluido/25">
-                  <Check size={11} strokeWidth={2} className="text-concluido" aria-hidden />
-                </span>
-                <p className="flex-1 min-w-0 text-[11px] text-ink truncate">
-                  {cleanTitleForDisplay(entry.titulo)}
-                </p>
-                <span className="font-mono text-[10px] tabular-nums text-concluido shrink-0">
-                  {entry.focusMinutes}m
-                </span>
-              </article>
-            ))}
-        </div>
+        <ul className="flex flex-col w-full divide-y divide-line/50">
+          {entries.map((entry) =>
+          {
+            const title = cleanTitleForDisplay(entry.titulo)
+            const created = fmtDate(entry.createdAt ?? entry.completedAt)
+            const completed = fmtDate(entry.completedAt)
+
+            return (
+              <li key={entry.id}>
+                <article
+                  className="achievement-pop-in w-full flex flex-col gap-0.5 py-2"
+                  title={`${title} · criada ${created} · concluída ${completed}`}
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <Check size={12} strokeWidth={2} className="text-concluido shrink-0" aria-hidden />
+                    <p className="text-[12px] font-medium text-ink leading-snug truncate flex-1 min-w-0">
+                      {title}
+                    </p>
+                    <span className="font-mono text-[10px] tabular-nums text-concluido shrink-0 inline-flex items-center gap-0.5">
+                      <Clock size={9} aria-hidden />
+                      {fmtRelative(entry.completedAt)}
+                    </span>
+                  </div>
+                  <p className="font-mono text-[9px] text-ink-muted pl-5 truncate">
+                    <Calendar size={9} className="inline shrink-0 opacity-70 mr-0.5 -mt-px" aria-hidden />
+                    Criada {created}
+                    <span className="mx-1 text-line">·</span>
+                    <Check size={9} className="inline shrink-0 text-concluido/90 mr-0.5 -mt-px" aria-hidden />
+                    Concluída {completed}
+                    <span className="mx-1 text-line">·</span>
+                    {entry.focusMinutes} min de foco
+                  </p>
+                </article>
+              </li>
+            )
+          })}
+        </ul>
       </div>
     </section>
   )

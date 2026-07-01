@@ -33,9 +33,14 @@ function mockCalculateUrgencyScores(tasks: TarefaUnificada[]): UrgencyScoreEntry
   return active.map((t) => mockScoreTask(t, active))
 }
 
-/** Fallback dev — chave no Vite (não usar em produção; preferir /api/orchestrate-tasks) */
+/** Fallback dev — chaves VITE_* só em desenvolvimento local; nunca em produção */
 async function fetchUrgencyFromClientAI(tasks: TarefaUnificada[]): Promise<UrgencyScoreEntry[]>
 {
+  if (!import.meta.env.DEV)
+  {
+    throw new Error('IA no cliente desabilitada em produção')
+  }
+
   const groqKey = import.meta.env.VITE_GROQ_API_KEY as string | undefined
   const geminiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined
 

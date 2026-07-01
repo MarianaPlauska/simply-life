@@ -3,13 +3,6 @@ import { Code2, Copy, RefreshCw, Loader2, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
 
-function randomSecret(): string
-{
-  const bytes = new Uint8Array(24);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-}
-
 export function WebhookJarvisSection()
 {
   const [loading, setLoading] = useState(true);
@@ -38,12 +31,16 @@ export function WebhookJarvisSection()
         setLoading(false);
         return;
       }
-      const { data } = await supabase
-        .from('user_webhook_secrets')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      setHasSecret(Boolean(data));
+      const { data, error } = await supabase.rpc('webhook_secret_configured');
+      if (error)
+      {
+        console.error('webhook_secret_configured:', error);
+        setHasSecret(false);
+      }
+      else
+      {
+        setHasSecret(Boolean(data));
+      }
       setLoading(false);
     })();
   }, []);
@@ -60,16 +57,13 @@ export function WebhookJarvisSection()
         return;
       }
 
-      const secret = randomSecret();
-      const { error } = await supabase
-        .from('user_webhook_secrets')
-        .upsert({
-          user_id: user.id,
-          secret,
-          updated_at: new Date().toISOString(),
-        });
+      const { data: secret, error } = await supabase.rpc('rotate_webhook_secret');
 
       if (error) throw error;
+      if (!secret || typeof secret !== 'string')
+      {
+        throw new Error('RPC não retornou secret');
+      }
 
       setHasSecret(true);
       setPlainSecret(secret);
@@ -78,7 +72,7 @@ export function WebhookJarvisSection()
     catch (e)
     {
       console.error(e);
-      toast.error('Erro ao salvar secret. Rode a migration 010 no Supabase.');
+      toast.error('Erro ao salvar secret. Rode a migration 037 no Supabase.');
     }
     finally
     {
@@ -165,7 +159,9 @@ export function WebhookJarvisSection()
 }`}
         </pre>
         <p className="text-[10px] text-zinc-600 mt-3">
-          Header obrigatório: <code className="text-zinc-400">X-Webhook-Signature: sha256=&lt;hmac-do-body&gt;</code>
+          Headers: <code className="text-zinc-400">Authorization: Bearer &lt;seu-secret&gt;</code>
+          {' · '}
+          <code className="text-zinc-400">X-Webhook-Signature: sha256=&lt;hmac-do-body&gt;</code>
         </p>
       </div>
     </div>

@@ -35,7 +35,7 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
     await store.addXP('foco', xpAmount)
   }
 
-  store.recordAchievement(tarefa.id, tarefa.titulo, focusMinutes)
+  store.recordAchievement(tarefa.id, tarefa.titulo, focusMinutes, tarefa.created_at)
 
   const baseXp = Math.max(15, Math.round(score || 25))
   if (isMainQuestTask(tarefa.id))

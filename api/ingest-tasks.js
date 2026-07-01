@@ -1,7 +1,9 @@
 // POST /api/ingest-tasks — triagem com score matemático + keywords
-// IA Gemini é opcional: se a chave não existir, usa fallback sem erro
+// Exige JWT Supabase — user_id vem do token, nunca do body
 
 import { getSupabaseAdmin } from './_lib/supabaseAdmin.js'
+import { getUserFromBearer } from './_lib/supabaseUser.js'
+import { applyCors } from './_lib/cors.js'
 import { fetchUserKeywords, matchUserKeywords } from './_lib/keywordBoost.js'
 import { scoreFromItem } from './_lib/triageScore.js'
 import { insertTriagedTask } from './_lib/insertTriagedTask.js'
@@ -61,11 +63,18 @@ async function triageWithGemini(item, apiKey)
 
 export default async function handler(req, res)
 {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  applyCors(req, res, {
+    methods: 'POST, OPTIONS',
+    headers: 'Content-Type, Authorization',
+  })
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+
+  const user = await getUserFromBearer(req)
+  if (!user)
+  {
+    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' })
+  }
 
   const supabase = getSupabaseAdmin()
   if (!supabase)
@@ -76,12 +85,11 @@ export default async function handler(req, res)
     })
   }
 
-  const { items, user_id: userId } = req.body || {}
+  const userId = user.id
+  const { items } = req.body || {}
   if (!items?.length) return res.status(400).json({ error: 'items[] obrigatorio' })
-  if (!userId) return res.status(400).json({ error: 'user_id obrigatorio' })
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
-  // ausencia da chave nao bloqueia — score matematico + keywords ainda funcionam
 
   try
   {

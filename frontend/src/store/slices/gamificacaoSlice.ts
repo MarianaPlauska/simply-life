@@ -563,14 +563,17 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
         {
           const { data, error } = await supabase
             .from('achievements')
-            .insert({
-              user_id: uid,
-              achievement_key: m.key,
-              titulo: m.titulo,
-              descricao: m.descricao,
-            })
+            .upsert(
+              {
+                user_id: uid,
+                achievement_key: m.key,
+                titulo: m.titulo,
+                descricao: m.descricao,
+              },
+              { onConflict: 'user_id,achievement_key', ignoreDuplicates: true },
+            )
             .select()
-            .single()
+            .maybeSingle()
 
           if (!error && data)
           {

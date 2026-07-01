@@ -20,6 +20,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import { paymentMethodLabel } from '../../lib/financePaymentMethod'
+import { FinanceTxLabel } from './overview/FinanceTxLabel'
 import type { Category, CategoryGrupo, Transaction } from '../../store/storeTypes'
 
 // FinanceTransactionsTab — tabela densa estilo Excel/Bloomberg
@@ -229,7 +230,7 @@ export function FinanceTransactionsTab({
             <li key={t.id} className={`px-3 py-3 space-y-2 ${AXEL_ROW_HOVER}`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className={`text-[13px] break-words ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
+                  <FinanceTxLabel label={t.descricao} observacao={t.observacao} className="text-[13px]" />
                   <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
                     {fmtDate(t.data)}
                     {' · '}

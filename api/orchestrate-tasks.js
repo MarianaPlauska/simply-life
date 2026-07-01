@@ -1,13 +1,9 @@
 // POST /api/orchestrate-tasks — priorização em lote com IA (Groq/Gemini no servidor)
+// POST exige JWT Supabase; GET (status) permanece público
 
 import { orchestrateTasksBatch } from './_lib/urgencyOrchestrator.js';
-
-function cors(res)
-{
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-}
+import { applyCors } from './_lib/cors.js';
+import { getUserFromBearer } from './_lib/supabaseUser.js';
 
 function hasServerAiKeys()
 {
@@ -20,7 +16,10 @@ function hasServerAiKeys()
 
 export default async function handler(req, res)
 {
-  cors(res);
+  applyCors(req, res, {
+    methods: 'POST, GET, OPTIONS',
+    headers: 'Content-Type, Authorization',
+  });
 
   if (req.method === 'OPTIONS')
   {
@@ -41,6 +40,12 @@ export default async function handler(req, res)
   if (req.method !== 'POST')
   {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const user = await getUserFromBearer(req);
+  if (!user)
+  {
+    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' });
   }
 
   try

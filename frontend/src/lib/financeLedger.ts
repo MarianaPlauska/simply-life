@@ -139,8 +139,9 @@ export function summarizeLedger(transactions: Transaction[], initialBalance = 0)
       pendentes += t.valor
       saldoProjetado += signed
     }
-    else if (status === 'agendado' && isCashExpense)
+    else if (status === 'agendado' && t.tipo !== 'receita')
     {
+      // Futuro no cartão ou no caixa — compromete o projetado
       agendados += t.valor
       saldoProjetado += signed
     }

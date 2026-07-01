@@ -1,10 +1,6 @@
 import { useMemo, useId, useState } from 'react'
 import { isGarrafa } from '../../lib/waterHydration'
-import {
-  aguaRitualMetaCopos,
-  aguaRitualPercentLabel,
-  isAguaRitualComplete,
-} from '../../lib/healthRitual'
+import { aguaRitualMetaCopos } from '../../lib/healthRitual'
 import { WaterDefaultMlControls, WaterEntryMlEditor } from './WaterHydrationControls'
 
 interface WaterCupGridProps
@@ -89,7 +85,6 @@ export function WaterCupGrid({
   const baseId = useId()
   const metaGoal = baseGoal ?? goal
   const ritualCups = useMemo(() => aguaRitualMetaCopos(metaGoal), [metaGoal])
-  const ritualPct = aguaRitualPercentLabel()
   const current = entries.length
   const cupCount = Math.min(Math.max(goal, metaGoal, current + 1), 12)
   const cols = cupCount <= 6 ? cupCount : 4
@@ -183,18 +178,6 @@ export function WaterCupGrid({
           )
         })}
       </div>
-
-      {metaGoal > 0 && (
-        <p className="font-mono text-[9px] text-ink-muted leading-relaxed">
-          {isAguaRitualComplete(current, metaGoal)
-            ? current >= metaGoal
-              ? 'Meta de hidratação completa hoje.'
-              : `Ritual do dia ok (${ritualPct} da meta) · faltam ${metaGoal - current} copo${metaGoal - current !== 1 ? 's' : ''} para a meta cheia.`
-            : current >= ritualCups
-              ? `Quase lá — ritual em ${ritualPct} da meta (${ritualCups} copo${ritualCups !== 1 ? 's' : ''}).`
-              : `Ritual do dia: ${ritualCups} copo${ritualCups !== 1 ? 's' : ''} (${ritualPct} da meta) · você está em ${current}/${ritualCups}.`}
-        </p>
-      )}
 
       {editingIndex !== null && entries[editingIndex] !== undefined && (
         <WaterEntryMlEditor
