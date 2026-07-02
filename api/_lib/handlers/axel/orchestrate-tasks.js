@@ -1,9 +1,9 @@
 // POST /api/orchestrate-tasks — priorização em lote com IA (Groq/Gemini no servidor)
 // POST exige JWT Supabase; GET (status) permanece público
 
-import { orchestrateTasksBatch } from './_lib/urgencyOrchestrator.js';
-import { applyCors } from './_lib/cors.js';
-import { getUserFromBearer } from './_lib/supabaseUser.js';
+import { orchestrateTasksBatch } from '../../urgencyOrchestrator.js';
+import { applyCors } from '../../cors.js';
+import { getUserFromBearer } from '../../supabaseUser.js';
 
 function hasServerAiKeys()
 {

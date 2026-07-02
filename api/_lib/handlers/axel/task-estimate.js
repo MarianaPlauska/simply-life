@@ -1,6 +1,6 @@
 // POST /api/task-estimate — estimativa de esforço via Groq/Gemini (fallback local)
 
-import { estimateTaskEffort } from './_lib/taskEstimateServer.js'
+import { estimateTaskEffort } from '../../taskEstimateServer.js'
 
 function cors(res)
 {

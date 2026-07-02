@@ -19,6 +19,17 @@
   "rewrites": [
     { "source": "/api/webhook-ingest", "destination": "/api/webhooks/m2m" },
     { "source": "/api/push-subscribe", "destination": "/api/webhooks/push-subscribe" },
+    { "source": "/api/morning-brief", "destination": "/api/axel/morning-brief" },
+    { "source": "/api/orchestrate-tasks", "destination": "/api/axel/orchestrate-tasks" },
+    { "source": "/api/task-estimate", "destination": "/api/axel/task-estimate" },
+    { "source": "/api/ingest-email", "destination": "/api/axel/ingest-email" },
+    { "source": "/api/ingest-tasks", "destination": "/api/axel/ingest-tasks" },
+    { "source": "/api/estimate-protein", "destination": "/api/axel/estimate-protein" },
+    { "source": "/api/process-event", "destination": "/api/axel/process-event" },
+    { "source": "/api/finance-coach", "destination": "/api/axel/finance-coach" },
+    { "source": "/api/finance-purchase-check", "destination": "/api/axel/finance-purchase-check" },
+    { "source": "/api/fetch-news", "destination": "/api/axel/fetch-news" },
+    { "source": "/api/generate-greeting", "destination": "/api/axel/generate-greeting" },
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],

@@ -1,11 +1,11 @@
 // POST /api/ingest-email — e-mail único ou lote com Groq estruturado
 // Exige JWT Supabase — user_id vem do token, nunca do body
 
-import { getSupabaseAdmin } from './_lib/supabaseAdmin.js'
-import { getUserFromBearer } from './_lib/supabaseUser.js'
-import { applyCors } from './_lib/cors.js'
-import { parseEmailWithAI, heuristicEmailParse } from './_lib/emailGroqParser.js'
-import { insertTriagedTask } from './_lib/insertTriagedTask.js'
+import { getSupabaseAdmin } from '../../supabaseAdmin.js'
+import { getUserFromBearer } from '../../supabaseUser.js'
+import { applyCors } from '../../cors.js'
+import { parseEmailWithAI, heuristicEmailParse } from '../../emailGroqParser.js'
+import { insertTriagedTask } from '../../insertTriagedTask.js'
 
 export default async function handler(req, res)
 {

@@ -1,12 +1,12 @@
 // POST /api/ingest-tasks — triagem com score matemático + keywords
 // Exige JWT Supabase — user_id vem do token, nunca do body
 
-import { getSupabaseAdmin } from './_lib/supabaseAdmin.js'
-import { getUserFromBearer } from './_lib/supabaseUser.js'
-import { applyCors } from './_lib/cors.js'
-import { fetchUserKeywords, matchUserKeywords } from './_lib/keywordBoost.js'
-import { scoreFromItem } from './_lib/triageScore.js'
-import { insertTriagedTask } from './_lib/insertTriagedTask.js'
+import { getSupabaseAdmin } from '../../supabaseAdmin.js'
+import { getUserFromBearer } from '../../supabaseUser.js'
+import { applyCors } from '../../cors.js'
+import { fetchUserKeywords, matchUserKeywords } from '../../keywordBoost.js'
+import { scoreFromItem } from '../../triageScore.js'
+import { insertTriagedTask } from '../../insertTriagedTask.js'
 
 const URGENCY_WORDS = ['urgente', 'urgent', 'asap', 'critico', 'crítico', 'p0', 'hotfix']
 

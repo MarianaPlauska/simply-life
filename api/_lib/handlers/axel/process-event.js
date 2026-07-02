@@ -1,8 +1,8 @@
 // POST /api/process-event — triagem de evento via IA (servidor)
 // Exige JWT Supabase
 
-import { applyCors } from './_lib/cors.js';
-import { getUserFromBearer } from './_lib/supabaseUser.js';
+import { applyCors } from '../../cors.js';
+import { getUserFromBearer } from '../../supabaseUser.js';
 
 export default async function handler(req, res)
 {
