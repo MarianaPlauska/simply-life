@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AxelCareNudge } from '../axel/AxelCareNudge'
-import { AXEL_MOOD_CARE_DURATION_MS, isAxelMoodCareActive } from '../../lib/axelMoodCare'
+import { isAxelMoodCareActive } from '../../lib/axelMoodCare'
 
 // Mensagem do AXEL após humor — permanece visível ~1 min no dashboard
 

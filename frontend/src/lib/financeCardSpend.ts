@@ -3,6 +3,7 @@ import { cardTemCicloFatura } from './financeCardModalidade'
 import {
   getBillingCycle,
   getInvoiceTransactions,
+  sumCardInvoicePayments,
   sumInvoice,
 } from './financeCardCycle'
 
@@ -30,7 +31,9 @@ export function sumOpenInvoiceSpend(
 
   const cycle = getBillingCycle(card, reference)
   const invoiceTx = getInvoiceTransactions(transactions, card.id, cycle)
-  return sumInvoice(invoiceTx)
+  const gross = sumInvoice(invoiceTx)
+  const paid = sumCardInvoicePayments(transactions, card, cycle)
+  return Math.max(0, gross - paid)
 }
 
 export function cardAvailableLimit(

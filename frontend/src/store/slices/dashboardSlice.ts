@@ -2,6 +2,11 @@
 import type { StateCreator } from 'zustand'
 import type { DashboardResumo, Notificacao } from '../storeTypes'
 import { normalizeNotificacao } from '../../lib/notificacaoUtils'
+import {
+  completedBillReferenceKeys,
+  isNotificationResolved,
+  reconcileStaleNotifications,
+} from '../../lib/notificationResolution'
 import { supabase } from '../../lib/supabase'
 import type { UISlice } from './uiSlice'
 
@@ -66,7 +71,19 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
         .order('criado_em', { ascending: false })
       if (error) throw error
       const rows = (data ?? []) as Record<string, unknown>[]
-      set({ notificacoes: rows.map(normalizeNotificacao) })
+      let notificacoes = rows.map(normalizeNotificacao)
+
+      const tarefas = (get() as { tarefas?: import('../../types').TarefaUnificada[] }).tarefas ?? []
+      if (tarefas.length > 0)
+      {
+        await reconcileStaleNotifications(notificacoes, tarefas)
+        const keys = completedBillReferenceKeys(tarefas)
+        notificacoes = notificacoes.map((n) =>
+          isNotificationResolved(n, tarefas, keys) ? { ...n, lida: true } : n,
+        )
+      }
+
+      set({ notificacoes })
     }
     catch (e) { console.error('fetchNotificacoes:', e) }
   },

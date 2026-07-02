@@ -1,7 +1,9 @@
-import { Calendar, Check, Clock } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Calendar, Check, Clock, Search } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_CHROME_PLANE } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
+import { billTaskReferenceKey, settlementCanonicalKey } from '../../lib/financeBillTaskDedup'
 
 // Rastro de conquistas — faixa inferior editorial
 
@@ -33,8 +35,44 @@ function fmtRelative(iso: string): string
 export function AxelAchievementTrail()
 {
   const entries = useTaskStore((s) => s.recentAchievements)
+  const [query, setQuery] = useState('')
 
-  if (entries.length === 0)
+  const deduped = useMemo(() =>
+  {
+    const seen = new Set<string>()
+    const out: typeof entries = []
+
+    for (const entry of entries)
+    {
+      const titleKey = cleanTitleForDisplay(entry.titulo).toLowerCase()
+      const completedDay = entry.completedAt?.slice(0, 10) ?? ''
+      const refKey = billTaskReferenceKey({
+        id: entry.taskId,
+        titulo: entry.titulo,
+        status: 'concluida',
+      } as never)
+      const key = refKey
+        ?? settlementCanonicalKey({ titulo: entry.titulo, valor: 0 })
+        ?? `${titleKey}|${completedDay}`
+
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(entry)
+    }
+
+    return out
+  }, [entries])
+
+  const filtered = useMemo(() =>
+  {
+    const q = query.trim().toLowerCase()
+    if (!q) return deduped
+    return deduped.filter((entry) =>
+      cleanTitleForDisplay(entry.titulo).toLowerCase().includes(q),
+    )
+  }, [deduped, query])
+
+  if (deduped.length === 0)
   {
     return null
   }
@@ -45,24 +83,36 @@ export function AxelAchievementTrail()
       aria-label="Concluídas recentemente"
     >
       <div className="px-5 lg:px-7 py-3 max-w-[1680px] mx-auto w-full">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
-            Concluídas recentemente
-          </h2>
-          <span className="font-mono text-[10px] text-ink-muted tabular-nums">
-            {entries.length}
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+          <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+            <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
+              Concluídas recentemente
+            </h2>
+            <span className="font-mono text-[10px] text-ink-muted tabular-nums">
+              {filtered.length}/{deduped.length}
+            </span>
+          </div>
+          <label className="relative sm:max-w-[220px] sm:ml-auto w-full">
+            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-muted" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar concluída…"
+              className="w-full pl-8 pr-3 py-1.5 rounded-sl border border-line bg-card text-[12px] text-ink placeholder:text-ink-muted"
+            />
+          </label>
         </div>
 
-        <ul className="flex flex-col w-full divide-y divide-line/50">
-          {entries.map((entry) =>
+        <ul className="flex flex-col w-full divide-y divide-line/50 max-h-[min(220px,28dvh)] overflow-y-auto custom-scrollbar pr-0.5">
+          {filtered.map((entry) =>
           {
             const title = cleanTitleForDisplay(entry.titulo)
             const created = fmtDate(entry.createdAt ?? entry.completedAt)
             const completed = fmtDate(entry.completedAt)
 
             return (
-              <li key={entry.id}>
+              <li key={`${entry.taskId}-${entry.completedAt}`}>
                 <article
                   className="achievement-pop-in w-full flex flex-col gap-0.5 py-2"
                   title={`${title} · criada ${created} · concluída ${completed}`}

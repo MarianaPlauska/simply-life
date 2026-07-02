@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Pencil, Plus, Trash2, X } from 'lucide-react'
+import { Pencil, Pin, Plus, Trash2, X } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { toast } from 'sonner'
 import type { Category, CategoryGrupo } from '../../store/storeTypes'
@@ -11,6 +11,11 @@ import {
   FINANCE_CATEGORY_ICON_IDS,
   FINANCE_CATEGORY_PRESET_COLORS,
 } from '../../lib/financeCategoryPresets'
+import {
+  pinCategory,
+  unpinCategory,
+  getPinnedCategoryIds,
+} from '../../lib/financeCategoryPins'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_FILTER_PILL_ACTIVE,
@@ -33,9 +38,23 @@ interface Props
 {
   onClose: () => void
   defaultParentId?: number | null
+  defaultTipo?: 'receita' | 'despesa'
+  autoOpenAdd?: boolean
+  initialGrupo?: CategoryGrupo
+  onCategoryCreated?: (cat: Category) => void
+  /** Tipo do lançamento — habilita toque para fixar atalho */
+  pinTipo?: 'receita' | 'despesa'
 }
 
-export function FinanceCategories({ onClose, defaultParentId = null }: Props)
+export function FinanceCategories({
+  onClose,
+  defaultParentId = null,
+  defaultTipo = 'despesa',
+  autoOpenAdd = false,
+  initialGrupo = 'geral',
+  onCategoryCreated,
+  pinTipo,
+}: Props)
 {
   const categories = useTaskStore((s) => s.categories)
   const addCategory = useTaskStore((s) => s.addCategory)
@@ -45,6 +64,7 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
   const [pendingDelete, setPendingDelete] = useState<Category | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editingNome, setEditingNome] = useState('')
+  const [pinTick, setPinTick] = useState(0)
 
   const defaultParent = defaultParentId != null
     ? categories.find((c) => c.id === defaultParentId)
@@ -60,7 +80,7 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
     nome: '',
     cor: PRESET_COLORS[0],
     icone: 'Wallet',
-    tipo: 'despesa' as 'receita' | 'despesa',
+    tipo: defaultTipo,
     grupo: (defaultParent?.grupo ?? 'geral') as CategoryGrupo,
   })
 
@@ -87,6 +107,22 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
 
   useEffect(() =>
   {
+    if (!autoOpenAdd || defaultParentId != null) return
+    const parent = null
+    const targetGrupo = initialGrupo
+    setParentId(parent)
+    setForm({
+      nome: '',
+      cor: PRESET_COLORS[0],
+      icone: 'Wallet',
+      tipo: defaultTipo,
+      grupo: targetGrupo,
+    })
+    setAddTarget({ grupo: targetGrupo, parentId: parent })
+  }, [autoOpenAdd, defaultParentId, defaultTipo, initialGrupo])
+
+  useEffect(() =>
+  {
     if (!addTarget) return
     const el = groupRefs.current[addTarget.grupo]
     if (el)
@@ -97,6 +133,37 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
       }, 50)
     }
   }, [addTarget])
+
+  const pinnedIds = useMemo(() =>
+  {
+    if (!pinTipo) return new Set<number>()
+    void pinTick
+    return new Set(getPinnedCategoryIds(pinTipo))
+  }, [pinTipo, pinTick])
+
+  const handlePickForShortcut = (cat: Category) =>
+  {
+    if (!pinTipo)
+    {
+      return
+    }
+    if (cat.tipo !== pinTipo)
+    {
+      toast.message(`Esta categoria é de ${cat.tipo} — escolha uma de ${pinTipo}`)
+      return
+    }
+    if (pinnedIds.has(cat.id))
+    {
+      unpinCategory(cat.id, cat.tipo)
+      setPinTick((t) => t + 1)
+      toast.success(`${cat.nome} removida do atalho`)
+      return
+    }
+    pinCategory(cat.id, cat.tipo)
+    setPinTick((t) => t + 1)
+    onCategoryCreated?.(cat)
+    toast.success(`${cat.nome} adicionada ao atalho`)
+  }
 
   const grouped = useMemo(() =>
   {
@@ -136,20 +203,30 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
     if (!form.nome.trim()) return
     try
     {
-      await addCategory({
+      const created = await addCategory({
         ...form,
         parent_id: parentId,
       })
       const savedGrupo = form.grupo
+      const savedTipo = form.tipo
       setForm({
         nome: '',
         cor: PRESET_COLORS[0],
         icone: 'Wallet',
-        tipo: 'despesa',
+        tipo: savedTipo,
         grupo: savedGrupo,
       })
       setParentId(null)
       setAddTarget(null)
+      if (created)
+      {
+        if (pinTipo && created.tipo === pinTipo)
+        {
+          pinCategory(created.id, created.tipo)
+          setPinTick((t) => t + 1)
+        }
+        onCategoryCreated?.(created)
+      }
       toast.success(parentId ? 'Subcategoria criada!' : 'Categoria criada!')
     }
     catch
@@ -231,6 +308,23 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
 
       {!isSubForm && (
         <>
+          <div>
+            <p className={`font-mono text-[9px] uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>Grupo</p>
+            <div className="flex flex-wrap gap-1.5">
+              {GRUPOS.map((g) => (
+                <button
+                  key={g}
+                  type="button"
+                  onClick={() => setForm({ ...form, grupo: g })}
+                  className={`px-2.5 py-1 rounded-sl font-mono text-[10px] uppercase ${
+                    form.grupo === g ? AXEL_FILTER_PILL_ACTIVE : AXEL_FILTER_PILL_IDLE
+                  }`}
+                >
+                  {CATEGORY_GRUPO_LABELS[g]}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {(['despesa', 'receita'] as const).map((t) => (
               <button
@@ -308,7 +402,9 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
           <div>
             <h3 className={`text-base font-display ${AXEL_TEXT_PRIMARY}`}>Suas categorias</h3>
             <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-              Adicione pelo grupo · lápis para renomear
+              {pinTipo
+                ? 'Toque para fixar ou desafixar atalho · lápis para renomear'
+                : 'Adicione pelo grupo · lápis para renomear'}
             </p>
           </div>
           <button
@@ -342,15 +438,15 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
                   const showSubForm = addTarget?.parentId === cat.id
                   return (
                     <div key={cat.id}>
-                      <div className="flex items-center gap-3 px-3 py-2.5 hover:bg-chrome/50 group">
-                        <div
-                          className="w-8 h-8 rounded-sl flex items-center justify-center border border-line bg-card shrink-0"
-                          style={{ color: cat.cor }}
-                        >
-                          <FinanceCategoryIcon name={cat.icone} className="w-4 h-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {editingId === cat.id ? (
+                      <div className="flex items-center gap-2 px-3 py-2.5 hover:bg-chrome/50 group">
+                        {editingId === cat.id ? (
+                          <>
+                            <div
+                              className="w-8 h-8 rounded-sl flex items-center justify-center border border-line bg-card shrink-0"
+                              style={{ color: cat.cor }}
+                            >
+                              <FinanceCategoryIcon name={cat.icone} className="w-4 h-4" />
+                            </div>
                             <input
                               autoFocus
                               value={editingNome}
@@ -360,13 +456,37 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
                                 if (e.key === 'Enter') void saveRename()
                                 if (e.key === 'Escape') setEditingId(null)
                               }}
-                              className="w-full border border-line rounded-sl bg-card px-2 py-1 text-[13px] text-ink"
+                              className="flex-1 min-w-0 border border-line rounded-sl bg-card px-2 py-1 text-[13px] text-ink"
                             />
-                          ) : (
-                            <p className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{cat.nome}</p>
-                          )}
-                          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>{cat.tipo}</p>
-                        </div>
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handlePickForShortcut(cat)}
+                            className="flex items-center gap-3 flex-1 min-w-0 text-left min-h-[44px] sm:min-h-0 -my-1 py-1 rounded-sl hover:text-accent transition-colors"
+                            aria-label={
+                              pinTipo
+                                ? pinnedIds.has(cat.id)
+                                  ? `Remover ${cat.nome} do atalho`
+                                  : `Adicionar ${cat.nome} ao atalho`
+                                : cat.nome
+                            }
+                          >
+                            <div
+                              className="w-8 h-8 rounded-sl flex items-center justify-center border border-line bg-card shrink-0"
+                              style={{ color: cat.cor }}
+                            >
+                              <FinanceCategoryIcon name={cat.icone} className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{cat.nome}</p>
+                              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>{cat.tipo}</p>
+                            </div>
+                            {pinTipo && pinnedIds.has(cat.id) && (
+                              <Pin className="w-3.5 h-3.5 text-accent shrink-0 fill-accent/25" aria-hidden />
+                            )}
+                          </button>
+                        )}
                         {editingId === cat.id ? (
                           <button
                             type="button"
@@ -425,7 +545,23 @@ export function FinanceCategories({ onClose, defaultParentId = null }: Props)
                                   className="flex-1 border border-line rounded-sl bg-card px-2 py-1 text-[12px] text-ink"
                                 />
                               ) : (
-                                <span className={`text-[12px] flex-1 ${AXEL_TEXT_PRIMARY}`}>{sub.nome}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handlePickForShortcut(sub)}
+                                  className={`text-[12px] flex-1 text-left min-h-[36px] flex items-center gap-1.5 ${AXEL_TEXT_PRIMARY}`}
+                                  aria-label={
+                                    pinTipo
+                                      ? pinnedIds.has(sub.id)
+                                        ? `Remover ${sub.nome} do atalho`
+                                        : `Adicionar ${sub.nome} ao atalho`
+                                      : sub.nome
+                                  }
+                                >
+                                  <span className="truncate">{sub.nome}</span>
+                                  {pinTipo && pinnedIds.has(sub.id) && (
+                                    <Pin className="w-3 h-3 text-accent shrink-0 fill-accent/25" aria-hidden />
+                                  )}
+                                </button>
                               )}
                               {editingId === sub.id ? (
                                 <button

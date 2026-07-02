@@ -33,7 +33,7 @@ interface CreditCardVisualProps
 
 export function CreditCardVisual({
   card,
-  cycle,
+  cycle: _cycle,
   invoiceTotal,
   selected = false,
   onClick,
@@ -48,6 +48,7 @@ export function CreditCardVisual({
   const temFatura = cardTemCicloFatura(card.modalidade)
   const usaExtrato = cardUsaExtrato(card.modalidade)
   const blocked = card.status === 'bloqueado'
+  const faturaPaga = temFatura && invoiceTotal <= 0.009
   const Tag = onClick ? 'button' : 'div'
   const billingDates = dueDateFromUserBillingDays(card)
 
@@ -106,9 +107,14 @@ export function CreditCardVisual({
           <div className="flex justify-between items-end gap-2">
             <div>
               <p className="font-mono text-[8px] uppercase tracking-wide text-white/55">
-                {temFatura ? 'Fatura aberta' : usaExtrato ? 'Extrato' : 'Usado'}
+                {faturaPaga ? 'Fatura paga' : temFatura ? 'Fatura aberta' : usaExtrato ? 'Extrato' : 'Usado'}
               </p>
-              <p className="font-display text-lg tabular-nums text-white leading-none">{fmt(invoiceTotal)}</p>
+              <p className={`font-display text-lg tabular-nums leading-none ${
+                faturaPaga ? 'text-concluido' : 'text-white'
+              }`}
+              >
+                {fmt(invoiceTotal)}
+              </p>
             </div>
             <div className="text-right">
               <p className="font-mono text-[8px] uppercase text-white/55">Disponível</p>

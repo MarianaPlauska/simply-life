@@ -4,7 +4,11 @@ import {
 } from './financeCategoryBudget'
 import { daysUntilDue, resolveBillVisualStatus } from './financeBillVisual'
 import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
+import { isBillDismissed } from './financeBillDismiss'
+import { isBillResolvedForPeriod } from './financeBillOrchestrator'
+import { isContaFixaPostedThisMonth } from './financeRecurringPost'
 import { estimateMonthlySavings, projectFinancialGoal } from './financeGoalProjection'
+import type { TarefaUnificada } from '../types'
 import type {
   BudgetLimit,
   Category,
@@ -49,6 +53,8 @@ export interface FinanceAlertsInput
   financialGoals: FinancialGoal[]
   recurringIncomes: RecurringIncome[]
   monthTransactions?: Transaction[]
+  tarefas?: TarefaUnificada[]
+  reference?: Date
 }
 
 function daysUntilMonthDay(dia: number, ref = new Date()): number
@@ -105,6 +111,8 @@ function budgetAlerts(
 function billAlerts(
   bills: ReservedBill[],
   items: ReservedBillItem[],
+  tarefas: TarefaUnificada[],
+  ref: Date,
 ): FinanceAlert[]
 {
   const out: FinanceAlert[] = []
@@ -112,6 +120,20 @@ function billAlerts(
   for (const bill of bills)
   {
     if (bill.status !== 'aberta') continue
+
+    const billId = `reserva-${bill.id}`
+    if (isBillDismissed(billId, ref)) continue
+
+    const probe = {
+      id: billId,
+      tipo: 'reserva' as const,
+      nome: bill.titulo,
+      valor: bill.valor_alocado,
+      vencimento: bill.data_vencimento.slice(0, 10),
+      diasRestantes: daysUntilDue(bill.data_vencimento),
+      urgente: true,
+    }
+    if (isBillResolvedForPeriod(probe, tarefas, ref)) continue
 
     const billItems = items.filter((i) => i.fatura_reserva_id === bill.id)
     const status = resolveBillVisualStatus(bill, billItems)
@@ -150,15 +172,35 @@ function billAlerts(
   return out
 }
 
-function fixedBillAlerts(contas: ContaFixa[]): FinanceAlert[]
+function fixedBillAlerts(
+  contas: ContaFixa[],
+  transactions: Transaction[],
+  tarefas: TarefaUnificada[],
+  ref: Date,
+): FinanceAlert[]
 {
   const out: FinanceAlert[] = []
 
   for (const conta of contas)
   {
-    if (!contaFixaEfetivamenteAtiva(conta)) continue
+    if (!contaFixaEfetivamenteAtiva(conta, ref)) continue
+    if (isContaFixaPostedThisMonth(conta.id, transactions, ref)) continue
 
-    const days = daysUntilMonthDay(conta.dia_vencimento)
+    const billId = `fixa-${conta.id}`
+    if (isBillDismissed(billId, ref)) continue
+
+    const days = daysUntilMonthDay(conta.dia_vencimento, ref)
+    const probe = {
+      id: billId,
+      tipo: 'conta_fixa' as const,
+      nome: conta.nome,
+      valor: conta.valor,
+      vencimento: '',
+      diasRestantes: days,
+      urgente: days <= 2,
+    }
+    if (isBillResolvedForPeriod(probe, tarefas, ref)) continue
+
     if (days > 5) continue
 
     out.push({
@@ -242,6 +284,9 @@ function goalAlerts(
 
 export function buildFinanceAlerts(input: FinanceAlertsInput): FinanceAlert[]
 {
+  const ref = input.reference ?? new Date()
+  const tarefas = input.tarefas ?? []
+
   const monthTx = input.monthTransactions ?? input.transactions.filter((t) =>
   {
     const now = new Date()
@@ -263,8 +308,8 @@ export function buildFinanceAlerts(input: FinanceAlertsInput): FinanceAlert[]
 
   const alerts = [
     ...budgetAlerts(budgetRows),
-    ...billAlerts(input.reservedBills, input.reservedBillItems),
-    ...fixedBillAlerts(input.contasFixas),
+    ...billAlerts(input.reservedBills, input.reservedBillItems, tarefas, ref),
+    ...fixedBillAlerts(input.contasFixas, input.transactions, tarefas, ref),
     ...cardAlerts(input.cards),
     ...goalAlerts(input.financialGoals, monthlySavings),
   ]

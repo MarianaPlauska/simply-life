@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react'
+import { useMemo } from 'react'
 import { Check, CheckCheck, Clock, Info, Heart, ListTodo, Wallet2, AlertTriangle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -36,13 +37,20 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
   const navigate = useNavigate()
   const notificacoes = useTaskStore((s) => s.notificacoes)
   const tarefas = useTaskStore((s) => s.tarefas)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
+  const transactions = useTaskStore((s) => s.transactions)
   const markNotificacaoRead = useTaskStore((s) => s.markNotificacaoRead)
   const markAllNotificacoesRead = useTaskStore((s) => s.markAllNotificacoesRead)
 
-  const tarefasAtrasadas = listTarefasAtrasadas(tarefas)
+  const alertCtx = useMemo(
+    () => ({ settlements: billSettlements, transactions }),
+    [billSettlements, transactions],
+  )
+
+  const tarefasAtrasadas = listTarefasAtrasadas(tarefas, alertCtx)
   const prazosUrgentes = listPrazosUrgentes(tarefas)
   const notificacoesPendentes = filterNotificacoesSemPrazoDuplicado(
-    listNotificacoesAcionaveis(notificacoes),
+    listNotificacoesAcionaveis(notificacoes, tarefas),
     prazosUrgentes,
   )
   const unreadCount = notificacoesPendentes.length
@@ -98,7 +106,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
           </button>
         )}
       </div>
-      <div className="max-h-72 overflow-y-auto">
+      <div className="max-h-[min(70dvh,24rem)] sm:max-h-72 overflow-y-auto custom-scrollbar">
         {empty ? (
           <div className={`px-4 py-6 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
             Nenhuma notificação

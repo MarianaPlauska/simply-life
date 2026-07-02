@@ -17,12 +17,12 @@ export function useAxelChartTheme()
     const legendColor = isDarkMode ? '#94A3B8' : '#334155'
     const openLineStroke = isDarkMode ? '#64748B' : '#94A3B8'
     const exerciseFill = isDarkMode ? '#1A2029' : '#E8ECF2'
-    const exerciseStroke = isDarkMode ? '#38B2AC' : '#0D9488'
+    const exerciseStroke = isDarkMode ? '#D4924A' : '#C17F3A'
 
-    const accent = isDarkMode ? '#38B2AC' : '#0D9488'
+    const accent = isDarkMode ? '#D4924A' : '#C17F3A'
 
-    const waterBar = isDarkMode ? '#38B2AC' : '#0D9488'
-    const waterBarMuted = isDarkMode ? '#2C7A7B' : '#5EEAD4'
+    const waterBar = isDarkMode ? '#D4924A' : '#C17F3A'
+    const waterBarMuted = isDarkMode ? '#A66B2E' : '#E8B87A'
 
     return {
       isDarkMode,
@@ -44,7 +44,7 @@ export function useAxelChartTheme()
       refLine: refStroke,
       legendStyle: { fontSize: 10, paddingTop: 8, color: legendColor },
       productivity: {
-        completed: isDarkMode ? '#38B2AC' : '#0F766E',
+        completed: isDarkMode ? '#D4924A' : '#C17F3A',
         open: openLineStroke,
       },
       exercise: {

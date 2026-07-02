@@ -1,6 +1,5 @@
 import { useRef, type ReactNode } from 'react'
 import { Plus } from 'lucide-react'
-import { AXEL_KANBAN_WORKSPACE } from '../../constants/axelKanbanTheme'
 import { AXEL_BTN_PRIMARY, AXEL_VIEW_SWITCHER_SHELL } from '../../constants/axelSurfaces'
 
 export type MobileBoardTab = 'executar' | 'prazo'
@@ -65,9 +64,9 @@ export function KanbanMobileBoardShell({
   }
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col relative mt-1 sm:mt-0">
+    <div className="flex-1 min-h-0 flex flex-col relative mt-1 sm:mt-0 lg:hidden">
       <div
-        className={`lg:hidden shrink-0 flex rounded-lg overflow-hidden ${AXEL_VIEW_SWITCHER_SHELL}`}
+        className={`shrink-0 flex rounded-lg overflow-hidden ${AXEL_VIEW_SWITCHER_SHELL}`}
         role="tablist"
         aria-label="Painel do planejador"
       >
@@ -98,7 +97,7 @@ export function KanbanMobileBoardShell({
       </div>
 
       <div
-        className="lg:hidden shrink-0 flex flex-col min-w-0 mt-2.5 border border-line rounded-lg bg-card shadow-sl overflow-hidden touch-pan-y max-h-[min(400px,calc(100dvh-14rem))]"
+        className="shrink-0 flex flex-col min-w-0 mt-2.5 border border-line rounded-lg bg-card shadow-sl overflow-hidden touch-pan-y max-h-[min(400px,calc(100dvh-14rem))]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -117,11 +116,6 @@ export function KanbanMobileBoardShell({
           <Plus size={20} strokeWidth={2} />
         </button>
       )}
-
-      <div className={`hidden lg:flex ${AXEL_KANBAN_WORKSPACE}`}>
-        {executar}
-        {prazo}
-      </div>
     </div>
   )
 }

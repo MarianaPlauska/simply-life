@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Code2, Mail, MessageSquare, CalendarDays, HardDrive, Globe, Check, ChevronDown, ChevronUp, Key, Link2, Timer, Minus, Plus, Accessibility, Monitor, Bell, Database, Shield, Brain, Tag, Save, Loader2, ExternalLink, Unlink, ShoppingBag } from 'lucide-react';
 import { AxelRewardShop } from '../gamification/AxelRewardShop';
 import { toast } from 'sonner';
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import type { LucideIcon } from 'lucide-react';
@@ -293,7 +294,7 @@ export function SettingsView() {
   const kwList = kwInput.split(',').map((k: string) => k.trim()).filter(Boolean);
 
   return (
-    <div className="max-w-5xl mx-auto px-3 sm:px-4 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-12">
+    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-12`}>
       <div className="mb-6 sm:mb-8">
         <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Configuracoes</h1>
         <p className="text-zinc-500 text-sm mt-0.5">Gerencie integracoes e preferencias do Simply-Life.</p>

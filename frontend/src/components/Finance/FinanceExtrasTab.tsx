@@ -1,11 +1,11 @@
 import { useMemo } from 'react'
-import { CalendarClock, Plus, Receipt } from 'lucide-react'
+import { CalendarClock, Plus } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { transactionDayKey } from '../../lib/financeLedger'
+import { transactionBusinessKey } from '../../lib/financeTransactionDedup'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY,
-  AXEL_SECTION_TITLE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -33,16 +33,28 @@ export function FinanceExtrasTab({ onNewTransaction, embedded = false }: Finance
 
   const extras = useMemo(() =>
   {
-    return transactions
+    const raw = transactions
       .filter((t) =>
       {
         if (t.tipo !== 'despesa') return false
         const status = t.status_pagamento ?? 'pendente'
         if (status !== 'agendado' && status !== 'pendente') return false
-        // Fatura reservada tem aba própria
         if (t.fatura_reserva_id != null) return false
         return true
       })
+
+    const byKey = new Map<string, typeof raw[number]>()
+    for (const t of raw)
+    {
+      const key = transactionBusinessKey(t)
+      const prev = byKey.get(key)
+      if (!prev || t.id < prev.id)
+      {
+        byKey.set(key, t)
+      }
+    }
+
+    return [...byKey.values()]
       .sort((a, b) => transactionDayKey(a.data).localeCompare(transactionDayKey(b.data)))
   }, [transactions])
 
@@ -53,24 +65,14 @@ export function FinanceExtrasTab({ onNewTransaction, embedded = false }: Finance
 
   return (
     <div className={embedded ? 'pt-2 border-t border-line' : 'space-y-4'}>
-      <header className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 ${embedded ? 'mb-3' : ''}`}>
+      <header className={`mb-3 ${embedded ? '' : ''}`}>
         <div>
-          <h2 className={embedded ? 'font-sans text-sm font-semibold tracking-tight text-ink' : AXEL_SECTION_TITLE}>
+          <h2 className={embedded ? 'font-sans text-sm font-semibold tracking-tight text-ink' : 'font-mono text-[10px] uppercase tracking-wide text-accent'}>
             Extras
           </h2>
           <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             Contas futuras e avulsos fora da fatura do cartão.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onNewTransaction}
-            className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 min-h-[44px] ${AXEL_BTN_PRIMARY}`}
-          >
-            <Plus className="w-4 h-4" />
-            Nova entrada
-          </button>
         </div>
       </header>
 
@@ -86,10 +88,10 @@ export function FinanceExtrasTab({ onNewTransaction, embedded = false }: Finance
 
       {extras.length === 0 ? (
         <div className="rounded-sl border border-dashed border-line py-12 text-center px-4">
-          <Receipt className="w-7 h-7 text-ink-muted mx-auto mb-2" aria-hidden />
+          <CalendarClock className="w-7 h-7 text-ink-muted mx-auto mb-2" aria-hidden />
           <p className={`text-[13px] ${AXEL_TEXT_PRIMARY}`}>Nenhum gasto extra</p>
           <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-            Registre em Novo lançamento → Conta futura.
+            Use o botão <strong className="text-ink">Nova entrada</strong> para registrar receita ou conta futura.
           </p>
         </div>
       ) : (
@@ -135,6 +137,16 @@ export function FinanceExtrasTab({ onNewTransaction, embedded = false }: Finance
           })}
         </ul>
       )}
+
+      <button
+        type="button"
+        onClick={onNewTransaction}
+        className={`fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] md:bottom-6 right-3 z-40 inline-flex items-center justify-center gap-1.5 min-h-[44px] px-3 py-2 font-mono text-[10px] uppercase tracking-wide shadow-lg ${AXEL_BTN_PRIMARY}`}
+      >
+        <Plus className="w-4 h-4" />
+        <span className="hidden sm:inline">Nova entrada</span>
+        <span className="sm:hidden">Novo</span>
+      </button>
     </div>
   )
 }

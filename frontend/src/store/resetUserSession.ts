@@ -43,7 +43,6 @@ export function getEmptyUserSensitiveState(): Partial<TaskStore>
     tarefas: [],
     anotacoes: [],
     labels: [],
-    subtarefas: [],
     medicamentos: [],
     humorHoje: null,
     humorHojeLista: [],

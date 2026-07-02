@@ -8,6 +8,10 @@ interface FinanceCashTabProps
   reservaRestante: number
   saldoProjetadoDisponivel: number
   compromissosFixas?: number
+  computedDisponivel?: number
+  computedCorrente?: number
+  computedReservado?: number
+  computedProjetado?: number
   onNewExtraIncome?: () => void
 }
 
@@ -17,6 +21,10 @@ export function FinanceCashTab({
   reservaRestante,
   saldoProjetadoDisponivel,
   compromissosFixas = 0,
+  computedDisponivel,
+  computedCorrente,
+  computedReservado,
+  computedProjetado,
   onNewExtraIncome,
 }: FinanceCashTabProps)
 {
@@ -28,6 +36,10 @@ export function FinanceCashTab({
         reservaRestante={reservaRestante}
         saldoProjetadoDisponivel={saldoProjetadoDisponivel}
         compromissosFixas={compromissosFixas}
+        computedDisponivel={computedDisponivel}
+        computedCorrente={computedCorrente}
+        computedReservado={computedReservado}
+        computedProjetado={computedProjetado}
       />
       {onNewExtraIncome && (
         <FinanceExtrasTab onNewTransaction={onNewExtraIncome} embedded />

@@ -8,6 +8,7 @@ import {
   mensagemGentilDose,
   proximaDosePendente,
 } from '../../../lib/medicamentosSchedule'
+import { buildMedicamentosAlertas } from '../../../lib/medicamentosAlerts'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 import { MedicamentosNotificationBanner } from './MedicamentosNotificationBanner'
 

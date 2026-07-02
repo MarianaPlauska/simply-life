@@ -107,7 +107,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
         </div>
       </section>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 lg:gap-4 w-full">
         <HealthQuickTile
           icon={Droplets}
           label="Água"

@@ -10,6 +10,7 @@ import { AXEL_HEADER_ACTION, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../.
 export function TopBar()
 {
   const notificacoes = useTaskStore((s) => s.notificacoes)
+  const tarefas = useTaskStore((s) => s.tarefas)
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes)
   const [weather, setWeather] = useState<{ temp: string; city: string } | null>(null)
 
@@ -51,7 +52,7 @@ export function TopBar()
     )
   }, [])
 
-  const unread = listNotificacoesAcionaveis(notificacoes).length
+  const unread = listNotificacoesAcionaveis(notificacoes, tarefas).length
 
   return (
     <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">

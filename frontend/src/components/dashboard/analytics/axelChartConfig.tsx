@@ -41,3 +41,9 @@ export function AxelChartTooltip({ active, payload, label }: AxelTooltipProps)
 }
 
 export const CHART_HEIGHT = 220
+
+/** Fundo do cursor de hover — evita retângulo branco/cinza claro no tema escuro */
+export function axelChartCursorFill(isDarkMode: boolean): string
+{
+  return isDarkMode ? 'rgba(26, 32, 41, 0.55)' : 'rgba(226, 232, 240, 0.45)'
+}

@@ -7,7 +7,7 @@ import {
   BarChart3, Calendar, ArrowUpRight, ArrowDownRight,
   Star, CheckCircle2, Brain,
 } from 'lucide-react';
-import { useTaskStore } from '../../store/useTaskStore';
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import type { AnalyticsReport, TrendPoint, RankingItem } from '../../store/useTaskStore';
 import { PrintButton } from '../ui/PrintButton';
 
@@ -183,7 +183,7 @@ export function RelatoriosView() {
   /* ── Loading ───── */
   if (loading && !report) {
     return (
-      <div className="max-w-5xl mx-auto p-6 space-y-8">
+      <div className={`${AXEL_PAGE_SHELL} p-6 space-y-8`}>
         <div className="h-10 w-72 bg-zinc-800/40 rounded-xl animate-pulse" />
         <div className="grid grid-cols-3 gap-6">
           {[1, 2, 3].map(i => <div key={i} className="h-32 bg-zinc-800/30 rounded-2xl animate-pulse" />)}
@@ -193,7 +193,7 @@ export function RelatoriosView() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-12 pb-24 text-zinc-50">
+    <div className={`${AXEL_PAGE_SHELL} p-6 space-y-12 pb-24 text-zinc-50`}>
       {/* ── Header ──────────────────────────────────────── */}
       <motion.div {...fadeUp} className="flex items-end justify-between gap-4">
         <div>

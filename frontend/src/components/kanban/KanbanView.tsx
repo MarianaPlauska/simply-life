@@ -40,6 +40,7 @@ import { AxelGruposSheet } from './AxelGruposSheet'
 import { ExecutionQueueEditorSheet } from './ExecutionQueueEditorSheet'
 import { KanbanBillDuplicatesBar } from './KanbanBillDuplicatesBar'
 import { AxelAchievementTrail } from './AxelAchievementTrail'
+import { KanbanHorizonDesktop } from './KanbanHorizonDesktop'
 import { AxelFlowSuggestionButton } from './AxelFlowSuggestionButton'
 import { computeDailyLoadBalancer } from '../../lib/adaptiveOrchestration'
 import {
@@ -747,6 +748,14 @@ export function KanbanView()
                   />
                 </div>
               )}
+            />
+
+            <KanbanHorizonDesktop
+              columns={columns}
+              allTasks={tarefas}
+              activeId={activeId}
+              onOpen={handleOpen}
+              onAddTask={openCreateDrawer}
             />
 
             <DragOverlay dropAnimation={null}>

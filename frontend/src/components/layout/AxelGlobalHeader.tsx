@@ -97,17 +97,23 @@ export function AxelGlobalHeader()
   const profileRef = useRef<HTMLDivElement>(null)
   const notifRef = useRef<HTMLDivElement>(null)
   const tarefas = useTaskStore((s) => s.tarefas)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
+  const transactions = useTaskStore((s) => s.transactions)
+  const alertCtx = useMemo(
+    () => ({ settlements: billSettlements, transactions }),
+    [billSettlements, transactions],
+  )
   const alertTotal = useMemo(
-    () => countAlertasHeader(notificacoes, tarefas),
-    [notificacoes, tarefas],
+    () => countAlertasHeader(notificacoes, tarefas, alertCtx),
+    [notificacoes, tarefas, alertCtx],
   )
   const urgentDeadlineCount = useMemo(
     () => countUrgentDeadlines(tarefas) + countOverdueTasks(tarefas),
     [tarefas],
   )
   const unreadNotifCount = useMemo(
-    () => listNotificacoesAcionaveis(notificacoes).length,
-    [notificacoes],
+    () => listNotificacoesAcionaveis(notificacoes, tarefas).length,
+    [notificacoes, tarefas],
   )
 
   useEffect(() =>
@@ -248,29 +254,23 @@ export function AxelGlobalHeader()
                 sinoAtivo ? 'ring-2 ring-rose-400/70 ring-offset-2 ring-offset-[#08090D] rounded-full animate-pulse' : ''
               }`}
               aria-label={
-                alertTotal > 0
-                  ? `Notificações: ${unreadNotifCount} não lidas${
-                      urgentDeadlineCount > 0 ? `, ${urgentDeadlineCount} prazo(s) em 24h` : ''
-                    }`
+                unreadNotifCount > 0
+                  ? `Notificações: ${unreadNotifCount} não lida${unreadNotifCount !== 1 ? 's' : ''}`
                   : 'Notificações'
               }
             >
               <Bell className={`w-4 h-4 ${sinoAtivo ? 'text-rose-400' : ''}`} />
-              {urgentDeadlineCount > 0 && (
+              {unreadNotifCount > 0 && (
                 <span
                   className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse ring-2 ring-[#08090D]"
                   aria-hidden
                 />
               )}
-              {alertTotal > 0 && (
+              {unreadNotifCount > 0 && (
                 <span
-                  className={`absolute -top-0.5 -right-0.5 min-w-[16px] h-4 text-white text-[10px] font-bold font-mono rounded-full flex items-center justify-center px-1 ${
-                    urgentDeadlineCount > 0
-                      ? 'bg-red-500 animate-pulse'
-                      : 'bg-rose-500'
-                  }`}
+                  className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 text-white text-[10px] font-bold font-mono rounded-full flex items-center justify-center px-1 bg-red-500 animate-pulse"
                 >
-                  {alertTotal > 9 ? '9+' : alertTotal}
+                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
                 </span>
               )}
             </button>

@@ -42,7 +42,7 @@ export function CategoryPill({
       {onRemove && (
         <button
           type="button"
-          aria-label={`Remover ${category.nome}`}
+          aria-label={`Remover ${category.nome} do atalho`}
           onClick={(e) =>
           {
             e.stopPropagation()

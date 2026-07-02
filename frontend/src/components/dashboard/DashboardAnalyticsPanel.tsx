@@ -104,72 +104,76 @@ export function DashboardAnalyticsPanel()
         </div>
       </div>
 
-      <article className="rounded-sl border border-line p-3 space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[12px] font-medium text-ink">Ritual de saúde</p>
-          <span className="font-mono text-[10px] text-ink-muted tabular-nums">{ritual.percent}%</span>
-        </div>
-        <div className="h-2 rounded-sl bg-chrome overflow-hidden">
-          <div
-            className="h-full bg-accent transition-all duration-500"
-            style={{ width: `${ritual.percent}%` }}
-          />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {ritualItems.map((item) => (
-            <span
-              key={item.id}
-              className={`px-2 py-1 rounded-sl font-mono text-[9px] uppercase border ${
-                item.done
-                  ? 'border-concluido/30 bg-concluido/10 text-concluido'
-                  : 'border-line text-ink-muted'
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch">
+        <article className="rounded-sl border border-line p-3 space-y-3 h-full flex flex-col min-h-[200px]">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[12px] font-medium text-ink">Humor · 7 dias</p>
+            {humorMedia7 && (
+              <span className="font-mono text-[10px] text-ink-muted">
+                média {humorMedia7} · {diasComHumor} dia{diasComHumor !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+          <div className="flex-1 min-h-0">
+            {humorSemanaAgregado.length === 0 ? (
+              <p className="text-[11px] text-ink-muted">Registre humor no atalho acima para ver a semana.</p>
+            ) : (
+              <MoodWeekGrid dias={humorSemanaAgregado} />
+            )}
+          </div>
+        </article>
+
+        <article className="rounded-sl border border-line p-3 h-full flex flex-col min-h-[200px]">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <p className="text-[12px] font-medium text-ink">Hidratação</p>
+            <span className="font-mono text-[10px] text-ink-muted tabular-nums">
+              {waterToday} / {waterGoalMl} ml
+            </span>
+          </div>
+          <div className="h-2 rounded-sl bg-chrome overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 ${
+                isAguaRitualComplete(waterCups, aguaMeta) ? 'bg-concluido' : 'bg-accent'
               }`}
-            >
-              {item.label}
-            </span>
-          ))}
-        </div>
-      </article>
+              style={{ width: `${waterPct}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-ink-muted mt-2 flex-1">
+            {waterPct >= 100
+              ? 'Meta do dia atingida.'
+              : waterPct >= 80
+                ? 'Ritual ok (80%) — siga no seu ritmo.'
+                : `${Math.max(0, aguaMeta - waterCups)} copo(s) para a meta.`}
+          </p>
+        </article>
 
-      <article className="rounded-sl border border-line p-3 space-y-3">
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-[12px] font-medium text-ink">Humor · 7 dias</p>
-          {humorMedia7 && (
-            <span className="font-mono text-[10px] text-ink-muted">
-              média {humorMedia7} · {diasComHumor} dia{diasComHumor !== 1 ? 's' : ''}
-            </span>
-          )}
-        </div>
-        {humorSemanaAgregado.length === 0 ? (
-          <p className="text-[11px] text-ink-muted">Registre humor no atalho acima para ver a semana.</p>
-        ) : (
-          <MoodWeekGrid dias={humorSemanaAgregado} />
-        )}
-      </article>
-
-      <article className="rounded-sl border border-line p-3">
-        <div className="flex items-center justify-between gap-2 mb-2">
-          <p className="text-[12px] font-medium text-ink">Hidratação</p>
-          <span className="font-mono text-[10px] text-ink-muted tabular-nums">
-            {waterToday} / {waterGoalMl} ml
-          </span>
-        </div>
-        <div className="h-2 rounded-sl bg-chrome overflow-hidden">
-          <div
-            className={`h-full transition-all duration-500 ${
-              isAguaRitualComplete(waterCups, aguaMeta) ? 'bg-concluido' : 'bg-accent'
-            }`}
-            style={{ width: `${waterPct}%` }}
-          />
-        </div>
-        <p className="text-[10px] text-ink-muted mt-2">
-          {waterPct >= 100
-            ? 'Meta do dia atingida.'
-            : waterPct >= 80
-              ? 'Ritual ok (80%) — siga no seu ritmo.'
-              : `${Math.max(0, aguaMeta - waterCups)} copo(s) para a meta.`}
-        </p>
-      </article>
+        <article className="rounded-sl border border-line p-3 space-y-3 h-full flex flex-col min-h-[200px]">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[12px] font-medium text-ink">Ritual de saúde</p>
+            <span className="font-mono text-[10px] text-ink-muted tabular-nums">{ritual.percent}%</span>
+          </div>
+          <div className="h-2 rounded-sl bg-chrome overflow-hidden">
+            <div
+              className="h-full bg-accent transition-all duration-500"
+              style={{ width: `${ritual.percent}%` }}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2 flex-1 content-start">
+            {ritualItems.map((item) => (
+              <span
+                key={item.id}
+                className={`px-2 py-1 rounded-sl font-mono text-[9px] uppercase border ${
+                  item.done
+                    ? 'border-concluido/30 bg-concluido/10 text-concluido'
+                    : 'border-line text-ink-muted'
+                }`}
+              >
+                {item.label}
+              </span>
+            ))}
+          </div>
+        </article>
+      </div>
 
       <DashboardPerformanceCharts />
     </section>

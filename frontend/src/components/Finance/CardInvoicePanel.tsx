@@ -1,11 +1,18 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { CreditCard, Wallet } from 'lucide-react'
+import { ChevronLeft, ChevronRight, CreditCard, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { BillingCycle } from '../../lib/financeCardCycle'
+import {
+  getBillingCycleAtOffset,
+  getInvoiceTransactions,
+  sumCardInvoicePayments,
+  sumInvoice,
+} from '../../lib/financeCardCycle'
 import type { Category, Transaction, VirtualCard } from '../../store/storeTypes'
 import { cardTemCicloFatura, cardUsaExtrato } from '../../lib/financeCardModalidade'
 import { buildExtratoLinhas } from '../../lib/financeCardSpend'
+import { CardInvoiceQuickItems } from './CardInvoiceQuickItems'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_ROW_HOVER,
@@ -41,19 +48,46 @@ export function CardInvoicePanel({
 
   const temFatura = cardTemCicloFatura(card.modalidade)
   const usaExtrato = cardUsaExtrato(card.modalidade)
-  const disponivel = Math.max(0, card.limite - invoiceTotal)
   const inDrawer = variant === 'drawer'
 
+  const [cycleOffset, setCycleOffset] = useState(0)
   const [paying, setPaying] = useState(false)
   const [fechamento, setFechamento] = useState(String(card.dia_fechamento ?? cycle.closingDay))
   const [vencimento, setVencimento] = useState(String(card.dia_vencimento ?? cycle.dueDay))
+
+  const activeCycle = useMemo(
+    () => (temFatura ? getBillingCycleAtOffset(card, cycleOffset) : cycle),
+    [temFatura, card, cycleOffset, cycle],
+  )
+
+  const activeInvoiceTx = useMemo(
+    () => (temFatura
+      ? getInvoiceTransactions(transactions, card.id, activeCycle)
+      : invoiceTx),
+    [temFatura, transactions, card.id, activeCycle, invoiceTx],
+  )
+
+  const activeInvoiceTotal = useMemo(() =>
+  {
+    if (!temFatura) return invoiceTotal
+    const gross = sumInvoice(activeInvoiceTx)
+    if (cycleOffset === 0)
+    {
+      const paid = sumCardInvoicePayments(transactions, card, activeCycle)
+      return Math.max(0, gross - paid)
+    }
+    return gross
+  }, [temFatura, invoiceTotal, activeInvoiceTx, cycleOffset, transactions, card, activeCycle])
+
+  const disponivel = Math.max(0, card.limite - activeInvoiceTotal)
+  const isCurrentCycle = cycleOffset === 0
 
   const extratoLinhas = useMemo(
     () => (usaExtrato ? buildExtratoLinhas(transactions, card) : []),
     [usaExtrato, transactions, card],
   )
 
-  const listaExibir = usaExtrato ? extratoLinhas.map((l) => l.tx) : invoiceTx
+  const listaExibir = usaExtrato ? extratoLinhas.map((l) => l.tx) : activeInvoiceTx
 
   const handlePay = async () =>
   {
@@ -120,7 +154,7 @@ export function CardInvoicePanel({
         </button>
         <button
           type="button"
-          disabled={paying || invoiceTotal <= 0}
+          disabled={paying || activeInvoiceTotal <= 0 || !isCurrentCycle}
           onClick={() => void handlePay()}
           className={`col-span-2 inline-flex items-center justify-center gap-1.5 min-h-[44px] font-mono text-[10px] uppercase px-3 py-2 disabled:opacity-40 ${AXEL_BTN_PRIMARY}`}
         >
@@ -169,7 +203,7 @@ export function CardInvoicePanel({
         </ul>
       ) : (
         <ul className="divide-y divide-line">
-          {invoiceTx.map((t) =>
+          {activeInvoiceTx.map((t) =>
           {
             const cat = t.categoria_id
               ? categories.find((c) => c.id === t.categoria_id)?.nome
@@ -201,7 +235,7 @@ export function CardInvoicePanel({
       <header className="px-3 sm:px-4 py-3 border-b border-line space-y-2 shrink-0">
         {inDrawer ? (
           <p className={`text-xl sm:text-2xl font-display tabular-nums break-all sm:break-normal ${AXEL_TEXT_PRIMARY}`}>
-            {fmt(invoiceTotal)}
+            {fmt(activeInvoiceTotal)}
           </p>
         ) : (
           <div className="flex items-start gap-2">
@@ -211,20 +245,57 @@ export function CardInvoicePanel({
                 {usaExtrato ? 'Extrato' : 'Fatura'} · {card.nome}
               </p>
               <p className={`text-xl sm:text-2xl font-display tabular-nums break-all sm:break-normal ${AXEL_TEXT_PRIMARY}`}>
-                {fmt(invoiceTotal)}
+                {fmt(activeInvoiceTotal)}
               </p>
             </div>
           </div>
         )}
         {temFatura ? (
-          <div className="flex flex-wrap gap-2 text-[10px] sm:text-[11px] font-mono">
-            <span className="px-2 py-1 rounded-sl border border-line bg-chrome text-ink-muted">
-              Fecha em {cycle.daysUntilClose}d
-            </span>
-            <span className="px-2 py-1 rounded-sl border border-accent/30 bg-accent/10 text-accent">
-              Vence em {cycle.daysUntilDue}d
-            </span>
-          </div>
+          <>
+            <div className="flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => setCycleOffset((o) => o - 1)}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line bg-chrome/60 text-ink-muted hover:text-accent min-h-[44px] min-w-[44px]"
+                aria-label="Fatura anterior"
+              >
+                <ChevronLeft size={16} aria-hidden />
+              </button>
+              <div className="min-w-0 flex-1 text-center">
+                <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  {isCurrentCycle ? 'Ciclo atual' : 'Ciclo anterior'}
+                </p>
+                <p className={`font-mono text-[10px] truncate ${AXEL_TEXT_PRIMARY}`}>
+                  {activeCycle.label}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={isCurrentCycle}
+                onClick={() => setCycleOffset((o) => Math.min(0, o + 1))}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line bg-chrome/60 text-ink-muted hover:text-accent disabled:opacity-40 min-h-[44px] min-w-[44px]"
+                aria-label="Próximo ciclo"
+              >
+                <ChevronRight size={16} aria-hidden />
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 text-[10px] sm:text-[11px] font-mono">
+              {isCurrentCycle ? (
+                <>
+                  <span className="px-2 py-1 rounded-sl border border-line bg-chrome text-ink-muted">
+                    Fecha em {activeCycle.daysUntilClose}d
+                  </span>
+                  <span className="px-2 py-1 rounded-sl border border-accent/30 bg-accent/10 text-accent">
+                    Vence em {activeCycle.daysUntilDue}d
+                  </span>
+                </>
+              ) : (
+                <span className="px-2 py-1 rounded-sl border border-line bg-chrome text-ink-muted">
+                  Venceu {activeCycle.dueDate.split('-').reverse().join('/')}
+                </span>
+              )}
+            </div>
+          </>
         ) : (
           <div className="flex flex-wrap gap-2 text-[10px] sm:text-[11px] font-mono">
             <span className="px-2 py-1 rounded-sl border border-concluido/30 bg-concluido/10 text-concluido">
@@ -240,6 +311,11 @@ export function CardInvoicePanel({
       {!inDrawer && billingSection && (
         <div className="border-b border-line">{billingSection}</div>
       )}
+
+      {temFatura && (
+        <CardInvoiceQuickItems card={card} items={listaExibir} />
+      )}
+
       {inDrawer ? transactionList : null}
 
       {inDrawer && billingSection && (

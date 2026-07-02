@@ -1,6 +1,5 @@
-import { useMemo, useId, useState } from 'react'
+import { useId, useState } from 'react'
 import { isGarrafa } from '../../lib/waterHydration'
-import { aguaRitualMetaCopos } from '../../lib/healthRitual'
 import { WaterDefaultMlControls, WaterEntryMlEditor } from './WaterHydrationControls'
 
 interface WaterCupGridProps
@@ -84,7 +83,6 @@ export function WaterCupGrid({
 {
   const baseId = useId()
   const metaGoal = baseGoal ?? goal
-  const ritualCups = useMemo(() => aguaRitualMetaCopos(metaGoal), [metaGoal])
   const current = entries.length
   const cupCount = Math.min(Math.max(goal, metaGoal, current + 1), 12)
   const cols = cupCount <= 6 ? cupCount : 4
@@ -116,18 +114,41 @@ export function WaterCupGrid({
     setEditingIndex(null)
   }
 
+  let defaultMlPanel = null
+  if (onDefaultMlChange)
+  {
+    defaultMlPanel = (
+      <WaterDefaultMlControls
+        defaultMl={defaultMl}
+        presets={mlPresets}
+        onDefaultChange={onDefaultMlChange}
+        onAddPreset={onAddMlPreset}
+        onRemovePreset={onRemoveMlPreset}
+        disabled={disabled}
+      />
+    )
+  }
+
+  let entryEditor = null
+  if (editingIndex !== null && entries[editingIndex] !== undefined)
+  {
+    const idx = editingIndex
+    const currentMl = entries[idx]
+    entryEditor = (
+      <WaterEntryMlEditor
+        index={idx}
+        currentMl={currentMl}
+        presets={mlPresets}
+        onApply={(ml) => setEntryMl(idx, ml)}
+        onRemove={() => removeEntry(idx)}
+        disabled={disabled}
+      />
+    )
+  }
+
   return (
     <div className="space-y-2">
-      {onDefaultMlChange && (
-        <WaterDefaultMlControls
-          defaultMl={defaultMl}
-          presets={mlPresets}
-          onDefaultChange={onDefaultMlChange}
-          onAddPreset={onAddMlPreset}
-          onRemovePreset={onRemoveMlPreset}
-          disabled={disabled}
-        />
-      )}
+      {defaultMlPanel}
 
       <div
         className={`grid gap-2 ${compact ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}
@@ -150,7 +171,7 @@ export function WaterCupGrid({
               onClick={() => handleSlot(i)}
               className={[
                 'relative flex flex-col items-center justify-end rounded-sl transition-all',
-                compact ? 'p-1 min-h-[52px]' : 'p-1.5 sm:p-2 min-h-[64px] sm:min-h-[72px]',
+                compact ? 'p-1 min-h-[44px]' : 'p-1.5 sm:p-2 min-h-[64px] sm:min-h-[72px]',
                 'border border-transparent hover:border-accent/25 hover:bg-accent-muted/30',
                 isExtraCup ? 'border-dashed border-accent/20' : '',
                 editingIndex === i ? 'ring-1 ring-accent/40 bg-accent-muted/20' : '',
@@ -179,16 +200,7 @@ export function WaterCupGrid({
         })}
       </div>
 
-      {editingIndex !== null && entries[editingIndex] !== undefined && (
-        <WaterEntryMlEditor
-          index={editingIndex}
-          currentMl={entries[editingIndex]}
-          presets={mlPresets}
-          onApply={(ml) => setEntryMl(editingIndex, ml)}
-          onRemove={() => removeEntry(editingIndex)}
-          disabled={disabled}
-        />
-      )}
+      {entryEditor}
     </div>
   )
 }

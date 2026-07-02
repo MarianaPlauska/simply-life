@@ -1,7 +1,8 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { computeCashPosition } from '../../lib/financeReservedBills'
+import { useCashPosition } from '../../hooks/useCashPosition'
 import { resolveCashTone, BALANCE_TONE_TEXT } from '../../lib/financeBalanceTone'
+import { countLedgerDuplicates } from '../../lib/financeTransactionDedup'
 import { FinanceMonthKpisRow } from './overview/FinanceMonthKpisRow'
 import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner'
 import {
@@ -42,16 +43,19 @@ export function FinanceHomeTab({
 {
   const isFutureMonth = monthOffset > 0
   const cashAccount = useTaskStore((s) => s.cashAccount)
-  const reservedBills = useTaskStore((s) => s.reservedBills)
-  const contasFixas = useTaskStore((s) => s.contasFixas)
   const alerts = useFinanceAlerts(monthTransactions)
-
-  const position = useMemo(
-    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills, {
-      contasFixas,
-    }),
-    [transactions, cashAccount.saldo_inicial, reservedBills, contasFixas],
+  const fetchBillSettlements = useTaskStore((s) => s.fetchBillSettlements)
+  const reconcileFinanceLedger = useTaskStore((s) => s.reconcileFinanceLedger)
+  const { display: position } = useCashPosition()
+  const ledgerDupCount = useMemo(
+    () => countLedgerDuplicates(transactions),
+    [transactions],
   )
+
+  useEffect(() =>
+  {
+    void fetchBillSettlements()
+  }, [fetchBillSettlements])
 
   const cashTone = resolveCashTone(position.saldoDisponivel, position.saldoProjetadoDisponivel)
   const criticalAlerts = alerts.filter((a) => a.severity === 'urgent' || a.severity === 'caution')
@@ -74,6 +78,11 @@ export function FinanceHomeTab({
         balanceToneClass={BALANCE_TONE_TEXT[cashTone]}
         compact
         onConfigureSaldo={() => onNavigate('conta')}
+        onReconcile={
+          ledgerDupCount > 0
+            ? () => void reconcileFinanceLedger()
+            : undefined
+        }
       />
 
       <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>

@@ -8,20 +8,6 @@ import { localTodayIso } from '../lib/healthDayBoundary';
 
 /* ── Helpers ───────────────────────────────────────── */
 
-function getDaysUntilDue(diaVencimento: number): number
-{
-  const today = new Date();
-  const currentDay = today.getDate();
-  const daysInMonth = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    0,
-  ).getDate();
-  let diff = diaVencimento - currentDay;
-  if (diff < 0) diff += daysInMonth;
-  return diff;
-}
-
 function calcMedScore(horario: string): number
 {
   const [h, m] = horario.split(':').map(Number);

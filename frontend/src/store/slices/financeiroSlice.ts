@@ -5,6 +5,7 @@ import type {
   Transaction,
   BudgetLimit,
   CashAccountSettings,
+  CashBalanceOverrides,
   Category,
   FinancialGoal,
   FinancePaymentMethod,
@@ -12,6 +13,7 @@ import type {
   ReservedBill,
   ReservedBillItem,
   RecurringIncome,
+  FinanceBillSettlement,
 } from '../storeTypes'
 import { checkBudgetAfterSpend } from '../../lib/financeCategoryBudget'
 import {
@@ -38,6 +40,7 @@ import {
   snapshotFromStore,
 } from '../../lib/financeReservedBillsLocal'
 import { supabase } from '../../lib/supabase'
+import { insertDespesaResilient } from '../../lib/despesasInsert'
 import { evaluateRule503020Compliance } from './financeiroRule503020'
 import {
   DEFAULT_EXPENSE_PRESETS,
@@ -49,6 +52,36 @@ import { DEFAULT_CATEGORY_SEEDS } from '../../lib/financeDefaultCategories'
 import { recoverCardsFromPersist } from '../../lib/recoverLegacyPersist'
 import { syncLocalCardsToServer } from '../../lib/financeCardRecovery'
 import { mergeTxObservacao, setTxObservacaoLocal } from '../../lib/financeTxObservacao'
+
+function parseCashBalanceOverrides(raw: unknown): CashBalanceOverrides | null
+{
+  if (!raw || typeof raw !== 'object') return null
+  const o = raw as Record<string, unknown>
+  if (!o.ativo) return null
+  return {
+    ativo: true,
+    disponivel: Number(o.disponivel) || 0,
+    corrente: Number(o.corrente) || 0,
+    reservado: Number(o.reservado) || 0,
+    projetado: Number(o.projetado) || 0,
+    atualizado_em: o.atualizado_em != null ? String(o.atualizado_em) : null,
+  }
+}
+
+async function persistCashAccountRemote(next: CashAccountSettings): Promise<void>
+{
+  const uid = (await supabase.auth.getUser()).data.user?.id
+  if (!uid) return
+
+  await supabase.from('fin_conta_corrente').upsert({
+    user_id: uid,
+    saldo_inicial: next.saldo_inicial,
+    saldo_banco: next.saldo_banco ?? null,
+    saldo_banco_at: next.saldo_banco_at ?? null,
+    saldos_manual: next.saldos_manual ?? null,
+    updated_at: new Date().toISOString(),
+  })
+}
 
 interface DatabaseDespesa
 {
@@ -86,9 +119,10 @@ export interface FinanceiroSlice
   fetchTransactions: () => Promise<void>
   addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>
   removeTransaction: (id: number) => void
+  patchTransaction: (id: number, patch: Partial<Pick<Transaction, 'descricao' | 'valor' | 'data' | 'categoria' | 'categoria_id'>>) => Promise<void>
   fetchCategories: () => Promise<void>
   seedDefaultCategories: () => Promise<void>
-  addCategory: (c: Omit<Category, 'id'>) => Promise<void>
+  addCategory: (c: Omit<Category, 'id'>) => Promise<Category | undefined>
   updateCategory: (id: number, patch: Partial<Pick<Category, 'nome' | 'cor' | 'icone' | 'grupo'>>) => Promise<void>
   removeCategory: (id: number) => Promise<void>
   fetchBudgets: () => Promise<void>
@@ -117,6 +151,14 @@ export interface FinanceiroSlice
   fetchCashAccount: () => Promise<void>
   setCashInitialBalance: (valor: number) => Promise<void>
   setBankBalance: (valor: number) => Promise<void>
+  alignCashToDisponivel: (targetDisponivel: number) => Promise<void>
+  setCashBalanceOverrides: (fields: {
+    disponivel: number
+    corrente: number
+    reservado: number
+    projetado: number
+  }) => Promise<void>
+  clearCashBalanceOverrides: () => Promise<void>
   fetchReservedBills: () => Promise<void>
   fetchReservedBillItems: () => Promise<void>
   addReservedBill: (bill: Omit<ReservedBill, 'id' | 'valor_gasto' | 'status'>) => Promise<void>
@@ -134,6 +176,10 @@ export interface FinanceiroSlice
   toggleRecurringIncome: (id: number) => Promise<void>
   runFinanceCheck: () => Promise<void>
   evaluateRule503020Compliance: () => Promise<void>
+  billSettlements: FinanceBillSettlement[]
+  fetchBillSettlements: () => Promise<void>
+  financeReconciling: boolean
+  reconcileFinanceLedger: () => Promise<void>
 }
 
 function notifyBudgetAlert(
@@ -316,29 +362,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       }
       if (observacao) insertPayload.observacao = observacao
 
-      let { data, error } = await supabase
-        .from('despesas')
-        .insert(insertPayload)
-        .select()
-        .single()
-
-      // Retry sem colunas ausentes no schema remoto (migration pendente)
-      while (error?.code === 'PGRST204')
-      {
-        const missing = error.message?.match(/'(\w+)' column/)?.[1]
-        if (!missing || !(missing in insertPayload))
-        {
-          break
-        }
-        delete insertPayload[missing]
-        const retry = await supabase
-          .from('despesas')
-          .insert(insertPayload)
-          .select()
-          .single()
-        data = retry.data
-        error = retry.error
-      }
+      const { data, error } = await insertDespesaResilient(supabase, insertPayload)
 
       if (error) throw error
       if (data)
@@ -425,11 +449,78 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     })
   },
 
-  markTransactionPaid: async (id) =>
+  patchTransaction: async (id, patch) =>
   {
+    const prev = get().transactions.find((t) => t.id === id)
+    if (!prev) return
+
     set((s) => ({
       transactions: s.transactions.map((t) =>
-        t.id === id ? { ...t, status_pagamento: 'pago' as const } : t,
+        t.id === id ? { ...t, ...patch } : t,
+      ),
+    }))
+
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid || id <= 0) return
+
+    const row: Record<string, unknown> = {}
+    if (patch.descricao != null) row.descricao = patch.descricao
+    if (patch.valor != null) row.valor = patch.valor
+    if (patch.data != null) row.data_gasto = patch.data
+    if (patch.categoria != null) row.categoria = patch.categoria
+    if (patch.categoria_id != null) row.categoria_id = patch.categoria_id
+
+    if (Object.keys(row).length === 0) return
+
+    try
+    {
+      await supabase.from('despesas').update(row).eq('id', id).eq('user_id', uid)
+    }
+    catch (e)
+    {
+      console.error('patchTransaction:', e)
+      set((s) => ({
+        transactions: s.transactions.map((t) => (t.id === id ? prev : t)),
+      }))
+    }
+  },
+
+  markTransactionPaid: async (id) =>
+  {
+    const target = get().transactions.find((t) => t.id === id)
+    if (!target) return
+
+    const { payablesDedupKey } = await import('../../lib/financePayablesDedup')
+    const { dismissBill } = await import('../../lib/financeBillDismiss')
+    const { recordBillSettlementFromTransaction } = await import('../../lib/financeBillSettlement')
+
+    const dedupKey = payablesDedupKey({
+      kind: target.status_pagamento === 'agendado' ? 'agendado' : 'pendente',
+      label: target.descricao,
+      valor: target.valor,
+      dueDate: target.data.slice(0, 10),
+    })
+
+    const siblingIds = get().transactions
+      .filter((t) =>
+      {
+        if (t.tipo !== 'despesa') return false
+        const status = t.status_pagamento ?? 'pendente'
+        if (status !== 'agendado' && status !== 'pendente') return false
+        return payablesDedupKey({
+          kind: status === 'agendado' ? 'agendado' : 'pendente',
+          label: t.descricao,
+          valor: t.valor,
+          dueDate: t.data.slice(0, 10),
+        }) === dedupKey
+      })
+      .map((t) => t.id)
+
+    const ids = siblingIds.length > 0 ? siblingIds : [id]
+
+    set((s) => ({
+      transactions: s.transactions.map((t) =>
+        ids.includes(t.id) ? { ...t, status_pagamento: 'pago' as const } : t,
       ),
     }))
 
@@ -438,8 +529,20 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       const { error } = await supabase
         .from('despesas')
         .update({ status_pagamento: 'pago' })
-        .eq('id', id)
+        .in('id', ids)
       if (error) throw error
+
+      dismissBill(`tx:${dedupKey}`)
+      dismissBill(`ref:tx:${dedupKey}`)
+
+      const fixaMatch = target.descricao.match(/\[fixa:(\d+)\]/i)
+      if (fixaMatch?.[1])
+      {
+        dismissBill(`fixa-${fixaMatch[1]}`)
+      }
+
+      await recordBillSettlementFromTransaction({ ...target, status_pagamento: 'pago' })
+      void get().fetchBillSettlements()
 
       const anyGet = get() as any
       if (anyGet.addXP) await anyGet.addXP('financeiro', 8)
@@ -514,10 +617,15 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
   addCategory: async (c) =>
   {
     const uid = (await supabase.auth.getUser()).data.user?.id
-    if (!uid) return
+    if (!uid) return undefined
     const { data, error } = await supabase.from('fin_categorias').insert({ ...c, user_id: uid }).select().single()
     if (error) throw error
-    if (data) set((s) => ({ categories: [...s.categories, data] }))
+    if (data)
+    {
+      set((s) => ({ categories: [...s.categories, data] }))
+      return data as Category
+    }
+    return undefined
   },
 
   updateCategory: async (id, patch) =>
@@ -885,7 +993,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       }
       const { data, error } = await supabase
         .from('fin_conta_corrente')
-        .select('saldo_inicial, saldo_banco, saldo_banco_at')
+        .select('saldo_inicial, saldo_banco, saldo_banco_at, saldos_manual')
         .eq('user_id', uid)
         .maybeSingle()
       if (error) throw error
@@ -895,6 +1003,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
           saldo_inicial: Number(data.saldo_inicial) || 0,
           saldo_banco: data.saldo_banco != null ? Number(data.saldo_banco) : null,
           saldo_banco_at: data.saldo_banco_at ?? null,
+          saldos_manual: parseCashBalanceOverrides(data.saldos_manual),
         }
         persistCashAccountLocal(next)
         set({ cashAccount: next })
@@ -922,49 +1031,121 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
     try
     {
-      const uid = (await supabase.auth.getUser()).data.user?.id
-      if (!uid) return
-      await supabase.from('fin_conta_corrente').upsert({
-        user_id: uid,
-        saldo_inicial: next.saldo_inicial,
-        saldo_banco: next.saldo_banco ?? null,
-        saldo_banco_at: next.saldo_banco_at ?? null,
-        updated_at: new Date().toISOString(),
-      })
+      await persistCashAccountRemote(next)
     }
     catch (e) { console.error('setCashInitialBalance:', e) }
   },
 
-  setBankBalance: async (valor) =>
+  alignCashToDisponivel: async (targetDisponivel) =>
   {
+    const { computeSaldoInicialForTargetDisponivel } = await import('../../lib/financeCashAlign')
+    const newInitial = computeSaldoInicialForTargetDisponivel(
+      get().transactions,
+      targetDisponivel,
+      get().reservedBills,
+    )
+
     const prev = get().cashAccount
-    const now = new Date().toISOString()
     const next: CashAccountSettings = {
       ...prev,
-      saldo_banco: Math.max(0, valor),
-      saldo_banco_at: now,
+      saldo_inicial: newInitial,
+      saldo_banco: targetDisponivel,
+      saldo_banco_at: new Date().toISOString(),
     }
     persistCashAccountLocal(next)
     set({ cashAccount: next })
 
     try
     {
-      const uid = (await supabase.auth.getUser()).data.user?.id
-      if (!uid) return
+      await persistCashAccountRemote(next)
 
-      await supabase.from('fin_conta_corrente').upsert({
-        user_id: uid,
-        saldo_inicial: prev.saldo_inicial,
-        saldo_banco: next.saldo_banco,
-        saldo_banco_at: now,
-        updated_at: now,
+      const { toast } = await import('sonner')
+      toast.success('Saldo ajustado', {
+        description: `Disponível agora reflete o valor que você informou. Saldo inicial recalculado para ${newInitial.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}.`,
       })
+    }
+    catch (e)
+    {
+      console.error('alignCashToDisponivel:', e)
+      const { toast } = await import('sonner')
+      toast.error('Não foi possível salvar o ajuste')
+    }
+  },
 
+  setCashBalanceOverrides: async (fields) =>
+  {
+    const { computeSaldoInicialForTargetDisponivel } = await import('../../lib/financeCashAlign')
+    const newInitial = computeSaldoInicialForTargetDisponivel(
+      get().transactions,
+      fields.disponivel,
+      get().reservedBills,
+    )
+
+    const prev = get().cashAccount
+    const manual: CashBalanceOverrides = {
+      ativo: true,
+      disponivel: fields.disponivel,
+      corrente: fields.corrente,
+      reservado: fields.reservado,
+      projetado: fields.projetado,
+      atualizado_em: new Date().toISOString(),
+    }
+    const next: CashAccountSettings = {
+      ...prev,
+      saldo_inicial: newInitial,
+      saldo_banco: fields.disponivel,
+      saldo_banco_at: manual.atualizado_em,
+      saldos_manual: manual,
+    }
+    persistCashAccountLocal(next)
+    set({ cashAccount: next })
+
+    try
+    {
+      await persistCashAccountRemote(next)
+      toast.success('Saldos fixados', {
+        description: 'Os valores da conta corrente foram salvos. O app usa estes números até você voltar ao cálculo automático.',
+      })
+    }
+    catch (e)
+    {
+      console.error('setCashBalanceOverrides:', e)
+      toast.error('Salvo localmente, mas não foi possível sincronizar com a nuvem')
+    }
+  },
+
+  clearCashBalanceOverrides: async () =>
+  {
+    const prev = get().cashAccount
+    const next: CashAccountSettings = {
+      ...prev,
+      saldos_manual: null,
+    }
+    persistCashAccountLocal(next)
+    set({ cashAccount: next })
+
+    try
+    {
+      await persistCashAccountRemote(next)
+      toast.success('Voltou ao cálculo automático')
+    }
+    catch (e)
+    {
+      console.error('clearCashBalanceOverrides:', e)
+    }
+  },
+
+  setBankBalance: async (valor) =>
+  {
+    await get().alignCashToDisponivel(valor)
+
+    try
+    {
       const { recordReconciliationStreak } = await import('../../lib/financeGamification')
       const { buildReconciliationSnapshot } = await import('../../lib/financeReconciliation')
       const snap = buildReconciliationSnapshot(
         get().transactions,
-        next,
+        get().cashAccount,
         get().reservedBills,
       )
       const streak = recordReconciliationStreak(snap.alinhado)
@@ -973,16 +1154,10 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       if (anyGet.addXP) await anyGet.addXP('financeiro', 15)
       if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('financeira', 1)
 
-      const { toast } = await import('sonner')
-      if (snap.alinhado)
+      if (snap.alinhado && streak > 1)
       {
-        toast.success('Saldo conferido com o banco', {
-          description: streak > 1 ? `Streak de reconciliação: ${streak} dias` : '+15 XP financeiro',
-        })
-      }
-      else if (snap.delta != null)
-      {
-        toast.info(snap.axelHeadline, { description: snap.axelDetail })
+        const { toast } = await import('sonner')
+        toast.success('Streak de reconciliação', { description: `${streak} dias` })
       }
     }
     catch (e) { console.error('setBankBalance:', e) }
@@ -1410,6 +1585,85 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       await supabase.from('fin_receitas_recorrentes').update({ ativa }).eq('id', id)
     }
     catch (e) { console.error('toggleRecurringIncome:', e) }
+  },
+
+  billSettlements: [],
+  financeReconciling: false,
+
+  fetchBillSettlements: async () =>
+  {
+    const { fetchBillSettlements, backfillBillSettlementsFromTasks } = await import('../../lib/financeBillSettlement')
+    const anyGet = get() as { tarefas?: { id: number; status: string; titulo: string }[] }
+    if (anyGet.tarefas?.length)
+    {
+      await backfillBillSettlementsFromTasks(anyGet.tarefas as never)
+    }
+    const rows = await fetchBillSettlements(200)
+    set({ billSettlements: rows })
+  },
+
+  reconcileFinanceLedger: async () =>
+  {
+    if (get().financeReconciling) return
+
+    set({ financeReconciling: true })
+    try
+    {
+      const { reconcileFinanceLedger: run } = await import('../../lib/financeLedgerReconcile')
+      const anyGet = get() as {
+        tarefas?: import('../../types').TarefaUnificada[]
+        patchTarefaLocal?: (id: number, dados: Partial<import('../../types').TarefaUnificada>) => void
+      }
+
+      const result = await run({
+        tarefas: anyGet.tarefas ?? [],
+        transactions: get().transactions,
+        reservedBills: get().reservedBills,
+        patchTarefaLocal: (id, dados) =>
+        {
+          anyGet.patchTarefaLocal?.(id, dados)
+        },
+        settlements: get().billSettlements,
+      })
+
+      await Promise.all([
+        get().fetchTransactions(),
+        get().fetchBillSettlements(),
+        get().fetchReservedBills(),
+      ])
+
+      const anyStore = get() as { fetchTarefas?: () => Promise<void> }
+      await anyStore.fetchTarefas?.()
+
+      const { toast } = await import('sonner')
+      const parts = [
+        result.transactionsDeduped > 0 ? `${result.transactionsDeduped} lanç.` : null,
+        result.paidByDayDeduped > 0 ? `${result.paidByDayDeduped} dia` : null,
+        result.settlementsDeduped > 0 ? `${result.settlementsDeduped} pag.` : null,
+        result.pendingDuplicatesRemoved > 0 ? `${result.pendingDuplicatesRemoved} pend.` : null,
+        result.pendingTxClosed > 0 ? `${result.pendingTxClosed} avulso` : null,
+        result.reservedBillsClosed > 0 ? `${result.reservedBillsClosed} reserva(s)` : null,
+        result.staleTasksClosed > 0 ? `${result.staleTasksClosed} tarefa(s)` : null,
+      ].filter(Boolean)
+
+      toast.success('Finanças reconciliadas', {
+        description: parts.length > 0
+          ? `Removido: ${parts.join(' · ')}`
+          : 'Nenhuma duplicata encontrada — histórico já está limpo.',
+      })
+    }
+    catch (e)
+    {
+      console.error('reconcileFinanceLedger:', e)
+      const { toast } = await import('sonner')
+      toast.error('Não foi possível reconciliar', {
+        description: 'Tente novamente em alguns segundos.',
+      })
+    }
+    finally
+    {
+      set({ financeReconciling: false })
+    }
   },
 
   runFinanceCheck: async () =>

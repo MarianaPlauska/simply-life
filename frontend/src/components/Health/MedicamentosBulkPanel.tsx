@@ -184,15 +184,15 @@ export function MedicamentosBulkPanel({
   const queuePreview = useMemo(() =>
     queue.map((item) =>
     {
-      const horarios = horariosFromPeriodos(item.periodos, item.horarios)
+      const horariosList = horariosFromPeriodos(item.periodos, item.horarios)
       const cat = MED_CATEGORIAS.find((c) => c.id === item.categoria)?.label ?? 'Outro'
-      return { ...item, horarios, cat }
+      return { draft: item, horariosList, cat }
     }),
   [queue])
 
   const handleSaveAll = async () =>
   {
-    const items = queuePreview.map((item) => draftToItem(item))
+    const items = queuePreview.map(({ draft }) => draftToItem(draft))
 
     if (items.length === 0)
     {
@@ -486,15 +486,15 @@ export function MedicamentosBulkPanel({
             {queuePreview.map((item, idx) => (
               <li key={idx} className="px-3 py-2.5 flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>{item.nome}</p>
+                  <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>{item.draft.nome}</p>
                   <p className={`text-[10px] font-mono ${AXEL_TEXT_SECONDARY}`}>
-                    {item.cat} · {item.horarios.join(' · ')}
-                    {item.usoDiario ? ' · diário' : ''}
-                    {' · '}{labelDiasSemana(item.diasSemana)}
-                    {item.duracaoDias
-                      ? ` · ${item.duracaoDias}d`
-                      : item.fimTratamento
-                        ? ` · até ${item.fimTratamento}`
+                    {item.cat} · {item.horariosList.join(' · ')}
+                    {item.draft.usoDiario ? ' · diário' : ''}
+                    {' · '}{labelDiasSemana(item.draft.diasSemana)}
+                    {item.draft.duracaoDias
+                      ? ` · ${item.draft.duracaoDias}d`
+                      : item.draft.fimTratamento
+                        ? ` · até ${item.draft.fimTratamento}`
                         : ' · contínuo'}
                   </p>
                 </div>

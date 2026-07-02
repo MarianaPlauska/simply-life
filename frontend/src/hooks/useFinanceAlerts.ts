@@ -14,6 +14,7 @@ export function useFinanceAlerts(monthTransactions?: import('../store/storeTypes
   const cards = useTaskStore((s) => s.cards)
   const financialGoals = useTaskStore((s) => s.financialGoals)
   const recurringIncomes = useTaskStore((s) => s.recurringIncomes)
+  const tarefas = useTaskStore((s) => s.tarefas)
 
   return useMemo(
     () => buildFinanceAlerts({
@@ -27,6 +28,7 @@ export function useFinanceAlerts(monthTransactions?: import('../store/storeTypes
       financialGoals,
       recurringIncomes,
       monthTransactions,
+      tarefas,
     }),
     [
       transactions,
@@ -39,6 +41,7 @@ export function useFinanceAlerts(monthTransactions?: import('../store/storeTypes
       financialGoals,
       recurringIncomes,
       monthTransactions,
+      tarefas,
     ],
   )
 }

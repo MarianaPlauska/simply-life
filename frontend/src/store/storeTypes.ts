@@ -179,11 +179,23 @@ export interface Transaction
   fatura_reserva_id?: number;
 }
 
+export interface CashBalanceOverrides
+{
+  ativo: boolean
+  disponivel: number
+  corrente: number
+  reservado: number
+  projetado: number
+  atualizado_em?: string | null
+}
+
 export interface CashAccountSettings
 {
   saldo_inicial: number;
   saldo_banco?: number | null;
   saldo_banco_at?: string | null;
+  /** Quando ativo, os KPIs da conta corrente usam estes valores em vez do cálculo */
+  saldos_manual?: CashBalanceOverrides | null;
 }
 
 export type ReservedBillStatus = 'aberta' | 'quitada' | 'cancelada';
@@ -211,6 +223,19 @@ export interface ReservedBillItem
   destaque?: 'erro' | null;
   despesa_id?: number;
   created_at?: string;
+}
+
+/** Pagamento de boleto registrado ao concluir tarefa no Kanban */
+export interface FinanceBillSettlement
+{
+  id: number;
+  tarefa_id: number | null;
+  bill_id: string | null;
+  titulo: string;
+  valor: number;
+  pago_em: string;
+  origem: string;
+  notas: string | null;
 }
 
 export interface BudgetLimit {

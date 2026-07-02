@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Plus, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -11,7 +11,7 @@ import {
   isToday,
   transactionDayKey,
 } from '../../lib/financeLedger'
-import { computeCashPosition } from '../../lib/financeReservedBills'
+import { useCashPosition } from '../../hooks/useCashPosition'
 import { CategoryPicker } from './CategoryPicker'
 import { FinanceCategories } from './FinanceCategories'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
@@ -22,7 +22,9 @@ import {
   resolvePaymentFromSelection,
 } from '../../lib/financePaymentMethod'
 import { FinanceQuickPresets } from './FinanceQuickPresets'
+import { FinanceReconcileButton } from './FinanceReconcileButton'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
+import { dedupeLedgerEntries, countLedgerDuplicates } from '../../lib/financeTransactionDedup'
 import {
   AXEL_BTN_PRIMARY_COMPACT,
   AXEL_BENTO_PANEL,
@@ -74,11 +76,8 @@ export function FinanceDailyLedgerTab({
 }: FinanceDailyLedgerTabProps)
 {
   const addTransaction = useTaskStore((s) => s.addTransaction)
-  const addCategory = useTaskStore((s) => s.addCategory)
-  const removeCategory = useTaskStore((s) => s.removeCategory)
   const cards = useTaskStore((s) => s.cards)
-  const cashAccount = useTaskStore((s) => s.cashAccount)
-  const reservedBills = useTaskStore((s) => s.reservedBills)
+  const { display: cashPosition } = useCashPosition()
 
   const todayKey = new Date().toISOString().slice(0, 10)
   const [dayKey, setDayKey] = useState(todayKey)
@@ -89,16 +88,34 @@ export function FinanceDailyLedgerTab({
   const [quickPayment, setQuickPayment] = useState<string>(DEFAULT_EXPENSE_PAYMENT)
   const [showCatModal, setShowCatModal] = useState(false)
   const [catModalParentId, setCatModalParentId] = useState<number | null>(null)
+  const [pinVersion, setPinVersion] = useState(0)
+  const [dayPage, setDayPage] = useState(0)
 
-  const dayTx = useMemo(
+  const DAY_PAGE_SIZE = 5
+
+  const dayTxRaw = useMemo(
     () => filterTransactionsByDay(transactions, dayKey),
     [transactions, dayKey],
   )
 
-  const cashPosition = useMemo(
-    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills),
-    [transactions, cashAccount.saldo_inicial, reservedBills],
+  const dayTx = useMemo(
+    () => dedupeLedgerEntries(dayTxRaw),
+    [dayTxRaw],
   )
+
+  const duplicateCount = countLedgerDuplicates(dayTxRaw)
+
+  const dayPageCount = Math.max(1, Math.ceil(dayTx.length / DAY_PAGE_SIZE))
+  const dayPageSafe = Math.min(dayPage, dayPageCount - 1)
+  const dayTxPage = dayTx.slice(
+    dayPageSafe * DAY_PAGE_SIZE,
+    dayPageSafe * DAY_PAGE_SIZE + DAY_PAGE_SIZE,
+  )
+
+  useEffect(() =>
+  {
+    setDayPage(0)
+  }, [dayKey])
 
   const dayNet = useMemo(
     () => dayTx
@@ -184,25 +201,6 @@ export function FinanceDailyLedgerTab({
     setShowCatModal(true)
   }
 
-  const handleRemoveCategory = async (id: number) =>
-  {
-    await removeCategory(id)
-    if (quickCatId === id) setQuickCatId('')
-    toast.success('Categoria removida')
-  }
-
-  const handleQuickAddCategory = async (nome: string) =>
-  {
-    await addCategory({
-      nome,
-      cor: '#6366f1',
-      icone: 'Wallet',
-      tipo: 'despesa',
-      grupo: 'geral',
-    })
-    toast.success(`Categoria "${nome}" criada`)
-  }
-
   const entryForm = (
     <>
       <div className="space-y-1.5">
@@ -272,13 +270,13 @@ export function FinanceDailyLedgerTab({
           <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Categoria</p>
           <CategoryPicker
             categories={activeCategories}
+            tipo="despesa"
             value={quickCatId}
             onChange={setQuickCatId}
             compact
+            pinVersion={pinVersion}
             onAddCategory={() => openCategories(null)}
             onAddSubcategory={(parentId) => openCategories(parentId)}
-            onRemoveCategory={(id) => void handleRemoveCategory(id)}
-            onQuickAddCategory={handleQuickAddCategory}
             onManageCategories={() => openCategories(null)}
           />
         </div>
@@ -289,20 +287,43 @@ export function FinanceDailyLedgerTab({
   const categoryModal = showCatModal ? (
     <FinanceCategories
       defaultParentId={catModalParentId}
-      onClose={() => setShowCatModal(false)}
+      defaultTipo="despesa"
+      pinTipo="despesa"
+      onCategoryCreated={(cat) =>
+      {
+        setQuickCatId(cat.id)
+        setPinVersion((v) => v + 1)
+      }}
+      onClose={() =>
+      {
+        setShowCatModal(false)
+        setPinVersion((v) => v + 1)
+      }}
     />
   ) : null
 
   const dayListSection = (
     <section className={AXEL_BENTO_PANEL}>
-      <header className="flex items-center justify-between px-3 py-2.5 border-b border-line">
-        <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-          {formattedDay} · {dayTx.length} item{dayTx.length !== 1 ? 's' : ''}
-        </p>
-        <p className={`font-mono text-[10px] tabular-nums ${dayNet >= 0 ? 'text-concluido' : 'text-urgente'}`}>
-          {dayNet >= 0 ? '+' : ''}{fmt(dayNet)}
-        </p>
+      <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line">
+        <div className="min-w-0">
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+            {formattedDay} · {dayTx.length} item{dayTx.length !== 1 ? 's' : ''}
+            {duplicateCount > 0 && (
+              <span className="text-urgente ml-1">({duplicateCount} dup.)</span>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {duplicateCount > 0 && (
+            <FinanceReconcileButton className="font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors" />
+          )}
+          <p className={`font-mono text-[10px] tabular-nums ${dayNet >= 0 ? 'text-concluido' : 'text-urgente'}`}>
+            {dayNet >= 0 ? '+' : ''}{fmt(dayNet)}
+          </p>
+        </div>
       </header>
+
+      <div className="max-h-[min(420px,50dvh)] overflow-y-auto custom-scrollbar">
 
       <ul className="md:hidden divide-y divide-line">
         {dayTx.length === 0 && (
@@ -310,7 +331,7 @@ export function FinanceDailyLedgerTab({
             Nada registrado neste dia
           </li>
         )}
-        {dayTx.map((t) =>
+        {dayTxPage.map((t) =>
         {
           const cat = t.categoria_id
             ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
@@ -355,7 +376,7 @@ export function FinanceDailyLedgerTab({
                 </td>
               </tr>
             )}
-            {dayTx.map((t) =>
+            {dayTxPage.map((t) =>
             {
               const cat = t.categoria_id
                 ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
@@ -382,6 +403,33 @@ export function FinanceDailyLedgerTab({
           </tbody>
         </table>
       </div>
+      </div>
+
+      {dayTx.length > 0 && (
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-line bg-chrome/30">
+          <button
+            type="button"
+            disabled={dayPageSafe <= 0}
+            onClick={() => setDayPage((p) => Math.max(0, p - 1))}
+            className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted disabled:opacity-40 min-h-[40px] px-2"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Anterior
+          </button>
+          <span className={`font-mono text-[9px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+            {dayPageSafe + 1} / {dayPageCount}
+          </span>
+          <button
+            type="button"
+            disabled={dayPageSafe >= dayPageCount - 1}
+            onClick={() => setDayPage((p) => Math.min(dayPageCount - 1, p + 1))}
+            className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted disabled:opacity-40 min-h-[40px] px-2"
+          >
+            Próxima
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </section>
   )
 

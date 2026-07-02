@@ -9,6 +9,7 @@ import {
   DEFAULT_ML_POR_COPO,
   metaMl,
   mlPorCopo,
+  isBuiltInMlPreset,
   patchMlPresetChange,
   registrosMl,
   resolveMlPresets,
@@ -68,6 +69,11 @@ export function WaterTrackerCard()
     const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
     if (!ensured) return
     await updateHabitoConfig(ensured.id, { ml_por_copo: ml })
+    if (!isBuiltInMlPreset(ml))
+    {
+      const patch = patchMlPresetChange(ensured, 'add', ml)
+      await updateHabitoConfig(ensured.id, patch)
+    }
   }
 
   const patchMlPresets = async (action: 'add' | 'remove', ml: number) =>

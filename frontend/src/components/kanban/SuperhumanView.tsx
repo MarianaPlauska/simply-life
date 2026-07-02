@@ -3,6 +3,7 @@ import { Zap, Search, Loader2, Sparkles, Radio } from 'lucide-react'
 import { toast } from 'sonner'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { useTaskStore } from '../../store/useTaskStore'
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces'
 import { useSuperhumanTasks } from '../../hooks/useSuperhumanTasks'
 import { SuperhumanTaskRow } from './SuperhumanTaskRow'
 
@@ -39,7 +40,7 @@ export function SuperhumanView()
         : 'bg-zinc-700'
 
   return (
-    <div className="max-w-5xl mx-auto w-full pb-16 px-1">
+    <div className={`${AXEL_PAGE_SHELL} w-full pb-16 px-1 lg:px-6 xl:px-8`}>
       <header className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">

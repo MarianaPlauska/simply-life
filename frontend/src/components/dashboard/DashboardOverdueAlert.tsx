@@ -2,24 +2,29 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { mergeDashboardTasks } from '../../data/mockDashboardData'
-import { bucketByDueDate } from '../../lib/dueBucket'
+import { listTarefasAtrasadas } from '../../lib/notificacaoUtils'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 export function DashboardOverdueAlert()
 {
   const navigate = useNavigate()
   const storeTarefas = useTaskStore((s) => s.tarefas)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
+  const transactions = useTaskStore((s) => s.transactions)
 
-  const overdue = useMemo(() =>
-  {
-    const ativas = mergeDashboardTasks(storeTarefas).filter((t) => t.status !== 'concluida')
-    return bucketByDueDate(ativas).vencido
-  }, [storeTarefas])
+  const alertCtx = useMemo(
+    () => ({ settlements: billSettlements, transactions }),
+    [billSettlements, transactions],
+  )
+
+  const overdue = useMemo(
+    () => listTarefasAtrasadas(storeTarefas, alertCtx),
+    [storeTarefas, alertCtx],
+  )
 
   if (overdue.length === 0) return null
 
-  const preview = overdue[0]?.titulo ?? 'Tarefa'
+  const preview = overdue[0]?.task.titulo ?? 'Tarefa'
   const extra = overdue.length > 1 ? ` (+${overdue.length - 1})` : ''
 
   return (

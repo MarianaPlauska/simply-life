@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Trash2, CheckCircle2, AlertCircle, CalendarClock,
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart,
   Zap, Briefcase, Shield, Target, Wallet, DollarSign, Search, ArrowUpDown,
+  ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { FinancePeriodToolbar } from './FinancePeriodToolbar'
 import { FinanceGroupedRollupTable } from './FinanceGroupedRollupTable'
@@ -20,6 +21,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import { paymentMethodLabel } from '../../lib/financePaymentMethod'
+import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup'
 import { FinanceTxLabel } from './overview/FinanceTxLabel'
 import type { Category, CategoryGrupo, Transaction } from '../../store/storeTypes'
 
@@ -92,6 +94,10 @@ export function FinanceTransactionsTab({
   const [sortKey, setSortKey] = useState<SortKey>('data')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [filterGrupo, setFilterGrupo] = useState<CategoryGrupo | 'all'>('all')
+  const [mobileOpen, setMobileOpen] = useState(true)
+  const [mobilePage, setMobilePage] = useState(0)
+
+  const MOBILE_PAGE_SIZE = 5
 
   const resolvedPeriod = useMemo(
     () => resolveFinancePeriod(periodConfig),
@@ -121,7 +127,7 @@ export function FinanceTransactionsTab({
   }, [periodTransactions, activeCategories, filterGrupo, filterCat, filterStatus])
 
   const sorted = useMemo(
-    () => [...filteredTx].sort((a, b) => b.data.localeCompare(a.data)),
+    () => dedupeTransactionsForLedger([...filteredTx]).sort((a, b) => b.data.localeCompare(a.data)),
     [filteredTx],
   )
 
@@ -160,6 +166,18 @@ export function FinanceTransactionsTab({
     }
     return map
   }, [rows])
+
+  const mobilePageCount = Math.max(1, Math.ceil(rows.length / MOBILE_PAGE_SIZE))
+  const mobilePageSafe = Math.min(mobilePage, mobilePageCount - 1)
+  const mobileRows = rows.slice(
+    mobilePageSafe * MOBILE_PAGE_SIZE,
+    mobilePageSafe * MOBILE_PAGE_SIZE + MOBILE_PAGE_SIZE,
+  )
+
+  useEffect(() =>
+  {
+    setMobilePage(0)
+  }, [search, filterCat, filterStatus, filterGrupo, periodTransactions.length])
 
   const toggleSort = (k: SortKey) =>
   {
@@ -211,67 +229,110 @@ export function FinanceTransactionsTab({
       </DashboardCollapsible>
 
       {/* Lista mobile */}
-      <ul className="md:hidden border border-line rounded-sl divide-y divide-line">
-        {rows.length === 0 && (
-          <li className={`py-12 text-center text-[12px] px-4 ${AXEL_TEXT_SECONDARY}`}>
-            Nenhum lançamento para os filtros atuais.
-          </li>
-        )}
-        {rows.map((t) =>
-        {
-          const isRec = t.tipo === 'receita'
-          const cat = activeCategories.find((c) => c.id === t.categoria_id || c.nome === t.categoria)
-          const statusKey = (t.status_pagamento || 'pendente') as keyof typeof STATUS_CONFIG
-          const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pendente
-          const StatusIcon = status.icon
-          const { before, after } = balancePair(t, accumulated)
+      <div className="md:hidden border border-line rounded-sl overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setMobileOpen((o) => !o)}
+          className="w-full flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line bg-chrome/40 text-left min-h-[44px]"
+        >
+          <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+            Extrato · {rows.length} lançamento{rows.length !== 1 ? 's' : ''}
+          </span>
+          {mobileOpen ? <ChevronUp className="w-4 h-4 text-ink-muted" /> : <ChevronDown className="w-4 h-4 text-ink-muted" />}
+        </button>
 
-          return (
-            <li key={t.id} className={`px-3 py-3 space-y-2 ${AXEL_ROW_HOVER}`}>
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <FinanceTxLabel label={t.descricao} observacao={t.observacao} className="text-[13px]" />
-                  <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-                    {fmtDate(t.data)}
-                    {' · '}
-                    {paymentMethodLabel(t)}
-                    {' · '}
-                    {isRec ? 'Receita' : (cat?.nome || '-')}
-                  </p>
-                </div>
-                <span className={`font-mono tabular-nums font-semibold shrink-0 text-[13px] ${
-                  isRec ? 'text-concluido' : AXEL_TEXT_PRIMARY
-                }`}>
-                  {isRec ? '+' : '−'}{fmt(t.valor)}
+        {mobileOpen && (
+          <>
+            <ul className="divide-y divide-line max-h-[min(55vh,480px)] overflow-y-auto custom-scrollbar">
+              {rows.length === 0 && (
+                <li className={`py-12 text-center text-[12px] px-4 ${AXEL_TEXT_SECONDARY}`}>
+                  Nenhum lançamento para os filtros atuais.
+                </li>
+              )}
+              {mobileRows.map((t) =>
+              {
+                const isRec = t.tipo === 'receita'
+                const cat = activeCategories.find((c) => c.id === t.categoria_id || c.nome === t.categoria)
+                const statusKey = (t.status_pagamento || 'pendente') as keyof typeof STATUS_CONFIG
+                const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pendente
+                const StatusIcon = status.icon
+                const { before, after } = balancePair(t, accumulated)
+
+                return (
+                  <li key={t.id} className={`px-3 py-3 space-y-2 ${AXEL_ROW_HOVER}`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <FinanceTxLabel label={t.descricao} observacao={t.observacao} className="text-[13px]" />
+                        <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                          {fmtDate(t.data)}
+                          {' · '}
+                          {paymentMethodLabel(t)}
+                          {' · '}
+                          {isRec ? (cat?.nome ?? 'Receita') : (cat?.nome || '-')}
+                        </p>
+                      </div>
+                      <span className={`font-mono tabular-nums font-semibold shrink-0 text-[13px] ${
+                        isRec ? 'text-concluido' : AXEL_TEXT_PRIMARY
+                      }`}>
+                        {isRec ? '+' : '−'}{fmt(t.valor)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${status.text}`}>
+                        <StatusIcon className="w-3 h-3" />
+                        {status.label}
+                      </span>
+                      <span className="flex items-center gap-2">
+                        <span className={`font-mono tabular-nums text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                          {fmt(before)}
+                          <span className="mx-1 opacity-60">→</span>
+                          <span className={after >= 0 ? AXEL_TEXT_PRIMARY : 'text-urgente'}>
+                            {fmt(after)}
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeTransaction(t.id)}
+                          className="p-2 text-ink-muted hover:text-urgente min-w-[40px] min-h-[40px] flex items-center justify-center"
+                          aria-label="Remover lançamento"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </span>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+
+            {rows.length > 0 && (
+              <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-line bg-chrome/30">
+                <button
+                  type="button"
+                  disabled={mobilePageSafe <= 0}
+                  onClick={() => setMobilePage((p) => Math.max(0, p - 1))}
+                  className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted disabled:opacity-40 min-h-[40px] px-2"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  Anterior
+                </button>
+                <span className={`font-mono text-[9px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+                  {mobilePageSafe + 1} / {mobilePageCount}
                 </span>
+                <button
+                  type="button"
+                  disabled={mobilePageSafe >= mobilePageCount - 1}
+                  onClick={() => setMobilePage((p) => Math.min(mobilePageCount - 1, p + 1))}
+                  className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted disabled:opacity-40 min-h-[40px] px-2"
+                >
+                  Próxima
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-              <div className="flex items-center justify-between gap-2">
-                <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${status.text}`}>
-                  <StatusIcon className="w-3 h-3" />
-                  {status.label}
-                </span>
-                <span className="flex items-center gap-2">
-                  <span className={`font-mono tabular-nums text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                    {fmt(before)}
-                    <span className="mx-1 opacity-60">→</span>
-                    <span className={after >= 0 ? AXEL_TEXT_PRIMARY : 'text-urgente'}>
-                      {fmt(after)}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeTransaction(t.id)}
-                    className="p-2 text-ink-muted hover:text-urgente min-w-[40px] min-h-[40px] flex items-center justify-center"
-                    aria-label="Remover lançamento"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </span>
-              </div>
-            </li>
-          )
-        })}
-      </ul>
+            )}
+          </>
+        )}
+      </div>
 
       <div className="hidden md:block border border-line rounded-sl overflow-x-auto">
         <table className="w-full min-w-[720px] text-[12px] border-collapse">

@@ -7,6 +7,7 @@ import type {
   ReservedBill,
   Transaction,
 } from '../store/storeTypes'
+import { dedupeTransactionsForLedger } from './financeTransactionDedup'
 
 const MONTH_NAMES = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -21,6 +22,7 @@ export const FINANCE_MAX_PAST_OFFSET = 5
 
 export interface OutlookLineItem
 {
+  id?: number
   label: string
   valor: number
   hint?: string
@@ -198,8 +200,9 @@ function computeActualMonthSlice(
 ): ActualMonthSlice
 {
   const monthTx = transactions.filter((t) => isInMonth(t.data, year, month))
-  const receitaTx = monthTx.filter((t) => t.tipo === 'receita')
-  const despesaTx = monthTx.filter((t) => t.tipo === 'despesa' || t.tipo === 'investimento')
+  const unique = dedupeTransactionsForLedger(monthTx)
+  const receitaTx = unique.filter((t) => t.tipo === 'receita')
+  const despesaTx = unique.filter((t) => t.tipo === 'despesa' || t.tipo === 'investimento')
   const receitas = receitaTx.reduce((s, t) => s + t.valor, 0)
   const despesas = despesaTx.reduce((s, t) => s + t.valor, 0)
 
@@ -208,11 +211,13 @@ function computeActualMonthSlice(
     despesas,
     saldo: receitas - despesas,
     receitaItens: receitaTx.map((t) => ({
+      id: t.id,
       label: t.descricao,
       valor: t.valor,
       hint: t.observacao?.trim() || undefined,
     })),
     despesaItens: despesaTx.map((t) => ({
+      id: t.id,
       label: t.descricao,
       valor: t.valor,
       hint: t.observacao?.trim() || undefined,

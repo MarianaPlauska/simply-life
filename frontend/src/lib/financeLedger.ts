@@ -1,4 +1,5 @@
 import type { Category, Transaction } from '../store/storeTypes'
+import { dedupeTransactionsForLedger } from './financeTransactionDedup'
 
 // Razão contábil — saldo corrente vs projetado (pago / pendente / agendado)
 
@@ -111,9 +112,10 @@ export function buildRunningLedger(
   })
 }
 
-/** Resumo — saldo inicial + movimentações que afetam caixa */
+/** Resumo — saldo inicial + movimentações que afetam caixa (sem duplicatas de boleto) */
 export function summarizeLedger(transactions: Transaction[], initialBalance = 0): LedgerSummary
 {
+  const unique = dedupeTransactionsForLedger(transactions)
   let saldoCorrente = initialBalance
   let receitasPagas = 0
   let despesasPagas = 0
@@ -121,7 +123,7 @@ export function summarizeLedger(transactions: Transaction[], initialBalance = 0)
   let agendados = 0
   let saldoProjetado = initialBalance
 
-  for (const t of transactions)
+  for (const t of unique)
   {
     const status = t.status_pagamento ?? 'pendente'
     const signed = signedValue(t)

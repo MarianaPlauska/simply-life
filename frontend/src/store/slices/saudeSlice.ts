@@ -11,6 +11,8 @@ import {
   isPhantomHabitId,
   localTodayIso,
   mergeHabitosAfterFetch,
+  readCachedWaterEntries,
+  writeCachedWaterEntries,
   writeStoredHealthDay,
 } from '../../lib/healthDayBoundary'
 import { persistLocalMlPorCopo } from '../../lib/waterHydration'
@@ -625,6 +627,38 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       const habitos = mergeHabitosAfterFetch(localBefore, mapped, today)
       set({ habitos })
 
+      const aguaMerged = habitos.find((h) => h.tipo === 'agua')
+      if (
+        aguaMerged
+        && !isPhantomHabitId(aguaMerged.id)
+        && aguaMerged.config?.ultima_data === today
+      )
+      {
+        const remoteAgua = mapped.find((h) => h.tipo === 'agua')
+        const remoteMl = remoteAgua?.config?.registros_ml?.length ?? 0
+        const mergedMl = aguaMerged.config?.registros_ml?.length ?? aguaMerged.progresso_atual
+        if (mergedMl > remoteMl)
+        {
+          try
+          {
+            const uid = (await supabase.auth.getUser()).data.user?.id
+            const query = supabase
+              .from('habitos_diarios')
+              .update({
+                progresso_atual: mergedMl,
+                config: aguaMerged.config,
+              })
+              .eq('id', aguaMerged.id)
+            const { error: syncErr } = uid ? await query.eq('user_id', uid) : await query
+            if (syncErr) throw syncErr
+          }
+          catch (e)
+          {
+            console.error('sync agua cache→supabase:', e)
+          }
+        }
+      }
+
       if (isNovoDiaDeSaude(today))
       {
         writeStoredHealthDay(today)
@@ -634,6 +668,13 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       {
         if (!habitoPrecisaReset(h, today))
         {
+          continue
+        }
+
+        const merged = habitos.find((m) => m.id === h.id)
+        if (merged?.config?.ultima_data === today)
+        {
+          // merge preservou progresso de hoje — não sobrescrever no Supabase
           continue
         }
 
@@ -909,6 +950,8 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       registros_ml,
     }
 
+    writeCachedWaterEntries(registros_ml)
+
     set((s) => ({
       habitos: s.habitos.map((h) =>
         h.id === id ? { ...h, progresso_atual: next, config } : h
@@ -918,11 +961,17 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     try
     {
       const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid)
+      {
+        const { toast } = await import('sonner')
+        toast.message('Água salva neste aparelho — entre na conta para sincronizar')
+        return
+      }
       const query = supabase
         .from('habitos_diarios')
         .update({ progresso_atual: next, config })
         .eq('id', id)
-      const { error } = uid ? await query.eq('user_id', uid) : await query
+      const { error } = await query.eq('user_id', uid)
       if (error) throw error
 
       writeStoredHealthDay(today)
@@ -936,9 +985,20 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     catch (e)
     {
       console.error('setAguaRegistros:', e)
+      const cached = readCachedWaterEntries() ?? registros_ml
+      set((s) => ({
+        habitos: s.habitos.map((h) =>
+          h.id === id
+            ? {
+              ...h,
+              progresso_atual: cached.length,
+              config: { ...(h.config ?? {}), ultima_data: today, registros_ml: cached },
+            }
+            : h
+        ),
+      }))
       const { toast } = await import('sonner')
-      toast.error('Não foi possível salvar a água — tente de novo')
-      await get().fetchHabitos()
+      toast.error('Não foi possível sincronizar a água — mantido neste aparelho')
     }
   },
 

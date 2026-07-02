@@ -1,10 +1,11 @@
-import type { ContaFixa, ReservedBill, Transaction, VirtualCard } from '../store/storeTypes'
+import type { ContaFixa, FinanceBillSettlement, ReservedBill, Transaction, VirtualCard } from '../store/storeTypes'
 import { billRemaining } from './financeReservedBills'
 import { isBillDismissed } from './financeBillDismiss'
-import { isContaFixaPostedThisMonth } from './financeRecurringPost'
+import { isContaFixaSatisfiedThisMonth } from './financeRecurringPost'
 import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
 import { getBillingCycle, getInvoiceTransactions, sumInvoice } from './financeCardCycle'
 import { transactionDayKey } from './financeLedger'
+import { dedupeUpcomingBills } from './financePayablesDedup'
 
 export interface UpcomingBill
 {
@@ -54,6 +55,7 @@ export function buildUpcomingBills(
     cards: VirtualCard[]
     transactions: Transaction[]
     reservedBills?: ReservedBill[]
+    settlements?: FinanceBillSettlement[]
     horizonDays?: number
     reference?: Date
     includeDismissed?: boolean
@@ -95,7 +97,12 @@ export function buildUpcomingBills(
 
   for (const conta of options.contasFixas.filter((c) => contaFixaEfetivamenteAtiva(c, reference)))
   {
-    if (isContaFixaPostedThisMonth(conta.id, options.transactions, reference)) continue
+    if (isContaFixaSatisfiedThisMonth(
+      conta,
+      options.transactions,
+      options.settlements ?? [],
+      reference,
+    )) continue
 
     const dueDate = nextContaFixaDate(conta, reference)
     const daysUntil = daysBetween(reference, new Date(`${dueDate}T12:00:00`))
@@ -160,5 +167,5 @@ export function buildUpcomingBills(
     if (keep(candidate)) bills.push(candidate)
   }
 
-  return bills.sort((a, b) => a.daysUntil - b.daysUntil)
+  return dedupeUpcomingBills(bills.sort((a, b) => a.daysUntil - b.daysUntil))
 }

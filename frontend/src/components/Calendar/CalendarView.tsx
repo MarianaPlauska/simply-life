@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock, MapPin, CalendarDays, Loader2 } from 'lucide-react';
 import { useTaskStore, type CalendarEvent } from '../../store/useTaskStore';
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 
 /* ── Adapt store events to local display model ── */
 interface DisplayEvent {
@@ -102,7 +103,7 @@ export function CalendarView() {
     day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
   return (
-    <div className="max-w-6xl mx-auto pb-16">
+    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16`}>
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>

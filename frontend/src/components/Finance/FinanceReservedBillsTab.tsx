@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CalendarClock, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -15,6 +15,8 @@ import { ReservedBillCard } from './reserved-bills/ReservedBillCard'
 import { ReservedBillsSummaryBar } from './reserved-bills/ReservedBillsSummaryBar'
 import { UpcomingPayablesSection } from './UpcomingPayablesSection'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
+import { FinanceReconcileButton } from './FinanceReconcileButton'
+import { isPaidInSettlements } from '../../lib/financeLedgerReconcile'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY,
@@ -28,6 +30,8 @@ export function FinanceReservedBillsTab()
   const cards = useTaskStore((s) => s.cards)
   const reservedBills = useTaskStore((s) => s.reservedBills)
   const reservedBillItems = useTaskStore((s) => s.reservedBillItems)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
+  const fetchBillSettlements = useTaskStore((s) => s.fetchBillSettlements)
   const addReservedBill = useTaskStore((s) => s.addReservedBill)
   const recordBillSpend = useTaskStore((s) => s.recordBillSpend)
   const cancelReservedBill = useTaskStore((s) => s.cancelReservedBill)
@@ -45,9 +49,18 @@ export function FinanceReservedBillsTab()
   const [expandedIds, setExpandedIds] = useState<Set<number>>(() => new Set())
   const [summaryExpanded, setSummaryExpanded] = useState(false)
 
+  useEffect(() =>
+  {
+    void fetchBillSettlements()
+  }, [fetchBillSettlements])
+
   const abertas = useMemo(
-    () => reservedBills.filter((b) => b.status === 'aberta'),
-    [reservedBills],
+    () => reservedBills.filter((b) =>
+    {
+      if (b.status !== 'aberta') return false
+      return !isPaidInSettlements(b.titulo, b.valor_alocado, billSettlements)
+    }),
+    [reservedBills, billSettlements],
   )
 
   const visibleBills = useMemo(() =>
@@ -126,7 +139,7 @@ export function FinanceReservedBillsTab()
       <UpcomingPayablesSection />
 
       <section className={AXEL_BORDERLESS_PANEL}>
-        <header className="mb-3">
+        <header className="mb-3 flex items-start justify-between gap-2">
           <div className="flex items-start gap-2 min-w-0">
             <CalendarClock size={14} className="text-accent shrink-0 mt-0.5" />
             <div className="min-w-0">
@@ -138,6 +151,7 @@ export function FinanceReservedBillsTab()
               </p>
             </div>
           </div>
+          <FinanceReconcileButton className="font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors shrink-0" />
         </header>
 
         {isDemoData && (

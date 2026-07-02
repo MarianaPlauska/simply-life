@@ -29,11 +29,8 @@ import {
 import { useFinancePurchaseCheck } from '../../hooks/useFinancePurchaseCheck'
 import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
 import { FinancePurchaseCheckStep } from './overview/FinancePurchaseCheckStep'
-import {
-  FinanceExtraIncomeSection,
-  type ReceitaCreditoQuando,
-} from './FinanceExtraIncomeSection'
-import type { NewTransactionModalMode } from '../../lib/newTransactionModalMode'
+import { FinanceExtraIncomeSection, type ReceitaCreditoQuando } from './FinanceExtraIncomeSection'
+import { FormFieldLabel } from '../ui/FormFieldLabel'
 
 type LancamentoModo = 'imediato' | 'futuro'
 type LancamentoTipo = 'despesa' | 'receita' | 'investimento'
@@ -67,13 +64,14 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const addTransaction = useTaskStore((s) => s.addTransaction)
   const setCashInitialBalance = useTaskStore((s) => s.setCashInitialBalance)
-  const removeCategory = useTaskStore((s) => s.removeCategory)
   const registerInteraction = useTaskStore((s) => s.registerInteraction)
   const { loading: checkLoading, verdict, iaAtiva, checkPurchase, reset: resetCheck } = useFinancePurchaseCheck()
   const mood = useMoodOrchestration()
 
   const [showCatModal, setShowCatModal] = useState(false)
   const [catModalParentId, setCatModalParentId] = useState<number | null>(null)
+  const [catModalDefaultTipo, setCatModalDefaultTipo] = useState<'receita' | 'despesa'>('despesa')
+  const [pinVersion, setPinVersion] = useState(0)
   const [showInvestimento, setShowInvestimento] = useState(false)
   const [modo, setModo] = useState<LancamentoModo>('imediato')
   const [phase, setPhase] = useState<'form' | 'axel'>('form')
@@ -131,16 +129,6 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
       setSaldoValor(cashAccount.saldo_inicial > 0 ? String(cashAccount.saldo_inicial) : '')
     }
   }, [isOpen, mode, cashAccount.saldo_inicial])
-
-  const handleRemoveCategory = async (id: number) =>
-  {
-    await removeCategory(id)
-    if (form.categoria_id === id)
-    {
-      setForm((f) => ({ ...f, categoria_id: '' }))
-    }
-    toast.success('Categoria removida')
-  }
 
   if (!isOpen) return null
 
@@ -335,9 +323,13 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     resetAndClose()
   }
 
-  const openCategories = (parentId: number | null = null) =>
+  const openCategories = (
+    parentId: number | null = null,
+    tipo: 'receita' | 'despesa' = form.tipo === 'receita' ? 'receita' : 'despesa',
+  ) =>
   {
     setCatModalParentId(parentId)
+    setCatModalDefaultTipo(tipo)
     setShowCatModal(true)
   }
 
@@ -484,7 +476,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
               </div>
               <div className="space-y-1.5">
                 <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-                  Saldo atual na conta (R$)
+                  Saldo atual na conta (R$) <span className="text-urgente">*</span>
                 </label>
                 <input
                   inputMode="decimal"
@@ -537,7 +529,11 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           )}
 
           <div className="space-y-1.5">
-            <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Descrição</label>
+            <label className="block">
+              <FormFieldLabel required className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Descrição
+              </FormFieldLabel>
+            </label>
             <input
               type="text"
               placeholder={
@@ -555,7 +551,11 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           </div>
 
           <div className="space-y-1.5">
-            <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Valor (R$)</label>
+            <label className="block">
+              <FormFieldLabel required className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Valor (R$)
+              </FormFieldLabel>
+            </label>
             <input
               inputMode="decimal"
               placeholder="0,00"
@@ -604,8 +604,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
           {(form.tipo === 'receita' || somenteReceita) && (
             <div className="space-y-2">
-              <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-                Origem (opcional)
+              <label className="block">
+                <FormFieldLabel optional className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  Categoria
+                </FormFieldLabel>
               </label>
               <CategoryPicker
                 categories={categories}
@@ -613,9 +615,9 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 value={form.categoria_id}
                 onChange={(id) => setForm({ ...form, categoria_id: id })}
                 compact
-                onAddCategory={() => openCategories(null)}
-                onManageCategories={() => openCategories(null)}
-                onRemoveCategory={(id) => void handleRemoveCategory(id)}
+                pinVersion={pinVersion}
+                onAddCategory={() => openCategories(null, 'receita')}
+                onManageCategories={() => openCategories(null, 'receita')}
               />
             </div>
           )}
@@ -633,10 +635,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                   value={form.categoria_id}
                   onChange={(id) => setForm({ ...form, categoria_id: id })}
                   compact
+                  pinVersion={pinVersion}
                   onAddCategory={() => openCategories(null)}
                   onAddSubcategory={(parentId) => openCategories(parentId)}
                   onManageCategories={() => openCategories(null)}
-                  onRemoveCategory={(id) => void handleRemoveCategory(id)}
                 />
               </div>
 
@@ -695,9 +697,9 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 value={form.categoria_id}
                 onChange={(id) => setForm({ ...form, categoria_id: id })}
                 compact
+                pinVersion={pinVersion}
                 onAddCategory={() => openCategories(null)}
                 onManageCategories={() => openCategories(null)}
-                onRemoveCategory={(id) => void handleRemoveCategory(id)}
               />
             </div>
           )}
@@ -754,10 +756,20 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
       {showCatModal && (
         <FinanceCategories
           defaultParentId={catModalParentId}
+          defaultTipo={catModalDefaultTipo}
+          autoOpenAdd={catModalParentId === null}
+          initialGrupo="geral"
+          pinTipo={catModalDefaultTipo}
+          onCategoryCreated={(cat) =>
+          {
+            setForm((f) => ({ ...f, categoria_id: cat.id }))
+            setPinVersion((v) => v + 1)
+          }}
           onClose={() =>
           {
             setShowCatModal(false)
             setCatModalParentId(null)
+            setPinVersion((v) => v + 1)
           }}
         />
       )}

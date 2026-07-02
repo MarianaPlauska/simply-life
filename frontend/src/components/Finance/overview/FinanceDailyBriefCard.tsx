@@ -43,8 +43,8 @@ export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCard
   )
 
   return (
-    <div id="dashboard-finance-launch" className="flex flex-col gap-3 min-w-0 scroll-mt-20">
-      <section className={`${AXEL_BORDERLESS_PANEL} border-l-[3px] border-l-accent bg-gradient-to-br from-accent/8 to-transparent`}>
+    <div id="dashboard-finance-launch" className="flex flex-col gap-2 min-w-0 scroll-mt-20">
+      <section className={`${AXEL_BORDERLESS_PANEL} border-l-[3px] border-l-accent bg-gradient-to-br from-accent/8 to-transparent flex flex-col`}>
         <button
           type="button"
           onClick={() => navigate('/financeiro')}

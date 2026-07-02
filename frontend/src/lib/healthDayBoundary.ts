@@ -1,6 +1,29 @@
 import type { HabitoDiario, HabitoDiarioConfig } from '../store/storeTypes'
 import { readScopedJson, scopedStorageKey, writeScopedJson } from './userScopedStorage'
 
+const WATER_DAY_CACHE_KEY = 'simply-life:water-entries-day'
+
+interface WaterDayCache
+{
+  date: string
+  entries: number[]
+}
+
+export function readCachedWaterEntries(): number[] | null
+{
+  const cached = readScopedJson<WaterDayCache>(WATER_DAY_CACHE_KEY)
+  if (!cached || cached.date !== localTodayIso()) return null
+  return cached.entries
+}
+
+export function writeCachedWaterEntries(entries: number[]): void
+{
+  writeScopedJson(WATER_DAY_CACHE_KEY, {
+    date: localTodayIso(),
+    entries,
+  })
+}
+
 // Data local do usuário (YYYY-MM-DD) — base para reset diário de saúde
 
 const STORAGE_KEY = 'simply-life:health-day-iso'
@@ -47,6 +70,22 @@ export function mergeHabitosAfterFetch(
     const localH = local.find((l) => l.id === remoteH.id || l.tipo === remoteH.tipo)
     if (!localH)
     {
+      if (remoteH.tipo === 'agua')
+      {
+        const cached = readCachedWaterEntries()
+        if (cached && cached.length > 0 && remoteH.config?.ultima_data !== today)
+        {
+          return {
+            ...remoteH,
+            progresso_atual: cached.length,
+            config: {
+              ...(remoteH.config ?? {}),
+              ultima_data: today,
+              registros_ml: cached,
+            },
+          }
+        }
+      }
       return remoteH
     }
 
@@ -54,6 +93,7 @@ export function mergeHabitosAfterFetch(
     const remoteToday = remoteH.config?.ultima_data === today
     const localMl = localH.config?.registros_ml?.length ?? 0
     const remoteMl = remoteH.config?.registros_ml?.length ?? 0
+    const cachedMl = localH.tipo === 'agua' ? (readCachedWaterEntries()?.length ?? 0) : 0
 
     if (
       localToday
@@ -61,6 +101,7 @@ export function mergeHabitosAfterFetch(
         !remoteToday
         || localH.progresso_atual > remoteH.progresso_atual
         || localMl > remoteMl
+        || cachedMl > remoteMl
         || (localH.config?.ml_por_copo && localH.config.ml_por_copo !== remoteH.config?.ml_por_copo)
         || (localH.config?.ml_presets?.length && JSON.stringify(localH.config.ml_presets) !== JSON.stringify(remoteH.config?.ml_presets))
         || (localH.config?.ml_ocultos?.length && JSON.stringify(localH.config.ml_ocultos) !== JSON.stringify(remoteH.config?.ml_ocultos))

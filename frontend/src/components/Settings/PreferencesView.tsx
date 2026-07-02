@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import { AxelSystemGuide } from '../axel/AxelSystemGuide';
@@ -199,7 +200,7 @@ export function PreferencesView() {
     {
       return;
     }
-    const next = toggleMobileNavModule(mobileNavModules, id);
+    const next = toggleMobileNavModule(mobileNavModules, id as Exclude<MobileNavModuleId, 'home'>);
     if (next.join(',') === mobileNavModules.join(','))
     {
       toast.info('Escolha pelo menos um módulo além do Home');
@@ -640,7 +641,7 @@ export function PreferencesView() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto pb-16">
+    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16`}>
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white tracking-tight">Preferências</h1>

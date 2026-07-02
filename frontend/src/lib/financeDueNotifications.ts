@@ -43,6 +43,21 @@ export async function syncFinanceDueNotifications(
   {
     if (wasDueNotifSent(bill.id)) continue
 
+    const { data: existing } = await supabase
+      .from('notificacoes')
+      .select('id')
+      .eq('user_id', uid)
+      .eq('tipo', 'financeiro')
+      .eq('lida', 0)
+      .ilike('titulo', `%${bill.label}%`)
+      .limit(1)
+
+    if (existing && existing.length > 0)
+    {
+      markDueNotifSent(bill.id)
+      continue
+    }
+
     const urgencia = bill.daysUntil <= 1 ? 'critica' : 'alta'
     const titulo = bill.daysUntil === 0
       ? `Conta vence hoje · ${bill.label}`

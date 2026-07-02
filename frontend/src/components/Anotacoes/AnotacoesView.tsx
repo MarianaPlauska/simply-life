@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';
 import { sanitizeNoteHtml } from '../../lib/sanitizeHtml';
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { RichTextEditor } from '../ui/RichTextEditor';
 import { EmptyState } from '../ui/EmptyState';
 
@@ -70,7 +71,7 @@ export function AnotacoesView() {
 
   return (
     <>
-      <div className="flex h-[calc(100vh-7rem)] max-w-7xl mx-auto gap-0 rounded-xl border border-zinc-800/40 overflow-hidden" role="region" aria-label="Segundo Cérebro">
+      <div className={`flex h-[calc(100vh-7rem)] ${AXEL_PAGE_SHELL} lg:px-6 xl:px-8 gap-0 rounded-xl border border-zinc-800/40 overflow-hidden`} role="region" aria-label="Segundo Cérebro">
 
         {/* Left Sidebar */}
         <aside className="w-72 shrink-0 bg-zinc-900/30 border-r border-zinc-800/30 flex flex-col" aria-label="Lista de anotações">

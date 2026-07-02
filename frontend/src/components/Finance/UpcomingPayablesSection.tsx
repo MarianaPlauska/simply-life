@@ -1,13 +1,19 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { AlertCircle, Calendar, QrCode, Receipt } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { buildUpcomingBills } from '../../lib/financeUpcomingBills'
+import { payablesDedupKey } from '../../lib/financePayablesDedup'
+import { isPaidInSettlements } from '../../lib/financeLedgerReconcile'
+import { isBillDismissed } from '../../lib/financeBillDismiss'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
+import type { UpcomingBill } from '../../lib/financeUpcomingBills'
+import type { FinanceBillSettlement } from '../../store/storeTypes'
+import type { TarefaUnificada } from '../../types'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -29,6 +35,52 @@ function kindLabel(kind: string, hint?: string): string
   return 'Conta'
 }
 
+function parseValorFromTitulo(titulo: string): number
+{
+  const m = titulo.match(/R\$\s*([\d.,]+)/i)
+  if (!m?.[1]) return 0
+  const raw = m[1].includes(',')
+    ? m[1].replace(/\./g, '').replace(',', '.')
+    : m[1]
+  const n = Number.parseFloat(raw)
+  return Number.isFinite(n) ? n : 0
+}
+
+function payableResolvedByTasks(bill: UpcomingBill, tarefas: TarefaUnificada[]): boolean
+{
+  const nome = bill.label.toLowerCase().replace(/\s*\[fixa:\d+\]/gi, '').trim()
+  const month = bill.dueDate.slice(0, 7)
+
+  return tarefas.some((t) =>
+  {
+    if (t.status !== 'concluida') return false
+    const titulo = t.titulo.toLowerCase()
+    if (!titulo.includes('boleto') && t.origem !== 'financeiro' && !titulo.startsWith('📄'))
+    {
+      return false
+    }
+    if (!titulo.includes(nome)) return false
+    const valor = parseValorFromTitulo(t.titulo)
+    if (valor > 0 && Math.abs(valor - bill.valor) > 0.02) return false
+    const tMonth = (t.data_vencimento ?? '').slice(0, 7)
+    return !tMonth || tMonth === month
+  })
+}
+
+function payableResolvedBySettlements(
+  bill: UpcomingBill,
+  settlements: FinanceBillSettlement[],
+): boolean
+{
+  if (isPaidInSettlements(bill.label, bill.valor, settlements))
+  {
+    return true
+  }
+
+  const key = payablesDedupKey(bill)
+  return settlements.some((s) => s.bill_id === `tx:${key}`)
+}
+
 /** PIX, boletos avulsos e lançamentos futuros — lembrete visual como nas fixas */
 export function UpcomingPayablesSection()
 {
@@ -36,7 +88,15 @@ export function UpcomingPayablesSection()
   const reservedBills = useTaskStore((s) => s.reservedBills)
   const cards = useTaskStore((s) => s.cards)
   const transactions = useTaskStore((s) => s.transactions)
+  const tarefas = useTaskStore((s) => s.tarefas)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
   const markTransactionPaid = useTaskStore((s) => s.markTransactionPaid)
+  const fetchBillSettlements = useTaskStore((s) => s.fetchBillSettlements)
+
+  useEffect(() =>
+  {
+    void fetchBillSettlements()
+  }, [fetchBillSettlements])
 
   const payables = useMemo(() =>
   {
@@ -47,11 +107,17 @@ export function UpcomingPayablesSection()
       transactions,
       horizonDays: 45,
     }).filter((b) =>
-      b.kind === 'agendado'
-      || b.kind === 'pendente'
-      || b.kind === 'fatura_reserva',
-    )
-  }, [contasFixas, reservedBills, cards, transactions])
+    {
+      if (b.kind !== 'agendado' && b.kind !== 'pendente' && b.kind !== 'fatura_reserva')
+      {
+        return false
+      }
+      if (isBillDismissed(b.id)) return false
+      if (payableResolvedBySettlements(b, billSettlements)) return false
+      if (payableResolvedByTasks(b, tarefas)) return false
+      return true
+    })
+  }, [contasFixas, reservedBills, cards, transactions, tarefas, billSettlements])
 
   if (payables.length === 0) return null
 
@@ -125,7 +191,11 @@ export function UpcomingPayablesSection()
                   {bill.transactionId != null && (
                     <button
                       type="button"
-                      onClick={() => void markTransactionPaid(bill.transactionId!)}
+                      onClick={() =>
+                      {
+                        void markTransactionPaid(bill.transactionId!)
+                        void fetchBillSettlements()
+                      }}
                       className="font-mono text-[9px] uppercase text-accent hover:underline"
                     >
                       Marcar pago

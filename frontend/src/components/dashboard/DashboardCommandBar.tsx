@@ -7,6 +7,7 @@ import { aguaDisplaySnapshot } from '../../lib/healthRitual'
 import { countAlertasHeader } from '../../lib/notificacaoUtils'
 import {
   AXEL_CHROME_PLANE,
+  AXEL_PAGE_SHELL,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
 } from '../../constants/axelSurfaces'
@@ -68,6 +69,8 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
 {
   const navigate = useNavigate()
   const notificacoes = useTaskStore((s) => s.notificacoes)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
+  const transactions = useTaskStore((s) => s.transactions)
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const storeTarefas = useTaskStore((s) => s.tarefas)
   const habitos = useTaskStore((s) => s.habitos)
@@ -98,7 +101,11 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
   const concluidas = resumo?.tarefas_concluidas
     ?? tarefas.filter((t) => t.status === 'concluida').length
   const saldo = resumo?.saldo_mes ?? 0
-  const alertasTotal = countAlertasHeader(notificacoes, tarefas)
+  const alertCtx = useMemo(
+    () => ({ settlements: billSettlements, transactions }),
+    [billSettlements, transactions],
+  )
+  const alertasTotal = countAlertasHeader(notificacoes, storeTarefas, alertCtx)
   const atrasadas = dueBuckets.vencido.length
 
   const now = new Date()
@@ -111,7 +118,7 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
 
   return (
     <div className={`border-b border-line ${AXEL_CHROME_PLANE}`}>
-      <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full">
+      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL}`}>
         <div className="mb-3 sm:mb-4">
           <p className="sl-eyebrow">Centro de comando</p>
           <h1 className="font-sans font-semibold tracking-tight text-xl md:text-3xl text-zinc-900 dark:text-zinc-100 mt-1">

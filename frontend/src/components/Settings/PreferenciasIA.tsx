@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Plus, X, Zap, Brain, AlertTriangle } from 'lucide-react';
 import { GlassCard } from '../ui/GlassCard';
 import { useTaskStore } from '../../store/useTaskStore';
+import { AXEL_PAGE_SHELL_MOBILE_NARROW } from '../../constants/axelSurfaces';
 import { toast } from 'sonner';
 
 /* ── Animações ───────────────────────────────────────────────── */
@@ -68,7 +69,7 @@ export function PreferenciasIA() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-8 pb-24">
+    <div className={`${AXEL_PAGE_SHELL_MOBILE_NARROW} p-6 lg:px-8 space-y-8 pb-24`}>
 
       {/* ── Header ───────────────────────────────────────────── */}
       <motion.div

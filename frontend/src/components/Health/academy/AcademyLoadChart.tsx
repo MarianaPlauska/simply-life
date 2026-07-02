@@ -7,7 +7,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts'
-import type { AcademyChartPoint } from '../../lib/academyWorkouts'
+import type { AcademyChartPoint } from '../../../lib/academyWorkouts'
 
 interface AcademyLoadChartProps
 {
@@ -50,10 +50,11 @@ export function AcademyLoadChart({ dados, exercicioNome }: AcademyLoadChartProps
               borderRadius: 8,
               fontSize: 11,
             }}
-            formatter={(value: number, _name, item) =>
+            formatter={(value, _name, item) =>
             {
               const reps = (item.payload as AcademyChartPoint).reps
-              return [`${value} kg × ${reps} reps`, 'Carga']
+              const kg = typeof value === 'number' ? value : Number(value ?? 0)
+              return [`${kg} kg × ${reps} reps`, 'Carga']
             }}
           />
           <Line

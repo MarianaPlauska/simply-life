@@ -56,7 +56,7 @@ export function ProteinMealLog()
     await setHabitoProgress(h.id, total)
   }
 
-  const adicionarGramas = async (gramas: number, label: string, kcal?: number) =>
+  const adicionarGramas = async (gramas: number, _label: string, kcal?: number) =>
   {
     if (gramas <= 0) return
     const h = await ensureProteina()

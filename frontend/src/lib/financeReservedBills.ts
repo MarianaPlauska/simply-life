@@ -1,7 +1,14 @@
-import type { ContaFixa, ReservedBill, Transaction } from '../store/storeTypes'
+import type {
+  CashAccountSettings,
+  ContaFixa,
+  FinanceBillSettlement,
+  ReservedBill,
+  Transaction,
+} from '../store/storeTypes'
 import { summarizeLedger, type LedgerSummary } from './financeLedger'
 import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
-import { isContaFixaPostedThisMonth } from './financeRecurringPost'
+import { isContaFixaSatisfiedThisMonth } from './financeRecurringPost'
+import type { CashBalanceOverrides } from '../store/storeTypes'
 
 export interface ReservationSummary
 {
@@ -24,7 +31,9 @@ export interface CashPosition extends LedgerSummary
 export interface CashPositionOptions
 {
   contasFixas?: ContaFixa[]
+  billSettlements?: FinanceBillSettlement[]
   reference?: Date
+  overrides?: CashBalanceOverrides | null
 }
 
 export function summarizeReservations(bills: ReservedBill[]): ReservationSummary
@@ -52,6 +61,7 @@ export function summarizeReservations(bills: ReservedBill[]): ReservationSummary
 function sumUnpostedContasFixas(
   contasFixas: ContaFixa[],
   transactions: Transaction[],
+  settlements: FinanceBillSettlement[],
   reference: Date,
 ): number
 {
@@ -60,11 +70,27 @@ function sumUnpostedContasFixas(
   for (const conta of contasFixas)
   {
     if (!contaFixaEfetivamenteAtiva(conta, reference)) continue
-    if (isContaFixaPostedThisMonth(conta.id, transactions, reference)) continue
+    if (isContaFixaSatisfiedThisMonth(conta, transactions, settlements, reference)) continue
     total += conta.valor
   }
 
   return total
+}
+
+function applyManualOverrides(
+  base: CashPosition,
+  overrides?: CashBalanceOverrides | null,
+): CashPosition
+{
+  if (!overrides?.ativo) return base
+
+  return {
+    ...base,
+    saldoCorrente: overrides.corrente,
+    reservaRestante: overrides.reservado,
+    saldoDisponivel: overrides.disponivel,
+    saldoProjetadoDisponivel: overrides.projetado,
+  }
 }
 
 export function computeCashPosition(
@@ -80,10 +106,11 @@ export function computeCashPosition(
   const compromissosFixas = sumUnpostedContasFixas(
     options?.contasFixas ?? [],
     transactions,
+    options?.billSettlements ?? [],
     reference,
   )
 
-  return {
+  const base: CashPosition = {
     ...ledger,
     saldoInicial,
     reservaRestante: res.totalReservado,
@@ -91,6 +118,31 @@ export function computeCashPosition(
     compromissosFixas,
     saldoProjetadoDisponivel: ledger.saldoProjetado - res.totalReservado - compromissosFixas,
   }
+
+  return applyManualOverrides(base, options?.overrides)
+}
+
+/** Posição de caixa com overrides e fixas já resolvidas */
+export function resolveCashPosition(params: {
+  transactions: Transaction[]
+  cashAccount: CashAccountSettings
+  reservedBills: ReservedBill[]
+  contasFixas?: ContaFixa[]
+  billSettlements?: FinanceBillSettlement[]
+  reference?: Date
+}): CashPosition
+{
+  return computeCashPosition(
+    params.transactions,
+    params.cashAccount.saldo_inicial,
+    params.reservedBills,
+    {
+      contasFixas: params.contasFixas,
+      billSettlements: params.billSettlements,
+      reference: params.reference,
+      overrides: params.cashAccount.saldos_manual,
+    },
+  )
 }
 
 export function billProgress(bill: ReservedBill): number

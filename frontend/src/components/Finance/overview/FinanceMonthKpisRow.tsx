@@ -13,6 +13,7 @@ interface FinanceMonthKpisRowProps
   balanceToneClass?: string
   compact?: boolean
   onConfigureSaldo?: () => void
+  onReconcile?: () => void
 }
 
 export function FinanceMonthKpisRow({
@@ -23,6 +24,7 @@ export function FinanceMonthKpisRow({
   balanceToneClass = 'text-ink',
   compact = false,
   onConfigureSaldo,
+  onReconcile,
 }: FinanceMonthKpisRowProps)
 {
   const items = [
@@ -56,6 +58,17 @@ export function FinanceMonthKpisRow({
 
   return (
     <div className="space-y-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {onReconcile && (
+          <button
+            type="button"
+            onClick={onReconcile}
+            className="font-mono text-[9px] uppercase tracking-wide px-2.5 py-1.5 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors min-h-[36px]"
+          >
+            Recalcular / limpar duplicatas
+          </button>
+        )}
+      </div>
       {saldoDisponivel <= 0 && onConfigureSaldo && (
         <button
           type="button"

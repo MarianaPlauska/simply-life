@@ -79,9 +79,14 @@ export function AppLayout()
 
   useEffect(() =>
   {
-    fetchMedicamentos()
-    fetchHabitos()
-    fetchTarefas()
+    void (async () =>
+    {
+      await fetchMedicamentos()
+      await fetchHabitos()
+      await fetchTarefas()
+      const fetchNotificacoes = useTaskStore.getState().fetchNotificacoes
+      await fetchNotificacoes()
+    })()
   }, [fetchMedicamentos, fetchHabitos, fetchTarefas])
 
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)

@@ -39,10 +39,11 @@ export function GlassHeader() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notificacoes = useTaskStore((s) => s.notificacoes);
+  const tarefas = useTaskStore((s) => s.tarefas);
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes);
   const markNotificacaoRead = useTaskStore((s) => s.markNotificacaoRead);
   const markAllNotificacoesRead = useTaskStore((s) => s.markAllNotificacoesRead);
-  const unreadCount = listNotificacoesAcionaveis(notificacoes).length;
+  const unreadCount = listNotificacoesAcionaveis(notificacoes, tarefas).length;
   const profileRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 

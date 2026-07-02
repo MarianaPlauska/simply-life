@@ -6,7 +6,7 @@ import { dismissNotificacoesRuido } from '../lib/dismissNotificacoesRuido'
 import {
   buildAutoPostTransaction,
   isContaFixaDueToday,
-  isContaFixaPostedThisMonth,
+  isContaFixaSatisfiedThisMonth,
 } from '../lib/financeRecurringPost'
 import {
   buildAutoPostReceitaRecorrente,
@@ -31,6 +31,7 @@ export function useFinanceSystemSync(): void
   const fetchCategories = useTaskStore((s) => s.fetchCategories)
   const fetchBudgets = useTaskStore((s) => s.fetchBudgets)
   const fetchCashAccount = useTaskStore((s) => s.fetchCashAccount)
+  const fetchBillSettlements = useTaskStore((s) => s.fetchBillSettlements)
   const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes)
   const addTransaction = useTaskStore((s) => s.addTransaction)
   const pulseSino = useTaskStore((s) => s.pulseSino)
@@ -58,6 +59,7 @@ export function useFinanceSystemSync(): void
           fetchCategories(),
           fetchBudgets(),
           fetchCashAccount(),
+          fetchBillSettlements(),
         ])
 
         if (cancelled) return
@@ -70,10 +72,17 @@ export function useFinanceSystemSync(): void
         for (const conta of state.contasFixas)
         {
           if (!isContaFixaDueToday(conta, ref)) continue
-          if (isContaFixaPostedThisMonth(conta.id, state.transactions, ref)) continue
+          if (isContaFixaSatisfiedThisMonth(conta, state.transactions, state.billSettlements ?? [], ref)) continue
 
-          await addTransaction(buildAutoPostTransaction({ conta, ref }))
-          postedFixas.push(conta.nome)
+          try
+          {
+            await addTransaction(buildAutoPostTransaction({ conta, ref }))
+            postedFixas.push(conta.nome)
+          }
+          catch (e)
+          {
+            console.warn('Auto-post conta fixa ignorado:', conta.nome, e)
+          }
         }
 
         for (const item of state.recurringIncomes)
@@ -81,8 +90,15 @@ export function useFinanceSystemSync(): void
           if (!isReceitaRecorrenteDueToday(item, ref)) continue
           if (isReceitaRecorrentePostedThisMonth(item.id, state.transactions, ref)) continue
 
-          await addTransaction(buildAutoPostReceitaRecorrente(item, ref))
-          postedReceitas.push(item.titulo)
+          try
+          {
+            await addTransaction(buildAutoPostReceitaRecorrente(item, ref))
+            postedReceitas.push(item.titulo)
+          }
+          catch (e)
+          {
+            console.warn('Auto-post receita ignorado:', item.titulo, e)
+          }
         }
 
         if (postedFixas.length > 0 && !cancelled)
@@ -158,6 +174,7 @@ export function useFinanceSystemSync(): void
     fetchCategories,
     fetchBudgets,
     fetchCashAccount,
+    fetchBillSettlements,
     fetchNotificacoes,
     addTransaction,
     pulseSino,

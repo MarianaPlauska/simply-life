@@ -233,6 +233,14 @@ export const AXEL_DISPLAY_STAT =
 /** Separador de seção no dashboard */
 export const AXEL_SECTION_DIVIDER = 'border-t border-line/80 pt-8'
 
+/** Contêiner de página — desktop fluido; mobile sem restrição extra além do viewport */
+export const AXEL_PAGE_SHELL =
+  'w-full max-w-none lg:max-w-[1400px] xl:max-w-[1600px] mx-auto'
+
+/** Mobile com coluna estreita (saúde, perfil) — só expande a partir de lg */
+export const AXEL_PAGE_SHELL_MOBILE_NARROW =
+  'w-full max-w-3xl lg:max-w-[1400px] xl:max-w-[1600px] mx-auto'
+
 /** @deprecated use AXEL_SOFT_CARD */
 export const AXEL_SURFACE = AXEL_SOFT_CARD
 export const AXEL_FINANCE_SURFACE = AXEL_SOFT_CARD

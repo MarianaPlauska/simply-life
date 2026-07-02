@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { Calendar, Plus, Trash2, TrendingUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../../store/useTaskStore'
+import { CategoryPicker } from '../CategoryPicker'
+import { FinanceCategories } from '../FinanceCategories'
+import { FormFieldLabel } from '../../ui/FormFieldLabel'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_SECTION_TITLE,
@@ -26,14 +29,15 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
   const toggleRecurringIncome = useTaskStore((s) => s.toggleRecurringIncome)
 
   const [showForm, setShowForm] = useState(false)
+  const [showCatModal, setShowCatModal] = useState(false)
+  const [pinVersion, setPinVersion] = useState(0)
   const [form, setForm] = useState({
     titulo: '',
     valor: '',
     dia_recebimento: '5',
-    categoria_id: '',
+    categoria_id: '' as number | '',
   })
 
-  const incomeCategories = activeCategories.filter((c) => c.tipo === 'receita')
   const totalAtivo = recurringIncomes
     .filter((r) => r.ativa)
     .reduce((s, r) => s + r.valor, 0)
@@ -47,7 +51,7 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
       return
     }
 
-    const valor = parseFloat(form.valor)
+    const valor = parseFloat(form.valor.replace(',', '.'))
     if (Number.isNaN(valor) || valor <= 0)
     {
       toast.error('Informe um valor válido')
@@ -65,7 +69,7 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
       titulo: form.titulo.trim(),
       valor,
       dia_recebimento: dia,
-      categoria_id: form.categoria_id ? parseInt(form.categoria_id, 10) : undefined,
+      categoria_id: form.categoria_id !== '' ? form.categoria_id : undefined,
       ativa: true,
     })
 
@@ -76,6 +80,23 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
 
   return (
     <section className={AXEL_BORDERLESS_PANEL}>
+      {showCatModal && (
+        <FinanceCategories
+          defaultTipo="receita"
+          pinTipo="receita"
+          onCategoryCreated={(cat) =>
+          {
+            setForm((f) => ({ ...f, categoria_id: cat.id }))
+            setPinVersion((v) => v + 1)
+          }}
+          onClose={() =>
+          {
+            setShowCatModal(false)
+            setPinVersion((v) => v + 1)
+          }}
+        />
+      )}
+
       <div className="flex flex-wrap items-start justify-between gap-3 pb-3 border-b border-line">
         <div>
           <h2 className={AXEL_SECTION_TITLE}>Receitas recorrentes</h2>
@@ -141,44 +162,60 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
 
       {showForm ? (
         <form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-line space-y-3">
-          <input
-            type="text"
-            placeholder="Ex.: Salário CLT"
-            value={form.titulo}
-            onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))}
-            className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] text-ink outline-none focus:border-accent/50"
-          />
-          <div className="grid grid-cols-2 gap-2">
+          <label className="block space-y-1">
+            <FormFieldLabel required className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+              Título
+            </FormFieldLabel>
             <input
-              type="number"
-              step="0.01"
-              placeholder="Valor (R$)"
-              value={form.valor}
-              onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))}
-              className="bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] font-mono text-ink outline-none focus:border-accent/50"
+              type="text"
+              placeholder="Ex.: Salário CLT"
+              value={form.titulo}
+              onChange={(e) => setForm((f) => ({ ...f, titulo: e.target.value }))}
+              className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] text-ink outline-none focus:border-accent/50"
             />
-            <input
-              type="number"
-              min={1}
-              max={31}
-              placeholder="Dia"
-              value={form.dia_recebimento}
-              onChange={(e) => setForm((f) => ({ ...f, dia_recebimento: e.target.value }))}
-              className="bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] font-mono text-ink outline-none focus:border-accent/50"
+          </label>
+          <div className="grid grid-cols-2 gap-2">
+            <label className="block space-y-1">
+              <FormFieldLabel required className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Valor (R$)
+              </FormFieldLabel>
+              <input
+                type="text"
+                inputMode="decimal"
+                placeholder="0,00"
+                value={form.valor}
+                onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))}
+                className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] font-mono text-ink outline-none focus:border-accent/50"
+              />
+            </label>
+            <label className="block space-y-1">
+              <FormFieldLabel required className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Dia
+              </FormFieldLabel>
+              <input
+                type="number"
+                min={1}
+                max={31}
+                value={form.dia_recebimento}
+                onChange={(e) => setForm((f) => ({ ...f, dia_recebimento: e.target.value }))}
+                className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] font-mono text-ink outline-none focus:border-accent/50"
+              />
+            </label>
+          </div>
+          <div className="space-y-1">
+            <FormFieldLabel optional className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+              Origem / categoria
+            </FormFieldLabel>
+            <CategoryPicker
+              categories={activeCategories}
+              tipo="receita"
+              value={form.categoria_id}
+              onChange={(id) => setForm((f) => ({ ...f, categoria_id: id }))}
+              pinVersion={pinVersion}
+              onAddCategory={() => setShowCatModal(true)}
+              onManageCategories={() => setShowCatModal(true)}
             />
           </div>
-          {incomeCategories.length > 0 && (
-            <select
-              value={form.categoria_id}
-              onChange={(e) => setForm((f) => ({ ...f, categoria_id: e.target.value }))}
-              className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] text-ink outline-none"
-            >
-              <option value="">Categoria (opcional)</option>
-              {incomeCategories.map((c) => (
-                <option key={c.id} value={c.id}>{c.nome}</option>
-              ))}
-            </select>
-          )}
           <div className="flex gap-2">
             <button
               type="submit"

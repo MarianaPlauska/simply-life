@@ -158,6 +158,17 @@ export function getBillingCycle(card: VirtualCard, reference = new Date()): Bill
   }
 }
 
+export function getBillingCycleAtOffset(
+  card: VirtualCard,
+  offsetMonths: number,
+  reference = new Date(),
+): BillingCycle
+{
+  const ref = new Date(reference)
+  ref.setMonth(ref.getMonth() + offsetMonths)
+  return getBillingCycle(card, ref)
+}
+
 export function getInvoiceTransactions(
   transactions: Transaction[],
   cardId: string,
@@ -168,8 +179,46 @@ export function getInvoiceTransactions(
   {
     if (t.card_id !== cardId || t.tipo !== 'despesa') return false
     const key = transactionDayKey(t.data)
-    return key >= cycle.start && key <= cycle.end
+    if (key < cycle.start || key > cycle.end) return false
+    // Linha de quitação manual no cartão — não compõe fatura aberta
+    if (/^fatura\b/i.test(t.descricao.trim()) && (t.status_pagamento ?? 'pendente') === 'pago')
+    {
+      return false
+    }
+    return true
   })
+}
+
+/** Pagamentos de fatura no caixa que abatem o ciclo atual */
+export function sumCardInvoicePayments(
+  transactions: Transaction[],
+  card: VirtualCard,
+  cycle: BillingCycle,
+): number
+{
+  const needle = card.nome.trim().toLowerCase()
+  let sum = 0
+
+  for (const t of transactions)
+  {
+    if (t.tipo !== 'despesa' || t.card_id) continue
+    if ((t.status_pagamento ?? 'pendente') !== 'pago') continue
+    const day = transactionDayKey(t.data)
+    if (day < cycle.start) continue
+
+    const desc = t.descricao.toLowerCase()
+    if (desc.includes('pagamento fatura') && desc.includes(needle))
+    {
+      sum += t.valor
+      continue
+    }
+    if (/^fatura\b/i.test(t.descricao.trim()))
+    {
+      sum += t.valor
+    }
+  }
+
+  return sum
 }
 
 export function sumInvoice(transactions: Transaction[]): number

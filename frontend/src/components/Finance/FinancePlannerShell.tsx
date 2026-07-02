@@ -6,6 +6,7 @@ import {
   AXEL_BTN_PRIMARY,
   AXEL_NAV_MAIN_ACTIVE,
   AXEL_NAV_MAIN_IDLE,
+  AXEL_PAGE_SHELL,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -49,7 +50,7 @@ export function FinancePlannerShell({
   const showMonthStrip = monthBounds.maxOffset > monthBounds.minOffset
 
   return (
-    <div className="w-full max-w-5xl lg:max-w-3xl xl:max-w-4xl mx-auto px-3 sm:px-4 relative pt-2 sm:pt-3 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-6">
+    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 relative pt-2 sm:pt-3 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-6`}>
       <header className="flex items-center justify-between gap-2 pb-2 border-b border-line">
         <div className="min-w-0">
           <h1 className={`text-base sm:text-lg font-display font-semibold ${AXEL_TEXT_PRIMARY}`}>

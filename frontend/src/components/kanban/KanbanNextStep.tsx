@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Play, Sparkles } from 'lucide-react'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import { buildMorningBrief, type MorningBrief } from '../../lib/morningBrief'
-import { fetchMorningBrief } from '../../lib/morningBriefApi'
 import { pickSuggestedExecutionTask } from '../../lib/suggestExecutionTask'
 import type { MoodOrchestrationContext } from '../../lib/moodOrchestration'
 import { AXEL_BTN_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
@@ -48,23 +47,7 @@ export function KanbanNextStep({
   useEffect(() =>
   {
     setBrief(buildMorningBrief(executionQueue, dailyScoreCap, mood))
-  }, [executionQueue, dailyScoreCap, mood])
-
-  useEffect(() =>
-  {
-    let cancelled = false
-
-    void fetchMorningBrief({ hojeTasks: executionQueue, dueToday, overdue, dailyScoreCap }).then((b) =>
-    {
-      if (cancelled) return
-      setBrief(b)
-    })
-
-    return () =>
-    {
-      cancelled = true
-    }
-  }, [executionQueue, dueToday, overdue, dailyScoreCap, mood])
+  }, [executionQueue, dailyScoreCap, mood?.capMultiplier, mood?.axelNote])
 
   const active = useMemo(
     () => tarefas.filter((t) => t.status !== 'concluida'),

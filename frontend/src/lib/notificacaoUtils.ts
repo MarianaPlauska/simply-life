@@ -1,6 +1,12 @@
 import type { Notificacao } from '../store/storeTypes'
 import type { TarefaUnificada } from '../types'
-import { getOverdueTasks, getUrgentDeadlineTasks } from './axelAlerts'
+import {
+  completedBillReferenceKeys,
+  filterOverdueTasksForAlerts,
+  filterUrgentTasksForAlerts,
+  isNotificationResolved,
+  type AlertFinanceContext,
+} from './notificationResolution'
 
 export function isNotificacaoLida(lida: Notificacao['lida'] | number | string | null | undefined): boolean
 {
@@ -29,13 +35,18 @@ export function isNotificacaoAcionavel(n: Notificacao): boolean
   return true
 }
 
-export function listNotificacoesAcionaveis(notificacoes: Notificacao[]): Notificacao[]
+export function listNotificacoesAcionaveis(
+  notificacoes: Notificacao[],
+  tarefas?: TarefaUnificada[],
+): Notificacao[]
 {
   const seen = new Map<string, Notificacao>()
+  const completedKeys = tarefas?.length ? completedBillReferenceKeys(tarefas) : null
 
   for (const n of notificacoes)
   {
     if (!isNotificacaoAcionavel(n)) continue
+    if (completedKeys && tarefas && isNotificationResolved(n, tarefas, completedKeys)) continue
 
     const key = `${n.titulo.trim().toLowerCase()}|${(n.mensagem ?? '').trim().toLowerCase()}`
     const prev = seen.get(key)
@@ -75,35 +86,23 @@ export interface TarefaAtrasadaItem
   task: TarefaUnificada
 }
 
-export function listTarefasAtrasadas(tarefas: TarefaUnificada[]): TarefaAtrasadaItem[]
+export function listTarefasAtrasadas(
+  tarefas: TarefaUnificada[],
+  ctx?: AlertFinanceContext,
+): TarefaAtrasadaItem[]
 {
-  const seen = new Set<number>()
-  const items: TarefaAtrasadaItem[] = []
-
-  for (const task of getOverdueTasks(tarefas)
-    .sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0)))
-  {
-    if (seen.has(task.id)) continue
-    seen.add(task.id)
-    items.push({ kind: 'tarefa_atrasada', task })
-  }
-
-  return items
+  return filterOverdueTasksForAlerts(tarefas, ctx).map((task) => ({
+    kind: 'tarefa_atrasada' as const,
+    task,
+  }))
 }
 
 export function listPrazosUrgentes(tarefas: TarefaUnificada[]): PrazoUrgenteItem[]
 {
-  const seen = new Set<number>()
-  const items: PrazoUrgenteItem[] = []
-
-  for (const task of getUrgentDeadlineTasks(tarefas))
-  {
-    if (seen.has(task.id)) continue
-    seen.add(task.id)
-    items.push({ kind: 'prazo_24h', task })
-  }
-
-  return items
+  return filterUrgentTasksForAlerts(tarefas).map((task) => ({
+    kind: 'prazo_24h' as const,
+    task,
+  }))
 }
 
 /** Evita financeiro duplicado quando já há alerta de prazo da mesma conta/tarefa */
@@ -134,10 +133,14 @@ export function filterNotificacoesSemPrazoDuplicado(
   })
 }
 
-export function countAlertasHeader(notificacoes: Notificacao[], tarefas: TarefaUnificada[]): number
+export function countAlertasHeader(
+  notificacoes: Notificacao[],
+  tarefas: TarefaUnificada[],
+  ctx?: AlertFinanceContext,
+): number
 {
-  const unread = listNotificacoesAcionaveis(notificacoes).length
+  const unread = listNotificacoesAcionaveis(notificacoes, tarefas).length
   const prazos = listPrazosUrgentes(tarefas).length
-  const atrasadas = listTarefasAtrasadas(tarefas).length
+  const atrasadas = listTarefasAtrasadas(tarefas, ctx).length
   return unread + prazos + atrasadas
 }

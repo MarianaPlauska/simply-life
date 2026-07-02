@@ -1,5 +1,6 @@
 import type { HabitoDiario } from '../store/storeTypes'
-import { localTodayIso, waterPrefsStorageKey } from './healthDayBoundary'
+import { localTodayIso, readCachedWaterEntries, waterPrefsStorageKey } from './healthDayBoundary'
+import { readScopedJson, writeScopedJson } from './userScopedStorage'
 
 export const DEFAULT_ML_POR_COPO = 200
 export const GARRAFA_MIN_ML = 500
@@ -42,13 +43,15 @@ export function hiddenMlPresets(h: HabitoDiario | undefined): number[]
   return normalizeMlPresets(h?.config?.ml_ocultos ?? [])
 }
 
-/** Atalhos visíveis — padrões do app (menos ocultos) + personalizados */
+/** Atalhos visíveis — padrões do app (menos ocultos) + personalizados + ml padrão atual */
 export function resolveMlPresets(h: HabitoDiario | undefined): number[]
 {
   const hidden = new Set(hiddenMlPresets(h))
   const custom = customMlPresets(h)
   const builtIn = ML_OPCOES.filter((ml) => !hidden.has(ml))
-  return [...new Set([...builtIn, ...custom])].sort((a, b) => a - b)
+  const defaultMl = mlPorCopo(h)
+  const merged = [...new Set([...builtIn, ...custom, defaultMl])]
+  return merged.sort((a, b) => a - b)
 }
 
 export function normalizeMlPresets(presets: number[]): number[]
@@ -143,6 +146,10 @@ export function registrosMl(h: HabitoDiario | undefined): number[]
 
   const cfg = h.config?.registros_ml
   if (cfg && cfg.length > 0) return cfg
+
+  const cached = readCachedWaterEntries()
+  if (cached && cached.length > 0) return cached
+
   const n = h?.progresso_atual ?? 0
   const unit = mlPorCopo(h)
   return Array.from({ length: n }, () => unit)

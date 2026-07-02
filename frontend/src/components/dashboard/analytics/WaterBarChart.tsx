@@ -10,7 +10,7 @@ import {
 import type { AnalyticsChartRow } from '../../../data/analyticsMockData'
 import { useAxelChartTheme } from '../../../hooks/useAxelChartTheme'
 import { AXEL_DISPLAY_STAT, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
-import { AxelChartTooltip, CHART_HEIGHT, type AxelTooltipProps } from './axelChartConfig'
+import { AxelChartTooltip, axelChartCursorFill, CHART_HEIGHT, type AxelTooltipProps } from './axelChartConfig'
 
 // Hidratação — barras verticais; grid/eixos reagem ao tema
 
@@ -39,7 +39,10 @@ export function WaterBarChart({ rows }: WaterBarChartProps)
           <CartesianGrid {...theme.grid} />
           <XAxis dataKey="label" {...theme.axis} />
           <YAxis {...theme.axis} unit="L" />
-          <Tooltip content={(props) => <AxelChartTooltip {...(props as AxelTooltipProps)} />} />
+          <Tooltip
+            content={(props) => <AxelChartTooltip {...(props as AxelTooltipProps)} />}
+            cursor={{ fill: axelChartCursorFill(theme.isDarkMode) }}
+          />
           <Bar
             dataKey="aguaLitros"
             name="Água (L)"

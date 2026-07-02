@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { Calendar } from 'lucide-react'
-import { localTodayIso } from '../../../lib/healthDayBoundary'
 import {
   type AcademyDiaRef,
   type AcademyPlanoDia,

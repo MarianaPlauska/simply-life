@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Shield, Star, Upload, FileText, Image, Film, Archive, Folder, Search, Grid, List, MoreHorizontal, Pin } from 'lucide-react';
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 
 /* ── Tipos ── */
 interface VaultFile {
@@ -38,7 +39,7 @@ export function DriveVaultView() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-16">
+    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 space-y-8 pb-16`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

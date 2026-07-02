@@ -18,6 +18,7 @@ import { MfaEnrollPanel } from './MfaEnrollPanel'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_BORDERLESS_PANEL,
+  AXEL_PAGE_SHELL_MOBILE_NARROW,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -64,7 +65,7 @@ export function ProfileView()
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 pb-16 space-y-3 sm:space-y-4">
+    <div className={`${AXEL_PAGE_SHELL_MOBILE_NARROW} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16 space-y-3 sm:space-y-4`}>
       <header>
         <p className="sl-eyebrow">Identidade</p>
         <h1 className={`text-2xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>

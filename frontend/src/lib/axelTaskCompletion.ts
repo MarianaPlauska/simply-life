@@ -1,6 +1,8 @@
 import { toast } from 'sonner'
 import { celebrateTaskComplete } from './axelCelebration'
+import { dismissBillForTask } from './financeBillOrchestrator'
 import { isMainQuestTask, mainQuestBonusXp } from './mainQuest'
+import { billCanonicalKey, billTaskReferenceKey, isFinanceBillTask } from './financeBillTaskDedup'
 import { evaluateProofOfWork } from './proofOfWork'
 import { useTaskStore } from '../store/useTaskStore'
 import type { TarefaUnificada } from '../types'
@@ -27,6 +29,45 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
   if (tarefa.id > 0)
   {
     await store.updateTarefa(tarefa.id, { status: 'concluida' })
+
+    const refKey = billTaskReferenceKey(tarefa)
+    const canonKey = billCanonicalKey(tarefa)
+    if (refKey || canonKey || isFinanceBillTask(tarefa))
+    {
+      dismissBillForTask(tarefa)
+      const { recordBillSettlementFromTask } = await import('../lib/financeBillSettlement')
+      await recordBillSettlementFromTask({ ...tarefa, status: 'concluida' })
+      const { postBillPaymentFromTask } = await import('../lib/financeBillPayment')
+      await postBillPaymentFromTask(
+        { ...tarefa, status: 'concluida' },
+        {
+          transactions: store.transactions,
+          addTransaction: (t) => store.addTransaction(t),
+        },
+      )
+      void store.fetchBillSettlements?.()
+      void store.fetchTransactions?.()
+    }
+
+    if (refKey || canonKey)
+    {
+      const duplicates = store.tarefas.filter((t) =>
+      {
+        if (t.id === tarefa.id || t.status === 'concluida') return false
+        const tCanon = billCanonicalKey(t)
+        if (canonKey && tCanon === canonKey) return true
+        return refKey ? billTaskReferenceKey(t) === refKey : false
+      })
+      for (const dup of duplicates)
+      {
+        dismissBillForTask(dup)
+        await store.updateTarefa(dup.id, { status: 'concluida' })
+      }
+    }
+
+    const { markNotificationsForCompletedTask } = await import('../lib/notificationResolution')
+    await markNotificationsForCompletedTask(tarefa)
+    await store.fetchNotificacoes()
   }
   else
   {

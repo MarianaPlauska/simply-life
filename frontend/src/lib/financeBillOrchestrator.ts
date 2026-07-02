@@ -1,5 +1,10 @@
-import type { ContaFixa, ReservedBill, Transaction, VirtualCard } from '../store/storeTypes'
+import type { ContaFixa, ReservedBill, Transaction, VirtualCard, FinanceBillSettlement } from '../store/storeTypes'
+import type { TarefaUnificada } from '../types'
+import { billReferenceKeyFromTitle, billTaskReferenceKey } from './financeBillTaskDedup'
+import { dismissBill, isBillDismissed } from './financeBillDismiss'
 import { buildUpcomingBills } from './financeUpcomingBills'
+import { isPaidInSettlements } from './financeLedgerReconcile'
+import { hasPaidExpenseForBill } from './financeBillPayment'
 
 export interface UpcomingBill
 {
@@ -18,6 +23,7 @@ export interface GetUpcomingBillsInput
   reservedBills: ReservedBill[]
   cards?: VirtualCard[]
   transactions?: Transaction[]
+  settlements?: FinanceBillSettlement[]
   windowDays?: number
   reference?: Date
 }
@@ -33,6 +39,7 @@ export function getUpcomingBills(input: GetUpcomingBillsInput): UpcomingBill[]
     reservedBills: input.reservedBills,
     cards: input.cards ?? [],
     transactions: input.transactions ?? [],
+    settlements: input.settlements ?? [],
     horizonDays: windowDays,
     reference: ref,
   })
@@ -108,8 +115,108 @@ export function taskMatchesBill(
   if (notas?.includes(bill.id)) return true
 
   const t = titulo.toLowerCase()
-  const nome = bill.nome.toLowerCase()
   if (!t.includes('[boleto]') && !t.includes('boleto')) return false
 
-  return t.includes(nome)
+  const billKey = billReferenceKeyFromTitle(billTaskTitle(bill))
+  const taskKey = billReferenceKeyFromTitle(titulo)
+  if (billKey && taskKey && billKey === taskKey) return true
+
+  const nome = bill.nome.replace(/\s*\[fixa:\d+\]/gi, '').trim().toLowerCase()
+  const valor = bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).toLowerCase()
+  return t.includes(nome) && t.includes(valor.replace(/\s/g, ''))
+}
+
+/** ID do boleto/conta a partir da tarefa financeira */
+export function billIdFromTask(tarefa: TarefaUnificada): string | null
+{
+  const phantom = tarefa.snippet_100_char?.match(/^phantom_fin_bill_(.+)$/)
+  if (phantom?.[1]) return phantom[1]
+
+  const ref = tarefa.notas_locais?.match(/Ref:\s*([^\s.]+)/i)
+  if (ref?.[1]) return ref[1]
+
+  return null
+}
+
+/** Marca o ciclo mensal como resolvido — impede recriar tarefa no refresh */
+export function dismissBillForTask(tarefa: TarefaUnificada, ref = new Date()): void
+{
+  const billId = billIdFromTask(tarefa)
+  if (billId)
+  {
+    dismissBill(billId, ref)
+    return
+  }
+
+  const refKey = billTaskReferenceKey(tarefa)
+  if (refKey)
+  {
+    dismissBill(`ref:${refKey}`, ref)
+  }
+}
+
+function taskCoversBillPeriod(tarefa: TarefaUnificada, bill: UpcomingBill): boolean
+{
+  if (tarefa.status !== 'concluida') return false
+
+  const taskBillId = billIdFromTask(tarefa)
+  if (taskBillId === bill.id) return true
+
+  const refKey = billReferenceKeyFromTitle(billTaskTitle(bill))
+  if (refKey && billTaskReferenceKey(tarefa) === refKey) return true
+
+  const nome = bill.nome.replace(/\s*\[fixa:\d+\]/gi, '').trim().toLowerCase()
+  const titulo = tarefa.titulo.toLowerCase()
+  if (nome.length >= 3 && titulo.includes(nome))
+  {
+    if (tarefa.data_vencimento && bill.vencimento)
+    {
+      return tarefa.data_vencimento.slice(0, 7) === bill.vencimento.slice(0, 7)
+    }
+    return true
+  }
+
+  if (tarefa.data_vencimento && bill.vencimento)
+  {
+    return tarefa.data_vencimento.slice(0, 7) === bill.vencimento.slice(0, 7)
+  }
+
+  return false
+}
+
+/** Boleto já pago/resolvido neste ciclo — não criar tarefa de novo */
+export function isBillResolvedForPeriod(
+  bill: UpcomingBill,
+  tarefas: TarefaUnificada[],
+  ref = new Date(),
+  options?: {
+    settlements?: FinanceBillSettlement[]
+    transactions?: Transaction[]
+  },
+): boolean
+{
+  if (isBillDismissed(bill.id, ref)) return true
+
+  const refKey = billReferenceKeyFromTitle(billTaskTitle(bill))
+  if (refKey && isBillDismissed(`ref:${refKey}`, ref)) return true
+
+  const settlements = options?.settlements ?? []
+  const transactions = options?.transactions ?? []
+  const monthKey = bill.vencimento.slice(0, 7)
+
+  if (settlements.length > 0)
+  {
+    const titulo = billTaskTitle(bill)
+    if (isPaidInSettlements(titulo, bill.valor, settlements)) return true
+    if (isPaidInSettlements(bill.nome, bill.valor, settlements)) return true
+  }
+
+  if (transactions.length > 0)
+  {
+    const titulo = billTaskTitle(bill)
+    if (hasPaidExpenseForBill(transactions, titulo, bill.valor, monthKey)) return true
+    if (hasPaidExpenseForBill(transactions, bill.nome, bill.valor, monthKey)) return true
+  }
+
+  return tarefas.some((t) => taskCoversBillPeriod(t, bill))
 }

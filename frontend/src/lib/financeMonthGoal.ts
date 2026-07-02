@@ -1,6 +1,7 @@
 import type { Transaction } from '../store/storeTypes'
 import { getCurrentMonthKey } from '../utils/rule503020'
 import { loadFinanceUserPrefs, saveFinanceUserPrefs } from './financeUserPrefs'
+import { dedupeTransactionsForLedger } from './financeTransactionDedup'
 
 const STORAGE_KEY = 'simply-life-finance-month-goal'
 
@@ -81,10 +82,11 @@ export function computeMonthGoalProgress(
   ref = new Date(),
 ): MonthGoalProgress
 {
-  const receita = monthTx
+  const unique = dedupeTransactionsForLedger(monthTx)
+  const receita = unique
     .filter((t) => t.tipo === 'receita')
     .reduce((s, t) => s + t.valor, 0)
-  const despesas = monthTx
+  const despesas = unique
     .filter((t) => t.tipo === 'despesa')
     .reduce((s, t) => s + t.valor, 0)
 

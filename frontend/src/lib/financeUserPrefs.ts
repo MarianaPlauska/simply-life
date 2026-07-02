@@ -1,9 +1,12 @@
 import { supabase } from './supabase'
 import type { MonthSavingsGoal } from './financeMonthGoal'
 
+export type MonthSpendGoalsMap = Record<string, { valorAlvo: number }>
+
 export interface FinanceUserPrefs
 {
   monthGoal?: MonthSavingsGoal | null
+  monthSpendGoals?: MonthSpendGoalsMap
   incomeProfile?: { salarioBruto: number; updatedAt: string } | null
 }
 

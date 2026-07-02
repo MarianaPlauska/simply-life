@@ -15,6 +15,7 @@ import {
   registrosMl,
   resolveMlPresets,
   totalMlHoje,
+  isBuiltInMlPreset,
 } from '../../lib/waterHydration'
 
 interface WaterWaveCardProps
@@ -27,16 +28,9 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
 {
   const navigate = useNavigate()
   const habitos = useTaskStore((s) => s.habitos)
-  const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
   const setAguaRegistros = useTaskStore((s) => s.setAguaRegistros)
   const updateHabitoConfig = useTaskStore((s) => s.updateHabitoConfig)
-
-  useEffect(() =>
-  {
-    void fetchHabitos()
-    void ensureHealthHabit(AGUA_PRESET)
-  }, [fetchHabitos, ensureHealthHabit])
 
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
   const entries = useMemo(() => registrosMl(agua), [agua])
@@ -51,6 +45,23 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
   const done = current >= goal && goal > 0
   const ritualOk = isAguaRitualComplete(current, goal)
 
+  useEffect(() =>
+  {
+    void (async () =>
+    {
+      const ensured = await ensureHealthHabit(AGUA_PRESET)
+      if (!ensured) return
+
+      const cached = registrosMl(ensured)
+      if (cached.length === 0) return
+
+      const remoteLen = ensured.config?.registros_ml?.length ?? 0
+      if (remoteLen >= cached.length) return
+
+      await setAguaRegistros(ensured.id, cached)
+    })()
+  }, [ensureHealthHabit, setAguaRegistros])
+
   const persistEntries = async (next: number[]) =>
   {
     const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
@@ -63,6 +74,11 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
     const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
     if (!ensured) return
     await updateHabitoConfig(ensured.id, { ml_por_copo: ml })
+    if (!isBuiltInMlPreset(ml))
+    {
+      const patch = patchMlPresetChange(ensured, 'add', ml)
+      await updateHabitoConfig(ensured.id, patch)
+    }
   }
 
   const patchMlPresets = async (action: 'add' | 'remove', ml: number) =>
@@ -93,7 +109,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
 
   return (
     <section
-      className={`sl-panel overflow-hidden flex flex-col ${hero ? 'p-4 sm:p-5' : 'p-4'} ${className}`}
+      className={`sl-panel overflow-hidden flex flex-col ${hero ? 'p-4 sm:p-5' : 'p-3'} ${className}`}
       aria-label="Hidratação hoje"
     >
       <div className="flex items-start justify-between gap-3 mb-3">

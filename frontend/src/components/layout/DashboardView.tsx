@@ -16,6 +16,7 @@ import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { DashboardQuickWidget } from '../dashboard/DashboardQuickWidget'
 import { DashboardAnalyticsPanel } from '../dashboard/DashboardAnalyticsPanel'
 import { resolveDashboardWidgets } from '../../lib/dashboardWidgets'
+import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces'
 
 function getGreeting(): string
 {
@@ -84,18 +85,20 @@ export function DashboardView()
         workspacePrefs.dashboard_quick_widgets,
         workspacePrefs.dashboard_priority ?? 'tasks',
       )
-      if (wellbeingPending)
-      {
-        return widgets.filter((id) => id !== 'wellbeing')
-      }
-      return widgets
+      // Humor tem bloco próprio (AxelPostMoodCare / card no topo) — nunca ocupa coluna vazia no grid
+      return widgets.filter((id) => id !== 'wellbeing')
     },
     [
       workspacePrefs.dashboard_quick_widgets,
       workspacePrefs.dashboard_priority,
-      wellbeingPending,
     ],
   )
+
+  const quickGridClass = quickWidgets.length <= 2
+    ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl items-start'
+    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full items-start'
+
+  const quickWidgetSpan = () => 'min-w-0 flex flex-col'
 
   const taskIdParam = searchParams.get('task')
   const selectedTask = useMemo(() =>
@@ -122,7 +125,7 @@ export function DashboardView()
     return (
       <div className="w-full flex flex-col">
         <div className="h-40 bg-chrome border-b border-line animate-pulse" />
-        <div className="px-4 lg:px-8 py-4 max-w-[1600px] mx-auto w-full flex flex-col gap-3">
+        <div className={`px-4 lg:px-8 py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-3`}>
           <Skeleton className="h-28 w-full" />
           <div className="grid grid-cols-12 gap-3">
             <Skeleton className="col-span-8 h-64" />
@@ -137,7 +140,7 @@ export function DashboardView()
     <div className="w-full flex flex-col flex-1 min-h-0">
       <DashboardCommandBar greeting={greeting} firstName={firstName} />
 
-      <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4 max-w-[1600px] mx-auto w-full flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4">
+      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
         {wellbeingPending && (
           <div className="order-first shrink-0">
             <DashboardQuickWidget id="wellbeing" />
@@ -151,9 +154,11 @@ export function DashboardView()
         <HealthRitualStrip />
 
         {quickWidgets.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+          <div className={quickGridClass}>
             {quickWidgets.map((id) => (
-              <DashboardQuickWidget key={id} id={id} />
+              <div key={id} className={quickWidgetSpan()}>
+                <DashboardQuickWidget id={id} />
+              </div>
             ))}
           </div>
         )}

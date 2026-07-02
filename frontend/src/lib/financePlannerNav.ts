@@ -14,6 +14,7 @@ export type PlannerLeafTab =
   | 'cartoes'
   | 'faturas'
   | 'contas-fixas'
+  | 'pagos'
   | 'visao-geral'
   | 'metas'
 
@@ -47,6 +48,7 @@ export const FINANCE_SUB_TABS: Record<Exclude<PlannerGroup, 'inicio'>, FinanceSu
     { id: 'conta', label: 'Conta' },
     { id: 'cartoes', label: 'Cartões' },
     { id: 'faturas', label: 'A pagar' },
+    { id: 'pagos', label: 'Pagos' },
     { id: 'contas-fixas', label: 'Fixas' },
   ],
   analise: [
@@ -71,6 +73,7 @@ const LEAF_TO_GROUP: Record<PlannerLeafTab, PlannerGroup> = {
   extras: 'contas',
   cartoes: 'contas',
   faturas: 'contas',
+  pagos: 'contas',
   'contas-fixas': 'contas',
   'visao-geral': 'analise',
   metas: 'analise',

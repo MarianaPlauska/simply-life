@@ -1,4 +1,6 @@
-import type { ContaFixa, Transaction } from '../store/storeTypes'
+import type { ContaFixa, FinanceBillSettlement, Transaction } from '../store/storeTypes'
+import { isPaidInSettlements } from './financeLedgerReconcile'
+import { hasPaidExpenseForBill } from './financeBillPayment'
 
 export const FIXA_MARKER_RE = /\[fixa:(\d+)\]/
 
@@ -41,6 +43,38 @@ export function isContaFixaPostedThisMonth(
     const match = t.descricao.match(FIXA_MARKER_RE)
     return match != null && Number(match[1]) === contaId
   })
+}
+
+/** Fixa já lançada ou quitada no mês — evita auto-post e tarefa fantasma */
+export function isContaFixaSatisfiedThisMonth(
+  conta: ContaFixa,
+  transactions: Transaction[],
+  settlements: FinanceBillSettlement[] = [],
+  ref = new Date(),
+): boolean
+{
+  if (isContaFixaPostedThisMonth(conta.id, transactions, ref))
+  {
+    return true
+  }
+
+  const monthKey = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}`
+  const tituloComMarker = `${conta.nome} ${fixaMarker(conta.id)}`
+
+  if (hasPaidExpenseForBill(transactions, tituloComMarker, conta.valor, monthKey))
+  {
+    return true
+  }
+  if (hasPaidExpenseForBill(transactions, conta.nome, conta.valor, monthKey))
+  {
+    return true
+  }
+  if (isPaidInSettlements(conta.nome, conta.valor, settlements))
+  {
+    return true
+  }
+
+  return false
 }
 
 export function findContaFixaTransaction(

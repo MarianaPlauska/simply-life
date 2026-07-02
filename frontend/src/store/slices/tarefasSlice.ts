@@ -108,7 +108,44 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
           contexto,
         };
       })
-      set({ tarefas, isLoading: false })
+      const anyFin = get() as {
+        billSettlements?: import('../storeTypes').FinanceBillSettlement[]
+        fetchBillSettlements?: () => Promise<void>
+        transactions?: import('../storeTypes').Transaction[]
+      }
+      await anyFin.fetchBillSettlements?.()
+      const settlements = anyFin.billSettlements ?? []
+      const transactions = anyFin.transactions ?? []
+
+      const { findStaleBillTasks, reconcileStaleBillTasks } = await import('../../lib/reconcileStaleBillTasks')
+      const stale = findStaleBillTasks(tarefas, settlements, transactions)
+      const staleIds = new Set(stale.map((t) => t.id))
+      const normalized = staleIds.size > 0
+        ? tarefas.map((t) =>
+          staleIds.has(t.id) ? { ...t, status: 'concluida' as const } : t,
+        )
+        : tarefas
+
+      set({ tarefas: normalized, isLoading: false })
+
+      const { countDuplicateBillTasks } = await import('../../lib/financeBillTaskDedup')
+      if (countDuplicateBillTasks(normalized) > 0)
+      {
+        void get().cleanupDuplicateBillTasks()
+      }
+
+      if (stale.length > 0)
+      {
+        void reconcileStaleBillTasks(
+          tarefas,
+          (id, dados) =>
+          {
+            get().patchTarefaLocal(id, dados)
+          },
+          settlements,
+          transactions,
+        )
+      }
     }
     catch (e)
     {
@@ -163,6 +200,27 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
         .maybeSingle()
 
       if (existing) return
+
+      const { hasPendingBillTask } = await import('../../lib/financeBillTaskDedup')
+      const { isBillResolvedForPeriod } = await import('../../lib/financeBillOrchestrator')
+      if (hasPendingBillTask(get().tarefas, { titulo: opts.titulo, phantomKey }))
+      {
+        return
+      }
+
+      const billProbe = {
+        id: opts.billId,
+        tipo: 'conta_fixa' as const,
+        nome: '',
+        valor: 0,
+        vencimento: opts.vencimento,
+        diasRestantes: opts.diasRestantes,
+        urgente: opts.diasRestantes <= 1,
+      }
+      if (isBillResolvedForPeriod(billProbe, get().tarefas))
+      {
+        return
+      }
 
       const score = opts.diasRestantes <= 0 ? 95 : opts.diasRestantes === 1 ? 88 : opts.diasRestantes === 2 ? 82 : 72
       const prioridade = score >= 85 ? 'alta' : 'media'

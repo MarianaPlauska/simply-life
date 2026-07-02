@@ -8,7 +8,7 @@ import {
   type FinancePeriodConfig,
 } from '../../lib/financePeriodFilter';
 import { useFinancePlannerInit } from '../../hooks/useFinancePlannerInit';
-import { computeCashPosition } from '../../lib/financeReservedBills';
+import { useCashPosition } from '../../hooks/useCashPosition';
 import { useFinanceDueNotifications } from '../../hooks/useFinanceDueNotifications';
 import {
   FINANCE_MAIN_TABS,
@@ -39,6 +39,8 @@ import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 import { clampFinanceMonthOffset, getFinanceMonthNavBounds } from '../../lib/financeMonthOutlook';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
 import { FinanceCashTab } from './FinanceCashTab';
+import { FinanceKanbanPaymentsPanel } from './overview/FinanceKanbanPaymentsPanel';
+import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup';
 import { NewGoalModal } from './NewGoalModal';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -50,9 +52,7 @@ export function FinancePlannerView() {
   const categories = useTaskStore((s) => s.categories);
   const financialGoals = useTaskStore((s) => s.financialGoals);
   const updateGoalProgress = useTaskStore((s) => s.updateGoalProgress);
-  const cashAccount = useTaskStore((s) => s.cashAccount);
-  const reservedBills = useTaskStore((s) => s.reservedBills);
-  const contasFixas = useTaskStore((s) => s.contasFixas);
+  const { computed: computedCashPosition, display: cashPosition } = useCashPosition();
 
   useFinancePlannerInit();
   useFinanceDueNotifications(true);
@@ -168,8 +168,14 @@ export function FinancePlannerView() {
     });
   }, [transactions, monthOffset]);
 
-  const receita = monthTx.filter((t) => t.tipo === 'receita').reduce((s, t) => s + t.valor, 0);
-  const despesas = monthTx.filter((t) => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
+  const receita = monthTx
+    .filter((t) => t.tipo === 'receita' && (t.status_pagamento === 'pago' || !t.status_pagamento))
+    .reduce((s, t) => s + t.valor, 0);
+  const despesas = useMemo(() =>
+    dedupeTransactionsForLedger(monthTx)
+      .filter((t) => t.tipo === 'despesa' && t.status_pagamento === 'pago')
+      .reduce((s, t) => s + t.valor, 0),
+  [monthTx]);
   const saldo = receita - despesas;
 
   const prevDespesas = prevMonthTx.filter((t) => t.tipo === 'despesa').reduce((s, t) => s + t.valor, 0);
@@ -237,13 +243,6 @@ export function FinancePlannerView() {
       };
     });
   }, [categoryTotals, activeCategories]);
-
-  const cashPosition = useMemo(
-    () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills, {
-      contasFixas,
-    }),
-    [transactions, cashAccount.saldo_inicial, reservedBills, contasFixas],
-  );
 
   const monthBounds = useMemo(
     () => getFinanceMonthNavBounds(transactions),
@@ -413,6 +412,10 @@ export function FinancePlannerView() {
           reservaRestante={cashPosition.reservaRestante}
           saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
           compromissosFixas={cashPosition.compromissosFixas}
+          computedDisponivel={computedCashPosition.saldoDisponivel}
+          computedCorrente={computedCashPosition.saldoCorrente}
+          computedReservado={computedCashPosition.reservaRestante}
+          computedProjetado={computedCashPosition.saldoProjetadoDisponivel}
           onNewExtraIncome={() => setNewTransactionOpen(true, 'receita')}
         />
       )}
@@ -426,6 +429,14 @@ export function FinancePlannerView() {
 
       {activeLeaf === 'faturas' && (
         <FinanceReservedBillsTab />
+      )}
+
+      {activeLeaf === 'pagos' && (
+        <FinanceKanbanPaymentsPanel
+          monthLabel={monthLabel}
+          viewYear={viewYear}
+          viewMonth={viewMonth}
+        />
       )}
 
       {/* ═══════ CONTAS FIXAS ═══════ */}
