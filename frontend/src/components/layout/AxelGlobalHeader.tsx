@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { countAlertasHeader } from '../../lib/notificacaoUtils'
 import { useNavigate } from 'react-router-dom'
-import { AxelStreakPopover } from './AxelStreakPopover'
 import { MobileSidebarDrawer } from './MobileSidebarDrawer'
 import { PinnedNavEditor } from './PinnedNavEditor'
 import { AxelPageBack } from './AxelPageBack'
@@ -9,16 +8,17 @@ import { NotificationDropdown } from './NotificationDropdown'
 import { AxelCompanionAvatar } from '../Onboarding/AxelCompanionAvatar'
 import { iniciaisDe } from '../../lib/axelAvatarPresets'
 import {
-  Search, SlidersHorizontal, LogOut, Bell,
-  PanelLeft,
+  SlidersHorizontal, LogOut, Bell,
+  PanelLeft, Sparkles,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AccessibilityQuickMenu } from '../dashboard/AccessibilityQuickMenu'
 import {
-  AXEL_CHROME_PLANE,
+  AXEL_GLASS_CHROME,
   AXEL_HEADER_ACTION,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
+  AXEL_TOUCH_PRESS,
 } from '../../constants/axelSurfaces'
 
 import { normalizePinnedModules, PINNED_DASHBOARD_ID } from '../../store/slices/uiSlice'
@@ -67,7 +67,7 @@ export function AxelGlobalHeader()
   const activeView = useTaskStore((s) => s.activeView)
   const pinnedModulesRaw = useTaskStore((s) => s.pinnedModules)
   const pinnedModules = useMemo(
-    () => normalizePinnedModules(pinnedModulesRaw),
+    () => normalizePinnedModules(Array.isArray(pinnedModulesRaw) ? pinnedModulesRaw : []),
     [pinnedModulesRaw],
   )
   const toggleSidebar = useTaskStore((s) => s.toggleSidebar)
@@ -78,6 +78,8 @@ export function AxelGlobalHeader()
   const sinoDestaqueAte = useTaskStore((s) => s.sinoDestaqueAte)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
   const userProfile = useTaskStore((s) => s.userProfile)
+  const setAxelAskOpen = useTaskStore((s) => s.setAxelAskOpen)
+  const userStats = useTaskStore((s) => s.userStats)
 
   const profileInitials = iniciaisDe(
     workspacePrefs.axel_calls_you
@@ -137,7 +139,7 @@ export function AxelGlobalHeader()
   return (
     <>
       <MobileSidebarDrawer />
-      <header className={`shrink-0 w-full border-b border-line relative z-50 overflow-visible ${AXEL_CHROME_PLANE}`}>
+      <header className={`sl-glass-chrome shrink-0 w-full border-b relative z-50 overflow-visible ${AXEL_GLASS_CHROME}`}>
       <div className="px-3 sm:px-4 md:px-6 lg:px-8 min-h-14 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 sm:gap-x-3">
         <div className="flex items-center gap-0.5 sm:gap-1 min-w-0 justify-self-start">
           <button
@@ -153,7 +155,7 @@ export function AxelGlobalHeader()
                 setMobileSidebarOpen(true)
               }
             }}
-            className="p-2 -ml-1 rounded-sl text-ink-muted hover:text-ink hover:bg-chrome transition-colors shrink-0"
+            className={`sl-touch p-2 -ml-1 rounded-sl text-ink-muted hover:text-ink hover:bg-chrome shrink-0 ${AXEL_TOUCH_PRESS}`}
             aria-label={sidebarCollapsed ? 'Abrir menu lateral' : 'Alternar menu lateral'}
             title="Menu"
           >
@@ -185,7 +187,7 @@ export function AxelGlobalHeader()
                     key={moduleId}
                     type="button"
                     onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
-                    className={`relative hidden sm:inline-flex px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono transition-colors whitespace-nowrap border shrink-0 ${
+                    className={`sl-touch relative hidden sm:inline-flex px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono whitespace-nowrap border shrink-0 ${AXEL_TOUCH_PRESS} ${
                       activeView === moduleId
                         ? 'text-ink bg-accent-muted border-accent/30'
                         : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
@@ -203,7 +205,7 @@ export function AxelGlobalHeader()
                   key={moduleId}
                   type="button"
                   onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
-                  className={`relative px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono transition-colors whitespace-nowrap border shrink-0 ${
+                  className={`sl-touch relative px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono whitespace-nowrap border shrink-0 ${AXEL_TOUCH_PRESS} ${
                     isActive
                       ? 'text-ink bg-accent-muted border-accent/30'
                       : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
@@ -226,16 +228,25 @@ export function AxelGlobalHeader()
           <div aria-hidden />
         )}
 
-        <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 min-w-0 justify-self-end">
-          <PinnedNavEditor />
-          <div className="hidden lg:flex items-center gap-2 bg-chrome border border-line rounded-sl px-3 py-1.5">
-            <Search className="w-3.5 h-3.5 text-ink-muted" />
-            <span className={`font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>Buscar</span>
+        <div className="flex items-center gap-0.5 sm:gap-1 min-w-0 justify-self-end">
+          <div className="hidden md:flex items-center gap-0.5">
+            <PinnedNavEditor />
           </div>
 
-          <AccessibilityQuickMenu />
+          <button
+            type="button"
+            onClick={() => setAxelAskOpen(true)}
+            className={`sl-touch relative p-2 rounded-sl border border-accent/30 bg-accent/10 hover:bg-accent/15 ${AXEL_TOUCH_PRESS}`}
+            aria-label="Consultar AXEL — posso fazer isso hoje?"
+            title="Consultar AXEL"
+          >
+            <Sparkles className="w-4 h-4 text-accent" />
+            {(userStats?.level ?? 1) < 3 && (
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-atencao ring-2 ring-card" aria-hidden />
+            )}
+          </button>
 
-          <AxelStreakPopover />
+          <AccessibilityQuickMenu />
 
           <div ref={notifRef} className="relative z-[200]">
             <button
@@ -275,7 +286,7 @@ export function AxelGlobalHeader()
             <button
               type="button"
               onClick={() => setIsProfileOpen((v) => !v)}
-              className="w-9 h-9 rounded-sl border border-line hover:border-accent/40 transition-colors flex items-center justify-center bg-card overflow-hidden"
+              className={`sl-touch w-9 h-9 rounded-sl border border-line hover:border-accent/40 flex items-center justify-center bg-card overflow-hidden ${AXEL_TOUCH_PRESS}`}
               aria-label="Perfil"
             >
               <AxelCompanionAvatar
@@ -307,7 +318,7 @@ export function AxelGlobalHeader()
                   onClick={() => { navigate('/configuracoes'); setIsProfileOpen(false) }}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-ink-muted" />
-                  Preferências
+                  Configurações
                 </button>
                 <div className="h-px bg-line mx-3" />
                 <button

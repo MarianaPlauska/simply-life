@@ -45,7 +45,7 @@ export interface UserWorkspacePrefs
 
 export const ACCENT_PALETTES: Record<AccentId, { label: string; light: string; dark: string; hover: string }> = {
   meridian: { label: 'Meridiano', light: '#0D9488', dark: '#38B2AC', hover: '#2DD4BF' },
-  copper: { label: 'Cobre', light: '#B87333', dark: '#C17F3A', hover: '#D4924A' },
+  copper: { label: 'Cobre', light: '#B87333', dark: '#E07A5F', hover: '#EB8F78' },
   sky: { label: 'Céu', light: '#1D6FA4', dark: '#38A3E8', hover: '#155A85' },
   forest: { label: 'Floresta', light: '#3D6B4F', dark: '#4A7C59', hover: '#5C9468' },
   violet: { label: 'Violeta', light: '#5B4B8A', dark: '#8B7CF6', hover: '#A394F8' },

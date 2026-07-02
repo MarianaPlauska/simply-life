@@ -9,9 +9,11 @@ import {
   migrateAllLegacyLocalKeys,
   setActiveStorageUserId,
 } from '../lib/userScopedStorage'
+import { loadAchievementsForUser } from './slices/axelAchievementSlice'
 import { loadCashAccountLocal } from '../lib/financeCashAccount'
 import { loadRecurringIncomesLocal } from '../lib/financeRecurringIncomeLocal'
 import { loadExpensePresets } from '../lib/financeExpensePresets'
+import { resetFinancePlannerInit } from '../hooks/useFinancePlannerInit'
 
 export function getEmptyUserSensitiveState(): Partial<TaskStore>
 {
@@ -58,6 +60,7 @@ export function getEmptyUserSensitiveState(): Partial<TaskStore>
     newsItems: [],
     workspacePrefs: { ...DEFAULT_WORKSPACE_PREFS },
     workspacePrefsLoaded: false,
+    recentAchievements: [],
   }
 }
 
@@ -69,6 +72,7 @@ function hydrateUserLocalSlices(userId: string | null): Partial<TaskStore>
     cashAccount: loadCashAccountLocal(userId),
     recurringIncomes: loadRecurringIncomesLocal(userId),
     expensePresets: loadExpensePresets(userId),
+    recentAchievements: loadAchievementsForUser(userId),
   }
 }
 
@@ -84,6 +88,8 @@ export async function switchUserSession(nextUserId: string | null): Promise<bool
   }
 
   setActiveStorageUserId(nextUserId)
+
+  resetFinancePlannerInit()
 
   if (nextUserId)
   {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { summarizeSpreadsheetPeriod } from '../../lib/financeSpreadsheetAnalytics'
 import { resolveSpreadsheetMood } from '../../lib/financeSpreadsheetMood'
@@ -31,18 +31,6 @@ export function FinanceGlobalMoodBanner({
   const reservedBills = useTaskStore((s) => s.reservedBills)
   const cards = useTaskStore((s) => s.cards)
   const transactions = useTaskStore((s) => s.transactions)
-  const fetchContasFixas = useTaskStore((s) => s.fetchContasFixas)
-  const fetchReservedBills = useTaskStore((s) => s.fetchReservedBills)
-  const fetchCards = useTaskStore((s) => s.fetchCards)
-  const fetchTransactions = useTaskStore((s) => s.fetchTransactions)
-
-  useEffect(() =>
-  {
-    void fetchContasFixas()
-    void fetchReservedBills()
-    void fetchCards()
-    void fetchTransactions()
-  }, [fetchContasFixas, fetchReservedBills, fetchCards, fetchTransactions])
 
   const billAlertCount = useMemo(
     () => countBillsDueWithinHours({ contasFixas, reservedBills, cards, transactions }),

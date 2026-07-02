@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Brain, Activity, Anchor } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
+import { XP_PER_LEVEL } from '../../lib/gamificationProfile'
 
 // PROGRESSO RPG — 3 atributos com barras XP (Foco / Vitalidade / Estabilidade)
 // Layout: icone + nome + nivel + barra + xp/proximo
@@ -27,9 +28,9 @@ export function ProgressoRPGCard()
   // Cada 100 XP = 1 nivel; barra mostra progresso no nivel atual
   function unpack(totalXp: number): { level: number; xp: number; xpNext: number }
   {
-    const level = Math.floor(totalXp / 100) + 1
-    const xp = totalXp % 100
-    return { level, xp, xpNext: 100 }
+    const level = Math.floor(totalXp / XP_PER_LEVEL) + 1
+    const xp = totalXp % XP_PER_LEVEL
+    return { level, xp, xpNext: XP_PER_LEVEL }
   }
 
   const values: Record<string, { level: number; xp: number; xpNext: number }> = {

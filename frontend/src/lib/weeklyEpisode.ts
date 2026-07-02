@@ -98,19 +98,26 @@ function buildMomentos(input: {
   tarefasConcluidas: number
   focoMinutos: number
   humorMedio: number
-  questsConcluidas: number
+  questsConcluidasSemana: number
 }): EpisodeMoment[]
 {
   const momentos: EpisodeMoment[] = []
 
-  if (input.tarefasConcluidas > 0 || input.questsConcluidas > 0)
+  if (input.tarefasConcluidas > 0)
   {
     momentos.push({
       tipo: 'conquista',
       titulo: 'Conquista',
-      texto: input.tarefasConcluidas > 0
-        ? `${input.tarefasConcluidas} tarefa${input.tarefasConcluidas !== 1 ? 's' : ''} riscada${input.tarefasConcluidas !== 1 ? 's' : ''}${input.focoMinutos > 0 ? ` e ${input.focoMinutos} min de foco` : ''}.`
-        : `${input.questsConcluidas} missão${input.questsConcluidas !== 1 ? 'ões' : ''} fechada${input.questsConcluidas !== 1 ? 's' : ''}.`,
+      texto: `${input.tarefasConcluidas} tarefa${input.tarefasConcluidas !== 1 ? 's' : ''} riscada${input.tarefasConcluidas !== 1 ? 's' : ''}${input.focoMinutos > 0 ? ` e ${input.focoMinutos} min de foco` : ''}.`,
+    })
+  }
+  else if (input.questsConcluidasSemana > 0)
+  {
+    const n = input.questsConcluidasSemana
+    momentos.push({
+      tipo: 'conquista',
+      titulo: 'Conquista',
+      texto: n === 1 ? '1 missão fechada esta semana.' : `${n} missões fechadas esta semana.`,
     })
   }
 
@@ -130,34 +137,38 @@ function buildMomentos(input: {
       texto: 'Muita execução, pouca ofensiva — o fio da consistência ficou fino.',
     })
   }
+  else if (input.ofensivasSalvas === 0 && input.tarefasConcluidas === 0 && input.focoMinutos === 0)
+  {
+    momentos.push({
+      tipo: 'susto',
+      titulo: 'Susto',
+      texto: 'Semana quietinha — um check-in ou tarefa já religa o episódio.',
+    })
+  }
 
-  if (input.humorMedio >= 3.5 || input.ofensivasSalvas >= 4)
+  if (input.ofensivasSalvas >= 4)
   {
     momentos.push({
       tipo: 'cuidado',
       titulo: 'Cuidado',
-      texto: input.ofensivasSalvas >= 4
-        ? `${input.ofensivasSalvas} dias de ofensiva — você se priorizou de verdade.`
-        : `Humor ${input.humorMedio.toFixed(1)}/5 — corpo e mente alinhados na média.`,
+      texto: `${input.ofensivasSalvas} dias de ofensiva — você se priorizou de verdade.`,
     })
   }
-  else if (input.focoMinutos >= 60)
+  else if (input.humorMedio >= 3.5)
+  {
+    momentos.push({
+      tipo: 'cuidado',
+      titulo: 'Cuidado',
+      texto: `Humor ${input.humorMedio.toFixed(1)}/5 — corpo e mente alinhados na média.`,
+    })
+  }
+  else if (input.focoMinutos >= 45)
   {
     momentos.push({
       tipo: 'cuidado',
       titulo: 'Cuidado',
       texto: `${input.focoMinutos} minutos de foco profundo — investimento em você.`,
     })
-  }
-
-  while (momentos.length < 3)
-  {
-    const filler: EpisodeMoment[] = [
-      { tipo: 'cuidado', titulo: 'Cuidado', texto: 'Um registro de humor já abre o próximo capítulo.' },
-      { tipo: 'conquista', titulo: 'Conquista', texto: 'Você voltou — isso já conta na série.' },
-      { tipo: 'susto', titulo: 'Susto', texto: 'Semana quietinha — às vezes silêncio também é plot.' },
-    ]
-    momentos.push(filler[momentos.length % filler.length])
   }
 
   return momentos.slice(0, 3)
@@ -222,7 +233,11 @@ export function buildWeeklyEpisode(input: {
   }).length
 
   const humorMedio = media(input.humorSemana.map((h) => h.humor))
-  const questsConcluidas = input.userQuests.filter((q) => q.concluida).length
+  const questsConcluidasSemana = input.userQuests.filter((q) =>
+  {
+    if (!q.concluida) return false
+    return q.created_at.slice(0, 10) >= desde
+  }).length
 
   const capituloTitulo = buildCapituloTitulo(ofensivasSalvas, tarefasConcluidas, humorMedio)
   const momentos = buildMomentos({
@@ -230,7 +245,7 @@ export function buildWeeklyEpisode(input: {
     tarefasConcluidas,
     focoMinutos,
     humorMedio,
-    questsConcluidas,
+    questsConcluidasSemana,
   })
 
   const billHint = nextBillLabel(
@@ -291,7 +306,7 @@ export function buildWeeklyEpisode(input: {
     tarefasConcluidas,
     focoMinutos,
     humorMedio,
-    questsConcluidas,
+    questsConcluidas: questsConcluidasSemana,
     xpTotal: input.xpTotal,
     nivel: input.nivel,
     headline,

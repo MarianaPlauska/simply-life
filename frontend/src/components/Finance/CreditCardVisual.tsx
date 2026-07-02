@@ -1,4 +1,4 @@
-import { Settings } from 'lucide-react'
+import { Settings, Trash2 } from 'lucide-react'
 import type { VirtualCard } from '../../store/storeTypes'
 import type { BillingCycle } from '../../lib/financeCardCycle'
 import { dueDateFromUserBillingDays, invoiceUsagePct } from '../../lib/financeCardCycle'
@@ -29,6 +29,7 @@ interface CreditCardVisualProps
   selected?: boolean
   onClick?: () => void
   onSettingsClick?: () => void
+  onDeleteClick?: () => void
 }
 
 export function CreditCardVisual({
@@ -38,6 +39,7 @@ export function CreditCardVisual({
   selected = false,
   onClick,
   onSettingsClick,
+  onDeleteClick,
 }: CreditCardVisualProps)
 {
   const usage = invoiceUsagePct(invoiceTotal, card.limite)
@@ -65,19 +67,37 @@ export function CreditCardVisual({
       <div className={`relative bg-gradient-to-br ${SKINS[card.tipo_gradiente]} p-4 min-h-[168px] flex flex-col justify-between`}>
         <div className="absolute inset-0 border border-white/5 pointer-events-none rounded-sl" aria-hidden />
 
-        {onSettingsClick && (
-          <button
-            type="button"
-            onClick={(e) =>
-            {
-              e.stopPropagation()
-              onSettingsClick()
-            }}
-            className="absolute top-2 right-2 z-20 inline-flex items-center justify-center w-9 h-9 rounded-sl bg-black/35 border border-white/15 text-white/90 hover:bg-black/50 transition-colors"
-            aria-label={`Configurar cartão ${card.nome}`}
-          >
-            <Settings size={15} strokeWidth={1.75} />
-          </button>
+        {(onSettingsClick || onDeleteClick) && (
+          <div className="absolute top-2 right-2 z-20 flex items-center gap-1">
+            {onDeleteClick && (
+              <button
+                type="button"
+                onClick={(e) =>
+                {
+                  e.stopPropagation()
+                  onDeleteClick()
+                }}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-sl bg-black/35 border border-white/15 text-white/90 hover:bg-urgente/40 hover:border-urgente/40 transition-colors"
+                aria-label={`Excluir cartão ${card.nome}`}
+              >
+                <Trash2 size={14} strokeWidth={1.75} />
+              </button>
+            )}
+            {onSettingsClick && (
+              <button
+                type="button"
+                onClick={(e) =>
+                {
+                  e.stopPropagation()
+                  onSettingsClick()
+                }}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-sl bg-black/35 border border-white/15 text-white/90 hover:bg-black/50 transition-colors"
+                aria-label={`Configurar cartão ${card.nome}`}
+              >
+                <Settings size={14} strokeWidth={1.75} />
+              </button>
+            )}
+          </div>
         )}
 
         <div className="relative z-10 flex items-start justify-between gap-2">

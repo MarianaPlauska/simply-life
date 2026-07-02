@@ -45,6 +45,7 @@ export interface UISlice {
   isNewTransactionModalOpen: boolean;
   newTransactionModalMode: NewTransactionModalMode;
   isCommandPaletteOpen: boolean;
+  isAxelAskOpen: boolean;
   timerConfig: TimerConfig;
   interactionScore: Record<string, number>;
   sidebarCollapsed: boolean;
@@ -59,6 +60,7 @@ export interface UISlice {
   setFinanceQuickCaptureSeed: (text: string) => void;
   setNewTransactionModalOpen: (isOpen: boolean, mode?: NewTransactionModalMode) => void;
   setCommandPaletteOpen: (isOpen: boolean) => void;
+  setAxelAskOpen: (isOpen: boolean) => void;
   setTimerConfig: (key: keyof TimerConfig, value: number) => void;
   registerInteraction: (moduleId: string) => void;
   toggleSidebar: () => void;
@@ -99,6 +101,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
   isNewTransactionModalOpen: false,
   newTransactionModalMode: DEFAULT_NEW_TX_MODAL_MODE,
   isCommandPaletteOpen: false,
+  isAxelAskOpen: false,
   timerConfig: { pomodoroTime: 25, shortBreak: 5, longBreak: 15 },
   interactionScore: {},
   sidebarCollapsed: false,
@@ -128,6 +131,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
         : DEFAULT_NEW_TX_MODAL_MODE,
     }),
   setCommandPaletteOpen: (isOpen) => set({ isCommandPaletteOpen: isOpen }),
+  setAxelAskOpen: (isOpen) => set({ isAxelAskOpen: isOpen }),
 
   setTimerConfig: (key, value) =>
   {

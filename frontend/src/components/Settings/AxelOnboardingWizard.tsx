@@ -2,6 +2,7 @@ import { Check, ChevronRight, Mail, Sparkles, Webhook, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import { SETTINGS as S } from './settingsTheme'
 
 const WIZARD_STEPS = [
   {
@@ -86,11 +87,11 @@ export function AxelOnboardingWizard({ onSelectTab }: AxelOnboardingWizardProps)
   }
 
   return (
-    <section className="mb-6 rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] to-transparent p-5">
+    <section className={`mb-6 p-5 ${S.accentPanel}`}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-lg font-semibold text-white">Ativação AXEL</h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <h2 className={S.sectionTitle}>Ativação AXEL</h2>
+          <p className={S.sectionHint}>
             Configure o centro de execução em {axelSteps.length} passos · {progress}% concluído
           </p>
         </div>
@@ -98,16 +99,16 @@ export function AxelOnboardingWizard({ onSelectTab }: AxelOnboardingWizardProps)
           <button
             type="button"
             onClick={() => dismiss()}
-            className="text-xs text-zinc-500 hover:text-zinc-300"
+            className="text-xs text-ink-muted hover:text-ink"
           >
             Ocultar
           </button>
         ) : null}
       </div>
 
-      <div className="h-1 rounded-full bg-zinc-800 mb-4 overflow-hidden">
+      <div className={S.progressTrack}>
         <div
-          className="h-full bg-violet-500 transition-all duration-500"
+          className={S.progressBar}
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -121,20 +122,20 @@ export function AxelOnboardingWizard({ onSelectTab }: AxelOnboardingWizardProps)
           return (
             <li
               key={step.id}
-              className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${done ? 'border-emerald-500/20 bg-emerald-500/[0.04]' : 'border-zinc-800/80 bg-zinc-900/40'}`}
+              className={`flex items-center gap-3 p-3 rounded-sl border transition-colors ${done ? `${S.successBorder} ${S.successBg}` : 'border-line bg-chrome/40'}`}
             >
-              <div className={`p-2 rounded-lg shrink-0 ${done ? 'bg-emerald-500/10' : 'bg-zinc-800/80'}`}>
+              <div className={`p-2 rounded-sl shrink-0 ${done ? S.successIconBg : 'bg-chrome'}`}>
                 {done ? (
-                  <Check className="w-4 h-4 text-emerald-400" strokeWidth={2} />
+                  <Check className={`w-4 h-4 ${S.successText}`} strokeWidth={2} />
                 ) : (
-                  <Icon className="w-4 h-4 text-violet-400" strokeWidth={1.75} />
+                  <Icon className={`w-4 h-4 ${S.iconAccent}`} strokeWidth={1.75} />
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-[13px] font-medium ${done ? 'text-zinc-400 line-through' : 'text-white'}`}>
+                <p className={`text-[13px] font-medium ${done ? 'text-ink-muted line-through' : 'text-ink'}`}>
                   {step.label}
                 </p>
-                <p className="text-[11px] text-zinc-500 mt-0.5 leading-snug">{step.description}</p>
+                <p className="text-[11px] text-ink-muted mt-0.5 leading-snug">{step.description}</p>
               </div>
               {!done && (
                 <button

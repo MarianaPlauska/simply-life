@@ -69,6 +69,11 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
       await get().createTarefa(taskTitle, conteudo.trim())
     }
 
+    void import('../../lib/processAxelNoteSignals').then(({ processAxelNoteSignals }) =>
+    {
+      processAxelNoteSignals(`${titulo ?? ''} ${conteudo}`)
+    })
+
     return data ?? null
   },
 
@@ -98,6 +103,15 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
     set((s) => ({
       anotacoes: s.anotacoes.map((n) => (n.id === id ? { ...n, ...patch } : n)),
     }))
+
+    if (patch.conteudo != null || patch.titulo != null)
+    {
+      const note = get().anotacoes.find((n) => n.id === id)
+      void import('../../lib/processAxelNoteSignals').then(({ processAxelNoteSignals }) =>
+      {
+        processAxelNoteSignals(`${patch.titulo ?? note?.titulo ?? ''} ${patch.conteudo ?? note?.conteudo ?? ''}`)
+      })
+    }
   },
 
   deleteAnotacao: async (id) =>

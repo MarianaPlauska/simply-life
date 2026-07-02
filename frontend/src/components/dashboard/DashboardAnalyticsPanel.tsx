@@ -61,46 +61,46 @@ export function DashboardAnalyticsPanel()
     <section className="sl-panel p-4 sm:p-5 space-y-4" aria-label="Painel de análise">
       <div>
         <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent">Hoje</p>
-        <h2 className="font-sans font-semibold tracking-tight text-lg md:text-xl text-zinc-900 dark:text-zinc-100 mt-1">
+        <h2 className="font-sans font-semibold tracking-tight text-lg md:text-xl text-ink mt-1">
           Resumo do dia
         </h2>
-        <p className="text-[11px] mt-1 text-zinc-500 dark:text-zinc-400">
+        <p className="text-[11px] mt-1 text-ink-muted">
           O essencial — ritual, hábitos e progresso. Detalhes nas páginas de cada módulo.
         </p>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <div className="rounded-sl border border-line bg-chrome/40 p-3">
-          <p className="font-mono text-[9px] uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+        <div className="sl-stat-chip">
+          <p className="font-mono text-[9px] uppercase text-ink-muted flex items-center gap-1">
             <HeartPulse size={10} className="text-accent" />
             Ritual
           </p>
           <p className="font-sans font-semibold tracking-tight text-lg tabular-nums text-ink">{ritual.percent}%</p>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">{ritual.doneCount}/{ritual.totalApplicable}</p>
+          <p className="text-[10px] text-ink-muted">{ritual.doneCount}/{ritual.totalApplicable}</p>
         </div>
-        <div className="rounded-sl border border-line bg-chrome/40 p-3">
-          <p className="font-mono text-[9px] uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+        <div className="sl-stat-chip">
+          <p className="font-mono text-[9px] uppercase text-ink-muted flex items-center gap-1">
             <Flame size={10} className="text-atencao" />
             Ofensiva
           </p>
           <p className="font-sans font-semibold tracking-tight text-lg tabular-nums text-ink">{streakCount}</p>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">Nv {userStats?.level ?? 1}</p>
+          <p className="text-[10px] text-ink-muted">Nv {userStats?.level ?? 1}</p>
         </div>
-        <div className="rounded-sl border border-line bg-chrome/40 p-3">
-          <p className="font-mono text-[9px] uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+        <div className="sl-stat-chip">
+          <p className="font-mono text-[9px] uppercase text-ink-muted flex items-center gap-1">
             <Droplets size={10} className="text-accent" />
             Água
           </p>
           <p className="font-sans font-semibold tracking-tight text-lg tabular-nums text-ink">{waterPct}%</p>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">{waterToday} ml</p>
+          <p className="text-[10px] text-ink-muted">{waterToday} ml</p>
         </div>
-        <div className="rounded-sl border border-line bg-chrome/40 p-3">
-          <p className="font-mono text-[9px] uppercase text-zinc-500 dark:text-zinc-400 flex items-center gap-1">
+        <div className="sl-stat-chip">
+          <p className="font-mono text-[9px] uppercase text-ink-muted flex items-center gap-1">
             <ListChecks size={10} className="text-accent" />
             Tarefas
           </p>
           <p className="font-sans font-semibold tracking-tight text-lg tabular-nums text-ink">{tarefasHoje.concluidas}</p>
-          <p className="text-[10px] text-zinc-500 dark:text-zinc-400">de {tarefasHoje.total} ativas</p>
+          <p className="text-[10px] text-ink-muted">de {tarefasHoje.total} ativas</p>
         </div>
       </div>
 

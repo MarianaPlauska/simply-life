@@ -2,7 +2,7 @@
 
 import type { UserWorkspacePrefs } from './userWorkspacePrefs'
 import type { DashboardWidgetId } from './dashboardWidgets'
-import { XP_PER_LEVEL } from './gamificationProfile'
+import { XP_PER_LEVEL, DAILY_XP_CAP } from './xpEconomy'
 
 export type XpModule = 'foco' | 'vitalidade' | 'estabilidade'
 
@@ -34,15 +34,15 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     module: 'foco',
     emoji: '⚡',
     action: 'Concluir tarefa no Kanban',
-    xp: '= score de urgência',
-    hint: 'Tarefa crítica vale mais. Main Quest dá bônus.',
+    xp: '+8 a +28',
+    hint: 'Score de urgência com teto — não pula níveis de uma vez.',
   },
   {
     id: 'focus',
     module: 'foco',
     emoji: '🎯',
     action: 'Sessão de foco / Pomodoro',
-    xp: '+10 a +30',
+    xp: '+12',
     hint: 'Minutos registrados somam ao módulo Foco.',
   },
   {
@@ -50,15 +50,15 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     module: 'foco',
     emoji: '🔥',
     action: 'Salvar a ofensiva do dia',
-    xp: '+15',
-    hint: '1 tarefa + humor/ritual = dia válido.',
+    xp: 'ofensiva',
+    hint: '1 tarefa + humor/ritual = dia válido (sem XP extra automático).',
   },
   {
     id: 'water',
     module: 'vitalidade',
     emoji: '💧',
     action: 'Registrar água, medicamento ou treino',
-    xp: '+10 a +20',
+    xp: '+5 a +12',
     hint: 'Pequenas vitórias contam — estilo Finch.',
   },
   {
@@ -66,7 +66,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     module: 'vitalidade',
     emoji: '💛',
     action: 'Check-in de humor',
-    xp: '+10',
+    xp: '+5',
     hint: 'Calibrar o AXEL para o seu dia.',
   },
   {
@@ -74,17 +74,52 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     module: 'estabilidade',
     emoji: '💰',
     action: 'Lançar movimento financeiro',
-    xp: '+8 a +50',
-    hint: 'Reconciliar e fechar mês valem mais.',
+    xp: '+5 a +15',
+    hint: 'Reconciliar e fechar mês valem um pouco mais.',
   },
   {
     id: 'quest',
     module: 'foco',
     emoji: '📜',
     action: 'Completar missão diária',
-    xp: '+25 a +40',
+    xp: '+5 a +8',
     hint: 'Aparece no dashboard e no Kanban.',
   },
+  {
+    id: 'daily_cap',
+    module: 'foco',
+    emoji: '⏳',
+    action: 'Teto diário de XP',
+    xp: `${DAILY_XP_CAP}/dia`,
+    hint: `${XP_PER_LEVEL} XP por nível — ~6 dias ativos para subir.`,
+  },
+]
+
+export interface TrailSkillNode
+{
+  level: number
+  module: XpModule
+  skill: string
+  unlock: string
+  emoji: string
+}
+
+/** Trilha estilo Duolingo — nós de habilidade por nível */
+export const TRAIL_SKILL_PATH: TrailSkillNode[] = [
+  { level: 1, module: 'foco', skill: 'Ofensiva', unlock: 'Dashboard + streak', emoji: '🔥' },
+  { level: 2, module: 'vitalidade', skill: 'Hidratação', unlock: 'Widget água', emoji: '💧' },
+  { level: 3, module: 'foco', skill: 'Consulta AXEL', unlock: 'Posso fazer hoje?', emoji: '💬' },
+  { level: 3, module: 'vitalidade', skill: 'Capacidade', unlock: 'Termômetro do dia', emoji: '🌡️' },
+  { level: 4, module: 'foco', skill: 'Episódio', unlock: 'Narrativa semanal', emoji: '📖' },
+  { level: 5, module: 'estabilidade', skill: 'Círculo', unlock: 'Convidar amigos', emoji: '👥' },
+  { level: 5, module: 'estabilidade', skill: 'Posso comprar?', unlock: 'E11 no lançamento', emoji: '🛒' },
+  { level: 7, module: 'foco', skill: 'Coach IA', unlock: 'Tom direto + layout', emoji: '🎯' },
+  { level: 8, module: 'vitalidade', skill: 'Sinais', unlock: 'Notas → nudges', emoji: '📝' },
+  { level: 9, module: 'estabilidade', skill: 'Previsão', unlock: 'Mini forecast 7 dias', emoji: '📅' },
+  { level: 10, module: 'foco', skill: 'Veterano', unlock: 'Molduras + badge', emoji: '🛡️' },
+  { level: 11, module: 'vitalidade', skill: 'Recuperação', unlock: 'Modo automático Finch', emoji: '🌿' },
+  { level: 15, module: 'vitalidade', skill: 'Aura', unlock: 'Recap com estilo', emoji: '✨' },
+  { level: 20, module: 'foco', skill: 'Mestre', unlock: 'Endgame cosmético', emoji: '👑' },
 ]
 
 export const TRAIL_MILESTONES: TrailMilestone[] = [
@@ -105,8 +140,8 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
   {
     level: 3,
     title: 'Operador em formação',
-    reward: 'Cores Céu e Floresta',
-    funCopy: 'Personalize o AXEL — corpo e mente começam a conversar.',
+    reward: 'Cores Céu e Floresta + Consulta AXEL',
+    funCopy: 'Pergunte “posso fazer isso hoje?” — compras, compromissos, projetos.',
     cosmeticIds: ['accent_sky', 'accent_forest'],
     featureUnlock: 'capacidade_do_dia',
   },
@@ -141,11 +176,32 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     featureUnlock: 'dashboard_custom',
   },
   {
+    level: 8,
+    title: 'Leitor de sinais',
+    reward: 'Notas viram pistas do AXEL',
+    funCopy: 'Diário e anotações alimentam nudges explicáveis — 1 por dia, tom Finch.',
+    featureUnlock: 'sinais_notas',
+  },
+  {
+    level: 9,
+    title: 'Cartógrafo da semana',
+    reward: 'Previsão 7 dias no dashboard',
+    funCopy: 'Contas, ritmo de gasto e humor — mini forecast sem planilha.',
+    featureUnlock: 'forecast_7d',
+  },
+  {
     level: 10,
     title: 'Veterano',
     reward: 'Badge 🛡️ + moldura episódio',
     funCopy: 'Endgame começa: coleção e história importam mais que pontos.',
     cosmeticIds: ['badge_veteran', 'ai_tone_coach_plus'],
+  },
+  {
+    level: 11,
+    title: 'Guardião gentil',
+    reward: 'Modo recuperação automático',
+    funCopy: 'Humor baixo + carga alta? O AXEL reduz o dia sozinho — estilo Finch.',
+    featureUnlock: 'recuperacao_auto',
   },
   {
     level: 15,

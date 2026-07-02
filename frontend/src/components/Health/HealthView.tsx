@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from 'react'
+import { useEffect, useMemo, useCallback, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Plus, Trash2, Minus, BookOpen, Moon, Brain, Sun, Sparkles, HeartPulse, LayoutGrid,
@@ -22,7 +22,8 @@ import { HealthTodayPanel } from './HealthTodayPanel'
 import { HealthCuidadosPanel } from './HealthCuidadosPanel'
 import { HealthNutritionStrip } from './HealthNutritionStrip'
 import { healthHeaderSubtitle } from './healthSectionMeta'
-import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT, AXEL_PAGE_SHELL_MOBILE_NARROW } from '../../constants/axelSurfaces'
+import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT, AXEL_PAGE_SHELL_MOBILE_NARROW, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
+import { BentoGridSkeleton } from '../ui/Skeleton'
 
 // HealthView — hub com 4 seções + subabas em Cuidados
 
@@ -103,6 +104,16 @@ export function HealthView()
   const fetchDiarioHoje = useTaskStore((s) => s.fetchDiarioHoje)
   const fetchPromptDoDia = useTaskStore((s) => s.fetchPromptDoDia)
   const fetchEntradasRecentes = useTaskStore((s) => s.fetchEntradasRecentes)
+  const userSessionReady = useTaskStore((s) => s.userSessionReady)
+
+  const [tabTransition, setTabTransition] = useState(false)
+
+  useEffect(() =>
+  {
+    setTabTransition(true)
+    const timer = window.setTimeout(() => setTabTransition(false), 160)
+    return () => window.clearTimeout(timer)
+  }, [section, cuidadosTab])
 
   // Dados leves — ritual e header em qualquer aba
   useEffect(() =>
@@ -176,6 +187,8 @@ export function HealthView()
     ritualTotal: ritualSnapshot.totalApplicable,
   })
 
+  const showHealthSkeleton = !userSessionReady || tabTransition
+
   return (
     <div className={`w-full min-h-0 flex flex-col ${AXEL_CANVAS} ${AXEL_MAIN_PT} ${AXEL_MAIN_PB_MOBILE}`}>
       <div className={`${AXEL_PAGE_SHELL_MOBILE_NARROW} px-4 sm:px-6 lg:px-8 flex flex-col flex-1 min-h-0`}>
@@ -198,7 +211,7 @@ export function HealthView()
           className="mt-3"
           aria-label="Seções de saúde"
         >
-          <div className="flex gap-1 p-1 rounded-sl bg-chrome border border-line">
+          <div className="flex gap-1 p-1 rounded-sl bg-chrome border border-line overflow-x-auto scrollbar-none">
             {SECTIONS.map(({ id, label, short, Icon }) =>
             {
               const active = section === id
@@ -208,7 +221,7 @@ export function HealthView()
                   type="button"
                   onClick={() => selectSection(id)}
                   className={[
-                    'flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-sl text-[11px] font-mono whitespace-nowrap transition-colors min-h-[44px]',
+                    `sl-touch flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-sl text-[11px] font-mono whitespace-nowrap min-h-[44px] ${AXEL_TOUCH_PRESS}`,
                     active
                       ? 'bg-card text-ink border border-line shadow-sm'
                       : 'text-ink-muted border border-transparent hover:text-ink',
@@ -224,6 +237,10 @@ export function HealthView()
         </nav>
 
         <div className="flex-1 py-4 sm:py-5 space-y-4 sm:space-y-5 min-h-0">
+          {showHealthSkeleton ? (
+            <BentoGridSkeleton variant="health" />
+          ) : (
+          <>
           {section === 'hoje' && (
             <HealthTodayPanel onSelectTab={goFromToday} />
           )}
@@ -247,6 +264,8 @@ export function HealthView()
                 preset={PRESET_HABITOS.filter((p) => p.tipo !== 'sono')}
               />
             </section>
+          )}
+          </>
           )}
         </div>
       </div>

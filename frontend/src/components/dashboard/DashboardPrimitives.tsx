@@ -7,7 +7,7 @@
 // ── Design System (ui/) ─────────────────────────────────────
 export { GlassCard, glassVariants } from '../ui/GlassCard';
 export type { GlassCardProps } from '../ui/GlassCard';
-export { Skeleton, CardSkeleton, ProgressBar, CircularProgress } from '../ui/Skeleton';
+export { Skeleton, CardSkeleton, Shimmer, BentoGridSkeleton, ProgressBar, CircularProgress } from '../ui/Skeleton';
 export { AmbientBackground } from '../ui/AmbientBackground';
 export type { GradientZone } from '../ui/AmbientBackground';
 

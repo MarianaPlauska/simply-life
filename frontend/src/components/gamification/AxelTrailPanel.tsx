@@ -2,10 +2,11 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Sparkles, Lock, Check, ChevronRight, Zap, Heart, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { computeGamificationProfile } from '../../lib/gamificationProfile'
+import { computeGamificationProfile, XP_PER_LEVEL } from '../../lib/gamificationProfile'
 import {
   XP_SOURCE_RULES,
   TRAIL_MILESTONES,
+  TRAIL_SKILL_PATH,
   getNextMilestone,
   arquetipoLabel,
   moduleLabel,
@@ -69,6 +70,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
           </div>
           <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             {profile.totalXp} XP total · {profile.xpInLevel}/{profile.xpToNextLevel} para o próximo nível
+            <span className="block text-[11px] mt-0.5 text-ink-muted">Teto: 90 XP/dia · 500 XP por nível</span>
           </p>
           <div className={`mt-3 h-2 rounded-full overflow-hidden ${AXEL_PROGRESS}`}>
             <div
@@ -88,7 +90,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
           {
             const Icon = MODULE_ICON[mod]
             const val = xpByModule[mod]
-            const subLevel = Math.floor(val / 100) + 1
+            const subLevel = Math.floor(val / XP_PER_LEVEL) + 1
             return (
               <div key={mod} className="p-2.5 rounded-sl border border-line bg-chrome/30 min-w-0">
                 <div className="flex items-center gap-1 mb-1">
@@ -140,6 +142,42 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
           </ul>
         </section>
       )}
+
+      <section className={AXEL_BORDERLESS_PANEL}>
+        <h3 className={`text-sm font-display mb-3 ${AXEL_TEXT_PRIMARY}`}>
+          Caminho de habilidades
+        </h3>
+        <ol className="relative border-l-2 border-line ml-3 pl-4 space-y-3">
+          {TRAIL_SKILL_PATH.map((node) =>
+          {
+            const unlocked = profile.level >= node.level
+            const Icon = MODULE_ICON[node.module]
+            return (
+              <li key={`${node.level}-${node.skill}`} className="relative">
+                <span
+                  className={`absolute -left-[1.35rem] top-1 w-3 h-3 rounded-full border-2 ${
+                    unlocked ? 'bg-accent border-accent' : 'bg-card border-line'
+                  }`}
+                  aria-hidden
+                />
+                <div className={`p-2.5 rounded-sl border ${unlocked ? 'border-accent/30 bg-accent/5' : 'border-line bg-chrome/20 opacity-80'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base" aria-hidden>{node.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>
+                        Nv {node.level} · {node.skill}
+                      </p>
+                      <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>{node.unlock}</p>
+                    </div>
+                    <Icon size={12} className={unlocked ? 'text-accent' : 'text-ink-muted'} />
+                    {unlocked ? <Check size={12} className="text-concluido" /> : <Lock size={12} className="text-ink-muted" />}
+                  </div>
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+      </section>
 
       <section className={AXEL_BORDERLESS_PANEL}>
         <h3 className={`text-sm font-display mb-3 ${AXEL_TEXT_PRIMARY}`}>

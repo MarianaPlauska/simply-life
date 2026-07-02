@@ -46,14 +46,14 @@ function KpiCell({ label, value, hint, variant = 'default', onClick }: KpiCellPr
         onClick ? `${AXEL_ROW_HOVER} w-full` : ''
       }`}
     >
-      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-zinc-500 dark:text-zinc-400">
+      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink-muted">
         {label}
       </p>
       <p className={`text-base sm:text-lg font-sans font-semibold tracking-tight tabular-nums mt-1 leading-none ${valueClass}`}>
         {value}
       </p>
       {hint && (
-        <p className="font-mono text-[10px] mt-1 truncate text-zinc-500 dark:text-zinc-400">{hint}</p>
+        <p className="font-mono text-[10px] mt-1 truncate text-ink-muted">{hint}</p>
       )}
     </Tag>
   )
@@ -121,10 +121,10 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
       <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL}`}>
         <div className="mb-3 sm:mb-4">
           <p className="sl-eyebrow">Centro de comando</p>
-          <h1 className="font-sans font-semibold tracking-tight text-xl md:text-3xl text-zinc-900 dark:text-zinc-100 mt-1">
+          <h1 className="font-sans font-semibold tracking-tight text-xl md:text-3xl text-ink mt-1">
             {greeting}, {firstName}
           </h1>
-          <p className="text-xs sm:text-sm capitalize mt-1 text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs sm:text-sm capitalize mt-1 text-ink-muted">
             {dateLine}
           </p>
         </div>

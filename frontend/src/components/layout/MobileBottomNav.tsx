@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
-import { AXEL_CHROME_PLANE } from '../../constants/axelSurfaces'
+import { AXEL_GLASS_CHROME, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
 import { resolveMobileNavItems } from '../../lib/mobileBottomNav'
 
 // Navegação de bolso — visível só no mobile (md:hidden no App)
@@ -19,7 +19,7 @@ export function MobileBottomNav()
   return (
     <nav
       aria-label="Navegação principal"
-      className={`fixed bottom-0 inset-x-0 z-50 flex md:hidden items-center justify-around border-t border-line pt-1 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] ${AXEL_CHROME_PLANE}`}
+      className={`sl-glass-chrome fixed bottom-0 inset-x-0 z-50 flex md:hidden items-center justify-around border-t pt-1 pb-[calc(0.625rem+env(safe-area-inset-bottom,0px))] ${AXEL_GLASS_CHROME}`}
     >
       {navItems.map(({ path, label, icon: Icon, isActive }) =>
       {
@@ -32,7 +32,7 @@ export function MobileBottomNav()
             onClick={() => navigate(path)}
             aria-current={active ? 'page' : undefined}
             aria-label={label}
-            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 min-h-[52px] transition-colors border-t-2 ${
+            className={`sl-touch flex flex-col items-center justify-center gap-0.5 flex-1 py-2 min-h-[52px] border-t-2 ${AXEL_TOUCH_PRESS} ${
               active
                 ? 'text-accent font-semibold border-accent -mt-px'
                 : 'text-ink-muted border-transparent hover:text-ink hover:opacity-90'

@@ -170,13 +170,34 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
       let xp_v = stats.xp_vitalidade
       let xp_e = stats.xp_estabilidade
 
-      if (modulo === 'foco') xp_f += quantidade
-      else if (modulo === 'saude') xp_v += quantidade
-      else if (modulo === 'financeiro') xp_e += quantidade
+      const { capXpGrant, levelFromTotalXp } = await import('../../lib/xpEconomy')
+      const { granted, capped } = capXpGrant(quantidade)
 
-      // 100 XP total por nível
+      if (granted <= 0)
+      {
+        const { toast } = await import('sonner')
+        toast.info('Meta diária de XP atingida', {
+          description: `Você já ganhou o máximo de hoje. Volte amanhã para continuar a trilha.`,
+          duration: 5000,
+        })
+        return
+      }
+
+      if (capped)
+      {
+        const { toast } = await import('sonner')
+        toast.info(`+${granted} XP (teto diário)`, {
+          description: 'O restante entra amanhã na trilha.',
+          duration: 4000,
+        })
+      }
+
+      if (modulo === 'foco') xp_f += granted
+      else if (modulo === 'saude') xp_v += granted
+      else if (modulo === 'financeiro') xp_e += granted
+
       const total_xp = xp_f + xp_v + xp_e
-      const newLevel = Math.floor(total_xp / 100) + 1
+      const newLevel = levelFromTotalXp(total_xp)
       const leveledUp = newLevel > stats.level
 
       const updatedStats = {
@@ -269,8 +290,9 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
       if (remaining > 0) xp_v = take(xp_v)
       if (remaining > 0) xp_e = take(xp_e)
 
+      const { levelFromTotalXp } = await import('../../lib/xpEconomy')
       const total_xp = xp_f + xp_v + xp_e
-      const newLevel = Math.max(1, Math.floor(total_xp / 100) + 1)
+      const newLevel = Math.max(1, levelFromTotalXp(total_xp))
 
       const updatedStats = {
         ...stats,
@@ -373,7 +395,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Tomar um medicamento pendente',
-            recompensa_xp: 20,
+            recompensa_xp: 8,
             progresso: 0,
             meta: 1,
             concluida: false,
@@ -385,7 +407,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Concluir 1 tarefa do Kanban',
-            recompensa_xp: 15,
+            recompensa_xp: 6,
             progresso: 0,
             meta: 1,
             concluida: false,
@@ -397,7 +419,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Registrar 1 movimentação financeira',
-            recompensa_xp: 15,
+            recompensa_xp: 6,
             progresso: 0,
             meta: 1,
             concluida: false,
@@ -409,7 +431,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Bater a meta de água do dia',
-            recompensa_xp: 15,
+            recompensa_xp: 6,
             progresso: 0,
             meta: 1,
             concluida: false,
@@ -421,7 +443,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Bater a meta de proteína do dia',
-            recompensa_xp: 15,
+            recompensa_xp: 6,
             progresso: 0,
             meta: 1,
             concluida: false,
@@ -433,7 +455,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'diaria',
             titulo: 'Manter o ritmo Jarvis — registre 1 hábito de saúde',
-            recompensa_xp: 10,
+            recompensa_xp: 5,
             progresso: 0,
             meta: 1,
             concluida: false,
@@ -449,7 +471,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           novasDiarias.push({
             tipo: 'semanal',
             titulo: 'Bater a meta da Regra 50/30/20',
-            recompensa_xp: 100,
+            recompensa_xp: 25,
             progresso: 0,
             meta: 1,
             concluida: false,

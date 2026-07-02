@@ -30,6 +30,7 @@
     { "source": "/api/finance-purchase-check", "destination": "/api/axel/finance-purchase-check" },
     { "source": "/api/fetch-news", "destination": "/api/axel/fetch-news" },
     { "source": "/api/generate-greeting", "destination": "/api/axel/generate-greeting" },
+    { "source": "/api/today-verdict", "destination": "/api/axel/today-verdict" },
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],

@@ -1,13 +1,23 @@
 import { motion } from 'framer-motion';
 import { AXEL_ANALYTICS_CARD, AXEL_PROGRESS_THICK, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 
-export function Skeleton({ className = '' }: { className?: string }) {
+/** Bloco com efeito shimmer — respeita tokens do tema */
+export function Shimmer({ className = '' }: { className?: string })
+{
   return (
-    <div className={`animate-pulse rounded-sl bg-chrome ${className}`} />
+    <div className={`sl-shimmer rounded-sl ${className}`} aria-hidden />
   );
 }
 
-export function CardSkeleton() {
+export function Skeleton({ className = '' }: { className?: string })
+{
+  return (
+    <Shimmer className={className} />
+  );
+}
+
+export function CardSkeleton()
+{
   return (
     <div className={`${AXEL_ANALYTICS_CARD} space-y-4`}>
       <div className="flex items-center gap-3">
@@ -20,6 +30,63 @@ export function CardSkeleton() {
   );
 }
 
+interface BentoGridSkeletonProps
+{
+  variant?: 'health' | 'finance' | 'default'
+}
+
+/** Placeholders no formato Bento — evita tela vazia durante fetch */
+export function BentoGridSkeleton({ variant = 'default' }: BentoGridSkeletonProps)
+{
+  if (variant === 'finance')
+  {
+    return (
+      <div className="space-y-3" aria-busy="true" aria-label="Carregando finanças">
+        <Shimmer className="h-24 w-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <Shimmer className="h-20" />
+          <Shimmer className="h-20" />
+          <Shimmer className="h-20" />
+          <Shimmer className="h-20" />
+        </div>
+        <Shimmer className="h-40 w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <Shimmer className="h-52" />
+          <Shimmer className="h-52" />
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === 'health')
+  {
+    return (
+      <div className="space-y-3" aria-busy="true" aria-label="Carregando saúde">
+        <Shimmer className="h-28 w-full" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <Shimmer className="h-24" />
+          <Shimmer className="h-24" />
+          <Shimmer className="h-24" />
+          <Shimmer className="h-24" />
+        </div>
+        <Shimmer className="h-36 w-full" />
+        <Shimmer className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3" aria-busy="true" aria-label="Carregando">
+      <Shimmer className="h-28 w-full" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Shimmer className="h-40" />
+        <Shimmer className="h-40" />
+      </div>
+      <Shimmer className="h-32 w-full" />
+    </div>
+  );
+}
+
 export function ProgressBar({
   pct,
   label = 'Progresso',
@@ -28,7 +95,8 @@ export function ProgressBar({
   pct: number;
   label?: string;
   color: string;
-}) {
+})
+{
   const clampedPct = Math.min(Math.max(pct, 0), 100);
   return (
     <div className="mt-6">
@@ -63,7 +131,8 @@ export function CircularProgress({
   color?: string;
   trackColor?: string;
   children?: React.ReactNode;
-}) {
+})
+{
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const clampedPct = Math.min(Math.max(pct, 0), 100);

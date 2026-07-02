@@ -1,8 +1,9 @@
 import type { UserStats } from '../store/slices/gamificacaoSlice'
+import { XP_PER_LEVEL, levelFromTotalXp, xpProgressInLevel } from './xpEconomy'
 
 // Perfil RPG derivado do store — level, XP no nível e meta
 
-export const XP_PER_LEVEL = 100
+export { XP_PER_LEVEL }
 
 export interface GamificationProfile
 {
@@ -20,14 +21,13 @@ export function computeGamificationProfile(userStats: UserStats | null): Gamific
     + (userStats?.xp_vitalidade ?? 0)
     + (userStats?.xp_estabilidade ?? 0)
 
-  const level = userStats?.level ?? Math.floor(totalXp / XP_PER_LEVEL) + 1
-  const xpInLevel = totalXp % XP_PER_LEVEL
-  const xpPct = Math.min(100, xpInLevel)
+  const level = userStats?.level ?? levelFromTotalXp(totalXp)
+  const { xpInLevel, xpToNext, pct: xpPct } = xpProgressInLevel(totalXp)
 
   return {
     level,
     xpInLevel,
-    xpToNextLevel: XP_PER_LEVEL,
+    xpToNextLevel: xpToNext,
     xpPct,
     totalXp,
   }

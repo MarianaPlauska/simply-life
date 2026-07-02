@@ -297,6 +297,8 @@ export interface HabitoDiarioConfig {
     kcal?: number;
     matches?: string[];
   }>;
+  /** Atalhos de alimento personalizados por refeição */
+  alimentos_custom?: Partial<Record<string, { id: string; nome: string; gramas: number; kcal: number }[]>>;
 }
 
 export interface HabitoDiario {

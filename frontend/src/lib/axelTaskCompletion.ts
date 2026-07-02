@@ -2,6 +2,7 @@ import { toast } from 'sonner'
 import { celebrateTaskComplete } from './axelCelebration'
 import { dismissBillForTask } from './financeBillOrchestrator'
 import { isMainQuestTask, mainQuestBonusXp } from './mainQuest'
+import { xpFromTaskScore, XP_FOCUS_SESSION } from './xpEconomy'
 import { billCanonicalKey, billTaskReferenceKey, isFinanceBillTask } from './financeBillTaskDedup'
 import { evaluateProofOfWork } from './proofOfWork'
 import { useTaskStore } from '../store/useTaskStore'
@@ -9,7 +10,7 @@ import type { TarefaUnificada } from '../types'
 
 // Conclusão de tarefa — XP sempre; ofensiva só com prova de trabalho
 
-const FOCUS_XP_BONUS = 50
+const FOCUS_XP_BONUS = XP_FOCUS_SESSION
 
 export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
 {
@@ -72,13 +73,14 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
   else
   {
     store.patchTarefaLocal(tarefa.id, { status: 'concluida' })
-    const xpAmount = Math.max(15, Math.round(score || 25))
-    await store.addXP('foco', xpAmount)
   }
+
+  const xpAmount = xpFromTaskScore(score)
+  await store.addXP('foco', xpAmount)
 
   store.recordAchievement(tarefa.id, tarefa.titulo, focusMinutes, tarefa.created_at)
 
-  const baseXp = Math.max(15, Math.round(score || 25))
+  const baseXp = xpAmount
   if (isMainQuestTask(tarefa.id))
   {
     const bonus = mainQuestBonusXp(baseXp)

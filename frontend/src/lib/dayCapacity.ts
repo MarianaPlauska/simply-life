@@ -1,4 +1,4 @@
-// Capacidade do dia — termômetro único (humor + finanças + Kanban)
+// Capacidade do dia — termômetro conservador (gargalo, não média otimista)
 
 import type { TarefaUnificada } from '../types'
 import type { ContaFixa, FinanceBillSettlement, ReservedBill, Transaction } from '../store/storeTypes'
@@ -79,7 +79,7 @@ function moodToPct(
   hasMood: boolean,
 ): number
 {
-  if (!hasMood || humorMedia == null) return 52
+  if (!hasMood || humorMedia == null) return 32
   let pct = (humorMedia / 5) * 100
   if (energia != null)
   {
@@ -94,11 +94,12 @@ function financeToPct(saldoDisponivel: number, compromissosSemana: number): { pc
   const fmt = (v: number) =>
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 
-  if (folga >= 1500) return { pct: 95, detail: `Folga ${fmt(folga)} após a semana` }
-  if (folga >= 500) return { pct: 78, detail: `Folga ${fmt(folga)} — confortável` }
-  if (folga >= 0) return { pct: 58, detail: `Apertado: ${fmt(folga)} após boletos` }
-  if (folga >= -500) return { pct: 35, detail: `Déficit ${fmt(Math.abs(folga))} na semana` }
-  return { pct: 18, detail: `Pressão alta: ${fmt(Math.abs(folga))} a cobrir` }
+  if (folga >= 2000) return { pct: 92, detail: `Folga ${fmt(folga)} após a semana` }
+  if (folga >= 800) return { pct: 72, detail: `Folga ${fmt(folga)} — confortável` }
+  if (folga >= 300) return { pct: 55, detail: `Margem ${fmt(folga)} após boletos` }
+  if (folga >= 0) return { pct: 38, detail: `No limite: ${fmt(folga)} após boletos` }
+  if (folga >= -400) return { pct: 22, detail: `Déficit ${fmt(Math.abs(folga))} na semana` }
+  return { pct: 12, detail: `Pressão alta: ${fmt(Math.abs(folga))} a cobrir` }
 }
 
 function kanbanToPct(
@@ -114,11 +115,16 @@ function kanbanToPct(
     return new Date(t.data_vencimento).getTime() < Date.now()
   }).length
 
+  if (active.length === 0)
+  {
+    return { pct: 48, detail: 'Hoje vazio — não confunda com energia alta', overdue: 0 }
+  }
+
   const load = computeMentalLoad(active, cap, mood)
   let pct = Math.max(0, 100 - load.percent)
   if (overdue > 0)
   {
-    pct = Math.max(0, pct - overdue * 12)
+    pct = Math.max(0, pct - overdue * 15)
   }
 
   let detail = `${load.percent}% da carga de Hoje`
@@ -128,9 +134,9 @@ function kanbanToPct(
 
 function resolveMode(score: number): CapacityMode
 {
-  if (score >= 75) return 'pleno'
-  if (score >= 55) return 'equilibrado'
-  if (score >= 35) return 'cuidado'
+  if (score >= 72) return 'pleno'
+  if (score >= 52) return 'equilibrado'
+  if (score >= 32) return 'cuidado'
   return 'critico'
 }
 
@@ -139,27 +145,32 @@ function buildAxelPhrase(
   importantTasks: number,
   impulseRisk: boolean,
   moodProfile: string | undefined,
+  hasMood: boolean,
 ): string
 {
+  if (!hasMood)
+  {
+    return `Registre humor para calibrar — por ora, sugiro no máximo ${importantTasks} foco${importantTasks !== 1 ? 's' : ''} em Hoje.`
+  }
   if (mode === 'pleno')
   {
     return impulseRisk
-      ? `Hoje é dia de ${importantTasks} coisa${importantTasks !== 1 ? 's' : ''} importante${importantTasks !== 1 ? 's' : ''} — caixa ok, mas evite compra por impulso.`
-      : `Energia boa e folga na semana — até ${importantTasks} foco${importantTasks !== 1 ? 's' : ''} importantes cabem bem.`
+      ? `Até ${importantTasks} prioridade${importantTasks !== 1 ? 's' : ''} — caixa ok, mas zero compra por impulso.`
+      : `Boa margem hoje — até ${importantTasks} foco${importantTasks !== 1 ? 's' : ''} importantes.`
   }
   if (mode === 'equilibrado')
   {
-    return `Ritmo sustentável: ${importantTasks} prioridade${importantTasks !== 1 ? 's' : ''} em Hoje e zero drama no cartão.`
+    return `${importantTasks} prioridade${importantTasks !== 1 ? 's' : ''} em Hoje e gasto consciente no cartão.`
   }
   if (mode === 'cuidado')
   {
     if (moodProfile === 'recuperacao' || moodProfile === 'cuidado')
     {
-      return `Hoje é dia de ${importantTasks} coisa${importantTasks !== 1 ? 's' : ''} importante${importantTasks !== 1 ? 's' : ''} e zero compras por impulso — você está em modo cuidado.`
+      return `${importantTasks} coisa${importantTasks !== 1 ? 's' : ''} importante${importantTasks !== 1 ? 's' : ''} e zero compras por impulso — modo cuidado.`
     }
-    return `Modo cuidado: poucas tarefas, sem gasto emocional. O AXEL segurou a carga.`
+    return `Poucas tarefas, sem gasto emocional. O AXEL segurou a carga.`
   }
-  return `Capacidade baixa — proteja energia e caixa. Só o essencial hoje.`
+  return `Capacidade baixa — só o essencial hoje.`
 }
 
 export function buildDayCapacity(input: {
@@ -202,10 +213,13 @@ export function buildDayCapacity(input: {
 
   const kanban = kanbanToPct(input.hojeTasks, input.dailyScoreCap, input.mood)
 
-  const score = Math.round(moodPct * 0.35 + finance.pct * 0.30 + kanban.pct * 0.35)
+  const bottleneck = Math.min(moodPct, finance.pct, kanban.pct)
+  const average = (moodPct + finance.pct + kanban.pct) / 3
+  const score = Math.round(bottleneck * 0.62 + average * 0.38)
+
   const mode = resolveMode(score)
 
-  const impulseRisk = finance.pct < 50 && moodPct < 55
+  const impulseRisk = finance.pct < 45 && moodPct < 50
   const suggestedImportantTasks =
     mode === 'critico' ? 1
       : mode === 'cuidado' ? 2
@@ -217,6 +231,7 @@ export function buildDayCapacity(input: {
     suggestedImportantTasks,
     impulseRisk,
     input.mood?.profile,
+    hasMood,
   )
 
   return {
@@ -232,7 +247,7 @@ export function buildDayCapacity(input: {
         pct: moodPct,
         detail: hasMood && humorMedia != null
           ? `${humorMedia.toFixed(1)}/5 hoje`
-          : 'Registre humor para calibrar',
+          : 'Sem registro hoje',
       },
       {
         id: 'finance',

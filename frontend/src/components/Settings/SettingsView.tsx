@@ -10,6 +10,7 @@ import { WebhookJarvisSection } from './WebhookJarvisSection';
 import { AxelOnboardingWizard } from './AxelOnboardingWizard';
 import { GmailImapSection } from './GmailImapSection';
 import { AccessibilityPanel } from '../dashboard/AccessibilityQuickMenu';
+import { SETTINGS as S } from './settingsTheme';
 
 type SettingsTab = 'integracoes' | 'webhook' | 'foco' | 'gamificacao' | 'acessibilidade' | 'ia' | 'sistema';
 
@@ -32,7 +33,7 @@ const PLATFORMS: Platform[] = [
 
 const TABS = [
   { id: 'integracoes' as SettingsTab, label: 'Integracoes', icon: Link2 },
-  { id: 'webhook' as SettingsTab, label: 'Webhooks Jarvis', icon: Code2 },
+  { id: 'webhook' as SettingsTab, label: 'Webhooks AXEL', icon: Code2 },
   { id: 'foco' as SettingsTab, label: 'Preferencias de Foco', icon: Timer },
   { id: 'gamificacao' as SettingsTab, label: 'Gamificacao', icon: ShoppingBag },
   { id: 'ia' as SettingsTab, label: 'Keywords & IA', icon: Brain },
@@ -89,14 +90,14 @@ function GoogleCalendarCard() {
   }
 
   return (
-    <div className={`group relative border rounded-2xl overflow-hidden transition-all duration-300 ${connected ? 'bg-emerald-500/[0.03] border-emerald-500/20' : 'bg-gradient-to-r from-violet-500/[0.04] to-transparent border-violet-500/20'}`}>
+    <div className={`group relative border rounded-sl overflow-hidden transition-all duration-300 ${connected ? 'bg-concluido/[0.03] border-concluido/20' : S.accentPanel}`}>
       <div className="p-5 flex items-center gap-4">
-        <div className={`p-3 rounded-xl transition-colors ${connected ? 'bg-emerald-500/10' : 'bg-violet-500/10'}`}>
-          <CalendarDays className={`w-5 h-5 ${connected ? 'text-emerald-400' : 'text-violet-400'}`} />
+        <div className={`p-3 rounded-sl transition-colors ${connected ? S.successIconBg : S.accentIconBg}`}>
+          <CalendarDays className={`w-5 h-5 ${connected ? S.successText : S.iconAccent}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-semibold text-white">Google OAuth (opcional)</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <h3 className={S.rowTitle}>Google OAuth (opcional)</h3>
+          <p className={S.rowHint}>
             {connected
               ? 'OAuth ativo — exige projeto no Google Cloud'
               : 'Opcional. Para e-mail grátis, use Gmail com senha de app acima.'}
@@ -105,14 +106,14 @@ function GoogleCalendarCard() {
         <div className="flex items-center gap-2.5">
           {connected ? (
             <>
-              <span className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+              <span className={`flex items-center gap-1.5 text-[12px] font-medium ${S.successText} bg-concluido/10 px-2.5 py-1 rounded-pill`}>
                 <Check className="w-3.5 h-3.5" /> Conectado
               </span>
               <button
                 type="button"
                 onClick={() => void handleGmailSync()}
                 disabled={isSyncingGmail}
-                className="px-3 py-1.5 text-[12px] font-medium rounded-lg border border-violet-500/25 text-violet-300 hover:bg-violet-500/10 transition-all flex items-center gap-1.5 disabled:opacity-40"
+                className="px-3 py-1.5 text-[12px] font-medium rounded-sl border border-accent/25 text-accent hover:bg-accent/10 transition-all flex items-center gap-1.5 disabled:opacity-40"
               >
                 {isSyncingGmail ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
                 Sync Gmail
@@ -130,7 +131,7 @@ function GoogleCalendarCard() {
             <button
               onClick={handleConnect}
               disabled={loading}
-              className="px-4 py-2 text-[13px] font-semibold rounded-xl bg-violet-600 text-white hover:bg-violet-500 transition-all flex items-center gap-2 disabled:opacity-40 shadow-lg shadow-violet-500/20"
+              className={`${S.btnPrimary} flex items-center gap-2 disabled:opacity-40 shadow-sm`}
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ExternalLink className="w-4 h-4" />}
               Conectar Google
@@ -139,7 +140,7 @@ function GoogleCalendarCard() {
         </div>
       </div>
       {connected && lastSyncResult && (
-        <p className="px-5 pb-4 text-[11px] text-zinc-500 font-mono tabular-nums">
+        <p className="px-5 pb-4 text-[11px] text-ink-muted font-mono tabular-nums">
           Último sync: {lastSyncResult.emails_lidos} e-mails · {lastSyncResult.tarefas_geradas} tarefas
         </p>
       )}
@@ -177,41 +178,41 @@ function PlatformCard({ platform }: { platform: Platform }) {
   }
 
   return (
-    <div className={`group relative bg-zinc-900/30 border rounded-2xl overflow-hidden transition-all ${connected ? 'border-emerald-500/20 shadow-[0_0_24px_-6px_rgba(16,185,129,0.08)]' : 'border-zinc-800/50 hover:border-zinc-700/60'}`}>
+    <div className={`group relative border rounded-sl overflow-hidden transition-all ${connected ? `${S.successBorder} shadow-sm` : 'border-line hover:border-accent/20'} ${S.cardMuted}`}>
       <div className="p-5 flex items-center gap-4">
-        <div className={`p-3 rounded-xl transition-colors ${connected ? 'bg-emerald-500/10' : 'bg-zinc-800/60'}`}>
-          <Icon className={`w-5 h-5 ${connected ? 'text-emerald-400' : 'text-zinc-400'}`} />
+        <div className={`p-3 rounded-sl transition-colors ${connected ? S.successIconBg : 'bg-chrome'}`}>
+          <Icon className={`w-5 h-5 ${connected ? S.successText : S.iconMuted}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-semibold text-white">{platform.name}</h3>
-          <p className="text-xs text-zinc-500 mt-0.5">{platform.description}</p>
+          <h3 className={S.rowTitle}>{platform.name}</h3>
+          <p className={S.rowHint}>{platform.description}</p>
         </div>
         <div className="flex items-center gap-3">
           {connected ? (
-            <span className="flex items-center gap-1.5 text-[12px] font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">
+            <span className={`flex items-center gap-1.5 text-[12px] font-medium ${S.successText} bg-concluido/10 px-2.5 py-1 rounded-pill`}>
               <Check className="w-3.5 h-3.5" /> Conectado
             </span>
           ) : (
-            <span className="text-[12px] font-medium text-zinc-600">Nao conectado</span>
+            <span className="text-[12px] font-medium text-ink-muted">Nao conectado</span>
           )}
-          <button onClick={() => setExpanded((e) => !e)} className="px-4 py-2 text-[13px] font-medium rounded-xl border border-zinc-700/50 text-zinc-300 hover:bg-zinc-800/60 transition-colors flex items-center gap-1.5">
+          <button onClick={() => setExpanded((e) => !e)} className={`${S.btnSecondary} flex items-center gap-1.5`}>
             Configurar
             {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
       {expanded && (
-        <div className="px-5 pb-5 border-t border-zinc-800/30 pt-4">
-          <label className="flex items-center gap-2 text-xs font-medium text-zinc-400 mb-2">
+        <div className={`px-5 pb-5 ${S.divider} pt-4`}>
+          <label className={`flex items-center gap-2 text-xs font-medium text-ink-muted mb-2`}>
             <Key className="w-3.5 h-3.5" /> {platform.tokenLabel}
           </label>
           <div className="flex gap-3">
-            <input type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder={platform.placeholder} className="flex-1 bg-zinc-800/40 border border-zinc-700/40 rounded-xl px-4 py-2.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 transition" />
-            <button onClick={handleSave} disabled={!token.trim() || saving} className="px-5 py-2.5 text-[13px] font-semibold bg-white text-zinc-900 rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <input type="password" value={token} onChange={(e) => setToken(e.target.value)} placeholder={platform.placeholder} className={`flex-1 ${S.input}`} />
+            <button onClick={handleSave} disabled={!token.trim() || saving} className={`px-5 py-2.5 ${S.btnPrimary} disabled:cursor-not-allowed`}>
               {saving ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
-          <p className="text-[11px] text-zinc-600 mt-2.5">Sua chave e armazenada com criptografia e nunca e exibida novamente.</p>
+          <p className="text-[11px] text-ink-muted mt-2.5">Sua chave e armazenada com criptografia e nunca e exibida novamente.</p>
         </div>
       )}
     </div>
@@ -220,18 +221,18 @@ function PlatformCard({ platform }: { platform: Platform }) {
 
 function TimerSetting({ label, description, value, onChange }: { label: string; description: string; value: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex items-center justify-between py-5 border-b border-zinc-800/30 last:border-0">
+    <div className="flex items-center justify-between py-5 border-b border-line last:border-0">
       <div>
-        <p className="text-sm font-medium text-white">{label}</p>
-        <p className="text-xs text-zinc-500 mt-0.5">{description}</p>
+        <p className={S.label}>{label}</p>
+        <p className="text-xs text-ink-muted mt-0.5">{description}</p>
       </div>
       <div className="flex items-center gap-3">
-        <button onClick={() => onChange(Math.max(1, value - 5))} className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
+        <button onClick={() => onChange(Math.max(1, value - 5))} className="p-1.5 rounded-sl bg-chrome border border-line text-ink-muted hover:text-ink transition-colors">
           <Minus className="w-3.5 h-3.5" />
         </button>
-        <span className="text-lg font-semibold text-white tabular-nums w-12 text-center">{value}</span>
-        <span className="text-xs text-zinc-500">min</span>
-        <button onClick={() => onChange(Math.min(120, value + 5))} className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors">
+        <span className="text-lg font-semibold text-ink tabular-nums w-12 text-center">{value}</span>
+        <span className="text-xs text-ink-muted">min</span>
+        <button onClick={() => onChange(Math.min(120, value + 5))} className="p-1.5 rounded-sl bg-chrome border border-line text-ink-muted hover:text-ink transition-colors">
           <Plus className="w-3.5 h-3.5" />
         </button>
       </div>
@@ -245,10 +246,10 @@ function ToggleRow({ icon: Icon, label, description, defaultOn = false }: { icon
   return (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center gap-3">
-        <Icon className="w-4 h-4 text-zinc-500" aria-hidden="true" />
+        <Icon className="w-4 h-4 text-ink-muted" aria-hidden="true" />
         <div>
-          <p className="text-[13px] font-medium text-white">{label}</p>
-          <p className="text-[11px] text-zinc-500 mt-0.5">{description}</p>
+          <p className="text-[13px] font-medium text-ink">{label}</p>
+          <p className="text-[11px] text-ink-muted mt-0.5">{description}</p>
         </div>
       </div>
       <button
@@ -256,7 +257,7 @@ function ToggleRow({ icon: Icon, label, description, defaultOn = false }: { icon
         aria-checked={enabled}
         aria-label={`${label}: ${enabled ? 'ativado' : 'desativado'}`}
         onClick={() => setEnabled((v) => !v)}
-        className={`relative w-9 h-5 rounded-full transition-colors ${enabled ? 'bg-violet-500' : 'bg-zinc-700'}`}
+        className={`relative w-9 h-5 rounded-full transition-colors ${enabled ? 'bg-accent' : 'bg-chrome border border-line'}`}
       >
         <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${enabled ? 'translate-x-4' : 'translate-x-0'}`} />
       </button>
@@ -296,8 +297,8 @@ export function SettingsView() {
   return (
     <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-12`}>
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Configuracoes</h1>
-        <p className="text-zinc-500 text-sm mt-0.5">Gerencie integracoes e preferencias do Simply-Life.</p>
+        <h1 className={S.title}>Configuracoes</h1>
+        <p className={S.subtitle}>Gerencie integracoes e preferencias do Simply-Life.</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-8">
@@ -309,7 +310,7 @@ export function SettingsView() {
                 <button
                   key={id}
                   onClick={() => setActiveTab(id)}
-                  className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-[12px] md:text-[13px] font-medium transition-all whitespace-nowrap ${isActive ? 'bg-zinc-800/80 text-white' : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800/30'}`}
+                  className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-2.5 rounded-sl text-[12px] md:text-[13px] font-medium transition-all whitespace-nowrap ${isActive ? S.navActive : S.navIdle}`}
                 >
                   <TabIcon className="w-4 h-4 shrink-0" />
                   {label}
@@ -326,8 +327,8 @@ export function SettingsView() {
               <AxelOnboardingWizard onSelectTab={(tab) => setActiveTab(tab)} />
               <GmailImapSection />
               <div className="mb-6 mt-6">
-                <h2 className="text-lg font-semibold text-white">Integracoes</h2>
-                <p className="text-xs text-zinc-500 mt-1">Conecte suas plataformas para o Simply-Life capturar dados automaticamente.</p>
+                <h2 className={S.sectionTitle}>Integracoes</h2>
+                <p className={S.sectionHint}>Conecte suas plataformas para o Simply-Life capturar dados automaticamente.</p>
               </div>
 
               {/* Google Calendar OAuth2 */}
@@ -342,8 +343,8 @@ export function SettingsView() {
           {activeTab === 'gamificacao' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white">Gamificacao</h2>
-                <p className="text-xs text-zinc-500 mt-1">
+                <h2 className={S.sectionTitle}>Gamificacao</h2>
+                <p className={S.sectionHint}>
                   Troque XP por recompensas e proteja sua ofensiva diaria.
                 </p>
               </div>
@@ -355,17 +356,17 @@ export function SettingsView() {
           {activeTab === 'foco' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white">Preferencias de Foco</h2>
-                <p className="text-xs text-zinc-500 mt-1">Configure os tempos do Modo Foco. As alteracoes sao aplicadas imediatamente.</p>
+                <h2 className={S.sectionTitle}>Preferencias de Foco</h2>
+                <p className={S.sectionHint}>Configure os tempos do Modo Foco. As alteracoes sao aplicadas imediatamente.</p>
               </div>
-              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl px-6 divide-zinc-800/30">
+              <div className={`${S.card} px-6`}>
                 <TimerSetting label="Sessao de Foco" description="Duracao da sessao de trabalho concentrado" value={timerConfig.pomodoroTime} onChange={(v) => setTimerConfig('pomodoroTime', v)} />
                 <TimerSetting label="Pausa Curta" description="Intervalo rapido entre sessoes" value={timerConfig.shortBreak} onChange={(v) => setTimerConfig('shortBreak', v)} />
                 <TimerSetting label="Pausa Longa" description="Descanso estendido apos ciclo completo" value={timerConfig.longBreak} onChange={(v) => setTimerConfig('longBreak', v)} />
               </div>
               <div className="mt-6">
-                <p className="text-xs text-zinc-500 mb-3">Presets rapidos</p>
-                <div className="flex gap-3">
+                <p className="text-xs text-ink-muted mb-3">Presets rapidos</p>
+                <div className="flex gap-3 flex-wrap">
                   {[
                     { label: 'Padrao', pomodoro: 25, short: 5, long: 15 },
                     { label: 'Intenso', pomodoro: 50, short: 10, long: 20 },
@@ -374,10 +375,10 @@ export function SettingsView() {
                     <button
                       key={preset.label}
                       onClick={() => { setTimerConfig('pomodoroTime', preset.pomodoro); setTimerConfig('shortBreak', preset.short); setTimerConfig('longBreak', preset.long); toast.success(`Preset "${preset.label}" aplicado`); }}
-                      className="px-4 py-2 text-[13px] font-medium rounded-xl border border-zinc-800/50 text-zinc-400 hover:text-white hover:border-zinc-700/60 hover:bg-zinc-800/30 transition-all"
+                      className={`${S.btnSecondary}`}
                     >
                       {preset.label}
-                      <span className="text-zinc-600 ml-1.5">{preset.pomodoro}/{preset.short}/{preset.long}</span>
+                      <span className="text-ink-muted ml-1.5">{preset.pomodoro}/{preset.short}/{preset.long}</span>
                     </button>
                   ))}
                 </div>
@@ -389,19 +390,19 @@ export function SettingsView() {
           {activeTab === 'ia' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white">Filtro de Keywords & IA</h2>
-                <p className="text-xs text-zinc-500 mt-1">
+                <h2 className={S.sectionTitle}>Filtro de Keywords & IA</h2>
+                <p className={S.sectionHint}>
                   Defina palavras-chave para o motor de score priorizar automaticamente tarefas relevantes.
                 </p>
               </div>
 
-              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-6 space-y-5">
+              <div className={`${S.card} p-6 space-y-5`}>
                 <div>
-                  <label className="flex items-center gap-2 text-[12px] font-semibold text-zinc-300 mb-2">
-                    <Tag className="w-3.5 h-3.5 text-violet-400" />
+                  <label className="flex items-center gap-2 text-[12px] font-semibold text-ink mb-2">
+                    <Tag className={`w-3.5 h-3.5 ${S.iconAccent}`} />
                     Palavras-chave de Prioridade
                   </label>
-                  <p className="text-[11px] text-zinc-500 mb-3">
+                  <p className="text-[11px] text-ink-muted mb-3">
                     Separe por virgulas. Quando o titulo de uma tarefa conter uma dessas palavras, o score de urgencia recebe +50 automaticamente.
                   </p>
                   <textarea
@@ -409,17 +410,16 @@ export function SettingsView() {
                     onChange={(e) => setKwInput(e.target.value)}
                     placeholder="urgente, bug, boleto, vaga, deadline, deploy, producao"
                     rows={3}
-                    className="w-full bg-zinc-800/40 border border-zinc-700/40 rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-zinc-600 outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/40 transition resize-none"
+                    className={S.textarea}
                   />
                 </div>
 
-                {/* Preview tags */}
                 {kwList.length > 0 && (
                   <div>
-                    <p className="text-[11px] text-zinc-500 mb-2">{kwList.length} keyword{kwList.length > 1 ? 's' : ''} ativa{kwList.length > 1 ? 's' : ''}</p>
+                    <p className="text-[11px] text-ink-muted mb-2">{kwList.length} keyword{kwList.length > 1 ? 's' : ''} ativa{kwList.length > 1 ? 's' : ''}</p>
                     <div className="flex flex-wrap gap-2">
                       {kwList.map((kw: string, i: number) => (
-                        <span key={i} className="px-2.5 py-1 text-[11px] font-medium bg-violet-500/10 text-violet-300 border border-violet-500/20 rounded-lg">
+                        <span key={i} className={S.tag}>
                           {kw}
                         </span>
                       ))}
@@ -430,7 +430,7 @@ export function SettingsView() {
                 <button
                   onClick={handleSaveKeywords}
                   disabled={savingKw}
-                  className="flex items-center gap-2 px-5 py-2.5 text-[13px] font-semibold bg-white text-zinc-900 rounded-xl hover:bg-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={`flex items-center gap-2 ${S.btnPrimary} disabled:cursor-not-allowed`}
                 >
                   {savingKw ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {savingKw ? 'Salvando...' : 'Salvar no Servidor'}
@@ -438,24 +438,24 @@ export function SettingsView() {
               </div>
 
               {/* How it works */}
-              <div className="mt-6 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-6">
-                <h3 className="text-[13px] font-semibold text-zinc-200 mb-3">Como funciona</h3>
-                <div className="space-y-3 text-[12px] text-zinc-400 leading-relaxed">
+              <div className={`mt-6 ${S.card} p-6`}>
+                <h3 className="text-[13px] font-semibold text-ink mb-3">Como funciona</h3>
+                <div className="space-y-3 text-[12px] text-ink-muted leading-relaxed">
                   <div className="flex gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center text-[11px] font-bold">1</span>
-                    <p>Voce define palavras-chave como <span className="text-violet-300 font-medium">urgente, bug, boleto</span></p>
+                    <span className={`shrink-0 w-6 h-6 rounded-sl bg-accent/10 text-accent flex items-center justify-center text-[11px] font-bold`}>1</span>
+                    <p>Voce define palavras-chave como <span className="text-accent font-medium">urgente, bug, boleto</span></p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center text-[11px] font-bold">2</span>
-                    <p>Quando uma tarefa chega via webhook (GitHub, Gmail, etc), o <span className="text-white font-medium">Motor de Score</span> analisa o titulo</p>
+                    <span className={`shrink-0 w-6 h-6 rounded-sl bg-accent/10 text-accent flex items-center justify-center text-[11px] font-bold`}>2</span>
+                    <p>Quando uma tarefa chega via webhook (GitHub, Gmail, etc), o <span className="text-ink font-medium">Motor de Score</span> analisa o titulo</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center text-[11px] font-bold">3</span>
-                    <p>Se o titulo contem alguma keyword, a tarefa recebe <span className="text-emerald-400 font-bold">+50 pontos</span> de urgencia automaticamente</p>
+                    <span className={`shrink-0 w-6 h-6 rounded-sl bg-accent/10 text-accent flex items-center justify-center text-[11px] font-bold`}>3</span>
+                    <p>Se o titulo contem alguma keyword, a tarefa recebe <span className="text-concluido font-bold">+50 pontos</span> de urgencia automaticamente</p>
                   </div>
                   <div className="flex gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center text-[11px] font-bold">4</span>
-                    <p>Tarefas com score alto sobem no Kanban e aparecem primeiro no modo <span className="text-white font-medium">Superhuman</span></p>
+                    <span className={`shrink-0 w-6 h-6 rounded-sl bg-accent/10 text-accent flex items-center justify-center text-[11px] font-bold`}>4</span>
+                    <p>Tarefas com score alto sobem no Kanban e aparecem primeiro no modo <span className="text-ink font-medium">Superhuman</span></p>
                   </div>
                 </div>
               </div>
@@ -479,19 +479,19 @@ export function SettingsView() {
           {activeTab === 'sistema' && (
             <div>
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-white">Sistema</h2>
-                <p className="text-xs text-zinc-500 mt-1">Configuracoes tecnicas, dados e comportamento do aplicativo.</p>
+                <h2 className={S.sectionTitle}>Sistema</h2>
+                <p className={S.sectionHint}>Configuracoes tecnicas, dados e comportamento do aplicativo.</p>
               </div>
-              <div className="bg-zinc-900/30 border border-zinc-800/50 rounded-2xl px-6 divide-y divide-zinc-800/30">
+              <div className={`${S.card} px-6 divide-y divide-line`}>
                 <ToggleRow icon={Bell} label="Notificacoes Push" description="Receba alertas de tarefas e lembretes" defaultOn />
                 <ToggleRow icon={Database} label="Cache Local" description="Armazena dados offline em localStorage" defaultOn />
                 <ToggleRow icon={Shield} label="Criptografia de Tokens" description="Tokens de integracao encriptados em repouso" defaultOn />
                 <ToggleRow icon={Monitor} label="Auto-refresh de Dados" description="Recarrega tarefas e despesas a cada 5 minutos" />
               </div>
-              <div className="mt-6 bg-zinc-900/30 border border-zinc-800/50 rounded-2xl p-6 space-y-4">
-                <h3 className="text-[13px] font-semibold text-zinc-200">Dados e Armazenamento</h3>
+              <div className={`mt-6 ${S.card} p-6 space-y-4`}>
+                <h3 className="text-[13px] font-semibold text-ink">Dados e Armazenamento</h3>
                 <div className="flex items-center justify-between text-[13px]">
-                  <span className="text-zinc-400">Cache do navegador</span>
+                  <span className="text-ink-muted">Cache do navegador</span>
                   <button
                     onClick={() => { localStorage.removeItem('simply-life-store'); toast.success('Cache limpo com sucesso'); }}
                     className="px-3 py-1.5 text-[12px] font-medium text-red-400 border border-red-800/40 rounded-lg hover:bg-red-500/10 transition-colors"
@@ -500,12 +500,12 @@ export function SettingsView() {
                   </button>
                 </div>
                 <div className="flex items-center justify-between text-[13px]">
-                  <span className="text-zinc-400">Versao do app</span>
-                  <span className="text-zinc-600 font-mono text-[12px]">v1.0.0-alpha</span>
+                  <span className="text-ink-muted">Versao do app</span>
+                  <span className="text-ink-muted font-mono text-[12px]">v1.0.0-alpha</span>
                 </div>
                 <div className="flex items-center justify-between text-[13px]">
-                  <span className="text-zinc-400">Backend</span>
-                  <span className="text-zinc-600 font-mono text-[12px]">Supabase (zuxkqmooxvnulgllduhr)</span>
+                  <span className="text-ink-muted">Backend</span>
+                  <span className="text-ink-muted font-mono text-[12px]">Supabase (zuxkqmooxvnulgllduhr)</span>
                 </div>
               </div>
             </div>

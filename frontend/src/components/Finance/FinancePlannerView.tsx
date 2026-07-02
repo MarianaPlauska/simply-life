@@ -42,6 +42,7 @@ import { FinanceCashTab } from './FinanceCashTab';
 import { FinanceKanbanPaymentsPanel } from './overview/FinanceKanbanPaymentsPanel';
 import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup';
 import { NewGoalModal } from './NewGoalModal';
+import { BentoGridSkeleton } from '../ui/Skeleton';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
@@ -54,7 +55,7 @@ export function FinancePlannerView() {
   const updateGoalProgress = useTaskStore((s) => s.updateGoalProgress);
   const { computed: computedCashPosition, display: cashPosition } = useCashPosition();
 
-  useFinancePlannerInit();
+  const { loading: financeLoading } = useFinancePlannerInit();
   useFinanceDueNotifications(true);
 
   const [navGroup, setNavGroup] = useState<PlannerGroup>('inicio');
@@ -262,6 +263,7 @@ export function FinancePlannerView() {
   };
 
   const subTabs = navGroup !== 'inicio' ? FINANCE_SUB_TABS[navGroup] : undefined;
+  const showFinanceSkeleton = financeLoading;
 
   return (
     <FinancePlannerShell
@@ -283,6 +285,10 @@ export function FinancePlannerView() {
         && activeLeaf !== 'contas-fixas'
       }
     >
+      {showFinanceSkeleton ? (
+        <BentoGridSkeleton variant="finance" />
+      ) : (
+      <>
       {subTabs && (
         <FinanceSectionNav
           tabs={subTabs}
@@ -442,6 +448,8 @@ export function FinancePlannerView() {
       {/* ═══════ CONTAS FIXAS ═══════ */}
       {activeLeaf === 'contas-fixas' && (
         <ContasFixasTab />
+      )}
+      </>
       )}
 
       <NewGoalModal isOpen={showGoalModal} onClose={() => setShowGoalModal(false)} />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Flame, ListChecks, Clock, Heart, Sparkles, ChevronRight, Share2, Trophy, AlertTriangle, Leaf } from 'lucide-react'
 import { toast } from 'sonner'
@@ -16,6 +16,7 @@ import {
 interface WeeklyEpisodeCardProps
 {
   embedded?: boolean
+  compact?: boolean
 }
 
 const MOMENT_ICON: Record<EpisodeMomentType, typeof Trophy> = {
@@ -23,6 +24,14 @@ const MOMENT_ICON: Record<EpisodeMomentType, typeof Trophy> = {
   susto: AlertTriangle,
   cuidado: Leaf,
 }
+
+const MOMENT_TONE: Record<EpisodeMomentType, string> = {
+  conquista: 'text-concluido',
+  susto: 'text-atencao',
+  cuidado: 'text-accent',
+}
+
+const PANEL = AXEL_BORDERLESS_PANEL
 
 function StatPill({
   icon: Icon,
@@ -37,21 +46,21 @@ function StatPill({
 })
 {
   return (
-    <div className="flex flex-col gap-1 p-3 rounded-sl border border-line bg-chrome/25 min-w-0">
-      <div className="flex items-center gap-1.5">
-        <Icon size={12} className={iconClass} strokeWidth={1.75} />
-        <span className={`font-mono text-[9px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+    <div className="sl-stat-chip flex flex-col gap-0.5 min-w-0">
+      <div className="flex items-center gap-1">
+        <Icon size={11} className={iconClass} strokeWidth={1.75} />
+        <span className={`font-mono text-[8px] uppercase ${AXEL_TEXT_SECONDARY}`}>
           {label}
         </span>
       </div>
-      <p className={`text-lg font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
+      <p className={`text-sm font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
         {value}
       </p>
     </div>
   )
 }
 
-export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
+export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyEpisodeCardProps)
 {
   const tarefas = useTaskStore((s) => s.tarefas)
   const streakSavedDays = useTaskStore((s) => s.streakSavedDays)
@@ -70,8 +79,8 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
   const transactions = useTaskStore((s) => s.transactions)
   const billSettlements = useTaskStore((s) => s.billSettlements)
 
-  const shareRef = useRef<HTMLDivElement>(null)
   const [sharing, setSharing] = useState(false)
+  const [expanded, setExpanded] = useState(!compact)
 
   useEffect(() =>
   {
@@ -132,7 +141,7 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
         return
       }
       await navigator.clipboard.writeText(episode.shareText)
-      toast.success('Resumo copiado — cole onde quiser compartilhar')
+      toast.success('Resumo copiado')
     }
     catch
     {
@@ -152,19 +161,61 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
     }
   }
 
+  if (compact && !expanded)
+  {
+    return (
+      <section className={`${PANEL} ${frameClass} p-2.5 sm:p-3`} aria-labelledby="weekly-episode-title">
+        <div className="flex items-start justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className="min-w-0 flex-1 text-left"
+          >
+            <p className="font-mono text-[9px] uppercase tracking-wide text-accent">
+              Episódio AXEL
+            </p>
+            <h2 id="weekly-episode-title" className="text-[13px] font-display mt-0.5 truncate text-ink">
+              {episode.headline}
+            </h2>
+            <p className="font-mono text-[10px] mt-0.5 truncate text-ink-muted">
+              {episode.cliffhanger}
+            </p>
+          </button>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <Link
+              to="/perfil"
+              className="font-mono text-[9px] uppercase text-accent hover:underline"
+            >
+              Abrir
+            </Link>
+            <button
+              type="button"
+              onClick={() => void handleShare()}
+              disabled={sharing}
+              className="p-1 rounded-sl border border-line bg-chrome text-ink-muted hover:text-ink"
+              aria-label="Compartilhar episódio"
+            >
+              <Share2 size={11} />
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} ${frameClass}`} aria-labelledby="weekly-episode-title">
-      <header className="flex items-start justify-between gap-3 mb-4">
+    <section className={`${PANEL} ${frameClass} ${compact ? 'p-2.5 sm:p-3' : ''}`} aria-labelledby="weekly-episode-title-full">
+      <header className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
           <p className={AXEL_SECTION_TITLE}>
             <Sparkles size={10} className="inline mr-1.5 text-accent" />
             Episódio AXEL
           </p>
-          <h2 id="weekly-episode-title" className={`${embedded ? 'text-sm' : 'text-base'} font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
+          <h2 id="weekly-episode-title-full" className={`text-sm font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
             {episode.capituloTitulo}
           </h2>
           <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            {episode.periodo} · {episode.headline}
+            {episode.periodo}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
@@ -177,11 +228,20 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
               <ChevronRight size={12} />
             </Link>
           )}
+          {compact && (
+            <button
+              type="button"
+              onClick={() => setExpanded(false)}
+              className="font-mono text-[9px] uppercase text-ink-muted hover:text-ink"
+            >
+              Recolher
+            </button>
+          )}
           <button
             type="button"
             onClick={() => void handleShare()}
             disabled={sharing}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-sl border border-line bg-chrome hover:bg-elevated font-mono text-[9px] uppercase text-ink-muted hover:text-ink transition-colors"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-sl border border-line bg-chrome font-mono text-[9px] uppercase text-ink-muted hover:text-ink"
           >
             <Share2 size={11} />
             Share
@@ -189,66 +249,40 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
         </div>
       </header>
 
-      <div ref={shareRef} className="space-y-3 mb-4">
-        {episode.momentos.map((mom, i) =>
-        {
-          const Icon = MOMENT_ICON[mom.tipo]
-          const tone = mom.tipo === 'conquista'
-            ? 'text-concluido'
-            : mom.tipo === 'susto'
-              ? 'text-atencao'
-              : 'text-accent'
-          return (
-            <article key={i} className="flex gap-3 p-3 rounded-sl border border-line bg-chrome/20">
-              <Icon size={16} className={`shrink-0 mt-0.5 ${tone}`} />
-              <div className="min-w-0">
-                <p className={`font-mono text-[9px] uppercase ${tone}`}>{mom.titulo}</p>
-                <p className={`text-[13px] mt-0.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-                  {mom.texto}
-                </p>
-              </div>
-            </article>
-          )
-        })}
+      {episode.momentos.length > 0 && (
+        <div className="space-y-2 mb-3">
+          {episode.momentos.map((mom, i) =>
+          {
+            const Icon = MOMENT_ICON[mom.tipo]
+            const tone = MOMENT_TONE[mom.tipo]
+            return (
+              <article key={i} className="flex gap-2.5 p-2 rounded-sl border border-line bg-chrome">
+                <div className="sl-icon-box">
+                  <Icon size={14} className={tone} />
+                </div>
+                <div className="min-w-0">
+                  <p className={`font-mono text-[9px] uppercase ${tone}`}>{mom.titulo}</p>
+                  <p className="text-[12px] mt-0.5 leading-relaxed text-ink-muted">
+                    {mom.texto}
+                  </p>
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      )}
+
+      <div className="grid grid-cols-4 gap-1.5 mb-3">
+        <StatPill icon={Flame} label="Ofens." value={String(episode.ofensivasSalvas)} iconClass="text-orange-500" />
+        <StatPill icon={ListChecks} label="Tarefas" value={String(episode.tarefasConcluidas)} iconClass="text-accent" />
+        <StatPill icon={Clock} label="Foco" value={`${episode.focoMinutos}m`} iconClass="text-ink-muted" />
+        <StatPill icon={Heart} label="Humor" value={episode.humorMedio > 0 ? episode.humorMedio.toFixed(1) : '—'} iconClass="text-atencao" />
       </div>
 
-      <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${embedded ? 'mb-3' : 'mb-4'}`}>
-        <StatPill
-          icon={Flame}
-          label="Ofensivas"
-          value={String(episode.ofensivasSalvas)}
-          iconClass="text-orange-500"
-        />
-        <StatPill
-          icon={ListChecks}
-          label="Tarefas"
-          value={String(episode.tarefasConcluidas)}
-          iconClass="text-accent"
-        />
-        <StatPill
-          icon={Clock}
-          label="Foco"
-          value={`${episode.focoMinutos}m`}
-          iconClass="text-ink-muted"
-        />
-        <StatPill
-          icon={Heart}
-          label="Humor"
-          value={episode.humorMedio > 0 ? episode.humorMedio.toFixed(1) : '—'}
-          iconClass="text-atencao"
-        />
+      <div className="p-2.5 rounded-sl border border-dashed border-accent/40 bg-accent/5">
+        <p className="font-mono text-[9px] uppercase text-accent mb-0.5">Cliffhanger</p>
+        <p className="text-[12px] leading-relaxed text-ink">{episode.cliffhanger}</p>
       </div>
-
-      <div className="p-3 rounded-sl border border-dashed border-accent/40 bg-accent/5">
-        <p className="font-mono text-[9px] uppercase text-accent mb-1">Cliffhanger</p>
-        <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
-          {episode.cliffhanger}
-        </p>
-      </div>
-
-      <p className={`text-[12px] mt-3 ${AXEL_TEXT_SECONDARY}`}>
-        {episode.resumo}
-      </p>
     </section>
   )
 }

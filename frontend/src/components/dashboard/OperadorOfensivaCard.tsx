@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Flame, Shield, Zap, TrendingUp } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { computeGamificationProfile } from '../../lib/gamificationProfile'
+import { computeGamificationProfile, XP_PER_LEVEL } from '../../lib/gamificationProfile'
 import { STREAK_MIN_SCORE } from '../../lib/proofOfWork'
 import { ProductivityHeatmap } from './ProductivityHeatmap'
 import {
@@ -61,9 +61,9 @@ export function OperadorOfensivaCard()
 
   const profile = computeGamificationProfile(userStats)
   const attrLevels = {
-    foco: Math.floor((userStats?.xp_foco ?? 0) / 100) + 1,
-    vitalidade: Math.floor((userStats?.xp_vitalidade ?? 0) / 100) + 1,
-    estabilidade: Math.floor((userStats?.xp_estabilidade ?? 0) / 100) + 1,
+    foco: Math.floor((userStats?.xp_foco ?? 0) / XP_PER_LEVEL) + 1,
+    vitalidade: Math.floor((userStats?.xp_vitalidade ?? 0) / XP_PER_LEVEL) + 1,
+    estabilidade: Math.floor((userStats?.xp_estabilidade ?? 0) / XP_PER_LEVEL) + 1,
   }
 
   const proofLabel = hasCompletedTaskToday

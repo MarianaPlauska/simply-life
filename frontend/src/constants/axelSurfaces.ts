@@ -10,6 +10,15 @@ export const AXEL_TEXT_SECONDARY = 'text-ink-muted'
 /** Menu lateral, footer e superfícies chrome */
 export const AXEL_CHROME_PLANE = 'bg-chrome'
 
+/** Estúdio de vidro — header e bottom nav (conteúdo rola por baixo) */
+export const AXEL_GLASS_CHROME =
+  'bg-card/75 backdrop-blur-lg backdrop-saturate-150 border-line ' +
+  'dark:bg-[#1E2128]/80 dark:border-white/[0.04]'
+
+/** Resposta física ao toque — botões, chips e itens de menu */
+export const AXEL_TOUCH_PRESS =
+  'active:scale-95 transition-all duration-150 ease-out'
+
 /** Plano de navegação lateral */
 export const AXEL_NAV_PLANE =
   `${AXEL_CHROME_PLANE} border-r border-line`
@@ -20,7 +29,7 @@ export const AXEL_FOOTER_PLANE =
 
 /** Botão de ação rápida no header */
 export const AXEL_HEADER_ACTION =
-  'p-2.5 rounded-sl bg-chrome hover:bg-elevated border border-line shadow-sl transition-colors text-ink-muted hover:text-ink'
+  `p-2.5 rounded-sl bg-chrome hover:bg-elevated border border-line shadow-sl text-ink-muted hover:text-ink ${AXEL_TOUCH_PRESS}`
 
 /** Padding inferior do main — barra mobile + safe area iOS */
 export const AXEL_MAIN_PB_MOBILE =
@@ -39,7 +48,7 @@ export const AXEL_BENTO_PANEL = 'sl-panel'
 
 /** Chip / micro-botão em painel — branco no claro, superfície no escuro */
 export const AXEL_BENTO_CHIP =
-  'bg-card border border-line rounded-sl transition-colors hover:bg-chrome/80'
+  'bg-white border border-zinc-200/80 rounded-sl shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-colors hover:bg-zinc-50 dark:bg-card dark:border-line dark:shadow-none dark:hover:bg-chrome/80'
 
 /** Shell de segmentos (Gasto/Receita, etc.) */
 export const AXEL_SEG_SHELL =
@@ -81,7 +90,7 @@ export const AXEL_PROGRESS_THICK = 'h-2 rounded-pill overflow-hidden bg-chrome'
 /** Badge de status — legível em claro e escuro */
 export const AXEL_STATUS_BADGE =
   'inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border ' +
-  'bg-zinc-100 text-zinc-600 border-zinc-200/60 dark:bg-zinc-800/50 dark:text-zinc-300 dark:border-white/8'
+  'bg-chrome text-ink-muted border-line'
 
 export const AXEL_STATUS_BADGE_WARN =
   'inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded border ' +
@@ -102,13 +111,11 @@ export const AXEL_VIEW_SWITCHER_SHELL =
 
 export const AXEL_VIEW_TAB_ACTIVE =
   'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-sans font-semibold transition-colors ' +
-  'bg-card text-ink shadow-sm border border-line/80 ' +
-  'dark:bg-zinc-700/80 dark:text-zinc-100 dark:border-white/[0.12] dark:shadow-none'
+  'bg-elevated text-ink shadow-sm border border-line'
 
 export const AXEL_VIEW_TAB_IDLE =
   'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-sans font-medium transition-colors ' +
-  'text-ink-muted hover:text-ink hover:bg-chrome/60 border border-transparent ' +
-  'dark:text-zinc-400 dark:hover:text-zinc-200 dark:hover:bg-zinc-800/40'
+  'text-ink-muted hover:text-ink hover:bg-chrome/60 border border-transparent'
 
 /** Pílula de filtro — formato cápsula */
 export const AXEL_FILTER_PILL =
@@ -134,10 +141,10 @@ export const AXEL_SEG_IDLE =
 
 /** Nav principal (Início / Movimentos / Contas) — único nível com caixa accent */
 export const AXEL_NAV_MAIN_ACTIVE =
-  'bg-accent-muted text-accent border border-accent/30'
+  `bg-accent-muted text-accent border border-accent/30 ${AXEL_TOUCH_PRESS}`
 
 export const AXEL_NAV_MAIN_IDLE =
-  'text-ink-muted border border-transparent hover:bg-chrome hover:text-ink'
+  `text-ink-muted border border-transparent hover:bg-chrome hover:text-ink ${AXEL_TOUCH_PRESS}`
 
 /** Sub-nav (Diário / Lista / Cartões) — texto + sublinhado, sem caixa */
 export const AXEL_NAV_SUB =
@@ -208,11 +215,11 @@ export const AXEL_STACK_GAP = 'gap-6'
 
 /** Botão primário — cápsula, alto contraste */
 export const AXEL_BTN_PRIMARY =
-  'bg-accent hover:bg-accent-hover text-white font-bold rounded-pill shadow-sm transition-all hover:shadow-md'
+  `bg-accent hover:bg-accent-hover text-white font-bold rounded-pill shadow-sm hover:shadow-md ${AXEL_TOUCH_PRESS}`
 
 /** Botão primário compacto — modais e formulários */
 export const AXEL_BTN_PRIMARY_COMPACT =
-  'bg-accent hover:bg-accent-hover text-white font-bold rounded-sl shadow-sm transition-colors text-[9px] font-mono uppercase tracking-wide'
+  `bg-accent hover:bg-accent-hover text-white font-bold rounded-sl shadow-sm text-[9px] font-mono uppercase tracking-wide ${AXEL_TOUCH_PRESS}`
 
 /** Link discreto */
 export const AXEL_LINK =

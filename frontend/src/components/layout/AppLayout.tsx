@@ -4,6 +4,7 @@ import { Sidebar } from './Sidebar'
 import { MobileBottomNav } from './MobileBottomNav'
 import { AxelGlobalHeader } from './AxelGlobalHeader'
 import { AxelSystemFooter } from './AxelSystemFooter'
+import { AxelAskDrawer } from '../axel/AxelAskDrawer'
 import { QuickCaptureModal } from '../Anotacoes/QuickCaptureModal'
 import { CommandPalette } from '../ui/CommandPalette'
 import { OnboardingChecklist } from '../Onboarding/OnboardingChecklist'
@@ -107,6 +108,8 @@ export function AppLayout()
   }, [fetchMedicamentos, fetchHabitos, fetchTarefas, userSessionReady])
 
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
+  const isAxelAskOpen = useTaskStore((s) => s.isAxelAskOpen)
+  const setAxelAskOpen = useTaskStore((s) => s.setAxelAskOpen)
   const hideChrome = zenFocusActive
 
   return (
@@ -118,6 +121,7 @@ export function AppLayout()
       <FinanceQuickCaptureModal />
       <GlobalNewTransactionModal />
       <CommandPalette />
+      <AxelAskDrawer open={isAxelAskOpen} onClose={() => setAxelAskOpen(false)} />
       <OnboardingChecklist />
       <AxelSystemGuideIntro />
       <PwaInstallBanner />

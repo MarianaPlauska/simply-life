@@ -80,11 +80,11 @@ export function AxelStreakPopover()
   }
 
   return (
-    <div ref={rootRef} className="relative hidden sm:block">
+    <div ref={rootRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={`flex items-center gap-1.5 px-2 py-1 rounded-sl border transition-all duration-300 ${
+        className={`sl-touch flex items-center gap-1 px-1.5 sm:px-2 py-1 rounded-sl border transition-all duration-300 ${
           animating
             ? 'animate-bounce border-atencao/40 bg-atencao/10'
             : open
@@ -110,7 +110,7 @@ export function AxelStreakPopover()
             aria-hidden
           />
         )}
-        <span className="text-[11px] font-mono tabular-nums text-ink-muted">
+        <span className="hidden sm:inline text-[11px] font-mono tabular-nums text-ink-muted">
           <span
             className={`font-semibold ${
               weekendFreeze

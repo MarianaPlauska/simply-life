@@ -490,7 +490,6 @@ export function FinanceDailyLedgerTab({
       <DashboardCollapsible
         title="Lançar neste dia"
         subtitle={`${isToday(dayKey) ? 'Hoje' : formattedDay} · dia ${dayNet >= 0 ? '+' : ''}${fmt(dayNet)}`}
-        defaultOpen
         className={AXEL_BENTO_PANEL}
         bodyClassName="space-y-2.5"
       >

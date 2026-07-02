@@ -129,6 +129,9 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
       set({ tarefas: normalized, isLoading: false })
 
+      const anyAch = get() as { reconcileRecentAchievements?: (tasks: TarefaUnificada[]) => void }
+      anyAch.reconcileRecentAchievements?.(normalized)
+
       const { countDuplicateBillTasks } = await import('../../lib/financeBillTaskDedup')
       if (countDuplicateBillTasks(normalized) > 0)
       {

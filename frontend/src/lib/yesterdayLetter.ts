@@ -2,6 +2,7 @@
 
 import type { HumorRegistro, EntradaDiario } from '../store/slices/bemEstarSlice'
 import type { MoodOrchestrationContext } from './moodOrchestration'
+import { findUnifiedNoteForDate } from './axelUnifiedNotes'
 
 export interface YesterdayLetter
 {
@@ -9,6 +10,7 @@ export interface YesterdayLetter
   yesterdayIso: string
   moodLabel: string | null
   noteSnippet: string | null
+  noteSource: 'diario' | 'anotacao' | 'humor' | null
   kanbanSlots: number
   axelMessage: string
   ctaLabel: string
@@ -47,24 +49,29 @@ function findYesterdayMood(
   return humorMes.find((h) => h.data === iso) ?? null
 }
 
-function findYesterdayNote(iso: string, entradas: EntradaDiario[]): EntradaDiario | null
+function findYesterdayNote(
+  iso: string,
+  entradas: EntradaDiario[],
+  anotacoes: { conteudo?: string | null; titulo?: string | null; updated_at?: string | null; created_at?: string | null }[],
+): { text: string; source: 'diario' | 'anotacao' } | null
 {
-  return entradas.find((e) => e.data === iso) ?? null
+  return findUnifiedNoteForDate(iso, anotacoes, entradas)
 }
 
 export function buildYesterdayLetter(input: {
   humorSemana: HumorRegistro[]
   humorMes: HumorRegistro[]
   entradasRecentes: EntradaDiario[]
+  anotacoes?: { conteudo?: string | null; titulo?: string | null; updated_at?: string | null; created_at?: string | null }[]
   mood?: MoodOrchestrationContext | null
   reference?: Date
 }): YesterdayLetter
 {
   const iso = yesterdayIso(input.reference)
   const mood = findYesterdayMood(iso, input.humorSemana, input.humorMes)
-  const entrada = findYesterdayNote(iso, input.entradasRecentes)
+  const unified = findYesterdayNote(iso, input.entradasRecentes, input.anotacoes ?? [])
 
-  const hasContent = Boolean(mood || entrada)
+  const hasContent = Boolean(mood || unified)
   const kanbanSlots = input.mood?.effectiveDailyCap
     ? Math.min(5, Math.max(1, Math.round(input.mood.effectiveDailyCap / 120)))
     : 3
@@ -76,6 +83,7 @@ export function buildYesterdayLetter(input: {
       yesterdayIso: iso,
       moodLabel: null,
       noteSnippet: null,
+      noteSource: null,
       kanbanSlots,
       axelMessage: '',
       ctaLabel: '',
@@ -84,8 +92,13 @@ export function buildYesterdayLetter(input: {
 
   const moodWord = mood ? (MOOD_WORDS[Math.round(mood.humor)] ?? 'como estava') : null
   const noteFromMood = mood?.nota?.trim() || null
-  const noteFromDiary = entrada?.conteudo?.trim() || null
-  const noteSnippet = noteFromDiary || noteFromMood
+  const noteFromUnified = unified?.text ?? null
+  const noteSnippet = noteFromUnified || noteFromMood
+  const noteSource: YesterdayLetter['noteSource'] = unified
+    ? unified.source
+    : noteFromMood
+      ? 'humor'
+      : null
 
   let axelMessage: string
 
@@ -111,6 +124,7 @@ export function buildYesterdayLetter(input: {
     yesterdayIso: iso,
     moodLabel: moodWord,
     noteSnippet: noteSnippet ? truncate(noteSnippet, 120) : null,
+    noteSource,
     kanbanSlots,
     axelMessage,
     ctaLabel: 'Manter leve hoje',

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
-import { Skeleton } from '../dashboard/DashboardPrimitives'
+import { BentoGridSkeleton } from '../dashboard/DashboardPrimitives'
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
 import { DashboardOverdueAlert } from '../dashboard/DashboardOverdueAlert'
 import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
@@ -12,6 +12,7 @@ import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
 import { DayCapacityCard } from '../dashboard/DayCapacityCard'
 import { YesterdayLetterCard } from '../dashboard/YesterdayLetterCard'
+import { AxelWeekForecastCard } from '../dashboard/AxelWeekForecastCard'
 import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
 import { computeGamificationProfile } from '../../lib/gamificationProfile'
 import { InboxIACard } from '../dashboard/InboxIACard'
@@ -137,13 +138,9 @@ export function DashboardView()
   {
     return (
       <div className="w-full flex flex-col">
-        <div className="h-40 bg-chrome border-b border-line animate-pulse" />
+        <div className="h-40 sl-shimmer border-b border-line" />
         <div className={`px-4 lg:px-8 py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-3`}>
-          <Skeleton className="h-28 w-full" />
-          <div className="grid grid-cols-12 gap-3">
-            <Skeleton className="col-span-8 h-64" />
-            <Skeleton className="col-span-4 h-64" />
-          </div>
+          <BentoGridSkeleton variant="default" />
         </div>
       </div>
     )
@@ -153,11 +150,12 @@ export function DashboardView()
     <div className="w-full flex flex-col flex-1 min-h-0">
       <DashboardCommandBar greeting={greeting} firstName={firstName} />
 
-      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
+      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-2.5 sm:gap-3 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
         <YesterdayLetterCard />
+        <AxelWeekForecastCard />
         <DayCapacityCard />
         {showEpisodeOnDashboard && (
-          <WeeklyEpisodeCard embedded />
+          <WeeklyEpisodeCard embedded compact />
         )}
         {wellbeingPending && (
           <div className="order-first shrink-0">

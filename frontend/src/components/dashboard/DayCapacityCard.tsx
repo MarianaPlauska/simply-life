@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Battery, ChevronRight, Sparkles } from 'lucide-react'
+import { Battery, ChevronDown, ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
@@ -21,6 +21,7 @@ const MODE_STYLES: Record<CapacityMode, { bar: string; label: string }> = {
 
 export function DayCapacityCard()
 {
+  const [expanded, setExpanded] = useState(false)
   const tarefas = useTaskStore((s) => s.tarefas)
   const dailyScoreCap = useTaskStore((s) => s.dailyScoreCap)
   const transactions = useTaskStore((s) => s.transactions)
@@ -67,79 +68,77 @@ export function DayCapacityCard()
   if (gated)
   {
     return (
-      <section className={`${AXEL_BORDERLESS_PANEL} border border-dashed border-line`}>
-        <div className="flex items-start gap-3">
-          <Battery className="w-5 h-5 text-ink-muted shrink-0 mt-0.5" />
-          <div className="min-w-0">
-            <p className={`text-sm font-display ${AXEL_TEXT_PRIMARY}`}>
-              Capacidade do dia
-            </p>
-            <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-              Desbloqueia no nível 3 — complete tarefas e humor para ver seu termômetro de vida.
-            </p>
-            <Link
-              to="/perfil"
-              className="inline-flex items-center gap-0.5 mt-2 font-mono text-[10px] uppercase text-accent hover:underline"
-            >
-              Ver trilha
-              <ChevronRight size={11} />
-            </Link>
-          </div>
+      <section className={`${AXEL_BORDERLESS_PANEL} border border-dashed border-line p-2.5 sm:p-3`}>
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Battery className="w-4 h-4 shrink-0 text-ink-muted" />
+          <p className={`text-[12px] flex-1 min-w-0 ${AXEL_TEXT_SECONDARY}`}>
+            Capacidade do dia — desbloqueia no <span className="text-accent">nível 3</span>
+          </p>
+          <Link
+            to="/perfil"
+            className="shrink-0 inline-flex items-center gap-0.5 font-mono text-[9px] uppercase text-accent hover:underline"
+          >
+            Trilha
+            <ChevronRight size={10} />
+          </Link>
         </div>
       </section>
     )
   }
 
   return (
-    <section
-      className={`${AXEL_BORDERLESS_PANEL} ring-1 ring-accent/20`}
-      aria-label="Capacidade do dia"
-    >
-      <header className="flex items-start justify-between gap-3 mb-3">
-        <div className="min-w-0">
-          <p className="font-mono text-[9px] uppercase tracking-wide text-accent flex items-center gap-1">
-            <Battery size={10} />
-            Capacidade do dia
-          </p>
-          <h2 className={`text-base font-display mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-            {style.label} · {capacity.score}%
-          </h2>
-        </div>
-        <span className="shrink-0 font-mono text-[9px] uppercase px-2 py-1 rounded-sl bg-chrome border border-line text-ink-muted">
-          {capacity.suggestedImportantTasks} foco{capacity.suggestedImportantTasks !== 1 ? 's' : ''}
-        </span>
-      </header>
-
-      <div className="h-3 rounded-full bg-chrome border border-line overflow-hidden mb-3">
-        <div
-          className={`h-full transition-all duration-700 ${style.bar}`}
-          style={{ width: `${capacity.score}%` }}
-        />
-      </div>
-
-      <p className={`text-[14px] leading-relaxed ${AXEL_TEXT_PRIMARY} mb-3`}>
-        <Sparkles size={12} className="inline mr-1 text-accent align-text-bottom" />
-        {capacity.axelPhrase}
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {capacity.factors.map((f) => (
-          <div key={f.id} className="p-2 rounded-sl bg-chrome/30 border border-line/70 min-w-0">
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-                {f.label}
-              </span>
-              <span className={`text-xs font-semibold tabular-nums ${AXEL_TEXT_PRIMARY}`}>
-                {f.pct}%
+    <section className={`${AXEL_BORDERLESS_PANEL} p-2.5 sm:p-3`} aria-label="Capacidade do dia">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full text-left"
+        aria-expanded={expanded}
+      >
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Battery size={14} className="shrink-0 text-accent" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="font-mono text-[9px] uppercase tracking-wide text-accent">
+                Capacidade
+              </p>
+              <span className={`text-xs font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
+                {style.label} · {capacity.score}%
               </span>
             </div>
-            <div className="h-1 rounded-full bg-chrome overflow-hidden">
-              <div className="h-full bg-accent/70" style={{ width: `${f.pct}%` }} />
+            <div className="mt-1.5 h-1.5 rounded-full overflow-hidden border border-line bg-chrome">
+              <div
+                className={`h-full transition-all duration-700 ${style.bar}`}
+                style={{ width: `${capacity.score}%` }}
+              />
             </div>
-            <p className={`text-[10px] mt-1 truncate ${AXEL_TEXT_SECONDARY}`}>{f.detail}</p>
           </div>
-        ))}
-      </div>
+          <ChevronDown
+            size={14}
+            className={`shrink-0 text-ink-muted transition-transform ${expanded ? 'rotate-180' : ''}`}
+          />
+        </div>
+        <p className={`text-[12px] leading-snug mt-2 line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
+          {capacity.axelPhrase}
+        </p>
+      </button>
+
+      {expanded && (
+        <div className="grid grid-cols-3 gap-1.5 mt-2.5 pt-2.5 border-t border-line">
+          {capacity.factors.map((f) => (
+            <div key={f.id} className="sl-stat-chip p-1.5 min-w-0">
+              <div className="flex items-center justify-between gap-1 mb-0.5">
+                <span className={`font-mono text-[8px] uppercase truncate ${AXEL_TEXT_SECONDARY}`}>
+                  {f.label.split(' ')[0]}
+                </span>
+                <span className={`text-[10px] font-semibold tabular-nums ${AXEL_TEXT_PRIMARY}`}>
+                  {f.pct}%
+                </span>
+              </div>
+              <p className={`text-[9px] truncate text-ink-muted`}>{f.detail}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }

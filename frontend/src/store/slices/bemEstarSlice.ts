@@ -28,7 +28,7 @@ export interface HumorRegistro
   created_at?: string
 }
 
-export type DiarioContexto = 'geral' | 'gasto' | 'tarefa' | 'saude'
+export type DiarioContexto = 'geral' | 'gasto' | 'tarefa' | 'saude' | 'carta_ontem'
 
 export interface EntradaDiario
 {

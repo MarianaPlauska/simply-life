@@ -5,7 +5,7 @@ import {
   type PurchaseCheckInput,
   type PurchaseVerdict,
 } from '../lib/financePurchaseCheck'
-import { fetchFinancePurchaseCheckIA } from '../services/jarvisApi'
+import { fetchFinancePurchaseCheckIA } from '../services/axelApi'
 
 export function useFinancePurchaseCheck()
 {

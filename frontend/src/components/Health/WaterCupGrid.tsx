@@ -170,12 +170,13 @@ export function WaterCupGrid({
               disabled={disabled}
               onClick={() => handleSlot(i)}
               className={[
-                'relative flex flex-col items-center justify-end rounded-sl transition-all',
+                'sl-touch relative flex flex-col items-center justify-end rounded-sl',
                 compact ? 'p-1 min-h-[44px]' : 'p-1.5 sm:p-2 min-h-[64px] sm:min-h-[72px]',
                 'border border-transparent hover:border-accent/25 hover:bg-accent-muted/30',
+                'active:scale-95 transition-all duration-150 ease-out',
                 isExtraCup ? 'border-dashed border-accent/20' : '',
                 editingIndex === i ? 'ring-1 ring-accent/40 bg-accent-muted/20' : '',
-                'active:scale-95 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
+                'disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
                 filled ? 'text-accent' : 'text-ink-muted',
               ].join(' ')}
               aria-label={

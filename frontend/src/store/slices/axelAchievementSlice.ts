@@ -1,8 +1,14 @@
 import type { StateCreator } from 'zustand'
+import type { TarefaUnificada } from '../../types'
+import {
+  getActiveStorageUserId,
+  readScopedJson,
+  writeScopedJson,
+} from '../../lib/userScopedStorage'
 
-// Rastro de Conquistas — tarefas concluídas recentemente
+// Rastro de Conquistas — tarefas concluídas recentemente (isolado por usuário)
 
-const ACHIEVEMENTS_KEY = 'axel-recent-achievements-v1'
+export const ACHIEVEMENTS_BASE_KEY = 'axel-recent-achievements-v1'
 const MAX_ACHIEVEMENTS = 16
 
 export interface AchievementEntry
@@ -16,27 +22,49 @@ export interface AchievementEntry
   pulseNonce: number
 }
 
-function loadAchievements(): AchievementEntry[]
+function normalizeAchievements(entries: AchievementEntry[] | null | undefined): AchievementEntry[]
 {
-  try
-  {
-    const raw = localStorage.getItem(ACHIEVEMENTS_KEY)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as AchievementEntry[]
-    return parsed.map((e) => ({
-      ...e,
-      createdAt: e.createdAt ?? e.completedAt,
-    }))
-  }
-  catch
-  {
-    return []
-  }
+  if (!entries?.length) return []
+
+  return entries.map((e) => ({
+    ...e,
+    createdAt: e.createdAt ?? e.completedAt,
+  }))
 }
 
-function saveAchievements(entries: AchievementEntry[]): void
+export function loadAchievementsForUser(userId?: string | null): AchievementEntry[]
 {
-  localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(entries))
+  const uid = userId !== undefined ? userId : getActiveStorageUserId()
+  if (!uid) return []
+
+  // Descarta cache global legado — vazava dados entre contas no mesmo navegador
+  try
+  {
+    localStorage.removeItem(ACHIEVEMENTS_BASE_KEY)
+  }
+  catch { /* ignore */ }
+
+  return normalizeAchievements(readScopedJson<AchievementEntry[]>(ACHIEVEMENTS_BASE_KEY, uid))
+}
+
+function saveAchievementsForUser(entries: AchievementEntry[], userId?: string | null): void
+{
+  const uid = userId !== undefined ? userId : getActiveStorageUserId()
+  if (!uid) return
+
+  writeScopedJson(ACHIEVEMENTS_BASE_KEY, entries, uid)
+}
+
+/** Remove entradas que não pertencem às tarefas do usuário atual */
+export function pruneAchievementsForTasks(
+  entries: AchievementEntry[],
+  tarefas: TarefaUnificada[],
+): AchievementEntry[]
+{
+  if (!entries.length) return entries
+
+  const taskIds = new Set(tarefas.map((t) => t.id))
+  return entries.filter((entry) => taskIds.has(entry.taskId))
 }
 
 export interface AxelAchievementSlice
@@ -48,6 +76,8 @@ export interface AxelAchievementSlice
     focusMinutes: number,
     createdAt?: string | null,
   ) => void
+  hydrateRecentAchievements: (userId?: string | null) => void
+  reconcileRecentAchievements: (tarefas: TarefaUnificada[]) => void
 }
 
 export const createAxelAchievementSlice: StateCreator<
@@ -55,8 +85,22 @@ export const createAxelAchievementSlice: StateCreator<
   [],
   [],
   AxelAchievementSlice
-> = (set) => ({
-  recentAchievements: loadAchievements(),
+> = (set, get) => ({
+  recentAchievements: [],
+
+  hydrateRecentAchievements: (userId) =>
+  {
+    set({ recentAchievements: loadAchievementsForUser(userId) })
+  },
+
+  reconcileRecentAchievements: (tarefas) =>
+  {
+    const pruned = pruneAchievementsForTasks(get().recentAchievements, tarefas)
+    if (pruned.length === get().recentAchievements.length) return
+
+    saveAchievementsForUser(pruned)
+    set({ recentAchievements: pruned })
+  },
 
   recordAchievement: (taskId, titulo, focusMinutes, createdAt) =>
   {
@@ -74,7 +118,7 @@ export const createAxelAchievementSlice: StateCreator<
     {
       const filtered = s.recentAchievements.filter((a) => a.taskId !== taskId)
       const next = [entry, ...filtered].slice(0, MAX_ACHIEVEMENTS)
-      saveAchievements(next)
+      saveAchievementsForUser(next)
       return { recentAchievements: next }
     })
   },

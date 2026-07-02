@@ -61,7 +61,7 @@ export function FinanceHomeTab({
   const criticalAlerts = alerts.filter((a) => a.severity === 'urgent' || a.severity === 'caution')
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 pt-2 sm:pt-3">
       <FinanceGlobalMoodBanner
         monthLabel={monthLabel}
         monthOffset={monthOffset}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { VirtualCard } from '../../store/storeTypes'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -6,6 +7,7 @@ import { AddCardForm } from './AddCardForm'
 import { CardEditForm } from './CardEditForm'
 import { CardSettingsMenu } from './CardSettingsMenu'
 import { CreditCardVisual } from './CreditCardVisual'
+import { CardDeleteDialog } from './CardDeleteDialog'
 import { CardInvoicePanel } from './CardInvoicePanel'
 import { CardInvoiceDrawer } from './CardInvoiceDrawer'
 import { getBillingCycle, getInvoiceTransactions } from '../../lib/financeCardCycle'
@@ -40,6 +42,24 @@ export function VirtualCardsTab({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [editingCardId, setEditingCardId] = useState<string | null>(null)
   const [settingsCardId, setSettingsCardId] = useState<string | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<VirtualCard | null>(null)
+
+  const requestDeleteCard = (card: VirtualCard) =>
+  {
+    setSettingsCardId(null)
+    setDeleteTarget(card)
+  }
+
+  const confirmDeleteCard = () =>
+  {
+    if (!deleteTarget) return
+    const removedId = deleteTarget.id
+    void removeCard(removedId)
+    setEditingCardId(null)
+    setSelectedId(cards.find((c) => c.id !== removedId)?.id ?? null)
+    setDeleteTarget(null)
+    toast.success('Cartão removido')
+  }
 
   useEffect(() =>
   {
@@ -134,6 +154,7 @@ export function VirtualCardsTab({
                     setSettingsCardId((prev) => (prev === card.id ? null : card.id))
                     setSelectedId(card.id)
                   }}
+                  onDeleteClick={() => requestDeleteCard(card)}
                 />
                 {settingsCardId === card.id && (
                   <CardSettingsMenu
@@ -155,17 +176,7 @@ export function VirtualCardsTab({
                       setSettingsCardId(null)
                       void toggleCardStatus(card.id)
                     }}
-                    onDelete={() =>
-                    {
-                      setSettingsCardId(null)
-                      if (confirm('Excluir este cartão?'))
-                      {
-                        removeCard(card.id)
-                        setEditingCardId(null)
-                        setSelectedId(cards.find((c) => c.id !== card.id)?.id ?? null)
-                        toast.success('Cartão removido')
-                      }
-                    }}
+                    onDelete={() => requestDeleteCard(card)}
                   />
                 )}
               </div>
@@ -218,6 +229,12 @@ export function VirtualCardsTab({
           <span className="sm:hidden">Novo</span>
         </button>
       )}
+
+      <CardDeleteDialog
+        card={deleteTarget}
+        onConfirm={confirmDeleteCard}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   )
 }

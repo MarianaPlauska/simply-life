@@ -12,11 +12,11 @@ export interface MoodOption
 }
 
 export const MOODS: MoodOption[] = [
-  { value: 1, icon: Frown, label: 'Péssimo', shortLabel: 'Péssimo', colorClass: 'border-red-500/40 bg-red-500/10 text-red-400', hex: '#ef4444' },
-  { value: 2, icon: Annoyed, label: 'Ruim', shortLabel: 'Ruim', colorClass: 'border-orange-500/40 bg-orange-500/10 text-orange-400', hex: '#f97316' },
-  { value: 3, icon: Meh, label: 'Neutro', shortLabel: 'Neutro', colorClass: 'border-amber-500/40 bg-amber-500/10 text-amber-400', hex: '#eab308' },
-  { value: 4, icon: Smile, label: 'Bom', shortLabel: 'Bom', colorClass: 'border-sky-500/40 bg-sky-500/10 text-sky-400', hex: '#22d3ee' },
-  { value: 5, icon: Laugh, label: 'Ótimo', shortLabel: 'Ótimo', colorClass: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-400', hex: '#06b6d4' },
+  { value: 1, icon: Frown, label: 'Péssimo', shortLabel: 'Péssimo', colorClass: 'border-red-400/30 bg-red-400/8 text-red-400/90', hex: '#f87171' },
+  { value: 2, icon: Annoyed, label: 'Ruim', shortLabel: 'Ruim', colorClass: 'border-orange-400/30 bg-orange-400/8 text-orange-400/90', hex: '#fb923c' },
+  { value: 3, icon: Meh, label: 'Neutro', shortLabel: 'Neutro', colorClass: 'border-amber-400/30 bg-amber-400/8 text-amber-400/90', hex: '#fbbf24' },
+  { value: 4, icon: Smile, label: 'Bom', shortLabel: 'Bom', colorClass: 'border-sky-400/30 bg-sky-400/8 text-sky-400/90', hex: '#38bdf8' },
+  { value: 5, icon: Laugh, label: 'Ótimo', shortLabel: 'Ótimo', colorClass: 'border-cyan-400/30 bg-cyan-400/8 text-cyan-400/90', hex: '#22d3ee' },
 ]
 
 export const MOOD_HEX: Record<number, string> = Object.fromEntries(

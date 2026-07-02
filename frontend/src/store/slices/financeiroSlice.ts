@@ -992,12 +992,34 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         set({ cashAccount: local })
         return
       }
-      const { data, error } = await supabase
+      let data: {
+        saldo_inicial: number | null
+        saldo_banco: number | null
+        saldo_banco_at: string | null
+        saldos_manual?: unknown
+      } | null = null
+
+      const full = await supabase
         .from('fin_conta_corrente')
         .select('saldo_inicial, saldo_banco, saldo_banco_at, saldos_manual')
         .eq('user_id', uid)
         .maybeSingle()
-      if (error) throw error
+
+      if (full.error)
+      {
+        // Migração 039 pode não estar aplicada no projeto remoto
+        const basic = await supabase
+          .from('fin_conta_corrente')
+          .select('saldo_inicial, saldo_banco, saldo_banco_at')
+          .eq('user_id', uid)
+          .maybeSingle()
+        if (basic.error) throw basic.error
+        data = basic.data
+      }
+      else
+      {
+        data = full.data
+      }
       if (data)
       {
         const next: CashAccountSettings = {

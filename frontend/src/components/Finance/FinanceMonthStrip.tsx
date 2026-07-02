@@ -50,8 +50,8 @@ export function FinanceMonthStrip({ monthOffset, bounds, onSelect }: FinanceMont
             onClick={() => onSelect(offset)}
             className={`shrink-0 flex flex-col items-center min-w-[2.75rem] px-2 py-1.5 rounded-sl font-mono transition-colors border ${
               active
-                ? 'bg-accent-muted text-accent border-accent/30 font-semibold'
-                : 'text-ink-muted border-transparent hover:bg-chrome hover:text-ink'
+                ? 'font-semibold bg-zinc-100 text-zinc-900 border-zinc-200/80 shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:bg-accent-muted dark:text-accent dark:border-accent/30 dark:shadow-none'
+                : 'text-zinc-500 border-transparent bg-transparent hover:text-zinc-700 dark:text-ink-muted dark:hover:bg-elevated dark:hover:text-ink'
             }`}
           >
             <span className="text-[10px] uppercase">{label}</span>

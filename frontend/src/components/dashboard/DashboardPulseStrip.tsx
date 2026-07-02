@@ -40,14 +40,14 @@ function PulseCard({
     >
       <div className="flex items-center gap-2 mb-2">
         <Icon className={`w-4 h-4 ${iconClass}`} strokeWidth={1.75} />
-        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-zinc-500 dark:text-zinc-400">
+        <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-muted">
           {label}
         </span>
       </div>
       <p className={`text-xl sm:text-2xl font-sans font-semibold tracking-tight tabular-nums leading-none ${valueTone}`}>
         {value}
       </p>
-      <p className="text-[11px] mt-2 text-zinc-500 dark:text-zinc-400">{hint}</p>
+      <p className="text-[11px] mt-2 text-ink-muted">{hint}</p>
     </button>
   )
 }
