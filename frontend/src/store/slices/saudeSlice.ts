@@ -16,6 +16,7 @@ import {
   writeStoredHealthDay,
 } from '../../lib/healthDayBoundary'
 import { persistLocalMlPorCopo } from '../../lib/waterHydration'
+import { upsertHabitHistorico } from '../../lib/habitHistorico'
 import {
   appendHistoricoCarga,
   mergeAcademyConfig,
@@ -334,16 +335,21 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         const consultaData = config.consulta_renovacao
         if (consultaData)
         {
-          const store = get as () => { createMedicamentoConsultaTask: (o: {
-            medicamentoId: number
-            nome: string
-            consultaData: string
-          }) => Promise<void> }
-          await store().createMedicamentoConsultaTask({
-            medicamentoId: mapped.id,
-            nome: med.nome,
-            consultaData,
-          })
+          const createTask = (get as unknown as {
+            createMedicamentoConsultaTask?: (o: {
+              medicamentoId: number
+              nome: string
+              consultaData: string
+            }) => Promise<void>
+          }).createMedicamentoConsultaTask
+          if (createTask)
+          {
+            await createTask({
+              medicamentoId: mapped.id,
+              nome: med.nome,
+              consultaData,
+            })
+          }
           const { toast } = await import('sonner')
           toast.success('Consulta adicionada ao Kanban', { duration: 2200 })
         }

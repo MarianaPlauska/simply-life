@@ -56,7 +56,6 @@ export function getEmptyUserSensitiveState(): Partial<TaskStore>
     correlacao: null,
     axelMoodCare: null,
     notificacoes: [],
-    unifiedEvents: [],
     newsItems: [],
     workspacePrefs: { ...DEFAULT_WORKSPACE_PREFS },
     workspacePrefsLoaded: false,

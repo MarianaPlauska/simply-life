@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { countOverdueTasks, countUrgentDeadlines } from '../../lib/axelAlerts'
-import { countAlertasHeader, listNotificacoesAcionaveis } from '../../lib/notificacaoUtils'
+import { countAlertasHeader } from '../../lib/notificacaoUtils'
 import { useNavigate } from 'react-router-dom'
 import { AxelStreakPopover } from './AxelStreakPopover'
 import { MobileSidebarDrawer } from './MobileSidebarDrawer'
@@ -106,14 +105,6 @@ export function AxelGlobalHeader()
   const alertTotal = useMemo(
     () => countAlertasHeader(notificacoes, tarefas, alertCtx),
     [notificacoes, tarefas, alertCtx],
-  )
-  const urgentDeadlineCount = useMemo(
-    () => countUrgentDeadlines(tarefas) + countOverdueTasks(tarefas),
-    [tarefas],
-  )
-  const unreadNotifCount = useMemo(
-    () => listNotificacoesAcionaveis(notificacoes, tarefas).length,
-    [notificacoes, tarefas],
   )
 
   useEffect(() =>
@@ -254,23 +245,23 @@ export function AxelGlobalHeader()
                 sinoAtivo ? 'ring-2 ring-rose-400/70 ring-offset-2 ring-offset-[#08090D] rounded-full animate-pulse' : ''
               }`}
               aria-label={
-                unreadNotifCount > 0
-                  ? `Notificações: ${unreadNotifCount} não lida${unreadNotifCount !== 1 ? 's' : ''}`
+                alertTotal > 0
+                  ? `Notificações: ${alertTotal} alerta${alertTotal !== 1 ? 's' : ''}`
                   : 'Notificações'
               }
             >
               <Bell className={`w-4 h-4 ${sinoAtivo ? 'text-rose-400' : ''}`} />
-              {unreadNotifCount > 0 && (
+              {alertTotal > 0 && (
                 <span
                   className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse ring-2 ring-[#08090D]"
                   aria-hidden
                 />
               )}
-              {unreadNotifCount > 0 && (
+              {alertTotal > 0 && (
                 <span
                   className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 text-white text-[10px] font-bold font-mono rounded-full flex items-center justify-center px-1 bg-red-500 animate-pulse"
                 >
-                  {unreadNotifCount > 9 ? '9+' : unreadNotifCount}
+                  {alertTotal > 9 ? '9+' : alertTotal}
                 </span>
               )}
             </button>

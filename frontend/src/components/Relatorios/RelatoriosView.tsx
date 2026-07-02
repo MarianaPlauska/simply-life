@@ -8,7 +8,7 @@ import {
   Star, CheckCircle2, Brain,
 } from 'lucide-react';
 import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
-import type { AnalyticsReport, TrendPoint, RankingItem } from '../../store/useTaskStore';
+import { useTaskStore, type AnalyticsReport, type TrendPoint, type RankingItem } from '../../store/useTaskStore';
 import { PrintButton } from '../ui/PrintButton';
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-40px' }, transition: { duration: 0.5 } };

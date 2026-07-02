@@ -60,7 +60,7 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
       tipo: 'despesa',
       status_pagamento: 'pendente',
       card_id: card.id,
-      forma_pagamento: 'credito',
+      forma_pagamento: 'cartao',
     })
 
     setDesc('')

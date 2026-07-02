@@ -56,7 +56,6 @@ function dedupeSettlements(rows: FinanceBillSettlement[]): FinanceBillSettlement
 
 /** Histórico permanente de boletos e contas marcados como pagos */
 export function FinanceKanbanPaymentsPanel({
-  compact = false,
   monthLabel,
   viewYear,
   viewMonth,

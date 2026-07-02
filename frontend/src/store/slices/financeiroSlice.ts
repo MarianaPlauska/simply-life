@@ -51,6 +51,7 @@ import {
 import { DEFAULT_CATEGORY_SEEDS } from '../../lib/financeDefaultCategories'
 import { recoverCardsFromPersist } from '../../lib/recoverLegacyPersist'
 import { syncLocalCardsToServer } from '../../lib/financeCardRecovery'
+import { persistCardToServer } from '../../lib/financeCardPersist'
 import { mergeTxObservacao, setTxObservacaoLocal } from '../../lib/financeTxObservacao'
 
 function parseCashBalanceOverrides(raw: unknown): CashBalanceOverrides | null
@@ -785,7 +786,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     {
       const synced = await syncLocalCardsToServer(uid, localOnly)
       const syncedIds = new Set(synced.map((c) => c.id))
-      set((s) => ({
+      set(() => ({
         cards: [
           ...remote,
           ...synced,

@@ -1,6 +1,5 @@
 import type { HabitoDiario } from '../store/storeTypes'
 import { localTodayIso, readCachedWaterEntries, waterPrefsStorageKey } from './healthDayBoundary'
-import { readScopedJson, writeScopedJson } from './userScopedStorage'
 
 export const DEFAULT_ML_POR_COPO = 200
 export const GARRAFA_MIN_ML = 500
