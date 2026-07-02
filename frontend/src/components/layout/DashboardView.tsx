@@ -10,6 +10,10 @@ import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
 import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
 import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
+import { DayCapacityCard } from '../dashboard/DayCapacityCard'
+import { YesterdayLetterCard } from '../dashboard/YesterdayLetterCard'
+import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
+import { computeGamificationProfile } from '../../lib/gamificationProfile'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
@@ -76,7 +80,16 @@ export function DashboardView()
     || 'Convidado'
 
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
+  const userStats = useTaskStore((s) => s.userStats)
   const wellbeingPending = humorHojeLista.length === 0
+
+  const gamificationProfile = useMemo(
+    () => computeGamificationProfile(userStats),
+    [userStats],
+  )
+  const showEpisodeOnDashboard =
+    gamificationProfile.level >= 4
+    && workspacePrefs.privacy.show_episode !== false
 
   const quickWidgets = useMemo(
     () =>
@@ -141,6 +154,11 @@ export function DashboardView()
       <DashboardCommandBar greeting={greeting} firstName={firstName} />
 
       <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-3 sm:gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
+        <YesterdayLetterCard />
+        <DayCapacityCard />
+        {showEpisodeOnDashboard && (
+          <WeeklyEpisodeCard embedded />
+        )}
         {wellbeingPending && (
           <div className="order-first shrink-0">
             <DashboardQuickWidget id="wellbeing" />

@@ -206,9 +206,26 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
       if (leveledUp)
       {
         const { toast } = await import('sonner')
-        toast.success(`LEVEL UP — você subiu para o Nível ${newLevel}`, {
-          description: 'Seus atributos e reputação no Jarvis aumentaram.',
+        const { describeLevelUp } = await import('../../lib/axelTrail')
+        const { fireConfetti } = await import('../../lib/axelCelebration')
+        fireConfetti('milestone')
+        toast.success(`Nível ${newLevel}!`, {
+          description: describeLevelUp(newLevel),
+          duration: 6000,
         })
+
+        const patchWorkspacePrefs = (get() as { patchWorkspacePrefs?: (p: object) => Promise<unknown> }).patchWorkspacePrefs
+        const workspacePrefs = (get() as { workspacePrefs?: { dashboard_quick_widgets?: string[]; privacy: { show_episode: boolean }; ai_coach_enabled: boolean } }).workspacePrefs
+        if (patchWorkspacePrefs && workspacePrefs)
+        {
+          const { buildLevelUnlockPatch } = await import('../../lib/axelTrail')
+          const patch = buildLevelUnlockPatch(newLevel, workspacePrefs as import('../../lib/userWorkspacePrefs').UserWorkspacePrefs)
+          if (patch)
+          {
+            await patchWorkspacePrefs(patch)
+          }
+        }
+        await (get() as { reconcileCosmeticUnlocks?: () => Promise<void> }).reconcileCosmeticUnlocks?.()
       }
 
       // Verifica conquistas após ganhar XP

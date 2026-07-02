@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Flame, ListChecks, Clock, Heart, Sparkles, ChevronRight } from 'lucide-react'
+import { Flame, ListChecks, Clock, Heart, Sparkles, ChevronRight, Share2, Trophy, AlertTriangle, Leaf } from 'lucide-react'
+import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
-import { buildWeeklyEpisode } from '../../lib/weeklyEpisode'
+import { buildWeeklyEpisode, type EpisodeMomentType } from '../../lib/weeklyEpisode'
 import { computeGamificationProfile } from '../../lib/gamificationProfile'
 import { resolveEpisodeFrameClass } from '../../lib/axelCosmetics'
 import {
@@ -12,11 +13,15 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Recap semanal — episódio narrativo no perfil e dashboard
-
 interface WeeklyEpisodeCardProps
 {
   embedded?: boolean
+}
+
+const MOMENT_ICON: Record<EpisodeMomentType, typeof Trophy> = {
+  conquista: Trophy,
+  susto: AlertTriangle,
+  cuidado: Leaf,
 }
 
 function StatPill({
@@ -60,6 +65,13 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
   const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
   const streakCount = useTaskStore((s) => s.streakCount)
+  const isStreakSafeToday = useTaskStore((s) => s.isStreakSafeToday)
+  const contasFixas = useTaskStore((s) => s.contasFixas)
+  const transactions = useTaskStore((s) => s.transactions)
+  const billSettlements = useTaskStore((s) => s.billSettlements)
+
+  const shareRef = useRef<HTMLDivElement>(null)
+  const [sharing, setSharing] = useState(false)
 
   useEffect(() =>
   {
@@ -74,6 +86,7 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
     { level: profile.level, streakCount },
     workspacePrefs.unlocked_cosmetics,
   )
+
   const episode = useMemo(
     () => buildWeeklyEpisode({
       streakSavedDays,
@@ -83,6 +96,11 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
       userQuests,
       xpTotal: getTotalXp(),
       nivel: profile.level,
+      streakCount,
+      isStreakSafeToday: isStreakSafeToday(),
+      contasFixas,
+      transactions,
+      billSettlements,
     }),
     [
       streakSavedDays,
@@ -92,8 +110,47 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
       userQuests,
       getTotalXp,
       profile.level,
+      streakCount,
+      isStreakSafeToday,
+      contasFixas,
+      transactions,
+      billSettlements,
     ],
   )
+
+  const handleShare = async () =>
+  {
+    setSharing(true)
+    try
+    {
+      if (navigator.share)
+      {
+        await navigator.share({
+          title: episode.capituloTitulo,
+          text: episode.shareText,
+        })
+        return
+      }
+      await navigator.clipboard.writeText(episode.shareText)
+      toast.success('Resumo copiado — cole onde quiser compartilhar')
+    }
+    catch
+    {
+      try
+      {
+        await navigator.clipboard.writeText(episode.shareText)
+        toast.success('Resumo copiado')
+      }
+      catch
+      {
+        toast.error('Não foi possível compartilhar agora')
+      }
+    }
+    finally
+    {
+      setSharing(false)
+    }
+  }
 
   return (
     <section className={`${AXEL_BORDERLESS_PANEL} ${frameClass}`} aria-labelledby="weekly-episode-title">
@@ -101,25 +158,59 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
         <div className="min-w-0">
           <p className={AXEL_SECTION_TITLE}>
             <Sparkles size={10} className="inline mr-1.5 text-accent" />
-            Seu episódio
+            Episódio AXEL
           </p>
           <h2 id="weekly-episode-title" className={`${embedded ? 'text-sm' : 'text-base'} font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
-            {episode.headline}
+            {episode.capituloTitulo}
           </h2>
           <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            {episode.periodo}
+            {episode.periodo} · {episode.headline}
           </p>
         </div>
-        {embedded && (
-          <Link
-            to="/perfil"
-            className="shrink-0 inline-flex items-center gap-0.5 font-mono text-[9px] uppercase text-accent hover:underline"
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          {embedded && (
+            <Link
+              to="/perfil"
+              className="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase text-accent hover:underline"
+            >
+              Perfil
+              <ChevronRight size={12} />
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => void handleShare()}
+            disabled={sharing}
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-sl border border-line bg-chrome hover:bg-elevated font-mono text-[9px] uppercase text-ink-muted hover:text-ink transition-colors"
           >
-            Perfil
-            <ChevronRight size={12} />
-          </Link>
-        )}
+            <Share2 size={11} />
+            Share
+          </button>
+        </div>
       </header>
+
+      <div ref={shareRef} className="space-y-3 mb-4">
+        {episode.momentos.map((mom, i) =>
+        {
+          const Icon = MOMENT_ICON[mom.tipo]
+          const tone = mom.tipo === 'conquista'
+            ? 'text-concluido'
+            : mom.tipo === 'susto'
+              ? 'text-atencao'
+              : 'text-accent'
+          return (
+            <article key={i} className="flex gap-3 p-3 rounded-sl border border-line bg-chrome/20">
+              <Icon size={16} className={`shrink-0 mt-0.5 ${tone}`} />
+              <div className="min-w-0">
+                <p className={`font-mono text-[9px] uppercase ${tone}`}>{mom.titulo}</p>
+                <p className={`text-[13px] mt-0.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+                  {mom.texto}
+                </p>
+              </div>
+            </article>
+          )
+        })}
+      </div>
 
       <div className={`grid grid-cols-2 sm:grid-cols-4 gap-2 ${embedded ? 'mb-3' : 'mb-4'}`}>
         <StatPill
@@ -148,7 +239,14 @@ export function WeeklyEpisodeCard({ embedded = false }: WeeklyEpisodeCardProps)
         />
       </div>
 
-      <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+      <div className="p-3 rounded-sl border border-dashed border-accent/40 bg-accent/5">
+        <p className="font-mono text-[9px] uppercase text-accent mb-1">Cliffhanger</p>
+        <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
+          {episode.cliffhanger}
+        </p>
+      </div>
+
+      <p className={`text-[12px] mt-3 ${AXEL_TEXT_SECONDARY}`}>
         {episode.resumo}
       </p>
     </section>

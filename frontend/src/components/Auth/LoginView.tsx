@@ -10,6 +10,9 @@ import { TabToggle } from '../ui/TabToggle';
 import { AxelLoader } from '../ui/AxelLoader';
 import { getAuthCallbackUrl, supabase } from '../../lib/supabase';
 import { resolvePostAuthPath } from '../../lib/postAuthRoute';
+import { switchUserSession } from '../../store/resetUserSession';
+import { reloadRemoteUserData } from '../../lib/reloadRemoteUserData';
+import { isLocalGuestUser } from '../../lib/authSession';
 import { LoginHero } from './LoginHero';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
@@ -83,13 +86,18 @@ export function LoginView()
 
   const finishAuth = async (session: { user: { id: string; email?: string | null } }, displayName: string, successKey: string) =>
   {
-    const prevId = useTaskStore.getState().userId;
-    login(session.user.email || '', displayName, session.user.id);
-    if (prevId !== session.user.id)
+    useTaskStore.getState().setUserSessionReady(false)
+    await switchUserSession(session.user.id)
+    login(session.user.email || '', displayName, session.user.id)
+    useTaskStore.getState().resetWorkspacePrefsState()
+    await useTaskStore.getState().fetchWorkspacePrefs()
+
+    if (!isLocalGuestUser(session.user.id))
     {
-      useTaskStore.getState().resetWorkspacePrefsState();
+      await reloadRemoteUserData()
     }
-    await useTaskStore.getState().fetchWorkspacePrefs();
+
+    useTaskStore.getState().setUserSessionReady(true)
     toast.success(t(successKey));
     const path = await resolvePostAuthPath();
     navigate(path, { replace: true });

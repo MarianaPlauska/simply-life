@@ -119,17 +119,9 @@ export const useTaskStore = create<TaskStore>()(
         userProfile: state.userProfile,
         accessibility: state.accessibility,
         keywords: state.keywords,
-        transactions: state.transactions,
-        budgetLimits: state.budgetLimits,
-        habitos: state.habitos,
         userId: state.userId,
         onboardingSteps: state.onboardingSteps,
         onboardingDismissed: state.onboardingDismissed,
-        cards: state.cards.map((card) => ({
-          ...card,
-          cvv: '',
-        })),
-        contasFixas: state.contasFixas,
         streakCount: state.streakCount,
         lastActiveDate: state.lastActiveDate,
         hasCompletedTaskToday: state.hasCompletedTaskToday,
@@ -148,6 +140,17 @@ export const useTaskStore = create<TaskStore>()(
       onRehydrateStorage: () => (state) =>
       {
         if (!state) return
+
+        // Dados sensíveis vêm só do servidor — ignora legado no disco
+        state.transactions = []
+        state.contasFixas = []
+        state.habitos = []
+        state.cards = []
+        state.tarefas = []
+        state.medicamentos = []
+        state.despesas = []
+        state.reservedBills = []
+        state.billSettlements = []
         const acc = state.accessibility as { colorScheme?: string } | undefined
         if (acc?.colorScheme === 'sepia')
         {

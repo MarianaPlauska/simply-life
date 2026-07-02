@@ -10,7 +10,11 @@ export interface AnotacoesSlice
 {
   anotacoes: Anotacao[]
   fetchAnotacoes: () => Promise<void>
-  addAnotacao: (conteudo: string, titulo?: string, tipo?: AnotacaoTipo) => Promise<void>
+  addAnotacao: (conteudo: string, titulo?: string, tipo?: AnotacaoTipo) => Promise<Anotacao | null>
+  createAnotacao: (tipo?: AnotacaoTipo) => Promise<Anotacao | null>
+  updateAnotacao: (id: number, patch: Partial<Pick<Anotacao, 'titulo' | 'conteudo' | 'categoria' | 'fixado'>>) => Promise<void>
+  deleteAnotacao: (id: number) => Promise<void>
+  togglePinAnotacao: (id: number) => Promise<void>
 }
 
 type StoreComTarefas = AnotacoesSlice & TarefasSlice
@@ -22,9 +26,14 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
   {
     try
     {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+
       const { data, error } = await supabase
         .from('anotacoes')
         .select('*')
+        .eq('user_id', uid)
+        .order('fixado', { ascending: false })
         .order('id', { ascending: false })
       if (error) throw error
       set({ anotacoes: data || [] })
@@ -35,7 +44,7 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
   addAnotacao: async (conteudo, titulo, tipo = 'diario') =>
   {
     const uid = (await supabase.auth.getUser()).data.user?.id
-    if (!uid) return
+    if (!uid) return null
     const { data, error } = await supabase
       .from('anotacoes')
       .insert({
@@ -59,5 +68,58 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
         || 'Lembrete'
       await get().createTarefa(taskTitle, conteudo.trim())
     }
+
+    return data ?? null
+  },
+
+  createAnotacao: async (tipo = 'diario') =>
+  {
+    const defaults: Record<AnotacaoTipo, { titulo: string; conteudo: string }> = {
+      diario: { titulo: 'Diário', conteudo: '' },
+      lembrete: { titulo: 'Lembrete', conteudo: '' },
+      lista: { titulo: 'Lista', conteudo: '- [ ] \n- [ ] ' },
+    }
+    const base = defaults[tipo]
+    return get().addAnotacao(base.conteudo, base.titulo, tipo)
+  },
+
+  updateAnotacao: async (id, patch) =>
+  {
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return
+
+    const { error } = await supabase
+      .from('anotacoes')
+      .update(patch)
+      .eq('id', id)
+      .eq('user_id', uid)
+    if (error) throw error
+
+    set((s) => ({
+      anotacoes: s.anotacoes.map((n) => (n.id === id ? { ...n, ...patch } : n)),
+    }))
+  },
+
+  deleteAnotacao: async (id) =>
+  {
+    const uid = (await supabase.auth.getUser()).data.user?.id
+    if (!uid) return
+
+    const { error } = await supabase
+      .from('anotacoes')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', uid)
+    if (error) throw error
+
+    set((s) => ({ anotacoes: s.anotacoes.filter((n) => n.id !== id) }))
+  },
+
+  togglePinAnotacao: async (id) =>
+  {
+    const note = get().anotacoes.find((n) => n.id === id)
+    if (!note) return
+    const next = note.fixado === 1 ? 0 : 1
+    await get().updateAnotacao(id, { fixado: next })
   },
 })

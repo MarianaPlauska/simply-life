@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { User, Mail, Camera, Bell, Moon, Keyboard, Monitor, Save, LogOut } from 'lucide-react'
+import { User, Mail, Camera, Bell, Moon, Keyboard, Monitor, Save, LogOut, ShieldCheck } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
+import { supabase } from '../../lib/supabase'
 import { fetchIsAdmin } from '../../lib/adminUsers'
 import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard'
 import { ProfileAxelHero } from '../gamification/ProfileAxelHero'
+import { AxelTrailPanel } from '../gamification/AxelTrailPanel'
 import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
 import { MonthlyStreakShieldCard } from '../gamification/MonthlyStreakShieldCard'
 import { ProfileAchievementsGrid } from '../gamification/ProfileAchievementsGrid'
@@ -14,6 +16,7 @@ import { InviteFriendPanel } from '../social/InviteFriendPanel'
 import { FriendCircleCard } from '../social/FriendCircleCard'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { ProfileAdminUsersPanel } from './ProfileAdminUsersPanel'
+import { ProfileWorkspacePrefsPanel } from './ProfileWorkspacePrefsPanel'
 import { MfaEnrollPanel } from './MfaEnrollPanel'
 import {
   AXEL_BTN_PRIMARY,
@@ -49,11 +52,31 @@ export function ProfileView()
   useEffect(() =>
   {
     let ativo = true
-    void fetchIsAdmin().then((admin) =>
+
+    const refreshAdmin = () =>
     {
-      if (ativo) setIsAdmin(admin)
+      void fetchIsAdmin().then((admin) =>
+      {
+        if (ativo) setIsAdmin(admin)
+      })
+    }
+
+    refreshAdmin()
+
+    const { data: authSub } = supabase.auth.onAuthStateChange(() =>
+    {
+      refreshAdmin()
     })
-    return () => { ativo = false }
+
+    const onFocus = () => { refreshAdmin() }
+    window.addEventListener('focus', onFocus)
+
+    return () =>
+    {
+      ativo = false
+      authSub.subscription.unsubscribe()
+      window.removeEventListener('focus', onFocus)
+    }
   }, [])
 
   const handleSave = () =>
@@ -68,15 +91,51 @@ export function ProfileView()
     <div className={`${AXEL_PAGE_SHELL_MOBILE_NARROW} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16 space-y-3 sm:space-y-4`}>
       <header>
         <p className="sl-eyebrow">Identidade</p>
-        <h1 className={`text-2xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
-          Meu perfil
-        </h1>
+        <div className="flex flex-wrap items-center gap-2 mt-1">
+          <h1 className={`text-2xl font-display ${AXEL_TEXT_PRIMARY}`}>
+            Meu perfil
+          </h1>
+          {isAdmin && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sl bg-accent/15 text-accent text-[10px] font-mono uppercase">
+              <ShieldCheck className="w-3 h-3" aria-hidden />
+              Admin
+            </span>
+          )}
+        </div>
         <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
           Toque em cada bloco para ver detalhes
         </p>
       </header>
 
+      {isAdmin && (
+        <>
+          <DashboardCollapsible title="Usuários" subtitle="Administração do sistema" defaultOpen>
+            <ProfileAdminUsersPanel />
+          </DashboardCollapsible>
+
+          <DashboardCollapsible title="Segurança admin" subtitle="Autenticação em dois fatores (TOTP)">
+            <MfaEnrollPanel />
+          </DashboardCollapsible>
+        </>
+      )}
+
       <ProfileAxelHero />
+
+      <DashboardCollapsible
+        title="Trilha AXEL"
+        subtitle="Níveis, XP e o que você desbloqueia"
+        defaultOpen
+      >
+        <AxelTrailPanel />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible
+        title="Meu AXEL"
+        subtitle="Avatar, mascote e o que aparece no dashboard"
+        defaultOpen
+      >
+        <ProfileWorkspacePrefsPanel />
+      </DashboardCollapsible>
 
       <DashboardCollapsible title="Social" subtitle="Círculo de amigos e convites">
         <FriendCircleCard />
@@ -187,18 +246,6 @@ export function ProfileView()
           </button>
         </section>
       </DashboardCollapsible>
-
-      {isAdmin && (
-        <DashboardCollapsible title="Usuários" subtitle="Administração do sistema">
-          <ProfileAdminUsersPanel />
-        </DashboardCollapsible>
-      )}
-
-      {isAdmin && (
-        <DashboardCollapsible title="Segurança admin" subtitle="Autenticação em dois fatores (TOTP)">
-          <MfaEnrollPanel />
-        </DashboardCollapsible>
-      )}
 
       <DashboardCollapsible title="Preferências rápidas" subtitle="Notificações e acessibilidade">
         <div className="divide-y divide-line">

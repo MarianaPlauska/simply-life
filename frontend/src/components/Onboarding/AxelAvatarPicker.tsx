@@ -6,11 +6,16 @@ interface AxelAvatarPickerProps
   value: AvatarStyleId
   displayName: string
   onChange: (id: AvatarStyleId) => void
+  /** Se omitido, mostra todos os presets */
+  allowedStyles?: AvatarStyleId[]
 }
 
-export function AxelAvatarPicker({ value, displayName, onChange }: AxelAvatarPickerProps)
+export function AxelAvatarPicker({ value, displayName, onChange, allowedStyles }: AxelAvatarPickerProps)
 {
   const initials = iniciaisDe(displayName)
+  const presets = allowedStyles
+    ? AVATAR_PRESETS.filter((preset) => allowedStyles.includes(preset.id))
+    : AVATAR_PRESETS
 
   return (
     <div className="space-y-2 md:space-y-2.5">
@@ -18,7 +23,7 @@ export function AxelAvatarPicker({ value, displayName, onChange }: AxelAvatarPic
         Seu rosto no Círculo
       </p>
       <div className="grid grid-cols-4 gap-1.5 sm:gap-2 md:gap-3">
-        {AVATAR_PRESETS.map((preset) =>
+        {presets.map((preset) =>
         {
           const selected = value === preset.id
           return (

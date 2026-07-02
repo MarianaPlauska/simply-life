@@ -1,7 +1,6 @@
 /**
  * Isolamento de cache local por usuário — evita vazamento entre contas no mesmo navegador.
  */
-import { mergeLegacyPersistIntoScoped } from './recoverLegacyPersist'
 
 const LEGACY_STORE_KEY = 'simply-life-store'
 
@@ -86,6 +85,4 @@ export function migrateAllLegacyLocalKeys(userId: string): void
   {
     migrateLegacyScopedKey(key, userId)
   }
-
-  mergeLegacyPersistIntoScoped(userId)
 }

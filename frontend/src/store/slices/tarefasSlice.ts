@@ -95,6 +95,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       const { data, error } = await supabase
         .from('tarefas_unificadas')
         .select('*, subtarefas(*), tarefa_labels(label_id, labels(*)), contexto_itens(tipo_item, contextos(titulo, cor))')
+        .eq('user_id', session.user.id)
         .is('deletado_em', null)
         .order('created_at', { ascending: false })
       if (error) throw error

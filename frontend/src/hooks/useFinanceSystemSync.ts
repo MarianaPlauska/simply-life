@@ -43,6 +43,7 @@ export function useFinanceSystemSync(): void
     const run = async () =>
     {
       if (syncingRef.current) return
+      if (!useTaskStore.getState().userSessionReady) return
       syncingRef.current = true
 
       try

@@ -73,12 +73,29 @@ export function AppLayout()
     void reconcileCosmeticUnlocks()
   }, [reconcileCosmeticUnlocks, userStats?.level, streakCount])
 
+  useEffect(() =>
+  {
+    const level = userStats?.level ?? 1
+    void import('../../lib/axelTrail').then(({ buildLevelUnlockPatch }) =>
+    {
+      const prefs = useTaskStore.getState().workspacePrefs
+      const patch = buildLevelUnlockPatch(level, prefs)
+      if (patch)
+      {
+        void useTaskStore.getState().patchWorkspacePrefs(patch)
+      }
+    })
+  }, [userStats?.level])
+
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
   const fetchTarefas = useTaskStore((s) => s.fetchTarefas)
+  const userSessionReady = useTaskStore((s) => s.userSessionReady)
 
   useEffect(() =>
   {
+    if (!userSessionReady) return
+
     void (async () =>
     {
       await fetchMedicamentos()
@@ -87,7 +104,7 @@ export function AppLayout()
       const fetchNotificacoes = useTaskStore.getState().fetchNotificacoes
       await fetchNotificacoes()
     })()
-  }, [fetchMedicamentos, fetchHabitos, fetchTarefas])
+  }, [fetchMedicamentos, fetchHabitos, fetchTarefas, userSessionReady])
 
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
   const hideChrome = zenFocusActive

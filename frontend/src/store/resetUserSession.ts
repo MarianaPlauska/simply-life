@@ -12,7 +12,6 @@ import {
 import { loadCashAccountLocal } from '../lib/financeCashAccount'
 import { loadRecurringIncomesLocal } from '../lib/financeRecurringIncomeLocal'
 import { loadExpensePresets } from '../lib/financeExpensePresets'
-import { recoverCardsFromPersist } from '../lib/recoverLegacyPersist'
 
 export function getEmptyUserSensitiveState(): Partial<TaskStore>
 {
@@ -96,20 +95,10 @@ export async function switchUserSession(nextUserId: string | null): Promise<bool
     ...hydrateUserLocalSlices(nextUserId),
     userId: nextUserId ?? '',
     isLoggedIn: Boolean(nextUserId),
+    userSessionReady: false,
   })
 
   await useTaskStore.persist.rehydrate()
-
-  if (nextUserId)
-  {
-    const recovered = recoverCardsFromPersist(nextUserId)
-    if (recovered.length > 0)
-    {
-      useTaskStore.setState((s) => (
-        s.cards.length > 0 ? {} : { cards: recovered }
-      ))
-    }
-  }
 
   return true
 }

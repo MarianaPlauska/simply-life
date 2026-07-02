@@ -14,16 +14,28 @@ import { hasPendingBillTask } from '../lib/financeBillTaskDedup'
 /** Sincroniza boletos/contas a vencer como tarefas no Kanban — hoje ou 1 dia antes */
 export function useFinanceBillKanbanSync(enabled = true)
 {
+  const userSessionReady = useTaskStore((s) => s.userSessionReady)
+  const userId = useTaskStore((s) => s.userId)
   const contasFixas = useTaskStore((s) => s.contasFixas)
   const reservedBills = useTaskStore((s) => s.reservedBills)
   const cards = useTaskStore((s) => s.cards)
   const createFinanceBillTask = useTaskStore((s) => s.createFinanceBillTask)
   const syncingRef = useRef(false)
   const syncedBillIdsRef = useRef<Set<string>>(new Set())
+  const lastUserIdRef = useRef('')
 
   useEffect(() =>
   {
-    if (!enabled || syncingRef.current) return
+    if (lastUserIdRef.current !== userId)
+    {
+      syncedBillIdsRef.current = new Set()
+      lastUserIdRef.current = userId
+    }
+  }, [userId])
+
+  useEffect(() =>
+  {
+    if (!enabled || !userSessionReady || !userId || syncingRef.current) return
 
     const bills = getUpcomingBills({
       contasFixas,
@@ -83,5 +95,5 @@ export function useFinanceBillKanbanSync(enabled = true)
     }
 
     void run()
-  }, [enabled, contasFixas, reservedBills, cards, createFinanceBillTask])
+  }, [enabled, userSessionReady, userId, contasFixas, reservedBills, cards, createFinanceBillTask])
 }

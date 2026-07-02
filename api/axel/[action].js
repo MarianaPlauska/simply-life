@@ -11,6 +11,7 @@ import financeCoach from '../_lib/handlers/axel/finance-coach.js';
 import financePurchaseCheck from '../_lib/handlers/axel/finance-purchase-check.js';
 import fetchNews from '../_lib/handlers/axel/fetch-news.js';
 import generateGreeting from '../_lib/handlers/axel/generate-greeting.js';
+import adminUsers from '../_lib/handlers/axel/admin-users.js';
 
 const ROUTES = {
   'morning-brief': morningBrief,
@@ -24,6 +25,7 @@ const ROUTES = {
   'finance-purchase-check': financePurchaseCheck,
   'fetch-news': fetchNews,
   'generate-greeting': generateGreeting,
+  'admin-users': adminUsers,
 };
 
 function pickQuery(value)

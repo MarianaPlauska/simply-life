@@ -6,30 +6,7 @@ import { supabase } from '../lib/supabase'
 import { useTaskStore } from '../store/useTaskStore'
 import { switchUserSession } from '../store/resetUserSession'
 import { isLocalGuestUser } from '../lib/authSession'
-
-async function reloadRemoteUserData(): Promise<void>
-{
-  const s = useTaskStore.getState()
-  await Promise.allSettled([
-    s.fetchTransactions?.(),
-    s.fetchCards?.(),
-    s.fetchContasFixas?.(),
-    s.fetchCategories?.(),
-    s.fetchBudgets?.(),
-    s.fetchGoals?.(),
-    s.fetchCashAccount?.(),
-    s.fetchReservedBills?.(),
-    s.fetchRecurringIncomes?.(),
-    s.fetchHumorResumo?.(),
-    s.fetchDiarioHoje?.(),
-    s.fetchEntradasRecentes?.(),
-    s.fetchHabitos?.(),
-    s.fetchMedicamentos?.(),
-    s.fetchTarefas?.(),
-    s.fetchAnotacoes?.(),
-    s.fetchWorkspacePrefs?.(),
-  ])
-}
+import { reloadRemoteUserData } from '../lib/reloadRemoteUserData'
 
 export function useUserSessionIsolation(): void
 {
@@ -41,6 +18,7 @@ export function useUserSessionIsolation(): void
 
     const bootstrap = async () =>
     {
+      useTaskStore.getState().setUserSessionReady(false)
       const { data: { session } } = await supabase.auth.getSession()
       const uid = session?.user?.id ?? null
       if (cancelled) return
@@ -48,10 +26,18 @@ export function useUserSessionIsolation(): void
       const switched = await switchUserSession(uid)
       bootstrapped.current = true
 
-      if (switched && uid && !isLocalGuestUser(uid))
+      if (uid && !isLocalGuestUser(uid))
       {
         await useTaskStore.getState().checkSession()
-        await reloadRemoteUserData()
+        if (switched || uid)
+        {
+          await reloadRemoteUserData()
+        }
+      }
+
+      if (!cancelled)
+      {
+        useTaskStore.getState().setUserSessionReady(true)
       }
     }
 
@@ -65,14 +51,19 @@ export function useUserSessionIsolation(): void
 
       void (async () =>
       {
+        useTaskStore.getState().setUserSessionReady(false)
         const switched = await switchUserSession(uid)
-        if (!switched) return
 
         if (uid && !isLocalGuestUser(uid))
         {
           await useTaskStore.getState().checkSession()
-          await reloadRemoteUserData()
+          if (switched || uid)
+          {
+            await reloadRemoteUserData()
+          }
         }
+
+        useTaskStore.getState().setUserSessionReady(true)
       })()
     })
 

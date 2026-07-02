@@ -26,6 +26,15 @@ export const AVATAR_PRESETS: AvatarPreset[] = [
   { id: 'companion_bunny', label: 'Coelho', hint: 'Suave e gentil' },
 ]
 
+export function avatarsForLevel(level: number): AvatarStyleId[]
+{
+  const all = AVATAR_PRESETS.map((preset) => preset.id)
+  if (level >= 10) return all
+  if (level >= 6) return all.slice(0, 6)
+  if (level >= 3) return all.slice(0, 4)
+  return ['initials', 'companion_owl']
+}
+
 export function iniciaisDe(nome: string): string
 {
   const partes = nome.trim().split(/\s+/).filter(Boolean)

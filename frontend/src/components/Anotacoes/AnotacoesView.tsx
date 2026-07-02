@@ -1,296 +1,405 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Plus, FileText, Pin, Search, AlignLeft, Trash2, X,
-  BookOpen, Bell, ListChecks, Maximize2,
-} from 'lucide-react';
-import { useTaskStore } from '../../store/useTaskStore';
-import { sanitizeNoteHtml } from '../../lib/sanitizeHtml';
-import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
-import { RichTextEditor } from '../ui/RichTextEditor';
-import { EmptyState } from '../ui/EmptyState';
+  Plus, FileText, Pin, Search, Trash2, ArrowLeft,
+  BookOpen, Bell, ListChecks, Loader2,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { useTaskStore } from '../../store/useTaskStore'
+import type { AnotacaoTipo } from '../../store/slices/anotacoesSlice'
+import { AXEL_PAGE_SHELL, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { EmptyState } from '../ui/EmptyState'
+import { NotesMoodStrip } from './NotesMoodStrip'
+import {
+  isChecklistNote,
+  parseChecklist,
+  plainTextPreview,
+  toggleChecklistLine,
+} from '../../lib/noteChecklist'
 
-/* -- Category system -- */
 const CATEGORIAS = [
-  { id: 'all', label: 'Todas', icon: BookOpen, text: 'text-zinc-400', bg: 'bg-zinc-500/10' },
-  { id: 'diario', label: 'Diário', icon: BookOpen, text: 'text-violet-400', bg: 'bg-violet-500/10' },
-  { id: 'lembrete', label: 'Lembretes', icon: Bell, text: 'text-amber-400', bg: 'bg-amber-500/10' },
-  { id: 'lista', label: 'Listas', icon: ListChecks, text: 'text-sky-400', bg: 'bg-sky-500/10' },
-] as const;
+  { id: 'all', label: 'Todas', icon: BookOpen },
+  { id: 'diario', label: 'Diário', icon: BookOpen },
+  { id: 'lembrete', label: 'Lembretes', icon: Bell },
+  { id: 'lista', label: 'Listas', icon: ListChecks },
+] as const
 
-function normalizarCategoria(raw?: string | null): string
+function normalizarCategoria(raw?: string | null): AnotacaoTipo
 {
   if (raw === 'lembrete' || raw === 'lista' || raw === 'diario')
   {
-    return raw;
+    return raw
   }
-  return 'diario';
+  return 'diario'
 }
 
-const CAT_MAP = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c]));
+const CAT_MAP = Object.fromEntries(CATEGORIAS.map((c) => [c.id, c]))
 
-export function AnotacoesView() {
-  const anotacoes = useTaskStore((s) => s.anotacoes);
-  const fetchAnotacoes = useTaskStore((s) => s.fetchAnotacoes);
-  const setQuickCaptureOpen = useTaskStore((s) => s.setQuickCaptureOpen);
+export function AnotacoesView()
+{
+  const anotacoes = useTaskStore((s) => s.anotacoes)
+  const fetchAnotacoes = useTaskStore((s) => s.fetchAnotacoes)
+  const createAnotacao = useTaskStore((s) => s.createAnotacao)
+  const updateAnotacao = useTaskStore((s) => s.updateAnotacao)
+  const deleteAnotacao = useTaskStore((s) => s.deleteAnotacao)
+  const togglePinAnotacao = useTaskStore((s) => s.togglePinAnotacao)
 
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [focusMode, setFocusMode] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [mobileEditor, setMobileEditor] = useState(false)
+  const [draftTitulo, setDraftTitulo] = useState('')
+  const [draftConteudo, setDraftConteudo] = useState('')
+  const [saving, setSaving] = useState(false)
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { fetchAnotacoes(); }, []);
+  useEffect(() =>
+  {
+    void fetchAnotacoes()
+  }, [fetchAnotacoes])
 
-  useEffect(() => {
-    if (anotacoes.length > 0 && selectedId === null) {
-      setSelectedId(anotacoes[0].id);
+  const selectedNote = anotacoes.find((n) => n.id === selectedId) ?? null
+
+  useEffect(() =>
+  {
+    if (!selectedNote)
+    {
+      setDraftTitulo('')
+      setDraftConteudo('')
+      return
     }
-  }, [anotacoes, selectedId]);
+    setDraftTitulo(selectedNote.titulo ?? '')
+    setDraftConteudo(selectedNote.conteudo ?? '')
+  }, [selectedNote?.id, selectedNote?.titulo, selectedNote?.conteudo])
 
-  const filteredNotes = useMemo(() => {
-    let notes = anotacoes;
-    if (activeCategory !== 'all') {
-      notes = notes.filter((n) => normalizarCategoria(n.categoria) === activeCategory);
+  const filteredNotes = useMemo(() =>
+  {
+    let notes = anotacoes
+    if (activeCategory !== 'all')
+    {
+      notes = notes.filter((n) => normalizarCategoria(n.categoria) === activeCategory)
     }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+    if (searchQuery.trim())
+    {
+      const q = searchQuery.toLowerCase()
       notes = notes.filter(
         (n) =>
-          n.titulo?.toLowerCase().includes(q) ||
-          n.conteudo.toLowerCase().includes(q)
-      );
+          n.titulo?.toLowerCase().includes(q)
+          || n.conteudo.toLowerCase().includes(q),
+      )
     }
-    return [...notes].sort((a, b) => (b.fixado || 0) - (a.fixado || 0));
-  }, [anotacoes, activeCategory, searchQuery]);
+    return [...notes].sort((a, b) => (b.fixado || 0) - (a.fixado || 0))
+  }, [anotacoes, activeCategory, searchQuery])
 
-  const selectedNote = anotacoes.find((n) => n.id === selectedId);
-  const wordCount = selectedNote ? selectedNote.conteudo.split(/\s+/).filter(Boolean).length : 0;
-  const readTime = Math.max(1, Math.ceil(wordCount / 200));
-  const noteCat = CAT_MAP[normalizarCategoria(selectedNote?.categoria)] || CAT_MAP['diario'];
-  const NoteCatIcon = noteCat.icon;
+  const scheduleSave = useCallback((id: number, titulo: string, conteudo: string) =>
+  {
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() =>
+    {
+      setSaving(true)
+      void updateAnotacao(id, { titulo: titulo || null, conteudo })
+        .catch(() => toast.error('Erro ao salvar nota'))
+        .finally(() => setSaving(false))
+    }, 550)
+  }, [updateAnotacao])
+
+  const handleTituloChange = (value: string) =>
+  {
+    setDraftTitulo(value)
+    if (selectedId) scheduleSave(selectedId, value, draftConteudo)
+  }
+
+  const handleConteudoChange = (value: string) =>
+  {
+    setDraftConteudo(value)
+    if (selectedId) scheduleSave(selectedId, draftTitulo, value)
+  }
+
+  const handleNewNote = async (tipo: AnotacaoTipo = 'diario') =>
+  {
+    try
+    {
+      const note = await createAnotacao(tipo)
+      if (!note) return
+      setSelectedId(note.id)
+      setMobileEditor(true)
+    }
+    catch
+    {
+      toast.error('Não foi possível criar a nota')
+    }
+  }
+
+  const handleDelete = async () =>
+  {
+    if (!selectedId) return
+    if (!window.confirm('Excluir esta anotação?')) return
+    try
+    {
+      await deleteAnotacao(selectedId)
+      setSelectedId(filteredNotes.find((n) => n.id !== selectedId)?.id ?? null)
+      setMobileEditor(false)
+      toast.success('Anotação excluída')
+    }
+    catch
+    {
+      toast.error('Erro ao excluir')
+    }
+  }
+
+  const selectNote = (id: number) =>
+  {
+    setSelectedId(id)
+    setMobileEditor(true)
+  }
+
+  const checklistMode = selectedNote
+    ? isChecklistNote(normalizarCategoria(selectedNote.categoria), draftConteudo)
+    : false
 
   return (
-    <>
-      <div className={`flex h-[calc(100vh-7rem)] ${AXEL_PAGE_SHELL} lg:px-6 xl:px-8 gap-0 rounded-xl border border-zinc-800/40 overflow-hidden`} role="region" aria-label="Segundo Cérebro">
+    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16`}>
+      <header className="mb-3 sm:mb-4">
+        <p className="sl-eyebrow">Bloco de notas</p>
+        <h1 className={`text-xl sm:text-2xl font-display ${AXEL_TEXT_PRIMARY}`}>
+          Anotações
+        </h1>
+        <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          Diário, listas e lembretes — rápido como papel, salvo na nuvem
+        </p>
+      </header>
 
-        {/* Left Sidebar */}
-        <aside className="w-72 shrink-0 bg-zinc-900/30 border-r border-zinc-800/30 flex flex-col" aria-label="Lista de anotações">
-          <div className="px-4 pt-4 pb-2">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[13px] font-semibold text-zinc-200">Anotações</h2>
-              <button
-                onClick={() => setQuickCaptureOpen(true)}
-                className="p-1.5 rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-colors"
-                aria-label="Nova anotação"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+      <NotesMoodStrip />
+
+      <div className="mt-3 sm:mt-4 flex flex-col md:flex-row gap-0 md:gap-3 min-h-[min(70dvh,640px)] rounded-sl border border-line overflow-hidden bg-card">
+        {/* Lista */}
+        <aside
+          className={`md:w-72 lg:w-80 shrink-0 border-b md:border-b-0 md:border-r border-line flex flex-col bg-chrome/20 ${
+            mobileEditor ? 'hidden md:flex' : 'flex'
+          }`}
+          aria-label="Lista de anotações"
+        >
+          <div className="p-3 border-b border-line space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono text-[10px] uppercase text-ink-muted">Suas notas</span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => void handleNewNote('lista')}
+                  className="p-2 rounded-sl text-ink-muted hover:text-accent hover:bg-chrome border border-transparent hover:border-line"
+                  aria-label="Nova lista"
+                  title="Nova lista"
+                >
+                  <ListChecks className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleNewNote('diario')}
+                  className="p-2 rounded-sl bg-accent text-white hover:bg-accent-hover"
+                  aria-label="Nova anotação"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            {/* Search */}
-            <div className="relative mb-3">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-600" aria-hidden="true" />
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-muted" aria-hidden />
               <input
-                type="text"
-                placeholder="Buscar notas..."
+                type="search"
+                placeholder="Buscar…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-800/40 border border-zinc-800/50 rounded-lg pl-8 pr-3 py-1.5 text-[12px] text-zinc-300 placeholder:text-zinc-600 outline-none focus:ring-1 focus:ring-zinc-700 transition"
-                aria-label="Buscar anotações"
+                className="w-full bg-card border border-line rounded-sl pl-8 pr-3 py-2 text-[12px] text-ink placeholder:text-ink-muted outline-none focus:border-accent/40"
               />
             </div>
 
-            {/* Category Tabs */}
             <div className="flex gap-1 flex-wrap">
-              {CATEGORIAS.map((cat) => {
-                const CIcon = cat.icon;
-                const isActive = activeCategory === cat.id;
+              {CATEGORIAS.map((cat) =>
+              {
+                const CIcon = cat.icon
+                const isActive = activeCategory === cat.id
                 return (
                   <button
                     key={cat.id}
+                    type="button"
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium transition-colors ${isActive ? `${cat.bg} ${cat.text}` : 'text-zinc-600 hover:text-zinc-400'}`}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-sl text-[10px] font-medium border transition-colors ${
+                      isActive
+                        ? 'border-accent bg-accent/10 text-accent'
+                        : 'border-line text-ink-muted hover:text-ink'
+                    }`}
                   >
                     <CIcon className="w-3 h-3" />
                     {cat.label}
                   </button>
-                );
+                )
               })}
             </div>
           </div>
 
-          {/* Note List */}
-          <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-0.5" aria-label="Notas recentes">
-            {filteredNotes.length === 0 && anotacoes.length === 0 && (
+          <nav className="flex-1 overflow-y-auto p-2 space-y-0.5 custom-scrollbar">
+            {filteredNotes.length === 0 && (
               <EmptyState
                 icon={FileText}
                 title="Nenhuma anotação"
-                description="Capture ideias, reflexões e insights do seu dia a dia."
-                actionLabel="Nova Anotação"
-                onAction={() => setQuickCaptureOpen(true)}
+                description="Capture ideias, listas de compras ou reflexões do dia."
+                actionLabel="Nova nota"
+                onAction={() => void handleNewNote('diario')}
               />
             )}
-            {filteredNotes.length === 0 && anotacoes.length > 0 && (
-              <p className="text-[12px] text-zinc-600 text-center py-8">Nenhuma anotação encontrada</p>
-            )}
-            {filteredNotes.map((nota) => {
-              const isActive = selectedId === nota.id;
-              const cat = CAT_MAP[normalizarCategoria(nota.categoria)] || CAT_MAP['diario'];
-              const CatIcon = cat.icon;
+            {filteredNotes.map((nota) =>
+            {
+              const isActive = selectedId === nota.id
+              const cat = CAT_MAP[normalizarCategoria(nota.categoria)] || CAT_MAP.diario
+              const CatIcon = cat.icon
               return (
                 <button
                   key={nota.id}
-                  onClick={() => setSelectedId(nota.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-lg transition-colors group ${isActive ? 'bg-zinc-800/60 text-white' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/30'}`}
-                  aria-current={isActive ? 'page' : undefined}
+                  type="button"
+                  onClick={() => selectNote(nota.id)}
+                  className={`w-full text-left px-3 py-2.5 rounded-sl transition-colors ${
+                    isActive
+                      ? 'bg-accent/10 border border-accent/30 text-ink'
+                      : 'text-ink-muted hover:text-ink hover:bg-chrome/50 border border-transparent'
+                  }`}
                 >
                   <div className="flex items-center gap-2 mb-0.5">
-                    <CatIcon className={`w-3.5 h-3.5 shrink-0 ${cat.text}`} aria-hidden="true" />
+                    <CatIcon className="w-3.5 h-3.5 shrink-0 text-accent" aria-hidden />
                     <span className="text-[12px] font-medium truncate flex-1">
                       {nota.titulo || 'Sem título'}
                     </span>
                     {nota.fixado === 1 && (
-                      <Pin className="w-3 h-3 text-amber-400 shrink-0" aria-label="Fixada" />
+                      <Pin className="w-3 h-3 text-accent shrink-0" aria-label="Fixada" />
                     )}
                   </div>
-                  <p className="text-[11px] text-zinc-600 line-clamp-1 ml-[22px]">
-                    {nota.conteudo}
+                  <p className="text-[11px] text-ink-muted line-clamp-1 ml-[22px]">
+                    {plainTextPreview(nota.conteudo) || 'Vazio'}
                   </p>
                 </button>
-              );
+              )
             })}
           </nav>
-
-          {/* Sidebar Footer */}
-          <div className="px-4 py-3 border-t border-zinc-800/30">
-            <p className="text-[10px] text-zinc-600 text-center">
-              {filteredNotes.length} nota{filteredNotes.length !== 1 ? 's' : ''} {activeCategory !== 'all' ? `em ${CAT_MAP[activeCategory]?.label}` : ''}
-            </p>
-          </div>
         </aside>
 
-        {/* Right Canvas */}
-        <main className="flex-1 flex flex-col bg-zinc-950/40 min-w-0" aria-label="Conteúdo da anotação">
+        {/* Editor */}
+        <main
+          className={`flex-1 flex flex-col min-w-0 min-h-[320px] ${
+            mobileEditor ? 'flex' : 'hidden md:flex'
+          }`}
+          aria-label="Editor de anotação"
+        >
           {selectedNote ? (
             <>
-              <header className="px-10 pt-10 pb-2 border-b border-zinc-800/20">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h1 className="text-2xl font-bold text-white tracking-tight leading-tight">
-                      {selectedNote.titulo || 'Sem título'}
-                    </h1>
-                    <div className="flex items-center gap-3 mt-2 text-[11px] text-zinc-600">
-                      <span className={`flex items-center gap-1 ${noteCat.text}`}>
-                        <NoteCatIcon className="w-3 h-3" aria-hidden="true" />
-                        {noteCat.label}
+              <header className="px-3 sm:px-5 py-3 border-b border-line flex items-start gap-2">
+                <button
+                  type="button"
+                  className="md:hidden p-2 -ml-1 rounded-sl text-ink-muted hover:text-ink"
+                  onClick={() => setMobileEditor(false)}
+                  aria-label="Voltar à lista"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </button>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <input
+                    type="text"
+                    value={draftTitulo}
+                    onChange={(e) => handleTituloChange(e.target.value)}
+                    placeholder="Título"
+                    className="w-full bg-transparent text-lg font-display text-ink outline-none placeholder:text-ink-muted"
+                  />
+                  <div className="flex items-center gap-2 text-[10px] font-mono text-ink-muted">
+                    <span>{CAT_MAP[normalizarCategoria(selectedNote.categoria)]?.label}</span>
+                    {saving && (
+                      <span className="inline-flex items-center gap-1 text-accent">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        Salvando
                       </span>
-                      <span className="flex items-center gap-1">
-                        <AlignLeft className="w-3 h-3" aria-hidden="true" />
-                        {wordCount} palavras
-                      </span>
-                      <span>~{readTime} min de leitura</span>
-                      <span>Nota #{selectedNote.id}</span>
-                      {selectedNote.fixado === 1 && (
-                        <span className="flex items-center gap-1 text-amber-500">
-                          <Pin className="w-3 h-3" aria-hidden="true" />
-                          Fixada
-                        </span>
-                      )}
-                    </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setFocusMode(true)}
-                      className="p-2 rounded-lg text-zinc-600 hover:text-violet-400 hover:bg-zinc-800/40 transition-colors"
-                      aria-label="Leitura focada"
-                      title="Leitura Focada"
-                    >
-                      <Maximize2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      className="p-2 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-zinc-800/40 transition-colors"
-                      aria-label="Excluir anotação"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => void togglePinAnotacao(selectedNote.id)}
+                    className={`p-2 rounded-sl border transition-colors ${
+                      selectedNote.fixado === 1
+                        ? 'border-accent text-accent bg-accent/10'
+                        : 'border-line text-ink-muted hover:text-ink'
+                    }`}
+                    aria-label="Fixar nota"
+                  >
+                    <Pin className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void handleDelete()}
+                    className="p-2 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40"
+                    aria-label="Excluir"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </header>
 
-              <div className="flex-1 overflow-y-auto px-10 py-8">
-                <article className="max-w-2xl">
-                  <RichTextEditor
-                    content={selectedNote.conteudo}
-                    placeholder="Comece a escrever..."
-                    onChange={() => {}}
+              <div className="flex-1 overflow-y-auto p-3 sm:p-5 custom-scrollbar">
+                {checklistMode ? (
+                  <ul className="space-y-2 max-w-xl">
+                    {parseChecklist(draftConteudo).map((line, idx) =>
+                    {
+                      if (!line.text && !line.raw.trim()) return null
+                      return (
+                        <li key={idx} className="flex items-start gap-2">
+                          <input
+                            type="checkbox"
+                            checked={line.checked}
+                            onChange={() =>
+                            {
+                              const next = toggleChecklistLine(draftConteudo, idx)
+                              handleConteudoChange(next)
+                            }}
+                            className="mt-1 w-4 h-4 rounded border-line accent-accent"
+                          />
+                          <span className={`text-[14px] flex-1 ${line.checked ? 'line-through text-ink-muted' : 'text-ink'}`}>
+                            {line.text || line.raw}
+                          </span>
+                        </li>
+                      )
+                    })}
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => handleConteudoChange(`${draftConteudo.trimEnd()}\n- [ ] `)}
+                        className="text-[12px] font-mono uppercase text-accent hover:underline mt-2"
+                      >
+                        + Item
+                      </button>
+                    </li>
+                  </ul>
+                ) : (
+                  <textarea
+                    value={draftConteudo}
+                    onChange={(e) => handleConteudoChange(e.target.value)}
+                    placeholder="Escreva livremente — diário, ideias, reflexões…"
+                    className="w-full min-h-[min(50dvh,400px)] bg-transparent text-[15px] leading-relaxed text-ink outline-none resize-none placeholder:text-ink-muted"
                   />
-                </article>
+                )}
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4">
-              <div className="p-4 rounded-2xl bg-zinc-800/30 border border-zinc-800/40">
-                <FileText className="w-8 h-8 text-zinc-600" aria-hidden="true" />
-              </div>
-              <div className="text-center">
-                <p className="text-[14px] font-medium text-zinc-400">Nenhuma nota selecionada</p>
-                <p className="text-[12px] text-zinc-600 mt-1">Selecione uma nota ou crie uma nova</p>
-              </div>
+            <div className="flex-1 flex flex-col items-center justify-center gap-3 p-6 text-center">
+              <FileText className="w-10 h-10 text-ink-muted" aria-hidden />
+              <p className={`text-[14px] ${AXEL_TEXT_SECONDARY}`}>Selecione ou crie uma nota</p>
               <button
-                onClick={() => setQuickCaptureOpen(true)}
-                className="mt-2 px-4 py-2 text-[12px] font-medium text-zinc-300 bg-zinc-800/50 border border-zinc-700/40 rounded-lg hover:bg-zinc-800 hover:text-white transition-colors"
+                type="button"
+                onClick={() => void handleNewNote('diario')}
+                className="px-4 py-2 rounded-sl bg-accent text-white font-mono text-[10px] uppercase"
               >
-                <span className="flex items-center gap-1.5">
-                  <Plus className="w-3.5 h-3.5" />
-                  Nova Anotação
-                </span>
+                Nova anotação
               </button>
             </div>
           )}
         </main>
       </div>
-
-      {/* Leitura Focada Modal */}
-      {focusMode && selectedNote && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center" onClick={() => setFocusMode(false)}>
-          <div className="w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-8 py-5">
-              <div>
-                <h2 className="text-xl font-bold text-white tracking-tight">{selectedNote.titulo || 'Sem título'}</h2>
-                <div className="flex items-center gap-3 mt-1.5 text-[11px] text-zinc-500">
-                  <span className={`flex items-center gap-1 ${noteCat.text}`}>
-                    <NoteCatIcon className="w-3 h-3" />
-                    {noteCat.label}
-                  </span>
-                  <span>{wordCount} palavras</span>
-                  <span>~{readTime} min</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setFocusMode(false)}
-                className="p-2 rounded-xl hover:bg-zinc-800/60 text-zinc-500 hover:text-white transition-colors"
-                aria-label="Fechar leitura focada"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-8 pb-10">
-              <article className="prose prose-invert prose-lg max-w-none">
-                <div
-                  className="text-[17px] leading-[2] text-zinc-200 font-[Georgia,_serif] selection:bg-violet-500/30"
-                  dangerouslySetInnerHTML={{ __html: sanitizeNoteHtml(selectedNote.conteudo) }}
-                />
-              </article>
-            </div>
-
-            <div className="px-8 py-4 border-t border-zinc-800/30 flex items-center justify-center gap-6 text-[11px] text-zinc-600">
-              <span>Leitura Focada</span>
-              <span>Pressione <kbd className="px-1.5 py-0.5 bg-zinc-800 border border-zinc-700 rounded text-[10px] font-mono text-zinc-400">Esc</kbd> para sair</span>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
+    </div>
+  )
 }
