@@ -35,6 +35,10 @@ Se não estiver conectado: **Connect Git Repository** → GitHub → `simply-lif
 | `VAPID_PUBLIC_KEY` | Production (server) — chave pública Web Push |
 | `VAPID_PRIVATE_KEY` | Production (server) — chave privada Web Push |
 | `VAPID_SUBJECT` | Production (opcional) — `mailto:` do contato |
+| `VITE_DEMO_EMAIL` | Production — e-mail da conta demo (`demo@simply-life.app`) |
+| `VITE_DEMO_PASSWORD` | Production — senha da conta demo (bundle; ver `docs/DEMO.md`) |
+| `DEMO_EMAIL` | Production (server) — mesmo e-mail, usado no reset |
+| `DEMO_USER_ID` | Production (server, opcional) — UUID da conta demo para o cron |
 
 ## Opção A — Reconectar Git (mais simples)
 

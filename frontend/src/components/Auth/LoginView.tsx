@@ -13,6 +13,7 @@ import { resolvePostAuthPath } from '../../lib/postAuthRoute';
 import { switchUserSession } from '../../store/resetUserSession';
 import { reloadRemoteUserData } from '../../lib/reloadRemoteUserData';
 import { isLocalGuestUser } from '../../lib/authSession';
+import { demoLoginEmail, demoLoginPassword, resetDemoWorkspaceOnLogin } from '../../lib/demoWorkspace';
 import { LoginHero } from './LoginHero';
 import { getPendingTotpFactorId, verifyTotpCode } from '../../lib/mfaAssurance';
 
@@ -287,36 +288,50 @@ export function LoginView()
     }
   };
 
-  const handleGuest = async () =>
+  const handleDemo = async () =>
   {
-    const goGuest = async (guestId: string) =>
+    const email = demoLoginEmail()
+    const password = demoLoginPassword()
+    if (!password)
     {
-      const prevId = useTaskStore.getState().userId;
-      login('convidado@simplylife.app', 'Convidado', guestId);
-      if (prevId !== guestId)
-      {
-        useTaskStore.getState().resetWorkspacePrefsState();
-      }
-      await useTaskStore.getState().fetchWorkspacePrefs();
-      const path = await resolvePostAuthPath();
-      navigate(path, { replace: true });
-    };
+      setError('Demo ainda não provisionada. Configure VITE_DEMO_PASSWORD na Vercel.')
+      toast.error('Demo indisponível neste ambiente')
+      return
+    }
 
+    setLoading(true)
+    setError('')
     try
     {
-      const { data, error: err } = await supabase.auth.signInAnonymously();
-      if (err) throw new Error(err.message);
-      if (data.user)
+      const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
+      if (err) throw new Error(err.message)
+      if (!data.session?.user)
       {
-        toast.success(t('login.success_guest'));
-        await goGuest(data.user.id);
-        return;
+        throw new Error('Sessão demo vazia')
       }
+
+      const token = data.session.access_token
+      try
+      {
+        await resetDemoWorkspaceOnLogin(token)
+      }
+      catch (resetErr)
+      {
+        console.warn('demo reset:', resetErr)
+        toast.error('Entrou na demo, mas o seed não restaurou. Rode a migration 047.')
+      }
+
+      await finishAuth(data.session, 'Visitante', 'login.success_demo')
     }
-    catch
+    catch (err)
     {
-      toast.success('Entrando como convidado — seus dados ficam apenas neste dispositivo');
-      await goGuest(`guest_${Date.now()}`);
+      const msg = err instanceof Error ? err.message : t('login.error_login')
+      setError(translateAuthError(msg, t))
+      toast.error(translateAuthError(msg, t))
+    }
+    finally
+    {
+      setLoading(false)
     }
   };
 
@@ -618,10 +633,11 @@ export function LoginView()
 
               <button
                 type="button"
-                onClick={() => void handleGuest()}
-                className="w-full mt-3 py-2.5 rounded-sl border border-line text-[13px] font-medium text-ink-muted hover:text-ink hover:border-ink-muted/50 transition-colors"
+                onClick={() => void handleDemo()}
+                disabled={loading}
+                className="w-full mt-3 min-h-11 py-2.5 rounded-sl border border-accent/40 bg-accent/10 text-[13px] font-medium text-ink hover:border-accent/70 transition-colors disabled:opacity-50"
               >
-                {t('login.guest')}
+                {t('login.demo')}
               </button>
             </div>
 

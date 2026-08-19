@@ -4,12 +4,14 @@ import gmailSync from '../_lib/handlers/cron/gmail-sync.js';
 import pushBills from '../_lib/handlers/cron/push-bills.js';
 import pushHealth from '../_lib/handlers/cron/push-health.js';
 import daily from '../_lib/handlers/cron/daily.js';
+import demoReset from '../_lib/handlers/cron/demo-reset.js';
 
 const ROUTES = {
   daily,
   'gmail-sync': gmailSync,
   'push-bills': pushBills,
   'push-health': pushHealth,
+  'demo-reset': demoReset,
 };
 
 function pickQuery(value)

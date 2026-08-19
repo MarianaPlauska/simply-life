@@ -20,6 +20,7 @@
     { "source": "/api/webhook-ingest", "destination": "/api/webhooks/m2m" },
     { "source": "/api/push-subscribe", "destination": "/api/webhooks/push-subscribe" },
     { "source": "/api/push-test", "destination": "/api/webhooks/push-test" },
+    { "source": "/api/demo-login-reset", "destination": "/api/demo/login-reset" },
     { "source": "/api/morning-brief", "destination": "/api/axel/morning-brief" },
     { "source": "/api/orchestrate-tasks", "destination": "/api/axel/orchestrate-tasks" },
     { "source": "/api/task-estimate", "destination": "/api/axel/task-estimate" },

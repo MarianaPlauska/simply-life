@@ -22,6 +22,7 @@ import { usePushSubscription } from '../../hooks/usePushSubscription'
 import { useHealthPushNotifications } from '../../hooks/useHealthPushNotifications'
 import { useHealthDayRollover } from '../../hooks/useHealthDayRollover'
 import { PwaInstallBanner } from './PwaInstallBanner'
+import { DemoWorkspaceBanner } from './DemoWorkspaceBanner'
 import { NotificationPermissionPrompt } from './NotificationPermissionPrompt'
 import { FinanceQuickCaptureModal } from '../Finance/FinanceQuickCaptureModal'
 import { NewTransactionModal } from '../Finance/NewTransactionModal'
@@ -147,6 +148,7 @@ export function AppLayout()
               role="main"
               tabIndex={-1}
             >
+              {!hideChrome && <DemoWorkspaceBanner />}
               <div className="flex flex-col flex-1 min-h-0 w-full">
                 <Suspense fallback={<PageLoader />}>
                   <Outlet />
