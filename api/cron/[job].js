@@ -5,6 +5,7 @@ import pushBills from '../_lib/handlers/cron/push-bills.js';
 import pushHealth from '../_lib/handlers/cron/push-health.js';
 import daily from '../_lib/handlers/cron/daily.js';
 import demoReset from '../_lib/handlers/cron/demo-reset.js';
+import weeklyDigest from '../_lib/handlers/cron/weekly-digest.js';
 
 const ROUTES = {
   daily,
@@ -12,6 +13,7 @@ const ROUTES = {
   'push-bills': pushBills,
   'push-health': pushHealth,
   'demo-reset': demoReset,
+  'weekly-digest': weeklyDigest,
 };
 
 function pickQuery(value)

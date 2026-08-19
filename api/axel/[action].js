@@ -13,6 +13,7 @@ import fetchNews from '../_lib/handlers/axel/fetch-news.js';
 import generateGreeting from '../_lib/handlers/axel/generate-greeting.js';
 import adminUsers from '../_lib/handlers/axel/admin-users.js';
 import todayVerdict from '../_lib/handlers/axel/today-verdict.js';
+import weeklyDigestTest from '../_lib/handlers/axel/weekly-digest-test.js';
 
 const ROUTES = {
   'morning-brief': morningBrief,
@@ -28,6 +29,7 @@ const ROUTES = {
   'generate-greeting': generateGreeting,
   'admin-users': adminUsers,
   'today-verdict': todayVerdict,
+  'weekly-digest-test': weeklyDigestTest,
 };
 
 function pickQuery(value)

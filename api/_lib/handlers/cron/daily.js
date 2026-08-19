@@ -4,6 +4,7 @@ import gmailSync from './gmail-sync.js';
 import pushBills from './push-bills.js';
 import pushHealth from './push-health.js';
 import demoReset from './demo-reset.js';
+import weeklyDigest from './weekly-digest.js';
 
 function invokeHandler(handler, req)
 {
@@ -48,6 +49,7 @@ export default async function handler(req, res)
   const push = await invokeHandler(pushBills, req);
   const health = await invokeHandler(pushHealth, req);
   const demo = await invokeHandler(demoReset, req);
+  const digest = await invokeHandler(weeklyDigest, req);
 
   return res.status(200).json({
     status: 'ok',
@@ -55,5 +57,6 @@ export default async function handler(req, res)
     push: push.data,
     health: health.data,
     demo: demo.data,
+    digest: digest.data,
   });
 }

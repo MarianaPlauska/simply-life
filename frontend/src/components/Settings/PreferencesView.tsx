@@ -13,6 +13,7 @@ import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import { MfaEnrollPanel } from '../Auth/MfaEnrollPanel';
+import { WeeklyDigestPrefs } from './WeeklyDigestPrefs';
 import {
   MOBILE_NAV_HOME_ID,
   MOBILE_NAV_OPTIONAL_CATALOG,
@@ -561,6 +562,11 @@ export function PreferencesView() {
             <ToggleSwitch active={notifSistema} onChange={() => setNotifSistema(!notifSistema)} />
           </SettingRow>
         </div>
+      </SectionCard>
+
+      <SectionCard>
+        <SectionHeader icon={Bell} title="Resumo semanal" subtitle="AXEL, 50/30/20 e hábitos — e-mail e/ou push no dia escolhido." iconColor="text-amber-400" />
+        <WeeklyDigestPrefs />
       </SectionCard>
     </div>
   );
