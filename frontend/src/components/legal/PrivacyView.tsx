@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { AXEL_PAGE_SHELL, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../constants/axelSurfaces'
+import { AXEL_PAGE_SHELL, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 export function PrivacyView()
 {

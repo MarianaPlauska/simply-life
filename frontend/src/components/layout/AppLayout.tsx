@@ -128,15 +128,24 @@ export function AppLayout()
       <NotificationPermissionPrompt />
       {!hideChrome && <MobileBottomNav />}
 
+      <a
+        href="#conteudo-principal"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-3 focus:left-3 focus:px-3 focus:py-2 focus:rounded-sl focus:bg-accent focus:text-white"
+      >
+        Ir para o conteúdo
+      </a>
+
       <div className={`min-h-screen flex flex-col w-full ${AXEL_CANVAS}`}>
         <div className="flex flex-1 min-h-screen w-full">
           {!hideChrome && <Sidebar />}
           <div className={`flex-1 flex flex-col min-w-0 min-h-screen ${AXEL_CANVAS}`}>
             {!hideChrome && <AxelGlobalHeader />}
             <main
+              id="conteudo-principal"
               ref={mainRef}
               className={`flex flex-col flex-1 min-h-0 w-full ${AXEL_CANVAS}`}
               role="main"
+              tabIndex={-1}
             >
               <div className="flex flex-col flex-1 min-h-0 w-full">
                 <Suspense fallback={<PageLoader />}>
