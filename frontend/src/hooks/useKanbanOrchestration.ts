@@ -193,6 +193,43 @@ export function useKanbanOrchestration({
       pushAiDecision(d.message)
     }
 
+    const persistable = result.decisions.filter((d) => d.kind)
+    if (persistable.length > 0)
+    {
+      void import('../lib/axelDecisionLog').then(({ logAxelDecision }) =>
+      {
+        for (const d of persistable)
+        {
+          void logAxelDecision({
+            taskId: d.taskId,
+            kind: d.kind!,
+            rationale: d.message,
+            horizon: result.autoHorizons[d.taskId] ?? null,
+          })
+        }
+      })
+    }
+
+    for (const entry of result.scores)
+    {
+      const horizon = result.autoHorizons[entry.taskId]
+      if (horizon !== 'hoje') continue
+      const task = sourceTasks.find((t) => t.id === entry.taskId)
+      if (!task?.horizon_override)
+      {
+        void import('../lib/axelDecisionLog').then(({ logAxelDecision }) =>
+        {
+          void logAxelDecision({
+            taskId: entry.taskId,
+            kind: 'promoted_hoje',
+            rationale: entry.rationale ?? task?.score_reason ?? 'prioridade alta',
+            score: entry.score,
+            horizon: 'hoje',
+          })
+        })
+      }
+    }
+
     if (setDeadlineProposals)
     {
       const proposals = computeDeadlineProposals(

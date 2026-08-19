@@ -22,6 +22,7 @@ export interface OrchestrationDecision
 {
   taskId: number
   message: string
+  kind?: 'promoted_hoje' | 'deferred_load' | 'decay_backlog'
 }
 
 export interface PipelineOrchestrationResult
@@ -153,6 +154,7 @@ export function assignOrchestratedHorizons(
     autoHorizons[task.id] = 'backlog'
     decisions.push({
       taskId: task.id,
+      kind: 'decay_backlog',
       message: `「${task.titulo.slice(0, 36)}」— ${stagnantDays}d sem movimento · AXEL enviou ao Backlog`,
     })
   }
@@ -173,6 +175,7 @@ export function assignOrchestratedHorizons(
     const moodTail = options.moodCapNote ? ` · ${options.moodCapNote}` : ''
     decisions.push({
       taskId,
+      kind: 'deferred_load',
       message: `Adiada para Semana — cap de Hoje em ${dailyScoreCap} pts. Score ${task.score_urgencia ?? 0}.${moodTail}`,
     })
   }

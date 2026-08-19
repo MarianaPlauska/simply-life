@@ -379,6 +379,16 @@ export function KanbanView()
         ...patch,
         score_urgencia: boostedHoje,
       })
+      void import('../../lib/axelDecisionLog').then(({ logAxelDecision }) =>
+      {
+        void logAxelDecision({
+          taskId: task.id,
+          kind: 'manual_override',
+          rationale: `Você moveu para ${HORIZON_LABELS[horizon]} — o AXEL respeita até Recalcular.`,
+          score: boostedHoje,
+          horizon,
+        })
+      })
     }
 
     if (horizon === 'hoje')

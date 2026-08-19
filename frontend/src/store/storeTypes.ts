@@ -16,6 +16,7 @@ export type ActiveView =
   | 'planner'
   | 'perfil'
   | 'relatorios'
+  | 'axel-historico'
   | 'login';
 
 export interface Anotacao {

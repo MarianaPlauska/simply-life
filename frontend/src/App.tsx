@@ -33,6 +33,7 @@ const DriveVaultView = lazy(() => import('./components/Drive/DriveVaultView').th
 const ProfileView = lazy(() => import('./components/Auth/ProfileView').then((m) => ({ default: m.ProfileView })))
 const PreferenciasIA = lazy(() => import('./components/Settings/PreferenciasIA').then((m) => ({ default: m.PreferenciasIA })))
 const RelatoriosView = lazy(() => import('./components/Relatorios/RelatoriosView').then((m) => ({ default: m.RelatoriosView })))
+const AxelHistoryView = lazy(() => import('./components/axel/AxelHistoryView').then((m) => ({ default: m.AxelHistoryView })))
 const SuperhumanView = lazy(() => import('./components/kanban/SuperhumanView').then((m) => ({ default: m.SuperhumanView })))
 
 function useAccessibilityInit()
@@ -83,6 +84,7 @@ const ROUTE_MAP: Record<string, ActiveView> = {
   '/inteligencia':  'inteligencia',
   '/carreira':      'carreira',
   '/relatorios':    'relatorios',
+  '/axel/historico': 'axel-historico',
 }
 
 const VIEW_TO_PATH: Record<ActiveView, string> = Object.fromEntries(
@@ -164,6 +166,7 @@ function AppShell()
           <Route path="superhuman" element={<ErrorBoundary fallbackTitle="Erro no Superhuman"><SuperhumanView /></ErrorBoundary>} />
           <Route path="inteligencia" element={<PreferenciasIA />} />
           <Route path="relatorios" element={<ErrorBoundary fallbackTitle="Erro nos Relatórios"><RelatoriosView /></ErrorBoundary>} />
+          <Route path="axel/historico" element={<ErrorBoundary fallbackTitle="Erro no histórico AXEL"><AxelHistoryView /></ErrorBoundary>} />
           <Route path="carreira" element={
             <PlaceholderView title="Radar de Carreira" subtitle="Monitoramento de vagas e oportunidades profissionais será ativado em breve." icon={Briefcase} />
           } />
