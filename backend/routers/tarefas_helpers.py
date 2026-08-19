@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 import models
 from auth import registrar_auditoria  # noqa: F401 – re-exportado para conveniência
@@ -50,8 +50,8 @@ def _get_tarefa_or_404(
     tarefa = (
         db.query(models.TarefaUnificada)
         .options(
-            joinedload(models.TarefaUnificada.subtarefas),
-            joinedload(models.TarefaUnificada.labels),
+            selectinload(models.TarefaUnificada.subtarefas),
+            selectinload(models.TarefaUnificada.labels),
         )
         .filter(
             models.TarefaUnificada.id == tarefa_id,

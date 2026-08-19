@@ -76,6 +76,24 @@ export function useKanbanOrchestration({
   const lastIngestionRef = useRef(0)
   const runRef = useRef<((options?: { clearManual?: boolean }) => Promise<unknown>) | null>(null)
 
+  useEffect(() =>
+  {
+    setManualHorizons((prev) =>
+    {
+      let changed = false
+      const next = { ...prev }
+      for (const t of tasks)
+      {
+        if (t.horizon_override && next[t.id] !== t.horizon_override)
+        {
+          next[t.id] = t.horizon_override
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [tasks])
+
   const taskFingerprint = useMemo(
     () =>
       tasks
@@ -106,14 +124,20 @@ export function useKanbanOrchestration({
 
   const applyPipelineResult = useCallback(async (
     result: Awaited<ReturnType<typeof runPipelineOrchestration>>,
+    sourceTasks: TarefaUnificada[] = tasks,
   ) =>
   {
     const scoreMap: Record<number, number> = {}
 
     for (const entry of result.scores)
     {
+      const task = sourceTasks.find((t) => t.id === entry.taskId)
+      if (task?.horizon_override)
+      {
+        continue
+      }
+
       scoreMap[entry.taskId] = entry.score
-      const task = tasks.find((t) => t.id === entry.taskId)
       const adaptive = task ? calculateAdaptiveUrgency(task, tasks) : null
       const reason = entry.rationale ?? adaptive?.reason
       const intent = adaptive?.intent
@@ -201,17 +225,28 @@ export function useKanbanOrchestration({
 
     try
     {
+      const pipelineTasks = options?.clearManual
+        ? tasks.map((t) => (t.horizon_override ? { ...t, horizon_override: null } : t))
+        : tasks
+
       if (options?.clearManual)
       {
         setManualHorizons({})
+        for (const t of tasks)
+        {
+          if (t.horizon_override && t.id > 0)
+          {
+            await updateTarefa(t.id, { horizon_override: null })
+          }
+        }
       }
 
-      const result = await runPipelineOrchestration(tasks, dailyScoreCap, {
+      const result = await runPipelineOrchestration(pipelineTasks, dailyScoreCap, {
         lastMovedAt: resolveLastMovedAt,
         moodSnoozeReason: moodContext?.snoozeReason,
         moodCapNote: moodContext?.hasMoodToday ? moodContext.profileLabel : undefined,
       })
-      await applyPipelineResult(result)
+      await applyPipelineResult(result, pipelineTasks)
       return result
     }
     finally
@@ -264,7 +299,7 @@ export function useKanbanOrchestration({
 
     if (debounceRef.current) clearTimeout(debounceRef.current)
 
-    const delay = ingestionBurst ? INGEST_DEBOUNCE_MS : isFirstRun ? 400 : DEBOUNCE_MS
+    const delay = ingestionBurst ? INGEST_DEBOUNCE_MS : isFirstRun ? 120 : DEBOUNCE_MS
     debounceRef.current = setTimeout(() =>
     {
       void runRef.current?.({ clearManual: false })?.then(() =>
@@ -283,6 +318,10 @@ export function useKanbanOrchestration({
 
   const horizonOverrides = { ...autoHorizons, ...manualHorizons }
 
+  const executionQueueReady = !autoEnabled
+    || taskFingerprint.length === 0
+    || lastRunAt !== null
+
   return {
     scoreOverrides,
     horizonOverrides,
@@ -293,6 +332,7 @@ export function useKanbanOrchestration({
     lastSource,
     intelligenceReady,
     autoEnabled,
+    executionQueueReady,
     setAutoEnabled,
     metricsKey,
     runOrchestration,

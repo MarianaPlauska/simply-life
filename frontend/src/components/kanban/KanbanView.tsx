@@ -56,6 +56,7 @@ import { appendTaskActivityLog } from '../../hooks/useTaskActivityLog'
 import {
   HORIZON_LABELS,
   bucketByTemporalHorizon,
+  horizonPersistPatch,
   resolveTemporalHorizon,
   type TemporalHorizon,
 } from '../../lib/temporalHorizon'
@@ -77,9 +78,9 @@ export function KanbanView()
 {
   const [searchParams, setSearchParams] = useSearchParams()
   const storeTarefas = useTaskStore((s) => s.tarefas)
+  const tarefasLoading = useTaskStore((s) => s.isLoading)
   const updateTarefa = useTaskStore((s) => s.updateTarefa)
   const patchTarefaLocal = useTaskStore((s) => s.patchTarefaLocal)
-  const moveTask = useTaskStore((s) => s.moveTask)
   const recordTaskMoved = useTaskStore((s) => s.recordTaskMoved)
   const setZenFocusActive = useTaskStore((s) => s.setZenFocusActive)
   const zenFocusActive = useTaskStore((s) => s.zenFocusActive)
@@ -128,6 +129,7 @@ export function KanbanView()
     lastSource,
     intelligenceReady,
     autoEnabled,
+    executionQueueReady,
     setAutoEnabled,
     metricsKey,
     runOrchestration,
@@ -223,6 +225,11 @@ export function KanbanView()
     [tarefas, horizonOverrides, executionPins],
   )
 
+  const queueBootstrapping = tarefasLoading
+    || (autoEnabled && !executionQueueReady && baseTarefas.some((t) => t.status !== 'concluida'))
+
+  const hojeQueueDisplay = queueBootstrapping ? [] : hojeActiveSorted
+
   const executionQueueIds = useMemo(
     () => deriveExecutionQueueIds(tarefas, horizonOverrides, executionPins),
     [tarefas, horizonOverrides, executionPins],
@@ -240,27 +247,35 @@ export function KanbanView()
 
   const heroTask = useMemo(() =>
   {
+    if (queueBootstrapping)
+    {
+      return null
+    }
     if (focusTaskId != null)
     {
-      return hojeActiveSorted.find((t) => t.id === focusTaskId)
+      return hojeQueueDisplay.find((t) => t.id === focusTaskId)
         ?? tarefas.find((t) => t.id === focusTaskId)
         ?? null
     }
-    return hojeActiveSorted[0] ?? null
-  }, [focusTaskId, hojeActiveSorted, tarefas])
+    return hojeQueueDisplay[0] ?? null
+  }, [queueBootstrapping, focusTaskId, hojeQueueDisplay, tarefas])
 
   useEffect(() =>
   {
-    if (hojeActiveSorted.length === 0)
+    if (queueBootstrapping || hojeQueueDisplay.length === 0)
     {
+      if (queueBootstrapping)
+      {
+        return
+      }
       setFocusTaskId(null)
       return
     }
-    if (focusTaskId == null || !hojeActiveSorted.some((t) => t.id === focusTaskId))
+    if (focusTaskId == null || !hojeQueueDisplay.some((t) => t.id === focusTaskId))
     {
-      setFocusTaskId(hojeActiveSorted[0].id)
+      setFocusTaskId(hojeQueueDisplay[0].id)
     }
-  }, [hojeActiveSorted, focusTaskId])
+  }, [hojeQueueDisplay, focusTaskId, queueBootstrapping])
 
   const gargalos = useMemo(() =>
   {
@@ -354,24 +369,16 @@ export function KanbanView()
     recordDragPreference(task.titulo, horizon)
     setManualHorizon(task.id, horizon)
 
-    if (horizon === 'hoje')
+    if (task.id > 0)
     {
-      const boosted = Math.max(task.score_urgencia ?? 0, 92)
-      if (task.id > 0)
-      {
-        await updateTarefa(task.id, { score_urgencia: boosted, status: 'em_progresso' })
-      }
-    }
-    else if (horizon === 'semana')
-    {
-      if (task.id > 0)
-      {
-        await moveTask(task.id, 'em_progresso')
-      }
-    }
-    else if (task.id > 0)
-    {
-      await moveTask(task.id, 'pendente')
+      const patch = horizonPersistPatch(horizon)
+      const boostedHoje = horizon === 'hoje'
+        ? Math.max(task.score_urgencia ?? 0, patch.score_urgencia)
+        : patch.score_urgencia
+      await updateTarefa(task.id, {
+        ...patch,
+        score_urgencia: boostedHoje,
+      })
     }
 
     if (horizon === 'hoje')
@@ -390,7 +397,7 @@ export function KanbanView()
     {
       toast.success(`Movido para ${HORIZON_LABELS[horizon]}`)
     }
-  }, [horizonOverrides, updateTarefa, moveTask, recordTaskMoved, setManualHorizon])
+  }, [horizonOverrides, updateTarefa, recordTaskMoved, setManualHorizon])
 
   const handleExecuteFromDue = useCallback(async (task: TarefaUnificada) =>
   {
@@ -658,11 +665,11 @@ export function KanbanView()
               </div>
               <div className="hidden md:block">
                 <KanbanNextStep
-                  executionQueue={hojeActiveSorted}
+                  executionQueue={hojeQueueDisplay}
                   tarefas={tarefas}
                   heroTask={heroTask}
                   isExecuting={heroTask != null && execution?.taskId === heroTask.id}
-                  orchestrating={orchestrating}
+                  orchestrating={orchestrating || queueBootstrapping}
                   dueToday={dueBuckets.hoje.length}
                   overdue={dueBuckets.vencido.length}
                   dailyScoreCap={effectiveDailyCap}
@@ -719,8 +726,9 @@ export function KanbanView()
               onAddTask={() => openCreateDrawer('backlog')}
               executar={(
                 <KanbanTodayPanel
-                  tasks={hojeActiveSorted}
-                  totalCount={columns.hoje.length}
+                  tasks={hojeQueueDisplay}
+                  totalCount={queueBootstrapping ? 0 : columns.hoje.length}
+                  isOrganizing={queueBootstrapping}
                   selectedId={focusTaskId}
                   selectedTask={heroTask}
                   executingId={execution?.taskId ?? null}

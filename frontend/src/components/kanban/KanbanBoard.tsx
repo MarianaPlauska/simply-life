@@ -22,6 +22,7 @@ import { BoardFilters } from './BoardFilters';
 import { toast } from 'sonner';
 import type { TarefaUnificada } from '../../types';
 import { PRIO_LABELS, ORIGIN_LABELS } from '../../constants/kanbanConfig';
+import { isFazer1h, isFazerHoje, isNestaSemana } from '../../lib/kanbanTemporalColumns';
 
 const COLUMNS = [
   { id: 'pendente',      title: 'Pendente',      dotColor: 'bg-red-500',     wipLimit: 5  },
@@ -140,29 +141,6 @@ export function KanbanBoard() {
 
   const boardColumns = boardStyle === 'temporal' ? TEMPORAL_COLUMNS : COLUMNS;
 
-  // regra temporal — prioridade crítica/alta também sobe coluna
-  const isFazer1h = useCallback((t: TarefaUnificada) =>
-  {
-    if (t.status !== 'pendente') return false
-    const score = t.score_urgencia ?? 0
-    return score >= 60 || t.prioridade === 'critica'
-  }, [])
-
-  const isFazerHoje = useCallback((t: TarefaUnificada) =>
-  {
-    if (t.status === 'em_progresso') return true
-    if (t.status !== 'pendente') return false
-    const score = t.score_urgencia ?? 0
-    return (score >= 35 && score < 60) || t.prioridade === 'alta'
-  }, [])
-
-  const isNestaSemana = useCallback((t: TarefaUnificada) =>
-  {
-    if (t.status !== 'pendente') return false
-    if (isFazer1h(t) || isFazerHoje(t)) return false
-    return true
-  }, [isFazer1h, isFazerHoje])
-
   const getColumnTasks = useCallback((colId: string) =>
   {
     if (boardStyle === 'temporal')
@@ -173,7 +151,7 @@ export function KanbanBoard() {
       return []
     }
     return filtered.filter((t) => t.status === colId);
-  }, [filtered, boardStyle, isFazer1h, isFazerHoje, isNestaSemana]);
+  }, [filtered, boardStyle]);
 
   const getGroupColumnTasks = useCallback((tasks: TarefaUnificada[], colId: string) =>
   {
@@ -185,7 +163,7 @@ export function KanbanBoard() {
       return []
     }
     return tasks.filter((t) => t.status === colId);
-  }, [boardStyle, isFazer1h, isFazerHoje, isNestaSemana]);
+  }, [boardStyle]);
 
   // agrupa tarefas se houver seleção de agrupamento
   const groups = useMemo(() => {
@@ -209,12 +187,8 @@ export function KanbanBoard() {
         {
           key = 'Sem label';
         } else {
-          lbls.forEach((l) => {
-            const prev = map.get(l.nome) || [];
-            prev.push(t);
-            map.set(l.nome, prev);
-          });
-          continue;
+          // uma swimlane por tarefa — a primeira flag (evita o mesmo card em N colunas)
+          key = lbls[0].nome;
         }
       }
       const prev = map.get(key) || [];
@@ -298,15 +272,15 @@ export function KanbanBoard() {
       {
         if (newStatus === 'fazer_1h')
         {
-          updateTarefa(taskId, { status: 'pendente', score_urgencia: 85, prioridade: 'critica' });
+          updateTarefa(taskId, { status: 'pendente', score_urgencia: 85, prioridade: 'critica', horizon_override: 'hoje' });
         }
         else if (newStatus === 'fazer_hoje')
         {
-          updateTarefa(taskId, { status: 'em_progresso', prioridade: 'alta' });
+          updateTarefa(taskId, { status: 'em_progresso', prioridade: 'alta', score_urgencia: 75, horizon_override: 'hoje' });
         }
         else if (newStatus === 'nesta_semana')
         {
-          updateTarefa(taskId, { status: 'pendente', score_urgencia: 30, prioridade: 'media' });
+          updateTarefa(taskId, { status: 'pendente', score_urgencia: 40, prioridade: 'media', horizon_override: 'semana' });
         }
       }
     }

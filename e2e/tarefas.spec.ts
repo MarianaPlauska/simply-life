@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 // credenciais de teste — ajustar conforme ambiente
-const TEST_EMAIL = 'teste@simplylife.com';
-const TEST_SENHA = 'Senha@123';
+const TEST_EMAIL = process.env.E2E_EMAIL || ''
+const TEST_SENHA = process.env.E2E_PASSWORD || ''
 
 test.describe('E4: fluxo completo login → criar → mover → concluir', () =>
 {
+  test.skip(!TEST_EMAIL || !TEST_SENHA, 'Defina E2E_EMAIL e E2E_PASSWORD')
   test.beforeEach(async ({ page }) =>
   {
     // navega para login

@@ -73,6 +73,8 @@ export default async function handler(req, res)
         data_vencimento: parsed.due_at,
         urgency_reason: parsed.rationale,
         intent_category: parsed.intent_category,
+        score_reason: 'Ingestão por e-mail',
+        external_ref: email.id || email.message_id || null,
       }
 
       const { data: inserted, error } = await insertTriagedTask(

@@ -40,6 +40,10 @@ export interface TarefaUnificada {
   intent_category?: 'bloqueio' | 'alinhamento' | 'execucao' | null;
   /** Razão da urgência (IntentAnalyzer) */
   urgency_reason?: string | null;
+  /** Horizonte fixado pelo usuário — o pipeline não sobrescreve até Recalcular */
+  horizon_override?: 'hoje' | 'semana' | 'backlog' | null;
+  /** Chave estável da origem (IMAP UID / webhook) — evita duplicar ingestão */
+  external_ref?: string | null;
 }
 
 // sprint D — recorrência, dependências, atividade

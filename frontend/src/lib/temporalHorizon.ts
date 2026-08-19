@@ -1,4 +1,5 @@
 import type { TarefaUnificada } from '../types'
+import { parseCalendarDate } from './dueBucket'
 
 // Horizonte temporal Bitrix — HOJE / ESTA SEMANA / BACKLOG
 
@@ -20,8 +21,8 @@ function startOfDay(d: Date): Date
 function isDueToday(dataVencimento: string | null | undefined): boolean
 {
   if (!dataVencimento) return false
-  const due = new Date(dataVencimento)
-  if (Number.isNaN(due.getTime())) return false
+  const due = parseCalendarDate(dataVencimento)
+  if (!due) return false
   const now = new Date()
   return startOfDay(due).getTime() === startOfDay(now).getTime()
 }
@@ -29,21 +30,40 @@ function isDueToday(dataVencimento: string | null | undefined): boolean
 function isDueThisWeek(dataVencimento: string | null | undefined): boolean
 {
   if (!dataVencimento) return false
-  const due = new Date(dataVencimento)
-  if (Number.isNaN(due.getTime())) return false
+  const due = parseCalendarDate(dataVencimento)
+  if (!due) return false
   const now = new Date()
   const end = new Date(now)
   end.setDate(end.getDate() + 7)
   return due >= startOfDay(now) && due <= end
 }
 
-/** Resolve horizonte com override manual (drag) */
+/** Patch persistido quando o usuário arrasta para um horizonte */
+export function horizonPersistPatch(horizon: TemporalHorizon): {
+  horizon_override: TemporalHorizon
+  score_urgencia: number
+  status: TarefaUnificada['status']
+}
+{
+  if (horizon === 'hoje')
+  {
+    return { horizon_override: 'hoje', score_urgencia: 92, status: 'em_progresso' }
+  }
+  if (horizon === 'semana')
+  {
+    return { horizon_override: 'semana', score_urgencia: 75, status: 'em_progresso' }
+  }
+  return { horizon_override: 'backlog', score_urgencia: 40, status: 'pendente' }
+}
+
+/** Resolve horizonte com override manual (drag) — persistido vence o score */
 export function resolveTemporalHorizon(
   tarefa: TarefaUnificada,
   override?: TemporalHorizon,
 ): TemporalHorizon
 {
-  if (override) return override
+  const pinned = override ?? tarefa.horizon_override ?? undefined
+  if (pinned) return pinned
 
   const score = tarefa.score_urgencia ?? 0
 
@@ -133,12 +153,17 @@ export function getTemporalPlacementRationale(
 export function formatDueMeta(dataVencimento: string | null | undefined): string | null
 {
   if (!dataVencimento) return null
-  const due = new Date(dataVencimento)
-  if (Number.isNaN(due.getTime())) return null
+  const due = parseCalendarDate(dataVencimento)
+  if (!due) return null
 
   if (isDueToday(dataVencimento))
   {
-    return `Hoje ${due.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+    const hasTime = dataVencimento.includes('T') && !dataVencimento.endsWith('T12:00:00')
+    if (hasTime)
+    {
+      return `Hoje ${due.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+    }
+    return 'Hoje'
   }
 
   return due.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })

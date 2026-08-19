@@ -55,6 +55,8 @@ export async function ingestGmailBatch(supabase, userId, emails, accessToken, us
       data_vencimento: parsed.due_at,
       urgency_reason: parsed.rationale,
       intent_category: parsed.intent_category,
+      score_reason: 'Ingestão por e-mail',
+      external_ref: email.id || null,
     };
 
     const { error } = await insertTriagedTask(

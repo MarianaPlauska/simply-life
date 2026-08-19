@@ -60,7 +60,7 @@ class TarefaUnificada(database.Base):
     palavra_chave = relationship("PalavraChave", foreign_keys=[palavra_chave_id])
     # Sprint 1: subtarefas e labels
     subtarefas = relationship("Subtarefa", back_populates="tarefa", cascade="all, delete-orphan", order_by="Subtarefa.ordem")
-    labels = relationship("Label", secondary="tarefa_labels", lazy="joined")
+    labels = relationship("Label", secondary="tarefa_labels", lazy="selectin")
 
 # 3. integrações 
 class Integracao(database.Base):

@@ -2,7 +2,10 @@
 import type { StateCreator } from 'zustand'
 import type { TarefaUnificada, Label, Subtarefa } from '../../types'
 import { supabase } from '../../lib/supabase'
+import { mapFetchedTarefas } from '../../lib/mapFetchedTarefas'
 import { applyTaskCompletionRewards } from './tarefasCompletionRewards'
+
+let fetchTarefasGeneration = 0
 
 
 interface DBTemplateRow
@@ -48,6 +51,7 @@ export interface TarefasSlice
     intent_category?: 'bloqueio' | 'alinhamento' | 'execucao' | null
     remetente?: string | null
     data_vencimento?: string | null
+    horizon_override?: 'hoje' | 'semana' | 'backlog' | null
   }) => Promise<void>
   patchTarefaLocal: (id: number, dados: Partial<TarefaUnificada>) => void
   deleteTarefa: (id: number) => Promise<void>
@@ -89,6 +93,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
   {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return
+    const generation = ++fetchTarefasGeneration
     set({ isLoading: true, error: null })
     try
     {
@@ -99,16 +104,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
         .is('deletado_em', null)
         .order('created_at', { ascending: false })
       if (error) throw error
-      // mapeia labels do formato join para array plano e adiciona info de contexto
-      const tarefas = (data || []).map((t: any) => {
-        const cItem = t.contexto_itens?.[0];
-        const contexto = cItem?.contextos ? { titulo: cItem.contextos.titulo, cor: cItem.contextos.cor } : undefined;
-        return {
-          ...t,
-          labels: (t.tarefa_labels || []).map((tl: any) => tl.labels).filter(Boolean) as Label[],
-          contexto,
-        };
-      })
+      const tarefas = mapFetchedTarefas(data as unknown[] | null)
       const anyFin = get() as {
         billSettlements?: import('../storeTypes').FinanceBillSettlement[]
         fetchBillSettlements?: () => Promise<void>
@@ -126,6 +122,8 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
           staleIds.has(t.id) ? { ...t, status: 'concluida' as const } : t,
         )
         : tarefas
+
+      if (generation !== fetchTarefasGeneration) return
 
       set({ tarefas: normalized, isLoading: false })
 
@@ -153,6 +151,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     }
     catch (e)
     {
+      if (generation !== fetchTarefasGeneration) return
       set({ error: (e as Error).message, isLoading: false })
     }
   },
@@ -240,7 +239,9 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
           prioridade,
           origem: 'financeiro',
           status: 'pendente',
-          data_vencimento: opts.vencimento,
+          data_vencimento: opts.vencimento.includes('T')
+            ? opts.vencimento
+            : `${opts.vencimento.slice(0, 10)}T12:00:00`,
         })
         .select()
         .single()
@@ -298,13 +299,22 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
   updateTarefa: async (id, dados) =>
   {
+    const snapshot = get().tarefas.find((t) => t.id === id)
+    const wasCompleted = snapshot?.status === 'concluida'
+    const isCompletedNow = dados.status === 'concluida'
+    const isCompleting = isCompletedNow && !wasCompleted
+
+    if (snapshot)
+    {
+      set((s) => ({
+        tarefas: s.tarefas.map((t) =>
+          t.id === id ? { ...t, ...dados } as TarefaUnificada : t
+        ),
+      }))
+    }
+
     try
     {
-      const oldTarefa = get().tarefas.find((t) => t.id === id)
-      const wasCompleted = oldTarefa?.status === 'concluida'
-      const isCompletedNow = dados.status === 'concluida'
-      const isCompleting = isCompletedNow && !wasCompleted
-
       const runUpdate = async (payload: typeof dados) =>
         supabase
           .from('tarefas_unificadas')
@@ -315,13 +325,14 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
       let { data, error } = await runUpdate(dados)
 
-      // Colunas de orquestração podem não existir até a migration 036
+      // Colunas de orquestração / override podem não existir até a migration
       if (error?.code === 'PGRST204')
       {
         const trimmed = { ...dados }
         delete trimmed.intent_category
         delete trimmed.urgency_reason
         delete trimmed.score_reason
+        delete trimmed.horizon_override
         const retry = await runUpdate(trimmed)
         data = retry.data
         error = retry.error
@@ -334,11 +345,22 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
         if (isCompleting)
         {
-          await applyTaskCompletionRewards(oldTarefa, get as unknown as () => Record<string, unknown>, set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)
+          await applyTaskCompletionRewards(snapshot, get as unknown as () => Record<string, unknown>, set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)
         }
       }
     }
-    catch (e) { console.error('updateTarefa:', e) }
+    catch (e)
+    {
+      if (snapshot)
+      {
+        set((s) => ({
+          tarefas: s.tarefas.map((t) => (t.id === id ? snapshot : t)),
+        }))
+      }
+      console.error('updateTarefa:', e)
+      const { toast } = await import('sonner')
+      toast.error('Não foi possível salvar a alteração da tarefa')
+    }
   },
 
   patchTarefaLocal: (id, dados) =>
@@ -637,14 +659,34 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
 
   batchPriority: async (ids, prioridade) =>
   {
+    const snapshots = new Map(
+      get().tarefas.filter((t) => ids.includes(t.id)).map((t) => [t.id, t]),
+    )
     set((s) => ({
       tarefas: s.tarefas.map((t) =>
         ids.includes(t.id) ? { ...t, prioridade: prioridade as TarefaUnificada['prioridade'] } : t
       ),
     }))
-    await Promise.allSettled(
-      ids.map((id) => supabase.from('tarefas_unificadas').update({ prioridade }).eq('id', id))
+    const results = await Promise.allSettled(
+      ids.map(async (id) =>
+      {
+        const { error } = await supabase.from('tarefas_unificadas').update({ prioridade }).eq('id', id)
+        if (error) throw error
+        return id
+      }),
     )
+    const failed = ids.filter((_, i) => results[i].status === 'rejected')
+    if (failed.length === 0) return
+
+    set((s) => ({
+      tarefas: s.tarefas.map((t) =>
+      {
+        const prev = snapshots.get(t.id)
+        return failed.includes(t.id) && prev ? prev : t
+      }),
+    }))
+    const { toast } = await import('sonner')
+    toast.error(`Não foi possível salvar a prioridade de ${failed.length} tarefa(s)`)
   },
 
   // ── C8: reorder subtarefas ──

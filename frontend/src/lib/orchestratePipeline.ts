@@ -70,6 +70,8 @@ function applyScoreAdjustments(
   const adjusted = tasks.map((task) =>
   {
     if (task.status === 'concluida') return task
+    // override manual — o AXEL não mexe no score até Recalcular
+    if (task.horizon_override) return task
 
     let score = task.score_urgencia ?? 0
     const moved = lastMovedAt?.(task.id, task.created_at ?? null) ?? null
@@ -125,6 +127,7 @@ export function assignOrchestratedHorizons(
   // Dependências — bloqueada até predecessor concluir
   for (const task of active)
   {
+    if (task.horizon_override) continue
     if (!isTaskDependencyBlocked(task, scoredTasks)) continue
     if (autoHorizons[task.id] !== 'hoje') continue
 
@@ -139,6 +142,7 @@ export function assignOrchestratedHorizons(
   // Decay térmico — parada há dias sai de Hoje/Semana
   for (const task of active)
   {
+    if (task.horizon_override) continue
     const moved = options.lastMovedAt?.(task.id, task.created_at ?? null) ?? null
     const stagnantDays = resolveDaysStagnant(task, moved)
     const horizon = autoHorizons[task.id]
@@ -163,7 +167,7 @@ export function assignOrchestratedHorizons(
     if (!entry.snoozed || autoHorizons[taskId] !== 'hoje') continue
 
     const task = active.find((t) => t.id === taskId)
-    if (!task) continue
+    if (!task || task.horizon_override) continue
 
     autoHorizons[taskId] = 'semana'
     const moodTail = options.moodCapNote ? ` · ${options.moodCapNote}` : ''

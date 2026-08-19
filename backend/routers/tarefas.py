@@ -18,7 +18,7 @@ import logging
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 import database
 import models
@@ -50,7 +50,10 @@ def listar_tarefas(
     """B5: paginação com limit/offset. B11: exclui soft-deleted."""
     base_query = (
         db.query(models.TarefaUnificada)
-        .options(joinedload(models.TarefaUnificada.subtarefas), joinedload(models.TarefaUnificada.labels))
+        .options(
+            selectinload(models.TarefaUnificada.subtarefas),
+            selectinload(models.TarefaUnificada.labels),
+        )
         .filter(
             models.TarefaUnificada.usuario_id == current_user.id,
             models.TarefaUnificada.deletado_em.is_(None),
@@ -62,15 +65,7 @@ def listar_tarefas(
         models.TarefaUnificada.deletado_em.is_(None),
     ).count()
     tarefas = base_query.offset(offset).limit(limit).all()
-
-    # Deduplicate (joinedload may cause duplicates with multiple relationships)
-    seen = set()
-    unique = []
-    for t in tarefas:
-        if t.id not in seen:
-            seen.add(t.id)
-            unique.append(t)
-    return {"total": total, "limit": limit, "offset": offset, "tarefas": [_tarefa_to_response(t) for t in unique]}
+    return {"total": total, "limit": limit, "offset": offset, "tarefas": [_tarefa_to_response(t) for t in tarefas]}
 
 
 @router.post("/tarefas", status_code=201, response_model=dict)
@@ -219,7 +214,10 @@ def listar_arquivo(
 ):
     base = (
         db.query(models.TarefaUnificada)
-        .options(joinedload(models.TarefaUnificada.subtarefas), joinedload(models.TarefaUnificada.labels))
+        .options(
+            selectinload(models.TarefaUnificada.subtarefas),
+            selectinload(models.TarefaUnificada.labels),
+        )
         .filter(
             models.TarefaUnificada.usuario_id == current_user.id,
             models.TarefaUnificada.deletado_em.isnot(None),
