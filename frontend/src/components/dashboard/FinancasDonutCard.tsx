@@ -79,7 +79,7 @@ export function FinancasDonutCard()
     <section className="bg-card border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
       <header className="px-3 py-2 border-b border-zinc-900 flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shadow-[0_0_6px_currentColor]" />
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-200">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-200">
           Finanças 50-30-20
         </h3>
       </header>
@@ -110,7 +110,7 @@ export function FinancasDonutCard()
               <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: a.color }} />
               <div className="flex-1 min-w-0">
                 <div className="text-[11.5px] text-zinc-300 font-medium">{a.label}</div>
-                <div className="text-[11px] text-zinc-500 tabular-nums">
+                <div className="text-[12px] text-zinc-500 tabular-nums">
                   R$ {a.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
               </div>
@@ -122,7 +122,7 @@ export function FinancasDonutCard()
       <div className="px-3 py-2 border-t border-zinc-900 flex justify-center">
         <button
           onClick={() => navigate('/financeiro')}
-          className="inline-flex items-center gap-1 text-[11px] text-violet-300 hover:text-violet-200 transition-colors"
+          className="inline-flex items-center gap-1 text-[12px] text-violet-300 hover:text-violet-200 transition-colors"
         >
           Ver planejamento <ArrowRight className="w-3 h-3" />
         </button>

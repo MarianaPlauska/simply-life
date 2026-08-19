@@ -51,7 +51,7 @@ export function SaudeEmDiaCard()
     <section className="bg-card border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
       <header className="px-3 py-2 border-b border-zinc-900 flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_currentColor]" />
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-200">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-200">
           Saúde em Dia
         </h3>
       </header>
@@ -86,7 +86,7 @@ export function SaudeEmDiaCard()
       <div className="px-3 py-2 border-t border-zinc-900 flex justify-center">
         <button
           onClick={() => navigate('/saude')}
-          className="inline-flex items-center gap-1 text-[11px] text-violet-300 hover:text-violet-200 transition-colors"
+          className="inline-flex items-center gap-1 text-[12px] text-violet-300 hover:text-violet-200 transition-colors"
         >
           Ver saúde completa <ArrowRight className="w-3 h-3" />
         </button>
@@ -109,7 +109,7 @@ function SaudeLine({ icon: Icon, label, value, valueColor }: SaudeLineProps)
     <li className="px-3 py-2 flex items-center gap-3">
       <Icon className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
       <span className="flex-1 text-[12.5px] text-zinc-300">{label}</span>
-      <span className={`text-[12px] font-medium tabular-nums ${valueColor}`}>{value}</span>
+      <span className={`text-[13px] font-medium tabular-nums ${valueColor}`}>{value}</span>
     </li>
   )
 }

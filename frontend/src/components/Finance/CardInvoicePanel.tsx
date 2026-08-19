@@ -48,6 +48,7 @@ export function CardInvoicePanel({
 
   const temFatura = cardTemCicloFatura(card.modalidade)
   const usaExtrato = cardUsaExtrato(card.modalidade)
+  const temCicloConfigurado = card.dia_fechamento != null && card.dia_vencimento != null
   const inDrawer = variant === 'drawer'
 
   const [cycleOffset, setCycleOffset] = useState(0)
@@ -81,6 +82,13 @@ export function CardInvoicePanel({
 
   const disponivel = Math.max(0, card.limite - activeInvoiceTotal)
   const isCurrentCycle = cycleOffset === 0
+
+  const cycleMonthHeading = useMemo(() =>
+  {
+    const due = new Date(`${activeCycle.dueDate}T12:00:00`)
+    if (Number.isNaN(due.getTime())) return ''
+    return due.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  }, [activeCycle.dueDate])
 
   const extratoLinhas = useMemo(
     () => (usaExtrato ? buildExtratoLinhas(transactions, card) : []),
@@ -252,20 +260,29 @@ export function CardInvoicePanel({
         )}
         {temFatura ? (
           <>
-            <div className="flex items-center justify-between gap-2">
+            <div className={`flex items-center justify-between gap-2 rounded-sl border px-2 py-2.5 ${
+              isCurrentCycle ? 'border-accent/40 bg-accent/10' : 'border-line bg-chrome/40'
+            }`}
+            >
               <button
                 type="button"
                 onClick={() => setCycleOffset((o) => o - 1)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line bg-chrome/60 text-ink-muted hover:text-accent min-h-[44px] min-w-[44px]"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line bg-card text-ink-muted hover:text-accent min-h-[44px] min-w-[44px]"
                 aria-label="Fatura anterior"
               >
                 <ChevronLeft size={16} aria-hidden />
               </button>
-              <div className="min-w-0 flex-1 text-center">
-                <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+              <div className="min-w-0 flex-1 text-center px-1">
+                <p className={`font-mono text-[10px] uppercase tracking-wide ${
+                  isCurrentCycle ? 'text-accent' : AXEL_TEXT_SECONDARY
+                }`}
+                >
                   {isCurrentCycle ? 'Ciclo atual' : 'Ciclo anterior'}
                 </p>
-                <p className={`font-mono text-[10px] truncate ${AXEL_TEXT_PRIMARY}`}>
+                <p className={`text-sm sm:text-base font-display font-semibold capitalize mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
+                  {cycleMonthHeading}
+                </p>
+                <p className={`font-mono text-[11px] mt-0.5 truncate ${AXEL_TEXT_SECONDARY}`}>
                   {activeCycle.label}
                 </p>
               </div>
@@ -273,12 +290,13 @@ export function CardInvoicePanel({
                 type="button"
                 disabled={isCurrentCycle}
                 onClick={() => setCycleOffset((o) => Math.min(0, o + 1))}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line bg-chrome/60 text-ink-muted hover:text-accent disabled:opacity-40 min-h-[44px] min-w-[44px]"
+                className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line bg-card text-ink-muted hover:text-accent disabled:opacity-40 min-h-[44px] min-w-[44px]"
                 aria-label="Próximo ciclo"
               >
                 <ChevronRight size={16} aria-hidden />
               </button>
             </div>
+            {temCicloConfigurado && (
             <div className="flex flex-wrap gap-2 text-[10px] sm:text-[11px] font-mono">
               {isCurrentCycle ? (
                 <>
@@ -295,6 +313,7 @@ export function CardInvoicePanel({
                 </span>
               )}
             </div>
+            )}
           </>
         ) : (
           <div className="flex flex-wrap gap-2 text-[10px] sm:text-[11px] font-mono">
@@ -312,7 +331,7 @@ export function CardInvoicePanel({
         <div className="border-b border-line">{billingSection}</div>
       )}
 
-      {temFatura && (
+      {(temFatura || usaExtrato) && (
         <CardInvoiceQuickItems card={card} items={listaExibir} />
       )}
 
@@ -321,7 +340,7 @@ export function CardInvoicePanel({
       {inDrawer && billingSection && (
         <details className="shrink-0 border-b border-line group">
           <summary className={`px-3 sm:px-4 py-2.5 cursor-pointer list-none select-none font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY} hover:bg-chrome/40 [&::-webkit-details-marker]:hidden`}>
-            Ciclo e pagamento
+            Fechamento e pagar fatura
           </summary>
           <div className="border-t border-line">{billingSection}</div>
         </details>

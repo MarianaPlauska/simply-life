@@ -100,14 +100,14 @@ export function ExecutionCommandRow({ tarefa, onOpen, onToggleComplete }: Execut
       </span>
 
       <span
-        className={`inline-flex items-center gap-0.5 text-[11px] font-mono font-medium tabular-nums shrink-0 ${urgencyScoreClass(score)}`}
+        className={`inline-flex items-center gap-0.5 text-[12px] font-mono font-medium tabular-nums shrink-0 ${urgencyScoreClass(score)}`}
       >
         <Zap className="w-3 h-3 opacity-80" strokeWidth={2} />
         {score}
       </span>
 
       {tag && (
-        <span className="hidden sm:inline text-[10px] text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded px-1.5 shrink-0 tracking-wide">
+        <span className="hidden sm:inline text-[11px] text-zinc-500 border border-zinc-200 dark:border-zinc-800 rounded px-1.5 shrink-0 tracking-wide">
           {tag}
         </span>
       )}
@@ -116,7 +116,7 @@ export function ExecutionCommandRow({ tarefa, onOpen, onToggleComplete }: Execut
         className="w-5 h-5 shrink-0 rounded-full flex items-center justify-center bg-zinc-200 dark:bg-zinc-800 border border-zinc-300/60 dark:border-zinc-700/60"
         title="Responsável"
       >
-        <span className="text-[8px] font-semibold text-zinc-600 dark:text-zinc-400 select-none">
+        <span className="text-[9px] font-semibold text-zinc-600 dark:text-zinc-400 select-none">
           {meta.iniciais}
         </span>
       </div>

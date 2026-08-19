@@ -108,7 +108,7 @@ export function Budget503020Chart()
                   aria-hidden="true"
                 />
               </div>
-              <span className="mt-2 text-[10px] text-ink-muted tabular-nums truncate w-full text-center">
+              <span className="mt-2 text-[11px] text-ink-muted tabular-nums truncate w-full text-center">
                 {cat.label}
               </span>
             </div>
@@ -116,7 +116,7 @@ export function Budget503020Chart()
         })}
       </div>
 
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-ink-muted tracking-tight">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ink-muted tracking-tight">
         <span className="inline-flex items-center gap-1.5">
           <span
             className="w-2 h-2 rounded-sm border"

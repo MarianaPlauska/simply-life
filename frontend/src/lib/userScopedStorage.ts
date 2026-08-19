@@ -77,6 +77,7 @@ const SCOPED_LOCAL_BASE_KEYS = [
   'simply-life-workspace-prefs',
   'simply-life:health-day-iso',
   'simply-life:water-prefs',
+  'simply-life:health-ritual-snapshot',
 ] as const
 
 export function migrateAllLegacyLocalKeys(userId: string): void

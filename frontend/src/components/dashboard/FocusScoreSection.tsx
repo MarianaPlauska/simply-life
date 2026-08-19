@@ -99,9 +99,9 @@ export function FocusScoreSection({ resumo, scoreDiario }: FocusScoreProps) {
               />
               {/* Inner content */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[11px] text-zinc-500 font-medium uppercase tracking-wider mb-0.5">Focus</span>
+                <span className="text-[12px] text-zinc-500 font-medium uppercase tracking-wider mb-0.5">Focus</span>
                 <span className="text-4xl font-black text-white tracking-tighter tabular-nums">{score}</span>
-                <span className={`text-[11px] font-semibold ${color} mt-0.5 inline-flex items-center gap-1`}>
+                <span className={`text-[12px] font-semibold ${color} mt-0.5 inline-flex items-center gap-1`}>
                   <Icon size={14} strokeWidth={1.5} className={iconColor} aria-hidden />
                   {label}
                 </span>
@@ -116,12 +116,12 @@ export function FocusScoreSection({ resumo, scoreDiario }: FocusScoreProps) {
                     <Trophy className="w-4 h-4 text-amber-400" />
                     Score de Foco
                   </h3>
-                  <p className="text-[11px] text-zinc-600 mt-0.5">Performance consolidada do dia</p>
+                  <p className="text-[12px] text-zinc-600 mt-0.5">Performance consolidada do dia</p>
                 </div>
                 {scoreDiario > 0 && (
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/10">
                     <Zap className="w-3 h-3 text-amber-400" />
-                    <span className="text-[11px] font-bold text-amber-400 tabular-nums">+{scoreDiario} XP</span>
+                    <span className="text-[12px] font-bold text-amber-400 tabular-nums">+{scoreDiario} XP</span>
                   </div>
                 )}
               </div>
@@ -135,10 +135,10 @@ export function FocusScoreSection({ resumo, scoreDiario }: FocusScoreProps) {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <Icon className="w-3.5 h-3.5 text-zinc-500" />
-                          <span className="text-[11px] font-medium text-zinc-400">{item.name}</span>
-                          <span className="text-[9px] text-zinc-600">({item.weight})</span>
+                          <span className="text-[12px] font-medium text-zinc-400">{item.name}</span>
+                          <span className="text-[10px] text-zinc-600">({item.weight})</span>
                         </div>
-                        <span className="text-[11px] font-semibold text-zinc-300 tabular-nums">{item.pct}%</span>
+                        <span className="text-[12px] font-semibold text-zinc-300 tabular-nums">{item.pct}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-zinc-900/80 rounded-full overflow-hidden border border-white/5">
                         <motion.div
@@ -159,10 +159,10 @@ export function FocusScoreSection({ resumo, scoreDiario }: FocusScoreProps) {
                     <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${criticalBonus ? 'bg-emerald-500/20' : 'bg-zinc-800'}`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${criticalBonus ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
                     </div>
-                    <span className="text-[11px] font-medium text-zinc-400">Zero Criticas</span>
-                    <span className="text-[9px] text-zinc-600">(20%)</span>
+                    <span className="text-[12px] font-medium text-zinc-400">Zero Criticas</span>
+                    <span className="text-[10px] text-zinc-600">(20%)</span>
                   </div>
-                  <span className={`text-[11px] font-semibold tabular-nums ${criticalBonus ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                  <span className={`text-[12px] font-semibold tabular-nums ${criticalBonus ? 'text-emerald-400' : 'text-zinc-600'}`}>
                     {criticalBonus ? '+20' : '0'}
                   </span>
                 </div>

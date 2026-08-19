@@ -14,6 +14,8 @@ import {
 } from '../../../lib/financeBillCardStyle'
 import { useReservedBillItems } from '../../../hooks/useReservedBillItems'
 import { ReservedBillDiscriminants } from './ReservedBillDiscriminants'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../../lib/currencyInput'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
@@ -71,7 +73,7 @@ export function ReservedBillCard({
 
   const handleManualSpend = async () =>
   {
-    const v = parseFloat(spendVal.replace(',', '.'))
+    const v = parseMoneyInputToNumber(spendVal)
     if (Number.isNaN(v) || v <= 0)
     {
       toast.error('Informe o valor gasto')
@@ -177,12 +179,11 @@ export function ReservedBillCard({
           <div className="flex flex-wrap gap-2 mb-3">
             {spendBillId === bill.id ? (
               <>
-                <input
-                  inputMode="decimal"
+                <MoneyInput
                   value={spendVal}
-                  onChange={(e) => setSpendVal(e.target.value)}
+                  onChange={setSpendVal}
                   placeholder="Quanto gastou?"
-                  className="flex-1 min-w-[140px] border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono"
+                  className="flex-1 min-w-[140px] text-sm"
                 />
                 <button
                   type="button"

@@ -9,12 +9,11 @@ import {
   DEFAULT_ML_POR_COPO,
   metaMl,
   mlPorCopo,
-  isBuiltInMlPreset,
-  patchMlPresetChange,
   registrosMl,
   resolveMlPresets,
   totalMlHoje,
 } from '../../lib/waterHydration'
+import { saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
@@ -26,7 +25,6 @@ export function WaterTrackerCard()
   const habitos = useTaskStore((s) => s.habitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
   const setAguaRegistros = useTaskStore((s) => s.setAguaRegistros)
-  const updateHabitoConfig = useTaskStore((s) => s.updateHabitoConfig)
   const updateHabitoMeta = useTaskStore((s) => s.updateHabitoMeta)
 
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
@@ -46,7 +44,7 @@ export function WaterTrackerCard()
   const handleActivate = async () =>
   {
     await ensureHealthHabit(AGUA_PRESET)
-    toast.success('Meta de água ativada — 8 copos por dia')
+    toast.success('Meta de água ativada: 8 copos por dia')
   }
 
   const persistEntries = async (next: number[]) =>
@@ -66,22 +64,12 @@ export function WaterTrackerCard()
 
   const handleDefaultMl = async (ml: number) =>
   {
-    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
-    if (!ensured) return
-    await updateHabitoConfig(ensured.id, { ml_por_copo: ml })
-    if (!isBuiltInMlPreset(ml))
-    {
-      const patch = patchMlPresetChange(ensured, 'add', ml)
-      await updateHabitoConfig(ensured.id, patch)
-    }
+    await saveAguaDefaultMl(agua, ml)
   }
 
   const patchMlPresets = async (action: 'add' | 'remove', ml: number) =>
   {
-    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
-    if (!ensured) return
-    const patch = patchMlPresetChange(ensured, action, ml)
-    await updateHabitoConfig(ensured.id, patch)
+    await saveAguaMlPreset(agua, action, ml)
   }
 
   const handleClear = async () =>
@@ -118,10 +106,10 @@ export function WaterTrackerCard()
             <p className={`text-[12px] sm:text-[13px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
               {done
                 ? extra > 0
-                  ? `Meta batida — ${totalMl} ml hoje.`
-                  : `Meta do dia — ${totalMl} / ${metaTotalMl} ml.`
+                  ? `Meta batida: ${totalMl} ml hoje.`
+                  : `Meta do dia: ${totalMl} / ${metaTotalMl} ml.`
                 : ritualOk
-                  ? `Ritual ok (80%) — ${totalMl} ml.`
+                  ? `Ritual ok (80%): ${totalMl} ml.`
                   : restante === 1
                     ? `Falta 1 copo · ${totalMl} ml.`
                     : `${restante} copos restantes · ${totalMl} ml.`}
@@ -183,11 +171,11 @@ export function WaterTrackerCard()
               <button
                 type="button"
                 onClick={() => void handleQuickAdd()}
-                className={`flex-1 sm:flex-none sm:min-w-[140px] inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-sl font-mono text-[11px] uppercase tracking-wide transition-all active:scale-[0.98] border border-sky-500/25 bg-sky-500/10 text-sky-200 hover:bg-sky-500/15 ${
+                className={`flex-1 sm:flex-none sm:max-w-[9.5rem] inline-flex items-center justify-center gap-2 sm:gap-1 py-2.5 sm:py-1.5 px-4 sm:px-2.5 rounded-sl font-mono text-[11px] sm:text-[9px] uppercase tracking-wide transition-all active:scale-[0.98] border border-sky-500/25 bg-sky-500/10 text-sky-200 hover:bg-sky-500/15 ${
                   done ? 'border-dashed' : ''
                 }`}
               >
-                <Plus size={16} strokeWidth={2} />
+                <Plus size={16} strokeWidth={2} className="sm:w-3.5 sm:h-3.5" />
                 {done ? `+${defaultMl} ml extra` : `+${defaultMl} ml`}
               </button>
               <p className="text-[11px] text-ink-muted text-center sm:text-right leading-relaxed">

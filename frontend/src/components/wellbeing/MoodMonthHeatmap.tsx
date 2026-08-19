@@ -14,7 +14,7 @@ export function MoodMonthHeatmap({ agregados, dias = 30 }: MoodMonthHeatmapProps
 
   return (
     <div className="pt-3 border-t border-line">
-      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink-muted mb-2">
+      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted mb-2">
         Últimos {dias} dias
       </p>
       <div className="flex flex-wrap gap-1">
@@ -38,7 +38,7 @@ export function MoodMonthHeatmap({ agregados, dias = 30 }: MoodMonthHeatmapProps
         {MOODS.map((m) => (
           <div key={m.value} className="flex items-center gap-1">
             <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: m.hex }} />
-            <span className="text-[9px] text-ink-muted">{m.shortLabel}</span>
+            <span className="text-[10px] text-ink-muted">{m.shortLabel}</span>
           </div>
         ))}
       </div>

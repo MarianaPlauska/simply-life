@@ -57,7 +57,7 @@ export function TopBar()
   return (
     <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
       {weather && (
-        <div className={`hidden sm:flex items-center gap-2 text-[12px] mr-1 ${AXEL_TEXT_SECONDARY}`}>
+        <div className={`hidden sm:flex items-center gap-2 text-[13px] mr-1 ${AXEL_TEXT_SECONDARY}`}>
           <Cloud className="w-3.5 h-3.5 text-zinc-500" />
           <span className={`font-medium ${AXEL_TEXT_PRIMARY}`}>{weather.temp}</span>
           <span className="text-zinc-400">·</span>

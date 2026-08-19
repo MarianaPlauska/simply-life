@@ -26,10 +26,10 @@ export function ProductivityHeatmap({
   return (
     <div className={compact ? 'space-y-2' : 'space-y-3'}>
       <div className="flex items-center justify-between gap-2">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
+        <p className="font-mono text-[11px] uppercase tracking-wider text-ink-muted">
           Foco · 30 dias
         </p>
-        <div className="flex items-center gap-1 text-[9px] text-ink-muted font-mono">
+        <div className="flex items-center gap-1 text-[10px] text-ink-muted font-mono">
           <span className="w-3 h-3 rounded-sm bg-chrome" title="Sem foco" />
           <span className="w-3 h-3 rounded-sm bg-accent/20" title="< 1h" />
           <span className="w-3 h-3 rounded-sm bg-accent/50" title="1–3h" />

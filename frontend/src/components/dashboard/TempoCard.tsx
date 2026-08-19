@@ -84,18 +84,18 @@ export function TempoCard({ bucket }: TempoCardProps)
       <header className={`px-3 py-2 bg-gradient-to-r ${cfg.headerBg} flex items-center justify-between border-b border-zinc-900/80`}>
         <div className="flex items-center gap-2">
           <span className={`w-1.5 h-1.5 rounded-full ${cfg.bullet} shadow-[0_0_6px_currentColor]`} />
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-200">
+          <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-200">
             {cfg.label}
           </h3>
         </div>
-        <span className="text-[11px] font-mono tabular-nums text-zinc-400 bg-black/40 border border-zinc-800 px-1.5 py-0.5 rounded">
+        <span className="text-[12px] font-mono tabular-nums text-zinc-400 bg-black/40 border border-zinc-800 px-1.5 py-0.5 rounded">
           {items.length}
         </span>
       </header>
 
       <ul role="list" className="flex-1 divide-y divide-zinc-900/60 min-h-[140px]">
         {visible.length === 0 && (
-          <li className="px-3 py-6 text-center text-[11px] text-zinc-600">
+          <li className="px-3 py-6 text-center text-[12px] text-zinc-600">
             Nenhuma tarefa nesta janela
           </li>
         )}
@@ -124,8 +124,8 @@ export function TempoCard({ bucket }: TempoCardProps)
                   </div>
                 )}
               </div>
-              <span className="text-[10px] text-zinc-500 shrink-0">Score</span>
-              <span className="text-[12px] font-mono font-semibold tabular-nums shrink-0 text-zinc-200">
+              <span className="text-[11px] text-zinc-500 shrink-0">Score</span>
+              <span className="text-[13px] font-mono font-semibold tabular-nums shrink-0 text-zinc-200">
                 {t.score_urgencia ?? 0}
               </span>
             </li>
@@ -137,7 +137,7 @@ export function TempoCard({ bucket }: TempoCardProps)
         <div className="px-3 py-2 border-t border-zinc-900/80 flex justify-center">
           <button
             onClick={() => navigate('/kanban')}
-            className="inline-flex items-center gap-1 text-[11px] text-violet-300 hover:text-violet-200 transition-colors"
+            className="inline-flex items-center gap-1 text-[12px] text-violet-300 hover:text-violet-200 transition-colors"
           >
             Ver todas ({items.length}) <ArrowRight className="w-3 h-3" />
           </button>

@@ -1,4 +1,4 @@
-import { startOfDay } from './dueBucket'
+import { parseCalendarDate, startOfDay } from './dueBucket'
 
 export interface DaysRemainingMeta
 {
@@ -14,8 +14,8 @@ export function diffDaysUntilDue(
 ): number | null
 {
   if (!dataVencimento) return null
-  const due = new Date(dataVencimento)
-  if (Number.isNaN(due.getTime())) return null
+  const due = parseCalendarDate(dataVencimento)
+  if (!due) return null
 
   const today = startOfDay(now).getTime()
   const dueDay = startOfDay(due).getTime()

@@ -105,8 +105,8 @@ export function buildHealthRitual(opts: {
       progress: moodLoggedToday ? 1 : 0,
       detail: moodLoggedToday
         ? `${opts.humorHojeCount} registro${opts.humorHojeCount !== 1 ? 's' : ''} hoje`
-        : 'Importante para o AXEL calibrar seu ritmo',
-      path: '/saude#bem_estar',
+        : 'Registre como você está se sentindo',
+      path: '/saude#diario',
     },
     {
       id: 'agua',

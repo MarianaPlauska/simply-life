@@ -40,10 +40,10 @@ export function AxelRewardShop()
     <section className={`border border-line rounded-sl bg-card p-4 ${AXEL_ROW_HOVER}`}>
       <header className="flex items-center gap-2 mb-3">
         <ShoppingBag size={14} className="text-accent" />
-        <h3 className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
+        <h3 className={`font-mono text-[11px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
           Loja AXEL
         </h3>
-        <span className={`ml-auto font-mono text-[10px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`ml-auto font-mono text-[11px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
           {totalXp} XP
         </span>
       </header>
@@ -60,11 +60,11 @@ export function AxelRewardShop()
           </div>
           <div className="flex-1 min-w-0">
             <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>Escudo extra (500 XP)</p>
-            <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
               1 grátis/mês no perfil · você tem {streakFreezes}
             </p>
           </div>
-          <span className="font-mono text-[10px] text-accent shrink-0">{STREAK_FREEZE_COST} XP</span>
+          <span className="font-mono text-[11px] text-accent shrink-0">{STREAK_FREEZE_COST} XP</span>
         </button>
 
         <div className="flex items-center gap-3 p-3 rounded-sl border border-dashed border-line">
@@ -73,7 +73,7 @@ export function AxelRewardShop()
           </div>
           <div className="flex-1">
             <p className={`text-sm ${AXEL_TEXT_PRIMARY}`}>Mais cosméticos</p>
-            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
               Veja a Coleção AXEL acima — skins, tons de IA e molduras
             </p>
           </div>

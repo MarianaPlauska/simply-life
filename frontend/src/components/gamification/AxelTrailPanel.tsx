@@ -70,7 +70,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
           </div>
           <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             {profile.totalXp} XP total · {profile.xpInLevel}/{profile.xpToNextLevel} para o próximo nível
-            <span className="block text-[11px] mt-0.5 text-ink-muted">Teto: 90 XP/dia · 500 XP por nível</span>
+            <span className="block text-[12px] mt-0.5 text-ink-muted">Teto: 90 XP/dia · 500 XP por nível</span>
           </p>
           <div className={`mt-3 h-2 rounded-full overflow-hidden ${AXEL_PROGRESS}`}>
             <div
@@ -79,7 +79,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
             />
           </div>
           {next && (
-            <p className={`text-[12px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[13px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
               Próximo ({next.level}): <span className="text-ink">{next.reward}</span>
             </p>
           )}
@@ -95,14 +95,14 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
               <div key={mod} className="p-2.5 rounded-sl border border-line bg-chrome/30 min-w-0">
                 <div className="flex items-center gap-1 mb-1">
                   <Icon size={11} className="text-accent shrink-0" />
-                  <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                  <span className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                     {moduleLabel(mod)}
                   </span>
                 </div>
                 <p className={`text-base font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
                   {val}
                 </p>
-                <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>Nv {subLevel}</p>
+                <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>Nv {subLevel}</p>
               </div>
             )
           })}
@@ -129,12 +129,12 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
                       <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
                         {rule.action}
                       </p>
-                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-accent/15 text-accent font-mono text-[9px]">
+                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-accent/15 text-accent font-mono text-[10px]">
                         <Icon size={9} />
                         {rule.xp}
                       </span>
                     </div>
-                    <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{rule.hint}</p>
+                    <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{rule.hint}</p>
                   </div>
                 </li>
               )
@@ -164,10 +164,10 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
                   <div className="flex items-center gap-2">
                     <span className="text-base" aria-hidden>{node.emoji}</span>
                     <div className="min-w-0 flex-1">
-                      <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>
+                      <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
                         Nv {node.level} · {node.skill}
                       </p>
-                      <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>{node.unlock}</p>
+                      <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{node.unlock}</p>
                     </div>
                     <Icon size={12} className={unlocked ? 'text-accent' : 'text-ink-muted'} />
                     {unlocked ? <Check size={12} className="text-concluido" /> : <Lock size={12} className="text-ink-muted" />}
@@ -215,10 +215,10 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
                     </p>
                     {!reached && <Lock size={11} className="text-ink-muted" />}
                   </div>
-                  <p className={`text-[12px] mt-0.5 text-accent`}>{m.reward}</p>
-                  <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{m.funCopy}</p>
+                  <p className={`text-[13px] mt-0.5 text-accent`}>{m.reward}</p>
+                  <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{m.funCopy}</p>
                   {reached && m.cosmeticIds && m.cosmeticIds.length > 0 && (
-                    <p className={`text-[10px] mt-1 font-mono ${cosmeticsOk ? 'text-concluido' : AXEL_TEXT_SECONDARY}`}>
+                    <p className={`text-[11px] mt-1 font-mono ${cosmeticsOk ? 'text-concluido' : AXEL_TEXT_SECONDARY}`}>
                       {cosmeticsOk ? '✓ Recompensas na coleção' : 'Recompensas liberadas'}
                     </p>
                   )}
@@ -230,7 +230,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
         {!compact && (
           <Link
             to="/perfil"
-            className="mt-3 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-accent hover:underline"
+            className="mt-3 inline-flex items-center gap-1 font-mono text-[11px] uppercase text-accent hover:underline"
           >
             Coleção e loja
             <ChevronRight size={12} />

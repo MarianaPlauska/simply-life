@@ -184,14 +184,14 @@ export function SetupQuestsSection()
               <div>
                 <h3 className="text-[14px] font-semibold text-white flex items-center gap-2">
                   Setup do Simply-Life
-                  <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
                     +{quests.reduce((sum, q) =>
                     {
                       return sum + q.xp;
                     }, 0)} XP
                   </span>
                 </h3>
-                <p className="text-[11px] text-zinc-600">
+                <p className="text-[12px] text-zinc-600">
                   Complete {totalCount - completedCount} missão{totalCount - completedCount !== 1 ? 'ões' : ''} para desbloquear o sistema completo
                 </p>
               </div>
@@ -199,7 +199,7 @@ export function SetupQuestsSection()
 
             <button
               onClick={dismiss}
-              className="text-[10px] text-zinc-600 hover:text-zinc-400 transition-colors"
+              className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
             >
               Pular
             </button>
@@ -208,8 +208,8 @@ export function SetupQuestsSection()
           {/* barra de progresso geral */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] text-zinc-500">Progresso do Setup</span>
-              <span className="text-[11px] font-bold text-violet-400 tabular-nums">{completedCount}/{totalCount}</span>
+              <span className="text-[12px] text-zinc-500">Progresso do Setup</span>
+              <span className="text-[12px] font-bold text-violet-400 tabular-nums">{completedCount}/{totalCount}</span>
             </div>
             <div className="w-full h-2 rounded-full bg-zinc-900/80 overflow-hidden border border-white/5">
               <motion.div
@@ -262,15 +262,15 @@ export function SetupQuestsSection()
 
                     {/* texto */}
                     <div className="flex-1 min-w-0">
-                      <p className={`text-[12px] font-medium truncate ${done ? 'text-emerald-300 line-through' : 'text-zinc-200'}`}>
+                      <p className={`text-[13px] font-medium truncate ${done ? 'text-emerald-300 line-through' : 'text-zinc-200'}`}>
                         {quest.title}
                       </p>
-                      <p className="text-[10px] text-zinc-600 truncate">{quest.description}</p>
+                      <p className="text-[11px] text-zinc-600 truncate">{quest.description}</p>
                     </div>
 
                     {/* badge xp ou seta */}
                     {done ? (
-                      <span className="shrink-0 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                      <span className="shrink-0 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                         +{quest.xp} XP
                       </span>
                     ) : (
@@ -295,7 +295,7 @@ export function SetupQuestsSection()
           {/* motivação */}
           <div className="flex items-center justify-center gap-2 mt-5 pt-4 border-t border-white/5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="text-[11px] text-zinc-500">
+            <span className="text-[12px] text-zinc-500">
               {completedCount === 0
                 ? 'Comece por qualquer missão — cada passo conta!'
                 : completedCount < 3

@@ -1,8 +1,6 @@
 import { FinanceOverviewCharts } from './FinanceOverviewCharts'
-import { FinanceOverviewKpis } from './overview/FinanceOverviewKpis'
 import { FinanceBudgetPanel } from './overview/FinanceBudgetPanel'
 import { FinanceRecurringIncomePanel } from './overview/FinanceRecurringIncomePanel'
-import { FinanceRecentTransactions } from './overview/FinanceRecentTransactions'
 import { FinanceMonthOutlookPanel } from './overview/FinanceMonthOutlookPanel'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import type { Category, Transaction } from '../../store/storeTypes'
@@ -34,8 +32,8 @@ interface FinanceOverviewTabProps
 
 export function FinanceOverviewTab({
   monthOffset = 0,
-  receita,
-  despesas,
+  receita: _receita,
+  despesas: _despesas,
   saldo,
   diffDespesas,
   diffDespesasPct,
@@ -45,7 +43,7 @@ export function FinanceOverviewTab({
   areaChartData,
   budgetUsedPct,
   budgetRows,
-  monthTx,
+  monthTx: _monthTx,
   activeCategories,
   editingBudget,
   setEditingBudget,
@@ -55,11 +53,28 @@ export function FinanceOverviewTab({
   setTab,
 }: FinanceOverviewTabProps)
 {
+  void _receita
+  void _despesas
+  void _monthTx
+
   return (
     <div className="space-y-3">
-      <FinanceMonthOutlookPanel monthOffset={monthOffset} />
+      <FinanceOverviewCharts
+        saldo={saldo}
+        diffDespesas={diffDespesas}
+        diffDespesasPct={diffDespesasPct}
+        biggestCategory={biggestCategory}
+        categoryTotals={categoryTotals}
+        pieChartData={pieChartData}
+        areaChartData={areaChartData}
+        onViewGoals={() => setTab('metas')}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-start">
+      <DashboardCollapsible
+        title="Orçamento por categoria"
+        subtitle="Limites e uso do mês"
+        defaultOpen={false}
+      >
         <FinanceBudgetPanel
           rows={budgetRows}
           budgetUsedPct={budgetUsedPct}
@@ -69,30 +84,14 @@ export function FinanceOverviewTab({
           setEditVal={setEditVal}
           onSaveBudget={handleSaveBudget}
         />
-        <FinanceRecentTransactions
-          monthTx={monthTx}
-          activeCategories={activeCategories}
-          onViewAll={() => setTab('tabela')}
-        />
-      </div>
+      </DashboardCollapsible>
 
       <DashboardCollapsible
-        title="Gráficos e tendências"
-        subtitle="Receitas, gastos e evolução"
+        title="Projeção do mês"
+        subtitle="Contas e faturas previstas"
         defaultOpen={false}
-        bodyClassName="space-y-4"
       >
-        <FinanceOverviewKpis receita={receita} despesas={despesas} saldo={saldo} />
-        <FinanceOverviewCharts
-          saldo={saldo}
-          diffDespesas={diffDespesas}
-          diffDespesasPct={diffDespesasPct}
-          biggestCategory={biggestCategory}
-          categoryTotals={categoryTotals}
-          pieChartData={pieChartData}
-          areaChartData={areaChartData}
-          onViewGoals={() => setTab('metas')}
-        />
+        <FinanceMonthOutlookPanel monthOffset={monthOffset} />
       </DashboardCollapsible>
 
       <DashboardCollapsible

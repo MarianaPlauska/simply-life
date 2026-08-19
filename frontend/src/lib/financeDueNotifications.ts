@@ -7,7 +7,8 @@ import {
 import type { ContaFixa, ReservedBill, Transaction, VirtualCard } from '../store/storeTypes'
 import { supabase } from './supabase'
 
-export const DUE_WINDOW_DAYS = 3
+/** Alerta até 2 dias antes do vencimento (e no dia) */
+export const DUE_WINDOW_DAYS = 2
 
 export interface FinanceDueSyncInput
 {
@@ -22,7 +23,7 @@ export interface FinanceDueSyncResult
   created: number
 }
 
-/** Insere notificações de vencimento (≤3 dias) e retorna quantas foram criadas */
+/** Insere notificações de vencimento (≤2 dias) e retorna quantas foram criadas */
 export async function syncFinanceDueNotifications(
   input: FinanceDueSyncInput,
 ): Promise<FinanceDueSyncResult>

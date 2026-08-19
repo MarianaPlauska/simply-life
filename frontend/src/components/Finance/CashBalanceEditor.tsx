@@ -6,6 +6,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
+import { MoneyInput } from '../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -13,8 +15,6 @@ const fmt = (v: number) =>
 interface BalanceFields
 {
   disponivel: string
-  corrente: string
-  reservado: string
   projetado: string
 }
 
@@ -24,39 +24,34 @@ interface CashBalanceEditorProps
   onClose: () => void
   computed: {
     disponivel: number
-    corrente: number
     reservado: number
     projetado: number
   }
   manualActive: boolean
   onSaveManual: (fields: {
     disponivel: number
-    corrente: number
     reservado: number
     projetado: number
+    corrente?: number
   }) => Promise<void>
   onClearManual: () => Promise<void>
 }
 
 function fieldsFromNumbers(values: {
   disponivel: number
-  corrente: number
-  reservado: number
   projetado: number
 }): BalanceFields
 {
   return {
-    disponivel: String(values.disponivel),
-    corrente: String(values.corrente),
-    reservado: String(values.reservado),
-    projetado: String(values.projetado),
+    disponivel: formatCentsToBrl(Math.round(values.disponivel * 100)),
+    projetado: formatCentsToBrl(Math.round(values.projetado * 100)),
   }
 }
 
 function parseField(value: string, label: string): number | null
 {
-  const n = parseFloat(value.replace(/\./g, '').replace(',', '.'))
-  if (Number.isNaN(n))
+  const n = parseMoneyInputToNumber(value)
+  if (!Number.isFinite(n))
   {
     toast.error(`${label}: valor inválido`)
     return null
@@ -98,16 +93,18 @@ export function CashBalanceEditor({
 
   const save = async () =>
   {
-    const disponivel = parseField(fields.disponivel, 'Disponível')
-    const corrente = parseField(fields.corrente, 'Corrente')
-    const reservado = parseField(fields.reservado, 'Reservado')
+    const disponivel = parseField(fields.disponivel, 'Disponível agora')
     const projetado = parseField(fields.projetado, 'Projetado livre')
-    if (disponivel == null || corrente == null || reservado == null || projetado == null) return
+    if (disponivel == null || projetado == null) return
 
     setSaving(true)
     try
     {
-      await onSaveManual({ disponivel, corrente, reservado, projetado })
+      await onSaveManual({
+        disponivel,
+        reservado: computed.reservado,
+        projetado,
+      })
       onClose()
     }
     finally
@@ -131,10 +128,16 @@ export function CashBalanceEditor({
   }
 
   const rows: Array<{ key: keyof BalanceFields; label: string; hint?: string }> = [
-    { key: 'disponivel', label: 'Disponível', hint: 'O que você vê no app do banco hoje' },
-    { key: 'corrente', label: 'Corrente', hint: 'Saldo bruto antes das reservas' },
-    { key: 'reservado', label: 'Reservado', hint: 'Valor separado para faturas futuras' },
-    { key: 'projetado', label: 'Projetado livre', hint: 'Após fixas e agendados do mês' },
+    {
+      key: 'disponivel',
+      label: 'Disponível agora',
+      hint: 'Quanto você tem livre hoje — igual ao app do banco, já descontando o que está reservado',
+    },
+    {
+      key: 'projetado',
+      label: 'Projetado livre',
+      hint: 'Quanto sobra após fixas, faturas e agendados do mês',
+    },
   ]
 
   return (
@@ -150,7 +153,7 @@ export function CashBalanceEditor({
           <div>
             <p className={`text-[14px] font-semibold ${AXEL_TEXT_PRIMARY}`}>Ajustar saldos</p>
             <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              Informe os valores reais da sua conta. O app fixa estes números até você voltar ao automático.
+              Informe o disponível real. O comprometido vem das reservas e contas em aberto.
             </p>
           </div>
           <button
@@ -164,6 +167,14 @@ export function CashBalanceEditor({
         </header>
 
         <div className="px-4 py-3 space-y-3">
+          <div className="rounded-sl border border-line bg-chrome/30 px-3 py-2.5">
+            <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Comprometido (calculado)</p>
+            <p className="text-base font-display tabular-nums text-atencao mt-0.5">{fmt(computed.reservado)}</p>
+            <p className={`text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+              Reservas e boletos ainda não pagos no caixa
+            </p>
+          </div>
+
           {rows.map(({ key, label, hint }) => (
             <label key={key} className="block space-y-1">
               <span className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
@@ -172,11 +183,10 @@ export function CashBalanceEditor({
               {hint && (
                 <span className={`block text-[10px] ${AXEL_TEXT_SECONDARY}`}>{hint}</span>
               )}
-              <input
-                inputMode="decimal"
+              <MoneyInput
                 value={fields[key]}
-                onChange={(e) => setField(key, e.target.value)}
-                className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono tabular-nums min-h-[44px] text-ink"
+                onChange={(v) => setField(key, v)}
+                className="w-full tabular-nums min-h-[44px] text-sm"
               />
               <span className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
                 Calculado agora: {fmt(computed[key])}

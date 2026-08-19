@@ -45,7 +45,7 @@ export function DashboardCollapsible({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 min-w-0">
               {section && (
-                <span className="font-mono text-[11px] text-ink tabular-nums shrink-0">
+                <span className="font-mono text-[12px] text-ink tabular-nums shrink-0">
                   {section}
                 </span>
               )}

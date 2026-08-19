@@ -51,7 +51,10 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
   const prazosUrgentes = listPrazosUrgentes(tarefas)
   const notificacoesPendentes = filterNotificacoesSemPrazoDuplicado(
     listNotificacoesAcionaveis(notificacoes, tarefas),
-    prazosUrgentes,
+    [
+      ...prazosUrgentes.map(({ task }) => task),
+      ...tarefasAtrasadas.map(({ task }) => task),
+    ],
   )
   const unreadCount = notificacoesPendentes.length
   const hasDismissible = unreadCount > 0

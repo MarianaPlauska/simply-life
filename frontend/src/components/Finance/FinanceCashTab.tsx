@@ -4,12 +4,13 @@ import { FinanceExtrasTab } from './FinanceExtrasTab'
 interface FinanceCashTabProps
 {
   saldoDisponivel: number
-  saldoCorrente: number
   reservaRestante: number
   saldoProjetadoDisponivel: number
+  saldoInicial: number
+  receitasPagas: number
+  despesasPagas: number
   compromissosFixas?: number
   computedDisponivel?: number
-  computedCorrente?: number
   computedReservado?: number
   computedProjetado?: number
   onNewExtraIncome?: () => void
@@ -17,12 +18,13 @@ interface FinanceCashTabProps
 
 export function FinanceCashTab({
   saldoDisponivel,
-  saldoCorrente,
   reservaRestante,
   saldoProjetadoDisponivel,
+  saldoInicial,
+  receitasPagas,
+  despesasPagas,
   compromissosFixas = 0,
   computedDisponivel,
-  computedCorrente,
   computedReservado,
   computedProjetado,
   onNewExtraIncome,
@@ -32,12 +34,13 @@ export function FinanceCashTab({
     <div className="space-y-4">
       <FinanceCashAccountCard
         saldoDisponivel={saldoDisponivel}
-        saldoCorrente={saldoCorrente}
         reservaRestante={reservaRestante}
         saldoProjetadoDisponivel={saldoProjetadoDisponivel}
+        saldoInicial={saldoInicial}
+        receitasPagas={receitasPagas}
+        despesasPagas={despesasPagas}
         compromissosFixas={compromissosFixas}
         computedDisponivel={computedDisponivel}
-        computedCorrente={computedCorrente}
         computedReservado={computedReservado}
         computedProjetado={computedProjetado}
       />

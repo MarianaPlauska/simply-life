@@ -11,6 +11,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
+import { MoneyInput } from '../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 interface FinancePresetEditorProps
 {
@@ -46,7 +48,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
 
     const catId = draft.categoria_id ? Number(draft.categoria_id) : undefined
     const cat = catId ? categories.find((c) => c.id === catId) : undefined
-    const val = draft.valor ? parseFloat(draft.valor.replace(',', '.')) : undefined
+    const val = draft.valor ? parseMoneyInputToNumber(draft.valor) : undefined
 
     const next: ExpensePreset[] = [
       ...presets,
@@ -71,7 +73,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
     setEditingId(p.id)
     setEditDraft({
       label: p.label,
-      valor: p.valor != null ? String(p.valor) : '',
+      valor: p.valor != null ? formatCentsToBrl(Math.round(p.valor * 100)) : '',
     })
   }
 
@@ -85,7 +87,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
     }
 
     const val = editDraft.valor
-      ? parseFloat(editDraft.valor.replace(',', '.'))
+      ? parseMoneyInputToNumber(editDraft.valor)
       : undefined
 
     const next = presets.map((p) =>
@@ -138,12 +140,11 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
               placeholder="Nome — ex: Padaria"
               className="col-span-8 border border-line rounded-sl bg-chrome px-3 py-2 text-sm text-ink"
             />
-            <input
+            <MoneyInput
               value={draft.valor}
-              onChange={(e) => setDraft({ ...draft, valor: e.target.value })}
+              onChange={(v) => setDraft({ ...draft, valor: v })}
               placeholder="R$ opcional"
-              inputMode="decimal"
-              className="col-span-4 border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono text-ink"
+              className="col-span-4 text-sm"
             />
           </div>
 
@@ -193,12 +194,11 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
                           onChange={(e) => setEditDraft({ ...editDraft, label: e.target.value })}
                           className="col-span-8 border border-line rounded-sl bg-chrome px-2 py-1.5 text-sm text-ink"
                         />
-                        <input
+                        <MoneyInput
                           value={editDraft.valor}
-                          onChange={(e) => setEditDraft({ ...editDraft, valor: e.target.value })}
+                          onChange={(v) => setEditDraft({ ...editDraft, valor: v })}
                           placeholder="R$"
-                          inputMode="decimal"
-                          className="col-span-4 border border-line rounded-sl bg-chrome px-2 py-1.5 text-sm font-mono text-ink"
+                          className="col-span-4 text-sm"
                         />
                       </div>
                       <div className="flex gap-2">

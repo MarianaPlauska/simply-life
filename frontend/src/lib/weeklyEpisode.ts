@@ -86,7 +86,7 @@ function buildCapituloTitulo(
 ): string
 {
   if (ofensivas >= 6 && tarefas >= 5) return 'Capítulo: Semana de fogo controlado'
-  if (ofensivas >= 4) return 'Capítulo: A ofensiva resistiu'
+  if (ofensivas >= 4) return 'Capítulo: Constância que se manteve'
   if (humor > 0 && humor < 2.8) return 'Capítulo: Sobrevivendo à tempestade'
   if (tarefas >= 8) return 'Capítulo: Máquina de entregar'
   if (humor >= 4) return 'Capítulo: Dias mais leves'
@@ -184,11 +184,15 @@ function buildCliffhanger(
 
   if (streakCount > 0 && !isStreakSafeToday)
   {
-    parts.push(`falta 1 dia para manter ofensiva de ${streakCount}`)
+    parts.push(
+      streakCount === 1
+        ? 'volte amanhã para manter seu progresso'
+        : `volte amanhã para manter os ${streakCount} dias seguidos`,
+    )
   }
   else if (streakCount > 0)
   {
-    parts.push(`ofensiva em ${streakCount} dias — não quebre o capítulo`)
+    parts.push(`${streakCount} dias seguidos usando o app — continue assim`)
   }
 
   if (billHint)

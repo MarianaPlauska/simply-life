@@ -105,15 +105,15 @@ export function listPrazosUrgentes(tarefas: TarefaUnificada[]): PrazoUrgenteItem
   }))
 }
 
-/** Evita financeiro duplicado quando já há alerta de prazo da mesma conta/tarefa */
+/** Evita financeiro duplicado quando já há alerta de prazo/atraso da mesma conta */
 export function filterNotificacoesSemPrazoDuplicado(
   notificacoes: Notificacao[],
-  prazos: PrazoUrgenteItem[],
+  relatedTasks: TarefaUnificada[],
 ): Notificacao[]
 {
-  if (prazos.length === 0) return notificacoes
+  if (relatedTasks.length === 0) return notificacoes
 
-  const titulosPrazo = prazos.map(({ task }) => task.titulo.trim().toLowerCase())
+  const titulosRelacionados = relatedTasks.map((task) => task.titulo.trim().toLowerCase())
 
   return notificacoes.filter((n) =>
   {
@@ -126,7 +126,7 @@ export function filterNotificacoesSemPrazoDuplicado(
 
     if (!label) return true
 
-    return !titulosPrazo.some((taskTitle) =>
+    return !titulosRelacionados.some((taskTitle) =>
       taskTitle.includes(label)
       || label.includes(taskTitle.replace(/\[boleto\]\s*/i, '').trim()),
     )
@@ -139,8 +139,15 @@ export function countAlertasHeader(
   ctx?: AlertFinanceContext,
 ): number
 {
-  const unread = listNotificacoesAcionaveis(notificacoes, tarefas).length
-  const prazos = listPrazosUrgentes(tarefas).length
-  const atrasadas = listTarefasAtrasadas(tarefas, ctx).length
-  return unread + prazos + atrasadas
+  const prazos = listPrazosUrgentes(tarefas)
+  const atrasadas = listTarefasAtrasadas(tarefas, ctx)
+  const relatedTasks = [
+    ...prazos.map(({ task }) => task),
+    ...atrasadas.map(({ task }) => task),
+  ]
+  const unread = filterNotificacoesSemPrazoDuplicado(
+    listNotificacoesAcionaveis(notificacoes, tarefas),
+    relatedTasks,
+  ).length
+  return unread + prazos.length + atrasadas.length
 }

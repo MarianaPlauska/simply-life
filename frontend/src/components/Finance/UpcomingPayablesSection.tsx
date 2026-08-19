@@ -91,12 +91,29 @@ export function UpcomingPayablesSection()
   const tarefas = useTaskStore((s) => s.tarefas)
   const billSettlements = useTaskStore((s) => s.billSettlements)
   const markTransactionPaid = useTaskStore((s) => s.markTransactionPaid)
+  const markReservedBillPaid = useTaskStore((s) => s.markReservedBillPaid)
   const fetchBillSettlements = useTaskStore((s) => s.fetchBillSettlements)
 
   useEffect(() =>
   {
     void fetchBillSettlements()
   }, [fetchBillSettlements])
+
+  const handleMarkPaid = async (bill: UpcomingBill) =>
+  {
+    if (bill.transactionId != null)
+    {
+      await markTransactionPaid(bill.transactionId)
+    }
+    else if (bill.reservedBillId != null)
+    {
+      await markReservedBillPaid(bill.reservedBillId)
+    }
+    void fetchBillSettlements()
+  }
+
+  const canMarkPaid = (bill: UpcomingBill) =>
+    bill.transactionId != null || bill.reservedBillId != null
 
   const payables = useMemo(() =>
   {
@@ -188,15 +205,11 @@ export function UpcomingPayablesSection()
                       {bill.daysUntil}d
                     </span>
                   )}
-                  {bill.transactionId != null && (
+                  {canMarkPaid(bill) && (
                     <button
                       type="button"
-                      onClick={() =>
-                      {
-                        void markTransactionPaid(bill.transactionId!)
-                        void fetchBillSettlements()
-                      }}
-                      className="font-mono text-[9px] uppercase text-accent hover:underline"
+                      onClick={() => void handleMarkPaid(bill)}
+                      className="font-mono text-[9px] uppercase px-2.5 py-1.5 rounded-sl border border-accent/45 bg-accent/12 text-accent hover:bg-accent/20 min-h-[36px] shadow-sm"
                     >
                       Marcar pago
                     </button>

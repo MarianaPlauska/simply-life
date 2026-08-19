@@ -50,21 +50,21 @@ export function DashboardPerformanceCharts()
     <div className="space-y-3 pt-2 border-t border-line lg:col-span-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent flex items-center gap-1">
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent flex items-center gap-1">
             <BarChart3 size={12} />
             Gráficos
           </p>
           <h3 className={`font-display text-lg mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
             Desempenho · 7 dias
           </h3>
-          <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             Humor e tarefas concluídas — visão rápida do seu ritmo.
           </p>
         </div>
         <button
           type="button"
           onClick={() => navigate('/relatorios')}
-          className="shrink-0 inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted hover:text-accent pt-1"
+          className="shrink-0 inline-flex items-center gap-1 font-mono text-[10px] uppercase text-ink-muted hover:text-accent pt-1"
         >
           Relatórios
           <ArrowRight size={12} />
@@ -73,7 +73,7 @@ export function DashboardPerformanceCharts()
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
         <article className="rounded-sl border border-line p-3 bg-card h-full flex flex-col">
-          <p className="text-[12px] font-medium text-ink mb-2">Humor (1–5)</p>
+          <p className="text-[13px] font-medium text-ink mb-2">Humor (1–5)</p>
           <ChartSizeBox className="flex-1" minHeight={chartHeight}>
             {(w, h) => (
               hasMood ? (
@@ -93,7 +93,7 @@ export function DashboardPerformanceCharts()
                   </Bar>
                 </BarChart>
               ) : (
-                <p className={`h-full flex items-center justify-center text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+                <p className={`h-full flex items-center justify-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
                   Registre humor para ver o gráfico.
                 </p>
               )
@@ -102,7 +102,7 @@ export function DashboardPerformanceCharts()
         </article>
 
         <article className="rounded-sl border border-line p-3 bg-card h-full flex flex-col">
-          <p className="text-[12px] font-medium text-ink mb-2">Tarefas concluídas</p>
+          <p className="text-[13px] font-medium text-ink mb-2">Tarefas concluídas</p>
           <ChartSizeBox className="flex-1" minHeight={chartHeight}>
             {(w, h) => (
               hasTasks ? (
@@ -120,7 +120,7 @@ export function DashboardPerformanceCharts()
                   />
                 </BarChart>
               ) : (
-                <p className={`h-full flex items-center justify-center text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+                <p className={`h-full flex items-center justify-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
                   Conclua tarefas no Kanban para ver o histórico.
                 </p>
               )

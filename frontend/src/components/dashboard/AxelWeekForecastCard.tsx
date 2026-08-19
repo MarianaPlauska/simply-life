@@ -51,12 +51,12 @@ export function AxelWeekForecastCard()
     <section className={`${AXEL_BORDERLESS_PANEL} p-2.5 sm:p-3`} aria-label="Previsão 7 dias">
       <div className="flex items-center gap-2 mb-1.5">
         <TrendingUp className="w-3.5 h-3.5 text-accent shrink-0" />
-        <p className="font-mono text-[9px] uppercase tracking-wide text-accent">
+        <p className="font-mono text-[10px] uppercase tracking-wide text-accent">
           Previsão 7 dias
         </p>
       </div>
 
-      <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
+      <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
         {forecast.headline}
       </p>
 
@@ -68,23 +68,23 @@ export function AxelWeekForecastCard()
             title={day.axelLine}
           >
             <div className="flex items-center justify-between gap-1">
-              <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+              <span className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 {day.label}
               </span>
               <span className={`w-1.5 h-1.5 rounded-full ${MOOD_DOT[day.moodHint]}`} />
             </div>
             {day.billCount > 0 ? (
-              <p className="text-[10px] font-mono tabular-nums text-ink mt-0.5">
+              <p className="text-[11px] font-mono tabular-nums text-ink mt-0.5">
                 {day.billsTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
               </p>
             ) : (
-              <p className={`text-[9px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>—</p>
+              <p className={`text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>—</p>
             )}
           </div>
         ))}
       </div>
 
-      <p className={`text-[10px] mt-2 font-mono ${AXEL_TEXT_SECONDARY}`}>
+      <p className={`text-[11px] mt-2 font-mono ${AXEL_TEXT_SECONDARY}`}>
         Humor {forecast.moodTrend} · média gasto/dia ~
         {forecast.avgDailySpend.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
       </p>

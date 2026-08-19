@@ -45,11 +45,11 @@ export function FinanceBalanceInsight()
       aria-label={`Saldo atual ${fmtBRL(current)}, tendência ${trendPct.toFixed(1)} por cento em 7 dias`}
     >
       <div className="min-w-0">
-        <p className="text-[11px] text-zinc-500 tracking-tight mb-0.5">Saldo disponível</p>
+        <p className="text-[12px] text-zinc-500 tracking-tight mb-0.5">Saldo disponível</p>
         <p className={`text-[18px] font-semibold tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
           {fmtBRL(current)}
         </p>
-        <p className={`mt-1.5 inline-flex items-center gap-1 text-[11px] tabular-nums ${trendClass}`}>
+        <p className={`mt-1.5 inline-flex items-center gap-1 text-[12px] tabular-nums ${trendClass}`}>
           <TrendIcon className="w-3 h-3 shrink-0" strokeWidth={2} />
           {trendUp ? '+' : ''}{trendPct.toFixed(1)}% · 7d
         </p>

@@ -66,7 +66,19 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
       const taskTitle = titulo?.trim()
         || conteudo.trim().split('\n')[0].slice(0, 120)
         || 'Lembrete'
-      await get().createTarefa(taskTitle, conteudo.trim())
+      const { syncNoteDatesToKanban } = await import('../../lib/noteDatesToKanban')
+      const fromDates = await syncNoteDatesToKanban(conteudo, taskTitle)
+      if (fromDates === 0)
+      {
+        await get().createTarefa(taskTitle, conteudo.trim())
+      }
+    }
+    else
+    {
+      void import('../../lib/noteDatesToKanban').then(({ syncNoteDatesToKanban }) =>
+      {
+        void syncNoteDatesToKanban(conteudo, titulo ?? undefined)
+      })
     }
 
     void import('../../lib/processAxelNoteSignals').then(({ processAxelNoteSignals }) =>
@@ -107,9 +119,14 @@ export const createAnotacoesSlice: StateCreator<StoreComTarefas, [], [], Anotaco
     if (patch.conteudo != null || patch.titulo != null)
     {
       const note = get().anotacoes.find((n) => n.id === id)
+      const merged = `${patch.titulo ?? note?.titulo ?? ''} ${patch.conteudo ?? note?.conteudo ?? ''}`
       void import('../../lib/processAxelNoteSignals').then(({ processAxelNoteSignals }) =>
       {
-        processAxelNoteSignals(`${patch.titulo ?? note?.titulo ?? ''} ${patch.conteudo ?? note?.conteudo ?? ''}`)
+        processAxelNoteSignals(merged)
+      })
+      void import('../../lib/noteDatesToKanban').then(({ syncNoteDatesToKanban }) =>
+      {
+        void syncNoteDatesToKanban(merged, patch.titulo ?? note?.titulo ?? undefined)
       })
     }
   },

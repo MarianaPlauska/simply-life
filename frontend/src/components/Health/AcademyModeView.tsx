@@ -12,6 +12,7 @@ import { AcademyRestOverlay } from './academy/AcademyRestOverlay'
 import {
   formatProgressoCarga,
   formatRestMmSs,
+  hojeDiaTreinoKey,
   melhorCarga,
   mergeAcademyConfig,
   MIN_DESCANSO_SEG,
@@ -19,6 +20,8 @@ import {
   resolveExerciciosHoje,
   resolvePlanoHoje,
 } from '../../lib/academyWorkouts'
+import { resolveTreinoCodigo, labelTreinoPlano } from '../../lib/academyTreinoCodes'
+import { localTodayIso } from '../../lib/healthDayBoundary'
 import type { HabitoDiarioConfig } from '../../store/storeTypes'
 
 // Modo Academia — treino guiado com séries, descanso e evolução de carga
@@ -49,6 +52,11 @@ export function AcademyModeView()
   )
   const temRotina = exercicios.length > 0
   const planoDia = resolvePlanoHoje(habitConfig, habitConfig?.plano_semana)
+  const modoPlano = academyConfig.academy_modo_plano ?? 'semana'
+  const rotuloTreino = labelTreinoPlano(planoDia, {
+    iso: modoPlano === 'mes' ? localTodayIso() : undefined,
+    diaKey: hojeDiaTreinoKey(),
+  })
   const nomeTreino = sessaoTreinoAtiva?.tipo_treino ?? planoDia?.titulo?.trim() ?? 'Treino'
   const metaMin = sessaoTreinoAtiva?.meta_minutos
     ?? planoDia?.meta_minutos
@@ -125,7 +133,7 @@ export function AcademyModeView()
       return
     }
     void requestNotificationPermission()
-    await iniciarTreino(habitoId, nomeTreino, metaMin)
+    await iniciarTreino(habitoId, rotuloTreino, metaMin)
     session.iniciarFluxo()
   }
 
@@ -154,7 +162,21 @@ export function AcademyModeView()
       navigate('/saude#academia')
       return
     }
-    await finalizarTreino(sessaoTreinoAtiva.id)
+
+    const modoPlano = academyConfig.academy_modo_plano ?? 'semana'
+    const treinoCodigo = resolveTreinoCodigo({
+      plano: planoDia,
+      iso: modoPlano === 'mes' ? localTodayIso() : undefined,
+      diaKey: hojeDiaTreinoKey(),
+      titulo: nomeTreino,
+    })
+
+    await finalizarTreino(sessaoTreinoAtiva.id, {
+      completedSets: session.completed,
+      exercicios,
+      treinoTitulo: rotuloTreino,
+      treinoCodigo,
+    })
     navigate('/saude#academia')
   }
 
@@ -209,7 +231,7 @@ export function AcademyModeView()
 
       <div className="flex-1 flex flex-col items-center justify-center py-4">
         <p className="text-[11px] text-zinc-500 tracking-tight mb-2 uppercase">
-          {session.phase === 'rest' ? 'Descanso' : nomeTreino}
+          {session.phase === 'rest' ? 'Descanso' : rotuloTreino}
         </p>
         <time
           className={`font-mono text-[clamp(3.5rem,16vw,6.5rem)] font-medium tracking-tighter tabular-nums leading-none ${

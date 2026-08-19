@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
 import {
   Droplets, HeartPulse, Pill, Beef,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import { buildHealthRitual, ritualHeadline, isAguaRitualComplete, aguaDisplaySnapshot } from '../../lib/healthRitual'
+import { ritualHeadline, isAguaRitualComplete, aguaDisplaySnapshot } from '../../lib/healthRitual'
+import { useHealthRitualSnapshot } from '../../hooks/useHealthRitualSnapshot'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
 import { snapshotNutricaoHoje } from '../../lib/healthNutrition'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
@@ -26,22 +26,12 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
 
   const agua = habitos.find((h) => h.tipo === 'agua')
   const proteina = habitos.find((h) => h.tipo === 'proteina')
-  const aguaCopos = agua?.progresso_atual ?? 0
   const aguaMeta = agua?.meta_diaria ?? 8
   const doseProgress = countDoseProgress(medicamentos, medicamentoTomadas)
   const medsTomados = doseProgress.tomados
 
-  const snapshot = useMemo(
-    () => buildHealthRitual({
-      humorHojeCount: humorHojeLista.length,
-      aguaCopos,
-      aguaMeta,
-      medicamentosTotal: doseProgress.total || medicamentos.length,
-      medicamentosTomados: medsTomados,
-    }),
-    [humorHojeLista.length, aguaCopos, aguaMeta, medicamentos.length, doseProgress, medsTomados],
-  )
-
+  const snapshot = useHealthRitualSnapshot()
+  const aguaCopos = agua?.progresso_atual ?? 0
   const headline = ritualHeadline(snapshot)
   const aguaOk = isAguaRitualComplete(aguaCopos, aguaMeta)
   const aguaSnap = aguaDisplaySnapshot(aguaCopos, aguaMeta)
@@ -119,12 +109,12 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
         />
         <HealthQuickTile
           icon={HeartPulse}
-          label="Humor"
+          label="Diário"
           value={humorHojeLista.length > 0 ? `${humorHojeLista.length} registro${humorHojeLista.length !== 1 ? 's' : ''}` : 'Como está?'}
-          sub={humorHojeLista.length > 0 ? 'Registrado hoje' : '1 toque basta'}
+          sub={humorHojeLista.length > 0 ? 'Hoje' : '1 toque'}
           tone="accent"
           done={humorHojeLista.length > 0}
-          onClick={() => onSelectTab('bem_estar')}
+          onClick={() => onSelectTab('diario')}
         />
         <HealthQuickTile
           icon={Pill}
@@ -147,7 +137,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
       </div>
 
       <p className="text-[11px] text-ink-muted text-center leading-relaxed px-2">
-        Vitalidade conecta com Kanban e Dashboard — medicamentos atrasados sobem na fila do AXEL.
+        Vitalidade conecta com Kanban e Dashboard. Medicamentos atrasados sobem na fila do AXEL.
       </p>
     </div>
   )

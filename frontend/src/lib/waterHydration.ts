@@ -1,5 +1,23 @@
 import type { HabitoDiario } from '../store/storeTypes'
 import { localTodayIso, readCachedWaterEntries, waterPrefsStorageKey } from './healthDayBoundary'
+import { readScopedJson, writeScopedJson } from './userScopedStorage'
+
+export interface WaterLocalPrefs
+{
+  ml_por_copo?: number
+  ml_presets?: number[]
+  ml_ocultos?: number[]
+}
+
+export function readLocalWaterPrefs(): WaterLocalPrefs
+{
+  return readScopedJson<WaterLocalPrefs>(waterPrefsStorageKey()) ?? {}
+}
+
+export function persistLocalWaterPrefs(patch: WaterLocalPrefs): void
+{
+  writeScopedJson(waterPrefsStorageKey(), { ...readLocalWaterPrefs(), ...patch })
+}
 
 export const DEFAULT_ML_POR_COPO = 200
 export const GARRAFA_MIN_ML = 500
@@ -34,12 +52,16 @@ export function isBuiltInMlPreset(ml: number): boolean
 
 export function customMlPresets(h: HabitoDiario | undefined): number[]
 {
-  return normalizeMlPresets(h?.config?.ml_presets ?? [])
+  const local = readLocalWaterPrefs().ml_presets ?? []
+  const remote = h?.config?.ml_presets ?? []
+  return normalizeMlPresets([...remote, ...local])
 }
 
 export function hiddenMlPresets(h: HabitoDiario | undefined): number[]
 {
-  return normalizeMlPresets(h?.config?.ml_ocultos ?? [])
+  const local = readLocalWaterPrefs().ml_ocultos ?? []
+  const remote = h?.config?.ml_ocultos ?? []
+  return normalizeMlPresets([...remote, ...local])
 }
 
 /** Atalhos visíveis — padrões do app (menos ocultos) + personalizados + ml padrão atual */
@@ -101,8 +123,29 @@ export function patchMlPresetChange(
   }
 }
 
+/** Patch único para ml padrão + atalho personalizado (evita corrida entre saves). */
+export function buildDefaultMlPatch(h: HabitoDiario | undefined, ml: number): {
+  ml_por_copo: number
+  ml_presets?: number[]
+  ml_ocultos?: number[]
+}
+{
+  const value = clampMl(ml)
+  if (isBuiltInMlPreset(value))
+  {
+    return { ml_por_copo: value }
+  }
+  return {
+    ml_por_copo: value,
+    ...patchMlPresetChange(h, 'add', value),
+  }
+}
+
 function readLocalMlPorCopo(): number | null
 {
+  const local = readLocalWaterPrefs().ml_por_copo
+  if (typeof local === 'number' && local > 0) return local
+
   try
   {
     const raw = localStorage.getItem(waterPrefsStorageKey())
@@ -117,11 +160,7 @@ function readLocalMlPorCopo(): number | null
 
 export function persistLocalMlPorCopo(ml: number): void
 {
-  try
-  {
-    localStorage.setItem(waterPrefsStorageKey(), JSON.stringify({ ml_por_copo: ml }))
-  }
-  catch { /* quota */ }
+  persistLocalWaterPrefs({ ml_por_copo: ml })
 }
 
 export function mlPorCopo(h: HabitoDiario | undefined): number

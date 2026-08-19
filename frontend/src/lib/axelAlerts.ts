@@ -1,8 +1,9 @@
 import type { TarefaUnificada } from '../types'
 
-// Alertas globais — prazos nas próximas 24h
+// Alertas globais — prazos nas próximas 48h (2 dias)
 
 const HOUR_MS = 3_600_000
+const TASK_DUE_ALERT_HOURS = 48
 
 export function getOverdueTasks(tarefas: TarefaUnificada[]): TarefaUnificada[]
 {
@@ -26,7 +27,7 @@ export function countOverdueTasks(tarefas: TarefaUnificada[]): number
 export function countUrgentDeadlines(tarefas: TarefaUnificada[]): number
 {
   const now = Date.now()
-  const limit = now + 24 * HOUR_MS
+  const limit = now + TASK_DUE_ALERT_HOURS * HOUR_MS
 
   return tarefas.filter((t) =>
   {
@@ -39,7 +40,7 @@ export function countUrgentDeadlines(tarefas: TarefaUnificada[]): number
 export function getUrgentDeadlineTasks(tarefas: TarefaUnificada[]): TarefaUnificada[]
 {
   const now = Date.now()
-  const limit = now + 24 * HOUR_MS
+  const limit = now + TASK_DUE_ALERT_HOURS * HOUR_MS
 
   return tarefas.filter((t) =>
   {

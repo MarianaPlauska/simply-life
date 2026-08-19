@@ -4,8 +4,6 @@ import {
   TrendingUp,
   PiggyBank,
   Wallet,
-  Eye,
-  EyeOff,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { toast } from 'sonner'
@@ -30,6 +28,8 @@ import { useFinancePurchaseCheck } from '../../hooks/useFinancePurchaseCheck'
 import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
 import { FinancePurchaseCheckStep } from './overview/FinancePurchaseCheckStep'
 import { FinanceExtraIncomeSection, type ReceitaCreditoQuando } from './FinanceExtraIncomeSection'
+import { MoneyInput } from '../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 import { FormFieldLabel } from '../ui/FormFieldLabel'
 
 type LancamentoModo = 'imediato' | 'futuro'
@@ -179,8 +179,8 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const parseValor = (): number | null =>
   {
-    const val = parseFloat(form.valor.replace(',', '.'))
-    if (!form.descricao.trim() || Number.isNaN(val) || val <= 0) return null
+    const val = parseMoneyInputToNumber(form.valor)
+    if (!form.descricao.trim() || !Number.isFinite(val) || val <= 0) return null
     return val
   }
 
@@ -192,8 +192,8 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const saveSaldoInicial = async () =>
   {
-    const n = parseFloat(saldoValor.replace(',', '.'))
-    if (Number.isNaN(n) || n < 0)
+    const n = parseMoneyInputToNumber(saldoValor)
+    if (!Number.isFinite(n) || n < 0)
     {
       toast.error('Informe um saldo válido')
       return
@@ -394,7 +394,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           {phase === 'axel' ? (
             <FinancePurchaseCheckStep
               descricao={form.descricao.trim()}
-              valor={parseFloat(form.valor.replace(',', '.'))}
+              valor={parseMoneyInputToNumber(form.valor)}
               verdict={verdict}
               loading={checkLoading}
               iaAtiva={iaAtiva}
@@ -428,8 +428,8 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           )}
 
           {mode === 'full' && (
-          <div className="flex items-stretch gap-1.5">
-            <div className={`grid flex-1 gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40 ${
+          <div className="space-y-1.5">
+            <div className={`grid gap-0.5 p-0.5 rounded-sl border border-line bg-chrome/40 ${
               showInvestimento ? 'grid-cols-3' : 'grid-cols-2'
             }`}>
               {((showInvestimento
@@ -445,23 +445,19 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 </button>
               ))}
             </div>
-            <button
-              type="button"
-              onClick={() =>
-              {
-                setShowInvestimento((prev) =>
+            {!showInvestimento && form.tipo !== 'investimento' && (
+              <button
+                type="button"
+                onClick={() =>
                 {
-                  const next = !prev
-                  if (!next && form.tipo === 'investimento') setTipo('despesa')
-                  return next
-                })
-              }}
-              className="shrink-0 inline-flex items-center justify-center w-9 rounded-sl border border-line text-ink-muted hover:text-accent hover:border-accent/40 transition-colors"
-              title={showInvestimento ? 'Ocultar investimento' : 'Mostrar investimento (avançado)'}
-              aria-label={showInvestimento ? 'Ocultar investimento' : 'Mostrar investimento'}
-            >
-              {showInvestimento ? <EyeOff size={15} /> : <Eye size={15} />}
-            </button>
+                  setShowInvestimento(true)
+                  setTipo('investimento')
+                }}
+                className="text-[10px] font-mono text-ink-muted hover:text-accent underline-offset-2 hover:underline"
+              >
+                Registrar investimento (poupança, CDB…)
+              </button>
+            )}
           </div>
           )}
 
@@ -478,13 +474,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                   Saldo atual na conta (R$) <span className="text-urgente">*</span>
                 </label>
-                <input
-                  inputMode="decimal"
-                  placeholder="0,00"
+                <MoneyInput
                   value={saldoValor}
-                  onChange={(e) => setSaldoValor(e.target.value)}
-                  className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono text-ink outline-none focus:border-accent/50"
-                  autoFocus
+                  onChange={setSaldoValor}
+                  className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm outline-none focus:border-accent/50"
                 />
               </div>
             </>
@@ -556,12 +549,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
                 Valor (R$)
               </FormFieldLabel>
             </label>
-            <input
-              inputMode="decimal"
-              placeholder="0,00"
+            <MoneyInput
               value={form.valor}
-              onChange={(e) => setForm({ ...form, valor: e.target.value })}
-              className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono text-ink outline-none focus:border-accent/50"
+              onChange={(v) => setForm({ ...form, valor: v })}
+              className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm outline-none focus:border-accent/50"
             />
           </div>
 

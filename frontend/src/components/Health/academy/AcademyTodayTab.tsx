@@ -4,7 +4,9 @@ import { Dumbbell, Play, Settings2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { TREINO_PRESET, DEFAULT_TREINO_MINUTOS } from '../../../constants/healthPresets'
-import { resolveExerciciosHoje, resolvePlanoHoje } from '../../../lib/academyWorkouts'
+import { hojeDiaTreinoKey, mergeAcademyConfig, resolveExerciciosHoje, resolvePlanoHoje } from '../../../lib/academyWorkouts'
+import { labelTreinoPlano } from '../../../lib/academyTreinoCodes'
+import { localTodayIso } from '../../../lib/healthDayBoundary'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 import type { HabitoDiarioConfig } from '../../../store/storeTypes'
 
@@ -38,6 +40,14 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
     () => resolveExerciciosHoje(habitConfig),
     [habitConfig],
   )
+  const rotuloHoje = useMemo(() =>
+  {
+    const modo = mergeAcademyConfig(habitConfig).academy_modo_plano ?? 'semana'
+    const ref = modo === 'mes'
+      ? { iso: localTodayIso() }
+      : { diaKey: hojeDiaTreinoKey() }
+    return labelTreinoPlano(planoHoje, ref)
+  }, [habitConfig, planoHoje])
   const concluidasHoje = sessoesTreinoHoje.filter((s) => s.concluido).length
   const temTreinoMontado = Boolean(
     planoHoje?.titulo?.trim()
@@ -102,7 +112,7 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
               </h2>
             </div>
             <p className={`text-lg font-display ${AXEL_TEXT_PRIMARY}`}>
-              {planoHoje?.titulo?.trim() || (temTreinoMontado ? 'Treino' : '—')}
+              {temTreinoMontado ? rotuloHoje : '—'}
             </p>
             <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               {temTreinoMontado

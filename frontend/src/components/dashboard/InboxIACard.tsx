@@ -58,15 +58,15 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
         <header className="px-4 pt-4 pb-3 border-b border-line flex items-center justify-between gap-2">
           <div>
             <p className={AXEL_SECTION_TITLE}>Inteligência</p>
-            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Inbox triado · tempo real</p>
+            <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Inbox triado · tempo real</p>
           </div>
-          <span className="font-mono text-[10px] text-accent tabular-nums">{total}</span>
+          <span className="font-mono text-[11px] text-accent tabular-nums">{total}</span>
         </header>
       )}
 
       <div className="flex-1 min-h-[120px] flex flex-col">
         {!top && (
-          <p className={`px-4 py-8 text-center font-mono text-[11px] flex-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`px-4 py-8 text-center font-mono text-[12px] flex-1 ${AXEL_TEXT_SECONDARY}`}>
             Fila vazia — aguardando ingestão
           </p>
         )}
@@ -86,23 +86,23 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
                 <>
                   <Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${AXEL_TEXT_SECONDARY}`} strokeWidth={1.75} />
                   <div className="flex-1 min-w-0">
-                    <div className={`font-mono text-[10px] truncate ${AXEL_TEXT_SECONDARY}`}>
+                    <div className={`font-mono text-[11px] truncate ${AXEL_TEXT_SECONDARY}`}>
                       {top.sender || top.source}
                     </div>
-                    <div className={`text-[12px] font-medium line-clamp-2 mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
+                    <div className={`text-[13px] font-medium line-clamp-2 mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
                       {top.raw_subject || top.resumo || 'Sem título'}
                     </div>
                     {restCount > 0 && (
-                      <p className={`font-mono text-[10px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
+                      <p className={`font-mono text-[11px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
                         +{restCount} na fila
                       </p>
                     )}
                   </div>
                   <div className="shrink-0 text-right">
-                    <span className={`font-mono text-[11px] tabular-nums block ${urgente ? 'text-urgente' : AXEL_TEXT_PRIMARY}`}>
+                    <span className={`font-mono text-[12px] tabular-nums block ${urgente ? 'text-urgente' : AXEL_TEXT_PRIMARY}`}>
                       {top.score_urgencia ?? '—'}
                     </span>
-                    <span className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
+                    <span className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
                       {timeAgo(top.created_at)}
                     </span>
                   </div>
@@ -117,7 +117,7 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
         <button
           type="button"
           onClick={() => navigate('/inteligencia')}
-          className={`inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide ${AXEL_LINK}`}
+          className={`inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-wide ${AXEL_LINK}`}
         >
           {total > 0 ? `Ver inbox (${total})` : 'Abrir inbox'}
           <ArrowRight className="w-3 h-3" />

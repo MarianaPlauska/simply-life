@@ -93,10 +93,10 @@ export function TemporalBoardSection()
       <header className="flex items-baseline justify-between mb-3">
         <div className="flex items-baseline gap-2">
           <span className="w-1 h-3 bg-violet-500 rounded-sm self-center" />
-          <h2 className="text-[12px] font-bold text-white uppercase tracking-[0.2em]">
+          <h2 className="text-[13px] font-bold text-white uppercase tracking-[0.2em]">
             Linha de Execução Ativa
           </h2>
-          <span className="text-[10px] text-zinc-600">Ordenado por prioridade matemática (Score)</span>
+          <span className="text-[11px] text-zinc-600">Ordenado por prioridade matemática (Score)</span>
         </div>
       </header>
 
@@ -113,9 +113,9 @@ export function TemporalBoardSection()
               <div className={`px-2.5 py-1.5 border-b border-zinc-900 flex items-center justify-between bg-gradient-to-r ${col.headerBg} to-transparent`}>
                 <div className="flex items-center gap-1.5">
                   <span className={`w-1.5 h-1.5 rounded-full ${col.dotColor} shadow-[0_0_6px_currentColor]`} />
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-white">{col.title}</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white">{col.title}</span>
                 </div>
-                <span className={`text-[10px] font-mono font-bold tabular-nums px-1.5 py-0.5 rounded ${col.countColor}`}>
+                <span className={`text-[11px] font-mono font-bold tabular-nums px-1.5 py-0.5 rounded ${col.countColor}`}>
                   {list.length}
                 </span>
               </div>
@@ -123,7 +123,7 @@ export function TemporalBoardSection()
               {/* lista densa */}
               {list.length === 0 ? (
                 <div className="flex-1 flex items-center justify-center px-3 py-6">
-                  <span className="text-[10px] text-zinc-700">Sem itens</span>
+                  <span className="text-[11px] text-zinc-700">Sem itens</span>
                 </div>
               ) : (
                 <ul role="list" className="divide-y divide-zinc-900/60 flex-1">
@@ -133,7 +133,7 @@ export function TemporalBoardSection()
                     </li>
                   ))}
                   {list.length > 8 && (
-                    <li className="px-2.5 py-1 text-[10px] text-zinc-600">
+                    <li className="px-2.5 py-1 text-[11px] text-zinc-600">
                       +{list.length - 8} outras
                     </li>
                   )}
@@ -143,7 +143,7 @@ export function TemporalBoardSection()
               {/* footer — add task */}
               <button
                 onClick={() => navigate('/kanban')}
-                className="px-2.5 py-1.5 border-t border-zinc-900 flex items-center justify-center gap-1 text-[10px] text-zinc-500 hover:text-violet-300 hover:bg-violet-500/5 transition-colors"
+                className="px-2.5 py-1.5 border-t border-zinc-900 flex items-center justify-center gap-1 text-[11px] text-zinc-500 hover:text-violet-300 hover:bg-violet-500/5 transition-colors"
               >
                 <Plus className="w-3 h-3" /> Nova tarefa
               </button>

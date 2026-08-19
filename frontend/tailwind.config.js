@@ -35,9 +35,15 @@ export default {
         'sl-lg': 'var(--sl-shadow-lg)',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        display: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
+      },
+      fontSize: {
+        'ui-caption': ['0.75rem', { lineHeight: '1rem' }],
+        'ui-body': ['0.8125rem', { lineHeight: '1.25rem' }],
+        'ui-title': ['0.9375rem', { lineHeight: '1.375rem' }],
+        'ui-heading': ['1.125rem', { lineHeight: '1.5rem' }],
       },
     },
   },

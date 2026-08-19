@@ -1,5 +1,11 @@
-// Capacidade do dia — termômetro conservador (gargalo, não média otimista)
-
+import {
+  computeCapacityScore,
+  resolveMode,
+  resolveWeightedBottleneck,
+  type CapacityFactorId,
+} from './dayCapacityModel'
+import { pickCapacityPhrase } from './dayCapacityPhrases'
+import { buildCapacityExplanation, type CapacityExplanation } from './dayCapacityExplain'
 import type { TarefaUnificada } from '../types'
 import type { ContaFixa, FinanceBillSettlement, ReservedBill, Transaction } from '../store/storeTypes'
 import type { CashAccountSettings } from '../store/storeTypes'
@@ -15,6 +21,7 @@ export interface DayCapacityFactor
 {
   id: 'mood' | 'finance' | 'kanban'
   label: string
+  shortLabel: string
   pct: number
   detail: string
 }
@@ -27,6 +34,8 @@ export interface DayCapacity
   impulseRisk: boolean
   suggestedImportantTasks: number
   factors: DayCapacityFactor[]
+  bottleneckId: DayCapacityFactor['id']
+  explanation: CapacityExplanation
 }
 
 function sumBillsThisWeek(
@@ -94,12 +103,17 @@ function financeToPct(saldoDisponivel: number, compromissosSemana: number): { pc
   const fmt = (v: number) =>
     v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
 
-  if (folga >= 2000) return { pct: 92, detail: `Folga ${fmt(folga)} após a semana` }
-  if (folga >= 800) return { pct: 72, detail: `Folga ${fmt(folga)} — confortável` }
-  if (folga >= 300) return { pct: 55, detail: `Margem ${fmt(folga)} após boletos` }
-  if (folga >= 0) return { pct: 38, detail: `No limite: ${fmt(folga)} após boletos` }
-  if (folga >= -400) return { pct: 22, detail: `Déficit ${fmt(Math.abs(folga))} na semana` }
-  return { pct: 12, detail: `Pressão alta: ${fmt(Math.abs(folga))} a cobrir` }
+  if (compromissosSemana <= 0)
+  {
+    return { pct: 85, detail: `Sem boletos nos próximos 7 dias · saldo ${fmt(saldoDisponivel)}` }
+  }
+
+  if (folga >= 2000) return { pct: 92, detail: `Sobra ${fmt(folga)} após boletos da semana` }
+  if (folga >= 800) return { pct: 72, detail: `Sobra ${fmt(folga)} após boletos da semana` }
+  if (folga >= 300) return { pct: 55, detail: `Margem ${fmt(folga)} após boletos da semana` }
+  if (folga >= 0) return { pct: 38, detail: `No limite: sobra ${fmt(folga)} após boletos` }
+  if (folga >= -400) return { pct: 22, detail: `Falta ${fmt(Math.abs(folga))} para cobrir a semana` }
+  return { pct: 12, detail: `Falta ${fmt(Math.abs(folga))} para cobrir boletos da semana` }
 }
 
 function kanbanToPct(
@@ -127,17 +141,24 @@ function kanbanToPct(
     pct = Math.max(0, pct - overdue * 15)
   }
 
-  let detail = `${load.percent}% da carga de Hoje`
+  let detail = `${load.percent}% da carga em Hoje`
   if (overdue > 0) detail += ` · ${overdue} vencida${overdue !== 1 ? 's' : ''}`
   return { pct: Math.round(pct), detail, overdue }
 }
 
-function resolveMode(score: number): CapacityMode
+const FACTOR_SHORT: Record<DayCapacityFactor['id'], string> = {
+  mood: 'Humor',
+  finance: 'Folga',
+  kanban: 'Carga',
+}
+
+function resolveBottleneck(
+  factors: DayCapacityFactor[],
+): CapacityFactorId
 {
-  if (score >= 72) return 'pleno'
-  if (score >= 52) return 'equilibrado'
-  if (score >= 32) return 'cuidado'
-  return 'critico'
+  return resolveWeightedBottleneck(
+    factors.map((f) => ({ id: f.id, pct: f.pct })),
+  )
 }
 
 function buildAxelPhrase(
@@ -146,31 +167,22 @@ function buildAxelPhrase(
   impulseRisk: boolean,
   moodProfile: string | undefined,
   hasMood: boolean,
+  bottleneck: DayCapacityFactor,
+  seed: string,
 ): string
 {
-  if (!hasMood)
-  {
-    return `Registre humor para calibrar — por ora, sugiro no máximo ${importantTasks} foco${importantTasks !== 1 ? 's' : ''} em Hoje.`
-  }
-  if (mode === 'pleno')
-  {
-    return impulseRisk
-      ? `Até ${importantTasks} prioridade${importantTasks !== 1 ? 's' : ''} — caixa ok, mas zero compra por impulso.`
-      : `Boa margem hoje — até ${importantTasks} foco${importantTasks !== 1 ? 's' : ''} importantes.`
-  }
-  if (mode === 'equilibrado')
-  {
-    return `${importantTasks} prioridade${importantTasks !== 1 ? 's' : ''} em Hoje e gasto consciente no cartão.`
-  }
-  if (mode === 'cuidado')
-  {
-    if (moodProfile === 'recuperacao' || moodProfile === 'cuidado')
-    {
-      return `${importantTasks} coisa${importantTasks !== 1 ? 's' : ''} importante${importantTasks !== 1 ? 's' : ''} e zero compras por impulso — modo cuidado.`
-    }
-    return `Poucas tarefas, sem gasto emocional. O AXEL segurou a carga.`
-  }
-  return `Capacidade baixa — só o essencial hoje.`
+  return pickCapacityPhrase({
+    mode,
+    bottleneckId: bottleneck.id,
+    bottleneckLabel: bottleneck.shortLabel,
+    bottleneckDetail: bottleneck.detail,
+    bottleneckPct: bottleneck.pct,
+    importantTasks,
+    hasMood,
+    impulseRisk,
+    moodProfile,
+    seed,
+  })
 }
 
 export function buildDayCapacity(input: {
@@ -213,9 +225,36 @@ export function buildDayCapacity(input: {
 
   const kanban = kanbanToPct(input.hojeTasks, input.dailyScoreCap, input.mood)
 
-  const bottleneck = Math.min(moodPct, finance.pct, kanban.pct)
-  const average = (moodPct + finance.pct + kanban.pct) / 3
-  const score = Math.round(bottleneck * 0.62 + average * 0.38)
+  const factors: DayCapacityFactor[] = [
+    {
+      id: 'mood',
+      label: 'Humor / energia',
+      shortLabel: FACTOR_SHORT.mood,
+      pct: moodPct,
+      detail: hasMood && humorMedia != null
+        ? `${humorMedia.toFixed(1)}/5 hoje`
+        : 'Sem registro hoje',
+    },
+    {
+      id: 'finance',
+      label: 'Folga financeira',
+      shortLabel: FACTOR_SHORT.finance,
+      pct: finance.pct,
+      detail: finance.detail,
+    },
+    {
+      id: 'kanban',
+      label: 'Carga Kanban',
+      shortLabel: FACTOR_SHORT.kanban,
+      pct: kanban.pct,
+      detail: kanban.detail,
+    },
+  ]
+
+  const bottleneckId = resolveBottleneck(factors)
+  const bottleneck = factors.find((f) => f.id === bottleneckId) ?? factors[0]
+
+  const score = computeCapacityScore(factors.map((f) => ({ id: f.id, pct: f.pct })))
 
   const mode = resolveMode(score)
 
@@ -226,13 +265,19 @@ export function buildDayCapacity(input: {
         : mode === 'equilibrado' ? 3
           : 4
 
+  const daySeed = ref.toISOString().slice(0, 10)
+
   const axelPhrase = buildAxelPhrase(
     mode,
     suggestedImportantTasks,
     impulseRisk,
     input.mood?.profile,
     hasMood,
+    bottleneck,
+    daySeed,
   )
+
+  const explanation = buildCapacityExplanation(factors, bottleneckId, score)
 
   return {
     score,
@@ -240,27 +285,8 @@ export function buildDayCapacity(input: {
     axelPhrase,
     impulseRisk,
     suggestedImportantTasks,
-    factors: [
-      {
-        id: 'mood',
-        label: 'Humor / energia',
-        pct: moodPct,
-        detail: hasMood && humorMedia != null
-          ? `${humorMedia.toFixed(1)}/5 hoje`
-          : 'Sem registro hoje',
-      },
-      {
-        id: 'finance',
-        label: 'Folga financeira',
-        pct: finance.pct,
-        detail: finance.detail,
-      },
-      {
-        id: 'kanban',
-        label: 'Carga Kanban',
-        pct: kanban.pct,
-        detail: kanban.detail,
-      },
-    ],
+    factors,
+    bottleneckId,
+    explanation,
   }
 }

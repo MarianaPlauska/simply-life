@@ -138,7 +138,7 @@ export function AcademyExercisesPanel({
         </header>
         {exercicios.length === 0 ? (
           <p className={`px-4 py-4 text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-            Nenhum exercício ainda — use a biblioteca ou adicione uma linha em branco.
+            Nenhum exercício ainda. Use a biblioteca ou adicione uma linha em branco.
           </p>
         ) : (
           <ul className="divide-y divide-line">

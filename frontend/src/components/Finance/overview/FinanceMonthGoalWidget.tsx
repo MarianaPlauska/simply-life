@@ -13,6 +13,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../../lib/currencyInput'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -56,14 +58,14 @@ export function FinanceMonthGoalWidget({
 
   const startEdit = () =>
   {
-    setDraft(goal ? String(goal.valorAlvo) : '')
+    setDraft(goal ? formatCentsToBrl(Math.round(goal.valorAlvo * 100)) : '')
     setEditing(true)
   }
 
   const save = () =>
   {
-    const val = Number(draft.replace(',', '.'))
-    if (Number.isNaN(val) || val <= 0) return
+    const val = parseMoneyInputToNumber(draft)
+    if (val <= 0) return
     const saved = saveMonthSavingsGoal(val, goal?.titulo)
     setGoal(saved)
     setEditing(false)
@@ -110,16 +112,11 @@ export function FinanceMonthGoalWidget({
           Meta de poupança
         </p>
         <div className="flex gap-2">
-          <input
-            type="number"
-            inputMode="decimal"
-            min={1}
-            step={50}
+          <MoneyInput
             value={draft}
-            onChange={(e) => setDraft(e.target.value)}
+            onChange={setDraft}
             placeholder="Ex.: 500"
-            className="flex-1 min-w-0 rounded-sl border border-line bg-chrome/30 px-2 py-1.5 font-mono text-[12px]"
-            autoFocus
+            className="flex-1 min-w-0 text-[12px]"
           />
           <button
             type="button"

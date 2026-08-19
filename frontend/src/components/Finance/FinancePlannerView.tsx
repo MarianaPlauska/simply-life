@@ -8,6 +8,7 @@ import {
   type FinancePeriodConfig,
 } from '../../lib/financePeriodFilter';
 import { useFinancePlannerInit } from '../../hooks/useFinancePlannerInit';
+import { useFinanceHideValues } from '../../hooks/useFinanceHideValues';
 import { useCashPosition } from '../../hooks/useCashPosition';
 import { useFinanceDueNotifications } from '../../hooks/useFinanceDueNotifications';
 import {
@@ -56,6 +57,7 @@ export function FinancePlannerView() {
   const { computed: computedCashPosition, display: cashPosition } = useCashPosition();
 
   const { loading: financeLoading } = useFinancePlannerInit();
+  const { hidden: hideValues, toggle: toggleHideValues } = useFinanceHideValues();
   useFinanceDueNotifications(true);
 
   const [navGroup, setNavGroup] = useState<PlannerGroup>('inicio');
@@ -276,6 +278,8 @@ export function FinancePlannerView() {
       onTabChange={(id) => goToGroup(id as PlannerGroup)}
       onManageCategories={() => setShowCatModal(true)}
       onNewTransaction={() => setNewTransactionOpen(true)}
+      hideValues={hideValues}
+      onToggleHideValues={toggleHideValues}
       showNewTransactionFab={
         navGroup !== 'analise'
         && navGroup !== 'contas'
@@ -328,6 +332,7 @@ export function FinancePlannerView() {
           saldo={saldo}
           transactions={transactions}
           monthTransactions={monthTx}
+          hideValues={hideValues}
           onNavigate={(t) => goToLeaf(t as PlannerLeafTab)}
         />
       )}
@@ -414,12 +419,13 @@ export function FinancePlannerView() {
       {activeLeaf === 'conta' && (
         <FinanceCashTab
           saldoDisponivel={cashPosition.saldoDisponivel}
-          saldoCorrente={cashPosition.saldoCorrente}
           reservaRestante={cashPosition.reservaRestante}
           saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
+          saldoInicial={cashPosition.saldoInicial}
+          receitasPagas={cashPosition.receitasPagas}
+          despesasPagas={cashPosition.despesasPagas}
           compromissosFixas={cashPosition.compromissosFixas}
           computedDisponivel={computedCashPosition.saldoDisponivel}
-          computedCorrente={computedCashPosition.saldoCorrente}
           computedReservado={computedCashPosition.reservaRestante}
           computedProjetado={computedCashPosition.saldoProjetadoDisponivel}
           onNewExtraIncome={() => setNewTransactionOpen(true, 'receita')}

@@ -58,11 +58,11 @@ export function MedicamentosView()
     <div className="space-y-4">
       <div>
         <h2 className="text-[13px] font-semibold text-ink flex items-center gap-2">
-          <Pill className="w-4 h-4 text-teal-400 shrink-0" />
+          <Pill className="w-4 h-4 text-accent shrink-0" />
           Medicamentos
         </h2>
         <p className={`text-[11px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-          Uma aba por vez — agenda, cadastro ou lista.
+          Uma aba por vez: agenda, cadastro ou lista.
         </p>
       </div>
 

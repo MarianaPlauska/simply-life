@@ -5,6 +5,11 @@ import {
   type AcademyPlanoDia,
   resolvePlanoParaRef,
 } from '../../../lib/academyWorkouts'
+import {
+  ensurePlanoCodigo,
+  formatTreinoLabel,
+  labelTreinoPlano,
+} from '../../../lib/academyTreinoCodes'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { DEFAULT_TREINO_MINUTOS } from '../../../constants/healthPresets'
@@ -46,13 +51,17 @@ export function AcademyDayBuilder({ diaRef, subtitulo }: AcademyDayBuilderProps)
 
   const titulo = planoAtual?.titulo ?? ''
   const metaMinutos = planoAtual?.meta_minutos ?? 0
+  const codigo = planoAtual?.codigo ?? ''
+
+  const refCodigo = diaRef.modo === 'mes'
+    ? { iso: diaRef.iso }
+    : { diaKey: diaRef.key }
+
+  const rotuloTreino = labelTreinoPlano(planoAtual, refCodigo)
 
   const salvarPlano = async (patch: Partial<AcademyPlanoDia>) =>
   {
-    const next: AcademyPlanoDia = {
-      titulo: patch.titulo ?? titulo,
-      meta_minutos: patch.meta_minutos ?? metaMinutos,
-    }
+    const next = ensurePlanoCodigo(patch, planoAtual, refCodigo, planoSemana)
 
     if (diaRef.modo === 'semana')
     {
@@ -81,7 +90,27 @@ export function AcademyDayBuilder({ diaRef, subtitulo }: AcademyDayBuilderProps)
           {subtitulo && (
             <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{subtitulo}</p>
           )}
+          {(titulo.trim() || codigo) && (
+            <p className={`text-[12px] mt-1 font-medium ${AXEL_TEXT_PRIMARY}`}>
+              {rotuloTreino}
+            </p>
+          )}
         </div>
+
+        <label className="block space-y-1">
+          <span className="text-[10px] font-mono uppercase text-ink-muted">Código do treino</span>
+          <input
+            type="text"
+            maxLength={4}
+            value={codigo}
+            onChange={(e) => void salvarPlano({ codigo: e.target.value.toUpperCase() })}
+            placeholder="A"
+            className="w-20 px-3 py-2 rounded-sl border border-line bg-chrome text-[13px] text-ink font-mono uppercase outline-none focus:border-accent/40"
+          />
+          <p className="text-[10px] text-ink-muted">
+            Estável no mês — ex.: {formatTreinoLabel(codigo || 'A', titulo || '…')}
+          </p>
+        </label>
 
         <label className="block space-y-1">
           <span className="text-[10px] font-mono uppercase text-ink-muted">Nome do treino</span>

@@ -21,7 +21,7 @@ export function ProfileAchievementsGrid()
           <Trophy size={14} className="text-atencao" />
           <h2 className={AXEL_SECTION_TITLE}>Conquistas</h2>
         </header>
-        <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+        <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
           Complete missões e mantenha a ofensiva — badges aparecem aqui.
         </p>
       </section>
@@ -35,7 +35,7 @@ export function ProfileAchievementsGrid()
         <h2 id="achievements-title" className={AXEL_SECTION_TITLE}>
           Conquistas
         </h2>
-        <span className={`ml-auto font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`ml-auto font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>
           {achievements.length}
         </span>
       </header>
@@ -53,7 +53,7 @@ export function ProfileAchievementsGrid()
               <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
                 {a.titulo}
               </p>
-              <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+              <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
                 {a.descricao}
               </p>
             </div>

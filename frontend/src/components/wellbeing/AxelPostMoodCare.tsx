@@ -49,7 +49,7 @@ export function AxelPostMoodCare()
 
   return (
     <div className="sl-panel p-3 sm:p-4 mb-3">
-      <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent mb-2">
+      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
         Axel · bem-estar
       </p>
       <AxelCareNudge

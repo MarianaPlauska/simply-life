@@ -36,11 +36,11 @@ export function ReportCardSection()
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4 text-violet-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-medium">
+            <span className="text-[12px] text-zinc-400 uppercase tracking-wider font-medium">
               Performance da Semana
             </span>
           </div>
-          <span className="text-[10px] text-zinc-600 group-hover:text-violet-400 transition-colors">
+          <span className="text-[11px] text-zinc-600 group-hover:text-violet-400 transition-colors">
             Ver relatório completo →
           </span>
         </div>
@@ -54,7 +54,7 @@ export function ReportCardSection()
               </span>
               <VariacaoBadge valor={resumo.variacao_score_semana} />
             </div>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Score Eficiência</p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">Score Eficiência</p>
           </div>
 
           {/* Tarefas */}
@@ -62,7 +62,7 @@ export function ReportCardSection()
             <span className="text-xl font-bold text-emerald-400">
               {resumo.tarefas_concluidas_semana}
             </span>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Tarefas Concluídas</p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">Tarefas Concluídas</p>
           </div>
 
           {/* Foco */}
@@ -70,7 +70,7 @@ export function ReportCardSection()
             <span className="text-xl font-bold text-cyan-400">
               {resumo.minutos_foco_semana}<span className="text-xs text-zinc-500">min</span>
             </span>
-            <p className="text-[10px] text-zinc-500 mt-0.5">Tempo de Foco</p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">Tempo de Foco</p>
           </div>
 
           {/* XP */}
@@ -78,7 +78,7 @@ export function ReportCardSection()
             <span className="text-xl font-bold text-amber-400">
               {resumo.xp_semana}<span className="text-xs text-zinc-500">xp</span>
             </span>
-            <p className="text-[10px] text-zinc-500 mt-0.5">XP Ganho</p>
+            <p className="text-[11px] text-zinc-500 mt-0.5">XP Ganho</p>
           </div>
         </div>
 
@@ -124,14 +124,14 @@ export function ReportCardSection()
 
 function VariacaoBadge({ valor }: { valor: number }) {
   if (valor > 0) return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-emerald-400">
+    <span className="inline-flex items-center gap-0.5 text-[12px] font-medium text-emerald-400">
       <ArrowUpRight className="w-3 h-3" />{valor}%
     </span>
   );
   if (valor < 0) return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-rose-400">
+    <span className="inline-flex items-center gap-0.5 text-[12px] font-medium text-rose-400">
       <ArrowDownRight className="w-3 h-3" />{Math.abs(valor)}%
     </span>
   );
-  return <span className="text-[11px] text-zinc-500">—</span>;
+  return <span className="text-[12px] text-zinc-500">—</span>;
 }

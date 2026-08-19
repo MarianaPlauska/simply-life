@@ -1,18 +1,24 @@
+import { ChevronDown } from 'lucide-react'
 import { MoodTracker } from './MoodTracker'
 import { HealthNoteComposer } from './HealthNoteComposer'
 import { MoodDiarySection } from '../wellbeing/MoodDiarySection'
-import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { WeeklyReviewCard } from './WeeklyReviewCard'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 
 export function HealthDiaryTab()
 {
   return (
     <section className="space-y-4">
-      <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-        Humor, reações e notas no mesmo lugar. O feed abaixo mistura registros de humor com suas anotações.
-      </p>
       <MoodTracker />
       <HealthNoteComposer />
-      <MoodDiarySection defaultView="diario" />
+      <MoodDiarySection defaultView="historico" />
+      <DashboardCollapsible
+        title="Revisão da semana"
+        icon={<ChevronDown className="w-4 h-4 text-accent shrink-0 group-open:rotate-180 transition-transform" />}
+        className="border border-line/80"
+      >
+        <WeeklyReviewCard />
+      </DashboardCollapsible>
     </section>
   )
 }

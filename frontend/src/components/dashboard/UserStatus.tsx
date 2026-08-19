@@ -120,7 +120,7 @@ function ProfileHeader({ nome, firstName, email, iniciais, level, onLogout }: Pr
             </span>
             <ChevronDown className={`w-4 h-4 shrink-0 ${AXEL_TEXT_SECONDARY} transition-transform ${open ? 'rotate-180' : ''}`} />
           </div>
-          <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
             Lv {level} · ver ofensiva no perfil
           </p>
         </div>
@@ -130,7 +130,7 @@ function ProfileHeader({ nome, firstName, email, iniciais, level, onLogout }: Pr
         <div className={`absolute z-50 left-0 right-0 top-full mt-2 py-1 ${AXEL_DROPDOWN}`}>
           <div className="px-4 py-2 text-left">
             <div className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{nome}</div>
-            {email && <div className={`font-mono text-[10px] truncate mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{email}</div>}
+            {email && <div className={`font-mono text-[11px] truncate mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{email}</div>}
           </div>
           <div className={AXEL_LINE} />
           <MenuItem Icon={User} label="Perfil & ofensiva" onClick={() => { setOpen(false); navigate('/perfil') }} />

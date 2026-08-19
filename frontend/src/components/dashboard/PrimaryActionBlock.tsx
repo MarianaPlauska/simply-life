@@ -78,10 +78,10 @@ export function PrimaryActionBlock()
   return (
     <section className={`bg-card border border-zinc-900 border-l-2 ${accent} rounded-md`}>
       <header className="px-3 pt-2 flex items-center justify-between">
-        <span className="text-[10px] font-bold text-violet-300 uppercase tracking-widest">
+        <span className="text-[11px] font-bold text-violet-300 uppercase tracking-widest">
           Próxima Ação
         </span>
-        <span className="text-[10px] font-mono text-zinc-500">score {next.score_urgencia ?? 0}</span>
+        <span className="text-[11px] font-mono text-zinc-500">score {next.score_urgencia ?? 0}</span>
       </header>
 
       <div className="px-3 pt-2 pb-4 flex items-center gap-4">
@@ -99,10 +99,10 @@ export function PrimaryActionBlock()
             {status}
           </p>
           <div className="flex items-center gap-2 mt-2">
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-zinc-400 border border-zinc-900">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium text-zinc-400 border border-zinc-900">
               {originLabel(next.origem)}
             </span>
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-zinc-400 border border-zinc-900">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium text-zinc-400 border border-zinc-900">
               {next.prioridade}
             </span>
           </div>

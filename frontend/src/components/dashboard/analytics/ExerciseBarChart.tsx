@@ -31,7 +31,7 @@ export function ExerciseBarChart({ rows, consistencyPct }: ExerciseBarChartProps
         <span className={AXEL_DISPLAY_STAT}>
           {totalMin}m
         </span>
-        <span className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{consistencyPct}% consistência</span>
+        <span className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>{consistencyPct}% consistência</span>
       </div>
 
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>

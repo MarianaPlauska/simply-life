@@ -10,7 +10,7 @@ export function XPHeaderBar()
 
   return (
     <div className="flex items-center gap-3 px-1 py-1">
-      <span className="text-[11px] font-bold tracking-wider text-ink-muted uppercase">
+      <span className="text-[12px] font-bold tracking-wider text-ink-muted uppercase">
         Nível {profile.level}
       </span>
       <div className="flex-1 h-1.5 rounded-full bg-chrome overflow-hidden border border-line">
@@ -19,7 +19,7 @@ export function XPHeaderBar()
           style={{ width: `${profile.xpPct}%` }}
         />
       </div>
-      <span className="text-[11px] font-mono tabular-nums text-ink-muted">
+      <span className="text-[12px] font-mono tabular-nums text-ink-muted">
         {profile.xpInLevel}/{profile.xpToNextLevel} XP
       </span>
     </div>

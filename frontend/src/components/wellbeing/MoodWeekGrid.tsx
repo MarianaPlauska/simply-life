@@ -42,7 +42,7 @@ export function MoodWeekGrid({ dias }: MoodWeekGridProps)
         const Icon = mood?.icon
         return (
           <div key={iso} className="flex flex-col items-center gap-1 min-w-0 flex-1">
-            <span className="font-mono text-[8px] uppercase text-ink-muted">{shortWeekday(iso)}</span>
+            <span className="font-mono text-[9px] uppercase text-ink-muted">{shortWeekday(iso)}</span>
             <div
               className={`w-9 h-9 rounded-sl border flex items-center justify-center ${
                 mood ? mood.colorClass : 'border-line bg-chrome/50'

@@ -13,7 +13,6 @@ export function NotesMoodStrip()
   const humorSemanaAgregado = useTaskStore((s) => s.humorSemanaAgregado)
   const fetchHumorResumo = useTaskStore((s) => s.fetchHumorResumo)
   const registrarHumor = useTaskStore((s) => s.registrarHumor)
-  const criarEntradaDiario = useTaskStore((s) => s.criarEntradaDiario)
 
   const [pendingMood, setPendingMood] = useState<{ value: number; label: string } | null>(null)
   const [nota, setNota] = useState('')
@@ -33,11 +32,7 @@ export function NotesMoodStrip()
     try
     {
       const texto = nota.trim()
-      const row = await registrarHumor(pendingMood.value, pendingMood.label, texto)
-      if (texto && row)
-      {
-        await criarEntradaDiario(texto, `Humor: ${pendingMood.label}`)
-      }
+      await registrarHumor(pendingMood.value, pendingMood.label, texto)
       setNota('')
       setPendingMood(null)
     }
@@ -78,7 +73,7 @@ export function NotesMoodStrip()
           <textarea
             value={nota}
             onChange={(e) => setNota(e.target.value)}
-            placeholder="Nota rápida (opcional) — vira entrada no diário"
+            placeholder="Nota rápida (opcional). Vai junto com o humor de hoje"
             rows={2}
             disabled={saving}
             className="mt-2 w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[13px] text-ink resize-none min-h-[48px] disabled:opacity-50"
@@ -90,7 +85,7 @@ export function NotesMoodStrip()
             onClick={() => void confirmMood()}
             className="mt-2 w-full sm:w-auto px-4 py-2 rounded-sl bg-accent text-white font-mono text-[10px] uppercase disabled:opacity-40"
           >
-            {saving ? 'Salvando…' : pendingMood ? `Registrar — ${pendingMood.label}` : 'Escolha o humor'}
+            {saving ? 'Salvando…' : pendingMood ? `Registrar · ${pendingMood.label}` : 'Escolha o humor'}
           </button>
         </div>
 

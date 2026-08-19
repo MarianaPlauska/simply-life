@@ -171,7 +171,7 @@ export function MedicamentosBulkPanel({
       const n = await addMedicamentosBulk([draftToItem({ ...draft, nome: draft.nome.trim() })])
       if (n > 0)
       {
-        toast.success('Medicamento salvo — lembrete no horário configurado')
+        toast.success('Medicamento salvo. Lembrete no horário configurado')
         setDraft(EMPTY_DRAFT())
       }
     }
@@ -253,7 +253,7 @@ export function MedicamentosBulkPanel({
               </p>
             </div>
             <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-              Uso diário com horários por período — o AXEL aprende e lembra na hora certa.
+              Uso diário com horários por período. O AXEL aprende e lembra na hora certa.
             </p>
           </>
         )}
@@ -363,7 +363,7 @@ export function MedicamentosBulkPanel({
             onChange={(e) => setDraft((d) => ({ ...d, usoDiario: e.target.checked }))}
             className="rounded-sl border-line accent-[var(--sl-accent)]"
           />
-          Uso diário — alertas automáticos
+          Uso diário com alertas automáticos
         </label>
 
         <div>
@@ -435,7 +435,7 @@ export function MedicamentosBulkPanel({
             onChange={(e) => setDraft((d) => ({ ...d, consultaRenovacao: e.target.value }))}
             className="mt-0.5 w-full bg-chrome border border-line rounded-sl px-2 py-1 text-[12px] text-ink min-h-[36px]"
           />
-          <p className="text-[10px] text-ink-muted mt-1">Lembrete na aba Hoje — útil para psiquiatra, cardiologista, etc.</p>
+          <p className="text-[10px] text-ink-muted mt-1">Lembrete na aba Hoje. Útil para psiquiatra, cardiologista, etc.</p>
         </label>
 
         <div>

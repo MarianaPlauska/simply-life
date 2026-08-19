@@ -74,6 +74,8 @@ export interface AcademyPlanoDia
 {
   titulo: string
   meta_minutos: number
+  /** Código estável ex.: A, B, 01 */
+  codigo?: string
 }
 
 export const DIAS_SEMANA = [

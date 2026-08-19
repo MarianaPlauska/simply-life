@@ -5,6 +5,8 @@ import { useTaskStore } from '../../store/useTaskStore'
 import type { ExpensePreset } from '../../lib/financeExpensePresets'
 import { resolvePresetIcon, resolvePresetColor } from '../../lib/financePresetIcons'
 import { FinancePresetEditor } from './FinancePresetEditor'
+import { MoneyInput } from '../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../lib/currencyInput'
 import {
   AXEL_SEG_IDLE,
   AXEL_TEXT_PRIMARY,
@@ -56,14 +58,18 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
   const handlePresetClick = (preset: ExpensePreset) =>
   {
     setPending(preset)
-    setPendingVal(preset.valor != null && preset.valor > 0 ? String(preset.valor) : '')
+    setPendingVal(
+      preset.valor != null && preset.valor > 0
+        ? formatCentsToBrl(Math.round(preset.valor * 100))
+        : '',
+    )
     setSaveValorToPreset(true)
   }
 
   const confirmPending = () =>
   {
     if (!pending) return
-    const val = parseFloat(pendingVal.replace(',', '.'))
+    const val = parseMoneyInputToNumber(pendingVal)
     if (Number.isNaN(val) || val <= 0)
     {
       toast.error('Informe um valor válido')
@@ -149,14 +155,11 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
             <p className={`text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               Ajuste o valor antes de lançar
             </p>
-            <input
-              autoFocus
+            <MoneyInput
               value={pendingVal}
-              onChange={(e) => setPendingVal(e.target.value)}
+              onChange={setPendingVal}
               placeholder="Valor (R$)"
-              inputMode="decimal"
-              className="mt-3 w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-base font-mono text-ink"
-              onKeyDown={(e) => e.key === 'Enter' && confirmPending()}
+              className="mt-3 w-full min-h-[44px] text-base"
             />
             <label className="mt-3 flex items-center gap-2 cursor-pointer">
               <input

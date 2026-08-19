@@ -13,6 +13,7 @@ interface KanbanTodayPanelProps
 {
   tasks: TarefaUnificada[]
   totalCount: number
+  isOrganizing?: boolean
   selectedId: number | null
   selectedTask: TarefaUnificada | null
   executingId: number | null
@@ -30,6 +31,7 @@ const WIP_LIMIT = 8
 export function KanbanTodayPanel({
   tasks,
   totalCount,
+  isOrganizing = false,
   selectedId,
   selectedTask,
   executingId,
@@ -87,7 +89,13 @@ export function KanbanTodayPanel({
       </header>
 
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        {tasks.length === 0 ? (
+        {isOrganizing ? (
+          <div className="mx-2 my-1.5 px-2.5 py-4 text-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted animate-pulse">
+              Organizando prioridades…
+            </p>
+          </div>
+        ) : tasks.length === 0 ? (
           <div className={`mx-2 my-1.5 px-2.5 py-3 text-center ${AXEL_KANBAN_DROPZONE} ${isOver ? 'border-accent/40 text-accent' : ''}`}>
             <p className="font-mono text-[10px] uppercase tracking-[0.12em]">
               {isOver ? 'Soltar aqui' : 'Nada priorizado'}

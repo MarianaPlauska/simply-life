@@ -74,7 +74,7 @@ export function ProfileAxelHero()
               initials={iniciais}
               size={80}
             />
-            <span className="absolute -bottom-1 -right-1 font-mono text-[9px] px-1.5 py-0.5 rounded-sl bg-accent text-white border border-line">
+            <span className="absolute -bottom-1 -right-1 font-mono text-[10px] px-1.5 py-0.5 rounded-sl bg-accent text-white border border-line">
               {profile.level}
             </span>
           </div>
@@ -85,10 +85,10 @@ export function ProfileAxelHero()
                 <span className="ml-2 text-base" title="Badge" aria-hidden>{badge.emoji}</span>
               )}
             </h2>
-            <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[13px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
               {arquetipo(profile.level)} · {profile.xpInLevel}/{profile.xpToNextLevel} XP
             </p>
-            <p className={`text-[11px] sm:text-[12px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[12px] sm:text-[13px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
               {reaction.message}
             </p>
           </div>

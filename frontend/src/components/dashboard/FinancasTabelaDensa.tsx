@@ -64,9 +64,9 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
       <FinanceBalanceInsight />
 
       <div className="overflow-x-auto mt-3">
-        <table className="w-full border-collapse text-[11px]">
+        <table className="w-full border-collapse text-[12px]">
           <thead>
-            <tr className={`font-mono uppercase text-[9px] tracking-wider ${AXEL_TEXT_SECONDARY} border-b border-line`}>
+            <tr className={`font-mono uppercase text-[10px] tracking-wider ${AXEL_TEXT_SECONDARY} border-b border-line`}>
               <th className="pb-2 pr-3 text-left font-medium w-[52px]">Data</th>
               <th className="pb-2 pr-3 text-left font-medium">Descrição</th>
               <th className="pb-2 pr-3 text-right font-medium w-[80px]">Valor</th>
@@ -116,7 +116,7 @@ export function FinancasTabelaDensa({ embedded = false }: FinancasTabelaDensaPro
 
       <div className="mt-4 pt-4 border-t border-line">
         <div className="flex items-center justify-between mb-2">
-          <span className={`font-mono text-[9px] uppercase tracking-wider ${AXEL_TEXT_SECONDARY}`}>
+          <span className={`font-mono text-[10px] uppercase tracking-wider ${AXEL_TEXT_SECONDARY}`}>
             Regra 50 · 30 · 20
           </span>
         </div>

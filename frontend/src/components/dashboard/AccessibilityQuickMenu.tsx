@@ -30,7 +30,7 @@ function ToggleRow({ label, description, active, onChange }: ToggleRowProps)
       <div className="min-w-0">
         <span className={`text-[13px] ${AXEL_TEXT_PRIMARY}`}>{label}</span>
         {description && (
-          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{description}</p>
+          <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{description}</p>
         )}
       </div>
       <span
@@ -72,7 +72,7 @@ export function AccessibilityPanel({ variant = 'menu' }: AccessibilityPanelProps
       <div className={isPage ? 'sl-panel overflow-hidden' : ''}>
         {!isPage && (
           <div className="px-3 py-2 border-b border-line">
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
               Aparência
             </p>
           </div>
@@ -98,7 +98,7 @@ export function AccessibilityPanel({ variant = 'menu' }: AccessibilityPanelProps
                   }`}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
-                  <p className="text-[12px] font-medium">{opt.label}</p>
+                  <p className="text-[13px] font-medium">{opt.label}</p>
                 </button>
               )
             })}
@@ -109,7 +109,7 @@ export function AccessibilityPanel({ variant = 'menu' }: AccessibilityPanelProps
       <div className={isPage ? 'sl-panel overflow-hidden' : ''}>
         {!isPage && (
           <div className="px-3 py-2 border-t border-line">
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
               Leitura
             </p>
           </div>
@@ -125,7 +125,7 @@ export function AccessibilityPanel({ variant = 'menu' }: AccessibilityPanelProps
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <span className={`text-[12px] font-mono tabular-nums w-8 text-center ${AXEL_TEXT_SECONDARY}`}>
+            <span className={`text-[13px] font-mono tabular-nums w-8 text-center ${AXEL_TEXT_SECONDARY}`}>
               {accessibility.fontSize}
             </span>
             <button
@@ -157,7 +157,7 @@ export function AccessibilityPanel({ variant = 'menu' }: AccessibilityPanelProps
       <div className={isPage ? 'sl-panel overflow-hidden divide-y divide-line' : 'border-t border-line'}>
         {!isPage && (
           <div className="px-3 py-2">
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
               Conforto
             </p>
           </div>

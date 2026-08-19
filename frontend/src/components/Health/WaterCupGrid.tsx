@@ -86,6 +86,8 @@ export function WaterCupGrid({
   const current = entries.length
   const cupCount = Math.min(Math.max(goal, metaGoal, current + 1), 12)
   const cols = cupCount <= 6 ? cupCount : 4
+  const colMin = compact ? '3.5rem' : '4rem'
+  const colMax = compact ? '4.5rem' : '5.25rem'
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   const handleSlot = (index: number) =>
@@ -146,13 +148,15 @@ export function WaterCupGrid({
     )
   }
 
+  const gridGap = compact ? 'gap-2' : 'gap-2 sm:gap-3'
+
   return (
     <div className="space-y-2">
       {defaultMlPanel}
 
       <div
-        className={`grid gap-2 ${compact ? 'gap-1.5' : 'gap-2 sm:gap-3'}`}
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        className={`grid w-fit max-w-full mx-auto justify-items-center ${gridGap}`}
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(${colMin}, ${colMax}))` }}
         role="group"
         aria-label={`${current} de ${metaGoal} — ${entries.reduce((a, b) => a + b, 0)} ml`}
       >
@@ -170,8 +174,8 @@ export function WaterCupGrid({
               disabled={disabled}
               onClick={() => handleSlot(i)}
               className={[
-                'sl-touch relative flex flex-col items-center justify-end rounded-sl',
-                compact ? 'p-1 min-h-[44px]' : 'p-1.5 sm:p-2 min-h-[64px] sm:min-h-[72px]',
+                'sl-touch relative flex flex-col items-center justify-end rounded-sl w-full',
+                compact ? 'p-1.5 min-h-[52px] sm:min-h-[56px]' : 'p-1.5 sm:p-2 min-h-[60px] sm:min-h-[68px]',
                 'border border-transparent hover:border-accent/25 hover:bg-accent-muted/30',
                 'active:scale-95 transition-all duration-150 ease-out',
                 isExtraCup ? 'border-dashed border-accent/20' : '',

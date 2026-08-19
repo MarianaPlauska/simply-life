@@ -9,6 +9,8 @@ import { summarizeLedger, type LedgerSummary } from './financeLedger'
 import { contaFixaEfetivamenteAtiva } from './financeContaFixa'
 import { isContaFixaSatisfiedThisMonth } from './financeRecurringPost'
 import type { CashBalanceOverrides } from '../store/storeTypes'
+import { isPaidInSettlements } from './financeLedgerReconcile'
+import { hasPaidCashExpenseForBill } from './financeBillPayment'
 
 export interface ReservationSummary
 {
@@ -32,12 +34,63 @@ export interface CashPositionOptions
 {
   contasFixas?: ContaFixa[]
   billSettlements?: FinanceBillSettlement[]
+  transactions?: Transaction[]
   reference?: Date
   overrides?: CashBalanceOverrides | null
 }
 
-export function summarizeReservations(bills: ReservedBill[]): ReservationSummary
+export interface ReservationOptions
 {
+  settlements?: FinanceBillSettlement[]
+  transactions?: Transaction[]
+}
+
+/** Reserva efetiva — ignora boletos já pagos (Pagos) ou com despesa no extrato */
+export function effectiveReservedForBill(
+  bill: ReservedBill,
+  settlements: FinanceBillSettlement[] = [],
+  transactions: Transaction[] = [],
+): number
+{
+  if (bill.status !== 'aberta') return 0
+
+  const remaining = Math.max(0, bill.valor_alocado - bill.valor_gasto)
+  if (remaining <= 0) return 0
+
+  if (isPaidInSettlements(bill.titulo, bill.valor_alocado, settlements)) return 0
+  if (hasPaidCashExpenseForBill(transactions, bill.titulo, bill.valor_alocado)) return 0
+  if (hasPaidCashExpenseForBill(transactions, bill.titulo, remaining)) return 0
+
+  return remaining
+}
+
+/** Pagamentos em Pagos sem lançamento no caixa — só desconta do mês corrente */
+function sumSettlementCashGaps(
+  settlements: FinanceBillSettlement[],
+  transactions: Transaction[],
+  reference: Date,
+): number
+{
+  const monthKey = `${reference.getFullYear()}-${String(reference.getMonth() + 1).padStart(2, '0')}`
+  let gap = 0
+
+  for (const s of settlements)
+  {
+    if (!s.pago_em.startsWith(monthKey)) continue
+    if (hasPaidCashExpenseForBill(transactions, s.titulo, s.valor)) continue
+    gap += s.valor
+  }
+
+  return gap
+}
+
+export function summarizeReservations(
+  bills: ReservedBill[],
+  options?: ReservationOptions,
+): ReservationSummary
+{
+  const settlements = options?.settlements ?? []
+  const transactions = options?.transactions ?? []
   const abertas = bills.filter((b) => b.status === 'aberta')
   let totalAlocado = 0
   let totalGasto = 0
@@ -47,7 +100,7 @@ export function summarizeReservations(bills: ReservedBill[]): ReservationSummary
   {
     totalAlocado += b.valor_alocado
     totalGasto += b.valor_gasto
-    totalReservado += Math.max(0, b.valor_alocado - b.valor_gasto)
+    totalReservado += effectiveReservedForBill(b, settlements, transactions)
   }
 
   return {
@@ -101,22 +154,29 @@ export function computeCashPosition(
 ): CashPosition
 {
   const reference = options?.reference ?? new Date()
+  const settlements = options?.billSettlements ?? []
   const ledger = summarizeLedger(transactions, saldoInicial)
-  const res = summarizeReservations(bills)
+  const settlementGap = sumSettlementCashGaps(settlements, transactions, reference)
+  const saldoCorrenteAjustado = ledger.saldoCorrente - settlementGap
+  const res = summarizeReservations(bills, {
+    settlements,
+    transactions,
+  })
   const compromissosFixas = sumUnpostedContasFixas(
     options?.contasFixas ?? [],
     transactions,
-    options?.billSettlements ?? [],
+    settlements,
     reference,
   )
 
   const base: CashPosition = {
     ...ledger,
+    saldoCorrente: saldoCorrenteAjustado,
     saldoInicial,
     reservaRestante: res.totalReservado,
-    saldoDisponivel: ledger.saldoCorrente - res.totalReservado,
+    saldoDisponivel: saldoCorrenteAjustado - res.totalReservado,
     compromissosFixas,
-    saldoProjetadoDisponivel: ledger.saldoProjetado - res.totalReservado - compromissosFixas,
+    saldoProjetadoDisponivel: ledger.saldoProjetado - settlementGap - res.totalReservado - compromissosFixas,
   }
 
   return applyManualOverrides(base, options?.overrides)

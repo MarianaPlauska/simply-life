@@ -102,7 +102,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
               {streakCount}
               <span className="text-xs font-normal text-ink-muted ml-1">dias</span>
             </p>
-            <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
               {offensive.safe ? 'Dia salvo' : 'Salve o dia com 1 ação'}
             </p>
           </div>
@@ -114,7 +114,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
               key={item.id}
               type="button"
               onClick={() => navigate(item.path)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sl border text-[11px] transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sl border text-[12px] transition-colors ${
                 item.done
                   ? 'border-concluido/30 bg-concluido/8 text-concluido'
                   : 'border-line bg-card hover:bg-chrome/50 text-ink'
@@ -130,8 +130,8 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
           <Target size={12} className="text-accent shrink-0" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2 mb-0.5">
-              <span className={`text-[10px] font-medium ${AXEL_TEXT_PRIMARY}`}>Nv {level}</span>
-              <span className={`font-mono text-[9px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+              <span className={`text-[11px] font-medium ${AXEL_TEXT_PRIMARY}`}>Nv {level}</span>
+              <span className={`font-mono text-[10px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
                 {xpInLevel}/100
               </span>
             </div>
@@ -139,7 +139,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
               <div className={`h-full rounded-sl ${AXEL_PROGRESS}`} style={{ width: `${xpInLevel}%` }} />
             </div>
             {dailyQuest && (
-              <p className={`text-[9px] mt-0.5 truncate ${AXEL_TEXT_SECONDARY}`}>
+              <p className={`text-[10px] mt-0.5 truncate ${AXEL_TEXT_SECONDARY}`}>
                 {dailyQuest.titulo} · {questPct}%
               </p>
             )}
@@ -166,11 +166,11 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
       aria-label="Ofensiva diária"
     >
       <header className="flex items-center justify-between gap-2 mb-3">
-        <span className={`font-mono text-[9px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`font-mono text-[10px] uppercase tracking-[0.14em] ${AXEL_TEXT_SECONDARY}`}>
           Ofensiva
         </span>
         {offensive.safe && (
-          <span className="font-mono text-[8px] uppercase text-concluido">Dia salvo</span>
+          <span className="font-mono text-[9px] uppercase text-concluido">Dia salvo</span>
         )}
       </header>
 
@@ -186,7 +186,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
             {streakCount}
             <span className="text-sm font-normal text-ink-muted ml-1">dias</span>
           </p>
-          <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             {offensive.safe
               ? 'Volte amanhã para continuar a sequência'
               : 'Faça 1 item abaixo para manter a ofensiva'}
@@ -200,7 +200,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
             <button
               type="button"
               onClick={() => navigate(item.path)}
-              className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-sl border text-left text-[11px] transition-colors ${
+              className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-sl border text-left text-[12px] transition-colors ${
                 item.done
                   ? 'border-concluido/30 bg-concluido/8 text-concluido'
                   : 'border-line bg-chrome/30 hover:bg-chrome/50 text-ink'
@@ -218,7 +218,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
         <div className="flex items-center gap-2">
           <Target size={14} className="text-accent shrink-0" />
           <span className={`text-xs font-medium ${AXEL_TEXT_PRIMARY}`}>Nível {level}</span>
-          <span className={`ml-auto font-mono text-[10px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+          <span className={`ml-auto font-mono text-[11px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
             {xpInLevel}/100 XP
           </span>
         </div>
@@ -227,7 +227,7 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
         </div>
 
         {dailyQuest && (
-          <p className={`text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             Missão: {dailyQuest.titulo} (+{dailyQuest.recompensa_xp} XP) · {questPct}%
           </p>
         )}

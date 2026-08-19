@@ -31,7 +31,7 @@ export function WaterBarChart({ rows }: WaterBarChartProps)
         <span className={AXEL_DISPLAY_STAT}>
           {avg.toFixed(1)}L
         </span>
-        <span className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>média / bucket</span>
+        <span className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>média / bucket</span>
       </div>
 
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>

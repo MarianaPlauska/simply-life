@@ -118,7 +118,7 @@ export function DashboardModulesRegistry({ excludeIds = [] }: DashboardModulesRe
   return (
     <div className="sl-panel overflow-hidden">
       <div className="px-4 py-2 border-b border-line">
-        <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink-muted">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
           Escopo do sistema
         </p>
       </div>
@@ -141,12 +141,12 @@ export function DashboardModulesRegistry({ excludeIds = [] }: DashboardModulesRe
               </div>
               <div>
                 <p className={`text-[13px] font-semibold ${AXEL_TEXT_PRIMARY}`}>{m.label}</p>
-                <p className={`text-[10px] font-mono mt-0.5 line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
+                <p className={`text-[11px] font-mono mt-0.5 line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
                   {m.desc}
                 </p>
               </div>
               <div className="flex items-center justify-between mt-auto pt-1">
-                <span className="font-mono text-[10px] text-accent">{m.metric}</span>
+                <span className="font-mono text-[11px] text-accent">{m.metric}</span>
                 <ChevronRight className="w-3 h-3 text-ink-muted" />
               </div>
             </button>

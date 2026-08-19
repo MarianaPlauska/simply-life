@@ -106,5 +106,10 @@ export async function switchUserSession(nextUserId: string | null): Promise<bool
 
   await useTaskStore.persist.rehydrate()
 
+  const scheme = useTaskStore.getState().accessibility.colorScheme
+  const { applyColorScheme } = await import('../utils/applyColorScheme')
+  applyColorScheme(scheme)
+  useTaskStore.getState().applyWorkspaceTheme()
+
   return true
 }

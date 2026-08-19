@@ -128,13 +128,13 @@ export function SystemStatePanel()
 
       <div className="flex items-end justify-between gap-3 pb-3 border-b border-line">
         <div>
-          <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>Índice</p>
+          <p className={`font-mono text-ui-caption uppercase ${AXEL_TEXT_SECONDARY}`}>Índice</p>
           <p className={`text-3xl font-display capitalize mt-1 ${CARGA_CLASS[state.carga]}`}>
             {state.carga}
           </p>
         </div>
         <div className="text-right">
-          <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>Capacidade</p>
+          <p className={`font-mono text-ui-caption ${AXEL_TEXT_SECONDARY}`}>Capacidade</p>
           <p className={`font-mono text-lg tabular-nums ${AXEL_TEXT_PRIMARY}`}>{pct}%</p>
         </div>
       </div>
@@ -146,7 +146,7 @@ export function SystemStatePanel()
         />
       </div>
 
-      <p className={`text-[12px] leading-relaxed mb-4 ${AXEL_TEXT_SECONDARY}`}>
+      <p className={`text-ui-body leading-relaxed mb-4 min-h-[2.5em] ${AXEL_TEXT_SECONDARY}`}>
         {state.sugestaoFrase}
       </p>
 
@@ -177,7 +177,7 @@ export function SystemStatePanel()
       <button
         type="button"
         onClick={() => navigate('/saude')}
-        className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[12px] font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
+        className={`w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 text-[13px] font-mono uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
       >
         Saúde completa
         <ArrowRight className="w-3.5 h-3.5" />
@@ -199,9 +199,9 @@ function ResumoItem({ Icon, primary, secondary }: ResumoItemProps)
     <li className={`flex items-start gap-2.5 px-3 py-2.5 ${AXEL_ROW_HOVER}`}>
       <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${AXEL_TEXT_SECONDARY}`} strokeWidth={1.75} />
       <div className="min-w-0">
-        <div className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>{primary}</div>
+        <div className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>{primary}</div>
         {secondary && (
-          <div className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{secondary}</div>
+          <div className={`font-mono text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{secondary}</div>
         )}
       </div>
     </li>

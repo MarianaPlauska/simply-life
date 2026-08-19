@@ -5,6 +5,8 @@ import { useTaskStore } from '../../../store/useTaskStore'
 import { CategoryPicker } from '../CategoryPicker'
 import { FinanceCategories } from '../FinanceCategories'
 import { FormFieldLabel } from '../../ui/FormFieldLabel'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../../lib/currencyInput'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_SECTION_TITLE,
@@ -51,7 +53,7 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
       return
     }
 
-    const valor = parseFloat(form.valor.replace(',', '.'))
+    const valor = parseMoneyInputToNumber(form.valor)
     if (Number.isNaN(valor) || valor <= 0)
     {
       toast.error('Informe um valor válido')
@@ -179,13 +181,10 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
               <FormFieldLabel required className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 Valor (R$)
               </FormFieldLabel>
-              <input
-                type="text"
-                inputMode="decimal"
-                placeholder="0,00"
+              <MoneyInput
                 value={form.valor}
-                onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))}
-                className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[12px] font-mono text-ink outline-none focus:border-accent/50"
+                onChange={(v) => setForm((f) => ({ ...f, valor: v }))}
+                className="w-full text-[12px]"
               />
             </label>
             <label className="block space-y-1">

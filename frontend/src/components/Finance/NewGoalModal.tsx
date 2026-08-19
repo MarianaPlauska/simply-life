@@ -7,6 +7,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
+import { MoneyInput } from '../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 interface NewGoalModalProps
 {
@@ -31,11 +33,12 @@ export function NewGoalModal({ isOpen, onClose }: NewGoalModalProps)
 
   const handleAddGoal = async () =>
   {
-    if (!goalForm.titulo.trim() || !goalForm.valor_alvo) return
+    const valorAlvo = parseMoneyInputToNumber(goalForm.valor_alvo)
+    if (!goalForm.titulo.trim() || valorAlvo <= 0) return
 
     await addGoal({
       titulo: goalForm.titulo,
-      valor_alvo: parseFloat(goalForm.valor_alvo),
+      valor_alvo: valorAlvo,
       valor_atual: 0,
       prazo: goalForm.prazo || undefined,
       icone: goalForm.icone,
@@ -86,12 +89,10 @@ export function NewGoalModal({ isOpen, onClose }: NewGoalModalProps)
             <label className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>
               Valor alvo (R$)
             </label>
-            <input
-              type="number"
-              placeholder="0,00"
+            <MoneyInput
               value={goalForm.valor_alvo}
-              onChange={(e) => setGoalForm({ ...goalForm, valor_alvo: e.target.value })}
-              className="w-full bg-chrome border border-line rounded-sl px-4 py-2.5 text-[13px] text-ink font-mono outline-none focus:border-accent/50 transition"
+              onChange={(v) => setGoalForm({ ...goalForm, valor_alvo: v })}
+              className="w-full text-[13px]"
             />
           </div>
           <div>
@@ -129,7 +130,7 @@ export function NewGoalModal({ isOpen, onClose }: NewGoalModalProps)
         <button
           type="button"
           onClick={handleAddGoal}
-          disabled={!goalForm.titulo.trim() || !goalForm.valor_alvo}
+          disabled={!goalForm.titulo.trim() || parseMoneyInputToNumber(goalForm.valor_alvo) <= 0}
           className={`w-full py-2.5 rounded-sl text-[13px] font-medium disabled:opacity-40 ${AXEL_BTN_PRIMARY}`}
         >
           Criar meta

@@ -46,7 +46,7 @@ const CUIDADOS_TABS: {
     label: 'Medicamentos',
     short: 'Meds',
     Icon: Pill,
-    color: 'text-teal-400',
+    color: 'text-accent',
     hint: 'Agenda, cadastro e lembretes',
   },
 ]
@@ -67,7 +67,7 @@ export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelPro
       <div>
         <h2 className="text-[13px] font-semibold text-ink">Cuidados do dia</h2>
         <p className={`text-[11px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-          Um ritual por vez — água, comida, treino e medicamentos.
+          Um ritual por vez: água, comida, treino e medicamentos.
         </p>
       </div>
 

@@ -20,14 +20,14 @@ export function JarvisRecommendation({ text }: JarvisRecommendationProps)
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300 mb-0.5">
+        <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-violet-300 mb-0.5">
           Jarvis
         </div>
         <p className="text-[13px] text-zinc-200 leading-relaxed">{text}</p>
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        <span className="text-[10px] text-zinc-500 mr-1">Foi útil?</span>
+        <span className="text-[11px] text-zinc-500 mr-1">Foi útil?</span>
         <button
           onClick={() => setFeedback('up')}
           className={`p-1.5 rounded-full transition-colors ${

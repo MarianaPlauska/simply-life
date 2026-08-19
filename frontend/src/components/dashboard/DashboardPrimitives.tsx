@@ -35,9 +35,9 @@ export function StatusRow({
         ) : (
           <div className="w-3 h-3 rounded-sl border border-line" />
         )}
-        <span className={`text-[11px] font-mono ${ok ? 'text-ink' : 'text-ink-muted'}`}>{label}</span>
+        <span className={`text-[12px] font-mono ${ok ? 'text-ink' : 'text-ink-muted'}`}>{label}</span>
       </div>
-      <span className={`font-mono text-[10px] tabular-nums ${ok ? 'text-concluido' : 'text-ink-muted'}`}>{detail}</span>
+      <span className={`font-mono text-[11px] tabular-nums ${ok ? 'text-concluido' : 'text-ink-muted'}`}>{detail}</span>
     </div>
   );
 }

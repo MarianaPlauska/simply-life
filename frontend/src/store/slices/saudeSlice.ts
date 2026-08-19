@@ -15,13 +15,18 @@ import {
   writeCachedWaterEntries,
   writeStoredHealthDay,
 } from '../../lib/healthDayBoundary'
-import { persistLocalMlPorCopo } from '../../lib/waterHydration'
+import { persistLocalMlPorCopo, persistLocalWaterPrefs } from '../../lib/waterHydration'
 import { upsertHabitHistorico } from '../../lib/habitHistorico'
 import {
   appendHistoricoCarga,
   mergeAcademyConfig,
   type AcademyTreinoConfig,
 } from '../../lib/academyWorkouts'
+import {
+  buildAcademySessionDetail,
+  parseAcademySessionDetail,
+  type FinalizarTreinoPayload,
+} from '../../lib/academySessionDetail'
 import { TREINO_PRESET } from '../../constants/healthPresets'
 import {
   medicamentoCompletoHoje,
@@ -62,6 +67,11 @@ function mapHabito(row: Record<string, unknown>): HabitoDiario
 
 function mapSessao(row: Record<string, unknown>): SessaoTreino
 {
+  const detalheRaw = row.detalhe
+  const detalhe = detalheRaw && typeof detalheRaw === 'object'
+    ? parseAcademySessionDetail(detalheRaw)
+    : null
+
   return {
     id: row.id as number,
     habito_id: row.habito_id != null ? Number(row.habito_id) : null,
@@ -71,6 +81,9 @@ function mapSessao(row: Record<string, unknown>): SessaoTreino
     finalizado_em: row.finalizado_em ? String(row.finalizado_em) : null,
     duracao_real_min: row.duracao_real_min != null ? Number(row.duracao_real_min) : null,
     concluido: Boolean(row.concluido),
+    treino_codigo: row.treino_codigo != null ? String(row.treino_codigo) : null,
+    volume_kg: row.volume_kg != null ? Number(row.volume_kg) : null,
+    detalhe,
   }
 }
 
@@ -94,6 +107,7 @@ export interface SaudeSlice
   sessaoTreinoAtiva: SessaoTreino | null
   sessoesTreinoHoje: SessaoTreino[]
   sessoesTreinoMes: SessaoTreino[]
+  sessoesTreinoAnalytics: SessaoTreino[]
   fetchMedicamentos: () => Promise<void>
   fetchMedicamentoTomadas: () => Promise<void>
   addMedicamento: (med: {
@@ -142,9 +156,10 @@ export interface SaudeSlice
   fetchSessaoTreinoAtiva: () => Promise<void>
   fetchSessoesTreinoHoje: () => Promise<void>
   fetchSessoesTreinoMes: () => Promise<void>
+  fetchSessoesTreinoAnalytics: (days?: number) => Promise<void>
   addTreinoHabito: (tipoTreino: string, metaMinutos: number) => Promise<void>
   iniciarTreino: (habitoId: number, tipoTreino: string, metaMinutos: number) => Promise<void>
-  finalizarTreino: (sessaoId: number) => Promise<void>
+  finalizarTreino: (sessaoId: number, payload?: FinalizarTreinoPayload) => Promise<void>
   runHealthCheck: () => Promise<void>
 }
 
@@ -223,6 +238,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
   sessaoTreinoAtiva: null,
   sessoesTreinoHoje: [],
   sessoesTreinoMes: [],
+  sessoesTreinoAnalytics: [],
 
   fetchMedicamentoTomadas: async () =>
   {
@@ -906,6 +922,14 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     }
 
     const config = { ...(before.config ?? {}), ...patch }
+    if (patch.ml_por_copo || patch.ml_presets || patch.ml_ocultos)
+    {
+      persistLocalWaterPrefs({
+        ml_por_copo: config.ml_por_copo,
+        ml_presets: config.ml_presets,
+        ml_ocultos: config.ml_ocultos,
+      })
+    }
     if (patch.ml_por_copo)
     {
       persistLocalMlPorCopo(patch.ml_por_copo)
@@ -1106,6 +1130,41 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     }
   },
 
+  fetchSessoesTreinoAnalytics: async (days = 180) =>
+  {
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid)
+      {
+        set({ sessoesTreinoAnalytics: [] })
+        return
+      }
+
+      const start = new Date()
+      start.setHours(0, 0, 0, 0)
+      start.setDate(start.getDate() - days + 1)
+      const inicio = start.toISOString()
+
+      const { data, error } = await supabase
+        .from('sessoes_treino')
+        .select('*')
+        .eq('user_id', uid)
+        .not('finalizado_em', 'is', null)
+        .gte('finalizado_em', inicio)
+        .order('finalizado_em', { ascending: false })
+
+      if (error) throw error
+      set({
+        sessoesTreinoAnalytics: (data || []).map((row) => mapSessao(row as Record<string, unknown>)),
+      })
+    }
+    catch (e)
+    {
+      console.error('fetchSessoesTreinoAnalytics:', e)
+    }
+  },
+
   addTreinoHabito: async (tipoTreino, metaMinutos) =>
   {
     await get().addHabito({
@@ -1158,7 +1217,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     }
   },
 
-  finalizarTreino: async (sessaoId) =>
+  finalizarTreino: async (sessaoId, payload) =>
   {
     const sessao = get().sessaoTreinoAtiva
     if (!sessao || sessao.id !== sessaoId) return
@@ -1167,15 +1226,28 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
     const duracao = minutesBetween(sessao.iniciado_em, endIso)
     const completo = isWorkoutComplete(duracao, sessao.meta_minutos)
 
+    const detalhe = payload
+      ? buildAcademySessionDetail(payload)
+      : null
+
+    const updateRow: Record<string, unknown> = {
+      finalizado_em: endIso,
+      duracao_real_min: duracao,
+      concluido: completo,
+    }
+
+    if (detalhe)
+    {
+      updateRow.treino_codigo = detalhe.treino_codigo
+      updateRow.volume_kg = detalhe.volume_kg
+      updateRow.detalhe = detalhe
+    }
+
     try
     {
       const { error } = await supabase
         .from('sessoes_treino')
-        .update({
-          finalizado_em: endIso,
-          duracao_real_min: duracao,
-          concluido: completo,
-        })
+        .update(updateRow)
         .eq('id', sessaoId)
 
       if (error) throw error
@@ -1185,6 +1257,9 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         finalizado_em: endIso,
         duracao_real_min: duracao,
         concluido: completo,
+        treino_codigo: detalhe?.treino_codigo ?? sessao.treino_codigo,
+        volume_kg: detalhe?.volume_kg ?? sessao.volume_kg,
+        detalhe: detalhe ?? sessao.detalhe,
       }
 
       set({
@@ -1217,6 +1292,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
       await get().fetchSessoesTreinoHoje()
       await get().fetchSessoesTreinoMes()
+      await get().fetchSessoesTreinoAnalytics(180)
     }
     catch (e)
     {

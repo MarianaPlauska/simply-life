@@ -53,8 +53,8 @@ export function AvatarStatusWidget()
   return (
     <aside className="bg-card border border-zinc-900 rounded-md flex flex-col">
       <header className="px-3 py-2 border-b border-zinc-900 flex items-center justify-between">
-        <span className="text-[10px] font-bold text-violet-300 uppercase tracking-widest">User Status</span>
-        <span className="text-[10px] text-zinc-600 font-mono">lv {userStats.level}</span>
+        <span className="text-[11px] font-bold text-violet-300 uppercase tracking-widest">User Status</span>
+        <span className="text-[11px] text-zinc-600 font-mono">lv {userStats.level}</span>
       </header>
 
       {/* avatar — pixel-art via dicebear */}
@@ -65,7 +65,7 @@ export function AvatarStatusWidget()
         />
         <div className="text-center">
           <p className="text-[13px] font-semibold text-zinc-100">{roleTitle}</p>
-          <p className="text-[10px] text-zinc-500 font-mono">{totalXP} XP total</p>
+          <p className="text-[11px] text-zinc-500 font-mono">{totalXP} XP total</p>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export function AvatarStatusWidget()
 
       {/* barra de XP */}
       <div className="px-3 pb-2 border-t border-zinc-900 pt-2">
-        <div className="flex justify-between text-[10px] text-zinc-500 mb-1">
+        <div className="flex justify-between text-[11px] text-zinc-500 mb-1">
           <span>Nível {userStats.level}</span>
           <span className="font-mono text-zinc-300">{currentLevelXP}/100</span>
         </div>
@@ -91,12 +91,12 @@ export function AvatarStatusWidget()
       {(userStats.streak_saude > 0 || userStats.streak_foco > 0) && (
         <div className="px-3 pb-2 flex flex-wrap gap-1.5">
           {userStats.streak_saude > 0 && (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-emerald-300 bg-emerald-500/5 border border-emerald-500/15">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium text-emerald-300 bg-emerald-500/5 border border-emerald-500/15">
               <Flame className="w-3 h-3" /> Saúde {userStats.streak_saude}d
             </span>
           )}
           {userStats.streak_foco > 0 && (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium text-violet-300 bg-violet-500/5 border border-violet-500/15">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-medium text-violet-300 bg-violet-500/5 border border-violet-500/15">
               <Flame className="w-3 h-3" /> Foco {userStats.streak_foco}/3
             </span>
           )}
@@ -105,12 +105,12 @@ export function AvatarStatusWidget()
 
       {/* inventario de conquistas */}
       <div className="border-t border-zinc-900 px-3 py-2">
-        <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
           <Trophy className="w-3 h-3 text-amber-500" />
           Inventário · {achievements.length}
         </div>
         {achievements.length === 0 ? (
-          <p className="text-[11px] text-zinc-600">Nenhuma conquista ainda.</p>
+          <p className="text-[12px] text-zinc-600">Nenhuma conquista ainda.</p>
         ) : (
           <div className="grid grid-cols-5 gap-1">
             {achievements.slice(0, 10).map((ach) => (
@@ -146,8 +146,8 @@ function Attribute({ Icon, label, value, ring, color }: AttributeProps)
       <div className={`relative w-10 h-10 rounded-full bg-black ring-1 ${ring} flex items-center justify-center`}>
         <Icon className={`w-4 h-4 ${color}`} />
       </div>
-      <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider">{label}</span>
-      <span className={`text-[11px] font-mono font-semibold ${color}`}>{value}</span>
+      <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">{label}</span>
+      <span className={`text-[12px] font-mono font-semibold ${color}`}>{value}</span>
     </div>
   )
 }

@@ -31,7 +31,7 @@ export function MoodWeekSparkline({ dias }: MoodWeekSparklineProps)
 
   return (
     <div className="flex items-center justify-between gap-3 pt-3 border-t border-line">
-      <span className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink-muted shrink-0">
+      <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted shrink-0">
         7 dias
       </span>
       <svg width={w} height={h} className="opacity-90">

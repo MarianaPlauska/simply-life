@@ -164,7 +164,7 @@ export function AnotacoesView()
           Anotações
         </h1>
         <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-          Diário, listas e lembretes — rápido como papel, salvo na nuvem
+          Diário, listas e lembretes. Rápido como papel, salvo na nuvem.
         </p>
       </header>
 
@@ -379,7 +379,7 @@ export function AnotacoesView()
                   <textarea
                     value={draftConteudo}
                     onChange={(e) => handleConteudoChange(e.target.value)}
-                    placeholder="Escreva livremente — diário, ideias, reflexões…"
+                    placeholder="Escreva livremente: diário, ideias, reflexões…"
                     className="w-full min-h-[min(50dvh,400px)] bg-transparent text-[15px] leading-relaxed text-ink outline-none resize-none placeholder:text-ink-muted"
                   />
                 )}

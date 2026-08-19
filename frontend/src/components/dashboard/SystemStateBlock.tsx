@@ -59,7 +59,7 @@ export function SystemStateBlock()
             <> {state.podemEsperar} item{state.podemEsperar !== 1 ? 's' : ''} podem esperar amanhã.</>
           )}
         </p>
-        <p className="text-[12px] text-zinc-500 mt-0.5">
+        <p className="text-[13px] text-zinc-500 mt-0.5">
           Jarvis recomenda: <span className="text-zinc-300">{state.sugestao}</span>
         </p>
       </div>

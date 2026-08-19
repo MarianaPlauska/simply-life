@@ -25,6 +25,8 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
 import { FinanceTxLabel } from './FinanceTxLabel'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../../lib/currencyInput'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -63,6 +65,7 @@ export function FinanceMonthOutlookPanel({
   const contasFixas = useTaskStore((s) => s.contasFixas)
   const budgetLimits = useTaskStore((s) => s.budgetLimits)
   const categories = useTaskStore((s) => s.categories)
+  const cards = useTaskStore((s) => s.cards)
 
   const outlook = useMemo(
     () => buildMonthOutlook({
@@ -73,6 +76,7 @@ export function FinanceMonthOutlookPanel({
       contasFixas,
       budgetLimits,
       categories,
+      cards,
       monthOffset,
     }),
     [
@@ -83,6 +87,7 @@ export function FinanceMonthOutlookPanel({
       contasFixas,
       budgetLimits,
       categories,
+      cards,
       monthOffset,
     ],
   )
@@ -228,13 +233,13 @@ function ComparisonBlock({
 
   const startGoalEdit = () =>
   {
-    setGoalDraft(spendGoal ? String(spendGoal.valorAlvo) : '')
+    setGoalDraft(spendGoal ? formatCentsToBrl(Math.round(spendGoal.valorAlvo * 100)) : '')
     setEditingGoal(true)
   }
 
   const saveGoal = () =>
   {
-    const val = parseFloat(goalDraft.replace(',', '.'))
+    const val = parseMoneyInputToNumber(goalDraft)
     if (Number.isNaN(val) || val <= 0)
     {
       clearMonthSpendGoal(monthKey)
@@ -283,13 +288,11 @@ function ComparisonBlock({
 
         {editingGoal ? (
           <div className="flex gap-2">
-            <input
-              inputMode="decimal"
+            <MoneyInput
               value={goalDraft}
-              onChange={(e) => setGoalDraft(e.target.value)}
+              onChange={setGoalDraft}
               placeholder="Ex.: 2500"
-              className="flex-1 border border-line rounded-sl bg-card px-2.5 py-1.5 text-[12px] font-mono min-h-[36px]"
-              autoFocus
+              className="flex-1 text-[12px] min-h-[36px]"
             />
             <button
               type="button"

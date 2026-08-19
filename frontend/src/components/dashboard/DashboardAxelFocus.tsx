@@ -56,7 +56,7 @@ export function DashboardAxelFocus({ onOpenTask, onExecuteTask, embedded = false
               Main Quest
             </h2>
             {topTask && bonusXp > 0 && (
-              <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded-sl border border-accent/35 bg-accent/10 text-accent">
+              <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded-sl border border-accent/35 bg-accent/10 text-accent">
                 <Sparkles size={9} />
                 +{bonusXp} XP
               </span>
@@ -75,7 +75,7 @@ export function DashboardAxelFocus({ onOpenTask, onExecuteTask, embedded = false
                 </span>
                 <ChevronRight size={14} className="shrink-0 text-ink-muted group-hover:text-accent" />
               </button>
-              <div className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+              <div className={`flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>
                 <span>{formatTaskRef(topTask.id)}</span>
                 <span aria-hidden>·</span>
                 <span className={urgencyScoreClass(topTask.score_urgencia ?? 0)}>
@@ -89,18 +89,18 @@ export function DashboardAxelFocus({ onOpenTask, onExecuteTask, embedded = false
                 )}
               </div>
               {mood.profile === 'sem_registro' && (
-                <p className={`text-[11px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
+                <p className={`text-[12px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
                   Registre humor no painel — o AXEL ajusta carga e prioridades.
                 </p>
               )}
               {mood.hasMoodToday && mood.capMultiplier < 1 && (
-                <p className={`text-[11px] mt-1.5 text-atencao`}>
+                <p className={`text-[12px] mt-1.5 text-atencao`}>
                   Cap de Hoje: {mood.effectiveDailyCap} pts ({mood.profileLabel.toLowerCase()}).
                 </p>
               )}
             </>
           ) : (
-            <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
               Sem demandas ativas — abra o Kanban para planejar.
             </p>
           )}
@@ -117,7 +117,7 @@ export function DashboardAxelFocus({ onOpenTask, onExecuteTask, embedded = false
             }
             navigate('/kanban')
           }}
-          className={`shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-wide px-4 py-2.5 sm:py-2 ${AXEL_BTN_PRIMARY}`}
+          className={`shrink-0 w-full sm:w-auto inline-flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-wide px-4 py-2.5 sm:py-2 ${AXEL_BTN_PRIMARY}`}
         >
           <Play size={12} strokeWidth={1.75} fill="currentColor" />
           {topTask ? 'Executar' : 'Kanban'}

@@ -98,7 +98,7 @@ export function PriorityCard({ tarefa, variant, label }: PriorityCardProps)
 
   return (
     <section className="space-y-2">
-      <div className={`text-[10px] font-bold uppercase tracking-[0.2em] ${tokens.labelText}`}>
+      <div className={`text-[11px] font-bold uppercase tracking-[0.2em] ${tokens.labelText}`}>
         {label}
       </div>
 
@@ -119,10 +119,10 @@ export function PriorityCard({ tarefa, variant, label }: PriorityCardProps)
             {status.text}
           </p>
           <div className="flex items-center gap-1.5 mt-2.5">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-zinc-300 bg-zinc-900/80 border border-zinc-800">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium text-zinc-300 bg-zinc-900/80 border border-zinc-800">
               {originChip(tarefa.origem)}
             </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium text-zinc-300 bg-zinc-900/80 border border-zinc-800">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium text-zinc-300 bg-zinc-900/80 border border-zinc-800">
               Score {tarefa.score_urgencia ?? 0}
             </span>
           </div>

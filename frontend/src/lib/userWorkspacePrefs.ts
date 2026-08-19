@@ -66,7 +66,7 @@ export const DEFAULT_WORKSPACE_PREFS: UserWorkspacePrefs = {
   privacy: {
     show_streak_to_friends: true,
     show_level: true,
-    show_episode: true,
+    show_episode: false,
   },
   axel_care_rotation: {},
   wellbeing_dashboard_hidden_until: null,

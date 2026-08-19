@@ -32,7 +32,7 @@ export function ProductivityLineChart({ rows, orchestrationScore }: Productivity
         <span className={AXEL_DISPLAY_STAT}>
           {orchestrationScore}
         </span>
-        <span className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{totalDone} concluídas no período</span>
+        <span className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>{totalDone} concluídas no período</span>
       </div>
 
       <ResponsiveContainer width="100%" height={CHART_HEIGHT}>

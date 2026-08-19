@@ -10,6 +10,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../../lib/currencyInput'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -39,13 +41,13 @@ export function FinanceReconciliationCard({ embedded = false }: FinanceReconcili
 
   const startEdit = () =>
   {
-    setVal(snap.saldoBanco != null ? String(snap.saldoBanco) : '')
+    setVal(snap.saldoBanco != null ? formatCentsToBrl(Math.round(snap.saldoBanco * 100)) : '')
     setEditing(true)
   }
 
   const save = async () =>
   {
-    const n = parseFloat(val.replace(',', '.'))
+    const n = parseMoneyInputToNumber(val)
     if (Number.isNaN(n) || n < 0)
     {
       toast.error('Informe o saldo do banco')
@@ -135,13 +137,11 @@ export function FinanceReconciliationCard({ embedded = false }: FinanceReconcili
 
       {editing ? (
         <div className="mt-3 flex flex-col sm:flex-row gap-2">
-          <input
-            inputMode="decimal"
+          <MoneyInput
             value={val}
-            onChange={(e) => setVal(e.target.value)}
+            onChange={setVal}
             placeholder="Saldo no app do banco"
-            className="flex-1 border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono"
-            autoFocus
+            className="flex-1 text-sm"
           />
           <button type="button" onClick={() => void save()} className={`px-4 py-2 font-mono text-[10px] uppercase ${AXEL_BTN_PRIMARY}`}>
             Conferir

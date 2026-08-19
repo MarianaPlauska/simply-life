@@ -58,7 +58,7 @@ export function DashboardFinanceMoodStrip()
       />
       <Link
         to="/financeiro"
-        className="absolute top-2 right-2 inline-flex items-center gap-0.5 font-mono text-[8px] uppercase text-accent hover:underline opacity-80 group-hover:opacity-100"
+        className="absolute top-2 right-2 inline-flex items-center gap-0.5 font-mono text-[9px] uppercase text-accent hover:underline opacity-80 group-hover:opacity-100"
       >
         Finanças
         <ArrowRight size={10} />

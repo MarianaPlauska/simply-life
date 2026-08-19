@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Beef, Droplets, Dumbbell, ListChecks } from 'lucide-react'
 import {
-  ANALYTICS_BY_TIMEFRAME,
   ANALYTICS_TIMEFRAME_LABELS,
   type AnalyticsTimeframe,
 } from '../../data/analyticsMockData'
+import { buildAnalyticsBundle, hasAnalyticsData } from '../../lib/buildAnalyticsBundle'
+import { useTaskStore } from '../../store/useTaskStore'
 import {
   AXEL_ANALYTICS_CARD,
   AXEL_FILTER_PILL_ACTIVE,
@@ -40,7 +41,7 @@ function ChartPanel({ title, subtitle, Icon, iconClass, children }: ChartPanelPr
           <h3 className={`text-[13px] font-semibold ${AXEL_TEXT_PRIMARY}`}>
             {title}
           </h3>
-          <p className={`text-[11px] font-mono mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{subtitle}</p>
+          <p className={`text-[12px] font-mono mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{subtitle}</p>
         </div>
       </div>
       {children}
@@ -51,8 +52,21 @@ function ChartPanel({ title, subtitle, Icon, iconClass, children }: ChartPanelPr
 export function HolisticAnalyticsSection({ borderless = false }: { borderless?: boolean })
 {
   const [timeframe, setTimeframe] = useState<AnalyticsTimeframe>('1W')
-  const bundle = useMemo(() => ANALYTICS_BY_TIMEFRAME[timeframe], [timeframe])
-  const hasData = bundle.rows.length > 0
+  const habitos = useTaskStore((s) => s.habitos)
+  const tarefas = useTaskStore((s) => s.tarefas)
+  const sessoes = useTaskStore((s) => s.sessoesTreinoAnalytics)
+  const fetchSessoesTreinoAnalytics = useTaskStore((s) => s.fetchSessoesTreinoAnalytics)
+
+  useEffect(() =>
+  {
+    void fetchSessoesTreinoAnalytics(180)
+  }, [fetchSessoesTreinoAnalytics])
+
+  const bundle = useMemo(
+    () => buildAnalyticsBundle({ habitos, tarefas, sessoesTreino: sessoes }, timeframe),
+    [habitos, tarefas, sessoes, timeframe],
+  )
+  const hasData = hasAnalyticsData(bundle)
 
   return (
     <section
@@ -68,7 +82,7 @@ export function HolisticAnalyticsSection({ borderless = false }: { borderless?: 
           <h2 id="holistic-analytics-title" className={`text-xl font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
             Visão holística
           </h2>
-          <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
             Saúde · hidratação · exercício · produtividade
           </p>
         </div>

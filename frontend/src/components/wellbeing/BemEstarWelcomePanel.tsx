@@ -4,7 +4,7 @@ import { mediaHumor } from '../../lib/moodInsights'
 
 const WHY_POINTS = [
   'O AXEL usa seu humor para sugerir carga e prioridades do dia.',
-  'Com o tempo, você vê padrões — o que ajuda e o que pesa.',
+  'Com o tempo, você vê padrões: o que ajuda e o que pesa.',
   'Pode registrar várias vezes ao dia; cada momento conta.',
 ]
 
@@ -25,30 +25,30 @@ export function BemEstarWelcomePanel()
               Seu diário de bem-estar
             </h2>
             {temRegistro ? (
-              <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-sl bg-concluido/15 text-concluido border border-concluido/25">
+              <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded-sl bg-concluido/15 text-concluido border border-concluido/25">
                 {humorHojeLista.length} hoje · média {mediaHumor(humorHojeLista)}
               </span>
             ) : (
-              <span className="font-mono text-[9px] uppercase px-1.5 py-0.5 rounded-sl bg-accent/15 text-accent border border-accent/30">
+              <span className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded-sl bg-accent/15 text-accent border border-accent/30">
                 Registro recomendado hoje
               </span>
             )}
           </div>
           <p className="text-[13px] text-ink-muted mt-2 leading-relaxed">
-            Este é o lugar para guardar como você está — com segurança e sem julgamento.
+            Este é o lugar para guardar como você está, com segurança e sem julgamento.
             Não é obrigatório responder tudo; um toque no humor já faz diferença.
           </p>
           <ul className="mt-3 space-y-1.5">
             {WHY_POINTS.map((line) => (
-              <li key={line} className="text-[12px] text-ink-muted flex items-start gap-2">
+              <li key={line} className="text-[13px] text-ink-muted flex items-start gap-2">
                 <span className="text-accent mt-0.5">·</span>
                 <span>{line}</span>
               </li>
             ))}
           </ul>
-          <p className="flex items-center gap-1.5 mt-3 text-[11px] text-ink-muted">
+          <p className="flex items-center gap-1.5 mt-3 text-[12px] text-ink-muted">
             <Shield size={12} className="shrink-0 text-accent/70" />
-            Registros privados — vinculados só à sua conta.
+            Registros privados, vinculados só à sua conta.
           </p>
         </div>
       </div>

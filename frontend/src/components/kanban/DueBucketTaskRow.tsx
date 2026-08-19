@@ -1,10 +1,8 @@
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { CheckCircle2, GripVertical, Lock, Play } from 'lucide-react'
-import { DueDateChip } from './DueDateChip'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
-import { formatTaskRef } from '../../lib/kanbanVisual'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -46,7 +44,7 @@ export function DueBucketTaskRow({
       ref={setNodeRef}
       style={style}
       className={[
-        'group flex items-center gap-1 px-2 py-1.5 rounded-md border text-left w-full transition-colors',
+        'group flex items-center gap-1.5 px-2.5 py-2 rounded-md border text-left w-full transition-colors',
         isExecuting
           ? 'border-accent/30 bg-accent/10 ring-1 ring-accent/25'
           : inExecutionQueue
@@ -77,18 +75,14 @@ export function DueBucketTaskRow({
         className="flex-1 min-w-0 flex items-center gap-2 text-left"
       >
         <div className="flex-1 min-w-0">
-          <p className={`text-[13px] leading-snug line-clamp-1 ${isExecuting ? 'text-accent font-medium' : 'text-ink'}`}>
+          <p className={`text-ui-body leading-snug line-clamp-1 ${isExecuting ? 'text-accent font-medium' : 'text-ink'}`}>
             {cleanTitleForDisplay(tarefa.titulo)}
           </p>
-          <p className="font-mono text-[9px] text-ink-muted mt-0.5 truncate">
-            {formatTaskRef(tarefa.id)}
-            {isExecuting && (
-              <span className="text-accent ml-1.5 uppercase">· em foco</span>
-            )}
-            {!isExecuting && inExecutionQueue && (
-              <span className="text-accent/80 ml-1.5 uppercase">· na fila</span>
-            )}
-          </p>
+          {(isExecuting || inExecutionQueue) && (
+            <p className="font-mono text-ui-caption text-ink-muted mt-0.5 truncate">
+              <span className="text-accent uppercase">{isExecuting ? 'Em foco' : 'Na fila'}</span>
+            </p>
+          )}
         </div>
       </button>
 
@@ -123,7 +117,6 @@ export function DueBucketTaskRow({
             <Play size={14} strokeWidth={1.75} fill="currentColor" />
           </button>
         )}
-        <DueDateChip date={tarefa.data_vencimento} compact />
         {blocked && (
           <Lock size={12} className="text-ink-muted" aria-label="Bloqueada" />
         )}

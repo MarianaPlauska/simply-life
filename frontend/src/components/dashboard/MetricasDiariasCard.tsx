@@ -33,7 +33,7 @@ function MetricRow({ label, detail, pct, onClick }: MetricRowProps)
     >
       <div className="flex items-center justify-between gap-3 mb-2">
         <span className={`text-[13px] font-medium tracking-tight ${AXEL_TEXT_PRIMARY}`}>{label}</span>
-        <span className="text-[12px] text-zinc-500 tabular-nums shrink-0">{detail}</span>
+        <span className="text-[13px] text-zinc-500 tabular-nums shrink-0">{detail}</span>
       </div>
       <div className="h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-900 overflow-hidden">
         <div
@@ -97,7 +97,7 @@ export function MetricasDiariasCard()
         <button
           type="button"
           onClick={() => navigate('/saude')}
-          className="flex items-center gap-1 text-[12px] text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 py-1"
+          className="flex items-center gap-1 text-[13px] text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-300 py-1"
         >
           Saúde
           <ChevronRight className="w-3.5 h-3.5" />

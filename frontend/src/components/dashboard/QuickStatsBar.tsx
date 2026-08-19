@@ -34,7 +34,7 @@ function MiniCard({
     >
       <div className="flex items-center gap-1.5 mb-2">
         <Icon className={`w-3.5 h-3.5 ${iconClass}`} strokeWidth={1.75} />
-        <span className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`font-mono text-[10px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
           {title}
         </span>
       </div>
@@ -42,7 +42,7 @@ function MiniCard({
         {primary}
       </div>
       {secondary && (
-        <div className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{secondary}</div>
+        <div className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{secondary}</div>
       )}
       {children}
     </button>

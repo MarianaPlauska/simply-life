@@ -155,15 +155,16 @@ export interface FinanceiroSlice
   alignCashToDisponivel: (targetDisponivel: number) => Promise<void>
   setCashBalanceOverrides: (fields: {
     disponivel: number
-    corrente: number
     reservado: number
     projetado: number
+    corrente?: number
   }) => Promise<void>
   clearCashBalanceOverrides: () => Promise<void>
   fetchReservedBills: () => Promise<void>
   fetchReservedBillItems: () => Promise<void>
   addReservedBill: (bill: Omit<ReservedBill, 'id' | 'valor_gasto' | 'status'>) => Promise<void>
   recordBillSpend: (billId: number, valor: number) => Promise<void>
+  markReservedBillPaid: (billId: number) => Promise<void>
   cancelReservedBill: (id: number) => Promise<void>
   addReservedBillItem: (
     billId: number,
@@ -352,15 +353,15 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         user_id: uid,
         descricao: descFinal,
         categoria: t.categoria,
-        categoria_id: t.categoria_id,
         valor: t.valor,
         data_gasto: t.data,
         tipo: t.tipo,
         status_pagamento: t.status_pagamento || 'pendente',
-        fatura_reserva_id: t.fatura_reserva_id,
-        card_id: t.card_id,
-        forma_pagamento: t.forma_pagamento,
       }
+      if (t.categoria_id != null) insertPayload.categoria_id = t.categoria_id
+      if (t.fatura_reserva_id != null) insertPayload.fatura_reserva_id = t.fatura_reserva_id
+      if (t.card_id) insertPayload.card_id = t.card_id
+      if (t.forma_pagamento) insertPayload.forma_pagamento = t.forma_pagamento
       if (observacao) insertPayload.observacao = observacao
 
       const { data, error } = await insertDespesaResilient(supabase, insertPayload)
@@ -383,7 +384,6 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         }
 
         const anyGet = get() as any
-        if (anyGet.addXP) await anyGet.addXP('financeiro', 10)
         if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Registrar 1 movimentação', 1)
 
         set((s) => {
@@ -436,6 +436,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     catch (e)
     {
       console.error('addTransaction error:', e)
+      toast.error('Não foi possível salvar no servidor — mantido localmente')
       set((s) => ({ transactions: [{ id: Date.now(), ...t }, ...s.transactions] }))
       notifyBudgetAlert(get, t)
     }
@@ -546,7 +547,6 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       void get().fetchBillSettlements()
 
       const anyGet = get() as any
-      if (anyGet.addXP) await anyGet.addXP('financeiro', 8)
       if (anyGet.incrementQuestProgress)
       {
         await (anyGet.incrementQuestProgress as (t: string, v: number) => Promise<void>)(
@@ -1066,6 +1066,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       get().transactions,
       targetDisponivel,
       get().reservedBills,
+      get().billSettlements,
     )
 
     const prev = get().cashAccount
@@ -1102,13 +1103,14 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       get().transactions,
       fields.disponivel,
       get().reservedBills,
+      get().billSettlements,
     )
 
     const prev = get().cashAccount
     const manual: CashBalanceOverrides = {
       ativo: true,
       disponivel: fields.disponivel,
-      corrente: fields.corrente,
+      corrente: fields.corrente ?? fields.disponivel + fields.reservado,
       reservado: fields.reservado,
       projetado: fields.projetado,
       atualizado_em: new Date().toISOString(),
@@ -1171,17 +1173,10 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         get().cashAccount,
         get().reservedBills,
       )
-      const streak = recordReconciliationStreak(snap.alinhado)
+      recordReconciliationStreak(snap.alinhado)
 
       const anyGet = get() as any
-      if (anyGet.addXP) await anyGet.addXP('financeiro', 15)
-      if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('financeira', 1)
-
-      if (snap.alinhado && streak > 1)
-      {
-        const { toast } = await import('sonner')
-        toast.success('Streak de reconciliação', { description: `${streak} dias` })
-      }
+      if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('financeira', 1, { silent: true })
     }
     catch (e) { console.error('setBankBalance:', e) }
   },
@@ -1321,6 +1316,78 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
         .eq('id', billId)
     }
     catch (e) { console.error('recordBillSpend:', e) }
+  },
+
+  markReservedBillPaid: async (billId) =>
+  {
+    const bill = get().reservedBills.find((b) => b.id === billId)
+    if (!bill || bill.status !== 'aberta') return
+
+    const { billRemaining } = await import('../../lib/financeReservedBills')
+    const { dismissBill } = await import('../../lib/financeBillDismiss')
+    const { recordBillSettlementFromTransaction } = await import('../../lib/financeBillSettlement')
+    const { postBillPaymentExpense } = await import('../../lib/financeBillPayment')
+
+    const rest = billRemaining(bill)
+    if (rest <= 0) return
+
+    const payDate = bill.data_vencimento.slice(0, 10)
+    const today = new Date().toISOString().slice(0, 10)
+
+    if (bill.card_id)
+    {
+      await get().addTransaction({
+        descricao: bill.titulo.trim(),
+        categoria: 'Contas',
+        valor: rest,
+        data: today,
+        tipo: 'despesa',
+        status_pagamento: 'pago',
+        card_id: bill.card_id,
+        forma_pagamento: 'cartao',
+      })
+    }
+    else
+    {
+      const posted = await postBillPaymentExpense(
+        { titulo: bill.titulo, valor: rest, data: payDate, origem: 'financeiro' },
+        { transactions: get().transactions, addTransaction: get().addTransaction },
+      )
+
+      if (!posted)
+      {
+        const { hasPaidCashExpenseForBill } = await import('../../lib/financeBillPayment')
+        if (!hasPaidCashExpenseForBill(get().transactions, bill.titulo, rest))
+        {
+          await get().addTransaction({
+            descricao: bill.titulo.trim(),
+            categoria: 'Contas',
+            valor: rest,
+            data: payDate,
+            tipo: 'despesa',
+            status_pagamento: 'pago',
+            forma_pagamento: 'pix',
+            observacao: 'Pago via Finanças',
+          })
+        }
+      }
+    }
+
+    await get().recordBillSpend(billId, rest)
+
+    const paidTx = get().transactions.find((t) =>
+      Math.abs(t.valor - rest) < 0.02
+      && t.descricao.trim() === bill.titulo.trim()
+      && (t.status_pagamento ?? 'pendente') === 'pago',
+    )
+
+    if (paidTx)
+    {
+      await recordBillSettlementFromTransaction(paidTx)
+    }
+
+    dismissBill(`reserva-${billId}`)
+    void get().fetchBillSettlements()
   },
 
   cancelReservedBill: async (id) =>

@@ -86,9 +86,9 @@ export function DueBucketSection({
     >
       <header
         id={`due-bucket-${bucket}`}
-        className={`shrink-0 px-2.5 py-2 border-b border-white/[0.04] ${tone}`}
+        className={`shrink-0 px-3 py-1.5 border-b border-white/[0.04] ${tone}`}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {collapsible && (
             <button
               type="button"
@@ -101,7 +101,7 @@ export function DueBucketSection({
             </button>
           )}
           <BucketIcon className="w-4 h-4 shrink-0" strokeWidth={1.75} aria-hidden />
-          <h3 className={`flex-1 min-w-0 font-mono text-[11px] uppercase tracking-[0.1em] truncate ${AXEL_TEXT_PRIMARY}`}>
+          <h3 className={`flex-1 min-w-0 font-mono text-ui-caption uppercase tracking-[0.1em] truncate ${AXEL_TEXT_PRIMARY}`}>
             {DUE_BUCKET_LABELS[bucket]}
           </h3>
           <span className={`font-display text-base tabular-nums shrink-0 ${AXEL_TEXT_PRIMARY}`}>
@@ -113,7 +113,7 @@ export function DueBucketSection({
       {!hidden && (
         <div
           className={[
-            'px-3 py-2 space-y-2 min-h-[48px]',
+            'px-3 py-2 space-y-1.5 min-h-[48px]',
             count === 0 ? AXEL_KANBAN_DROPZONE : '',
           ].join(' ')}
         >

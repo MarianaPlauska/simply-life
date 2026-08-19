@@ -63,7 +63,11 @@ export function KanbanNextStep({
 
   let headline: string
 
-  if (queueEmpty && active.length === 0)
+  if (orchestrating && queueEmpty)
+  {
+    headline = 'Organizando prioridades…'
+  }
+  else if (queueEmpty && active.length === 0)
   {
     headline = 'Nenhuma demanda ativa'
   }
@@ -94,8 +98,9 @@ export function KanbanNextStep({
           {headline}
         </p>
         <p className={`text-[11px] mt-0.5 leading-relaxed line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
-          {brief.headline}
-          {brief.detail ? ` · ${brief.detail}` : ''}
+          {orchestrating && queueEmpty
+            ? 'Aguarde — a fila de execução está sendo montada com seus dados reais.'
+            : `${brief.headline}${brief.detail ? ` · ${brief.detail}` : ''}`}
         </p>
       </div>
 

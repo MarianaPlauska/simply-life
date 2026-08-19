@@ -31,18 +31,18 @@ export function DashboardOverdueAlert()
     <button
       type="button"
       onClick={() => navigate('/kanban?bucket=vencido')}
-      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sl border border-urgente/35 bg-urgente/10 text-left hover:bg-urgente/15 transition-colors"
+      className="w-full flex items-center gap-3 px-4 py-3.5 rounded-sl border-2 border-urgente/50 bg-urgente/10 text-left hover:bg-urgente/15 transition-colors shadow-sm"
     >
-      <AlertTriangle className="w-4 h-4 text-urgente shrink-0" />
+      <AlertTriangle className="w-6 h-6 text-urgente shrink-0" />
       <div className="min-w-0 flex-1">
-        <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>
-          {overdue.length} tarefa{overdue.length !== 1 ? 's' : ''} atrasada{overdue.length !== 1 ? 's' : ''}
+        <p className={`text-[14px] font-semibold ${AXEL_TEXT_PRIMARY}`}>
+          {overdue.length} tarefa{overdue.length !== 1 ? 's' : ''} atrasada{overdue.length !== 1 ? 's' : ''} — precisa de atenção
         </p>
-        <p className={`text-[11px] truncate ${AXEL_TEXT_SECONDARY}`}>
+        <p className={`text-[13px] truncate ${AXEL_TEXT_SECONDARY}`}>
           {preview}{extra}
         </p>
       </div>
-      <ChevronRight className="w-4 h-4 text-urgente shrink-0" />
+      <ChevronRight className="w-5 h-5 text-urgente shrink-0" />
     </button>
   )
 }

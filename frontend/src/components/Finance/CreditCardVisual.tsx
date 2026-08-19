@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react'
 import { Settings, Trash2 } from 'lucide-react'
 import type { VirtualCard } from '../../store/storeTypes'
 import type { BillingCycle } from '../../lib/financeCardCycle'
@@ -51,18 +52,29 @@ export function CreditCardVisual({
   const usaExtrato = cardUsaExtrato(card.modalidade)
   const blocked = card.status === 'bloqueado'
   const faturaPaga = temFatura && invoiceTotal <= 0.009
-  const Tag = onClick ? 'button' : 'div'
   const billingDates = dueDateFromUserBillingDays(card)
 
   const fmtBr = (iso: string) => iso.split('-').reverse().join('/')
 
+  const handleCardKeyDown = (e: KeyboardEvent) =>
+  {
+    if (!onClick) return
+    if (e.key === 'Enter' || e.key === ' ')
+    {
+      e.preventDefault()
+      onClick()
+    }
+  }
+
   return (
-    <Tag
-      type={onClick ? 'button' : undefined}
+    <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
+      onKeyDown={handleCardKeyDown}
       className={`w-full text-left rounded-sl border overflow-hidden transition-all ${
         selected ? 'border-accent ring-1 ring-accent/30' : 'border-line hover:border-accent/40'
-      } ${blocked ? 'opacity-60' : ''}`}
+      } ${blocked ? 'opacity-60' : ''} ${onClick ? 'cursor-pointer' : ''}`}
     >
       <div className={`relative bg-gradient-to-br ${SKINS[card.tipo_gradiente]} p-4 min-h-[168px] flex flex-col justify-between`}>
         <div className="absolute inset-0 border border-white/5 pointer-events-none rounded-sl" aria-hidden />
@@ -171,6 +183,6 @@ export function CreditCardVisual({
           )}
         </div>
       </div>
-    </Tag>
+    </div>
   )
 }

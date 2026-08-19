@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { Pencil, Wallet, Plus, Loader2, X, SlidersHorizontal } from 'lucide-react'
+import { Wallet, Plus, Loader2, X, SlidersHorizontal } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { toast } from 'sonner'
 import {
   AXEL_BORDERLESS_PANEL,
-  AXEL_BTN_PRIMARY,
+  AXEL_BTN_PRIMARY_COMPACT,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import { countLedgerDuplicates } from '../../lib/financeTransactionDedup'
 import { CashBalanceEditor } from './CashBalanceEditor'
+import { MoneyInput } from '../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -17,26 +19,31 @@ const fmt = (v: number) =>
 interface FinanceCashAccountCardProps
 {
   saldoDisponivel: number
-  saldoCorrente: number
   reservaRestante: number
   saldoProjetadoDisponivel: number
+  saldoInicial: number
+  receitasPagas: number
+  despesasPagas: number
   compromissosFixas?: number
   computedDisponivel?: number
-  computedCorrente?: number
   computedReservado?: number
   computedProjetado?: number
 }
 
 const DUP_DISMISS_KEY = 'simply-life:finance-dup-warn-dismissed'
 
+const ACTION_BTN =
+  'inline-flex items-center justify-center gap-1.5 font-mono text-[9px] uppercase text-ink-muted border border-line rounded-sl bg-card hover:border-accent/40 hover:text-ink min-h-[44px] px-3'
+
 export function FinanceCashAccountCard({
   saldoDisponivel,
-  saldoCorrente,
   reservaRestante,
   saldoProjetadoDisponivel,
+  saldoInicial,
+  receitasPagas,
+  despesasPagas,
   compromissosFixas = 0,
   computedDisponivel,
-  computedCorrente,
   computedReservado,
   computedProjetado,
 }: FinanceCashAccountCardProps)
@@ -44,6 +51,7 @@ export function FinanceCashAccountCard({
   const cashAccount = useTaskStore((s) => s.cashAccount)
   const transactions = useTaskStore((s) => s.transactions)
   const setCashInitialBalance = useTaskStore((s) => s.setCashInitialBalance)
+  const alignCashToDisponivel = useTaskStore((s) => s.alignCashToDisponivel)
   const setCashBalanceOverrides = useTaskStore((s) => s.setCashBalanceOverrides)
   const clearCashBalanceOverrides = useTaskStore((s) => s.clearCashBalanceOverrides)
   const setNewTransactionOpen = useTaskStore((s) => s.setNewTransactionModalOpen)
@@ -64,7 +72,6 @@ export function FinanceCashAccountCard({
 
   const computed = {
     disponivel: computedDisponivel ?? saldoDisponivel,
-    corrente: computedCorrente ?? saldoCorrente,
     reservado: computedReservado ?? reservaRestante,
     projetado: computedProjetado ?? saldoProjetadoDisponivel,
   }
@@ -103,20 +110,22 @@ export function FinanceCashAccountCard({
     }
   }, [needsSetup])
 
-  const startEdit = () =>
-  {
-    setVal(String(cashAccount.saldo_inicial || ''))
-    setEditing(true)
-  }
-
   const save = async () =>
   {
-    const n = parseFloat(val.replace(/\./g, '').replace(',', '.'))
+    const n = parseMoneyInputToNumber(val)
     if (Number.isNaN(n) || n < 0)
     {
       toast.error('Valor inválido')
       return
     }
+
+    if (needsSetup)
+    {
+      await alignCashToDisponivel(n)
+      setEditing(false)
+      return
+    }
+
     await setCashInitialBalance(n)
     setEditing(false)
     toast.success('Saldo inicial atualizado')
@@ -124,7 +133,7 @@ export function FinanceCashAccountCard({
 
   return (
     <section className={`${AXEL_BORDERLESS_PANEL}`}>
-      <header className="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <header className="mb-3 space-y-3">
         <div className="flex items-center gap-2 min-w-0">
           <Wallet size={14} className="text-accent shrink-0" />
           <div className="min-w-0">
@@ -136,85 +145,89 @@ export function FinanceCashAccountCard({
             )}
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-          <button
-            type="button"
-            onClick={() => setNewTransactionOpen(true, 'conta')}
-            className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-accent hover:underline min-h-[44px] px-1"
-          >
-            <Plus size={10} />
-            Lançamento
-          </button>
+
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setBalanceEditorOpen(true)}
-            className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-accent hover:underline min-h-[44px] px-1"
+            className={ACTION_BTN}
           >
-            <SlidersHorizontal size={10} />
-            Ajustar saldos
+            <SlidersHorizontal size={12} />
+            Ajustar saldo
           </button>
-          {dupCount > 0 && (
-            <button
-              type="button"
-              onClick={() => void reconcileFinanceLedger()}
-              disabled={financeReconciling}
-              className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted hover:text-urgente min-h-[44px] px-1 disabled:opacity-50 disabled:pointer-events-none"
-            >
-              {financeReconciling ? (
-                <>
-                  <Loader2 size={10} className="animate-spin" aria-hidden />
-                  Recalculando…
-                </>
-              ) : (
-                'Recalcular'
-              )}
-            </button>
-          )}
           <button
             type="button"
-            onClick={startEdit}
-            className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted hover:underline min-h-[44px] px-1"
+            onClick={() => setNewTransactionOpen(true, 'conta')}
+            className={ACTION_BTN}
           >
-            <Pencil size={10} />
-            Saldo inicial
+            <Plus size={12} />
+            Lançamento
           </button>
         </div>
+
+        {dupCount > 0 && (
+          <button
+            type="button"
+            onClick={() => void reconcileFinanceLedger()}
+            disabled={financeReconciling}
+            className="w-full inline-flex items-center justify-center gap-1 font-mono text-[9px] uppercase text-ink-muted border border-line rounded-sl hover:text-urgente hover:border-urgente/40 min-h-[44px] px-3 disabled:opacity-50 disabled:pointer-events-none"
+          >
+            {financeReconciling ? (
+              <>
+                <Loader2 size={10} className="animate-spin" aria-hidden />
+                Recalculando…
+              </>
+            ) : (
+              'Recalcular duplicatas'
+            )}
+          </button>
+        )}
       </header>
 
       {needsSetup && (
         <div className="mb-3 rounded-sl border border-accent/35 bg-accent/10 px-3 py-3">
           <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
-            Quanto você tem na conta hoje?
+            Quanto você tem livre na conta hoje?
           </p>
           <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            Informe o saldo atual ou use <strong>Ajustar saldos</strong> para fixar Disponível, Corrente e Projetado.
+            Informe o <strong>disponível</strong> do app do banco (já descontando o que está reservado).
+            O app recalcula o ponto de partida com base nas suas entradas e pagos.
           </p>
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      <button
+        type="button"
+        onClick={() => setBalanceEditorOpen(true)}
+        className="w-full rounded-sl border border-accent/30 bg-accent/8 px-4 py-3 text-left hover:border-accent/50 transition-colors min-h-[44px] mb-2"
+      >
+        <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Disponível agora</p>
+        {needsSetup ? (
+          <p className={`text-lg font-display mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            Configure abaixo
+          </p>
+        ) : (
+          <p className={`text-2xl sm:text-3xl font-display tabular-nums mt-0.5 ${
+            saldoDisponivel < 0 ? 'text-urgente' : AXEL_TEXT_PRIMARY
+          }`}>
+            {fmt(saldoDisponivel)}
+          </p>
+        )}
+        {!needsSetup && (
+          <p className={`text-[10px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            Entrou {fmt(saldoInicial + receitasPagas)} · Pagou {fmt(despesasPagas)}
+            {reservaRestante > 0 && <> · Comprometido {fmt(reservaRestante)}</>}
+          </p>
+        )}
+      </button>
+
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => setBalanceEditorOpen(true)}
           className="border border-line rounded-sl bg-chrome/40 px-3 py-2 text-left hover:border-accent/40 transition-colors min-h-[44px]"
         >
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Disponível</p>
-          <p className={`text-lg font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>{fmt(saldoDisponivel)}</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => setBalanceEditorOpen(true)}
-          className="border border-line rounded-sl bg-chrome/40 px-3 py-2 text-left hover:border-accent/40 transition-colors min-h-[44px]"
-        >
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Corrente</p>
-          <p className={`text-lg font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>{fmt(saldoCorrente)}</p>
-        </button>
-        <button
-          type="button"
-          onClick={() => setBalanceEditorOpen(true)}
-          className="border border-line rounded-sl bg-chrome/40 px-3 py-2 text-left hover:border-accent/40 transition-colors min-h-[44px]"
-        >
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Reservado</p>
+          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Comprometido</p>
           <p className="text-lg font-display tabular-nums text-atencao">{fmt(reservaRestante)}</p>
         </button>
         <button
@@ -238,14 +251,13 @@ export function FinanceCashAccountCard({
             {cashAccount.saldos_manual?.atualizado_em && (
               <> em {new Date(cashAccount.saldos_manual.atualizado_em).toLocaleDateString('pt-BR')}</>
             )}
-            . Use <strong>Ajustar saldos</strong> para editar ou voltar ao cálculo automático.
+            . Use <strong>Ajustar saldo</strong> para editar ou voltar ao cálculo automático.
           </>
         ) : (
           <>
-            Saldo inicial: {fmt(cashAccount.saldo_inicial)}.
-            Cada receita ou gasto pago no caixa atualiza o saldo automaticamente.
-            Inclui fixas do mês ({fmt(compromissosFixas)}) e agendados no projetado.
-            Se não bater com o banco, use <strong>Ajustar saldos</strong>.
+            Saldo inicial {fmt(saldoInicial)} + entradas − pagos no caixa − comprometido = disponível agora.
+            Fixas do mês ({fmt(compromissosFixas)}) entram no projetado.
+            Se não bater com o banco, use <strong>Ajustar saldo</strong>.
           </>
         )}
       </p>
@@ -269,14 +281,13 @@ export function FinanceCashAccountCard({
 
       {(editing || needsSetup) && (
         <div className="mt-3 flex flex-col sm:flex-row gap-2">
-          <input
-            inputMode="decimal"
+          <MoneyInput
             value={val}
-            onChange={(e) => setVal(e.target.value)}
-            placeholder="Ex.: 1500,00"
-            className="flex-1 border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono min-h-[44px]"
+            onChange={setVal}
+            placeholder="Disponível hoje, ex.: 1500,00"
+            className="flex-1 min-h-[44px] text-sm"
           />
-          <button type="button" onClick={() => void save()} className={`px-4 py-2.5 min-h-[44px] font-mono text-[10px] uppercase ${AXEL_BTN_PRIMARY}`}>
+          <button type="button" onClick={() => void save()} className={`px-4 py-2.5 min-h-[44px] font-mono text-[10px] uppercase ${AXEL_BTN_PRIMARY_COMPACT}`}>
             Salvar saldo
           </button>
           {!needsSetup && (

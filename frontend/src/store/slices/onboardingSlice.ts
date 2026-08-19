@@ -13,7 +13,7 @@ export interface OnboardingSlice
 export const ONBOARDING_STEPS = [
   { id: 'create_task',       label: 'Criar primeira tarefa',   path: '/kanban' },
   { id: 'add_expense',       label: 'Registrar uma despesa',   path: '/financeiro' },
-  { id: 'register_mood',     label: 'Registrar como está hoje', path: '/saude#bem_estar' },
+  { id: 'register_mood',     label: 'Registrar como está hoje', path: '/saude#diario' },
   { id: 'add_habit',         label: 'Registrar um hábito',     path: '/saude' },
   { id: 'activate_focus',    label: 'Iniciar um treino',       path: '/saude#academia' },
   { id: 'customize_sidebar', label: 'Personalizar sidebar',    path: '/configuracoes' },

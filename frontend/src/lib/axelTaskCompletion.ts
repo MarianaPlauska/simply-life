@@ -38,12 +38,15 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
       dismissBillForTask(tarefa)
       const { recordBillSettlementFromTask } = await import('../lib/financeBillSettlement')
       await recordBillSettlementFromTask({ ...tarefa, status: 'concluida' })
-      const { postBillPaymentFromTask } = await import('../lib/financeBillPayment')
+      const { postBillPaymentFromTask } = await import('../lib/financeTaskPayment')
       await postBillPaymentFromTask(
         { ...tarefa, status: 'concluida' },
         {
           transactions: store.transactions,
+          cards: store.cards,
           addTransaction: (t) => store.addTransaction(t),
+          markTransactionPaid: (id) => store.markTransactionPaid(id),
+          markReservedBillPaid: (id) => store.markReservedBillPaid(id),
         },
       )
       void store.fetchBillSettlements?.()

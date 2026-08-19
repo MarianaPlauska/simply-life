@@ -262,7 +262,7 @@ export function SmartNudgesSection(props: SmartNudgesProps) {
             </div>
             <div>
               <h3 className="text-[14px] font-semibold text-white">Insights Proativos</h3>
-              <p className="text-[11px] text-zinc-600">
+              <p className="text-[12px] text-zinc-600">
                 {nudges.length} sugestao{nudges.length !== 1 ? 'es' : ''} baseada{nudges.length !== 1 ? 's' : ''} no seu dia
               </p>
             </div>
@@ -307,12 +307,12 @@ function NudgeCard({
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[13px] font-medium text-zinc-200">{nudge.title}</p>
-          <p className="text-[11px] text-zinc-400 mt-0.5 leading-relaxed">{nudge.body}</p>
+          <p className="text-[12px] text-zinc-400 mt-0.5 leading-relaxed">{nudge.body}</p>
         </div>
         {nudge.action && (
           <button
             onClick={() => setActiveView(nudge.action!.view)}
-            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-zinc-300 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-300"
+            className="shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-[12px] font-semibold text-zinc-300 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-300"
           >
             {nudge.action.label}
             <ArrowRight className="w-3 h-3" />

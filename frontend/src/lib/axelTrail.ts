@@ -281,12 +281,6 @@ export function buildLevelUnlockPatch(
     }
   }
 
-  if (level >= 4 && !prefs.privacy.show_episode)
-  {
-    patch.privacy = { ...prefs.privacy, show_episode: true }
-    changed = true
-  }
-
   if (level >= 7 && prefs.ai_coach_enabled === false)
   {
     patch.ai_coach_enabled = true

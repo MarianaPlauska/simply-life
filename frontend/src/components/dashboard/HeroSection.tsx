@@ -127,7 +127,7 @@ export function HeroSection({
             <div className="flex items-center gap-3 mb-3">
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/10">
                 <GreetIcon className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[10px] font-semibold text-violet-300 tracking-wide uppercase">
+                <span className="text-[11px] font-semibold text-violet-300 tracking-wide uppercase">
                   {getGreeting()}
                 </span>
               </div>
@@ -170,9 +170,9 @@ export function HeroSection({
                     <span className="text-xs font-medium text-zinc-300 leading-none">{weather.description}</span>
                   </div>
                   {weather.city && (
-                    <span className="text-[11px] text-zinc-500 mt-1 font-light">{weather.city}</span>
+                    <span className="text-[12px] text-zinc-500 mt-1 font-light">{weather.city}</span>
                   )}
-                  <span className="text-[10px] text-zinc-500 font-light mt-0.5">Vento: {weather.windSpeed} km/h</span>
+                  <span className="text-[11px] text-zinc-500 font-light mt-0.5">Vento: {weather.windSpeed} km/h</span>
                 </div>
               </div>
             )}
@@ -180,7 +180,7 @@ export function HeroSection({
             <button className="relative p-2.5 rounded-lg bg-zinc-900/60 border border-white/5 hover:border-violet-500/20 hover:bg-zinc-850 transition-all duration-300 group">
               <Bell className="w-4 h-4 text-zinc-400 group-hover:text-zinc-300 transition-colors" />
               {naoLidas > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white px-1 ring-2 ring-zinc-950">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white px-1 ring-2 ring-zinc-950">
                   {naoLidas > 9 ? '9+' : naoLidas}
                 </span>
               )}
@@ -196,7 +196,7 @@ function QuickStat({ value, label, accent }: { value: number; label: string; acc
   return (
     <div className="flex flex-col">
       <span className={`text-2xl font-black tabular-nums tracking-tighter ${accent}`}>{value}</span>
-      <span className="text-[10px] text-zinc-500 uppercase tracking-wider">{label}</span>
+      <span className="text-[11px] text-zinc-500 uppercase tracking-wider">{label}</span>
     </div>
   );
 }

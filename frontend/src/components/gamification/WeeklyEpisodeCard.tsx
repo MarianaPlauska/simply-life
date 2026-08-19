@@ -49,7 +49,7 @@ function StatPill({
     <div className="sl-stat-chip flex flex-col gap-0.5 min-w-0">
       <div className="flex items-center gap-1">
         <Icon size={11} className={iconClass} strokeWidth={1.75} />
-        <span className={`font-mono text-[8px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
           {label}
         </span>
       </div>
@@ -171,20 +171,20 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
             onClick={() => setExpanded(true)}
             className="min-w-0 flex-1 text-left"
           >
-            <p className="font-mono text-[9px] uppercase tracking-wide text-accent">
+            <p className="font-mono text-[11px] uppercase tracking-wide text-accent">
               Episódio AXEL
             </p>
-            <h2 id="weekly-episode-title" className="text-[13px] font-display mt-0.5 truncate text-ink">
+            <h2 id="weekly-episode-title" className="text-[14px] font-display mt-0.5 truncate text-ink">
               {episode.headline}
             </h2>
-            <p className="font-mono text-[10px] mt-0.5 truncate text-ink-muted">
+            <p className="font-mono text-[12px] mt-0.5 truncate text-ink-muted">
               {episode.cliffhanger}
             </p>
           </button>
           <div className="flex flex-col items-end gap-1 shrink-0">
             <Link
               to="/perfil"
-              className="font-mono text-[9px] uppercase text-accent hover:underline"
+              className="font-mono text-[10px] uppercase text-accent hover:underline"
             >
               Abrir
             </Link>
@@ -214,7 +214,7 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
           <h2 id="weekly-episode-title-full" className={`text-sm font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>
             {episode.capituloTitulo}
           </h2>
-          <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
             {episode.periodo}
           </p>
         </div>
@@ -222,7 +222,7 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
           {embedded && (
             <Link
               to="/perfil"
-              className="inline-flex items-center gap-0.5 font-mono text-[9px] uppercase text-accent hover:underline"
+              className="inline-flex items-center gap-0.5 font-mono text-[10px] uppercase text-accent hover:underline"
             >
               Perfil
               <ChevronRight size={12} />
@@ -232,7 +232,7 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
             <button
               type="button"
               onClick={() => setExpanded(false)}
-              className="font-mono text-[9px] uppercase text-ink-muted hover:text-ink"
+              className="font-mono text-[10px] uppercase text-ink-muted hover:text-ink"
             >
               Recolher
             </button>
@@ -241,7 +241,7 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
             type="button"
             onClick={() => void handleShare()}
             disabled={sharing}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-sl border border-line bg-chrome font-mono text-[9px] uppercase text-ink-muted hover:text-ink"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-sl border border-line bg-chrome font-mono text-[10px] uppercase text-ink-muted hover:text-ink"
           >
             <Share2 size={11} />
             Share
@@ -261,8 +261,8 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
                   <Icon size={14} className={tone} />
                 </div>
                 <div className="min-w-0">
-                  <p className={`font-mono text-[9px] uppercase ${tone}`}>{mom.titulo}</p>
-                  <p className="text-[12px] mt-0.5 leading-relaxed text-ink-muted">
+                  <p className={`font-mono text-[10px] uppercase ${tone}`}>{mom.titulo}</p>
+                  <p className="text-[13px] mt-0.5 leading-relaxed text-ink-muted">
                     {mom.texto}
                   </p>
                 </div>
@@ -280,8 +280,8 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
       </div>
 
       <div className="p-2.5 rounded-sl border border-dashed border-accent/40 bg-accent/5">
-        <p className="font-mono text-[9px] uppercase text-accent mb-0.5">Cliffhanger</p>
-        <p className="text-[12px] leading-relaxed text-ink">{episode.cliffhanger}</p>
+        <p className="font-mono text-[10px] uppercase text-accent mb-0.5">Cliffhanger</p>
+        <p className="text-[13px] leading-relaxed text-ink">{episode.cliffhanger}</p>
       </div>
     </section>
   )

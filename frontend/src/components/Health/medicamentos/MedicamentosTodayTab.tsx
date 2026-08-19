@@ -70,8 +70,8 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
       )}
 
       {proxima && (
-        <section className="rounded-sl border border-teal-500/25 bg-teal-500/5 p-4">
-          <p className="font-mono text-[9px] uppercase tracking-wider text-teal-300/90 mb-1">
+        <section className="rounded-sl border border-accent/25 bg-accent/5 p-4">
+          <p className="font-mono text-[9px] uppercase tracking-wider text-accent/90 mb-1">
             Próxima dose
           </p>
           <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
@@ -81,7 +81,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
             <button
               type="button"
               onClick={() => void handleTomar(proxima.medicamentoId, proxima.horario)}
-              className="mt-3 w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-sl bg-teal-600/20 border border-teal-500/30 text-teal-100 font-mono text-[11px] uppercase tracking-wide hover:bg-teal-600/30 transition-colors"
+              className="mt-3 w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-sl bg-accent/10 border border-accent/30 text-ink font-mono text-[11px] uppercase tracking-wide hover:bg-accent/15 transition-colors"
             >
               Sim, já tomei
             </button>
@@ -92,7 +92,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
       <section className="rounded-sl border border-line bg-card overflow-hidden">
         <header className="flex items-center justify-between px-4 py-3 border-b border-line min-h-[52px]">
           <div className="flex items-center gap-2 min-w-0">
-            <Pill className="w-4 h-4 text-teal-400 shrink-0" />
+            <Pill className="w-4 h-4 text-accent shrink-0" />
             <h2 className="text-[13px] font-semibold text-ink">Agenda de hoje</h2>
             <span className="font-mono text-[10px] text-ink-muted tabular-nums">
               {tomadasHoje}/{totalDoses} doses
@@ -108,7 +108,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
               description="Cadastre nome e horários na aba Cadastrar. Cada dose pode gerar lembrete no horário."
               actionLabel="Ir para Cadastrar"
               onAction={onGoCadastrar}
-              tone="teal"
+              tone="accent"
             />
           </div>
         ) : doses.length === 0 ? (
@@ -133,7 +133,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
                   >
                     <div className={[
                       'w-5 h-5 rounded-sl border-2 flex items-center justify-center shrink-0',
-                      tomado ? 'bg-teal-500 border-teal-500' : 'border-line',
+                      tomado ? 'bg-accent border-accent' : 'border-line',
                     ].join(' ')}>
                       {tomado && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
                     </div>
@@ -148,7 +148,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
                             ? 'Ainda não é hora'
                             : dose.status === 'janela'
                               ? 'Na janela do horário'
-                              : 'Horário passou — registre quando puder'}
+                              : 'Horário passou. Registre quando puder'}
                       </p>
                     </div>
                     <Clock className="w-3.5 h-3.5 text-ink-muted shrink-0" />

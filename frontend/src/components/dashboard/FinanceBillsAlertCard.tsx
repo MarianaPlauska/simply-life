@@ -48,7 +48,7 @@ export function FinanceBillsAlertCard()
               ? `${urgent.length} conta${urgent.length > 1 ? 's' : ''} urgente${urgent.length > 1 ? 's' : ''}`
               : `${bills.length} conta${bills.length > 1 ? 's' : ''} esta semana`}
           </p>
-          <ul className={`mt-2 space-y-1 text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+          <ul className={`mt-2 space-y-1 text-[13px] ${AXEL_TEXT_SECONDARY}`}>
             {bills.slice(0, 3).map((b) => (
               <li key={b.id} className="flex justify-between gap-2">
                 <span className="truncate">{b.nome}</span>
@@ -58,14 +58,14 @@ export function FinanceBillsAlertCard()
               </li>
             ))}
           </ul>
-          <p className={`text-[11px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[12px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
             Tarefas de pagamento foram criadas no Kanban automaticamente.
           </p>
         </div>
         <button
           type="button"
           onClick={() => navigate('/financeiro?aba=faturas')}
-          className="shrink-0 font-mono text-[9px] uppercase text-accent hover:underline"
+          className="shrink-0 font-mono text-[10px] uppercase text-accent hover:underline"
         >
           Ver
         </button>

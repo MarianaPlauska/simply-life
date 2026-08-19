@@ -1,4 +1,5 @@
 import { TrendingDown, TrendingUp, Wallet } from 'lucide-react'
+import { maskFinanceValue } from '../../../lib/financeHideValues'
 import { AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 
 const fmt = (v: number) =>
@@ -12,6 +13,8 @@ interface FinanceMonthKpisRowProps
   saldoMes?: number
   balanceToneClass?: string
   compact?: boolean
+  hideValues?: boolean
+  projectionLabels?: boolean
   onConfigureSaldo?: () => void
   onReconcile?: () => void
 }
@@ -23,32 +26,34 @@ export function FinanceMonthKpisRow({
   saldoMes,
   balanceToneClass = 'text-ink',
   compact = false,
+  hideValues = false,
+  projectionLabels = false,
   onConfigureSaldo,
   onReconcile,
 }: FinanceMonthKpisRowProps)
 {
   const items = [
     {
-      label: 'Disponível',
+      label: projectionLabels ? 'Saldo inicial' : 'Disponível',
       value: saldoDisponivel,
       icon: Wallet,
       tone: balanceToneClass,
     },
     {
-      label: 'Entrou',
+      label: projectionLabels ? 'Entradas previstas' : 'Entrou',
       value: receita,
       icon: TrendingUp,
       tone: 'text-concluido',
     },
     {
-      label: 'Saiu',
+      label: projectionLabels ? 'Compromissos' : 'Saiu',
       value: despesas,
       icon: TrendingDown,
       tone: 'text-urgente',
     },
     ...(saldoMes !== undefined
       ? [{
-          label: 'Saldo mês',
+          label: projectionLabels ? 'Sobra estimada' : 'Saldo mês',
           value: saldoMes,
           icon: Wallet,
           tone: saldoMes >= 0 ? 'text-concluido' : 'text-urgente',
@@ -58,8 +63,8 @@ export function FinanceMonthKpisRow({
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        {onReconcile && (
+      {onReconcile && (
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
             onClick={onReconcile}
@@ -67,19 +72,19 @@ export function FinanceMonthKpisRow({
           >
             Recalcular / limpar duplicatas
           </button>
-        )}
-      </div>
-      {saldoDisponivel <= 0 && onConfigureSaldo && (
+        </div>
+      )}
+      {saldoDisponivel <= 0 && !projectionLabels && onConfigureSaldo && (
         <button
           type="button"
           onClick={onConfigureSaldo}
           className="w-full text-left rounded-sl border border-accent/35 bg-accent/10 px-3 py-2.5 min-h-[44px] hover:bg-accent/15 transition-colors"
         >
           <p className="text-[12px] font-medium text-ink">
-            Cadastre o saldo da sua conta
+            Informe quanto você tem livre na conta
           </p>
           <p className="text-[10px] text-ink-muted mt-0.5 font-mono uppercase">
-            Finanças → Contas → Conta → Saldo inicial
+            Finanças → Contas → Conta → salvar o disponível do banco
           </p>
         </button>
       )}
@@ -93,8 +98,8 @@ export function FinanceMonthKpisRow({
             <Icon size={11} className={tone} />
             <span className={`font-mono text-[8px] uppercase ${AXEL_TEXT_SECONDARY}`}>{label}</span>
           </div>
-          <p className={`${compact ? 'text-sm' : 'text-base'} font-display tabular-nums ${tone}`}>
-            {fmt(value)}
+          <p className={`${compact ? 'text-sm' : 'text-base'} font-display tabular-nums ${hideValues ? 'text-ink-muted' : tone}`}>
+            {maskFinanceValue(hideValues, fmt(value))}
           </p>
         </div>
       ))}

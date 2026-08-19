@@ -107,13 +107,13 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
       {!embedded && (
         <header className="px-4 pt-4 pb-3 border-b border-line">
           <p className={AXEL_SECTION_TITLE}>Auditoria</p>
-          <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Atividade recente</p>
+          <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Atividade recente</p>
         </header>
       )}
 
       <ul role="list" className="flex-1 divide-y divide-line min-h-[140px]">
         {items.length === 0 && (
-          <li className={`px-4 py-8 text-center font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>
+          <li className={`px-4 py-8 text-center font-mono text-[12px] ${AXEL_TEXT_SECONDARY}`}>
             Nenhum evento registrado hoje
           </li>
         )}
@@ -121,11 +121,11 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
           <li key={a.id} className={`px-4 py-2.5 flex items-center gap-2.5 ${AXEL_ROW_HOVER}`}>
             <a.Icon className={`w-3.5 h-3.5 shrink-0 ${a.iconClass}`} strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
-              <div className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{a.primary}</div>
-              <div className={`font-mono text-[10px] truncate ${AXEL_TEXT_SECONDARY}`}>{a.secondary}</div>
+              <div className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{a.primary}</div>
+              <div className={`font-mono text-[11px] truncate ${AXEL_TEXT_SECONDARY}`}>{a.secondary}</div>
             </div>
-            <span className={`font-mono text-[9px] text-accent shrink-0`}>{a.xpGain}</span>
-            <span className={`font-mono text-[9px] w-6 text-right shrink-0 ${AXEL_TEXT_SECONDARY}`}>{a.when}</span>
+            <span className={`font-mono text-[10px] text-accent shrink-0`}>{a.xpGain}</span>
+            <span className={`font-mono text-[10px] w-6 text-right shrink-0 ${AXEL_TEXT_SECONDARY}`}>{a.when}</span>
           </li>
         ))}
       </ul>
@@ -134,7 +134,7 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
         <button
           type="button"
           onClick={() => navigate('/relatorios')}
-          className={`inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide ${AXEL_LINK}`}
+          className={`inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-wide ${AXEL_LINK}`}
         >
           Relatório completo
           <ArrowRight className="w-3 h-3" />

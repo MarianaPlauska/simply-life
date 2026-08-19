@@ -54,7 +54,7 @@ export function BurnoutAuraCard()
     <section className="bg-card border border-zinc-800 rounded-xl overflow-hidden flex flex-col">
       <header className="px-3 py-2 border-b border-zinc-900 flex items-center gap-2">
         <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: cor, boxShadow: `0 0 6px ${cor}` }} />
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.18em] text-zinc-200">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-zinc-200">
           Burnout Aura
         </h3>
       </header>
@@ -82,7 +82,7 @@ export function BurnoutAuraCard()
 
         <div className="text-center mt-3">
           <p className="text-[12.5px] text-zinc-200 font-medium">{NIVEL_LABEL[nivel]}</p>
-          <p className="text-[11px] text-zinc-500 mt-0.5">
+          <p className="text-[12px] text-zinc-500 mt-0.5">
             {criticas} tarefa{criticas !== 1 ? 's' : ''} crítica{criticas !== 1 ? 's' : ''} pendente{criticas !== 1 ? 's' : ''}
           </p>
         </div>
@@ -91,7 +91,7 @@ export function BurnoutAuraCard()
       <div className="px-3 pb-3 flex justify-center">
         <button
           onClick={() => navigate('/relatorios')}
-          className="inline-flex items-center gap-1 text-[11px] text-violet-300 hover:text-violet-200 transition-colors"
+          className="inline-flex items-center gap-1 text-[12px] text-violet-300 hover:text-violet-200 transition-colors"
         >
           Ver análise completa <ArrowRight className="w-3 h-3" />
         </button>

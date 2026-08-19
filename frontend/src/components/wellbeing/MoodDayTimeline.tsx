@@ -20,7 +20,7 @@ export function MoodDayTimeline({ entries }: MoodDayTimelineProps)
 
   return (
     <div className="pt-3 border-t border-line">
-      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink-muted mb-2">
+      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-ink-muted mb-2">
         Hoje · {entries.length} {entries.length === 1 ? 'momento' : 'momentos'}
       </p>
       <div className="flex flex-wrap gap-2">
@@ -34,8 +34,8 @@ export function MoodDayTimeline({ entries }: MoodDayTimelineProps)
               className="w-2 h-2 rounded-full shrink-0"
               style={{ backgroundColor: MOOD_HEX[e.humor] || '#71717a' }}
             />
-            <span className="text-[11px] text-ink">{moodLabel(e.humor)}</span>
-            <span className="font-mono text-[10px] text-ink-muted">{formatTime(e.created_at)}</span>
+            <span className="text-[12px] text-ink">{moodLabel(e.humor)}</span>
+            <span className="font-mono text-[11px] text-ink-muted">{formatTime(e.created_at)}</span>
           </div>
         ))}
       </div>

@@ -49,7 +49,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
               strokeWidth={4}
               color={medsPct === 100 ? 'stroke-emerald-400' : 'stroke-emerald-600'}
             >
-              <span className={`text-[10px] font-bold tabular-nums ${medsPct === 100 ? 'text-emerald-400' : 'text-zinc-400'}`}>
+              <span className={`text-[11px] font-bold tabular-nums ${medsPct === 100 ? 'text-emerald-400' : 'text-zinc-400'}`}>
                 {medsPct}%
               </span>
             </CircularProgress>
@@ -72,7 +72,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
             <>
               <p className="text-5xl font-extrabold text-white tracking-tighter">—</p>
               <ProgressBar pct={0} label="Progresso" color="bg-gradient-to-r from-emerald-600 to-emerald-400" />
-              <p className="text-[10px] text-zinc-500 mt-2">Nenhum medicamento cadastrado</p>
+              <p className="text-[11px] text-zinc-500 mt-2">Nenhum medicamento cadastrado</p>
             </>
           )}
         </GlassCard>
@@ -92,7 +92,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
               strokeWidth={4}
               color={habitosPct >= 100 ? 'stroke-emerald-400' : habitosPct >= 50 ? 'stroke-cyan-500' : 'stroke-zinc-600'}
             >
-              <span className={`text-[10px] font-bold tabular-nums ${
+              <span className={`text-[11px] font-bold tabular-nums ${
                 habitosPct >= 100 ? 'text-emerald-400' : 'text-zinc-400'
               }`}>
                 {habitosPct.toFixed(0)}%
@@ -120,7 +120,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
             <>
               <p className="text-5xl font-extrabold text-white tracking-tighter">0%</p>
               <ProgressBar pct={0} label="Progresso" color="bg-gradient-to-r from-cyan-500 to-blue-400" />
-              <p className="text-[10px] text-zinc-500 mt-2">Configure seus habitos</p>
+              <p className="text-[11px] text-zinc-500 mt-2">Configure seus habitos</p>
             </>
           )}
         </GlassCard>
@@ -182,7 +182,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
                   >
                     <HIcon className={`w-4 h-4 shrink-0 ${done ? 'text-emerald-400' : 'text-zinc-500'}`} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-medium text-zinc-300 truncate">{h.nome_exibicao}</p>
+                      <p className="text-[13px] font-medium text-zinc-300 truncate">{h.nome_exibicao}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <div className="flex-1 h-1.5 rounded-full bg-zinc-800/60 overflow-hidden">
                           <div
@@ -190,7 +190,7 @@ export function HealthSection({ resumo }: { resumo: DashboardResumo | null }) {
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <span className={`text-[10px] tabular-nums shrink-0 ${done ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                        <span className={`text-[11px] tabular-nums shrink-0 ${done ? 'text-emerald-400' : 'text-zinc-500'}`}>
                           {h.progresso_atual}/{h.meta_diaria}
                         </span>
                       </div>

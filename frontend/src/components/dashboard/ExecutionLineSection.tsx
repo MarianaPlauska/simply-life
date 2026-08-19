@@ -145,7 +145,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
               <span className={`ml-1.5 font-normal tabular-nums ${AXEL_TEXT_SECONDARY}`}>{total}</span>
             )}
           </h2>
-          <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
             Motor de urgência · filas dinâmicas
             {lastOrchestration && (
               <span className="ml-1 opacity-70">
@@ -154,7 +154,7 @@ export function ExecutionLineSection({ prominent = false }: { prominent?: boolea
             )}
           </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 text-[12px]">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 text-[13px]">
           <button
             type="button"
             onClick={handleOrchestrate}
@@ -252,11 +252,11 @@ function BucketSection({ cfg, items, collapsed, onToggle, onOpen, onAdd }: Bucke
         <ChevronDown
           className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-150 ${collapsed ? '-rotate-90' : ''}`}
         />
-        <h3 className={`text-[12px] font-semibold tracking-tight ${cfg.accent}`}>
+        <h3 className={`text-[13px] font-semibold tracking-tight ${cfg.accent}`}>
           {cfg.label}
         </h3>
-        <span className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>({cfg.hint})</span>
-        <span className={`text-[11px] font-mono tabular-nums ml-auto ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>({cfg.hint})</span>
+        <span className={`text-[12px] font-mono tabular-nums ml-auto ${AXEL_TEXT_SECONDARY}`}>
           {items.length}
         </span>
         <span
@@ -272,7 +272,7 @@ function BucketSection({ cfg, items, collapsed, onToggle, onOpen, onAdd }: Bucke
       {!collapsed && (
         <div role="list" className="min-w-0 w-full pl-1">
           {items.length === 0 && (
-            <p className={`py-2 pl-5 text-[12px] ${AXEL_TEXT_SECONDARY}`}>{cfg.emptyHint}</p>
+            <p className={`py-2 pl-5 text-[13px] ${AXEL_TEXT_SECONDARY}`}>{cfg.emptyHint}</p>
           )}
           {items.map((t) => (
             <ExecutionCommandRow

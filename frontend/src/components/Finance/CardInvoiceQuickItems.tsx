@@ -1,9 +1,19 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { Transaction, VirtualCard } from '../../store/storeTypes'
 import { FormFieldLabel } from '../ui/FormFieldLabel'
+import { MoneyInput } from '../ui/MoneyInput'
+import {
+  cardCategoryNome,
+  loadCardCategories,
+  type CardCategory,
+} from '../../lib/financeCardCategories'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
+import { CardCategoryPicker } from './CardCategoryPicker'
+import { CardCategoriesModal } from './CardCategoriesModal'
+import { FinanceCategoryIcon } from './financeCategoryIcons'
 import {
   AXEL_BTN_PRIMARY_COMPACT,
   AXEL_FIELD_INPUT,
@@ -14,6 +24,22 @@ import {
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+function resolveCategoryNome(
+  categorias: CardCategory[],
+  categoriaId: string,
+  legacyCategoria?: string,
+): string
+{
+  const cat = categorias.find((c) => c.id === categoriaId)
+  if (cat) return cardCategoryNome(cat)
+  if (legacyCategoria)
+  {
+    const semEmoji = legacyCategoria.replace(/^[\p{Emoji}\s]+/u, '').trim()
+    if (semEmoji) return semEmoji
+  }
+  return 'Outros'
+}
 
 interface CardInvoiceQuickItemsProps
 {
@@ -30,17 +56,34 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
 
   const [desc, setDesc] = useState('')
   const [valor, setValor] = useState('')
+  const [categoriaId, setCategoriaId] = useState('')
+  const [categorias, setCategorias] = useState<CardCategory[]>(() => loadCardCategories(card.id))
+  const [pinVersion, setPinVersion] = useState(0)
+  const [catModal, setCatModal] = useState<'manage' | 'add' | null>(null)
+
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editDesc, setEditDesc] = useState('')
   const [editValor, setEditValor] = useState('')
+  const [editCatId, setEditCatId] = useState('')
 
   const today = new Date().toISOString().slice(0, 10)
 
+  const categoriaAtual = useMemo(
+    () => categorias.find((c) => c.id === categoriaId) ?? categorias[0],
+    [categorias, categoriaId],
+  )
+
   const parseValor = (raw: string): number | null =>
   {
-    const n = parseFloat(raw.replace(',', '.'))
-    if (Number.isNaN(n) || n <= 0) return null
+    const n = parseMoneyInputToNumber(raw)
+    if (!Number.isFinite(n) || n <= 0) return null
     return n
+  }
+
+  const refreshCategories = () =>
+  {
+    setCategorias(loadCardCategories(card.id))
+    setPinVersion((v) => v + 1)
   }
 
   const handleAdd = async () =>
@@ -55,7 +98,7 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
     await addTransaction({
       descricao: desc.trim(),
       valor: v,
-      categoria: 'Contas',
+      categoria: cardCategoryNome(categoriaAtual),
       data: today,
       tipo: 'despesa',
       status_pagamento: 'pendente',
@@ -72,7 +115,9 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
   {
     setEditingId(tx.id)
     setEditDesc(tx.descricao)
-    setEditValor(String(tx.valor).replace('.', ','))
+    setEditValor(tx.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }))
+    const match = categorias.find((c) => c.nome === tx.categoria || tx.categoria?.endsWith(c.nome))
+    setEditCatId(match?.id ?? categorias[0]?.id ?? '')
   }
 
   const saveEdit = async () =>
@@ -85,9 +130,11 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
       return
     }
 
+    const cat = categorias.find((c) => c.id === editCatId)
     await patchTransaction(editingId, {
       descricao: editDesc.trim(),
       valor: v,
+      categoria: cardCategoryNome(cat),
     })
     setEditingId(null)
     toast.success('Item atualizado')
@@ -111,34 +158,39 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 items-end">
+      <CardCategoryPicker
+        cardId={card.id}
+        value={categoriaId || categorias[0]?.id || ''}
+        onChange={setCategoriaId}
+        pinVersion={pinVersion}
+        onManageCategories={() => setCatModal('manage')}
+        onAddCategory={() => setCatModal('add')}
+      />
+
+      <div className="grid grid-cols-1 sm:grid-cols-[1fr_7rem_auto] gap-2">
         <label className="block space-y-1 min-w-0">
           <FormFieldLabel required>Descrição</FormFieldLabel>
           <input
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             placeholder="Ex.: Mercado, Uber…"
-            className={`w-full ${AXEL_FIELD_INPUT}`}
+            className={`w-full min-h-[44px] ${AXEL_FIELD_INPUT}`}
           />
         </label>
-        <label className="block space-y-1 sm:w-28">
+        <label className="block space-y-1">
           <FormFieldLabel required>Valor</FormFieldLabel>
-          <input
-            inputMode="decimal"
-            value={valor}
-            onChange={(e) => setValor(e.target.value)}
-            placeholder="0,00"
-            className={`w-full font-mono ${AXEL_FIELD_INPUT}`}
-          />
+          <MoneyInput value={valor} onChange={setValor} className="w-full min-h-[44px]" />
         </label>
-        <button
-          type="button"
-          onClick={() => void handleAdd()}
-          className={`inline-flex items-center justify-center gap-1 min-h-[44px] px-3 ${AXEL_BTN_PRIMARY_COMPACT}`}
-        >
-          <Plus size={12} />
-          Adicionar
-        </button>
+        <div className="flex flex-col gap-1 sm:pt-[1.35rem]">
+          <button
+            type="button"
+            onClick={() => void handleAdd()}
+            className={`inline-flex items-center justify-center gap-1 min-h-[44px] h-[44px] px-3 ${AXEL_BTN_PRIMARY_COMPACT}`}
+          >
+            <Plus size={12} />
+            Adicionar
+          </button>
+        </div>
       </div>
 
       {items.length > 0 && (
@@ -155,12 +207,26 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
                     onChange={(e) => setEditDesc(e.target.value)}
                     className={`w-full ${AXEL_FIELD_INPUT}`}
                   />
+                  <div className="flex flex-wrap gap-1">
+                    {categorias.map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => setEditCatId(cat.id)}
+                        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] border ${
+                          editCatId === cat.id ? 'border-accent text-accent' : 'border-line text-ink-muted'
+                        }`}
+                      >
+                        <FinanceCategoryIcon name={cat.icone} className="w-3 h-3" />
+                        {cat.nome}
+                      </button>
+                    ))}
+                  </div>
                   <div className="flex gap-2">
-                    <input
-                      inputMode="decimal"
+                    <MoneyInput
                       value={editValor}
-                      onChange={(e) => setEditValor(e.target.value)}
-                      className={`flex-1 font-mono ${AXEL_FIELD_INPUT}`}
+                      onChange={setEditValor}
+                      className="flex-1"
                     />
                     <button
                       type="button"
@@ -181,6 +247,8 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
               )
             }
 
+            const catNome = resolveCategoryNome(categorias, '', tx.categoria)
+
             return (
               <li
                 key={tx.id}
@@ -190,6 +258,7 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
                   <p className={`text-[12px] truncate ${AXEL_TEXT_PRIMARY}`}>{tx.descricao}</p>
                   <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
                     {tx.data.slice(0, 10).split('-').reverse().join('/')}
+                    {catNome ? ` · ${catNome}` : ''}
                   </p>
                 </div>
                 <span className="font-mono text-[12px] tabular-nums text-urgente shrink-0">
@@ -217,6 +286,16 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
             )
           })}
         </ul>
+      )}
+
+      {catModal && (
+        <CardCategoriesModal
+          cardId={card.id}
+          cardNome={card.nome}
+          autoOpenAdd={catModal === 'add'}
+          onClose={() => setCatModal(null)}
+          onChanged={refreshCategories}
+        />
       )}
     </div>
   )

@@ -128,7 +128,7 @@ export function YesterdayLetterCard()
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-2 min-w-0">
           <Mail className="w-3.5 h-3.5 text-accent shrink-0" />
-          <p className="font-mono text-[9px] uppercase tracking-wide text-accent">
+          <p className="font-mono text-[10px] uppercase tracking-wide text-accent">
             Carta do eu de ontem
             {letter.noteSource && (
               <span className={`ml-1 ${AXEL_TEXT_SECONDARY}`}>
@@ -147,12 +147,12 @@ export function YesterdayLetterCard()
         </button>
       </div>
 
-      <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
+      <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
         {letter.axelMessage}
       </p>
 
       <div className="mt-2.5 space-y-1.5">
-        <label className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+        <label className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
           O que você diria ao eu de ontem?
         </label>
         <textarea
@@ -160,13 +160,13 @@ export function YesterdayLetterCard()
           onChange={(e) => setReply(e.target.value)}
           rows={3}
           placeholder="Ex: Hoje vou com calma. Ontem foi pesado, mas eu sobrevivi."
-          className="w-full border border-line rounded-sl bg-chrome/60 px-3 py-2 text-[12px] text-ink placeholder:text-ink-muted outline-none focus:border-accent/50 resize-none min-h-[72px]"
+          className="w-full border border-line rounded-sl bg-chrome/60 px-3 py-2 text-[13px] text-ink placeholder:text-ink-muted outline-none focus:border-accent/50 resize-none min-h-[72px]"
         />
         <button
           type="button"
           disabled={savingReply || !reply.trim()}
           onClick={() => void persistReply()}
-          className={`w-full py-2 font-mono text-[9px] uppercase rounded-sl border border-line text-ink-muted hover:border-accent/40 hover:text-accent disabled:opacity-40`}
+          className={`w-full py-2 font-mono text-[10px] uppercase rounded-sl border border-line text-ink-muted hover:border-accent/40 hover:text-accent disabled:opacity-40`}
         >
           {savingReply ? 'Salvando…' : 'Guardar resposta no diário'}
         </button>
@@ -176,14 +176,14 @@ export function YesterdayLetterCard()
         <button
           type="button"
           onClick={acceptLightDay}
-          className={`inline-flex items-center px-2.5 py-1.5 font-mono text-[9px] uppercase ${AXEL_BTN_PRIMARY}`}
+          className={`inline-flex items-center px-2.5 py-1.5 font-mono text-[10px] uppercase ${AXEL_BTN_PRIMARY}`}
         >
           {letter.ctaLabel}
         </button>
         <button
           type="button"
           onClick={dismiss}
-          className="px-2.5 py-1.5 font-mono text-[9px] uppercase text-ink-muted border border-line rounded-sl hover:bg-chrome"
+          className="px-2.5 py-1.5 font-mono text-[10px] uppercase text-ink-muted border border-line rounded-sl hover:bg-chrome"
         >
           Hoje quero mais
         </button>

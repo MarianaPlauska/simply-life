@@ -1,17 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Plus, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
-import {
-  adviseSpend,
-  daysUntilMonthEnd,
-} from '../../lib/financeSpendAdvice'
 import {
   filterTransactionsByDay,
   isToday,
   transactionDayKey,
 } from '../../lib/financeLedger'
-import { useCashPosition } from '../../hooks/useCashPosition'
 import { CategoryPicker } from './CategoryPicker'
 import { FinanceCategories } from './FinanceCategories'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
@@ -37,6 +32,8 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import type { Category, Transaction } from '../../store/storeTypes'
+import { MoneyInput } from '../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -77,7 +74,6 @@ export function FinanceDailyLedgerTab({
 {
   const addTransaction = useTaskStore((s) => s.addTransaction)
   const cards = useTaskStore((s) => s.cards)
-  const { display: cashPosition } = useCashPosition()
 
   const todayKey = new Date().toISOString().slice(0, 10)
   const [dayKey, setDayKey] = useState(todayKey)
@@ -124,34 +120,11 @@ export function FinanceDailyLedgerTab({
     [dayTx],
   )
 
-  const advice = useMemo(() =>
-  {
-    const cardLimits = cards
-      .filter((c) => c.status === 'ativo')
-      .map((c) => c.limite)
-    const limiteDisp = cardLimits.length > 0 ? Math.max(...cardLimits) : undefined
-
-    return adviseSpend({
-      saldoCorrente: cashPosition.saldoDisponivel,
-      saldoProjetado: cashPosition.saldoProjetadoDisponivel,
-      despesasPendentes: cashPosition.pendentes,
-      despesasAgendadas: cashPosition.agendados,
-      diasAteFimMes: daysUntilMonthEnd(),
-      limiteCartaoDisponivel: limiteDisp,
-    })
-  }, [cashPosition, cards])
-
-  const adviceToneClass = advice.tone === 'ok'
-    ? 'border-concluido/30 bg-concluido/8'
-    : advice.tone === 'caution'
-      ? 'border-atencao/30 bg-atencao/8'
-      : 'border-urgente/30 bg-urgente/8'
-
   const despesaCats = activeCategories.filter((c) => c.tipo === 'despesa')
 
   const handleQuickAdd = async () =>
   {
-    const val = parseFloat(quickVal.replace(',', '.'))
+    const val = parseMoneyInputToNumber(quickVal)
     if (!quickDesc.trim() || Number.isNaN(val) || val <= 0)
     {
       toast.error('Preencha descrição e valor')
@@ -233,12 +206,11 @@ export function FinanceDailyLedgerTab({
             className={`flex-1 min-w-0 ${AXEL_FIELD_INPUT}`}
           />
           <div className="flex gap-2 sm:w-auto w-full">
-            <input
+            <MoneyInput
               value={quickVal}
-              onChange={(e) => setQuickVal(e.target.value)}
+              onChange={setQuickVal}
               placeholder="R$"
-              inputMode="decimal"
-              className={`w-full sm:w-28 font-mono ${AXEL_FIELD_INPUT}`}
+              className="w-full sm:w-28"
             />
             <button
               type="button"
@@ -499,14 +471,6 @@ export function FinanceDailyLedgerTab({
       <section className={`${AXEL_BENTO_PANEL} p-2 md:p-3`}>
         <FinanceQuickPresets />
       </section>
-
-      <div className={`rounded-sl p-2.5 text-[10px] ${adviceToneClass}`}>
-        <div className="flex items-center gap-1.5">
-          <Sparkles size={11} className="text-accent" />
-          <span className={`font-mono text-[8px] uppercase ${AXEL_TEXT_SECONDARY}`}>AXEL</span>
-          <span className={AXEL_TEXT_PRIMARY}>{advice.headline}</span>
-        </div>
-      </div>
     </div>
   )
 }

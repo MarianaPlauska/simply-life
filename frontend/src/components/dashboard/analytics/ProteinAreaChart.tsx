@@ -34,7 +34,7 @@ export function ProteinAreaChart({ rows, meta, eggsToday, eggMax }: ProteinAreaC
     <div className="flex flex-col h-full min-h-[280px]">
       <div className="flex items-baseline justify-between mb-2">
         <span className={AXEL_DISPLAY_STAT}>{last}g</span>
-        <span className={`font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>meta {meta}g</span>
+        <span className={`font-mono text-[12px] ${AXEL_TEXT_SECONDARY}`}>meta {meta}g</span>
       </div>
 
       <div className="flex-1 min-h-[220px]">

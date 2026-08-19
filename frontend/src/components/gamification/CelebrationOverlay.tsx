@@ -57,7 +57,7 @@ export function CelebrationOverlay()
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="mt-5 w-full font-mono text-[10px] uppercase tracking-wide py-2.5 rounded-sl border border-line hover:bg-chrome/40 transition-colors"
+          className="mt-5 w-full font-mono text-[11px] uppercase tracking-wide py-2.5 rounded-sl border border-line hover:bg-chrome/40 transition-colors"
         >
           Continuar
         </button>

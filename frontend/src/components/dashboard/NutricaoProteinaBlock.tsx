@@ -38,7 +38,7 @@ export function NutricaoProteinaBlock({ atual, meta, pct, onNavigate }: Nutricao
           <span className="text-[13px] font-medium text-zinc-800 dark:text-zinc-200 tracking-tight">
             Nutrição · Proteína
           </span>
-          <span className="text-[12px] text-zinc-500 tabular-nums shrink-0">
+          <span className="text-[13px] text-zinc-500 tabular-nums shrink-0">
             {atual}/{meta}g
           </span>
         </div>
@@ -52,7 +52,7 @@ export function NutricaoProteinaBlock({ atual, meta, pct, onNavigate }: Nutricao
       </div>
 
       <div className="mt-4">
-        <p className="text-[10px] font-medium uppercase tracking-widest text-zinc-500 mb-2">
+        <p className="text-[11px] font-medium uppercase tracking-widest text-zinc-500 mb-2">
           Ovos hoje
           <span className="text-zinc-600 normal-case tracking-tight font-normal ml-1">
             (máx. {MAX_OVOS})
@@ -84,7 +84,7 @@ export function NutricaoProteinaBlock({ atual, meta, pct, onNavigate }: Nutricao
               </button>
             )
           })}
-          <span className="ml-1 text-[11px] text-zinc-600 tabular-nums">
+          <span className="ml-1 text-[12px] text-zinc-600 tabular-nums">
             {ovosConsumidos}/{MAX_OVOS}
           </span>
         </div>

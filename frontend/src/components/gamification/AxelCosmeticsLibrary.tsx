@@ -100,7 +100,7 @@ export function AxelCosmeticsLibrary()
       <header className="flex items-center gap-2 mb-3">
         <Palette size={14} className="text-accent" />
         <h2 className={AXEL_SECTION_TITLE}>Coleção AXEL</h2>
-        <span className={`ml-auto font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`ml-auto font-mono text-[11px] ${AXEL_TEXT_SECONDARY}`}>
           {workspacePrefs.unlocked_cosmetics.length}/{AXEL_COSMETICS_CATALOG.length}
         </span>
       </header>
@@ -111,7 +111,7 @@ export function AxelCosmeticsLibrary()
             key={t.id}
             type="button"
             onClick={() => setTab(t.id)}
-            className={`shrink-0 px-2.5 py-1.5 rounded-sl text-[10px] font-mono uppercase border ${
+            className={`shrink-0 px-2.5 py-1.5 rounded-sl text-[11px] font-mono uppercase border ${
               tab === t.id ? 'border-accent bg-accent/10 text-ink' : 'border-line text-ink-muted'
             }`}
           >
@@ -149,9 +149,9 @@ export function AxelCosmeticsLibrary()
                     {item.label}
                     {equipped && <Check size={12} className="text-accent" />}
                   </p>
-                  <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{item.description}</p>
+                  <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>{item.description}</p>
                   {!unlocked && (
-                    <p className="text-[10px] font-mono text-ink-muted mt-1 flex items-center gap-1">
+                    <p className="text-[11px] font-mono text-ink-muted mt-1 flex items-center gap-1">
                       <Lock size={10} />
                       {item.unlock.type === 'level' && `Nv ${item.unlock.minLevel}`}
                       {item.unlock.type === 'streak' && `${item.unlock.minStreak}d ofensiva`}

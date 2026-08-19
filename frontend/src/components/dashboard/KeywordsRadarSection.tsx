@@ -69,21 +69,21 @@ export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
                   Radar de Palavras-Chave
                   <Eye className="w-3.5 h-3.5 text-cyan-400/60" />
                 </h3>
-                <p className="text-[11px] text-zinc-600">
+                <p className="text-[12px] text-zinc-600">
                   {keywords.length} palavra{keywords.length !== 1 ? 's' : ''} monitorada{keywords.length !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/10">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Ativo</span>
+              <span className="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Ativo</span>
             </div>
 
             {/* botão sincronizar gmail */}
             <button
               onClick={handleSync}
               disabled={isSyncing}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-semibold
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-semibold
                 bg-cyan-500/10 border border-cyan-500/15 text-cyan-400
                 hover:bg-cyan-500/20 hover:border-cyan-500/30
                 disabled:opacity-60 disabled:cursor-wait
@@ -111,7 +111,7 @@ export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
                   <div className="relative px-4 py-2 rounded-2xl border border-white/5 bg-zinc-900/40 backdrop-blur-sm hover:border-white/10 transition-all duration-300 cursor-default">
                     <div className="flex items-center gap-2">
                       <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${colorClass}`} />
-                      <span className="text-[12px] font-medium text-zinc-300 group-hover:text-white transition-colors">
+                      <span className="text-[13px] font-medium text-zinc-300 group-hover:text-white transition-colors">
                         {kw}
                       </span>
                     </div>
@@ -124,7 +124,7 @@ export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
           {/* Footer insight */}
           <div className="mt-6 pt-5 border-t border-white/5 flex items-center gap-2">
             <Zap className="w-3.5 h-3.5 text-amber-400/60" />
-            <p className="text-[11px] text-zinc-500">
+            <p className="text-[12px] text-zinc-500">
               E-mails e mensagens contendo estas palavras sao automaticamente priorizados como <span className="text-amber-400/80 font-medium">Tarefa Critica</span>
             </p>
           </div>
@@ -136,7 +136,7 @@ export function KeywordsRadarSection({ keywords }: { keywords: string[] }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-5 py-2.5 rounded-xl backdrop-blur-xl border text-[12px] font-medium shadow-lg z-10
+            className={`absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-5 py-2.5 rounded-xl backdrop-blur-xl border text-[13px] font-medium shadow-lg z-10
               ${toast.type === 'success'
                 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
                 : 'bg-cyan-500/10 border-cyan-500/20 text-cyan-300'
@@ -161,10 +161,10 @@ function EmptyKeywords() {
             <Radar className="w-6 h-6 text-zinc-600" />
           </div>
           <p className="text-[14px] font-semibold text-zinc-400 mb-1">Radar Desativado</p>
-          <p className="text-[12px] text-zinc-600 max-w-xs leading-relaxed">
+          <p className="text-[13px] text-zinc-600 max-w-xs leading-relaxed">
             Configure suas Palavras-Chave de Foco nas Configuracoes para ativar a triagem automatica de e-mails
           </p>
-          <div className="flex items-center gap-1.5 mt-4 text-[11px] text-cyan-400/60">
+          <div className="flex items-center gap-1.5 mt-4 text-[12px] text-cyan-400/60">
             <TrendingUp className="w-3.5 h-3.5" />
             <span>Integracoes → Palavras-Chave</span>
           </div>

@@ -128,7 +128,7 @@ export function ProteinGoalCard()
           <span className="text-base text-ink-muted font-normal">/ {goal}g</span>
         </div>
         <p className={`text-[12px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
-          {done ? 'Meta do dia completa.' : `${Math.round(pct)}% — registre refeições abaixo ou ajuste manual.`}
+          {done ? 'Meta do dia completa.' : `${Math.round(pct)}%. Registre refeições abaixo ou ajuste manual.`}
         </p>
         <div className="h-1.5 rounded-sl bg-chrome overflow-hidden mt-3" aria-hidden>
           <div

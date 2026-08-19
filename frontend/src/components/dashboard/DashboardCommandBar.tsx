@@ -5,6 +5,7 @@ import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { bucketByDueDate } from '../../lib/dueBucket'
 import { aguaDisplaySnapshot } from '../../lib/healthRitual'
 import { countAlertasHeader } from '../../lib/notificacaoUtils'
+import { DayCapacityCard } from './DayCapacityCard'
 import {
   AXEL_CHROME_PLANE,
   AXEL_PAGE_SHELL,
@@ -46,14 +47,14 @@ function KpiCell({ label, value, hint, variant = 'default', onClick }: KpiCellPr
         onClick ? `${AXEL_ROW_HOVER} w-full` : ''
       }`}
     >
-      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-ink-muted">
+      <p className="font-mono text-ui-caption uppercase tracking-[0.12em] text-ink-muted">
         {label}
       </p>
       <p className={`text-base sm:text-lg font-sans font-semibold tracking-tight tabular-nums mt-1 leading-none ${valueClass}`}>
         {value}
       </p>
       {hint && (
-        <p className="font-mono text-[10px] mt-1 truncate text-ink-muted">{hint}</p>
+        <p className="font-mono text-ui-caption mt-1 truncate text-ink-muted">{hint}</p>
       )}
     </Tag>
   )
@@ -124,9 +125,12 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
           <h1 className="font-sans font-semibold tracking-tight text-xl md:text-3xl text-ink mt-1">
             {greeting}, {firstName}
           </h1>
-          <p className="text-xs sm:text-sm capitalize mt-1 text-ink-muted">
+          <p className="text-sm sm:text-base capitalize mt-1 text-ink-muted">
             {dateLine}
           </p>
+          <div className="mt-2">
+            <DayCapacityCard />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 border border-line rounded-sl bg-card overflow-hidden">
@@ -138,9 +142,9 @@ export function DashboardCommandBar({ greeting, firstName }: DashboardCommandBar
             onClick={() => navigate(atrasadas > 0 ? '/kanban?bucket=vencido' : '/kanban')}
           />
           <KpiCell
-            label="Ofensiva"
-            value={String(streakCount)}
-            hint={isStreakSafeToday() ? 'Segura hoje' : 'Tarefa ou humor'}
+            label="Progresso"
+            value={`${streakCount} dia${streakCount !== 1 ? 's' : ''}`}
+            hint={isStreakSafeToday() ? 'Registrado hoje' : 'Registre uma tarefa ou humor'}
             variant={isStreakSafeToday() ? 'ok' : 'default'}
             onClick={() => navigate('/kanban?panel=executar')}
           />

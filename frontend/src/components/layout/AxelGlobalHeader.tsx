@@ -79,7 +79,6 @@ export function AxelGlobalHeader()
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
   const userProfile = useTaskStore((s) => s.userProfile)
   const setAxelAskOpen = useTaskStore((s) => s.setAxelAskOpen)
-  const userStats = useTaskStore((s) => s.userStats)
 
   const profileInitials = iniciaisDe(
     workspacePrefs.axel_calls_you
@@ -241,9 +240,6 @@ export function AxelGlobalHeader()
             title="Consultar AXEL"
           >
             <Sparkles className="w-4 h-4 text-accent" />
-            {(userStats?.level ?? 1) < 3 && (
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-atencao ring-2 ring-card" aria-hidden />
-            )}
           </button>
 
           <AccessibilityQuickMenu />

@@ -42,7 +42,7 @@ export function buildAccountPanelData(
       kind: 'cash',
       balance: position.saldoDisponivel,
       tone: cashTone,
-      hint: `Corrente ${position.saldoCorrente.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} · Reservado ${position.reservaRestante.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+      hint: `Disponível ${position.saldoDisponivel.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} · Comprometido ${position.reservaRestante.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
     },
   ]
 

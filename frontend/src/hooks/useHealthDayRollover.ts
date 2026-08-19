@@ -25,6 +25,11 @@ export function useHealthDayRollover(): void
       void fetchHumorResumo()
     }
 
+    // revalida no mount: se o app ficou fechado desde ontem, fetchHabitos aplica o reset local antes de exibir os dados
+    void fetchHabitos()
+    void fetchMedicamentos()
+    void fetchHumorResumo()
+
     const intervalId = window.setInterval(check, 60_000)
     const onVisible = () =>
     {

@@ -53,12 +53,12 @@ export function MonthlyStreakShieldCard()
         <h2 id="shield-title" className={AXEL_SECTION_TITLE}>
           Escudos de ofensiva
         </h2>
-        <span className={`ml-auto font-mono text-[10px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+        <span className={`ml-auto font-mono text-[11px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
           {streakFreezes} na mochila
         </span>
       </header>
 
-      <p className={`text-[12px] mb-4 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+      <p className={`text-[13px] mb-4 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
         Um escudo absorve 1 dia perdido sem zerar sua sequência. Você ganha{' '}
         <strong className="text-ink">1 grátis por mês</strong> — extras custam 500 XP.
       </p>
@@ -68,7 +68,7 @@ export function MonthlyStreakShieldCard()
           type="button"
           disabled={!available}
           onClick={handleClaim}
-          className={`flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-sl font-mono text-[10px] uppercase tracking-wide border transition-colors ${
+          className={`flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-sl font-mono text-[11px] uppercase tracking-wide border transition-colors ${
             available
               ? `${AXEL_BTN_PRIMARY} border-transparent`
               : 'border-line bg-chrome/40 text-ink-muted cursor-not-allowed'
@@ -80,7 +80,7 @@ export function MonthlyStreakShieldCard()
         <button
           type="button"
           onClick={() => void handleBuy()}
-          className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-sl font-mono text-[10px] uppercase tracking-wide border border-line bg-chrome/30 hover:bg-chrome/50 text-ink transition-colors"
+          className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-sl font-mono text-[11px] uppercase tracking-wide border border-line bg-chrome/30 hover:bg-chrome/50 text-ink transition-colors"
         >
           <Shield size={14} className="text-sky-400" />
           Comprar · 500 XP ({getTotalXp()} disp.)

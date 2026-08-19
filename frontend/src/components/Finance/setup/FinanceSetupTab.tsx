@@ -13,6 +13,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../../lib/currencyInput'
 
 const GRADIENTS: VirtualCard['tipo_gradiente'][] = [
   'purple', 'obsidian', 'sunset', 'ocean', 'mint',
@@ -22,17 +24,21 @@ interface FinanceSetupTabProps
 {
   onNavigate: (tab: 'cartoes' | 'contas-fixas' | 'faturas') => void
   saldoDisponivel: number
-  saldoCorrente: number
   reservaRestante: number
   saldoProjetadoDisponivel: number
+  saldoInicial: number
+  receitasPagas: number
+  despesasPagas: number
 }
 
 export function FinanceSetupTab({
   onNavigate,
   saldoDisponivel,
-  saldoCorrente,
   reservaRestante,
   saldoProjetadoDisponivel,
+  saldoInicial,
+  receitasPagas,
+  despesasPagas,
 }: FinanceSetupTabProps)
 {
   const cards = useTaskStore((s) => s.cards)
@@ -52,7 +58,7 @@ export function FinanceSetupTab({
     setEditingId(card.id)
     setDraft({
       nome: card.nome,
-      limite: String(card.limite),
+      limite: formatCentsToBrl(Math.round(card.limite * 100)),
       dia_fechamento: String(card.dia_fechamento ?? 5),
       dia_vencimento: String(card.dia_vencimento ?? 12),
       tipo_gradiente: card.tipo_gradiente,
@@ -62,7 +68,7 @@ export function FinanceSetupTab({
   const saveCard = async () =>
   {
     if (!editingId) return
-    const limite = parseFloat(draft.limite.replace(',', '.'))
+    const limite = parseMoneyInputToNumber(draft.limite)
     if (!draft.nome.trim() || Number.isNaN(limite) || limite <= 0)
     {
       toast.error('Nome e limite válidos são obrigatórios')
@@ -94,9 +100,11 @@ export function FinanceSetupTab({
 
       <FinanceCashAccountCard
         saldoDisponivel={saldoDisponivel}
-        saldoCorrente={saldoCorrente}
         reservaRestante={reservaRestante}
         saldoProjetadoDisponivel={saldoProjetadoDisponivel}
+        saldoInicial={saldoInicial}
+        receitasPagas={receitasPagas}
+        despesasPagas={despesasPagas}
       />
 
       <section className={AXEL_BORDERLESS_PANEL}>
@@ -135,12 +143,11 @@ export function FinanceSetupTab({
                       placeholder="Nome do cartão"
                     />
                     <div className="grid grid-cols-2 gap-2">
-                      <input
-                        inputMode="decimal"
+                      <MoneyInput
                         value={draft.limite}
-                        onChange={(e) => setDraft((d) => ({ ...d, limite: e.target.value }))}
-                        className="border border-line rounded-sl bg-chrome px-3 py-2 text-sm font-mono"
+                        onChange={(v) => setDraft((d) => ({ ...d, limite: v }))}
                         placeholder="Limite R$"
+                        className="text-sm"
                       />
                       <input
                         value={draft.dia_vencimento}

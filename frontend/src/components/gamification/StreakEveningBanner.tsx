@@ -47,7 +47,7 @@ export function StreakEveningBanner()
     >
       <Flame className="w-5 h-5 text-orange-500 shrink-0" />
       <div className="flex-1 min-w-[200px]">
-        <p className="font-mono text-[10px] uppercase tracking-wide text-orange-600 dark:text-orange-400">
+        <p className="font-mono text-[11px] uppercase tracking-wide text-orange-600 dark:text-orange-400">
           Ofensiva em risco
         </p>
         <p className="text-sm text-ink mt-0.5">
@@ -58,7 +58,7 @@ export function StreakEveningBanner()
       <button
         type="button"
         onClick={() => navigate('/kanban')}
-        className="font-mono text-[10px] uppercase tracking-wide px-3 py-2 rounded-sl bg-orange-500/20 text-orange-700 dark:text-orange-300 hover:bg-orange-500/30"
+        className="font-mono text-[11px] uppercase tracking-wide px-3 py-2 rounded-sl bg-orange-500/20 text-orange-700 dark:text-orange-300 hover:bg-orange-500/30"
       >
         Executar agora
       </button>

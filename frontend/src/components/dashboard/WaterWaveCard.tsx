@@ -11,12 +11,11 @@ import {
   metaMl,
   mlPorCopo,
   ML_OPCOES,
-  patchMlPresetChange,
   registrosMl,
   resolveMlPresets,
   totalMlHoje,
-  isBuiltInMlPreset,
 } from '../../lib/waterHydration'
+import { saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
 
 interface WaterWaveCardProps
 {
@@ -30,7 +29,6 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
   const habitos = useTaskStore((s) => s.habitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
   const setAguaRegistros = useTaskStore((s) => s.setAguaRegistros)
-  const updateHabitoConfig = useTaskStore((s) => s.updateHabitoConfig)
 
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
   const entries = useMemo(() => registrosMl(agua), [agua])
@@ -71,22 +69,12 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
 
   const handleDefaultMl = async (ml: number) =>
   {
-    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
-    if (!ensured) return
-    await updateHabitoConfig(ensured.id, { ml_por_copo: ml })
-    if (!isBuiltInMlPreset(ml))
-    {
-      const patch = patchMlPresetChange(ensured, 'add', ml)
-      await updateHabitoConfig(ensured.id, patch)
-    }
+    await saveAguaDefaultMl(agua, ml)
   }
 
   const patchMlPresets = async (action: 'add' | 'remove', ml: number) =>
   {
-    const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
-    if (!ensured) return
-    const patch = patchMlPresetChange(ensured, action, ml)
-    await updateHabitoConfig(ensured.id, patch)
+    await saveAguaMlPreset(agua, action, ml)
   }
 
   const handleQuickAdd = async () =>
@@ -107,6 +95,60 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
       ? `Ritual ok — ${totalMl} / ${metaTotalMl} ml`
       : `${Math.max(0, goal - current)} copo${goal - current !== 1 ? 's' : ''} · ${totalMl} ml`
 
+  if (!hero)
+  {
+    const pct = goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0
+
+    return (
+      <section className={`sl-panel p-3 sm:p-4 ${className}`} aria-label="Hidratação hoje">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <Droplets size={16} className="text-accent shrink-0" strokeWidth={1.75} />
+              <p className="font-mono text-ui-caption uppercase tracking-[0.12em] text-accent">Água hoje</p>
+            </div>
+            <p className={`mt-1 text-ui-title font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
+              {current} de {goal} copos
+            </p>
+            <p className={`mt-0.5 text-ui-caption ${AXEL_TEXT_SECONDARY}`}>
+              {totalMl} de {metaTotalMl} ml
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void handleQuickAdd()}
+            className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-sl border border-accent/25 bg-accent-muted px-3 text-ui-body font-semibold text-ink hover:bg-accent-muted/80 active:scale-95 transition-colors"
+          >
+            <Plus size={17} strokeWidth={2} aria-hidden="true" />
+            {defaultMl} ml
+          </button>
+        </div>
+        <div className="mt-3 h-2 overflow-hidden rounded-full bg-chrome" aria-label={`${pct}% da meta de hidratação`}>
+          <div className="h-full bg-accent transition-all duration-500" style={{ width: `${pct}%` }} />
+        </div>
+        <div className="mt-3">
+          <WaterCupGrid
+            entries={entries}
+            goal={displayGoal}
+            baseGoal={goal}
+            defaultMl={defaultMl}
+            mlPresets={mlPresets}
+            onEntriesChange={(next) => void persistEntries(next)}
+            compact
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/saude#hidratacao')}
+          className="mt-2 inline-flex items-center gap-1 text-ui-caption text-ink-muted hover:text-accent"
+        >
+          Ajustar meta ou quantidade
+          <ChevronRight size={13} aria-hidden="true" />
+        </button>
+      </section>
+    )
+  }
+
   return (
     <section
       className={`sl-panel overflow-hidden flex flex-col ${hero ? 'p-4 sm:p-5' : 'p-3'} ${className}`}
@@ -116,7 +158,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <Droplets size={hero ? 16 : 14} className="text-accent shrink-0" strokeWidth={1.75} />
-            <span className="font-mono uppercase tracking-[0.12em] text-accent text-[10px]">
+            <span className="font-mono uppercase tracking-[0.12em] text-accent text-[11px]">
               Água hoje
             </span>
           </div>
@@ -125,7 +167,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
             <span className={`text-ink-muted font-normal ${hero ? 'text-base' : 'text-sm'}`}> ml</span>
             <span className={`text-ink-muted font-normal ${hero ? 'text-base' : 'text-sm'}`}> · {current}/{goal}</span>
           </p>
-          <p className={`mt-1 ${AXEL_TEXT_SECONDARY} ${hero ? 'text-xs' : 'text-[11px]'}`}>
+          <p className={`mt-1 ${AXEL_TEXT_SECONDARY} ${hero ? 'text-xs' : 'text-[12px]'}`}>
             {statusLine}
           </p>
         </div>
@@ -134,7 +176,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
             <button
               type="button"
               onClick={() => void handleClear()}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-sl border border-line text-ink-muted hover:text-atencao hover:border-atencao/40 hover:bg-atencao/5 transition-colors"
+              className="inline-flex items-center justify-center w-8 h-8 sm:w-7 sm:h-7 rounded-sl border border-line text-ink-muted hover:text-atencao hover:border-atencao/40 hover:bg-atencao/5 transition-colors"
               title="Zerar água de hoje"
               aria-label="Zerar água de hoje"
             >
@@ -144,7 +186,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
           <button
             type="button"
             onClick={() => navigate('/saude#hidratacao')}
-            className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-wide px-2.5 py-1.5 rounded-sl border border-line text-ink-muted hover:text-ink hover:bg-chrome transition-colors"
+            className="inline-flex items-center gap-1 font-mono text-[11px] sm:text-[10px] uppercase tracking-wide px-2.5 py-1.5 sm:px-2 sm:py-1 rounded-sl border border-line text-ink-muted hover:text-ink hover:bg-chrome transition-colors"
           >
             Saúde
             <ChevronRight size={12} />
@@ -169,11 +211,11 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
           <button
             type="button"
             onClick={() => void handleQuickAdd()}
-            className={`mt-3 w-full inline-flex items-center justify-center gap-2 py-2 px-3 rounded-sl font-mono text-[10px] uppercase tracking-wide border border-accent/25 bg-accent-muted text-ink hover:bg-accent-muted/80 transition-colors ${
+            className={`mt-3 w-full sm:w-auto sm:max-w-[9.5rem] inline-flex items-center justify-center gap-1.5 sm:gap-1 py-2 sm:py-1.5 px-3 sm:px-2.5 rounded-sl font-mono text-[11px] sm:text-[10px] uppercase tracking-wide border border-accent/25 bg-accent-muted text-ink hover:bg-accent-muted/80 transition-colors ${
               done ? 'border-dashed' : ''
             }`}
           >
-            <Plus size={14} strokeWidth={2} />
+            <Plus size={14} strokeWidth={2} className="sm:w-3 sm:h-3" />
             {done ? `+${defaultMl} ml extra` : `+${defaultMl} ml`}
           </button>
         </>
@@ -191,7 +233,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
           <button
             type="button"
             onClick={() => void ensureHealthHabit(AGUA_PRESET)}
-            className="w-full py-3 rounded-sl border border-accent/25 bg-accent-muted text-ink font-mono text-[11px] uppercase tracking-wide hover:bg-accent-muted/80 transition-colors"
+            className="w-full py-3 rounded-sl border border-accent/25 bg-accent-muted text-ink font-mono text-[12px] uppercase tracking-wide hover:bg-accent-muted/80 transition-colors"
           >
             Ativar meta de 8 copos
           </button>

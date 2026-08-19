@@ -1,4 +1,6 @@
 import { billRemaining, computeCashPosition } from './financeReservedBills'
+import { getBillingCycle, getInvoiceTransactions, sumInvoice } from './financeCardCycle'
+import { cardTemCicloFatura } from './financeCardModalidade'
 import type {
   BudgetLimit,
   Category,
@@ -6,6 +8,7 @@ import type {
   RecurringIncome,
   ReservedBill,
   Transaction,
+  VirtualCard,
 } from '../store/storeTypes'
 import { dedupeTransactionsForLedger } from './financeTransactionDedup'
 
@@ -75,6 +78,7 @@ export interface MonthOutlookInput
   contasFixas: ContaFixa[]
   budgetLimits: BudgetLimit[]
   categories: Category[]
+  cards?: VirtualCard[]
   monthOffset: number
   saldoPartidaOverride?: number
 }
@@ -161,17 +165,34 @@ function computePlannedMonthSlice(
   }
 
   let agendadosMes = 0
+  let pendentesMes = 0
   for (const t of input.transactions)
   {
-    if (t.status_pagamento !== 'agendado') continue
+    const status = t.status_pagamento ?? 'pendente'
     if (!isInMonth(t.data, year, month)) continue
-    if (t.tipo === 'receita')
+
+    if (status === 'agendado')
     {
-      agendadosMes -= t.valor
+      if (t.tipo === 'receita')
+      {
+        agendadosMes -= t.valor
+      }
+      else
+      {
+        agendadosMes += t.valor
+      }
+      continue
     }
-    else
+
+    if (status === 'pendente' && t.tipo === 'despesa' && !t.card_id)
     {
-      agendadosMes += t.valor
+      pendentesMes += t.valor
+      compromissosItens.push({
+        id: t.id,
+        label: t.descricao,
+        valor: t.valor,
+        hint: 'PIX / caixa pendente',
+      })
     }
   }
 
@@ -182,6 +203,34 @@ function computePlannedMonthSlice(
       valor: agendadosMes,
     })
     compromissos += agendadosMes
+  }
+
+  if (pendentesMes > 0)
+  {
+    compromissos += pendentesMes
+  }
+
+  const cards = input.cards ?? []
+  for (const card of cards.filter((c) => c.status === 'ativo' && cardTemCicloFatura(c.modalidade)))
+  {
+    const ref = new Date(year, month, 15)
+    const cycle = getBillingCycle(card, ref)
+    if (!isInMonth(cycle.dueDate, year, month)) continue
+
+    const label = `Fatura · ${card.nome}`
+    if (compromissosItens.some((i) => i.label === label)) continue
+
+    const invoiceTx = getInvoiceTransactions(input.transactions, card.id, cycle)
+    const total = sumInvoice(invoiceTx)
+
+    if (total <= 0) continue
+
+    compromissosItens.push({
+      label,
+      valor: total,
+      hint: `vence ${cycle.dueDate.slice(0, 10).split('-').reverse().join('/')}`,
+    })
+    compromissos += total
   }
 
   return {
@@ -335,6 +384,17 @@ export function canShiftFinanceMonth(
   const min = bounds?.minOffset ?? -FINANCE_MAX_PAST_OFFSET
   const max = bounds?.maxOffset ?? FINANCE_MAX_FUTURE_OFFSET
   return next >= min && next <= max
+}
+
+/** Há lançamentos reais no mês (passado ou atual) */
+export function monthHasLedgerData(
+  transactions: Transaction[],
+  monthOffset: number,
+  ref = new Date(),
+): boolean
+{
+  const d = targetMonthDate(monthOffset, ref)
+  return transactions.some((t) => isInMonth(t.data, d.getFullYear(), d.getMonth()))
 }
 
 /** Previsão de um mês — real (passado/atual) ou futuro (compromissos + recorrentes) */

@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { normalizePinnedModules } from './slices/uiSlice';
-import { applyColorScheme } from '../utils/applyColorScheme';
+import { syncColorSchemeAfterRehydrate } from '../utils/themeBootstrap';
 import { localTodayIso, resetHabitosParaHoje } from '../lib/healthDayBoundary';
 import { getActiveStorageUserId, getPersistStorageKey } from '../lib/userScopedStorage';
 
@@ -155,8 +155,8 @@ export const useTaskStore = create<TaskStore>()(
         if (acc?.colorScheme === 'sepia')
         {
           acc.colorScheme = 'light'
-          applyColorScheme('light')
         }
+        syncColorSchemeAfterRehydrate()
         if (Array.isArray(state.pinnedModules))
         {
           state.pinnedModules = normalizePinnedModules(state.pinnedModules as string[])

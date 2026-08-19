@@ -38,15 +38,15 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
           <div className="flex items-center gap-2.5">
             <ListChecks className="w-4.5 h-4.5 text-violet-400" />
             <div>
-              <p className="text-[12px] font-semibold text-zinc-400 uppercase tracking-wider">Tarefas</p>
+              <p className="text-[13px] font-semibold text-zinc-400 uppercase tracking-wider">Tarefas</p>
               {tarefasTotal > 0 && (
-                <p className="text-[10px] text-zinc-500 font-light mt-0.5">
+                <p className="text-[11px] text-zinc-500 font-light mt-0.5">
                   {resumo?.tarefas_pendentes ?? 0} pendente{(resumo?.tarefas_pendentes ?? 0) !== 1 ? 's' : ''}
                 </p>
               )}
             </div>
           </div>
-          <span className="text-[11px] font-bold text-violet-400 tabular-nums bg-violet-500/10 px-2 py-0.5 rounded">
+          <span className="text-[12px] font-bold text-violet-400 tabular-nums bg-violet-500/10 px-2 py-0.5 rounded">
             {tarefasPct}%
           </span>
         </div>
@@ -56,12 +56,12 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
               {tarefasConcluidas}
               <span className="text-lg text-zinc-500 font-normal ml-1.5">/ {tarefasTotal}</span>
             </p>
-            <p className="text-[10px] text-zinc-500 mt-2 font-light">Progresso geral concluído</p>
+            <p className="text-[11px] text-zinc-500 mt-2 font-light">Progresso geral concluído</p>
           </div>
         ) : (
           <div>
             <p className="text-3xl font-extrabold text-white tracking-tight tabular-nums leading-none">—</p>
-            <p className="text-[10px] text-zinc-500 mt-2 font-light">Crie sua primeira tarefa</p>
+            <p className="text-[11px] text-zinc-500 mt-2 font-light">Crie sua primeira tarefa</p>
           </div>
         )}
       </div>
@@ -72,7 +72,7 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
         {tarefasIA > 0 && (
           <div className="absolute top-0 right-0 flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-600/20 border border-violet-500/30">
             <Sparkles className="w-2.5 h-2.5 text-violet-300" />
-            <span className="text-[9px] font-bold text-violet-300">{tarefasIA} IA</span>
+            <span className="text-[10px] font-bold text-violet-300">{tarefasIA} IA</span>
           </div>
         )}
 
@@ -81,8 +81,8 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
             ? <AlertTriangle className="w-4.5 h-4.5 text-red-400" />
             : <CheckCircle2 className="w-4.5 h-4.5 text-emerald-400" />}
           <div>
-            <p className="text-[12px] font-semibold text-zinc-400 uppercase tracking-wider">Foco Crítico</p>
-            <p className="text-[10px] text-zinc-500 font-light mt-0.5">Prioridades para hoje</p>
+            <p className="text-[13px] font-semibold text-zinc-400 uppercase tracking-wider">Foco Crítico</p>
+            <p className="text-[11px] text-zinc-500 font-light mt-0.5">Prioridades para hoje</p>
           </div>
         </div>
         <div>
@@ -91,7 +91,7 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
           }`}>
             {resumo?.tarefas_criticas ?? 0}
           </p>
-          <p className="text-[10px] text-zinc-500 mt-2 font-light">
+          <p className="text-[11px] text-zinc-500 mt-2 font-light">
             {hasCriticas ? 'Score >= 100 — ação imediata' : 'Nenhuma tarefa crítica'}
           </p>
         </div>
@@ -102,8 +102,8 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
         <div className="flex items-center gap-2.5 mb-4">
           <DollarSign className={`w-4.5 h-4.5 ${inBudget ? 'text-emerald-400' : 'text-red-400'}`} />
           <div>
-            <p className="text-[12px] font-semibold text-zinc-400 uppercase tracking-wider">Gastos Hoje</p>
-            <p className="text-[10px] text-zinc-500 font-light mt-0.5">Mensal: {fmt(resumo?.despesas_mes ?? 0)}</p>
+            <p className="text-[13px] font-semibold text-zinc-400 uppercase tracking-wider">Gastos Hoje</p>
+            <p className="text-[11px] text-zinc-500 font-light mt-0.5">Mensal: {fmt(resumo?.despesas_mes ?? 0)}</p>
           </div>
         </div>
         <div>
@@ -112,7 +112,7 @@ export function KPISection({ resumo, tarefasIA = 0 }: KPISectionProps) {
           }`}>
             {fmt(despesaDia)}
           </p>
-          <p className={`text-[10px] mt-2 font-medium ${
+          <p className={`text-[11px] mt-2 font-medium ${
             inBudget ? 'text-emerald-400' : 'text-red-400'
           }`}>
             {inBudget ? '+' : ''}{fmt(saldoMes)} de saldo

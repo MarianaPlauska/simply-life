@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Plus, Settings2 } from 'lucide-react'
+import { Eye, EyeOff, Plus, Settings2 } from 'lucide-react'
 import { FinanceMonthStrip } from './FinanceMonthStrip'
 import type { FinanceMonthNavBounds } from '../../lib/financeMonthOutlook'
 import {
@@ -28,6 +28,8 @@ interface FinancePlannerShellProps
   onManageCategories: () => void
   onNewTransaction: () => void
   showNewTransactionFab?: boolean
+  hideValues?: boolean
+  onToggleHideValues?: () => void
   children: ReactNode
 }
 
@@ -42,6 +44,8 @@ export function FinancePlannerShell({
   onManageCategories,
   onNewTransaction,
   showNewTransactionFab = true,
+  hideValues = false,
+  onToggleHideValues,
   children,
 }: FinancePlannerShellProps)
 {
@@ -61,6 +65,17 @@ export function FinancePlannerShell({
           </p>
         </div>
         <div className="flex items-center gap-0.5 shrink-0">
+          {onToggleHideValues && (
+            <button
+              type="button"
+              onClick={onToggleHideValues}
+              className="p-1.5 rounded-sl border border-line hover:bg-chrome text-ink-muted hover:text-ink"
+              aria-label={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+              title={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
+            >
+              {hideValues ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            </button>
+          )}
           <button
             type="button"
             onClick={onManageCategories}

@@ -107,7 +107,7 @@ export function SaudeBentoEditorial()
             onClick={() => navigate('/saude#hidratacao')}
             className="text-left group"
           >
-            <p className="text-[11px] font-medium text-zinc-500 tracking-wide uppercase mb-3">Hidratação</p>
+            <p className="text-[12px] font-medium text-zinc-500 tracking-wide uppercase mb-3">Hidratação</p>
             <div className="flex items-baseline gap-2">
               <span className="text-[48px] font-semibold tabular-nums tracking-tighter text-zinc-100 leading-none">
                 {saude.aguaPct}
@@ -130,7 +130,7 @@ export function SaudeBentoEditorial()
             onClick={() => navigate('/saude#medicamentos')}
             className="text-left"
           >
-            <p className="text-[11px] font-medium text-zinc-500 tracking-wide uppercase mb-3">Próximo remédio</p>
+            <p className="text-[12px] font-medium text-zinc-500 tracking-wide uppercase mb-3">Próximo remédio</p>
             {saude.proximo ? (
               <>
                 <p className={`text-[20px] font-semibold tracking-tighter leading-snug ${
@@ -158,8 +158,8 @@ export function SaudeBentoEditorial()
             className="text-left mb-4"
           >
             <div className="flex items-center justify-between gap-4">
-              <p className="text-[11px] font-medium text-zinc-500 tracking-wide uppercase">Nutrição</p>
-              <span className="text-[11px] text-zinc-600 tabular-nums">
+              <p className="text-[12px] font-medium text-zinc-500 tracking-wide uppercase">Nutrição</p>
+              <span className="text-[12px] text-zinc-600 tabular-nums">
                 {saude.proteinaAtual}g / {saude.proteinaMeta}g
               </span>
             </div>
@@ -176,7 +176,7 @@ export function SaudeBentoEditorial()
           </div>
 
           <div className="mt-auto">
-            <p className="text-[11px] font-medium text-zinc-500 tracking-wide uppercase mb-3">
+            <p className="text-[12px] font-medium text-zinc-500 tracking-wide uppercase mb-3">
               Ovos <span className="text-zinc-600 normal-case tracking-tight">(máx. {MAX_OVOS})</span>
             </p>
             <div className="flex items-center gap-3" role="group" aria-label="Controle de ovos">

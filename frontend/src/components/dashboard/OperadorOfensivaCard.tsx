@@ -78,7 +78,7 @@ export function OperadorOfensivaCard()
           <h2 id="momentum-heading" className={AXEL_SECTION_TITLE}>
             Momentum AXEL
           </h2>
-          <p className={`text-[12px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[13px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
             {proofLabel}
           </p>
         </div>
@@ -86,23 +86,23 @@ export function OperadorOfensivaCard()
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div className="p-3 rounded-sl border border-line bg-chrome/30">
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Ofensiva</p>
+          <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>Ofensiva</p>
           <p className="text-2xl font-display tabular-nums text-atencao mt-1">
             {streakCount}
             <span className="text-sm text-ink-muted ml-1">dias</span>
           </p>
           {streakFreezes > 0 && (
-            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+            <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               {streakFreezes} escudo{streakFreezes > 1 ? 's' : ''}
             </p>
           )}
         </div>
         <div className="p-3 rounded-sl border border-line bg-chrome/30">
-          <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
             Nível {profile.level}
           </p>
           <p className={`text-sm font-display mt-1 ${AXEL_TEXT_PRIMARY}`}>{arquetipo(profile.level)}</p>
-          <p className={`font-mono text-[10px] tabular-nums mt-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`font-mono text-[11px] tabular-nums mt-1 ${AXEL_TEXT_SECONDARY}`}>
             {profile.xpInLevel}/{profile.xpToNextLevel} XP
           </p>
         </div>
@@ -125,7 +125,7 @@ export function OperadorOfensivaCard()
               <p className={`text-lg font-display tabular-nums mt-1 ${AXEL_TEXT_PRIMARY}`}>
                 {attrLevels[a.key]}
               </p>
-              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>{a.label}</p>
+              <p className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>{a.label}</p>
             </div>
           )
         })}
@@ -138,7 +138,7 @@ export function OperadorOfensivaCard()
       <button
         type="button"
         onClick={() => navigate('/kanban')}
-        className={`mt-4 w-full font-mono text-[10px] uppercase tracking-wide py-2.5 ${AXEL_BTN_PRIMARY}`}
+        className={`mt-4 w-full font-mono text-[11px] uppercase tracking-wide py-2.5 ${AXEL_BTN_PRIMARY}`}
       >
         Ganhar XP executando
       </button>

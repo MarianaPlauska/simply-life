@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CalendarClock, Plus } from 'lucide-react'
+import { CalendarClock, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { isMockReservedBillId } from '../../lib/financeReservedBillsLocal'
@@ -16,6 +16,8 @@ import { ReservedBillsSummaryBar } from './reserved-bills/ReservedBillsSummaryBa
 import { UpcomingPayablesSection } from './UpcomingPayablesSection'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
 import { FinanceReconcileButton } from './FinanceReconcileButton'
+import { MoneyInput } from '../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 import { isPaidInSettlements } from '../../lib/financeLedgerReconcile'
 import {
   AXEL_BORDERLESS_PANEL,
@@ -102,7 +104,7 @@ export function FinanceReservedBillsTab()
 
   const handleCreate = async () =>
   {
-    const v = parseFloat(valor.replace(',', '.'))
+    const v = parseMoneyInputToNumber(valor)
     if (!titulo.trim() || Number.isNaN(v) || v <= 0 || !vencimento)
     {
       toast.error('Preencha título, valor e vencimento')
@@ -173,7 +175,15 @@ export function FinanceReservedBillsTab()
         )}
 
         {showForm && (
-          <div className="border border-line rounded-sl bg-chrome/30 p-4 space-y-3 mb-4">
+          <div className="relative border border-line rounded-sl bg-chrome/30 p-4 space-y-3 mb-4">
+            <button
+              type="button"
+              onClick={() => setShowForm(false)}
+              className="absolute top-2 right-2 p-2 rounded-sl text-ink-muted hover:text-ink hover:bg-chrome/80 min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Fechar formulário"
+            >
+              <X size={16} />
+            </button>
             <input
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
@@ -181,12 +191,11 @@ export function FinanceReservedBillsTab()
               className="w-full border border-line rounded-sl bg-card px-3 py-2 text-sm"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <input
-                inputMode="decimal"
+              <MoneyInput
                 value={valor}
-                onChange={(e) => setValor(e.target.value)}
+                onChange={setValor}
                 placeholder="Valor total (R$)"
-                className="border border-line rounded-sl bg-card px-3 py-2 text-sm font-mono"
+                className="text-sm"
               />
               <input
                 type="date"

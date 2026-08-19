@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { CreditCard, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -16,6 +16,8 @@ import {
 } from '../../lib/financeCardQuickSubtypes'
 import { CardSpendProgress } from './CardSpendProgress'
 import { CardQuickSpendSubtypes } from './CardQuickSpendSubtypes'
+import { MoneyInput } from '../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../lib/currencyInput'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import {
   AXEL_BTN_PRIMARY,
@@ -70,7 +72,7 @@ export function CardQuickSpendStrip({
   const [customDesc, setCustomDesc] = useState('')
   const [valor, setValor] = useState('')
   const [saving, setSaving] = useState(false)
-  const valorRef = useRef<HTMLInputElement>(null)
+  const valorInputId = 'card-quick-spend-valor'
 
   useEffect(() =>
   {
@@ -133,10 +135,10 @@ export function CardQuickSpendStrip({
     {
       setCustomDesc('')
     }
-    window.requestAnimationFrame(() => valorRef.current?.focus())
+    window.requestAnimationFrame(() => document.getElementById(valorInputId)?.focus())
   }
 
-  const parseValor = () => parseFloat(valor.replace(',', '.'))
+  const parseValor = () => parseMoneyInputToNumber(valor)
 
   const handleSpend = async (valorOverride?: number) =>
   {
@@ -165,7 +167,7 @@ export function CardQuickSpendStrip({
     if (Number.isNaN(val) || val <= 0)
     {
       toast.error('Informe o valor')
-      valorRef.current?.focus()
+      document.getElementById(valorInputId)?.focus()
       return
     }
 
@@ -211,13 +213,13 @@ export function CardQuickSpendStrip({
 
   const handleAmountTap = (amt: number) =>
   {
-    setValor(String(amt))
+    setValor(formatCentsToBrl(Math.round(amt * 100)))
     if (isDashboard)
     {
       void handleSpend(amt)
       return
     }
-    window.requestAnimationFrame(() => valorRef.current?.focus())
+    window.requestAnimationFrame(() => document.getElementById(valorInputId)?.focus())
   }
   const amountHints = isDashboard ? CARD_QUICK_AMOUNT_HINTS_COMPACT : CARD_QUICK_AMOUNT_HINTS
 
@@ -296,18 +298,16 @@ export function CardQuickSpendStrip({
       </div>
 
       <div className="flex gap-2">
-        <input
-          ref={valorRef}
+        <MoneyInput
+          id={valorInputId}
           value={valor}
-          onChange={(e) => setValor(e.target.value)}
+          onChange={setValor}
           placeholder="Valor"
-          inputMode="decimal"
-          className={`flex-1 min-w-0 border border-line rounded-sl bg-chrome px-3 font-mono tabular-nums text-ink ${
+          className={`flex-1 min-w-0 tabular-nums ${
             isDashboard
               ? 'py-2 text-base min-h-[40px]'
               : 'py-2.5 text-lg text-center min-h-[44px]'
           }`}
-          onKeyDown={(e) => e.key === 'Enter' && void handleSpend()}
         />
         <button
           type="button"

@@ -64,14 +64,20 @@ function scrollToBucket(bucket: DueBucket)
 
 export function DueBucketMap({ counts }: DueBucketMapProps)
 {
-  const visible = NAV_BUCKETS.filter((b) => b !== 'proxima_semana' || counts[b] > 0)
+  // mostra somente faixas que realmente têm tarefas: evita transformar a navegação em um painel de status
+  const visible = NAV_BUCKETS.filter((bucket) => counts[bucket] > 0)
+
+  if (visible.length === 0)
+  {
+    return null
+  }
 
   return (
     <nav
       className="sticky top-0 z-10 px-2 py-1.5 border-b border-white/[0.04] bg-card/95 backdrop-blur-sm"
       aria-label="Ir para faixa de prazo"
     >
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5">
+      <div className="flex gap-1 overflow-x-auto pb-px custom-scrollbar-x">
         {visible.map((bucket) =>
         {
           const ui = BUCKET_CHIP[bucket]
@@ -85,7 +91,7 @@ export function DueBucketMap({ counts }: DueBucketMapProps)
               key={bucket}
               type="button"
               onClick={() => scrollToBucket(bucket)}
-              className={`inline-flex items-center justify-between gap-1 w-full min-w-0 px-2 py-1 rounded-md border font-mono text-[10px] uppercase tracking-wide transition-colors hover:opacity-90 ${
+              className={`inline-flex shrink-0 items-center justify-between gap-1 min-w-[5.5rem] px-2 py-1.5 rounded-md border font-mono text-ui-caption uppercase tracking-wide transition-colors hover:opacity-90 ${
                 hasItems ? ui.active : ui.idle
               }`}
             >

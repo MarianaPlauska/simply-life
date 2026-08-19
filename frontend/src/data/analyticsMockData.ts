@@ -1,4 +1,4 @@
-// Séries temporais para analytics — vazio até integrar historico_habitos + tarefas
+// Tipos de analytics — dados reais via buildAnalyticsBundle (lib/buildAnalyticsBundle.ts)
 
 export type AnalyticsTimeframe = '1W' | '1M' | '6M'
 

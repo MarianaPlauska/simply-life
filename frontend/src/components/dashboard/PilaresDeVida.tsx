@@ -173,7 +173,7 @@ function LinhasSaude()
             : 'Registre seu humor — recomendado hoje'
         }
         valueColor={humorHojeLista.length === 0 ? 'text-accent' : undefined}
-        onClick={() => navigate('/saude#bem_estar')}
+        onClick={() => navigate('/saude#diario')}
       />
     </>
   )
@@ -313,7 +313,7 @@ function Linha({
           {label}
         </div>
         {sub && (
-          <div className="text-[11px] text-zinc-400 truncate mt-0.5">{sub}</div>
+          <div className="text-[12px] text-zinc-400 truncate mt-0.5">{sub}</div>
         )}
       </div>
 

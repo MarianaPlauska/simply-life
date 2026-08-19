@@ -10,11 +10,8 @@ import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
 import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
 import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
-import { DayCapacityCard } from '../dashboard/DayCapacityCard'
 import { YesterdayLetterCard } from '../dashboard/YesterdayLetterCard'
 import { AxelWeekForecastCard } from '../dashboard/AxelWeekForecastCard'
-import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
-import { computeGamificationProfile } from '../../lib/gamificationProfile'
 import { InboxIACard } from '../dashboard/InboxIACard'
 import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
@@ -81,16 +78,7 @@ export function DashboardView()
     || 'Convidado'
 
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
-  const userStats = useTaskStore((s) => s.userStats)
   const wellbeingPending = humorHojeLista.length === 0
-
-  const gamificationProfile = useMemo(
-    () => computeGamificationProfile(userStats),
-    [userStats],
-  )
-  const showEpisodeOnDashboard =
-    gamificationProfile.level >= 4
-    && workspacePrefs.privacy.show_episode !== false
 
   const quickWidgets = useMemo(
     () =>
@@ -151,23 +139,19 @@ export function DashboardView()
       <DashboardCommandBar greeting={greeting} firstName={firstName} />
 
       <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-2.5 sm:gap-3 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
+        {/* alerta de atraso primeiro — precisa ser a primeira coisa que o usuário vê */}
+        <DashboardOverdueAlert />
+
         <YesterdayLetterCard />
         <AxelWeekForecastCard />
-        <DayCapacityCard />
-        {showEpisodeOnDashboard && (
-          <WeeklyEpisodeCard embedded compact />
-        )}
-        {wellbeingPending && (
-          <div className="order-first shrink-0">
-            <DashboardQuickWidget id="wellbeing" />
-          </div>
-        )}
-        <div id="dashboard-wellbeing" className="scroll-mt-20 min-w-0">
+
+        <section id="dashboard-wellbeing" className="scroll-mt-20 min-w-0 space-y-2.5 sm:space-y-3" aria-label="Seu cuidado hoje">
+          {wellbeingPending && <DashboardQuickWidget id="wellbeing" />}
           <AxelPostMoodCare />
-        </div>
+          <HealthRitualStrip />
+        </section>
+
         <StreakEveningBanner />
-        <DashboardOverdueAlert />
-        <HealthRitualStrip />
 
         {quickWidgets.length > 0 && (
           <div className={quickGridClass}>

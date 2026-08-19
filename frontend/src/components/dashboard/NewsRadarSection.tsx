@@ -74,17 +74,17 @@ export function NewsRadarSection()
               <div>
                 <h3 className="text-[14px] font-semibold text-white flex items-center gap-2">
                   Radar de Notícias
-                  <span className="text-[10px] font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full">
+                  <span className="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full">
                     {newsItems.length} novas
                   </span>
                 </h3>
-                <p className="text-[11px] text-zinc-600">
+                <p className="text-[12px] text-zinc-600">
                   Curado pela IA com base nos seus interesses
                 </p>
               </div>
             </div>
 
-            <button className="text-[10px] text-zinc-600 hover:text-cyan-400 transition-colors flex items-center gap-1">
+            <button className="text-[11px] text-zinc-600 hover:text-cyan-400 transition-colors flex items-center gap-1">
               Gerenciar tópicos <ChevronRight className="w-3 h-3" />
             </button>
           </div>
@@ -94,7 +94,7 @@ export function NewsRadarSection()
             <button
               onClick={() => setActiveFilter(null)}
               className={`
-                shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200
+                shrink-0 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all duration-200
                 ${!activeFilter
                   ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
                   : 'bg-zinc-900/30 text-zinc-500 border border-white/5 hover:text-zinc-300'
@@ -112,7 +112,7 @@ export function NewsRadarSection()
                   key={topic}
                   onClick={() => setActiveFilter(isActive ? null : topic)}
                   className={`
-                    shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-medium transition-all duration-200
+                    shrink-0 px-3 py-1.5 rounded-xl text-[12px] font-medium transition-all duration-200
                     ${isActive
                       ? `${colors.bg} ${colors.text} border border-current/20`
                       : 'bg-zinc-900/30 text-zinc-500 border border-white/5 hover:text-zinc-300'
@@ -162,24 +162,24 @@ export function NewsRadarSection()
                     {/* conteúdo */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5">
-                        <span className={`text-[9px] font-medium ${topicColor.text} ${topicColor.bg} px-1.5 py-0.5 rounded-md`}>
+                        <span className={`text-[10px] font-medium ${topicColor.text} ${topicColor.bg} px-1.5 py-0.5 rounded-md`}>
                           {news.topico}
                         </span>
-                        <span className="text-[9px] text-zinc-600 flex items-center gap-0.5">
+                        <span className="text-[10px] text-zinc-600 flex items-center gap-0.5">
                           <Globe className="w-3 h-3" />
                           {news.fonte || 'Notícia'}
                         </span>
-                        <span className="text-[9px] text-zinc-700 flex items-center gap-0.5 ml-auto">
+                        <span className="text-[10px] text-zinc-700 flex items-center gap-0.5 ml-auto">
                           <Clock className="w-3 h-3" />
                           {timeAgo(new Date(news.created_at))}
                         </span>
                       </div>
 
-                      <h4 className="text-[12px] font-medium text-zinc-200 leading-snug mb-1 group-hover:text-white transition-colors">
+                      <h4 className="text-[13px] font-medium text-zinc-200 leading-snug mb-1 group-hover:text-white transition-colors">
                         {news.titulo}
                       </h4>
 
-                      <p className="text-[11px] text-zinc-500 leading-relaxed line-clamp-2">
+                      <p className="text-[12px] text-zinc-500 leading-relaxed line-clamp-2">
                         {news.resumo}
                       </p>
                     </div>
@@ -198,11 +198,11 @@ export function NewsRadarSection()
           <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-3.5 h-3.5 text-cyan-500" />
-              <span className="text-[10px] text-zinc-600">
+              <span className="text-[11px] text-zinc-600">
                 Relevância média: {newsItems.length ? Math.round(newsItems.reduce((s, n) => s + n.relevancia, 0) / newsItems.length) : 0}%
               </span>
             </div>
-            <span className="text-[10px] text-zinc-700">
+            <span className="text-[11px] text-zinc-700">
               Atualizado há 12 min
             </span>
           </div>

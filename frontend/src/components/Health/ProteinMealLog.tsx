@@ -175,7 +175,7 @@ export function ProteinMealLog()
 
       <div className="space-y-2">
         <label className={`text-[10px] font-mono uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-          {refeicaoLabel} — descreva o prato
+          {refeicaoLabel}: descreva o prato
         </label>
         <textarea
           value={journalText}

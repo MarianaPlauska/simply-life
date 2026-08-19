@@ -11,6 +11,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../../lib/currencyInput'
 import type { ReservedBill, ReservedBillItem } from '../../../store/storeTypes'
 
 const fmt = (v: number) =>
@@ -67,7 +69,7 @@ export function ReservedBillDiscriminants({
 
   const handleAdd = async () =>
   {
-    const v = parseFloat(valor.replace(',', '.'))
+    const v = parseMoneyInputToNumber(valor)
     if (!descricao.trim() || Number.isNaN(v) || v <= 0)
     {
       toast.error('Informe descrição e valor')
@@ -168,12 +170,11 @@ export function ReservedBillDiscriminants({
             className="w-full border border-line rounded-sl bg-card px-3 py-2 text-sm"
           />
           <div className="grid grid-cols-3 gap-2">
-            <input
-              inputMode="decimal"
+            <MoneyInput
               value={valor}
-              onChange={(e) => setValor(e.target.value)}
+              onChange={setValor}
               placeholder="Valor"
-              className="border border-line rounded-sl bg-card px-2 py-2 text-sm font-mono"
+              className="text-sm"
             />
             <input
               inputMode="numeric"

@@ -28,7 +28,7 @@ export interface HumorRegistro
   created_at?: string
 }
 
-export type DiarioContexto = 'geral' | 'gasto' | 'tarefa' | 'saude' | 'carta_ontem'
+export type DiarioContexto = 'geral' | 'gasto' | 'tarefa' | 'saude' | 'lembrete' | 'carta_ontem'
 
 export interface EntradaDiario
 {
@@ -134,7 +134,7 @@ type BemEstarStore = BemEstarSlice &
   Pick<AxelStreakSlice, 'focusMinutesByDate' | 'recordWellbeingForStreak'> &
   Pick<GamificacaoSlice, 'addXP' | 'incrementQuestProgress'> &
   Pick<SaudeSlice, 'habitos'> &
-  Pick<TarefasSlice, 'tarefas'> &
+  Pick<TarefasSlice, 'tarefas' | 'createTarefa'> &
   Pick<FinanceiroSlice, 'transactions'>
 
 function last7Days(): string[]
@@ -484,6 +484,16 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       if (error) throw error
       set({ entradaHoje: data })
       await get().fetchEntradasRecentes(60)
+
+      void import('../../lib/noteDatesToKanban').then(async ({ syncNoteDatesToKanban }) =>
+      {
+        const fromDates = await syncNoteDatesToKanban(conteudo, prompt)
+        if (contexto === 'lembrete' && fromDates === 0)
+        {
+          const taskTitle = conteudo.trim().split('\n')[0].slice(0, 120) || 'Lembrete'
+          await get().createTarefa(taskTitle, conteudo.trim())
+        }
+      })
     }
     catch (e) { console.error('criarEntradaDiario:', e) }
   },

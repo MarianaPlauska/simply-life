@@ -53,18 +53,18 @@ export function DashboardCriticalTasksPreview()
                 onClick={() => navigate('/kanban')}
                 className={`w-full flex items-center gap-3 py-3 px-4 text-left ${AXEL_ROW_HOVER}`}
               >
-                <span className={`font-mono text-[11px] tabular-nums w-6 shrink-0 ${AXEL_TEXT_SECONDARY}`}>
+                <span className={`font-mono text-[12px] tabular-nums w-6 shrink-0 ${AXEL_TEXT_SECONDARY}`}>
                   {String(idx + 1).padStart(2, '0')}
                 </span>
                 <span className={`flex-1 min-w-0 text-[13px] truncate ${AXEL_TEXT_PRIMARY}`}>
                   {t.titulo}
                 </span>
                 {tag && (
-                  <span className={`hidden md:inline font-mono text-[9px] uppercase tracking-wider shrink-0 ${AXEL_TEXT_SECONDARY}`}>
+                  <span className={`hidden md:inline font-mono text-[10px] uppercase tracking-wider shrink-0 ${AXEL_TEXT_SECONDARY}`}>
                     {tag}
                   </span>
                 )}
-                <span className={`inline-flex items-center gap-0.5 font-mono text-[11px] tabular-nums shrink-0 ${urgencyBadgeClass(score)}`}>
+                <span className={`inline-flex items-center gap-0.5 font-mono text-[12px] tabular-nums shrink-0 ${urgencyBadgeClass(score)}`}>
                   <Zap className="w-3 h-3" strokeWidth={2} />
                   {score}
                 </span>

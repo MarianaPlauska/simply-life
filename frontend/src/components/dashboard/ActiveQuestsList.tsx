@@ -24,7 +24,7 @@ export function ActiveQuestsList()
           <Compass className="w-4 h-4 text-violet-400" />
           <h3 className="text-sm font-bold text-zinc-200">Quests Jarvis Ativas</h3>
         </div>
-        <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">
+        <span className="text-[11px] text-zinc-500 font-semibold uppercase tracking-wider">
           {completedQuests.length} / {userQuests.length} Concluídas
         </span>
       </div>
@@ -48,7 +48,7 @@ export function ActiveQuestsList()
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-zinc-200">{q.titulo}</span>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider ${
+                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-bold uppercase tracking-wider ${
                         q.tipo === 'semanal' 
                           ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
                           : 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
@@ -57,14 +57,14 @@ export function ActiveQuestsList()
                         {q.tipo}
                       </span>
                       {q.meta > 1 && (
-                        <span className="text-[10px] text-zinc-500 font-medium">
+                        <span className="text-[11px] text-zinc-500 font-medium">
                           Progresso: {q.progresso} / {q.meta}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-extrabold text-violet-400">
+                <div className="flex items-center gap-1 text-[11px] font-extrabold text-violet-400">
                   <span>+{q.recompensa_xp} XP</span>
                 </div>
               </div>
@@ -82,12 +82,12 @@ export function ActiveQuestsList()
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-zinc-400 line-through">{q.titulo}</span>
-                    <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-500 border border-white/5 text-[9px] font-bold uppercase tracking-wider w-max">
+                    <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.2 rounded bg-zinc-900 text-zinc-500 border border-white/5 text-[10px] font-bold uppercase tracking-wider w-max">
                       concluída
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-500">
+                <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-500">
                   <span>+{q.recompensa_xp} XP</span>
                 </div>
               </div>

@@ -30,11 +30,11 @@ export function AgendaSection({
               </div>
               <div>
                 <h3 className="text-[14px] font-semibold text-white">Agenda de Hoje</h3>
-                <p className="text-[11px] text-zinc-600">Google Calendar</p>
+                <p className="text-[12px] text-zinc-600">Google Calendar</p>
               </div>
             </div>
             {googleConnected && calendarEvents.length > 0 && (
-              <span className="text-[11px] text-zinc-500 tabular-nums px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/10">
+              <span className="text-[12px] text-zinc-500 tabular-nums px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/10">
                 {calendarEvents.length} evento{calendarEvents.length !== 1 ? 's' : ''}
               </span>
             )}
@@ -70,7 +70,7 @@ function ErrorState403({ setActiveView }: { setActiveView: (v: ActiveView) => vo
         <AlertTriangle className="w-7 h-7 text-rose-400/80" />
       </div>
       <p className="text-[15px] font-semibold text-rose-300 mb-2">Permissao Negada</p>
-      <p className="text-[12px] text-rose-200/30 max-w-sm mb-6 leading-relaxed">
+      <p className="text-[13px] text-rose-200/30 max-w-sm mb-6 leading-relaxed">
         Permissao negada pelo Google. Por favor, reconecte nas Configuracoes e nao esqueca de marcar a caixa de acesso a agenda na tela do Google.
       </p>
       <button
@@ -92,7 +92,7 @@ function DisconnectedState({ setActiveView }: { setActiveView: (v: ActiveView) =
         <CalendarOff className="w-7 h-7 text-zinc-600" />
       </div>
       <p className="text-[15px] font-semibold text-zinc-300 mb-2">Agenda Desconectada</p>
-      <p className="text-[12px] text-zinc-500 max-w-xs mb-6 leading-relaxed">
+      <p className="text-[13px] text-zinc-500 max-w-xs mb-6 leading-relaxed">
         Conecte sua conta Google para visualizar compromissos e eventos do dia
       </p>
       <button
@@ -112,7 +112,7 @@ function EmptyState() {
     <div className="flex flex-col items-center justify-center py-14 px-8 text-center">
       <CalendarDays className="w-8 h-8 text-zinc-700 mb-3" />
       <p className="text-[13px] text-zinc-500">Nenhum evento para hoje</p>
-      <p className="text-[11px] text-zinc-600 mt-0.5">Seu dia esta livre</p>
+      <p className="text-[12px] text-zinc-600 mt-0.5">Seu dia esta livre</p>
     </div>
   );
 }
@@ -135,15 +135,15 @@ function EventTimeline({ events }: { events: CalendarEvent[] }) {
               <div className="absolute left-[-5px] top-[20px] w-2 h-2 rounded-full bg-blue-400 ring-4 ring-zinc-950 group-hover:ring-blue-500/10 transition-all" />
               <div className="flex items-start gap-4">
                 <div className="shrink-0 pt-0.5 min-w-[60px]">
-                  <p className="text-[12px] font-semibold text-blue-400 tabular-nums flex items-center gap-1">
+                  <p className="text-[13px] font-semibold text-blue-400 tabular-nums flex items-center gap-1">
                     <Clock className="w-3 h-3" /> {inicio}
                   </p>
-                  {fim && <p className="text-[10px] text-zinc-600 tabular-nums ml-4">{fim}</p>}
+                  {fim && <p className="text-[11px] text-zinc-600 tabular-nums ml-4">{fim}</p>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-medium text-zinc-200 truncate">{ev.titulo}</p>
                   {ev.local && (
-                    <p className="text-[11px] text-zinc-500 flex items-center gap-1 mt-0.5 truncate">
+                    <p className="text-[12px] text-zinc-500 flex items-center gap-1 mt-0.5 truncate">
                       <MapPin className="w-3 h-3 shrink-0" /> {ev.local}
                     </p>
                   )}

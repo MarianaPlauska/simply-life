@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { History } from 'lucide-react'
 import { useTaskStore } from '../../../store/useTaskStore'
+import { formatTreinoLabel } from '../../../lib/academyTreinoCodes'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 
 function formatarData(iso: string): string
@@ -29,10 +30,15 @@ export function AcademyHistoryTab()
   {
     const concluidas = sessoesTreinoMes.filter((s) => s.concluido)
     const minutos = concluidas.reduce((acc, s) => acc + (s.duracao_real_min ?? 0), 0)
+    const volume = sessoesTreinoMes.reduce(
+      (acc, s) => acc + (s.volume_kg ?? s.detalhe?.volume_kg ?? 0),
+      0,
+    )
     return {
       total: sessoesTreinoMes.length,
       concluidas: concluidas.length,
       minutos,
+      volume: Math.round(volume),
     }
   }, [sessoesTreinoMes])
 
@@ -47,7 +53,7 @@ export function AcademyHistoryTab()
             Histórico · {mesLabel}
           </h2>
         </div>
-        <div className="grid grid-cols-3 gap-2 font-mono text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-center">
           <div className="rounded-sl bg-chrome/60 py-2 px-1">
             <p className="text-[18px] text-ink tabular-nums">{stats.concluidas}</p>
             <p className="text-[9px] uppercase text-ink-muted">concluídas</p>
@@ -59,6 +65,10 @@ export function AcademyHistoryTab()
           <div className="rounded-sl bg-chrome/60 py-2 px-1">
             <p className="text-[18px] text-ink tabular-nums">{stats.minutos}</p>
             <p className="text-[9px] uppercase text-ink-muted">min totais</p>
+          </div>
+          <div className="rounded-sl bg-chrome/60 py-2 px-1">
+            <p className="text-[18px] text-ink tabular-nums">{stats.volume}</p>
+            <p className="text-[9px] uppercase text-ink-muted">kg·rep</p>
           </div>
         </div>
         <p className={`text-[11px] mt-3 ${AXEL_TEXT_SECONDARY}`}>
@@ -76,14 +86,25 @@ export function AcademyHistoryTab()
           </p>
         ) : (
           <ul className="divide-y divide-line max-h-[min(420px,50vh)] overflow-y-auto custom-scrollbar">
-            {sessoesTreinoMes.map((s) => (
+            {sessoesTreinoMes.map((s) =>
+            {
+              const codigo = s.treino_codigo ?? s.detalhe?.treino_codigo ?? ''
+              const titulo = s.detalhe?.treino_titulo || s.tipo_treino
+              const rotulo = codigo
+                ? formatTreinoLabel(codigo, titulo)
+                : titulo
+
+              return (
               <li key={s.id} className="px-4 py-3 flex items-center justify-between gap-3 min-h-[52px]">
                 <div className="min-w-0">
                   <p className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
-                    {s.tipo_treino}
+                    {rotulo}
                   </p>
                   <p className="text-[10px] font-mono text-ink-muted mt-0.5">
                     {formatarData(s.iniciado_em)} · {formatarHora(s.iniciado_em)}
+                    {(s.volume_kg ?? s.detalhe?.volume_kg)
+                      ? ` · ${Math.round(s.volume_kg ?? s.detalhe?.volume_kg ?? 0)} kg·rep`
+                      : ''}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -97,7 +118,8 @@ export function AcademyHistoryTab()
                   </p>
                 </div>
               </li>
-            ))}
+              )
+            })}
           </ul>
         )}
       </section>

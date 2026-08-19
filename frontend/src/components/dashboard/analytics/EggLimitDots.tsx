@@ -13,7 +13,7 @@ export function EggLimitDots({ consumed, max = 3 }: EggLimitDotsProps)
 {
   return (
     <div className={`flex items-center gap-2 pt-3 ${AXEL_LINE}`}>
-      <span className={`font-mono text-[10px] uppercase tracking-wider mr-1 ${AXEL_TEXT_SECONDARY}`}>Ovos</span>
+      <span className={`font-mono text-[11px] uppercase tracking-wider mr-1 ${AXEL_TEXT_SECONDARY}`}>Ovos</span>
       {Array.from({ length: max }, (_, i) =>
       {
         const filled = i < consumed
@@ -30,7 +30,7 @@ export function EggLimitDots({ consumed, max = 3 }: EggLimitDotsProps)
           />
         )
       })}
-      <span className={`font-mono text-[10px] tabular-nums ml-auto ${AXEL_TEXT_SECONDARY}`}>
+      <span className={`font-mono text-[11px] tabular-nums ml-auto ${AXEL_TEXT_SECONDARY}`}>
         {consumed}/{max} hoje
       </span>
     </div>

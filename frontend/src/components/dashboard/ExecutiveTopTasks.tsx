@@ -42,7 +42,7 @@ export function ExecutiveTopTasks()
         <button
           type="button"
           onClick={() => navigate('/kanban')}
-          className={`flex items-center gap-1 text-[12px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors ${AXEL_TOUCH_ROW} px-2 -my-3`}
+          className={`flex items-center gap-1 text-[13px] font-medium text-zinc-500 hover:text-zinc-300 transition-colors ${AXEL_TOUCH_ROW} px-2 -my-3`}
         >
           Kanban
           <ChevronRight className="w-4 h-4" />

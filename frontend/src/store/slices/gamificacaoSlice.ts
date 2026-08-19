@@ -56,14 +56,14 @@ export interface GamificacaoSlice
   fetchGamificacaoStats: () => Promise<void>;
   fetchAchievements: () => Promise<void>;
   fetchQuests: () => Promise<void>;
-  addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number) => Promise<void>;
+  addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number, options?: { silent?: boolean }) => Promise<void>;
   /** Debita XP total (prioriza módulo foco) — compras na loja AXEL */
   spendXp: (amount: number) => Promise<boolean>;
   /** Conclui tarefa e converte score de urgência em XP (1:1) */
   completeTask: (taskId: number, urgencyScore: number) => Promise<void>;
   checkAndUnlockAchievements: () => Promise<void>;
   generateQuestsForToday: () => Promise<void>;
-  incrementQuestProgress: (tituloContendo: string, valor: number) => Promise<void>;
+  incrementQuestProgress: (tituloContendo: string, valor: number, options?: { silent?: boolean }) => Promise<void>;
 }
 
 export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], GamificacaoSlice> = (set, get) => ({
@@ -150,8 +150,9 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
     catch (e) { console.error('fetchQuests:', e) }
   },
 
-  addXP: async (modulo, quantidade) =>
+  addXP: async (modulo, quantidade, options) =>
   {
+    const silent = options?.silent === true
     try
     {
       const uid = (await supabase.auth.getUser()).data.user?.id
@@ -175,15 +176,18 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
 
       if (granted <= 0)
       {
-        const { toast } = await import('sonner')
-        toast.info('Meta diária de XP atingida', {
-          description: `Você já ganhou o máximo de hoje. Volte amanhã para continuar a trilha.`,
-          duration: 5000,
-        })
+        if (!silent)
+        {
+          const { toast } = await import('sonner')
+          toast.info('Meta diária de XP atingida', {
+            description: `Você já ganhou o máximo de hoje. Volte amanhã para continuar a trilha.`,
+            duration: 5000,
+          })
+        }
         return
       }
 
-      if (capped)
+      if (capped && !silent)
       {
         const { toast } = await import('sonner')
         toast.info(`+${granted} XP (teto diário)`, {
@@ -499,8 +503,9 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
     catch (e) { console.error('generateQuestsForToday:', e) }
   },
 
-  incrementQuestProgress: async (tituloContendo, valor) =>
+  incrementQuestProgress: async (tituloContendo, valor, options) =>
   {
+    const silent = options?.silent === true
     try
     {
       const quests = get().userQuests
@@ -528,12 +533,15 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
               if (titleLower.includes('medicamento') || titleLower.includes('água') || titleLower.includes('agua') || titleLower.includes('proteína') || titleLower.includes('proteina') || titleLower.includes('saúde') || titleLower.includes('saude') || titleLower.includes('treino')) modulo = 'saude'
               else if (titleLower.includes('financeira') || titleLower.includes('50/30/20')) modulo = 'financeiro'
 
-              await get().addXP(modulo, q.recompensa_xp)
+              await get().addXP(modulo, q.recompensa_xp, { silent: silent || q.tipo === 'diaria' })
 
-              const { toast } = await import('sonner')
-              toast.success(`Quest concluída: "${q.titulo}"`, {
-                description: `+${q.recompensa_xp} XP em ${modulo.toUpperCase()}`,
-              })
+              if (!silent && q.tipo !== 'diaria')
+              {
+                const { toast } = await import('sonner')
+                toast.success(`Quest concluída: "${q.titulo}"`, {
+                  description: `+${q.recompensa_xp} XP em ${modulo.toUpperCase()}`,
+                })
+              }
             }
 
             // Atualiza no Supabase

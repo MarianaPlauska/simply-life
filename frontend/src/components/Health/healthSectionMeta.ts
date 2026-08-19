@@ -12,11 +12,7 @@ export function healthHeaderSubtitle(
   }
   if (section === 'diario')
   {
-    return 'Registros, reflexões e listas — no seu ritmo'
-  }
-  if (section === 'bem_estar')
-  {
-    return 'Humor, hábitos e revisão semanal'
+    return 'Humor, notas e histórico'
   }
 
   const labels: Record<CuidadosTab, string> = {

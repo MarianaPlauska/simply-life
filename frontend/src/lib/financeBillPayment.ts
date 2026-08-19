@@ -1,7 +1,6 @@
 import type { Transaction } from '../store/storeTypes'
 import type { TarefaUnificada } from '../types'
 import {
-  billCanonicalKey,
   parseBillAmountFromTitle,
   settlementCanonicalKey,
 } from './financeBillTaskDedup'
@@ -33,6 +32,28 @@ export function hasPaidExpenseForBill(
     if (t.tipo !== 'despesa') return false
     if ((t.status_pagamento ?? 'pendente') !== 'pago') return false
     if (!t.data.startsWith(monthKey)) return false
+    const txCanon = settlementCanonicalKey({ titulo: t.descricao, valor: t.valor })
+    if (txCanon === canon) return true
+    return nome.length >= 3 && t.descricao.toLowerCase().includes(nome)
+      && Math.abs(t.valor - valor) < 0.02
+  })
+}
+
+/** Despesa paga no caixa em qualquer mês — evita contar Pagos sem lançamento duas vezes */
+export function hasPaidCashExpenseForBill(
+  transactions: Transaction[],
+  titulo: string,
+  valor: number,
+): boolean
+{
+  const canon = settlementCanonicalKey({ titulo, valor })
+  const nome = canon.split('|')[1]
+
+  return transactions.some((t) =>
+  {
+    if (t.tipo !== 'despesa') return false
+    if ((t.status_pagamento ?? 'pendente') !== 'pago') return false
+    if (t.card_id) return false
     const txCanon = settlementCanonicalKey({ titulo: t.descricao, valor: t.valor })
     if (txCanon === canon) return true
     return nome.length >= 3 && t.descricao.toLowerCase().includes(nome)
@@ -84,21 +105,20 @@ export async function postBillPaymentExpense(
 export async function postBillPaymentFromTask(
   tarefa: TarefaUnificada,
   deps: {
-    transactions: Transaction[]
-    addTransaction: (t: Omit<Transaction, 'id'>) => Promise<void>
+    transactions: import('../store/storeTypes').Transaction[]
+    addTransaction: (t: Omit<import('../store/storeTypes').Transaction, 'id'>) => Promise<void>
+    cards?: import('../store/storeTypes').VirtualCard[]
+    markTransactionPaid?: (id: number) => Promise<void>
+    markReservedBillPaid?: (id: number) => Promise<void>
   },
 ): Promise<void>
 {
-  const valor = parseBillAmountFromTitle(tarefa.titulo)
-  if (valor <= 0 && !billCanonicalKey(tarefa)) return
-
-  await postBillPaymentExpense(
-    {
-      titulo: tarefa.titulo,
-      valor,
-      data: todayIso(),
-      origem: 'kanban',
-    },
-    deps,
-  )
+  const { postBillPaymentFromTask: route } = await import('./financeTaskPayment')
+  await route(tarefa, {
+    transactions: deps.transactions,
+    cards: deps.cards ?? [],
+    addTransaction: deps.addTransaction,
+    markTransactionPaid: deps.markTransactionPaid ?? (async () => {}),
+    markReservedBillPaid: deps.markReservedBillPaid ?? (async () => {}),
+  })
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SmilePlus, Check } from 'lucide-react';
+import { Check, SmilePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTaskStore } from '../../store/useTaskStore';
 import { MoodQuickPicker } from '../wellbeing/MoodQuickPicker';
@@ -30,32 +30,30 @@ export function MoodTracker()
     setSalvando(true);
     await registrarHumor(value, label, nota, contexto.length ? { contexto } : undefined);
     completeOnboardingStep('register_mood');
-    toast.success(`${label} guardado no seu diário`, { description: nota || undefined });
+    toast.success(label);
     setNota('');
     setContexto([]);
     setSalvando(false);
   };
 
   return (
-    <section className="sl-panel p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <SmilePlus className="w-4 h-4 text-accent" />
+    <section className="sl-panel p-4 sm:p-5 space-y-3 border border-rose-400/15 bg-gradient-to-br from-rose-500/[0.06] to-transparent">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 rounded-sl bg-rose-500/10 border border-rose-400/20">
+            <SmilePlus className="w-4 h-4 text-rose-300" strokeWidth={1.75} />
+          </div>
           <h2 className="font-display text-base text-ink">
-            Como você está agora?
+            Humor agora
           </h2>
         </div>
         {temRegistroHoje && (
-          <span className="flex items-center gap-1 text-[10px] text-concluido font-medium">
+          <span className="flex items-center gap-1 text-[10px] text-concluido font-mono tabular-nums">
             <Check className="w-3 h-3" />
-            {humorHojeLista.length} hoje · média {mediaHumor(humorHojeLista)}
+            {humorHojeLista.length} · {mediaHumor(humorHojeLista)}/5
           </span>
         )}
       </div>
-
-      <p className="text-[12px] text-ink-muted leading-relaxed">
-        Toque no humor que combina com agora. Pode registrar de novo quando mudar — cada momento fica guardado no seu histórico.
-      </p>
 
       <MoodQuickPicker disabled={salvando} onSelect={(v, l) => void handleSave(v, l)} />
 
@@ -68,10 +66,10 @@ export function MoodTracker()
               key={tag.id}
               type="button"
               onClick={() => toggleContexto(tag.id)}
-              className={`px-2 py-1 rounded-sl font-mono text-[9px] uppercase border transition-colors ${
+              className={`px-2.5 py-1 rounded-pill font-mono text-[9px] uppercase border transition-colors min-h-[32px] ${
                 on
-                  ? 'border-accent/50 bg-accent-muted text-accent'
-                  : 'border-line text-ink-muted hover:text-ink'
+                  ? 'border-rose-400/40 bg-rose-500/10 text-rose-200'
+                  : 'border-line/70 text-ink-muted hover:text-ink hover:border-line'
               }`}
             >
               {tag.label}
@@ -85,7 +83,7 @@ export function MoodTracker()
         placeholder="Nota rápida (opcional)"
         value={nota}
         onChange={(e) => setNota(e.target.value)}
-        className="w-full bg-chrome border border-line rounded-sl px-3 py-2 text-[13px] text-ink placeholder:text-ink-muted outline-none focus:border-accent transition-colors"
+        className="w-full bg-card/50 border border-line/80 rounded-sl px-3 py-2.5 text-[13px] text-ink placeholder:text-ink-muted outline-none focus:border-rose-400/35 transition-colors min-h-[44px]"
       />
     </section>
   );

@@ -54,10 +54,10 @@ export function StatusGaugeCircular({
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-[22px] font-bold text-white leading-none tabular-nums">{value}</span>
-          <span className="text-[9px] text-zinc-500 font-mono mt-0.5">/{max}</span>
+          <span className="text-[10px] text-zinc-500 font-mono mt-0.5">/{max}</span>
         </div>
       </div>
-      <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider">{label}</span>
+      <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider">{label}</span>
     </div>
   )
 }

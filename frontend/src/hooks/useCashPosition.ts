@@ -27,6 +27,7 @@ export function useCashPosition(): CashPositionPair
     () => computeCashPosition(transactions, cashAccount.saldo_inicial, reservedBills, {
       contasFixas,
       billSettlements,
+      transactions,
     }),
     [transactions, cashAccount.saldo_inicial, reservedBills, contasFixas, billSettlements],
   )

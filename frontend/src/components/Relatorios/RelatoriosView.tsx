@@ -10,6 +10,7 @@ import {
 import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { useTaskStore, type AnalyticsReport, type TrendPoint, type RankingItem } from '../../store/useTaskStore';
 import { PrintButton } from '../ui/PrintButton';
+import { AcademyAnalyticsSection } from '../dashboard/AcademyAnalyticsSection';
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-40px' }, transition: { duration: 0.5 } };
 
@@ -406,6 +407,11 @@ export function RelatoriosView() {
           </div>
         </motion.div>
       )}
+
+      {/* ── Saúde & Academia ─────────────────────────────── */}
+      <motion.div {...fadeUp} className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <AcademyAnalyticsSection />
+      </motion.div>
 
       {/* ── All-time Stats Footer ───────────────────────── */}
       <motion.div {...fadeUp} className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">

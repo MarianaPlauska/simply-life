@@ -5,6 +5,8 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { CARD_CHIP_STYLES } from '../../lib/financeCardTheme'
 import type { VirtualCard } from '../../store/storeTypes'
 import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import { MoneyInput } from '../ui/MoneyInput'
+import { formatCentsToBrl, parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 const GRADIENTS: VirtualCard['tipo_gradiente'][] = [
   'purple', 'obsidian', 'sunset', 'ocean', 'mint',
@@ -23,7 +25,7 @@ export function CardEditForm({ card, onDone, onCancel }: CardEditFormProps)
 
   const [draft, setDraft] = useState({
     nome: card.nome,
-    limite: String(card.limite),
+    limite: formatCentsToBrl(Math.round(card.limite * 100)),
     dia_fechamento: String(card.dia_fechamento ?? ''),
     dia_vencimento: String(card.dia_vencimento ?? ''),
     tipo_gradiente: card.tipo_gradiente,
@@ -31,7 +33,7 @@ export function CardEditForm({ card, onDone, onCancel }: CardEditFormProps)
 
   const save = async () =>
   {
-    const limite = parseFloat(draft.limite.replace(',', '.'))
+    const limite = parseMoneyInputToNumber(draft.limite)
     if (!draft.nome.trim() || Number.isNaN(limite) || limite <= 0)
     {
       toast.error('Nome e limite válidos são obrigatórios')
@@ -63,12 +65,11 @@ export function CardEditForm({ card, onDone, onCancel }: CardEditFormProps)
         placeholder="Nome do cartão"
       />
       <div className="grid grid-cols-2 gap-2">
-        <input
-          inputMode="decimal"
+        <MoneyInput
           value={draft.limite}
-          onChange={(e) => setDraft((d) => ({ ...d, limite: e.target.value }))}
-          className="border border-line rounded-sl bg-card px-3 py-2.5 text-sm font-mono min-h-[44px]"
+          onChange={(v) => setDraft((d) => ({ ...d, limite: v }))}
           placeholder="Limite R$"
+          className="min-h-[44px] text-sm"
         />
         <input
           inputMode="numeric"

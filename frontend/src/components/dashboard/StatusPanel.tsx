@@ -47,11 +47,11 @@ export function StatusPanel()
       <header className="px-3 py-2.5 border-b border-zinc-900 flex items-center justify-between bg-gradient-to-r from-violet-500/5 to-transparent">
         <div className="flex items-center gap-2">
           <span className="w-1 h-3 bg-violet-500 rounded-sm" />
-          <span className="text-[10px] font-bold text-violet-300 uppercase tracking-[0.2em]">Seu Status</span>
+          <span className="text-[11px] font-bold text-violet-300 uppercase tracking-[0.2em]">Seu Status</span>
         </div>
         <button
           onClick={() => navigate('/perfil')}
-          className="text-[11px] text-zinc-500 hover:text-violet-300 transition-colors"
+          className="text-[12px] text-zinc-500 hover:text-violet-300 transition-colors"
         >
           Ver perfil →
         </button>
@@ -71,7 +71,7 @@ export function StatusPanel()
           <p className="text-[13px] font-semibold text-white">
             {userProfile?.nome?.split(' ')[0] || 'Convidado'}
           </p>
-          <p className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">
+          <p className="text-[11px] text-zinc-500 font-mono uppercase tracking-wider">
             Nível {stats.level} · Jarvis
           </p>
         </div>
@@ -79,7 +79,7 @@ export function StatusPanel()
 
       {/* nivel + barra XP */}
       <div className="px-3 pb-3">
-        <div className="flex justify-between items-center text-[11px] mb-1.5">
+        <div className="flex justify-between items-center text-[12px] mb-1.5">
           <span className="text-zinc-300 font-semibold">XP</span>
           <span className="text-zinc-500 font-mono tabular-nums">{xpAtual.toLocaleString('pt-BR')} / {xpNivel.toLocaleString('pt-BR')}</span>
         </div>
@@ -105,15 +105,15 @@ export function StatusPanel()
         </div>
         <div className="flex-1">
           <div className="text-[15px] font-bold text-white leading-none">
-            {Math.max(stats.streak_saude, stats.streak_foco, 0)} <span className="text-[11px] font-medium text-zinc-400">dias</span>
+            {Math.max(stats.streak_saude, stats.streak_foco, 0)} <span className="text-[12px] font-medium text-zinc-400">dias</span>
           </div>
-          <div className="text-[10px] text-zinc-500 mt-0.5">Ofensiva · seguidos de consistência</div>
+          <div className="text-[11px] text-zinc-500 mt-0.5">Ofensiva · seguidos de consistência</div>
         </div>
       </div>
 
       {/* conquistas — fileira de 5 quadradinhos */}
       <div className="px-3 py-2.5 border-t border-zinc-900">
-        <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.15em] mb-2">
+        <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.15em] mb-2">
           Conquistas · {achievements.length}
         </div>
         <div className="grid grid-cols-5 gap-1.5">

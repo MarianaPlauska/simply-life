@@ -29,9 +29,9 @@ export function parseHealthRoute(hash: string): HealthRoute
   {
     return { section: 'diario', cuidados: 'hidratacao' }
   }
-  if (raw === 'bem_estar')
+  if (raw === 'bem_estar' || raw === 'bem-estar')
   {
-    return { section: 'bem_estar', cuidados: 'hidratacao' }
+    return { section: 'diario', cuidados: 'hidratacao' }
   }
   if (raw.startsWith('medicamentos'))
   {

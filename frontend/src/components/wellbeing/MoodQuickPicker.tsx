@@ -45,7 +45,7 @@ export function MoodQuickPicker({ disabled, selected, compact, onSelect }: MoodQ
               strokeWidth={1.75}
               className={iconClass}
             />
-            <span className={`font-mono uppercase tracking-wide ${compact ? 'text-[7px]' : 'text-[8px]'} ${iconClass}`}>
+            <span className={`font-mono uppercase tracking-wide ${compact ? 'text-[9px]' : 'text-ui-caption'} ${iconClass}`}>
               {compact ? m.shortLabel.slice(0, 3) : m.shortLabel}
             </span>
           </button>

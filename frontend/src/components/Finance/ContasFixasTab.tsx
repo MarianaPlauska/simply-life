@@ -7,6 +7,7 @@ import {
   contaFixaPrazoLabel,
 } from '../../lib/financeContaFixa'
 import { FinanceCategoryIcon } from './financeCategoryIcons'
+import { CategoryLinkPicker } from './CategoryLinkPicker'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY,
@@ -18,6 +19,8 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
+import { MoneyInput } from '../ui/MoneyInput'
+import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 const todayIso = () => new Date().toISOString().slice(0, 10)
 
@@ -73,7 +76,7 @@ export function ContasFixasTab()
       toast.error('Informe o nome da conta')
       return
     }
-    const valorNum = parseFloat(form.valor)
+    const valorNum = parseMoneyInputToNumber(form.valor)
     if (Number.isNaN(valorNum) || valorNum <= 0)
     {
       toast.error('Informe um valor válido maior que zero')
@@ -161,13 +164,10 @@ export function ContasFixasTab()
             </label>
             <label className="flex flex-col gap-1">
               <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Valor (R$)</span>
-              <input
-                type="number"
-                step="0.01"
-                placeholder="150.00"
+              <MoneyInput
                 value={form.valor}
-                onChange={(e) => setForm({ ...form, valor: e.target.value })}
-                className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm font-mono text-ink min-h-[44px]"
+                onChange={(v) => setForm({ ...form, valor: v })}
+                className="w-full min-h-[44px] text-sm"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -185,16 +185,12 @@ export function ContasFixasTab()
               <span className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
                 Categoria de gasto (atalhos)
               </span>
-              <select
+              <CategoryLinkPicker
+                categories={despesaCats}
                 value={form.categoria_id}
-                onChange={(e) => setForm({ ...form, categoria_id: e.target.value })}
-                className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm text-ink min-h-[44px]"
-              >
-                <option value="">Sem vínculo</option>
-                {despesaCats.map((c) => (
-                  <option key={c.id} value={c.id}>{c.nome}</option>
-                ))}
-              </select>
+                onChange={(id) => setForm({ ...form, categoria_id: id })}
+                emptyLabel="Sem vínculo"
+              />
             </label>
           </div>
 

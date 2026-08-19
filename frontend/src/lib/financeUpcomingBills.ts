@@ -148,11 +148,20 @@ export function buildUpcomingBills(
   {
     const status = t.status_pagamento ?? 'pendente'
     if (t.tipo !== 'despesa') continue
+    if (status === 'pago') continue
+
+    // Gasto no cartão entra na fatura — não gera alerta de "conta vence"
+    if (t.card_id) continue
+
+    // Só contas futuras/agendadas ou pendentes com vencimento futuro
     if (status !== 'agendado' && status !== 'pendente') continue
 
     const dueDate = transactionDayKey(t.data)
     const daysUntil = daysBetween(reference, new Date(`${dueDate}T12:00:00`))
     if (daysUntil < 0 || daysUntil > horizon) continue
+
+    // Pendente com vencimento hoje = gasto já registrado no momento
+    if (status === 'pendente' && daysUntil === 0) continue
 
     const candidate: UpcomingBill = {
       id: `tx-${t.id}`,

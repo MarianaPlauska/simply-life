@@ -56,7 +56,7 @@ export function TimelineList()
   return (
     <section className="bg-card border border-zinc-800 rounded-xl overflow-hidden">
       <header className="px-4 pt-3 pb-2 flex items-center justify-between">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">
           Linha do Tempo <span className="text-zinc-700">·</span> Hoje
         </h3>
       </header>
@@ -79,7 +79,7 @@ export function TimelineList()
               <span className="flex-1 min-w-0 text-[13.5px] font-medium text-zinc-100 truncate">
                 {task.titulo}
               </span>
-              <span className="text-[11px] text-zinc-400 bg-zinc-900/80 border border-zinc-800 px-2 py-0.5 rounded-full">
+              <span className="text-[12px] text-zinc-400 bg-zinc-900/80 border border-zinc-800 px-2 py-0.5 rounded-full">
                 {tag.label}
               </span>
             </li>
@@ -90,7 +90,7 @@ export function TimelineList()
       <div className="px-4 py-2.5 border-t border-zinc-900 flex justify-end">
         <button
           onClick={() => navigate('/calendario')}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium text-zinc-300 bg-card border border-zinc-800 hover:border-violet-500/40 hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[13px] font-medium text-zinc-300 bg-card border border-zinc-800 hover:border-violet-500/40 hover:text-white transition-colors"
         >
           Ver agenda <ArrowRight className="w-3.5 h-3.5" />
         </button>

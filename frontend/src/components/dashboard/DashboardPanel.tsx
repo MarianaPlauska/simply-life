@@ -36,12 +36,12 @@ export function DashboardPanel({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             {section && (
-              <span className="font-mono text-[10px] text-accent tabular-nums">{section}</span>
+              <span className="font-mono text-[11px] text-accent tabular-nums">{section}</span>
             )}
             <p className={AXEL_SECTION_TITLE}>{title}</p>
           </div>
           {subtitle && (
-            <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{subtitle}</p>
+            <p className={`font-mono text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>{subtitle}</p>
           )}
         </div>
         {action}
@@ -63,7 +63,7 @@ export function DashboardPanelLink({ label, onClick }: DashboardPanelLinkProps)
     <button
       type="button"
       onClick={onClick}
-      className={`font-mono text-[11px] uppercase tracking-wide ${AXEL_LINK}`}
+      className={`font-mono text-[12px] uppercase tracking-wide ${AXEL_LINK}`}
     >
       {label}
     </button>
