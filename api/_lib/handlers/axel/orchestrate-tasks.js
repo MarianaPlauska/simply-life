@@ -4,6 +4,7 @@
 import { orchestrateTasksBatch } from '../../urgencyOrchestrator.js';
 import { applyCors } from '../../cors.js';
 import { getUserFromBearer } from '../../supabaseUser.js';
+import { enforceRateLimit, sendRateLimited } from '../../rateLimit.js';
 
 function hasServerAiKeys()
 {
@@ -46,6 +47,17 @@ export default async function handler(req, res)
   if (!user)
   {
     return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' });
+  }
+
+  const limited = await enforceRateLimit(req, {
+    route: 'orchestrate-tasks',
+    limit: 30,
+    windowSec: 60,
+    key: user.id,
+  });
+  if (!limited.ok)
+  {
+    return sendRateLimited(res, limited.retryAfter);
   }
 
   try

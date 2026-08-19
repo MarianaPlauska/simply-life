@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, Link } from 'react-router-dom';
 import { AlertCircle, Mail, Lock, Eye, EyeOff, UserPlus, Globe, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ import { switchUserSession } from '../../store/resetUserSession';
 import { reloadRemoteUserData } from '../../lib/reloadRemoteUserData';
 import { isLocalGuestUser } from '../../lib/authSession';
 import { LoginHero } from './LoginHero';
-import { ForgotPasswordModal } from './ForgotPasswordModal';
+import { getPendingTotpFactorId, verifyTotpCode } from '../../lib/mfaAssurance';
 
 function GoogleLogo({ className }: { className?: string })
 {
@@ -68,6 +68,10 @@ export function LoginView()
   const [error, setError] = useState('');
   const [senhaErro, setSenhaErro] = useState('');
   const [forgotMode, setForgotMode] = useState(false);
+  const [mfaFactorId, setMfaFactorId] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+  const [pendingSession, setPendingSession] = useState<{ user: { id: string; email?: string | null } } | null>(null);
+  const [pendingName, setPendingName] = useState('');
 
   const switchMode = (next: 'login' | 'register') =>
   {
@@ -160,7 +164,53 @@ export function LoginView()
       return profile?.nome_completo || data.user.email?.split('@')[0] || '';
     })();
 
-    await finishAuth(data.session, displayName, 'login.success_login');
+    await maybeChallengeMfa(data.session, displayName);
+  };
+
+  const maybeChallengeMfa = async (
+    session: { user: { id: string; email?: string | null } },
+    displayName: string,
+  ) =>
+  {
+    const factorId = await getPendingTotpFactorId()
+    if (!factorId)
+    {
+      await finishAuth(session, displayName, 'login.success_login')
+      return
+    }
+    setPendingSession(session)
+    setPendingName(displayName)
+    setMfaFactorId(factorId)
+    setMfaCode('')
+  };
+
+  const handleVerifyMfa = async (e: React.FormEvent) =>
+  {
+    e.preventDefault()
+    if (!pendingSession || !mfaFactorId || mfaCode.trim().length < 6) return
+    setLoading(true)
+    setError('')
+    try
+    {
+      const result = await verifyTotpCode(mfaFactorId, mfaCode)
+      if (!result.ok)
+      {
+        throw new Error(result.message)
+      }
+      await finishAuth(pendingSession, pendingName, 'login.success_login')
+      setMfaFactorId('')
+      setPendingSession(null)
+    }
+    catch (err)
+    {
+      const raw = err instanceof Error ? err.message : t('login.error_connection')
+      setError(raw)
+      toast.error(raw)
+    }
+    finally
+    {
+      setLoading(false)
+    }
   };
 
   const handleSubmitLogin = async (e: React.FormEvent) =>
@@ -300,7 +350,49 @@ export function LoginView()
                 onChange={switchMode}
               />
 
-              {mode === 'login' ? (
+              {mfaFactorId ? (
+                <form onSubmit={(e) => void handleVerifyMfa(e)} className="space-y-4 mt-5">
+                  <p className="text-[13px] text-ink-muted">
+                    Esta conta tem 2FA. Digite o código de 6 dígitos do autenticador.
+                  </p>
+                  <AuthInput
+                    id="login-mfa"
+                    name="totp"
+                    label="Código 2FA"
+                    type="text"
+                    autoFocus
+                    required
+                    autoComplete="one-time-code"
+                    inputMode="numeric"
+                    placeholder="000000"
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    icon={<Lock className="w-4 h-4" />}
+                  />
+                  {error && (
+                    <p role="alert" className="text-[12px] text-urgente text-center py-1">{error}</p>
+                  )}
+                  <AuthButton
+                    loading={loading}
+                    disabled={mfaCode.length < 6}
+                    label="Verificar código"
+                    loadingLabel="Verificando…"
+                  />
+                  <button
+                    type="button"
+                    className="w-full text-[12px] text-ink-muted hover:text-ink"
+                    onClick={() =>
+                    {
+                      setMfaFactorId('')
+                      setPendingSession(null)
+                      setMfaCode('')
+                      void supabase.auth.signOut()
+                    }}
+                  >
+                    Voltar ao login
+                  </button>
+                </form>
+              ) : mode === 'login' ? (
                 <form
                   key="simply-life-login-form"
                   onSubmit={handleSubmitLogin}
@@ -536,9 +628,9 @@ export function LoginView()
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-8">
               <p className="text-[11px] text-ink-muted text-center">
                 {t('login.terms_agree')}{' '}
-                <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.terms')}</span>
+                <Link to="/termos" className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.terms')}</Link>
                 {' '}{t('login.and')}{' '}
-                <span className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.privacy')}</span>
+                <Link to="/privacidade" className="text-ink hover:text-accent cursor-pointer transition-colors">{t('login.privacy')}</Link>
               </p>
 
               <button

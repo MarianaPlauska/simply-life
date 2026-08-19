@@ -1,6 +1,5 @@
+import { Link } from 'react-router-dom'
 import { AXEL_CHROME_PLANE, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
-
-// Rodapé de sistema — sticky footer via mt-auto no pai flex-col min-h-screen
 
 interface AxelSystemFooterProps
 {
@@ -16,6 +15,11 @@ export function AxelSystemFooter({ className = '' }: AxelSystemFooterProps)
     >
       <p className={`font-mono text-[10px] uppercase tracking-[0.1em] text-center ${AXEL_TEXT_SECONDARY}`}>
         Simply-Life · Uma vida simplificada, com AXEL ao seu lado
+      </p>
+      <p className="mt-1.5 text-center font-mono text-[10px] uppercase tracking-wide text-ink-muted">
+        <Link to="/privacidade" className="hover:text-accent">Privacidade</Link>
+        <span className="mx-2 opacity-40">·</span>
+        <Link to="/termos" className="hover:text-accent">Termos</Link>
       </p>
     </footer>
   )

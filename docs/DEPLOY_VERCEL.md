@@ -31,7 +31,7 @@ Se não estiver conectado: **Connect Git Repository** → GitHub → `simply-lif
 | `VITE_SUPABASE_URL` | Production + Preview |
 | `VITE_SUPABASE_ANON_KEY` | Production + Preview |
 | `GROQ_API_KEY` | Production + Preview (server) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Production (server, webhooks) |
+| `ENCRYPTION_KEY` | Production (server) — 32 bytes em hex/base64 para AES-256-GCM das senhas IMAP |
 
 ## Opção A — Reconectar Git (mais simples)
 

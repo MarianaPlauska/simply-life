@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
-import { AxelSystemGuide } from '../axel/AxelSystemGuide';
+import { MfaEnrollPanel } from '../Auth/MfaEnrollPanel';
 import {
   MOBILE_NAV_HOME_ID,
   MOBILE_NAV_OPTIONAL_CATALOG,
@@ -131,7 +131,6 @@ export function PreferencesView() {
   const [notifUrgentOnly, setNotifUrgentOnly] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light' | 'system'>('dark');
   const [compactMode, setCompactMode] = useState(false);
-  const [twoFactor, setTwoFactor] = useState(false);
   const [sessionTimeout, setSessionTimeout] = useState(24);
   const [notifTarefas, setNotifTarefas] = useState(true);
   const [notifSaude, setNotifSaude] = useState(true);
@@ -570,11 +569,11 @@ export function PreferencesView() {
   const renderSeguranca = () => (
     <div className="space-y-6">
       <SectionCard>
-        <SectionHeader icon={Shield} title="Autenticação" subtitle="Configurações de segurança da sua conta." iconColor="text-emerald-400" />
+        <SectionHeader icon={Shield} title="Autenticação" subtitle="2FA é opcional — TOTP nativo do Supabase." iconColor="text-emerald-400" />
+        <div className="px-1 pb-4">
+          <MfaEnrollPanel />
+        </div>
         <div className="divide-y divide-zinc-800/50">
-          <SettingRow icon={Fingerprint} label="Autenticação de dois fatores" desc="Adicione uma camada extra de proteção" iconColor="text-emerald-400">
-            <ToggleSwitch active={twoFactor} onChange={() => setTwoFactor(!twoFactor)} />
-          </SettingRow>
           <SettingRow icon={Clock} label="Timeout da sessão" desc="Tempo antes do logout automático" iconColor="text-emerald-400">
             <select
               value={sessionTimeout}

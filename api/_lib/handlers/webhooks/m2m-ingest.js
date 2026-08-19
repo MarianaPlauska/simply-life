@@ -5,6 +5,7 @@ import { resolveWebhookPlainSecret } from '../../resolveWebhookAuth.js';
 import { fetchUserKeywords, matchUserKeywords } from '../../keywordBoost.js';
 import { scoreFromItem } from '../../triageScore.js';
 import { insertTriagedTask } from '../../insertTriagedTask.js';
+import { enforceRateLimit, sendRateLimited } from '../../rateLimit.js';
 
 function buildItemText(item)
 {
@@ -18,6 +19,16 @@ export default async function handler(req, res)
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Webhook-Signature, X-Webhook-Secret');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+  const limited = await enforceRateLimit(req, {
+    route: 'webhook-ingest',
+    limit: 60,
+    windowSec: 60,
+  });
+  if (!limited.ok)
+  {
+    return sendRateLimited(res, limited.retryAfter);
+  }
 
   const supabase = getSupabaseAdmin();
   if (!supabase) return res.status(500).json({ error: 'Supabase não configurado' });

@@ -124,8 +124,8 @@ export function MfaEnrollPanel()
   return (
     <div className="space-y-4">
       <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-        Proteja a conta admin com TOTP (Google Authenticator, 1Password, etc.).
-        No Supabase: Authentication → Providers → habilite MFA (TOTP).
+        Proteja sua conta com TOTP (Google Authenticator, Authy, 1Password).
+        É opcional — nunca obrigatório. No Supabase: Authentication → MFA (TOTP).
       </p>
 
       {loading ? (

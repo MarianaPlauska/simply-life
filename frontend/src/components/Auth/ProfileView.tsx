@@ -108,16 +108,14 @@ export function ProfileView()
       </header>
 
       {isAdmin && (
-        <>
-          <DashboardCollapsible title="Usuários" subtitle="Administração do sistema" defaultOpen>
-            <ProfileAdminUsersPanel />
-          </DashboardCollapsible>
-
-          <DashboardCollapsible title="Segurança admin" subtitle="Autenticação em dois fatores (TOTP)">
-            <MfaEnrollPanel />
-          </DashboardCollapsible>
-        </>
+        <DashboardCollapsible title="Usuários" subtitle="Administração do sistema" defaultOpen>
+          <ProfileAdminUsersPanel />
+        </DashboardCollapsible>
       )}
+
+      <DashboardCollapsible title="Segurança" subtitle="Autenticação em dois fatores (opcional)" defaultOpen={false}>
+        <MfaEnrollPanel />
+      </DashboardCollapsible>
 
       <ProfileAxelHero />
 

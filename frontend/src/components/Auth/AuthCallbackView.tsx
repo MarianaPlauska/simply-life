@@ -33,6 +33,14 @@ export function AuthCallbackView()
         return
       }
 
+      const { getPendingTotpFactorId } = await import('../../lib/mfaAssurance')
+      if (await getPendingTotpFactorId())
+      {
+        setError('Esta conta exige 2FA. Entre com e-mail e senha para informar o código.')
+        await supabase.auth.signOut()
+        return
+      }
+
       finished = true
       const prevId = useTaskStore.getState().userId
       await applySessionToStore(session, login)

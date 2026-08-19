@@ -3,6 +3,8 @@ import { lazy, Suspense, useEffect, useRef } from 'react'
 import { Toaster } from 'sonner'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { LoginView } from './components/Auth/LoginView'
+import { PrivacyView } from './components/legal/PrivacyView'
+import { TermsView } from './components/legal/TermsView'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
 import { SetupGuard } from './components/Auth/SetupGuard'
 import { JoinFriendView } from './components/Auth/JoinFriendView'
@@ -197,6 +199,8 @@ function App()
       />
       <Routes>
         <Route path="/login" element={<LoginView />} />
+        <Route path="/privacidade" element={<PrivacyView />} />
+        <Route path="/termos" element={<TermsView />} />
         <Route path="/reset-password" element={<ResetPasswordView />} />
         <Route path="/auth/callback" element={<AuthCallbackView />} />
         <Route path="/google-callback" element={<GoogleCallbackView />} />
