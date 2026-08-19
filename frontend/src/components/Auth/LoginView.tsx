@@ -15,6 +15,7 @@ import { reloadRemoteUserData } from '../../lib/reloadRemoteUserData';
 import { isLocalGuestUser } from '../../lib/authSession';
 import { demoLoginEmail, demoLoginPassword, resetDemoWorkspaceOnLogin } from '../../lib/demoWorkspace';
 import { LoginHero } from './LoginHero';
+import { ForgotPasswordModal } from './ForgotPasswordModal';
 import { getPendingTotpFactorId, verifyTotpCode } from '../../lib/mfaAssurance';
 
 function GoogleLogo({ className }: { className?: string })
