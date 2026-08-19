@@ -32,6 +32,9 @@ Se não estiver conectado: **Connect Git Repository** → GitHub → `simply-lif
 | `VITE_SUPABASE_ANON_KEY` | Production + Preview |
 | `GROQ_API_KEY` | Production + Preview (server) |
 | `ENCRYPTION_KEY` | Production (server) — 32 bytes em hex/base64 para AES-256-GCM das senhas IMAP |
+| `VAPID_PUBLIC_KEY` | Production (server) — chave pública Web Push |
+| `VAPID_PRIVATE_KEY` | Production (server) — chave privada Web Push |
+| `VAPID_SUBJECT` | Production (opcional) — `mailto:` do contato |
 
 ## Opção A — Reconectar Git (mais simples)
 

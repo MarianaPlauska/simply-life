@@ -9,6 +9,7 @@ import type { LucideIcon } from 'lucide-react';
 import { WebhookJarvisSection } from './WebhookJarvisSection';
 import { AxelOnboardingWizard } from './AxelOnboardingWizard';
 import { GmailImapSection } from './GmailImapSection';
+import { PushTestSection } from './PushTestSection';
 import { AccessibilityPanel } from '../dashboard/AccessibilityQuickMenu';
 import { SETTINGS as S } from './settingsTheme';
 
@@ -488,6 +489,7 @@ export function SettingsView() {
                 <ToggleRow icon={Shield} label="Criptografia de Tokens" description="Tokens de integracao encriptados em repouso" defaultOn />
                 <ToggleRow icon={Monitor} label="Auto-refresh de Dados" description="Recarrega tarefas e despesas a cada 5 minutos" />
               </div>
+              <PushTestSection />
               <div className={`mt-6 ${S.card} p-6 space-y-4`}>
                 <h3 className="text-[13px] font-semibold text-ink">Dados e Armazenamento</h3>
                 <div className="flex items-center justify-between text-[13px]">

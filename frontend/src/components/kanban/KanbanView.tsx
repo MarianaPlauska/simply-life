@@ -506,6 +506,19 @@ export function KanbanView()
     setZenFocusActive(true, top.id)
   }, [tarefas, horizonOverrides, setZenFocusActive])
 
+  const focoParamTried = useRef(false)
+  useEffect(() =>
+  {
+    if (searchParams.get('foco') !== '1') return
+    if (tarefasLoading) return
+    if (focoParamTried.current) return
+    focoParamTried.current = true
+    openZenFocus()
+    const next = new URLSearchParams(searchParams)
+    next.delete('foco')
+    setSearchParams(next, { replace: true })
+  }, [searchParams, setSearchParams, tarefasLoading, openZenFocus])
+
   useEffect(() =>
   {
     const onKey = (e: KeyboardEvent) =>

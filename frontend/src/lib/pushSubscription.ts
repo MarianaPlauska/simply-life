@@ -108,3 +108,49 @@ export async function unregisterPushSubscription(): Promise<void>
 
   await subscription.unsubscribe()
 }
+
+/** Pede permissão, registra a subscription e dispara um push de teste. */
+export async function sendPushTest(): Promise<{ sent: number }>
+{
+  if (typeof window === 'undefined' || !('Notification' in window))
+  {
+    throw new Error('Este navegador não suporta notificações')
+  }
+
+  const permission = Notification.permission === 'granted'
+    ? 'granted'
+    : await Notification.requestPermission()
+
+  if (permission !== 'granted')
+  {
+    throw new Error('Permissão de notificação recusada')
+  }
+
+  const ok = await registerPushSubscription()
+  if (!ok)
+  {
+    throw new Error('Não foi possível registrar o dispositivo (VAPID ausente?)')
+  }
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token)
+  {
+    throw new Error('Não autenticado')
+  }
+
+  const res = await fetch(`${API_BASE}/push-test`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  })
+
+  const data = await res.json().catch(() => ({})) as { sent?: number; error?: string }
+  if (!res.ok)
+  {
+    throw new Error(data.error || 'Falha ao enviar push de teste')
+  }
+
+  return { sent: data.sent ?? 0 }
+}

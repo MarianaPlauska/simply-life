@@ -53,7 +53,7 @@ export default defineConfig({
     devOrchestrateMock(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'og-image.png'],
+      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512.png', 'og-image.png'],
       manifest: {
         name: 'Simply-Life OS',
         short_name: 'Simply-Life',
@@ -65,17 +65,17 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
-        theme_color: '#141312',
-        background_color: '#141312',
+        theme_color: '#1D2029',
+        background_color: '#1D2029',
         categories: ['productivity', 'lifestyle', 'finance'],
         icons: [
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         shortcuts: [
-          { name: 'Finanças', short_name: 'Finanças', url: '/financeiro', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
           { name: 'Kanban', short_name: 'Kanban', url: '/kanban', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
+          { name: 'Rotina Guiada', short_name: 'Rotina', url: '/kanban?foco=1', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
           { name: 'Dashboard', short_name: 'Início', url: '/', icons: [{ src: 'pwa-192x192.png', sizes: '192x192' }] },
         ],
       },

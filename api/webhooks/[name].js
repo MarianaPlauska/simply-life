@@ -2,11 +2,13 @@
 import ingest from '../_lib/handlers/webhooks/ingest.js';
 import m2mIngest from '../_lib/handlers/webhooks/m2m-ingest.js';
 import pushSubscribe from '../_lib/handlers/push/subscribe.js';
+import pushTest from '../_lib/handlers/push/test.js';
 
 const ROUTES = {
   ingest,
   m2m: m2mIngest,
   'push-subscribe': pushSubscribe,
+  'push-test': pushTest,
 };
 
 function pickQuery(value)

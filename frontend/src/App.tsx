@@ -154,7 +154,7 @@ function AppShell()
           } />
           <Route path="kanban/board" element={<Navigate to="/kanban" replace />} />
           <Route path="anotacoes" element={<ErrorBoundary fallbackTitle="Erro nas Anotações"><AnotacoesView /></ErrorBoundary>} />
-          <Route path="foco" element={<Navigate to="/saude#academia" replace />} />
+          <Route path="foco" element={<Navigate to="/kanban?foco=1" replace />} />
           <Route path="configuracoes" element={<ErrorBoundary fallbackTitle="Erro nas Configurações"><SettingsView /></ErrorBoundary>} />
           <Route path="financeiro" element={<ErrorBoundary fallbackTitle="Erro no Financeiro"><FinancePlannerView /></ErrorBoundary>} />
           <Route path="saude" element={<ErrorBoundary fallbackTitle="Erro na Saúde"><HealthView /></ErrorBoundary>} />

@@ -70,6 +70,7 @@ export function PwaInstallBanner()
           <p className="text-sm font-medium text-ink">Instalar no iPhone</p>
           <p className="text-[11px] text-ink-muted mt-1 leading-relaxed">
             Safari → Compartilhar → Adicionar à Tela de Início. Abre em tela cheia como app.
+            Push só no iOS 16.4+, depois de instalado — o Safari na aba não pede permissão.
           </p>
           <button
             type="button"
