@@ -24,7 +24,7 @@ export function KanbanHorizonDesktop({
 {
   return (
     <div
-      className="hidden lg:flex flex-1 min-h-0 flex-row gap-6 w-full items-stretch overflow-x-auto pb-4 custom-scrollbar custom-scrollbar-x"
+      className="hidden lg:flex flex-1 min-h-0 flex-row gap-4 w-full items-stretch overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x"
       role="region"
       aria-label="Quadro por horizonte"
     >
@@ -36,7 +36,7 @@ export function KanbanHorizonDesktop({
         return (
           <div
             key={horizon}
-            className="w-full lg:w-1/3 lg:min-w-[320px] flex flex-col min-h-0 h-full max-h-[min(680px,calc(100vh-260px))] rounded-lg border border-line bg-card shadow-sm overflow-hidden"
+            className="w-full lg:w-1/3 lg:min-w-[300px] flex flex-col min-h-0 h-full"
           >
             <AxelKanbanColumn
               id={horizon}
@@ -53,8 +53,9 @@ export function KanbanHorizonDesktop({
                   key={tarefa.id}
                   tarefa={tarefa}
                   allTasks={allTasks}
+                  columnHorizon={horizon}
                   isDragging={activeId === tarefa.id}
-                  featured={horizon === 'hoje'}
+                  layout="checklist"
                   onOpen={() => onOpen(tarefa)}
                 />
               ))}

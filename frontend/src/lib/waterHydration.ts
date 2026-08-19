@@ -20,7 +20,22 @@ export function persistLocalWaterPrefs(patch: WaterLocalPrefs): void
 }
 
 export const DEFAULT_ML_POR_COPO = 200
+/** Meta visual padrão: 10 copos de 200 ml = 2 L */
+export const DEFAULT_AGUA_COPOS = 10
+export const META_AGUA_ML = DEFAULT_AGUA_COPOS * DEFAULT_ML_POR_COPO
 export const GARRAFA_MIN_ML = 500
+
+export function coposParaDoisLitros(ml: number): number
+{
+  const unit = clampMl(ml)
+  return Math.max(1, Math.round(META_AGUA_ML / unit))
+}
+
+/** 8 × 200 ml era 1,6 L — legado a promover para 2 L */
+export function isLegacyAgua16L(metaCopos: number, ml: number): boolean
+{
+  return metaCopos === 8 && ml === DEFAULT_ML_POR_COPO
+}
 
 export const ML_OPCOES = [150, 200, 250, 300, 500, 750, 1000] as const
 export const ML_MIN = 50
@@ -200,7 +215,16 @@ export function totalMlHoje(h: HabitoDiario | undefined): number
 
 export function metaMl(h: HabitoDiario | undefined): number
 {
-  return (h?.meta_diaria ?? 8) * mlPorCopo(h)
+  return (h?.meta_diaria ?? DEFAULT_AGUA_COPOS) * mlPorCopo(h)
+}
+
+export function formatLiters(ml: number): string
+{
+  const liters = ml / 1000
+  if (!Number.isFinite(liters) || liters <= 0) return '0 L'
+  const rounded = Math.round(liters * 10) / 10
+  const label = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1).replace('.', ',')
+  return `${label} L`
 }
 
 export function isGarrafa(ml: number): boolean

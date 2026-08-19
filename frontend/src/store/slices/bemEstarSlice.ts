@@ -262,7 +262,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       contexto: opts?.contexto ?? null,
     }
 
-    // Mensagem do AXEL aparece na hora (otimista) — visível por no máx. 1 min
+    // Mensagem do AXEL — some sozinha em 25s
     const moodLevelOtimista = Math.min(5, Math.max(1, humor)) as MoodLevel
     set((s) =>
     {
@@ -562,7 +562,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
         humorMes: humorRows,
         humorPorDia: aggregateHumorByDay(humorRows),
         aguaPorDia: {},
-        aguaMeta: get().habitos.find((h) => h.tipo === 'agua')?.meta_diaria ?? 8,
+        aguaMeta: get().habitos.find((h) => h.tipo === 'agua')?.meta_diaria ?? 10,
         treinoPorDia: {},
         focoMinutosPorDia: {},
       })
@@ -598,7 +598,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       const habitos = get().habitos
       const aguaHabito = habitos.find((h) => h.tipo === 'agua')
       const sonoHabito = habitos.find((h) => h.tipo === 'sono')
-      const aguaMeta = aguaHabito?.meta_diaria ?? 8
+      const aguaMeta = aguaHabito?.meta_diaria ?? 10
 
       const aguaPorDia: Record<string, number> = {}
       const sonoPorDia: Record<string, number> = {}

@@ -1,6 +1,10 @@
 import type { ColorScheme } from '../store/storeTypes'
 import { getPersistStorageKey } from '../lib/userScopedStorage'
-import { applyColorScheme } from './applyColorScheme'
+import {
+  applyColorScheme,
+  parseColorScheme,
+  readDedicatedColorScheme,
+} from './applyColorScheme'
 
 const LEGACY_STORE_KEY = 'simply-life-store'
 
@@ -18,9 +22,7 @@ function schemeFromBlob(raw: string | null): ColorScheme | null
   try
   {
     const parsed = JSON.parse(raw) as PersistBlob
-    const cs = parsed.state?.accessibility?.colorScheme
-    if (cs === 'dark' || cs === 'light') return cs
-    if (cs === 'sepia') return 'light'
+    return parseColorScheme(parsed.state?.accessibility?.colorScheme)
   }
   catch { /* ignore */ }
   return null
@@ -73,15 +75,29 @@ function collectStoreKeys(): string[]
   return [...new Set(keys)]
 }
 
-/** Lê o tema salvo no disco — usado no boot e após rehydrate. */
+/** Lê o tema salvo no disco — chave dedicada primeiro, depois persist Zustand. */
 export function readPersistedColorScheme(): ColorScheme
 {
+  const dedicated = readDedicatedColorScheme()
+  if (dedicated) return dedicated
+
   for (const key of collectStoreKeys())
   {
     const scheme = schemeFromBlob(localStorage.getItem(key))
     if (scheme) return scheme
   }
   return 'dark'
+}
+
+/** Garante que o store em memória siga a escolha gravada neste aparelho. */
+export function overlayRememberedColorScheme(accessibility: { colorScheme?: string } | undefined): ColorScheme
+{
+  const remembered = readPersistedColorScheme()
+  if (accessibility)
+  {
+    accessibility.colorScheme = remembered
+  }
+  return remembered
 }
 
 /** Aplica tema salvo sem esperar o React — evita flash claro/escuro. */

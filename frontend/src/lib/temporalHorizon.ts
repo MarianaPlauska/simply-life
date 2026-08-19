@@ -1,14 +1,14 @@
 import type { TarefaUnificada } from '../types'
 import { parseCalendarDate } from './dueBucket'
 
-// Horizonte temporal Bitrix — HOJE / ESTA SEMANA / BACKLOG
+// Horizonte temporal Bitrix · HOJE / ESTA SEMANA / BACKLOG
 
 export type TemporalHorizon = 'hoje' | 'semana' | 'backlog'
 
 export const HORIZON_LABELS: Record<TemporalHorizon, string> = {
   hoje: 'Hoje',
-  semana: 'Esta Semana',
-  backlog: 'Backlog',
+  semana: 'Semana',
+  backlog: 'Entrada',
 }
 
 function startOfDay(d: Date): Date
@@ -56,7 +56,7 @@ export function horizonPersistPatch(horizon: TemporalHorizon): {
   return { horizon_override: 'backlog', score_urgencia: 40, status: 'pendente' }
 }
 
-/** Resolve horizonte com override manual (drag) — persistido vence o score */
+/** Resolve horizonte com override manual (drag) · persistido vence o score */
 export function resolveTemporalHorizon(
   tarefa: TarefaUnificada,
   override?: TemporalHorizon,
@@ -125,11 +125,11 @@ export function getTemporalPlacementRationale(
   {
     if (isDueToday(tarefa.data_vencimento))
     {
-      return 'Esta demanda está em HOJE porque o prazo vence hoje — execução imediata obrigatória no ciclo atual.'
+      return 'Esta demanda está em HOJE porque o prazo vence hoje · execução imediata obrigatória no ciclo atual.'
     }
     if (score > 90)
     {
-      return `Esta demanda está em HOJE porque o Motor de Contexto atribuiu score crítico (${score}) — foco máximo nas próximas horas.`
+      return `Esta demanda está em HOJE porque o Motor de Contexto atribuiu score crítico (${score}) · foco máximo nas próximas horas.`
     }
     return 'Esta demanda está em HOJE por decisão de orquestração manual ou sinais combinados de urgência.'
   }
@@ -142,12 +142,12 @@ export function getTemporalPlacementRationale(
     }
     if (tarefa.status === 'em_progresso')
     {
-      return 'Esta demanda está em ESTA SEMANA porque já está em progresso — sprint curto com entrega planejada nos próximos dias.'
+      return 'Esta demanda está em ESTA SEMANA porque já está em progresso · sprint curto com entrega planejada nos próximos dias.'
     }
-    return `Esta demanda está em ESTA SEMANA (score ${score}) — médio prazo com orquestração ativa antes do backlog.`
+    return `Esta demanda está em ESTA SEMANA (score ${score}) · médio prazo com orquestração ativa antes do backlog.`
   }
 
-  return 'Esta demanda está no BACKLOG porque a IA ainda não a priorizou para o ciclo atual — aguarda sinais de prazo, score ou dependências.'
+  return 'Esta demanda está no BACKLOG porque a IA ainda não a priorizou para o ciclo atual · aguarda sinais de prazo, score ou dependências.'
 }
 
 export function formatDueMeta(dataVencimento: string | null | undefined): string | null

@@ -11,7 +11,7 @@ export interface MorningBrief
   hojeCount: number
 }
 
-/** Resumo matinal — tom de assistente, não de dashboard frio */
+/** Resumo matinal · tom de assistente, não de dashboard frio */
 export function buildMorningBrief(
   hojeTasks: TarefaUnificada[],
   dailyScoreCap: number,
@@ -27,11 +27,11 @@ export function buildMorningBrief(
   let headline: string
   if (hojeCount === 0)
   {
-    headline = 'Fila de Hoje vazia — bom momento para planejar a semana.'
+    headline = 'Fila de Hoje vazia · bom momento para planejar a semana.'
   }
   else if (mood?.profile === 'recuperacao')
   {
-    headline = `Humor baixo hoje — AXEL limitou Hoje a ${dailyScoreCap} pts. Poucas tarefas, no seu ritmo.`
+    headline = `Humor baixo hoje · AXEL limitou Hoje a ${dailyScoreCap} pts. Poucas tarefas, no seu ritmo.`
   }
   else if (mood?.profile === 'sem_registro')
   {
@@ -39,15 +39,15 @@ export function buildMorningBrief(
   }
   else if (criticalCount >= 3)
   {
-    headline = `${criticalCount} críticas em Hoje — comece pela de maior score.`
+    headline = `${criticalCount} críticas em Hoje · comece pela de maior score.`
   }
   else if (load.level === 'overload')
   {
-    headline = `Carga em ${loadPercent}% — AXEL pode adiar o excesso para Semana.`
+    headline = `Carga em ${loadPercent}% · AXEL pode adiar o excesso para Semana.`
   }
   else
   {
-    headline = `${hojeCount} em Hoje · carga ${loadPercent}% — ritmo sustentável.`
+    headline = `${hojeCount} em Hoje · carga ${loadPercent}% · ritmo sustentável.`
   }
 
   const top = [...active].sort((a, b) => (b.score_urgencia ?? 0) - (a.score_urgencia ?? 0))[0]

@@ -85,10 +85,10 @@ export function AxelAchievementTrail()
       <div className="px-5 lg:px-7 py-3 max-w-[1680px] mx-auto w-full">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
           <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
-            <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
+            <h2 className="text-[13px] font-medium text-ink-muted">
               Concluídas recentemente
             </h2>
-            <span className="font-mono text-[10px] text-ink-muted tabular-nums">
+            <span className="text-[12px] text-ink-muted tabular-nums">
               {filtered.length}/{deduped.length}
             </span>
           </div>

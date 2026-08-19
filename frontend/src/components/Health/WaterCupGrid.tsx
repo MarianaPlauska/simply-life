@@ -17,54 +17,84 @@ interface WaterCupGridProps
   compact?: boolean
 }
 
-function CupSvg({ filled, gradId }: { filled: boolean; gradId: string })
+function CupSvg({ filled, fillRatio, gradId }: { filled: boolean; fillRatio: number; gradId: string })
 {
+  const waterTop = 46 - 32 * Math.min(1, Math.max(0.18, fillRatio))
+
   return (
-    <svg viewBox="0 0 40 52" className="w-full h-full drop-shadow-sm" aria-hidden>
+    <svg viewBox="0 0 36 48" className="w-full h-full" aria-hidden>
       <defs>
         <linearGradient id={gradId} x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor="var(--sl-water-fill, var(--sl-accent))" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="var(--sl-water-fill-end, var(--sl-accent-hover))" stopOpacity="0.75" />
+          <stop offset="0%" stopColor="var(--sl-health)" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="var(--sl-health)" stopOpacity="0.45" />
         </linearGradient>
+        <clipPath id={`${gradId}-clip`}>
+          <path d="M9 8 h18 l-2.4 32 a5 5 0 0 1-5 4.2 H16.4 a5 5 0 0 1-5-4.2 Z" />
+        </clipPath>
       </defs>
       <path
-        d="M10 6 h20 l-3 40 a4 4 0 0 1-4 3.5 H17 a4 4 0 0 1-4-3.5 Z"
-        fill={filled ? `url(#${gradId})` : 'var(--sl-chrome)'}
-        stroke="var(--sl-border)"
-        strokeWidth="1.5"
+        d="M9 8 h18 l-2.4 32 a5 5 0 0 1-5 4.2 H16.4 a5 5 0 0 1-5-4.2 Z"
+        fill="color-mix(in srgb, var(--sl-ink) 16%, var(--sl-canvas))"
+        stroke="var(--sl-health)"
+        strokeOpacity={filled ? 0.95 : 0.45}
+        strokeWidth="1.6"
         strokeLinejoin="round"
-        className="transition-colors duration-300"
       />
       {filled && (
-        <ellipse cx="20" cy="14" rx="7" ry="2" fill="var(--sl-elevated)" opacity="0.45" />
+        <g clipPath={`url(#${gradId}-clip)`}>
+          <rect x="8" y={waterTop} width="20" height={48 - waterTop} fill={`url(#${gradId})`} />
+          <ellipse cx="18" cy={waterTop + 1} rx="7.2" ry="1.6" fill="var(--sl-ink)" opacity="0.18" />
+        </g>
+      )}
+      <path
+        d="M11 8.2 h14"
+        stroke="var(--sl-health)"
+        strokeOpacity={filled ? 0.9 : 0.4}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function BottleSvg({ filled, fillRatio, gradId }: { filled: boolean; fillRatio: number; gradId: string })
+{
+  const waterTop = 44 - 28 * Math.min(1, Math.max(0.2, fillRatio))
+
+  return (
+    <svg viewBox="0 0 36 48" className="w-full h-full" aria-hidden>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%" stopColor="var(--sl-health)" stopOpacity="0.95" />
+          <stop offset="100%" stopColor="var(--sl-health)" stopOpacity="0.55" />
+        </linearGradient>
+        <clipPath id={`${gradId}-clip`}>
+          <path d="M12 11 h12 l-1.6 29 a4.5 4.5 0 0 1-4.4 3.6 H18 a4.5 4.5 0 0 1-4.4-3.6 Z" />
+        </clipPath>
+      </defs>
+      <rect x="14" y="3" width="8" height="5" rx="1.5" fill="var(--sl-health)" opacity={filled ? 0.9 : 0.4} />
+      <path
+        d="M12 11 h12 l-1.6 29 a4.5 4.5 0 0 1-4.4 3.6 H18 a4.5 4.5 0 0 1-4.4-3.6 Z"
+        fill="color-mix(in srgb, var(--sl-ink) 16%, var(--sl-canvas))"
+        stroke="var(--sl-health)"
+        strokeOpacity={filled ? 0.95 : 0.45}
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      {filled && (
+        <g clipPath={`url(#${gradId}-clip)`}>
+          <rect x="11" y={waterTop} width="14" height={48 - waterTop} fill={`url(#${gradId})`} />
+        </g>
       )}
     </svg>
   )
 }
 
-function BottleSvg({ filled, gradId }: { filled: boolean; gradId: string })
+function columnCount(cupCount: number): number
 {
-  return (
-    <svg viewBox="0 0 40 52" className="w-full h-full drop-shadow-sm" aria-hidden>
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor="var(--sl-water-fill, var(--sl-accent))" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="var(--sl-water-fill-end, var(--sl-accent-hover))" stopOpacity="0.75" />
-        </linearGradient>
-      </defs>
-      <rect x="14" y="4" width="12" height="6" rx="2" fill="var(--sl-border)" />
-      <path
-        d="M12 10 h16 l-2 38 a5 5 0 0 1-5 4 H19 a5 5 0 0 1-5-4 Z"
-        fill={filled ? `url(#${gradId})` : 'var(--sl-chrome)'}
-        stroke="var(--sl-border)"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      {filled && (
-        <rect x="15" y="22" width="10" height="14" rx="2" fill="var(--sl-elevated)" opacity="0.35" />
-      )}
-    </svg>
-  )
+  if (cupCount <= 5) return cupCount
+  if (cupCount <= 10) return 5
+  return 5
 }
 
 export function WaterCupGrid({
@@ -84,10 +114,11 @@ export function WaterCupGrid({
   const baseId = useId()
   const metaGoal = baseGoal ?? goal
   const current = entries.length
-  const cupCount = Math.min(Math.max(goal, metaGoal, current + 1), 12)
-  const cols = cupCount <= 6 ? cupCount : 4
-  const colMin = compact ? '3.5rem' : '4rem'
-  const colMax = compact ? '4.5rem' : '5.25rem'
+  // Sempre mostra a grade da meta (2 L) — extra só quando a meta já foi batida
+  const cupCount = Math.min(Math.max(metaGoal, current >= metaGoal ? current + 1 : metaGoal), 16)
+  const cols = columnCount(cupCount)
+  const colMin = compact ? '2.6rem' : '2.75rem'
+  const colMax = compact ? '3.4rem' : '3.6rem'
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   const handleSlot = (index: number) =>
@@ -148,17 +179,19 @@ export function WaterCupGrid({
     )
   }
 
-  const gridGap = compact ? 'gap-2' : 'gap-2 sm:gap-3'
+  const gridGap = compact ? 'gap-2.5 sm:gap-3' : 'gap-2 sm:gap-2.5'
+  const totalMl = entries.reduce((a, b) => a + b, 0)
+  const metaMl = metaGoal * defaultMl
 
   return (
     <div className="space-y-2">
       {defaultMlPanel}
 
       <div
-        className={`grid w-fit max-w-full mx-auto justify-items-center ${gridGap}`}
+        className={`grid w-full max-w-md justify-items-center ${gridGap}`}
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(${colMin}, ${colMax}))` }}
         role="group"
-        aria-label={`${current} de ${metaGoal} — ${entries.reduce((a, b) => a + b, 0)} ml`}
+        aria-label={`${current} de ${metaGoal} copos — ${totalMl} de ${metaMl} ml`}
       >
         {Array.from({ length: cupCount }, (_, i) =>
         {
@@ -166,6 +199,7 @@ export function WaterCupGrid({
           const ml = filled ? entries[i] : defaultMl
           const garrafa = isGarrafa(ml)
           const isExtraCup = i >= metaGoal
+          const fillRatio = filled ? Math.min(1, ml / Math.max(defaultMl, 1)) : 0
 
           return (
             <button
@@ -175,13 +209,13 @@ export function WaterCupGrid({
               onClick={() => handleSlot(i)}
               className={[
                 'sl-touch relative flex flex-col items-center justify-end rounded-sl w-full',
-                compact ? 'p-1.5 min-h-[52px] sm:min-h-[56px]' : 'p-1.5 sm:p-2 min-h-[60px] sm:min-h-[68px]',
-                'border border-transparent hover:border-accent/25 hover:bg-accent-muted/30',
+                compact ? 'p-1 min-h-[48px] sm:min-h-[52px]' : 'p-1 sm:p-1.5 min-h-[56px] sm:min-h-[64px]',
+                'border border-transparent hover:bg-health-muted/50',
                 'active:scale-95 transition-all duration-150 ease-out',
-                isExtraCup ? 'border-dashed border-accent/20' : '',
-                editingIndex === i ? 'ring-1 ring-accent/40 bg-accent-muted/20' : '',
-                'disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent',
-                filled ? 'text-accent' : 'text-ink-muted',
+                isExtraCup ? 'border-dashed border-health/25' : '',
+                editingIndex === i ? 'ring-1 ring-health/40 bg-health-muted/30' : '',
+                'disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-health',
+                filled ? 'text-health' : 'text-ink-muted',
               ].join(' ')}
               aria-label={
                 filled
@@ -190,16 +224,13 @@ export function WaterCupGrid({
               }
               aria-pressed={filled}
             >
-              {garrafa ? (
-                <BottleSvg filled={filled} gradId={`${baseId}-bottle-${i}`} />
-              ) : (
-                <CupSvg filled={filled} gradId={`${baseId}-cup-${i}`} />
-              )}
-              {filled && (
-                <span className="font-mono text-[8px] tabular-nums mt-0.5 text-ink-muted">
-                  {ml}ml
-                </span>
-              )}
+              <span className={compact ? 'w-7 h-9 sm:w-8 sm:h-10' : 'w-8 h-11 sm:w-9 sm:h-12'}>
+                {garrafa ? (
+                  <BottleSvg filled={filled} fillRatio={fillRatio} gradId={`${baseId}-bottle-${i}`} />
+                ) : (
+                  <CupSvg filled={filled} fillRatio={fillRatio} gradId={`${baseId}-cup-${i}`} />
+                )}
+              </span>
             </button>
           )
         })}

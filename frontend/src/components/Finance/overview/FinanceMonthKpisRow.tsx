@@ -1,4 +1,3 @@
-import { TrendingDown, TrendingUp, Wallet } from 'lucide-react'
 import { maskFinanceValue } from '../../../lib/financeHideValues'
 import { AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 
@@ -24,7 +23,7 @@ export function FinanceMonthKpisRow({
   receita,
   despesas,
   saldoMes,
-  balanceToneClass = 'text-ink',
+  balanceToneClass = 'text-finance',
   compact = false,
   hideValues = false,
   projectionLabels = false,
@@ -32,34 +31,24 @@ export function FinanceMonthKpisRow({
   onReconcile,
 }: FinanceMonthKpisRowProps)
 {
-  const items = [
-    {
-      label: projectionLabels ? 'Saldo inicial' : 'Disponível',
-      value: saldoDisponivel,
-      icon: Wallet,
-      tone: balanceToneClass,
-    },
+  const rest = [
     {
       label: projectionLabels ? 'Entradas previstas' : 'Entrou',
       value: receita,
-      icon: TrendingUp,
-      tone: 'text-concluido',
     },
     {
       label: projectionLabels ? 'Compromissos' : 'Saiu',
       value: despesas,
-      icon: TrendingDown,
-      tone: 'text-urgente',
     },
     ...(saldoMes !== undefined
       ? [{
-          label: projectionLabels ? 'Sobra estimada' : 'Saldo mês',
+          label: projectionLabels ? 'Sobra estimada' : 'Saldo do mês',
           value: saldoMes,
-          icon: Wallet,
-          tone: saldoMes >= 0 ? 'text-concluido' : 'text-urgente',
         }]
       : []),
   ]
+
+  const heroLabel = projectionLabels ? 'Saldo inicial' : 'Disponível'
 
   return (
     <div className="space-y-2">
@@ -68,9 +57,9 @@ export function FinanceMonthKpisRow({
           <button
             type="button"
             onClick={onReconcile}
-            className="font-mono text-[9px] uppercase tracking-wide px-2.5 py-1.5 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors min-h-[36px]"
+            className="text-[12px] px-2.5 py-1.5 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors min-h-[36px]"
           >
-            Recalcular / limpar duplicatas
+            Recalcular duplicatas
           </button>
         </div>
       )}
@@ -78,31 +67,33 @@ export function FinanceMonthKpisRow({
         <button
           type="button"
           onClick={onConfigureSaldo}
-          className="w-full text-left rounded-sl border border-accent/35 bg-accent/10 px-3 py-2.5 min-h-[44px] hover:bg-accent/15 transition-colors"
+          className="w-full text-left rounded-sl border border-finance/35 bg-finance-muted px-3 py-2.5 min-h-[44px] hover:opacity-90 transition-colors"
         >
-          <p className="text-[12px] font-medium text-ink">
-            Informe quanto você tem livre na conta
+          <p className="text-[13px] font-medium text-ink">
+            Informe o saldo livre da conta
           </p>
-          <p className="text-[10px] text-ink-muted mt-0.5 font-mono uppercase">
-            Finanças → Contas → Conta → salvar o disponível do banco
+          <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+            Contas → Conta. Sem isso o disponível não é real.
           </p>
         </button>
       )}
-      <div className={`grid grid-cols-2 ${items.length > 3 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'} gap-2`}>
-      {items.map(({ label, value, icon: Icon, tone }) => (
-        <div
-          key={label}
-          className="rounded-sl border border-line bg-card px-2.5 py-2"
-        >
-          <div className="flex items-center gap-1 mb-0.5">
-            <Icon size={11} className={tone} />
-            <span className={`font-mono text-[8px] uppercase ${AXEL_TEXT_SECONDARY}`}>{label}</span>
+
+      <div className="rounded-sl bg-card px-3 py-3">
+        <p className="sl-eyebrow text-finance">{heroLabel}</p>
+        <p className={`${compact ? 'text-[1.65rem]' : 'sl-metric'} font-sans font-medium tabular-nums tracking-tight mt-1 ${hideValues ? 'text-ink-muted' : balanceToneClass}`}>
+          {maskFinanceValue(hideValues, fmt(saldoDisponivel))}
+        </p>
+      </div>
+
+      <div className={`grid gap-2 ${rest.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        {rest.map(({ label, value }) => (
+          <div key={label} className="rounded-sl bg-card px-2.5 py-2">
+            <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{label}</p>
+            <p className={`text-[13px] sm:text-sm font-sans tabular-nums mt-0.5 ${hideValues ? 'text-ink-muted' : 'text-ink'}`}>
+              {maskFinanceValue(hideValues, fmt(value))}
+            </p>
           </div>
-          <p className={`${compact ? 'text-sm' : 'text-base'} font-display tabular-nums ${hideValues ? 'text-ink-muted' : tone}`}>
-            {maskFinanceValue(hideValues, fmt(value))}
-          </p>
-        </div>
-      ))}
+        ))}
       </div>
     </div>
   )

@@ -1,9 +1,10 @@
 // Boot de tema antes do React — evita flash ao recarregar
 (function ()
 {
-  var THEME_DARK = '#1D2029'
-  var THEME_LIGHT = '#F4F4F2'
+  var THEME_DARK = '#1E1C18'
+  var THEME_LIGHT = '#F4EFE6'
   var STORE = 'simply-life-store'
+  var DEDICATED = 'simply-life-color-scheme'
 
   function schemeFromRaw(raw)
   {
@@ -40,6 +41,13 @@
 
   function readScheme()
   {
+    try
+    {
+      var saved = localStorage.getItem(DEDICATED)
+      if (saved === 'dark' || saved === 'light') return saved
+    }
+    catch (e) { /* ignore */ }
+
     var keys = []
     var uid = supabaseUserId()
     if (uid) keys.push(STORE + ':' + uid)

@@ -131,7 +131,7 @@ function kanbanToPct(
 
   if (active.length === 0)
   {
-    return { pct: 48, detail: 'Hoje vazio — não confunda com energia alta', overdue: 0 }
+    return { pct: 48, detail: 'Hoje vazio · não confunda com energia alta', overdue: 0 }
   }
 
   const load = computeMentalLoad(active, cap, mood)

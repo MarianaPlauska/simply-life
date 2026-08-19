@@ -65,8 +65,8 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
-        theme_color: '#1D2029',
-        background_color: '#1D2029',
+        theme_color: '#1E1C18',
+        background_color: '#1E1C18',
         categories: ['productivity', 'lifestyle', 'finance'],
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

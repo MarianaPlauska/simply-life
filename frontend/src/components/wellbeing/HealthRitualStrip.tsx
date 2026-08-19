@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { HeartPulse, Droplets, Pill, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { ritualHeadline, type RitualItemId } from '../../lib/healthRitual'
 import { useHealthRitualSnapshot } from '../../hooks/useHealthRitualSnapshot'
 import { AxelCareNudge } from '../axel/AxelCareNudge'
+import { WaterWaveCard } from '../dashboard/WaterWaveCard'
+import { friendlyCallName } from '../../lib/friendlyCallName'
 import type { MoodLevel } from '../../lib/axelCareMessages'
-
-const ICONS: Record<RitualItemId, typeof HeartPulse> = {
-  humor: HeartPulse,
-  agua: Droplets,
-  medicamentos: Pill,
-}
 
 export function HealthRitualStrip()
 {
@@ -30,10 +26,11 @@ export function HealthRitualStrip()
 
   const snapshot = useHealthRitualSnapshot()
 
-  const displayName = workspacePrefs.axel_calls_you
-    || workspacePrefs.display_name
-    || userProfile?.nome
-    || ''
+  const displayName = friendlyCallName(
+    workspacePrefs.axel_calls_you,
+    workspacePrefs.display_name,
+    userProfile?.nome,
+  )
 
   useEffect(() =>
   {
@@ -122,24 +119,16 @@ export function HealthRitualStrip()
     navigate(item.path)
   }
 
+  const ritualItems = snapshot.items.filter((i) => i.applies && i.id !== 'agua')
+
   return (
-    <section
-      className={`sl-panel px-4 py-4 ${
-        !snapshot.moodLoggedToday ? 'sl-panel-emphasis' : ''
-      }`}
-      aria-label="Seu cuidado hoje"
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="font-mono text-ui-caption uppercase tracking-[0.14em] text-accent">
-            Seu cuidado hoje
-          </p>
-          <p className="text-ui-title text-ink leading-snug mt-1">{headline}</p>
-        </div>
-        <span className="shrink-0 rounded-full border border-line bg-chrome px-2 py-1 font-mono text-ui-caption text-ink-muted tabular-nums">
-          {snapshot.doneCount} de {snapshot.totalApplicable}
-        </span>
-      </div>
+    <section className="min-w-0" aria-label="Seu cuidado hoje">
+      <p className="text-[13px] font-medium text-ink-muted">
+        Cuidado hoje
+      </p>
+      <p className="text-[16px] font-semibold text-ink leading-snug mt-0.5">
+        {headline}
+      </p>
 
       {celebrateMood !== null && (
         <AxelCareNudge
@@ -153,49 +142,43 @@ export function HealthRitualStrip()
         />
       )}
 
-      <div className="grid grid-cols-1 min-[420px]:grid-cols-2 gap-2 mt-3">
-        {snapshot.items.filter((i) => i.applies).map((item) =>
-        {
-          const Icon = ICONS[item.id]
-          const inProgress = !item.done && item.progress > 0
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => handleRitualTap(item)}
-              className={`
-                min-h-14 flex items-center gap-2.5 px-3 py-2.5 rounded-sl border text-left transition-colors
-                ${item.done
-                  ? 'border-concluido/30 bg-concluido/10 text-concluido'
-                  : inProgress
-                    ? 'border-sky-500/35 bg-sky-500/10 text-sky-300'
-                    : item.id === 'humor'
-                      ? 'border-accent/40 bg-accent-muted text-ink hover:border-accent'
-                      : 'border-line bg-chrome/50 text-ink-muted hover:text-ink hover:border-ink-muted/50'}
-              `}
-            >
-              <span className="shrink-0">
-                {item.done ? <Check size={18} /> : <Icon size={18} strokeWidth={1.75} />}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-ui-body font-semibold">{item.label}</span>
-                <span className="block text-ui-caption leading-snug opacity-80 truncate">{item.done ? 'Concluído hoje' : item.detail}</span>
-              </span>
-            </button>
-          )
-        })}
-      </div>
+      {ritualItems.length > 0 && (
+        <ul className="mt-2" role="list">
+          {ritualItems.map((item) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                onClick={() => handleRitualTap(item)}
+                className="w-full min-h-12 flex items-center gap-3 py-2 text-left"
+              >
+                <span
+                  className={`
+                    shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center
+                    ${item.done
+                      ? 'border-concluido bg-concluido/20 text-concluido'
+                      : 'border-line text-transparent'}
+                  `}
+                  aria-hidden
+                >
+                  {item.done && <Check size={14} strokeWidth={2.5} />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[15px] font-medium text-ink">
+                    {item.label}
+                  </span>
+                  <span className="block text-[13px] text-ink-muted truncate">
+                    {item.done ? 'Concluído hoje' : item.detail}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      <div className="mt-3" aria-label={`${snapshot.percent}% do cuidado de hoje concluído`}>
-        <div className="h-2 rounded-full bg-chrome overflow-hidden">
-          <div
-            className="h-full bg-accent transition-all duration-500"
-            style={{ width: `${snapshot.percent}%` }}
-          />
-        </div>
-        <p className="text-ui-caption text-ink-muted mt-1">
-          {snapshot.percent}% concluído hoje
-        </p>
+      <div id="dashboard-water" className="mt-1 scroll-mt-20">
+        <p className="text-[15px] font-medium text-ink">Água</p>
+        <WaterWaveCard embedded className="mt-1" />
       </div>
     </section>
   )

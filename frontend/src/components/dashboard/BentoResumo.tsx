@@ -36,7 +36,7 @@ function useSaudeResumo()
 
     const agua = habitos.find((h) => h.tipo === 'agua')
     const aguaCopos = agua?.progresso_atual ?? 0
-    const aguaMeta = agua?.meta_diaria ?? 8
+    const aguaMeta = agua?.meta_diaria ?? 10
     const aguaPct = aguaMeta > 0 ? Math.round((aguaCopos / aguaMeta) * 100) : 0
 
     return { atrasados, aguaCopos, aguaMeta, aguaPct, treinos: sessoesTreinoHoje?.length || 0 }

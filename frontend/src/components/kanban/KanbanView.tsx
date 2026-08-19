@@ -18,7 +18,6 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { KanbanCommandBar } from './KanbanCommandBar'
 import { KanbanDecisionLog } from './KanbanDecisionLog'
-import { KanbanNextStep } from './KanbanNextStep'
 import { KanbanInsightsPanel } from './KanbanInsightsPanel'
 import { KanbanOrchestrationStatus } from './KanbanOrchestrationStatus'
 import { KanbanTodayPanel } from './KanbanTodayPanel'
@@ -29,7 +28,6 @@ import { KanbanCalendarView } from './KanbanCalendarView'
 import { GanttView } from './GanttView'
 import { KanbanMobileBoardShell, type MobileBoardTab } from './KanbanMobileBoardShell'
 import { resolveKanbanDragIntent } from './KanbanDragSemantics'
-import { KanbanStatusRibbon } from './KanbanStatusRibbon'
 import type { DueBucket } from '../../lib/dueBucket'
 import { KanbanViewSwitcher, type KanbanViewMode } from './KanbanViewSwitcher'
 import { AxelKanbanCard } from './AxelKanbanCard'
@@ -70,7 +68,7 @@ import {
 import { AXEL_BTN_PRIMARY, AXEL_MAIN_PB_MOBILE } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
-// Orquestrador Temporal — colunas por horizonte (Bitrix logic)
+// Orquestrador Temporal · colunas por horizonte (Bitrix logic)
 
 const HORIZONS: TemporalHorizon[] = ['hoje', 'semana', 'backlog']
 
@@ -129,7 +127,6 @@ export function KanbanView()
     lastSource,
     intelligenceReady,
     autoEnabled,
-    executionQueueReady,
     setAutoEnabled,
     metricsKey,
     runOrchestration,
@@ -225,8 +222,7 @@ export function KanbanView()
     [tarefas, horizonOverrides, executionPins],
   )
 
-  const queueBootstrapping = tarefasLoading
-    || (autoEnabled && !executionQueueReady && baseTarefas.some((t) => t.status !== 'concluida'))
+  const queueBootstrapping = tarefasLoading && baseTarefas.length === 0
 
   const hojeQueueDisplay = queueBootstrapping ? [] : hojeActiveSorted
 
@@ -244,6 +240,17 @@ export function KanbanView()
     + dueBuckets.proxima_semana.length
     + dueBuckets.sem_prazo.length,
   [dueBuckets])
+
+  const landedMobileTab = useRef(false)
+  useEffect(() =>
+  {
+    if (landedMobileTab.current || queueBootstrapping) return
+    landedMobileTab.current = true
+    if (hojeActiveSorted.length === 0 && dueCount > 0)
+    {
+      setMobileTab('prazo')
+    }
+  }, [queueBootstrapping, hojeActiveSorted.length, dueCount])
 
   const heroTask = useMemo(() =>
   {
@@ -384,7 +391,7 @@ export function KanbanView()
         void logAxelDecision({
           taskId: task.id,
           kind: 'manual_override',
-          rationale: `Você moveu para ${HORIZON_LABELS[horizon]} — o AXEL respeita até Recalcular.`,
+          rationale: `Você moveu para ${HORIZON_LABELS[horizon]} · o AXEL respeita até Recalcular.`,
           score: boostedHoje,
           horizon,
         })
@@ -485,7 +492,7 @@ export function KanbanView()
         const task = tarefas.find((t) => t.id === id)
         if (task) await moveToHorizon(task, target)
       }
-      pushAiDecision('Sugestão de fluxo aplicada — carga de HOJE aliviada.')
+      pushAiDecision('Sugestão de fluxo aplicada · carga de HOJE aliviada.')
     },
     [tarefas, moveToHorizon, pushAiDecision],
   )
@@ -509,15 +516,24 @@ export function KanbanView()
   const focoParamTried = useRef(false)
   useEffect(() =>
   {
-    if (searchParams.get('foco') !== '1') return
     if (tarefasLoading) return
     if (focoParamTried.current) return
+    const raw = searchParams.get('foco')
+    if (raw == null || raw === '') return
     focoParamTried.current = true
-    openZenFocus()
+    const taskId = Number(raw)
+    if (Number.isFinite(taskId) && taskId > 0)
+    {
+      setZenFocusActive(true, taskId)
+    }
+    else
+    {
+      openZenFocus()
+    }
     const next = new URLSearchParams(searchParams)
     next.delete('foco')
     setSearchParams(next, { replace: true })
-  }, [searchParams, setSearchParams, tarefasLoading, openZenFocus])
+  }, [searchParams, setSearchParams, tarefasLoading, openZenFocus, setZenFocusActive])
 
   useEffect(() =>
   {
@@ -617,7 +633,7 @@ export function KanbanView()
       if (!result) return
       toast.success(`AXEL reorganizou · ${result.hojeCount} em Hoje`, {
         description: result.source === 'mock'
-          ? 'Motor local — configure IA para análise avançada'
+          ? 'Motor local · configure IA para análise avançada'
           : 'Prioridades e horizontes recalculados',
       })
     }
@@ -642,72 +658,49 @@ export function KanbanView()
       <div className={AXEL_KANBAN_GLOW} aria-hidden />
 
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
-        <div className="shrink-0 max-w-[1680px] mx-auto w-full px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-2 flex flex-col gap-2.5 sm:gap-3 border-b border-white/[0.05]">
-          <div className="flex items-center justify-between gap-3 min-w-0">
-            <h1 className="text-base sm:text-xl font-sans font-semibold tracking-tight text-ink leading-tight truncate">
-              Execução
+        <div className="shrink-0 max-w-[1680px] mx-auto w-full px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-2 flex items-center gap-2 border-b border-line">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[20px] sm:text-[22px] font-sans font-semibold tracking-tight text-ink leading-tight">
+              Tarefas
             </h1>
-            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setGruposOpen(true)}
-                className="inline-flex items-center gap-1 px-2 py-1.5 rounded-md border border-white/[0.05] text-ink-muted hover:text-ink hover:bg-chrome font-mono text-[10px] uppercase tracking-wide"
-                aria-label="Ver pastas e flags"
-              >
-                <FolderOpen className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Grupos</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => openCreateDrawer('backlog')}
-                className={`hidden sm:inline-flex items-center gap-1.5 font-mono text-[10px] sm:text-[11px] uppercase tracking-wide px-2.5 sm:px-3 py-1.5 sm:py-2 ${AXEL_BTN_PRIMARY}`}
-              >
-                Nova demanda
-              </button>
-            </div>
+            {viewMode === 'board' && (
+              <p className="text-[13px] text-ink-muted mt-0.5 leading-snug">
+                <span className="tabular-nums">
+                  {tarefas.filter((t) => t.status !== 'concluida').length}
+                </span>
+                {' '}abertas
+                {dueBuckets.vencido.length > 0 && (
+                  <>
+                    {' · '}
+                    <button
+                      type="button"
+                      onClick={() => jumpToDueBucket('vencido')}
+                      className="text-urgente tabular-nums hover:underline"
+                    >
+                      {dueBuckets.vencido.length} atrasadas
+                    </button>
+                  </>
+                )}
+              </p>
+            )}
           </div>
-
-          <div className="flex justify-center sm:justify-start">
-            <KanbanViewSwitcher mode={viewMode} onChange={handleViewModeChange} />
-          </div>
-
-          <KanbanBillDuplicatesBar />
-
-          {viewMode === 'board' && (
-            <>
-              <div className="hidden md:block">
-                <KanbanStatusRibbon
-                  overdue={dueBuckets.vencido.length}
-                  dueToday={dueBuckets.hoje.length}
-                  thisWeek={dueBuckets.esta_semana.length}
-                  noDate={dueBuckets.sem_prazo.length}
-                  execCount={hojeActiveSorted.length}
-                  onJump={jumpToDueBucket}
-                  onExecJump={() => setMobileTab('executar')}
-                />
-              </div>
-              <div className="hidden md:block">
-                <KanbanNextStep
-                  executionQueue={hojeQueueDisplay}
-                  tarefas={tarefas}
-                  heroTask={heroTask}
-                  isExecuting={heroTask != null && execution?.taskId === heroTask.id}
-                  orchestrating={orchestrating || queueBootstrapping}
-                  dueToday={dueBuckets.hoje.length}
-                  overdue={dueBuckets.vencido.length}
-                  dailyScoreCap={effectiveDailyCap}
-                  mood={mood}
-                  onExecute={() =>
-                  {
-                    if (heroTask) void startTask(heroTask)
-                  }}
-                  onOpenTask={handleOpen}
-                  onReorganize={() => void handleReorganizeAll()}
-                  onPrioritizeTask={(task) => void moveToHorizon(task, 'hoje')}
-                />
-              </div>
-            </>
-          )}
+          <KanbanViewSwitcher mode={viewMode} onChange={handleViewModeChange} />
+          <button
+            type="button"
+            onClick={() => setGruposOpen(true)}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-sl text-ink-muted hover:text-ink hover:bg-elevated shrink-0"
+            aria-label="Pastas e flags"
+            title="Grupos"
+          >
+            <FolderOpen size={20} strokeWidth={1.75} />
+          </button>
+          <button
+            type="button"
+            onClick={() => openCreateDrawer('hoje')}
+            className={`hidden lg:inline-flex items-center min-h-11 px-3.5 text-[14px] ${AXEL_BTN_PRIMARY}`}
+          >
+            Nova tarefa
+          </button>
         </div>
 
         <div
@@ -715,6 +708,7 @@ export function KanbanView()
             viewVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
+        <KanbanBillDuplicatesBar />
         {viewMode === 'list' && (
           <AxelKanbanListView
             tarefas={tarefas}
@@ -746,7 +740,6 @@ export function KanbanView()
               dueCount={dueCount}
               tab={mobileTab}
               onTabChange={setMobileTab}
-              onAddTask={() => openCreateDrawer('backlog')}
               executar={(
                 <KanbanTodayPanel
                   tasks={hojeQueueDisplay}
@@ -797,7 +790,7 @@ export function KanbanView()
                       {dragIntent}
                     </span>
                   )}
-                  <AxelKanbanCard tarefa={activeTask} allTasks={tarefas} isDragging />
+                  <AxelKanbanCard tarefa={activeTask} allTasks={tarefas} isDragging layout="checklist" />
                 </div>
               )}
             </DragOverlay>

@@ -4,7 +4,6 @@ import { ArrowRight, Check, Pill, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
   AXEL_BORDERLESS_PANEL,
-  AXEL_LINE,
   AXEL_LINK,
   AXEL_ROW_HOVER,
   AXEL_SECTION_TITLE,
@@ -104,21 +103,23 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
 
   return (
     <section className={`${embedded ? '' : AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
-      {!embedded && (
+      {embedded ? (
+        <p className="text-[13px] font-medium text-ink-muted">Atividade</p>
+      ) : (
         <header className="px-4 pt-4 pb-3 border-b border-line">
           <p className={AXEL_SECTION_TITLE}>Auditoria</p>
           <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>Atividade recente</p>
         </header>
       )}
 
-      <ul role="list" className="flex-1 divide-y divide-line min-h-[140px]">
+      <ul role="list" className="flex-1">
         {items.length === 0 && (
-          <li className={`px-4 py-8 text-center font-mono text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+          <li className={`py-3 text-[13px] ${AXEL_TEXT_SECONDARY}`}>
             Nenhum evento registrado hoje
           </li>
         )}
         {items.map((a) => (
-          <li key={a.id} className={`px-4 py-2.5 flex items-center gap-2.5 ${AXEL_ROW_HOVER}`}>
+          <li key={a.id} className={`py-2.5 flex items-center gap-2.5 ${AXEL_ROW_HOVER}`}>
             <a.Icon className={`w-3.5 h-3.5 shrink-0 ${a.iconClass}`} strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
               <div className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{a.primary}</div>
@@ -130,11 +131,11 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
         ))}
       </ul>
 
-      <div className={`px-4 py-2.5 ${AXEL_LINE} border-t flex justify-center`}>
+      <div className="pt-1">
         <button
           type="button"
           onClick={() => navigate('/relatorios')}
-          className={`inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-wide ${AXEL_LINK}`}
+          className={`inline-flex items-center gap-1 text-[13px] ${AXEL_LINK}`}
         >
           Relatório completo
           <ArrowRight className="w-3 h-3" />

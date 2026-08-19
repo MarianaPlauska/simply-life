@@ -116,43 +116,38 @@ export function DashboardModulesRegistry({ excludeIds = [] }: DashboardModulesRe
   }
 
   return (
-    <div className="sl-panel overflow-hidden">
-      <div className="px-4 py-2 border-b border-line">
-        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
-          Escopo do sistema
-        </p>
-      </div>
-      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-line ${
-        visible.length <= 3 ? 'xl:grid-cols-3' : 'xl:grid-cols-6'
-      }`}>
+    <div>
+      <p className="text-[13px] font-medium text-ink-muted">
+        Escopo do sistema
+      </p>
+      <ul className="mt-1" role="list">
         {visible.map((m) =>
         {
           const Icon = m.Icon
           return (
-            <button
-              key={m.id}
-              type="button"
-              onClick={() => navigate(m.path)}
-              className={`text-left px-4 py-3 flex flex-col gap-2 min-h-[108px] ${AXEL_ROW_HOVER}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <Icon className="w-4 h-4 text-accent shrink-0" strokeWidth={1.75} />
-                <span className={`w-1.5 h-1.5 rounded-sl shrink-0 ${statusDot(m.status)}`} />
-              </div>
-              <div>
-                <p className={`text-[13px] font-semibold ${AXEL_TEXT_PRIMARY}`}>{m.label}</p>
-                <p className={`text-[11px] font-mono mt-0.5 line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
-                  {m.desc}
-                </p>
-              </div>
-              <div className="flex items-center justify-between mt-auto pt-1">
-                <span className="font-mono text-[11px] text-accent">{m.metric}</span>
-                <ChevronRight className="w-3 h-3 text-ink-muted" />
-              </div>
-            </button>
+            <li key={m.id}>
+              <button
+                type="button"
+                onClick={() => navigate(m.path)}
+                className={`w-full text-left min-h-12 py-2.5 flex items-center gap-3 ${AXEL_ROW_HOVER}`}
+              >
+                <Icon className="w-4 h-4 text-ink-muted shrink-0" strokeWidth={1.75} />
+                <span className="min-w-0 flex-1">
+                  <span className={`block text-[15px] font-medium ${AXEL_TEXT_PRIMARY}`}>{m.label}</span>
+                  <span className={`block text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
+                    {m.desc}
+                  </span>
+                </span>
+                <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusDot(m.status)}`} />
+                <span className="font-mono text-[11px] text-ink-muted shrink-0 hidden sm:inline">
+                  {m.metric}
+                </span>
+                <ChevronRight className="w-3.5 h-3.5 text-ink-muted shrink-0" />
+              </button>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
 }

@@ -21,7 +21,6 @@ interface FinanceSpreadsheetTabProps
   onPeriodChange: (config: FinancePeriodConfig) => void
   onPeriodShift: (direction: -1 | 1) => void
   activeCategories: Category[]
-  onNewTransaction: () => void
 }
 
 export function FinanceSpreadsheetTab({
@@ -32,7 +31,6 @@ export function FinanceSpreadsheetTab({
   onPeriodChange,
   onPeriodShift,
   activeCategories,
-  onNewTransaction,
 }: FinanceSpreadsheetTabProps)
 {
   const [sheetView, setSheetView] = useState<SheetView>('painel')
@@ -88,10 +86,10 @@ export function FinanceSpreadsheetTab({
               type="button"
               onClick={() => setSheetView(id)}
               className={[
-                'shrink-0 px-4 py-2.5 font-mono text-[10px] uppercase tracking-wide border-b-2 -mb-px transition-colors',
+                'shrink-0 px-3 py-2 text-[13px] font-sans border-b-2 -mb-px transition-colors',
                 active
-                  ? 'border-[#217346] text-[#217346] bg-[#217346]/8'
-                  : 'border-transparent text-ink-muted hover:text-ink hover:bg-chrome/50',
+                  ? 'border-ink text-ink font-semibold'
+                  : 'border-transparent text-ink-muted hover:text-ink',
               ].join(' ')}
             >
               {label}
@@ -104,7 +102,6 @@ export function FinanceSpreadsheetTab({
         <FinanceSpreadsheetDashboard
           periodLabel={periodLabel}
           summary={summary}
-          onNewTransaction={onNewTransaction}
         />
       )}
 

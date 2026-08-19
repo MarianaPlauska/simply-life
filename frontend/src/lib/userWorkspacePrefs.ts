@@ -21,6 +21,8 @@ export interface UserWorkspacePrefs
   display_name: string
   axel_calls_you: string
   accent: AccentId
+  /** Tema claro/escuro — backup na conta para sobreviver a limpeza do aparelho */
+  color_scheme?: 'light' | 'dark'
   mascot_mood: MascotMoodPref
   avatar_style: AvatarStyleId
   dashboard_priority: DashboardPriority
@@ -153,6 +155,9 @@ function mergePrefs(raw: Partial<UserWorkspacePrefs> | null | undefined): UserWo
     wellbeing_dashboard_hidden_until:
       raw?.wellbeing_dashboard_hidden_until ?? DEFAULT_WORKSPACE_PREFS.wellbeing_dashboard_hidden_until,
     dashboard_quick_widgets: raw?.dashboard_quick_widgets,
+    ...(raw?.color_scheme === 'light' || raw?.color_scheme === 'dark'
+      ? { color_scheme: raw.color_scheme }
+      : {}),
     mobile_bottom_nav: normalizeMobileNavModules(
       raw?.mobile_bottom_nav,
       raw?.dashboard_priority ?? DEFAULT_WORKSPACE_PREFS.dashboard_priority,

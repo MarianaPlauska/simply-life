@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Plus, TrendingDown, TrendingUp, Wallet } from 'lucide-react'
+import { TrendingDown, TrendingUp, Wallet } from 'lucide-react'
 import type { SpreadsheetPeriodSummary } from '../../../lib/financeSpreadsheetAnalytics'
 import { resolveSpreadsheetMood } from '../../../lib/financeSpreadsheetMood'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
@@ -11,13 +11,11 @@ interface FinanceSpreadsheetDashboardProps
 {
   periodLabel: string
   summary: SpreadsheetPeriodSummary
-  onNewTransaction: () => void
 }
 
 export function FinanceSpreadsheetDashboard({
   periodLabel,
   summary,
-  onNewTransaction,
 }: FinanceSpreadsheetDashboardProps)
 {
   const moodState = useMemo(() => resolveSpreadsheetMood(summary), [summary])
@@ -55,21 +53,11 @@ export function FinanceSpreadsheetDashboard({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <p className={`font-mono text-[10px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
-            Painel · {periodLabel}
-          </p>
-          <p className={`text-sm mt-0.5 ${AXEL_TEXT_PRIMARY}`}>{moodState.detail}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onNewTransaction}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-sl bg-[#217346] hover:bg-[#1a5c38] text-white font-mono text-[10px] uppercase tracking-wide transition-colors min-h-[44px]"
-        >
-          <Plus className="w-4 h-4" />
-          Novo lançamento
-        </button>
+      <div>
+        <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+          {periodLabel}
+        </p>
+        <p className={`text-[13px] mt-0.5 ${AXEL_TEXT_PRIMARY}`}>{moodState.detail}</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
@@ -77,7 +65,7 @@ export function FinanceSpreadsheetDashboard({
           <div key={label} className="rounded-sl border border-line bg-card px-3 py-2.5">
             <div className="flex items-center gap-1.5 mb-0.5">
               <Icon size={12} className={tone} />
-              <p className={`font-mono text-[8px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
+              <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
                 {label}
               </p>
             </div>
@@ -96,7 +84,7 @@ export function FinanceSpreadsheetDashboard({
             {' '}· {folgaPct}% de folga sobre entradas
           </span>
         )}
-        . Receitas extras: use <strong className="text-ink">Novo lançamento → Receita</strong>.
+        . Receitas extras: capture pelo + → Gasto, ou Conta → Lançamento.
       </p>
     </div>
   )

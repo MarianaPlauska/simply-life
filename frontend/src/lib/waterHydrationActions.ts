@@ -3,8 +3,14 @@ import { useTaskStore } from '../store/useTaskStore'
 import { AGUA_PRESET } from '../constants/healthPresets'
 import {
   buildDefaultMlPatch,
+  coposParaDoisLitros,
+  DEFAULT_AGUA_COPOS,
+  isLegacyAgua16L,
+  META_AGUA_ML,
+  mlPorCopo,
   patchMlPresetChange,
-} from '../lib/waterHydration'
+  registrosMl,
+} from './waterHydration'
 
 /** Estado fresco do hábito água — evita patch com config desatualizada. */
 export function freshAguaHabit(fallback?: HabitoDiario): HabitoDiario | undefined
@@ -25,13 +31,30 @@ export async function ensureAguaHabit(fallback?: HabitoDiario): Promise<HabitoDi
   return useTaskStore.getState().ensureHealthHabit(AGUA_PRESET)
 }
 
+/** Sobe meta 1,6 L (8×200 ml) para 2 L sem mexer em metas já personalizadas. */
+export async function promoteAguaMetaTo2L(fallback?: HabitoDiario): Promise<void>
+{
+  const agua = freshAguaHabit(fallback)
+  if (!agua) return
+  const ml = mlPorCopo(agua)
+  if (!isLegacyAgua16L(agua.meta_diaria, ml)) return
+  await useTaskStore.getState().updateHabitoMeta(agua.id, DEFAULT_AGUA_COPOS)
+}
+
 export async function saveAguaDefaultMl(fallback: HabitoDiario | undefined, ml: number): Promise<void>
 {
   const ensured = await ensureAguaHabit(fallback)
   if (!ensured) return
   const fresh = freshAguaHabit(ensured)
+  const beforeMl = mlPorCopo(fresh)
   const patch = buildDefaultMlPatch(fresh, ml)
   await useTaskStore.getState().updateHabitoConfig(ensured.id, patch)
+
+  const metaAtualMl = ensured.meta_diaria * beforeMl
+  if (metaAtualMl === META_AGUA_ML || isLegacyAgua16L(ensured.meta_diaria, beforeMl))
+  {
+    await useTaskStore.getState().updateHabitoMeta(ensured.id, coposParaDoisLitros(ml))
+  }
 }
 
 export async function saveAguaMlPreset(
@@ -45,4 +68,16 @@ export async function saveAguaMlPreset(
   const fresh = freshAguaHabit(ensured)
   const patch = patchMlPresetChange(fresh, action, ml)
   await useTaskStore.getState().updateHabitoConfig(ensured.id, patch)
+}
+
+/** Um copo na hora — captura rápida sem abrir Saúde */
+export async function addOneWaterCup(): Promise<number | null>
+{
+  const ensured = await ensureAguaHabit()
+  if (!ensured) return null
+  const fresh = freshAguaHabit(ensured)
+  const ml = mlPorCopo(fresh)
+  const next = [...registrosMl(fresh), ml]
+  await useTaskStore.getState().setAguaRegistros(ensured.id, next)
+  return next.length
 }

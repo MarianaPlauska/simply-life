@@ -25,6 +25,7 @@ import { PwaInstallBanner } from './PwaInstallBanner'
 import { DemoWorkspaceBanner } from './DemoWorkspaceBanner'
 import { NotificationPermissionPrompt } from './NotificationPermissionPrompt'
 import { FinanceQuickCaptureModal } from '../Finance/FinanceQuickCaptureModal'
+import { CaptureProvider } from '../capture/CaptureProvider'
 import { NewTransactionModal } from '../Finance/NewTransactionModal'
 import { AxelLoader } from '../ui/AxelLoader'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
@@ -114,7 +115,7 @@ export function AppLayout()
   const hideChrome = zenFocusActive
 
   return (
-    <>
+    <CaptureProvider>
       <MedicationLockOverlay />
       <BurnoutAura />
       <CelebrationOverlay />
@@ -163,6 +164,6 @@ export function AppLayout()
           </div>
         </div>
       </div>
-    </>
+    </CaptureProvider>
   )
 }

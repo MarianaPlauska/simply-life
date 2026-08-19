@@ -1,4 +1,4 @@
-// Previsão 7 dias — mini forecast local (nível 9+)
+// Previsão 7 dias · mini forecast local (nível 9+)
 
 import type { ContaFixa, FinanceBillSettlement, ReservedBill, Transaction } from '../store/storeTypes'
 import type { DiaHumorAgregado } from './moodInsights'
@@ -105,14 +105,14 @@ export function buildAxelWeekForecast(input: {
     if (trend === 'subindo') moodHint = 'leve'
     if (billsTotal > avgSpend * 2 && billsTotal > 80) moodHint = 'pesado'
 
-    let axelLine = 'Ritmo normal — sem contas grandes.'
+    let axelLine = 'Ritmo normal · sem contas grandes.'
     if (billsTotal > 0 && billsTotal >= spendPace)
     {
       axelLine = `${dayBills.length} conta(s) · ${billsTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}`
     }
     else if (spendPace > 0 && moodHint === 'pesado')
     {
-      axelLine = `Gastos ~${spendPace.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}/dia — vá leve.`
+      axelLine = `Gastos ~${spendPace.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}/dia · vá leve.`
     }
 
     days.push({
@@ -129,18 +129,18 @@ export function buildAxelWeekForecast(input: {
   const weekBillsTotal = days.reduce((s, d) => s + d.billsTotal, 0)
   const heavyDays = days.filter((d) => d.moodHint === 'pesado').length
 
-  let headline = 'Semana equilibrada — contas e humor sob controle.'
+  let headline = 'Semana equilibrada · contas e humor sob controle.'
   if (weekBillsTotal > avgSpend * 10)
   {
-    headline = 'Semana com contas concentradas — planeje folga nos dias leves.'
+    headline = 'Semana com contas concentradas · planeje folga nos dias leves.'
   }
   else if (heavyDays >= 3)
   {
-    headline = 'Humor em queda + gastos — priorize dias com menos contas.'
+    headline = 'Humor em queda + gastos · priorize dias com menos contas.'
   }
   else if (trend === 'subindo')
   {
-    headline = 'Humor subindo — boa janela para 1–2 prioridades extras.'
+    headline = 'Humor subindo · boa janela para 1–2 prioridades extras.'
   }
 
   return {

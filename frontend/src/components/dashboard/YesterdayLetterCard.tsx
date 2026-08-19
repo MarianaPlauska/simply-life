@@ -10,9 +10,7 @@ import {
   saveYesterdayLetterReply,
 } from '../../lib/yesterdayLetterReply'
 import {
-  AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY,
-  AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
@@ -122,16 +120,15 @@ export function YesterdayLetterCard()
 
   return (
     <section
-      className={`${AXEL_BORDERLESS_PANEL} p-2.5 sm:p-3 border-l-4 border-l-accent bg-accent/5`}
       aria-label="Carta do eu de ontem"
     >
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <div className="flex items-center gap-2 min-w-0">
-          <Mail className="w-3.5 h-3.5 text-accent shrink-0" />
-          <p className="font-mono text-[10px] uppercase tracking-wide text-accent">
-            Carta do eu de ontem
+          <Mail className="w-4 h-4 text-axel shrink-0" />
+          <p className="sl-eyebrow text-axel">
+            AXEL · carta de ontem
             {letter.noteSource && (
-              <span className={`ml-1 ${AXEL_TEXT_SECONDARY}`}>
+              <span className={`ml-1 font-normal normal-case tracking-normal ${AXEL_TEXT_SECONDARY}`}>
                 · {letter.noteSource === 'diario' ? 'diário' : letter.noteSource === 'anotacao' ? 'nota' : 'humor'}
               </span>
             )}
@@ -147,12 +144,12 @@ export function YesterdayLetterCard()
         </button>
       </div>
 
-      <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
+      <p className="sl-voice-copy text-ink mt-1">
         {letter.axelMessage}
       </p>
 
       <div className="mt-2.5 space-y-1.5">
-        <label className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+        <label className="text-[12px] text-ink-muted">
           O que você diria ao eu de ontem?
         </label>
         <textarea

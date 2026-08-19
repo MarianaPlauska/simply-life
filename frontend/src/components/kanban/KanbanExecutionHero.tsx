@@ -7,12 +7,12 @@ import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
-// Bloco “Executar agora” — gancho de uso diário (por que esta tarefa, CTA claro)
+// Bloco “Executar agora” · gancho de uso diário (por que esta tarefa, CTA claro)
 
 const PERIOD_LABEL: Record<EnergyPeriod, string> = {
-  manha: 'Manhã — pico cognitivo',
-  tarde: 'Tarde — execução',
-  noite: 'Noite — manutenção',
+  manha: 'Manhã · pico cognitivo',
+  tarde: 'Tarde · execução',
+  noite: 'Noite · manutenção',
 }
 
 interface KanbanExecutionHeroProps

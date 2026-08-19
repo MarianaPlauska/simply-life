@@ -26,7 +26,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
 
   const agua = habitos.find((h) => h.tipo === 'agua')
   const proteina = habitos.find((h) => h.tipo === 'proteina')
-  const aguaMeta = agua?.meta_diaria ?? 8
+  const aguaMeta = agua?.meta_diaria ?? 10
   const doseProgress = countDoseProgress(medicamentos, medicamentoTomadas)
   const medsTomados = doseProgress.tomados
 

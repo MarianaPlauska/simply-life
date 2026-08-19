@@ -8,6 +8,12 @@ import {
 import { hydrateAxelCareRotation } from '../../lib/axelCareRotation'
 import { applyAccentTheme } from '../../lib/applyAccentTheme'
 import {
+  applyColorScheme,
+  parseColorScheme,
+  persistColorScheme,
+  readDedicatedColorScheme,
+} from '../../utils/applyColorScheme'
+import {
   accentIdFromCosmetic,
   getCosmeticById,
   isCosmeticUnlocked,
@@ -64,6 +70,14 @@ export const createUserPrefsSlice: StateCreator<PrefsStore, [], [], UserPrefsSli
     const prefs = await loadWorkspacePrefs()
     hydrateAxelCareRotation(prefs.axel_care_rotation)
     set({ workspacePrefs: prefs, workspacePrefsLoaded: true })
+    const dedicated = readDedicatedColorScheme()
+    const remoteScheme = parseColorScheme(prefs.color_scheme)
+    if (!dedicated && remoteScheme)
+    {
+      persistColorScheme(remoteScheme)
+      set((s) => ({ accessibility: { ...s.accessibility, colorScheme: remoteScheme } }))
+      applyColorScheme(remoteScheme)
+    }
     get().applyWorkspaceTheme()
     await get().reconcileCosmeticUnlocks()
   },

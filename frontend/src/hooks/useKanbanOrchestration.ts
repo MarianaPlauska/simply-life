@@ -185,7 +185,7 @@ export function useKanbanOrchestration({
       const horizon = result.autoHorizons[entry.taskId]
       if (!task || !horizon || horizon !== 'hoje') continue
       const why = entry.rationale ?? task.score_reason ?? 'prioridade alta'
-      pushAiDecision(`Hoje · ${task.titulo.slice(0, 48)} (${entry.score} pts) — ${why}`)
+      pushAiDecision(`Hoje · ${task.titulo.slice(0, 48)} (${entry.score} pts) · ${why}`)
     }
 
     for (const d of result.decisions.slice(0, 6))
@@ -243,7 +243,7 @@ export function useKanbanOrchestration({
         const task = tasks.find((t) => t.id === p.taskId)
         if (!task) continue
         pushAiDecision(
-          `Prazo sugerido · ${task.titulo.slice(0, 36)} — ${p.reason}`,
+          `Prazo sugerido · ${task.titulo.slice(0, 36)} · ${p.reason}`,
         )
       }
     }
@@ -298,7 +298,7 @@ export function useKanbanOrchestration({
   const setManualHorizon = useCallback((taskId: number, horizon: TemporalHorizon) =>
   {
     setManualHorizons((prev) => ({ ...prev, [taskId]: horizon }))
-    pushAiDecision(`Você moveu manualmente — AXEL respeita até a próxima reorganização completa.`)
+    pushAiDecision(`Você moveu manualmente · AXEL respeita até a próxima reorganização completa.`)
   }, [pushAiDecision])
 
   const clearManualHorizon = useCallback((taskId: number) =>
@@ -311,7 +311,7 @@ export function useKanbanOrchestration({
     })
   }, [])
 
-  // Auto-organização — dispara em mudanças reais de demanda, não em loop de score
+  // Auto-organização · dispara em mudanças reais de demanda, não em loop de score
   useEffect(() =>
   {
     if (!autoEnabled) return
@@ -321,7 +321,7 @@ export function useKanbanOrchestration({
     if (ingestionBurst)
     {
       lastIngestionRef.current = ingestionTick
-      pushAiDecision('Nova demanda ingerida — reorganizando prioridades agora.')
+      pushAiDecision('Nova demanda ingerida · reorganizando prioridades agora.')
     }
 
     const isFirstRun = !mountedRef.current

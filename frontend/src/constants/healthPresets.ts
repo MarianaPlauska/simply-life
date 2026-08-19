@@ -1,7 +1,9 @@
+import { DEFAULT_AGUA_COPOS } from '../lib/waterHydration'
+
 export const AGUA_PRESET = {
   tipo: 'agua',
   nome_exibicao: 'Água',
-  meta_diaria: 8,
+  meta_diaria: DEFAULT_AGUA_COPOS,
   unidade: 'copos',
   config: { incremento: 1 },
 } as const;

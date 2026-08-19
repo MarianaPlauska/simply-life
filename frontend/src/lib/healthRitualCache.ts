@@ -100,7 +100,7 @@ export function buildHealthRitualInputsFromStore(opts: {
   return {
     humorHojeCount: opts.humorHojeCount,
     aguaCopos,
-    aguaMeta: agua?.meta_diaria ?? 8,
+    aguaMeta: agua?.meta_diaria ?? 10,
     medicamentosTotal: dose.total || opts.medicamentos.length,
     medicamentosTomados: dose.tomados,
   }

@@ -1,4 +1,4 @@
-// Frases do AXEL para capacidade do dia — banco rotativo por contexto
+// Frases do AXEL para capacidade do dia · banco rotativo por contexto
 
 import type { CapacityMode } from './dayCapacity'
 import type { CapacityFactorId } from './dayCapacityModel'
@@ -43,67 +43,67 @@ function pickIndex(seed: string, bucket: string, size: number): number
 }
 
 const PLENO_PHRASES: PhraseTemplate[] = [
-  (c) => `Boa margem hoje — até ${priorities(c.importantTasks)} importantes.`,
+  (c) => `Boa margem hoje · até ${priorities(c.importantTasks)} importantes.`,
   (c) => `Capacidade alta. Cabe até ${tasks(c.importantTasks)} sem apertar o dia.`,
-  (c) => `Dia favorável — ${priorities(c.importantTasks)} com calma.`,
+  (c) => `Dia favorável · ${priorities(c.importantTasks)} com calma.`,
   (c) => `Energia e folga ok. Aproveite para ${tasks(c.importantTasks)}.`,
-  (c) => `Tudo alinhado — o freio menor é ${c.bottleneckLabel.toLowerCase()} (${c.bottleneckPct}%).`,
+  (c) => `Tudo alinhado · o freio menor é ${c.bottleneckLabel.toLowerCase()} (${c.bottleneckPct}%).`,
 ]
 
 const PLENO_IMPULSE_PHRASES: PhraseTemplate[] = [
-  (c) => `Margem boa, mas ${c.bottleneckLabel.toLowerCase()} pede cautela — zero compra por impulso.`,
-  (c) => `Caixa e humor ok; segure gastos emocionais — freio em ${c.bottleneckLabel.toLowerCase()}.`,
-  (c) => `Até ${priorities(c.importantTasks)} — confortável, mas sem compras reativas.`,
+  (c) => `Margem boa, mas ${c.bottleneckLabel.toLowerCase()} pede cautela · zero compra por impulso.`,
+  (c) => `Caixa e humor ok; segure gastos emocionais · freio em ${c.bottleneckLabel.toLowerCase()}.`,
+  (c) => `Até ${priorities(c.importantTasks)} · confortável, mas sem compras reativas.`,
 ]
 
 const EQUILIBRADO_PHRASES: PhraseTemplate[] = [
-  (c) => `${priorities(c.importantTasks)} em Hoje. O que mais limita: ${c.bottleneckLabel.toLowerCase()} — ${c.bottleneckDetail}.`,
+  (c) => `${priorities(c.importantTasks)} em Hoje. O que mais limita: ${c.bottleneckLabel.toLowerCase()} · ${c.bottleneckDetail}.`,
   (c) => `Dia equilibrado. Gargalo em ${c.bottleneckLabel.toLowerCase()} (${c.bottleneckPct}%).`,
-  (c) => `Ritmo moderado — ${tasks(c.importantTasks)} e atenção à ${c.bottleneckLabel.toLowerCase()}.`,
+  (c) => `Ritmo moderado · ${tasks(c.importantTasks)} e atenção à ${c.bottleneckLabel.toLowerCase()}.`,
   (c) => `Capacidade na média. ${c.bottleneckDetail}.`,
   (c) => `Sustentável: ${priorities(c.importantTasks)}. Freio: ${c.bottleneckLabel.toLowerCase()}.`,
 ]
 
 const CUIDADO_PHRASES: PhraseTemplate[] = [
-  (c) => `Modo cuidado — ${tasks(c.importantTasks)}. Principal freio: ${c.bottleneckDetail}.`,
-  (c) => `Capacidade moderada. ${c.bottleneckLabel} em ${c.bottleneckPct}% — vá com calma.`,
+  (c) => `Modo cuidado · ${tasks(c.importantTasks)}. Principal freio: ${c.bottleneckDetail}.`,
+  (c) => `Capacidade moderada. ${c.bottleneckLabel} em ${c.bottleneckPct}% · vá com calma.`,
   (c) => `Pouca folga hoje. Priorize ${c.importantTasks} coisa${c.importantTasks !== 1 ? 's' : ''} e proteja energia.`,
   (c) => `O gargalo é ${c.bottleneckLabel.toLowerCase()}: ${c.bottleneckDetail}.`,
-  (c) => `Não empilhe — ${tasks(c.importantTasks)} e pausas curtas.`,
+  (c) => `Não empilhe · ${tasks(c.importantTasks)} e pausas curtas.`,
 ]
 
 const CUIDADO_MOOD_PHRASES: PhraseTemplate[] = [
-  (c) => `Recuperação em curso — ${tasks(c.importantTasks)} e zero cobrança extra.`,
+  (c) => `Recuperação em curso · ${tasks(c.importantTasks)} e zero cobrança extra.`,
   (c) => `Corpo pedindo cuidado. ${c.bottleneckDetail}.`,
-  (c) => `Humor frágil (${c.bottleneckPct}%) — proteja o básico e adie o resto.`,
+  (c) => `Humor frágil (${c.bottleneckPct}%) · proteja o básico e adie o resto.`,
 ]
 
 const CRITICO_PHRASES: PhraseTemplate[] = [
-  (c) => `Capacidade baixa — gargalo em ${c.bottleneckLabel.toLowerCase()}: ${c.bottleneckDetail}. Só o essencial.`,
-  (c) => `Dia apertado. ${c.bottleneckLabel} (${c.bottleneckPct}%) puxa tudo para baixo — 1 prioridade.`,
+  (c) => `Capacidade baixa · gargalo em ${c.bottleneckLabel.toLowerCase()}: ${c.bottleneckDetail}. Só o essencial.`,
+  (c) => `Dia apertado. ${c.bottleneckLabel} (${c.bottleneckPct}%) puxa tudo para baixo · 1 prioridade.`,
   (c) => `Freio forte na ${c.bottleneckLabel.toLowerCase()}. ${c.bottleneckDetail}. Modo sobrevivência.`,
-  (c) => `Não force a barra — ${c.bottleneckLabel.toLowerCase()} limita em ${c.bottleneckPct}%.`,
+  (c) => `Não force a barra · ${c.bottleneckLabel.toLowerCase()} limita em ${c.bottleneckPct}%.`,
   (c) => `Essencial apenas. O que mais pesa: ${c.bottleneckDetail}.`,
 ]
 
 const SEM_HUMOR_PHRASES: PhraseTemplate[] = [
-  (c) => `Sem humor registrado. Gargalo provável: ${c.bottleneckLabel.toLowerCase()} — ${c.bottleneckDetail}.`,
+  (c) => `Sem humor registrado. Gargalo provável: ${c.bottleneckLabel.toLowerCase()} · ${c.bottleneckDetail}.`,
   (c) => `Registre humor para calibrar. Por ora: ${tasks(c.importantTasks)} e atenção à ${c.bottleneckLabel.toLowerCase()}.`,
-  (c) => `Falta humor hoje — estimativa baseada em ${c.bottleneckLabel.toLowerCase()} (${c.bottleneckDetail}).`,
+  (c) => `Falta humor hoje · estimativa baseada em ${c.bottleneckLabel.toLowerCase()} (${c.bottleneckDetail}).`,
 ]
 
 const BOTTLENECK_FINANCE: PhraseTemplate[] = [
   (c) => `A folga financeira está apertada: ${c.bottleneckDetail}.`,
-  (c) => `Boletos da semana pesam — ${c.bottleneckDetail}.`,
+  (c) => `Boletos da semana pesam · ${c.bottleneckDetail}.`,
 ]
 
 const BOTTLENECK_KANBAN: PhraseTemplate[] = [
-  (c) => `A carga em Hoje está alta — ${c.bottleneckDetail}.`,
+  (c) => `A carga em Hoje está alta · ${c.bottleneckDetail}.`,
   (c) => `Kanban cheio: ${c.bottleneckDetail}.`,
 ]
 
 const BOTTLENECK_MOOD: PhraseTemplate[] = [
-  (c) => `Humor/energia baixos — ${c.bottleneckDetail}.`,
+  (c) => `Humor/energia baixos · ${c.bottleneckDetail}.`,
   (c) => `Como você está pesa hoje: ${c.bottleneckDetail}.`,
 ]
 

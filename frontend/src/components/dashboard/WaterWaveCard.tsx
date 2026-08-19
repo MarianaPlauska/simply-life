@@ -7,23 +7,28 @@ import { isAguaRitualComplete } from '../../lib/healthRitual'
 import { WaterCupGrid } from '../Health/WaterCupGrid'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import {
+  DEFAULT_AGUA_COPOS,
   DEFAULT_ML_POR_COPO,
+  META_AGUA_ML,
   metaMl,
   mlPorCopo,
   ML_OPCOES,
+  formatLiters,
   registrosMl,
   resolveMlPresets,
   totalMlHoje,
 } from '../../lib/waterHydration'
-import { saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
+import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
 
 interface WaterWaveCardProps
 {
   hero?: boolean
+  /** Sem caixa — entra no ritual da home */
+  embedded?: boolean
   className?: string
 }
 
-export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProps)
+export function WaterWaveCard({ hero = true, embedded = false, className = '' }: WaterWaveCardProps)
 {
   const navigate = useNavigate()
   const habitos = useTaskStore((s) => s.habitos)
@@ -33,7 +38,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
   const entries = useMemo(() => registrosMl(agua), [agua])
   const current = entries.length
-  const goal = agua?.meta_diaria ?? 8
+  const goal = agua?.meta_diaria ?? DEFAULT_AGUA_COPOS
   const defaultMl = mlPorCopo(agua)
   const mlPresets = useMemo(() => resolveMlPresets(agua), [agua])
   const totalMl = totalMlHoje(agua)
@@ -42,6 +47,12 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
   const extra = Math.max(0, current - goal)
   const done = current >= goal && goal > 0
   const ritualOk = isAguaRitualComplete(current, goal)
+
+  useEffect(() =>
+  {
+    if (!agua) return
+    void promoteAguaMetaTo2L(agua)
+  }, [agua])
 
   useEffect(() =>
   {
@@ -87,6 +98,8 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
     await persistEntries([])
   }
 
+  const litrosLine = `${formatLiters(totalMl)} de ${formatLiters(metaTotalMl)}`
+
   const statusLine = done
     ? extra > 0
       ? `Meta batida · +${extra} extra · ${totalMl} ml`
@@ -94,6 +107,38 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
     : ritualOk
       ? `Ritual ok — ${totalMl} / ${metaTotalMl} ml`
       : `${Math.max(0, goal - current)} copo${goal - current !== 1 ? 's' : ''} · ${totalMl} ml`
+
+  if (embedded)
+  {
+    return (
+      <div className={className} aria-label="Hidratação hoje">
+        <div className="flex items-center justify-between gap-2">
+          <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
+            {litrosLine} · {current}/{goal} copos
+          </p>
+          <button
+            type="button"
+            onClick={() => void handleQuickAdd()}
+            className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1 text-[14px] font-semibold text-health hover:text-ink active:scale-95 transition-colors"
+          >
+            <Plus size={17} strokeWidth={2} aria-hidden="true" />
+            {defaultMl} ml
+          </button>
+        </div>
+        <div className="mt-2">
+          <WaterCupGrid
+            entries={entries}
+            goal={displayGoal}
+            baseGoal={goal}
+            defaultMl={defaultMl}
+            mlPresets={mlPresets}
+            onEntriesChange={(next) => void persistEntries(next)}
+            compact
+          />
+        </div>
+      </div>
+    )
+  }
 
   if (!hero)
   {
@@ -104,27 +149,27 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <Droplets size={16} className="text-accent shrink-0" strokeWidth={1.75} />
-              <p className="font-mono text-ui-caption uppercase tracking-[0.12em] text-accent">Água hoje</p>
+              <Droplets size={16} className="text-health shrink-0" strokeWidth={1.75} />
+              <p className="sl-eyebrow">Água hoje</p>
             </div>
-            <p className={`mt-1 text-ui-title font-display tabular-nums ${AXEL_TEXT_PRIMARY}`}>
-              {current} de {goal} copos
+            <p className="sl-metric text-health mt-2">
+              {current}<span className="text-[1rem] font-normal text-ink-muted">/{goal}</span>
             </p>
             <p className={`mt-0.5 text-ui-caption ${AXEL_TEXT_SECONDARY}`}>
-              {totalMl} de {metaTotalMl} ml
+              {litrosLine}
             </p>
           </div>
           <button
             type="button"
             onClick={() => void handleQuickAdd()}
-            className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-sl border border-accent/25 bg-accent-muted px-3 text-ui-body font-semibold text-ink hover:bg-accent-muted/80 active:scale-95 transition-colors"
+            className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-sl border border-health/30 bg-health-muted px-3 text-[14px] font-semibold text-ink hover:bg-health-muted/80 active:scale-95 transition-colors"
           >
             <Plus size={17} strokeWidth={2} aria-hidden="true" />
             {defaultMl} ml
           </button>
         </div>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-chrome" aria-label={`${pct}% da meta de hidratação`}>
-          <div className="h-full bg-accent transition-all duration-500" style={{ width: `${pct}%` }} />
+          <div className="h-full bg-health transition-all duration-500" style={{ width: `${pct}%` }} />
         </div>
         <div className="mt-3">
           <WaterCupGrid
@@ -157,18 +202,17 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Droplets size={hero ? 16 : 14} className="text-accent shrink-0" strokeWidth={1.75} />
-            <span className="font-mono uppercase tracking-[0.12em] text-accent text-[11px]">
+            <Droplets size={hero ? 16 : 14} className="text-health shrink-0" strokeWidth={1.75} />
+            <span className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-health">
               Água hoje
             </span>
           </div>
           <p className={`font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY} ${hero ? 'text-2xl sm:text-3xl' : 'text-xl'}`}>
-            {totalMl}
-            <span className={`text-ink-muted font-normal ${hero ? 'text-base' : 'text-sm'}`}> ml</span>
-            <span className={`text-ink-muted font-normal ${hero ? 'text-base' : 'text-sm'}`}> · {current}/{goal}</span>
+            {formatLiters(totalMl)}
+            <span className={`text-ink-muted font-normal ${hero ? 'text-base' : 'text-sm'}`}> / {formatLiters(metaTotalMl)}</span>
           </p>
           <p className={`mt-1 ${AXEL_TEXT_SECONDARY} ${hero ? 'text-xs' : 'text-[12px]'}`}>
-            {statusLine}
+            {current}/{goal} copos · {statusLine}
           </p>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -211,7 +255,7 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
           <button
             type="button"
             onClick={() => void handleQuickAdd()}
-            className={`mt-3 w-full sm:w-auto sm:max-w-[9.5rem] inline-flex items-center justify-center gap-1.5 sm:gap-1 py-2 sm:py-1.5 px-3 sm:px-2.5 rounded-sl font-mono text-[11px] sm:text-[10px] uppercase tracking-wide border border-accent/25 bg-accent-muted text-ink hover:bg-accent-muted/80 transition-colors ${
+            className={`mt-3 w-full sm:w-auto sm:max-w-[9.5rem] inline-flex items-center justify-center gap-1.5 sm:gap-1 py-2 sm:py-1.5 px-3 sm:px-2.5 rounded-sl text-[13px] font-medium border border-health/30 bg-health-muted text-ink hover:bg-health-muted/80 transition-colors ${
               done ? 'border-dashed' : ''
             }`}
           >
@@ -223,8 +267,8 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
         <div className="space-y-3">
           <WaterCupGrid
             entries={[]}
-            goal={8}
-            baseGoal={8}
+            goal={DEFAULT_AGUA_COPOS}
+            baseGoal={DEFAULT_AGUA_COPOS}
             defaultMl={DEFAULT_ML_POR_COPO}
             mlPresets={[...ML_OPCOES]}
             onEntriesChange={() => void ensureHealthHabit(AGUA_PRESET)}
@@ -233,9 +277,9 @@ export function WaterWaveCard({ hero = true, className = '' }: WaterWaveCardProp
           <button
             type="button"
             onClick={() => void ensureHealthHabit(AGUA_PRESET)}
-            className="w-full py-3 rounded-sl border border-accent/25 bg-accent-muted text-ink font-mono text-[12px] uppercase tracking-wide hover:bg-accent-muted/80 transition-colors"
+            className="w-full py-3 rounded-sl border border-health/30 bg-health-muted text-ink text-[13px] font-medium hover:bg-health-muted/80 transition-colors"
           >
-            Ativar meta de 8 copos
+            Ativar meta de {formatLiters(META_AGUA_ML)}
           </button>
         </div>
       )}

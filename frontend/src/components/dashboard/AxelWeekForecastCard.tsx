@@ -7,14 +7,12 @@ import {
 } from '../../lib/axelWeekForecast'
 import { computeGamificationProfile } from '../../lib/gamificationProfile'
 import {
-  AXEL_BORDERLESS_PANEL,
-  AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
 const MOOD_DOT = {
-  leve: 'bg-concluido',
-  neutro: 'bg-accent',
+  leve: 'bg-health',
+  neutro: 'bg-ink-muted',
   pesado: 'bg-urgente',
 } as const
 
@@ -48,15 +46,15 @@ export function AxelWeekForecastCard()
   }
 
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} p-2.5 sm:p-3`} aria-label="Previsão 7 dias">
+    <section aria-label="Previsão 7 dias">
       <div className="flex items-center gap-2 mb-1.5">
-        <TrendingUp className="w-3.5 h-3.5 text-accent shrink-0" />
-        <p className="font-mono text-[10px] uppercase tracking-wide text-accent">
-          Previsão 7 dias
+        <TrendingUp className="w-3.5 h-3.5 text-axel shrink-0" />
+        <p className="sl-eyebrow text-axel">
+          AXEL · 7 dias
         </p>
       </div>
 
-      <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_PRIMARY}`}>
+      <p className="sl-voice-copy text-ink">
         {forecast.headline}
       </p>
 
@@ -64,17 +62,17 @@ export function AxelWeekForecastCard()
         {forecast.days.map((day) => (
           <div
             key={day.iso}
-            className="shrink-0 min-w-[4.5rem] rounded-sl border border-line bg-chrome/40 px-2 py-1.5"
+            className="shrink-0 min-w-[4.5rem] py-1"
             title={day.axelLine}
           >
             <div className="flex items-center justify-between gap-1">
-              <span className={`font-mono text-[10px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+              <span className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
                 {day.label}
               </span>
               <span className={`w-1.5 h-1.5 rounded-full ${MOOD_DOT[day.moodHint]}`} />
             </div>
             {day.billCount > 0 ? (
-              <p className="text-[11px] font-mono tabular-nums text-ink mt-0.5">
+              <p className="text-[11px] tabular-nums text-finance mt-0.5">
                 {day.billsTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}
               </p>
             ) : (

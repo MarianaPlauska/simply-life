@@ -27,6 +27,7 @@ import {
 import { useFinancePurchaseCheck } from '../../hooks/useFinancePurchaseCheck'
 import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
 import { FinancePurchaseCheckStep } from './overview/FinancePurchaseCheckStep'
+import { deferPurchaseToKanban } from '../../lib/deferPurchaseToKanban'
 import { FinanceExtraIncomeSection, type ReceitaCreditoQuando } from './FinanceExtraIncomeSection'
 import { MoneyInput } from '../ui/MoneyInput'
 import { parseMoneyInputToNumber } from '../../lib/currencyInput'
@@ -49,9 +50,9 @@ const TIPO_LABELS: Record<LancamentoTipo, string> = {
 }
 
 const TIPO_HINTS: Record<LancamentoTipo, string> = {
-  despesa: 'Dinheiro que saiu — compras, contas, consumo.',
-  receita: 'Dinheiro que entrou — salário, PIX recebido, freelance.',
-  investimento: 'Dinheiro guardado — poupança, CDB, ações, reserva.',
+  despesa: 'Dinheiro que saiu · compras, contas, consumo.',
+  receita: 'Dinheiro que entrou · salário, PIX recebido, freelance.',
+  investimento: 'Dinheiro guardado · poupança, CDB, ações, reserva.',
 }
 
 export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProps)
@@ -215,7 +216,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
   {
     if (isContaSaldo)
     {
-      return 'Defina quanto você tem na conta hoje — base para Disponível e Projetado.'
+      return 'Defina quanto você tem na conta hoje · base para Disponível e Projetado.'
     }
     if (somenteReceita)
     {
@@ -323,6 +324,30 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     resetAndClose()
   }
 
+  const deferAfterAxel = async () =>
+  {
+    const val = parseValor()
+    if (val == null || !verdict)
+    {
+      toast.error('Consulta AXEL incompleta')
+      return
+    }
+    try
+    {
+      await deferPurchaseToKanban({
+        descricao: form.descricao.trim(),
+        valor: val,
+        verdict,
+      })
+      toast.success('Tarefa no Kanban · o AXEL cobra a revisão')
+      resetAndClose()
+    }
+    catch
+    {
+      toast.error('Não foi possível criar a tarefa')
+    }
+  }
+
   const openCategories = (
     parentId: number | null = null,
     tipo: 'receita' | 'despesa' = form.tipo === 'receita' ? 'receita' : 'despesa',
@@ -350,9 +375,9 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
 
   const paymentHint = form.tipo === 'despesa'
     ? modo === 'futuro'
-      ? 'Agendado — aparece em próximas contas, sem descontar o saldo agora.'
+      ? 'Agendado · aparece em próximas contas, sem descontar o saldo agora.'
       : isCardPaymentSelection(form.payment, cards)
-        ? 'Abate o limite do cartão — entra na fatura.'
+        ? 'Abate o limite do cartão · entra na fatura.'
         : 'Desconta da conta corrente na hora (PIX, débito, dinheiro…).'
     : undefined
 
@@ -400,6 +425,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
               iaAtiva={iaAtiva}
               onConfirm={() => void handleAdd()}
               onCancel={resetAndClose}
+              onDefer={() => void deferAfterAxel()}
               onBack={() =>
               {
                 setPhase('form')
@@ -517,7 +543,7 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
           {mode === 'full' && form.tipo === 'investimento' && (
             <div className={`flex items-start gap-2 rounded-sl border px-3 py-2 text-[10px] border-accent/35 bg-accent/10 text-accent`}>
               <PiggyBank size={14} className="shrink-0 mt-0.5" />
-              <span>Sai do caixa e vai para poupança/reserva — separado dos gastos do dia a dia.</span>
+              <span>Sai do caixa e vai para poupança/reserva · separado dos gastos do dia a dia.</span>
             </div>
           )}
 

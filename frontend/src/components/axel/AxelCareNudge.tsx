@@ -34,6 +34,7 @@ export function AxelCareNudge({
   className = '',
 }: AxelCareNudgeProps)
 {
+  const durationRef = useRef(durationMs)
   const [visible, setVisible] = useState(() =>
     bypassGate || tryClaimAxelCareNudge(durationMs))
   const doneRef = useRef(false)
@@ -76,13 +77,14 @@ export function AxelCareNudge({
     {
       setVisible(false)
       finish()
-    }, durationMs)
+    }, durationRef.current)
     return () =>
     {
       window.clearTimeout(t)
       if (!doneRef.current && !bypassGate) releaseAxelCareNudge()
     }
-  }, [durationMs, visible, bypassGate])
+    // durationMs no ref — re-render do dashboard não reinicia os 25s
+  }, [visible, bypassGate])
 
   const initials = iniciaisDe(displayName ?? '')
 
@@ -94,14 +96,14 @@ export function AxelCareNudge({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -2 }}
           transition={{ duration: 0.25 }}
-          className={`flex items-center gap-2.5 px-2.5 py-2 rounded-sl border border-accent/25 bg-accent-muted/40 ${className}`}
+          className={`flex items-center gap-2.5 ${className}`}
           role="status"
           aria-live="polite"
         >
           <div className={`shrink-0 axel-care-${reaction}`} aria-hidden>
             <AxelCompanionAvatar style={avatarStyle} initials={initials} size={32} />
           </div>
-          <p className="text-[12px] text-ink leading-snug min-w-0">{message}</p>
+          <p className="sl-voice-copy text-ink leading-snug min-w-0">{message}</p>
         </motion.div>
       )}
     </AnimatePresence>

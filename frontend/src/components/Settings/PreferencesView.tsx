@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Tag, X, Save, Loader2, Columns, CalendarDays, Crosshair, Wallet,
   Plus, Search, Trash2, Brain, Filter, SlidersHorizontal,
-  Bell, Shield, Eye, Globe, Moon, Sun, Zap, Layout, Monitor,
+  Bell, Shield, Eye, Globe, Moon, Sun, Zap, Layout,
   Smartphone, Clock, Palette, AlertTriangle, Info, Sparkles, KeyRound,
   RefreshCw, Volume2, VolumeX, CheckCircle, Key,
   Lock as LockIcon,
@@ -131,7 +131,6 @@ export function PreferencesView() {
   const [notifEnabled, setNotifEnabled] = useState(true);
   const [notifSound, setNotifSound] = useState(true);
   const [notifUrgentOnly, setNotifUrgentOnly] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light' | 'system'>('dark');
   const [compactMode, setCompactMode] = useState(false);
   const [sessionTimeout, setSessionTimeout] = useState(24);
   const [notifTarefas, setNotifTarefas] = useState(true);
@@ -476,23 +475,23 @@ export function PreferencesView() {
     <div className="space-y-6">
       <SectionCard>
         <SectionHeader icon={Palette} title="Tema" subtitle="Escolha o esquema de cores do aplicativo." iconColor="text-pink-400" />
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {([
-            { id: 'dark', label: 'Escuro', icon: Moon, desc: 'Padrão' },
-            { id: 'light', label: 'Claro', icon: Sun, desc: 'Alta visibilidade' },
-            { id: 'system', label: 'Sistema', icon: Monitor, desc: 'Automático' },
-          ] as const).map((t) => (
+            { id: 'dark' as const, label: 'Escuro', icon: Moon, desc: 'Grafite à noite' },
+            { id: 'light' as const, label: 'Claro', icon: Sun, desc: 'Papel quente' },
+          ]).map((t) => (
             <button
               key={t.id}
-              onClick={() => setTheme(t.id)}
-              className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-all ${
-                theme === t.id
+              type="button"
+              onClick={() => setAccessibility('colorScheme', t.id)}
+              className={`flex flex-col items-center gap-2 p-4 min-h-[44px] rounded-xl border transition-all ${
+                accessibility.colorScheme === t.id
                   ? 'bg-ia/5 border-ia/20 ring-1 ring-ia/10'
                   : 'bg-zinc-800/20 border-zinc-800/40 hover:border-zinc-700/50'
               }`}
             >
-              <t.icon className={`w-5 h-5 ${theme === t.id ? 'text-ia' : 'text-zinc-500'}`} />
-              <span className={`text-[12px] font-medium ${theme === t.id ? 'text-white' : 'text-zinc-400'}`}>{t.label}</span>
+              <t.icon className={`w-5 h-5 ${accessibility.colorScheme === t.id ? 'text-ia' : 'text-zinc-500'}`} />
+              <span className={`text-[12px] font-medium ${accessibility.colorScheme === t.id ? 'text-white' : 'text-zinc-400'}`}>{t.label}</span>
               <span className="text-[10px] text-zinc-600">{t.desc}</span>
             </button>
           ))}

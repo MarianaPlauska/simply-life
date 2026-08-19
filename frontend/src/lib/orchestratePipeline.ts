@@ -176,7 +176,7 @@ export function assignOrchestratedHorizons(
     decisions.push({
       taskId,
       kind: 'deferred_load',
-      message: `Adiada para Semana — cap de Hoje em ${dailyScoreCap} pts. Score ${task.score_urgencia ?? 0}.${moodTail}`,
+      message: `Adiada para Semana · cap de Hoje em ${dailyScoreCap} pts. Score ${task.score_urgencia ?? 0}.${moodTail}`,
     })
   }
 

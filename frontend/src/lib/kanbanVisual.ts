@@ -29,11 +29,14 @@ export function formatTaskRef(id: number): string
   return `SL-${String(id).padStart(4, '0')}`
 }
 
+export const WIP_HOJE_BOARD = 8
+export const WIP_HOJE_EXEC = 5
+
 export const COLUMN_META: Record<
   TemporalHorizon,
   { index: string; subtitle: string }
 > = {
-  hoje: { index: '01', subtitle: 'Fila AXEL · WIP' },
-  semana: { index: '02', subtitle: 'Janela de 7 dias' },
-  backlog: { index: '03', subtitle: 'Fila de entrada' },
+  hoje: { index: '', subtitle: '' },
+  semana: { index: '', subtitle: '' },
+  backlog: { index: '', subtitle: '' },
 }

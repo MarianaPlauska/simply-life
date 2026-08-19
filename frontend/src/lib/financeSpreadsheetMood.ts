@@ -20,8 +20,8 @@ export function resolveSpreadsheetMood(summary: SpreadsheetPeriodSummary): Sprea
   {
     return {
       mood: 'stressed',
-      headline: 'Apertado',
-      detail: 'Despesas passaram das entradas — priorize o essencial.',
+      headline: 'Folga negativa',
+      detail: 'Saídas passaram das entradas. Priorize contas e corte o discricionário.',
     }
   }
 
@@ -29,8 +29,8 @@ export function resolveSpreadsheetMood(summary: SpreadsheetPeriodSummary): Sprea
   {
     return {
       mood: 'tight',
-      headline: 'No limite',
-      detail: 'Pouca folga no período — vale revisar gastos discricionários.',
+      headline: 'Folga estreita',
+      detail: 'Pouca margem no período. Revise gastos que podem esperar.',
     }
   }
 
@@ -38,14 +38,14 @@ export function resolveSpreadsheetMood(summary: SpreadsheetPeriodSummary): Sprea
   {
     return {
       mood: 'great',
-      headline: 'Em dia',
-      detail: 'Entradas cobrem o mês com folga — bom ritmo!',
+      headline: 'Folga positiva',
+      detail: 'Entradas cobrem o mês com margem. Mantenha o ritmo de registro.',
     }
   }
 
   return {
     mood: 'ok',
-    headline: 'Equilibrado',
-    detail: 'Caixa estável — mantenha o registro em dia.',
+    headline: 'Caixa estável',
+    detail: 'Saldo em equilíbrio. Continue lançando para o AXEL ter base.',
   }
 }

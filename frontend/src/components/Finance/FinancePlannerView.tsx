@@ -277,17 +277,8 @@ export function FinancePlannerView() {
       activeTab={navGroup}
       onTabChange={(id) => goToGroup(id as PlannerGroup)}
       onManageCategories={() => setShowCatModal(true)}
-      onNewTransaction={() => setNewTransactionOpen(true)}
       hideValues={hideValues}
       onToggleHideValues={toggleHideValues}
-      showNewTransactionFab={
-        navGroup !== 'analise'
-        && navGroup !== 'contas'
-        && activeLeaf !== 'diario'
-        && activeLeaf !== 'cartoes'
-        && activeLeaf !== 'faturas'
-        && activeLeaf !== 'contas-fixas'
-      }
     >
       {showFinanceSkeleton ? (
         <BentoGridSkeleton variant="finance" />
@@ -379,7 +370,6 @@ export function FinancePlannerView() {
           onPeriodChange={setPeriodConfig}
           onPeriodShift={(dir) => setPeriodConfig((c) => shiftPeriodConfig(c, dir))}
           activeCategories={activeCategories}
-          onNewTransaction={() => setNewTransactionOpen(true)}
         />
       )}
 

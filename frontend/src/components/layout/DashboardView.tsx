@@ -1,24 +1,23 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
+import {
+  fetchHomeVoiceLine,
+  hydrateHomeEssential,
+  scheduleHomeSecondary,
+} from '../../lib/hydrateHome'
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
 import { BentoGridSkeleton } from '../dashboard/DashboardPrimitives'
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
 import { DashboardOverdueAlert } from '../dashboard/DashboardOverdueAlert'
-import { DashboardModulesRegistry } from '../dashboard/DashboardModulesRegistry'
-import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
+import { DashboardMaisBody } from '../dashboard/DashboardMaisBody'
 import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
-import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
-import { YesterdayLetterCard } from '../dashboard/YesterdayLetterCard'
-import { AxelWeekForecastCard } from '../dashboard/AxelWeekForecastCard'
-import { InboxIACard } from '../dashboard/InboxIACard'
-import { AtividadeRecenteCard } from '../dashboard/AtividadeRecenteCard'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { DashboardQuickWidget } from '../dashboard/DashboardQuickWidget'
-import { DashboardAnalyticsPanel } from '../dashboard/DashboardAnalyticsPanel'
-import { resolveDashboardWidgets } from '../../lib/dashboardWidgets'
 import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces'
+import { friendlyCallName } from '../../lib/friendlyCallName'
+import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
 
 function getGreeting(): string
 {
@@ -32,75 +31,44 @@ function getGreeting(): string
 export function DashboardView()
 {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [voiceLine, setVoiceLine] = useState<string | null>(null)
   const storeTarefas = useTaskStore((s) => s.tarefas)
-
-  const fetchDashboard = useTaskStore((s) => s.fetchDashboard)
-  const fetchTarefas = useTaskStore((s) => s.fetchTarefas)
-  const fetchNotificacoes = useTaskStore((s) => s.fetchNotificacoes)
-  const fetchPreferencias = useTaskStore((s) => s.fetchPreferencias)
-  const fetchPalavrasChave = useTaskStore((s) => s.fetchPalavrasChave)
-  const checkGoogleStatus = useTaskStore((s) => s.checkGoogleStatus)
-  const runFinanceCheck = useTaskStore((s) => s.runFinanceCheck)
-  const runHealthCheck = useTaskStore((s) => s.runHealthCheck)
-  const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
-  const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
-  const fetchInbox = useTaskStore((s) => s.fetchInbox)
-  const fetchHumorResumo = useTaskStore((s) => s.fetchHumorResumo)
-  const fetchContasFixas = useTaskStore((s) => s.fetchContasFixas)
-
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const loading = useTaskStore((s) => s.dashboardLoading)
   const userProfile = useTaskStore((s) => s.userProfile)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
-
-  const hasFetched = useRef(false)
-
-  useEffect(() =>
-  {
-    if (hasFetched.current) return
-    hasFetched.current = true
-    const init = async () =>
-    {
-      await Promise.all([fetchDashboard(), fetchTarefas()])
-      await Promise.all([fetchNotificacoes(), fetchPreferencias(), fetchGamificacaoStats?.()])
-      syncStreakCalendarDay()
-      await Promise.all([fetchPalavrasChave(), checkGoogleStatus(), fetchInbox?.(), fetchHumorResumo(), fetchContasFixas()])
-      await runFinanceCheck()
-      await runHealthCheck()
-    }
-    init()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const greeting = getGreeting()
-  const firstName = workspacePrefs.axel_calls_you
-    || (workspacePrefs.display_name || userProfile?.nome || '').split(' ')[0]
-    || 'Convidado'
-
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
   const wellbeingPending = humorHojeLista.length === 0
 
-  const quickWidgets = useMemo(
-    () =>
+  useEffect(() =>
+  {
+    let cancelled = false
+    void (async () =>
     {
-      const widgets = resolveDashboardWidgets(
-        workspacePrefs.dashboard_quick_widgets,
-        workspacePrefs.dashboard_priority ?? 'tasks',
-      )
-      // Humor tem bloco próprio (AxelPostMoodCare / card no topo) — nunca ocupa coluna vazia no grid
-      return widgets.filter((id) => id !== 'wellbeing')
-    },
-    [
-      workspacePrefs.dashboard_quick_widgets,
-      workspacePrefs.dashboard_priority,
-    ],
+      await hydrateHomeEssential()
+      if (cancelled)
+      {
+        return
+      }
+      scheduleHomeSecondary()
+      const line = await fetchHomeVoiceLine()
+      if (!cancelled)
+      {
+        setVoiceLine(line)
+      }
+    })()
+    return () =>
+    {
+      cancelled = true
+    }
+  }, [])
+
+  const greeting = getGreeting()
+  const firstName = friendlyCallName(
+    workspacePrefs.axel_calls_you,
+    workspacePrefs.display_name,
+    userProfile?.nome,
   )
-
-  const quickGridClass = quickWidgets.length <= 2
-    ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl items-start'
-    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full items-start'
-
-  const quickWidgetSpan = () => 'min-w-0 flex flex-col'
 
   const taskIdParam = searchParams.get('task')
   const selectedTask = useMemo(() =>
@@ -122,6 +90,11 @@ export function DashboardView()
     setSearchParams({})
   }, [setSearchParams])
 
+  const openTask = useCallback((id: number) =>
+  {
+    setSearchParams({ task: String(id) })
+  }, [setSearchParams])
+
   if (loading && !resumo)
   {
     return (
@@ -136,46 +109,31 @@ export function DashboardView()
 
   return (
     <div className="w-full flex flex-col flex-1 min-h-0">
-      <DashboardCommandBar greeting={greeting} firstName={firstName} />
+      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-5 sm:gap-6 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
+        <DashboardCommandBar
+          greeting={greeting}
+          firstName={firstName}
+          voiceLine={voiceLine}
+          onOpenTask={openTask}
+        />
 
-      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-2.5 sm:gap-3 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
-        {/* alerta de atraso primeiro — precisa ser a primeira coisa que o usuário vê */}
         <DashboardOverdueAlert />
 
-        <YesterdayLetterCard />
-        <AxelWeekForecastCard />
-
-        <section id="dashboard-wellbeing" className="scroll-mt-20 min-w-0 space-y-2.5 sm:space-y-3" aria-label="Seu cuidado hoje">
-          {wellbeingPending && <DashboardQuickWidget id="wellbeing" />}
-          <AxelPostMoodCare />
-          <HealthRitualStrip />
-        </section>
-
-        <StreakEveningBanner />
-
-        {quickWidgets.length > 0 && (
-          <div className={quickGridClass}>
-            {quickWidgets.map((id) => (
-              <div key={id} className={quickWidgetSpan()}>
-                <DashboardQuickWidget id={id} />
-              </div>
-            ))}
-          </div>
+        {wellbeingPending && (
+          <section id="dashboard-wellbeing" className="scroll-mt-20 min-w-0" aria-label="Humor de hoje">
+            <DashboardQuickWidget id="wellbeing" />
+          </section>
         )}
+        <AxelPostMoodCare />
 
-        <DashboardAnalyticsPanel />
+        <HealthRitualStrip />
 
         <DashboardCollapsible
           title="Mais"
-          subtitle="Módulos · integrações · atividade"
+          subtitle="Métricas e atalhos"
+          borderless
         >
-          <div className="flex flex-col gap-3">
-            <DashboardModulesRegistry excludeIds={['exec', 'fin', 'saude']} />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              <InboxIACard embedded />
-              <AtividadeRecenteCard embedded />
-            </div>
-          </div>
+          <DashboardMaisBody />
         </DashboardCollapsible>
 
         {selectedTask && (

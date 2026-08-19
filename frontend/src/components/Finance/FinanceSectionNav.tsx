@@ -38,7 +38,7 @@ export function FinanceSectionNav({ tabs, activeId, onChange }: FinanceSectionNa
         })}
       </div>
       {hint && (
-        <p className="font-mono text-[9px] uppercase tracking-wide text-ink-muted">
+        <p className="text-[12px] text-ink-muted">
           {hint}
         </p>
       )}

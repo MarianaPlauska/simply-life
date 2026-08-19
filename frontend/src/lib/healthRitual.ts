@@ -1,8 +1,8 @@
-// Ritual diário de saúde — claro o que importa, sem culpa por ausência
+// Ritual diário de saúde · claro o que importa, sem culpa por ausência
 
 export type RitualItemId = 'humor' | 'agua' | 'medicamentos'
 
-/** Ritual conta engajamento — 80%+ da meta já vale como cuidado do dia */
+/** Ritual conta engajamento · 80%+ da meta já vale como cuidado do dia */
 export const AGUA_RITUAL_THRESHOLD = 0.8
 
 export interface RitualItem
@@ -55,7 +55,7 @@ export interface AguaDisplaySnapshot
   ritualOk: boolean
 }
 
-/** KPI unificado — dashboard e Saúde usam a mesma base (ritual 80%) */
+/** KPI unificado · dashboard e Saúde usam a mesma base (ritual 80%) */
 export function aguaDisplaySnapshot(copos: number, meta: number): AguaDisplaySnapshot
 {
   const ritualCopos = aguaRitualMetaCopos(meta)
@@ -91,7 +91,6 @@ export function buildHealthRitual(opts: {
   const moodLoggedToday = opts.humorHojeCount > 0
   const aguaRatio = opts.aguaMeta > 0 ? opts.aguaCopos / opts.aguaMeta : 0
   const aguaDone = isAguaRitualComplete(opts.aguaCopos, opts.aguaMeta)
-  const aguaRitual = aguaRitualMetaCopos(opts.aguaMeta)
   const medsApply = opts.medicamentosTotal > 0
   const medsRatio = medsApply ? opts.medicamentosTomados / opts.medicamentosTotal : 0
   const medsDone = !medsApply || opts.medicamentosTomados >= opts.medicamentosTotal
@@ -114,9 +113,9 @@ export function buildHealthRitual(opts: {
       done: aguaDone,
       applies: true,
       progress: Math.min(1, aguaRatio),
-      detail: aguaRitual > 0
-        ? `${opts.aguaCopos}/${aguaRitual} copos (ritual)`
-        : `${opts.aguaCopos}/${opts.aguaMeta} copos`,
+      detail: opts.aguaMeta > 0
+        ? `${opts.aguaCopos}/${opts.aguaMeta} copos`
+        : `${opts.aguaCopos} copos`,
       path: '/saude#hidratacao',
     },
     {
@@ -155,7 +154,7 @@ export function ritualHeadline(snapshot: HealthRitualSnapshot): string
 {
   if (snapshot.allCoreDone)
   {
-    return 'Ritual de hoje completo — seus registros estão guardados.'
+    return 'Ritual de hoje completo · seus registros estão guardados.'
   }
   if (!snapshot.moodLoggedToday)
   {
@@ -170,11 +169,11 @@ export function ritualHeadline(snapshot: HealthRitualSnapshot): string
       : 0
     if (restante === 1)
     {
-      return 'Quase lá — mais 1 copo e o ritual de hoje fecha.'
+      return 'Quase lá · mais 1 copo e o ritual de hoje fecha.'
     }
     if (restante > 1)
     {
-      return `Hidratação no ritmo (${agua.detail}) — sem pressa.`
+      return `Hidratação no ritmo (${agua.detail}) · sem pressa.`
     }
   }
 
@@ -183,5 +182,5 @@ export function ritualHeadline(snapshot: HealthRitualSnapshot): string
   {
     return `Falta só ${pending[0].label.toLowerCase()} para fechar o ritual de hoje.`
   }
-  return `${pending.length} cuidados ainda pendentes hoje — no seu ritmo.`
+  return `${pending.length} cuidados ainda pendentes hoje · no seu ritmo.`
 }

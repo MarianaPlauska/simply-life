@@ -1,4 +1,4 @@
-// Carta do eu de ontem — loop emocional → comportamental
+// Carta do eu de ontem · loop emocional → comportamental
 
 import type { HumorRegistro, EntradaDiario } from '../store/slices/bemEstarSlice'
 import type { MoodOrchestrationContext } from './moodOrchestration'
@@ -104,7 +104,7 @@ export function buildYesterdayLetter(input: {
 
   if (noteSnippet && moodWord)
   {
-    axelMessage = `Ontem você escreveu que estava ${moodWord} — "${truncate(noteSnippet, 90)}". Hoje o Kanban tem só ${kanbanSlots} slots. Quer manter assim?`
+    axelMessage = `Ontem você escreveu que estava ${moodWord} · "${truncate(noteSnippet, 90)}". Hoje o Kanban tem só ${kanbanSlots} slots. Quer manter assim?`
   }
   else if (noteSnippet)
   {
@@ -112,11 +112,11 @@ export function buildYesterdayLetter(input: {
   }
   else if (mood && moodWord)
   {
-    axelMessage = `Ontem seu humor ficou em ${mood.humor}/5 (${moodWord}). Hoje cabem ~${kanbanSlots} prioridades em Hoje — quer manter leve?`
+    axelMessage = `Ontem seu humor ficou em ${mood.humor}/5 (${moodWord}). Hoje cabem ~${kanbanSlots} prioridades em Hoje · quer manter leve?`
   }
   else
   {
-    axelMessage = `Lembrei do seu registro de ontem. Hoje o Kanban está com ${kanbanSlots} slots — quer manter assim?`
+    axelMessage = `Lembrei do seu registro de ontem. Hoje o Kanban está com ${kanbanSlots} slots · quer manter assim?`
   }
 
   return {

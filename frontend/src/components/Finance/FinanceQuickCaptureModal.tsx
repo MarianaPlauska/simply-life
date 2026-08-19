@@ -11,6 +11,7 @@ import { findCategory } from '../../lib/financeCategoryTree'
 import { useFinancePurchaseCheck } from '../../hooks/useFinancePurchaseCheck'
 import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
 import { FinancePurchaseCheckStep } from './overview/FinancePurchaseCheckStep'
+import { deferPurchaseToKanban } from '../../lib/deferPurchaseToKanban'
 import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 
 /** Gastos acima deste valor passam pelo E11 antes de salvar */
@@ -99,7 +100,7 @@ export function FinanceQuickCaptureModal()
     toast.success(
       p.tipo === 'receita'
         ? `Receita ${p.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} lançada`
-        : `Gasto lançado — saldo atualizado`,
+        : `Gasto lançado · saldo atualizado`,
     )
     close()
   }
@@ -172,6 +173,30 @@ export function FinanceQuickCaptureModal()
     }
   }
 
+  const deferAfterAxel = async () =>
+  {
+    if (!pendingParsed || !verdict) return
+    setSaving(true)
+    try
+    {
+      await deferPurchaseToKanban({
+        descricao: pendingParsed.descricao,
+        valor: pendingParsed.valor,
+        verdict,
+      })
+      toast.success('Tarefa no Kanban · o AXEL cobra a revisão')
+      close()
+    }
+    catch
+    {
+      toast.error('Não foi possível criar a tarefa')
+    }
+    finally
+    {
+      setSaving(false)
+    }
+  }
+
   const axelDescricao = pendingParsed?.descricao ?? parsed?.descricao ?? ''
   const axelValor = pendingParsed?.valor ?? parsed?.valor ?? 0
 
@@ -201,6 +226,7 @@ export function FinanceQuickCaptureModal()
             iaAtiva={iaAtiva}
             onConfirm={() => void confirmAfterAxel()}
             onCancel={close}
+            onDefer={() => void deferAfterAxel()}
             onBack={() =>
             {
               setPhase('form')
@@ -230,10 +256,10 @@ export function FinanceQuickCaptureModal()
                     {parsed.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                   </span>
                   {' · '}{parsed.descricao}
-                  {looksLikeFinanceCapture(text) && ' — desconta do caixa (PIX pago)'}
+                  {looksLikeFinanceCapture(text) && ' · desconta do caixa (PIX pago)'}
                   {needsE11(parsed) && (
                     <span className="block mt-1 text-accent">
-                      Acima de R$ {E11_QUICK_CAPTURE_THRESHOLD} — AXEL consulta antes de lançar.
+                      Acima de R$ {E11_QUICK_CAPTURE_THRESHOLD} · AXEL consulta antes de lançar.
                     </span>
                   )}
                 </p>

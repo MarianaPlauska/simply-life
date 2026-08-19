@@ -86,14 +86,14 @@ export function DueBucketSection({
     >
       <header
         id={`due-bucket-${bucket}`}
-        className={`shrink-0 px-3 py-1.5 border-b border-white/[0.04] ${tone}`}
+        className={`shrink-0 px-3 py-2.5 border-b border-line ${tone}`}
       >
         <div className="flex items-center gap-1.5">
           {collapsible && (
             <button
               type="button"
               onClick={() => setCollapsed((c) => !c)}
-              className="p-0.5 rounded hover:bg-chrome/60 text-ink-muted shrink-0"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -ml-1 rounded-sl hover:bg-chrome/60 text-ink-muted shrink-0"
               aria-expanded={!collapsed}
               aria-label={collapsed ? 'Expandir seção' : 'Recolher seção'}
             >
@@ -101,10 +101,10 @@ export function DueBucketSection({
             </button>
           )}
           <BucketIcon className="w-4 h-4 shrink-0" strokeWidth={1.75} aria-hidden />
-          <h3 className={`flex-1 min-w-0 font-mono text-ui-caption uppercase tracking-[0.1em] truncate ${AXEL_TEXT_PRIMARY}`}>
+          <h3 className={`flex-1 min-w-0 font-sans text-[14px] font-semibold truncate ${AXEL_TEXT_PRIMARY}`}>
             {DUE_BUCKET_LABELS[bucket]}
           </h3>
-          <span className={`font-display text-base tabular-nums shrink-0 ${AXEL_TEXT_PRIMARY}`}>
+          <span className={`text-[18px] font-medium tabular-nums shrink-0 ${AXEL_TEXT_PRIMARY}`}>
             {count}
           </span>
         </div>

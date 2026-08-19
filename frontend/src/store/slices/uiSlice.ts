@@ -2,7 +2,7 @@ import type { NewTransactionModalMode } from '../../lib/newTransactionModalMode'
 import { DEFAULT_NEW_TX_MODAL_MODE } from '../../lib/newTransactionModalMode';
 import type { StateCreator } from 'zustand';
 import type { ActiveView, TimerConfig, AccessibilitySettings, ColorScheme } from '../storeTypes';
-import { applyColorScheme } from '../../utils/applyColorScheme';
+import { readDedicatedColorScheme, rememberAndApplyColorScheme } from '../../utils/applyColorScheme';
 
 /** Dashboard fixo + até 2 atalhos no header */
 export function normalizePinnedModules(modules: string[]): string[]
@@ -10,6 +10,17 @@ export function normalizePinnedModules(modules: string[]): string[]
   const migrated = modules.map((m) => (m === 'foco' ? 'saude' : m));
   const extras = migrated.filter((m) => m !== PINNED_DASHBOARD_ID).slice(0, MAX_PINNED_MODULES - 1);
   return [PINNED_DASHBOARD_ID, ...extras];
+}
+
+function syncColorSchemeToAccount(
+  get: () => UISlice,
+  scheme: ColorScheme,
+): void
+{
+  const patch = (get() as UISlice & {
+    patchWorkspacePrefs?: (p: { color_scheme: ColorScheme }) => Promise<unknown>
+  }).patchWorkspacePrefs
+  if (patch) void patch({ color_scheme: scheme })
 }
 
 export const MAX_PINNED_MODULES = 3;
@@ -115,7 +126,7 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
     focusVisible: true,
     soundFeedback: false,
     keyboardShortcuts: true,
-    colorScheme: 'light',
+    colorScheme: readDedicatedColorScheme() ?? 'dark',
   },
   keywords: [] as string[],
 
@@ -192,7 +203,8 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
     set((state) => ({
       accessibility: { ...state.accessibility, colorScheme: next },
     }))
-    applyColorScheme(next)
+    rememberAndApplyColorScheme(next)
+    syncColorSchemeToAccount(get, next)
   },
 
   setAccessibility: (key, value) =>
@@ -204,7 +216,11 @@ export const createUISlice: StateCreator<UISlice, [], [], UISlice> = (set, get) 
     if (key === 'highContrast') document.documentElement.classList.toggle('high-contrast', value as boolean);
     if (key === 'reducedMotion') document.documentElement.classList.toggle('reduce-motion', value as boolean);
     if (key === 'focusVisible') document.documentElement.classList.toggle('focus-enhanced', value as boolean);
-    if (key === 'colorScheme') applyColorScheme(value as ColorScheme);
+    if (key === 'colorScheme')
+    {
+      rememberAndApplyColorScheme(value as ColorScheme)
+      syncColorSchemeToAccount(get, value as ColorScheme)
+    }
   },
 
   setKeywords: (keywords) => set({ keywords }),

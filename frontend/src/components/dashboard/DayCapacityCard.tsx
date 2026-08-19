@@ -54,14 +54,14 @@ export function DayCapacityCard()
   const style = MODE_STYLES[capacity.mode]
 
   return (
-    <div
-      className="inline-flex max-w-full items-center gap-2 rounded-pill border border-line bg-card px-2.5 py-1.5 text-ui-caption text-ink-muted"
+    <p
+      className="flex max-w-full items-center gap-2 text-[13px] text-ink-muted"
       title={capacity.axelPhrase}
       aria-label={`Como está seu dia: ${style.label}, ${capacity.score}%`}
     >
-      <Battery size={14} className="shrink-0 text-accent" aria-hidden="true" />
+      <Battery size={14} className="shrink-0 text-ink-muted" aria-hidden="true" />
       <span className="font-medium text-ink">Como está seu dia:</span>
       <span className="truncate">{style.label}</span>
-    </div>
+    </p>
   )
 }

@@ -54,7 +54,9 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
 
   return (
     <section className={`${embedded ? '' : AXEL_BORDERLESS_PANEL} flex flex-col h-full p-0 overflow-hidden`}>
-      {!embedded && (
+      {embedded ? (
+        <p className="text-[13px] font-medium text-ink-muted">Inbox</p>
+      ) : (
         <header className="px-4 pt-4 pb-3 border-b border-line flex items-center justify-between gap-2">
           <div>
             <p className={AXEL_SECTION_TITLE}>Inteligência</p>
@@ -64,15 +66,15 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
         </header>
       )}
 
-      <div className="flex-1 min-h-[120px] flex flex-col">
+      <div className="flex-1 min-h-[80px] flex flex-col">
         {!top && (
-          <p className={`px-4 py-8 text-center font-mono text-[12px] flex-1 ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`py-3 text-[13px] flex-1 ${AXEL_TEXT_SECONDARY}`}>
             Fila vazia — aguardando ingestão
           </p>
         )}
         {top && (
           <div
-            className={`px-4 py-3 flex items-start gap-2.5 cursor-pointer flex-1 ${AXEL_ROW_HOVER}`}
+            className={`${embedded ? 'py-3' : 'px-4 py-3'} flex items-start gap-2.5 cursor-pointer flex-1 ${AXEL_ROW_HOVER}`}
             onClick={() => navigate('/inteligencia')}
             onKeyDown={(ev) => ev.key === 'Enter' && navigate('/inteligencia')}
             role="button"
@@ -113,11 +115,11 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
         )}
       </div>
 
-      <div className={`px-4 py-2.5 border-t border-line flex justify-center`}>
+      <div className="pt-2 flex">
         <button
           type="button"
           onClick={() => navigate('/inteligencia')}
-          className={`inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-wide ${AXEL_LINK}`}
+          className={`inline-flex items-center gap-1 text-[13px] ${AXEL_LINK}`}
         >
           {total > 0 ? `Ver inbox (${total})` : 'Abrir inbox'}
           <ArrowRight className="w-3 h-3" />

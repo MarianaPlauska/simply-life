@@ -41,7 +41,7 @@ export function FinanceGlobalMoodBanner({
   {
     if (billAlertCount <= 0) return undefined
     const n = billAlertCount
-    return `${n} conta${n > 1 ? 's' : ''} vence${n > 1 ? 'm' : ''} em até 48h — confira faturas.`
+    return `${n} conta${n > 1 ? 's' : ''} vence${n > 1 ? 'm' : ''} em até 48h. Confira faturas.`
   }, [billAlertCount])
 
   const moodState = useMemo(() =>

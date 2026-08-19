@@ -26,7 +26,11 @@ export interface TarefasSlice
   arquivo: TarefaUnificada[]
   arquivoLoading: boolean
   fetchTarefas: () => Promise<void>
-  createTarefa: (titulo: string, notas?: string) => Promise<void>
+  createTarefa: (
+    titulo: string,
+    notas?: string,
+    extras?: { data_vencimento?: string; origem?: string },
+  ) => Promise<number | undefined>
   createFinanceBillTask: (opts: {
     billId: string
     titulo: string
@@ -156,7 +160,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     }
   },
 
-  createTarefa: async (titulo, notas) =>
+  createTarefa: async (titulo, notas, extras) =>
   {
     try
     {
@@ -175,13 +179,18 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
           notas_locais: notas || null,
           score_urgencia: score,
           prioridade,
-          origem: 'manual',
+          origem: extras?.origem ?? 'manual',
           status: 'pendente',
+          data_vencimento: extras?.data_vencimento ?? null,
         })
         .select()
         .single()
       if (error) throw error
-      if (data) set((s) => ({ tarefas: [{ ...data, subtarefas: [], labels: [] }, ...s.tarefas] }))
+      if (data)
+      {
+        set((s) => ({ tarefas: [{ ...data, subtarefas: [], labels: [] }, ...s.tarefas] }))
+        return data.id as number
+      }
     }
     catch (e) { console.error('createTarefa:', e) }
   },

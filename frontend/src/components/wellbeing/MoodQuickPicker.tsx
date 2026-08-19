@@ -1,4 +1,6 @@
+import { AXEL_MOOD } from '../../design/identityTokens'
 import { MOODS } from '../../lib/moodConstants'
+import { AxelMoodFace } from '../axel/AxelMoodFace'
 import { AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
 
 interface MoodQuickPickerProps
@@ -9,20 +11,14 @@ interface MoodQuickPickerProps
   onSelect: (value: number, label: string) => void
 }
 
-function moodIconClass(colorClass: string): string
-{
-  return colorClass.split(' ').find((c) => c.startsWith('text-')) ?? 'text-ink-muted'
-}
-
 export function MoodQuickPicker({ disabled, selected, compact, onSelect }: MoodQuickPickerProps)
 {
   return (
     <div className={`grid grid-cols-5 ${compact ? 'gap-1.5' : 'gap-2'}`}>
       {MOODS.map((m) =>
       {
-        const Icon = m.icon
         const active = selected === m.value
-        const iconClass = moodIconClass(m.colorClass)
+        const stateLabel = Object.values(AXEL_MOOD.states).find((s) => s.value === m.value)?.label ?? m.shortLabel
         return (
           <button
             key={m.value}
@@ -30,23 +26,23 @@ export function MoodQuickPicker({ disabled, selected, compact, onSelect }: MoodQ
             disabled={disabled}
             onClick={() => onSelect(m.value, m.label)}
             className={`
-              sl-touch flex flex-col items-center gap-1 rounded-sl border
-              hover:scale-[1.02] disabled:opacity-50
+              sl-touch flex flex-col items-center justify-center gap-1 rounded-sl min-h-[52px]
+              disabled:opacity-50
               ${compact ? 'p-1.5' : 'p-2'}
               ${AXEL_TOUCH_PRESS}
               ${active
-                ? `${m.colorClass} ring-1 ring-white/10`
-                : `${m.colorClass} opacity-75 hover:opacity-100`}
+                ? 'bg-axel-muted text-ink'
+                : 'text-ink-muted hover:text-ink'}
             `}
             title={m.label}
           >
-            <Icon
-              size={compact ? 18 : 20}
-              strokeWidth={1.75}
-              className={iconClass}
+            <AxelMoodFace
+              level={m.value}
+              size={compact ? 22 : 26}
+              title={stateLabel}
             />
-            <span className={`font-mono uppercase tracking-wide ${compact ? 'text-[9px]' : 'text-ui-caption'} ${iconClass}`}>
-              {compact ? m.shortLabel.slice(0, 3) : m.shortLabel}
+            <span className={`font-sans leading-tight text-center w-full px-0.5 ${compact ? 'text-[11px]' : 'text-[12px]'} ${active ? 'text-ink' : 'text-ink-muted'}`}>
+              {m.label}
             </span>
           </button>
         )

@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AxelCareNudge } from '../axel/AxelCareNudge'
-import { isAxelMoodCareActive } from '../../lib/axelMoodCare'
+import { AXEL_MOOD_CARE_DURATION_MS, isAxelMoodCareActive } from '../../lib/axelMoodCare'
 
-// Mensagem do AXEL após humor — permanece visível ~1 min no dashboard
+// Mensagem do AXEL após humor — some sozinha em 25s
 
 export function AxelPostMoodCare()
 {
@@ -45,19 +45,20 @@ export function AxelPostMoodCare()
     return null
   }
 
-  const remainingMs = Math.max(0, session.until - Date.now())
+  const remainingMs = Math.min(
+    AXEL_MOOD_CARE_DURATION_MS,
+    Math.max(0, session.until - Date.now()),
+  )
 
   return (
-    <div className="sl-panel p-3 sm:p-4 mb-3">
-      <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent mb-2">
-        Axel · bem-estar
-      </p>
+    <div className="mb-1">
+      <p className="sl-eyebrow text-axel mb-2">AXEL</p>
       <AxelCareNudge
         avatarStyle={workspacePrefs.avatar_style}
         displayName={displayName}
         moodLevel={session.mood}
         message={session.message}
-        durationMs={remainingMs}
+        durationMs={remainingMs || AXEL_MOOD_CARE_DURATION_MS}
         bypassGate
         onDone={clearAxelMoodCare}
       />

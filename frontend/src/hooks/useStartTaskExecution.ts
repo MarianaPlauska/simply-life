@@ -3,7 +3,7 @@ import { useTaskStore } from '../store/useTaskStore'
 import { resolveTaskEstimate } from '../services/axelTaskEstimateService'
 import type { TarefaUnificada } from '../types'
 
-// Iniciar execução — timer + status em progresso (card ou drawer)
+// Iniciar execução · timer + status em progresso (card ou drawer)
 
 export function useStartTaskExecution()
 {
@@ -42,7 +42,7 @@ export function useStartTaskExecution()
         ? 'Local (configure GROQ_API_KEY no servidor) · '
         : 'Local · '
     pushAiDecision(
-      `${iaTag}Foco iniciado (~${estimate} min) — ${resolved.reasoning}`,
+      `${iaTag}Foco iniciado (~${estimate} min) · ${resolved.reasoning}`,
     )
   }, [
     startExecution,

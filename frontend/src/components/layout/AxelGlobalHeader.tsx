@@ -7,12 +7,11 @@ import { AxelPageBack } from './AxelPageBack'
 import { NotificationDropdown } from './NotificationDropdown'
 import { AxelCompanionAvatar } from '../Onboarding/AxelCompanionAvatar'
 import { iniciaisDe } from '../../lib/axelAvatarPresets'
-import {
-  SlidersHorizontal, LogOut, Bell,
-  PanelLeft, Sparkles,
-} from 'lucide-react'
+import { Bell, LogOut, PanelLeft, SlidersHorizontal, Sparkles, Accessibility } from 'lucide-react'
+import { CapturePlusButton } from '../capture/CapturePlusButton'
 import { useTaskStore } from '../../store/useTaskStore'
-import { AccessibilityQuickMenu } from '../dashboard/AccessibilityQuickMenu'
+import { AccessibilityPanel } from '../dashboard/AccessibilityQuickMenu'
+import { ICON } from '../../design/identityTokens'
 import {
   AXEL_GLASS_CHROME,
   AXEL_HEADER_ACTION,
@@ -88,10 +87,12 @@ export function AxelGlobalHeader()
   )
 
   const isPinnedActive = pinnedModules.includes(activeView)
-  // Com atalhos fixos, o título da página fica no conteúdo — evita 3+ rótulos no header
+  const extraPins = pinnedModules.filter((id) => id !== PINNED_DASHBOARD_ID)
+  const showCenterNav = extraPins.length > 0 || (activeView !== 'dashboard' && !isPinnedActive)
   const showBreadcrumbPage = !isPinnedActive && pinnedModules.length === 0
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
   const [isNotifOpen, setIsNotifOpen] = useState(false)
   const [sinoAtivo, setSinoAtivo] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -128,7 +129,11 @@ export function AxelGlobalHeader()
   {
     function handleClickOutside(e: MouseEvent)
     {
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setIsProfileOpen(false)
+      if (profileRef.current && !profileRef.current.contains(e.target as Node))
+      {
+        setIsProfileOpen(false)
+        setAppearanceOpen(false)
+      }
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setIsNotifOpen(false)
     }
     if (isProfileOpen || isNotifOpen) document.addEventListener('mousedown', handleClickOutside)
@@ -154,16 +159,16 @@ export function AxelGlobalHeader()
                 setMobileSidebarOpen(true)
               }
             }}
-            className={`sl-touch p-2 -ml-1 rounded-sl text-ink-muted hover:text-ink hover:bg-chrome shrink-0 ${AXEL_TOUCH_PRESS}`}
+            className={`sl-touch -ml-1 ${AXEL_HEADER_ACTION} shrink-0`}
             aria-label={sidebarCollapsed ? 'Abrir menu lateral' : 'Alternar menu lateral'}
             title="Menu"
           >
-            <PanelLeft className="w-4 h-4" />
+            <PanelLeft size={ICON.sizeNav} strokeWidth={ICON.stroke} />
           </button>
           <AxelPageBack />
           {showBreadcrumbPage && (
             <>
-              <span className={`font-mono text-[11px] uppercase tracking-wider hidden md:inline ${AXEL_TEXT_SECONDARY}`}>Simply-Life</span>
+              <span className={`text-[11px] font-sans tracking-wide hidden md:inline ${AXEL_TEXT_SECONDARY}`}>Simply-Life</span>
               <span className="text-ink-muted hidden md:inline">/</span>
               <span className={`text-[13px] sm:text-[14px] font-display truncate max-w-[7rem] sm:max-w-[12rem] md:max-w-none ${AXEL_TEXT_PRIMARY}`}>
                 {VIEW_LABELS[activeView] || activeView}
@@ -172,31 +177,13 @@ export function AxelGlobalHeader()
           )}
         </div>
 
-        {pinnedModules.length > 0 || !isPinnedActive ? (
+        {showCenterNav ? (
           <nav
             className="flex items-center justify-center gap-0.5 sm:gap-1 justify-self-center min-w-0 max-w-full overflow-x-auto scrollbar-none px-0.5"
             aria-label="Atalhos fixos"
           >
-            {pinnedModules.map((moduleId) =>
+            {extraPins.map((moduleId) =>
             {
-              if (moduleId === PINNED_DASHBOARD_ID)
-              {
-                return (
-                  <button
-                    key={moduleId}
-                    type="button"
-                    onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
-                    className={`sl-touch relative hidden sm:inline-flex px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono whitespace-nowrap border shrink-0 ${AXEL_TOUCH_PRESS} ${
-                      activeView === moduleId
-                        ? 'text-ink bg-accent-muted border-accent/30'
-                        : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
-                    }`}
-                  >
-                    {VIEW_LABELS[moduleId] || moduleId}
-                  </button>
-                )
-              }
-
               const isActive = activeView === moduleId
               const label = VIEW_LABELS[moduleId] || moduleId
               return (
@@ -204,9 +191,9 @@ export function AxelGlobalHeader()
                   key={moduleId}
                   type="button"
                   onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
-                  className={`sl-touch relative px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono whitespace-nowrap border shrink-0 ${AXEL_TOUCH_PRESS} ${
+                  className={`sl-touch relative px-2.5 py-1.5 rounded-sl text-[13px] font-sans font-medium whitespace-nowrap border shrink-0 ${AXEL_TOUCH_PRESS} ${
                     isActive
-                      ? 'text-ink bg-accent-muted border-accent/30'
+                      ? 'text-ink bg-chrome border-line'
                       : 'text-ink-muted border-transparent hover:text-ink hover:bg-chrome'
                   }`}
                 >
@@ -214,9 +201,9 @@ export function AxelGlobalHeader()
                 </button>
               )
             })}
-            {!isPinnedActive && (
+            {activeView !== 'dashboard' && !isPinnedActive && (
               <span
-                className="px-2 sm:px-2.5 py-1.5 rounded-sl text-[10px] sm:text-[12px] font-mono whitespace-nowrap border shrink-0 text-ink bg-accent-muted border-accent/30"
+                className="px-2.5 py-1.5 rounded-sl text-[13px] font-sans font-medium whitespace-nowrap border shrink-0 text-ink bg-chrome border-line"
                 aria-current="page"
               >
                 {VIEW_LABELS[activeView] || activeView}
@@ -232,24 +219,24 @@ export function AxelGlobalHeader()
             <PinnedNavEditor />
           </div>
 
+          <CapturePlusButton placement="header" />
+
           <button
             type="button"
             onClick={() => setAxelAskOpen(true)}
-            className={`sl-touch relative p-2 rounded-sl border border-accent/30 bg-accent/10 hover:bg-accent/15 ${AXEL_TOUCH_PRESS}`}
-            aria-label="Consultar AXEL — posso fazer isso hoje?"
+            className={`sl-touch ${AXEL_HEADER_ACTION} text-axel hover:text-axel hover:bg-axel-muted`}
+            aria-label="Consultar AXEL. Posso fazer isso hoje?"
             title="Consultar AXEL"
           >
-            <Sparkles className="w-4 h-4 text-accent" />
+            <Sparkles size={ICON.sizeNav} strokeWidth={ICON.stroke} className="text-axel" />
           </button>
-
-          <AccessibilityQuickMenu />
 
           <div ref={notifRef} className="relative z-[200]">
             <button
               type="button"
               onClick={() => { setIsNotifOpen((v) => !v); if (!isNotifOpen) fetchNotificacoes() }}
               className={`relative ${AXEL_HEADER_ACTION} ${
-                sinoAtivo ? 'ring-2 ring-rose-400/70 ring-offset-2 ring-offset-[#08090D] rounded-full animate-pulse' : ''
+                sinoAtivo ? 'ring-2 ring-urgente/70 ring-offset-2 ring-offset-chrome rounded-sl' : ''
               }`}
               aria-label={
                 alertTotal > 0
@@ -257,16 +244,10 @@ export function AxelGlobalHeader()
                   : 'Notificações'
               }
             >
-              <Bell className={`w-4 h-4 ${sinoAtivo ? 'text-rose-400' : ''}`} />
+              <Bell size={ICON.sizeNav} strokeWidth={ICON.stroke} className={sinoAtivo ? 'text-urgente' : ''} />
               {alertTotal > 0 && (
                 <span
-                  className="absolute top-0.5 right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse ring-2 ring-[#08090D]"
-                  aria-hidden
-                />
-              )}
-              {alertTotal > 0 && (
-                <span
-                  className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 text-white text-[10px] font-bold font-mono rounded-full flex items-center justify-center px-1 bg-red-500 animate-pulse"
+                  className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 text-fundo text-[10px] font-bold rounded-full flex items-center justify-center px-1 bg-urgente"
                 >
                   {alertTotal > 9 ? '9+' : alertTotal}
                 </span>
@@ -282,7 +263,7 @@ export function AxelGlobalHeader()
             <button
               type="button"
               onClick={() => setIsProfileOpen((v) => !v)}
-              className={`sl-touch w-9 h-9 rounded-sl border border-line hover:border-accent/40 flex items-center justify-center bg-card overflow-hidden ${AXEL_TOUCH_PRESS}`}
+              className={`sl-touch w-9 h-9 rounded-full overflow-hidden ${AXEL_TOUCH_PRESS} hover:opacity-90`}
               aria-label="Perfil"
             >
               <AxelCompanionAvatar
@@ -293,38 +274,61 @@ export function AxelGlobalHeader()
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 top-10 w-44 rounded-sl border border-line bg-card shadow-lg overflow-hidden z-[100]">
-                <button
-                  type="button"
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] hover:bg-chrome transition-colors ${AXEL_TEXT_PRIMARY}`}
-                  onClick={() => { navigate('/perfil'); setIsProfileOpen(false) }}
-                >
-                  <span className="w-6 h-6 shrink-0 overflow-hidden rounded-sl">
-                    <AxelCompanionAvatar
-                      style={workspacePrefs.avatar_style}
-                      initials={profileInitials}
-                      size={24}
-                    />
-                  </span>
-                  Meu Perfil
-                </button>
-                <button
-                  type="button"
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] hover:bg-chrome transition-colors ${AXEL_TEXT_PRIMARY}`}
-                  onClick={() => { navigate('/configuracoes'); setIsProfileOpen(false) }}
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-ink-muted" />
-                  Configurações
-                </button>
-                <div className="h-px bg-line mx-3" />
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[12px] text-urgente hover:bg-chrome transition-colors"
-                  onClick={() => { useTaskStore.getState().logout(); setIsProfileOpen(false) }}
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  Sair
-                </button>
+              <div className={`absolute right-0 top-10 rounded-sl border border-line bg-card shadow-lg overflow-hidden z-[100] ${appearanceOpen ? 'w-72' : 'w-44'}`}>
+                {appearanceOpen ? (
+                  <div>
+                    <button
+                      type="button"
+                      className={`w-full px-3.5 py-2.5 text-left text-[12px] hover:bg-chrome border-b border-line ${AXEL_TEXT_SECONDARY}`}
+                      onClick={() => setAppearanceOpen(false)}
+                    >
+                      Voltar
+                    </button>
+                    <AccessibilityPanel variant="menu" />
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] hover:bg-chrome transition-colors ${AXEL_TEXT_PRIMARY}`}
+                      onClick={() => { navigate('/perfil'); setIsProfileOpen(false); setAppearanceOpen(false) }}
+                    >
+                      <span className="w-6 h-6 shrink-0 overflow-hidden rounded-sl">
+                        <AxelCompanionAvatar
+                          style={workspacePrefs.avatar_style}
+                          initials={profileInitials}
+                          size={24}
+                        />
+                      </span>
+                      Meu Perfil
+                    </button>
+                    <button
+                      type="button"
+                      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] hover:bg-chrome transition-colors ${AXEL_TEXT_PRIMARY}`}
+                      onClick={() => setAppearanceOpen(true)}
+                    >
+                      <Accessibility className="w-3.5 h-3.5 text-ink-muted" />
+                      Aparência
+                    </button>
+                    <button
+                      type="button"
+                      className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] hover:bg-chrome transition-colors ${AXEL_TEXT_PRIMARY}`}
+                      onClick={() => { navigate('/configuracoes'); setIsProfileOpen(false); setAppearanceOpen(false) }}
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-ink-muted" />
+                      Configurações
+                    </button>
+                    <div className="h-px bg-line mx-3" />
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[13px] text-urgente hover:bg-chrome transition-colors"
+                      onClick={() => { useTaskStore.getState().logout(); setIsProfileOpen(false) }}
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      Sair
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>

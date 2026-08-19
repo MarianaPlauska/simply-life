@@ -31,6 +31,8 @@ interface FinancePurchaseCheckStepProps
   onConfirm: () => void
   onCancel: () => void
   onBack: () => void
+  /** Esperar / cautela → cria tarefa no Kanban em vez de lançar */
+  onDefer?: () => void
 }
 
 export function FinancePurchaseCheckStep({
@@ -42,6 +44,7 @@ export function FinancePurchaseCheckStep({
   onConfirm,
   onCancel,
   onBack,
+  onDefer,
 }: FinancePurchaseCheckStepProps)
 {
   const Icon = verdict ? TONE_ICON[verdict.tone] : Sparkles
@@ -98,38 +101,49 @@ export function FinancePurchaseCheckStep({
       </div>
 
       <div className="flex flex-col gap-2">
-        {!loading && verdict?.tone !== 'wait' && (
+        {!loading && verdict && verdict.tone !== 'wait' && (
           <button
             type="button"
             onClick={onConfirm}
-            className={`w-full py-3 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY}`}
+            className={`w-full py-3 min-h-11 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY}`}
           >
-            {verdict?.tone === 'caution' ? 'Comprar mesmo assim' : 'Confirmar compra'}
+            {verdict.tone === 'caution' ? 'Comprar mesmo assim' : 'Confirmar compra'}
+          </button>
+        )}
+        {!loading && verdict && (verdict.tone === 'wait' || verdict.tone === 'caution') && onDefer && (
+          <button
+            type="button"
+            onClick={onDefer}
+            className={`w-full py-2.5 min-h-11 font-mono text-[11px] uppercase ${
+              verdict.tone === 'wait' ? AXEL_BTN_PRIMARY : 'rounded-sl border border-line text-ink hover:bg-chrome'
+            }`}
+          >
+            {verdict.tone === 'wait' ? 'Criar tarefa e esperar' : 'Esperar, criar tarefa'}
           </button>
         )}
         {!loading && verdict?.tone === 'wait' && (
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="w-full py-3 min-h-11 font-mono text-[11px] uppercase rounded-sl border border-urgente/40 text-urgente hover:bg-urgente/10"
+          >
+            Registrar mesmo assim
+          </button>
+        )}
+        {!loading && verdict?.tone === 'wait' && !onDefer && (
           <button
             type="button"
             onClick={onCancel}
-            className={`w-full py-3 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY}`}
+            className={`w-full py-3 min-h-11 font-mono text-[11px] uppercase ${AXEL_BTN_PRIMARY}`}
           >
-            Desistir — boa escolha
-          </button>
-        )}
-        {!loading && verdict?.tone === 'wait' && (
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="w-full py-3 font-mono text-[11px] uppercase rounded-sl border border-urgente/40 text-urgente hover:bg-urgente/10"
-          >
-            Registrar mesmo assim
+            Desistir. Boa escolha
           </button>
         )}
         <button
           type="button"
           onClick={onBack}
           disabled={loading}
-          className="w-full py-2.5 font-mono text-[10px] uppercase text-ink-muted hover:text-ink disabled:opacity-40"
+          className="w-full py-2.5 min-h-11 font-mono text-[10px] uppercase text-ink-muted hover:text-ink disabled:opacity-40"
         >
           Voltar ao formulário
         </button>

@@ -106,8 +106,25 @@ export async function switchUserSession(nextUserId: string | null): Promise<bool
 
   await useTaskStore.persist.rehydrate()
 
-  const scheme = useTaskStore.getState().accessibility.colorScheme
-  const { applyColorScheme } = await import('../utils/applyColorScheme')
+  const {
+    applyColorScheme,
+    parseColorScheme,
+    persistColorScheme,
+    readDedicatedColorScheme,
+  } = await import('../utils/applyColorScheme')
+  const dedicated = readDedicatedColorScheme()
+  const fromStore = parseColorScheme(useTaskStore.getState().accessibility.colorScheme) ?? 'dark'
+  const scheme = dedicated ?? fromStore
+  if (!dedicated && nextUserId)
+  {
+    persistColorScheme(scheme)
+  }
+  if (scheme !== useTaskStore.getState().accessibility.colorScheme)
+  {
+    useTaskStore.setState({
+      accessibility: { ...useTaskStore.getState().accessibility, colorScheme: scheme },
+    })
+  }
   applyColorScheme(scheme)
   useTaskStore.getState().applyWorkspaceTheme()
 

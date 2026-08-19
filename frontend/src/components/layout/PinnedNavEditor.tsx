@@ -3,7 +3,7 @@ import { Pin, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { PINNABLE_VIEWS, MAX_PINNED_MODULES } from '../../store/slices/uiSlice'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_HEADER_ACTION, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
 // Editor de atalhos fixos no header (máx. 4 páginas)
 
@@ -45,12 +45,12 @@ export function PinnedNavEditor()
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="p-2 rounded-sl border border-line bg-chrome hover:bg-elevated text-ink-muted hover:text-ink transition-colors"
+        className={`${AXEL_HEADER_ACTION}`}
         aria-label="Fixar páginas no topo"
         aria-expanded={open}
         title="Fixar até 2 páginas além do Dashboard"
       >
-        <Pin className="w-3.5 h-3.5" />
+        <Pin size={20} strokeWidth={1.75} />
       </button>
 
       {open && (

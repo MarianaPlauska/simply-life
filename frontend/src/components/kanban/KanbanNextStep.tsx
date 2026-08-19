@@ -99,7 +99,7 @@ export function KanbanNextStep({
         </p>
         <p className={`text-[11px] mt-0.5 leading-relaxed line-clamp-2 ${AXEL_TEXT_SECONDARY}`}>
           {orchestrating && queueEmpty
-            ? 'Aguarde — a fila de execução está sendo montada com seus dados reais.'
+            ? 'Aguarde · a fila de execução está sendo montada com seus dados reais.'
             : `${brief.headline}${brief.detail ? ` · ${brief.detail}` : ''}`}
         </p>
       </div>

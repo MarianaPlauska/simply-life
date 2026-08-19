@@ -18,18 +18,18 @@ export function KanbanInsightsPanel({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <section className="border border-line rounded-sl bg-card overflow-hidden">
+    <section className="overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-2 px-4 py-2.5 hover:bg-chrome/40 transition-colors text-left"
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 min-h-[44px] hover:bg-chrome/40 transition-colors text-left"
         aria-expanded={open}
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-muted">
-          Métricas e AXEL
+        <span className="text-[13px] font-medium text-ink">
+          Mais
         </span>
         <span className="flex items-center gap-2 min-w-0">
-          <span className={`font-mono text-[10px] truncate ${AXEL_TEXT_SECONDARY}`}>
+          <span className={`text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
             {summary}
           </span>
           {open ? (
@@ -40,7 +40,7 @@ export function KanbanInsightsPanel({
         </span>
       </button>
       {open && (
-        <div className="border-t border-line space-y-3 p-3 bg-chrome/15">
+        <div className="border-t border-line space-y-3 pt-3">
           {children}
         </div>
       )}

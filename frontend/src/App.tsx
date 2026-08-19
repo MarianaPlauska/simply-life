@@ -15,7 +15,7 @@ import { AxelSetupWizard } from './components/Onboarding/AxelSetupWizard'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 import { AxelLoader } from './components/ui/AxelLoader'
 import { useTaskStore, type ActiveView } from './store/useTaskStore'
-import { applyColorScheme } from './utils/applyColorScheme'
+import { applyColorScheme, readDedicatedColorScheme } from './utils/applyColorScheme'
 import { AppLayout } from './components/layout/AppLayout'
 import { Briefcase, Rocket } from 'lucide-react'
 import { useUserSessionIsolation } from './hooks/useUserSessionIsolation'
@@ -46,7 +46,14 @@ function useAccessibilityInit()
     document.documentElement.classList.toggle('high-contrast', a.highContrast)
     document.documentElement.classList.toggle('reduce-motion', a.reducedMotion)
     document.documentElement.classList.toggle('focus-enhanced', a.focusVisible)
-    applyColorScheme(a.colorScheme)
+    const scheme = readDedicatedColorScheme() ?? a.colorScheme
+    if (scheme !== a.colorScheme)
+    {
+      useTaskStore.setState({
+        accessibility: { ...useTaskStore.getState().accessibility, colorScheme: scheme },
+      })
+    }
+    applyColorScheme(scheme)
     applyWorkspaceTheme()
   }, [a.fontSize, a.highContrast, a.reducedMotion, a.colorScheme, a.focusVisible, applyWorkspaceTheme])
 }

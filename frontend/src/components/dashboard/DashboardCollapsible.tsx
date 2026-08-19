@@ -36,10 +36,12 @@ export function DashboardCollapsible({
 {
   return (
     <details
-      className={`group sl-panel overflow-hidden ${borderless ? 'border-0' : ''} ${className}`}
+      className={`group overflow-hidden ${borderless ? '' : 'sl-panel'} ${className}`}
       {...(defaultOpen ? { open: true } : {})}
     >
-      <summary className="flex items-center gap-2 p-3 sm:p-4 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+      <summary className={`flex items-center gap-2 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden ${
+        borderless ? 'px-0 py-2' : 'p-3 sm:p-4'
+      }`}>
         {icon}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
@@ -68,7 +70,11 @@ export function DashboardCollapsible({
           aria-hidden
         />
       </summary>
-      <div className={`px-2.5 sm:px-3 pb-2.5 sm:pb-3 pt-0 border-t border-line ${bodyClassName}`}>
+      <div className={`${
+        borderless
+          ? 'px-0 pb-2 pt-1'
+          : 'px-2.5 sm:px-3 pb-2.5 sm:pb-3 pt-0 border-t border-line'
+      } ${bodyClassName}`}>
         {children}
       </div>
     </details>

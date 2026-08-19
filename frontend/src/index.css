@@ -1,13 +1,13 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Simply-Life — grafite neutro + DM Sans
-   · Fundo profundo sem viés azulado
-   · Cards flutuantes discretos, bordas hairline
-  · Tipografia: DM Sans + DM Mono
+/* ── Simply-Life — identidade AXEL (ver src/design/identityTokens.ts)
+   · Grafite quente, não preto-azulado
+   · Laranja só na voz do AXEL (--sl-axel)
+   · Fraunces = fala · Manrope = dados/ações
 */
 
 html {
@@ -20,58 +20,86 @@ body {
 }
 
 :root {
-  --sl-canvas: #FAFAFA;
-  --sl-chrome: #F4F4F5;
-  --sl-surface: #FFFFFF;
+  --sl-canvas: #F4EFE6;
+  --sl-chrome: #EBE4D8;
+  --sl-surface: #FFFBF5;
+  --sl-voice: #F7EDE4;
   --sl-elevated: #FFFFFF;
-  --sl-text: #18181B;
-  --sl-text-muted: #52525B;
-  --sl-border: rgba(228, 228, 231, 0.8);
-  --sl-border-subtle: rgba(228, 228, 231, 0.55);
-  --sl-accent: #4F46E5;
-  --sl-accent-hover: #4338CA;
-  --sl-accent-muted: rgba(79, 70, 229, 0.09);
-  --sl-urgent: #DC4C64;
-  --sl-attention: #D97706;
-  --sl-success: #059669;
-  --sl-radius-sm: 10px;
-  --sl-radius: 14px;
-  --sl-radius-lg: 20px;
+  --sl-text: #1C1916;
+  --sl-text-muted: #5C564E;
+  --sl-text-faint: #6F6860;
+  --sl-border: rgba(28, 25, 22, 0.10);
+  --sl-border-subtle: rgba(28, 25, 22, 0.08);
+  --sl-accent: #1C1916;
+  --sl-accent-hover: #2A2623;
+  --sl-accent-muted: rgba(28, 25, 22, 0.08);
+  --sl-axel: #C45A32;
+  --sl-axel-hover: #D46840;
+  --sl-axel-muted: rgba(196, 90, 50, 0.12);
+  --sl-axel-on-fill: #FFFBF5;
+  --sl-health: #4F6F4C;
+  --sl-health-muted: rgba(79, 111, 76, 0.12);
+  --sl-finance: #8A6A2E;
+  --sl-finance-muted: rgba(138, 106, 46, 0.12);
+  --sl-tasks: #4A5C68;
+  --sl-tasks-muted: rgba(74, 92, 104, 0.12);
+  --sl-urgent: #A33D3D;
+  --sl-attention: #8A6A2E;
+  --sl-success: #5C564E;
+  --sl-radius-sm: 12px;
+  --sl-radius: 16px;
+  --sl-radius-lg: 24px;
   --sl-radius-pill: 9999px;
-  --sl-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --sl-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 20px -6px rgba(0, 0, 0, 0.06);
-  --sl-chart-meta: #FFFFFF;
-  --sl-chart-meta-border: rgba(228, 228, 231, 0.8);
-  --sl-chart-real-a: #4F46E5;
-  --sl-chart-real-b: #6366F1;
-  --sl-chart-real-c: #059669;
+  --sl-shadow: none;
+  --sl-shadow-lg: 0 16px 48px rgba(28, 25, 22, 0.08);
+  --sl-shadow-voice: 0 0 0 1px rgba(196, 90, 50, 0.22), 0 12px 40px rgba(196, 90, 50, 0.08);
+  --sl-chart-meta: #FFFBF5;
+  --sl-chart-meta-border: rgba(28, 25, 22, 0.10);
+  --sl-chart-real-a: #C45A32;
+  --sl-chart-real-b: #8A6A2E;
+  --sl-chart-real-c: #4F6F4C;
+  --sl-water-fill: #4F6F4C;
+  --sl-water-fill-end: #7FA37A;
 }
 
 .dark {
-  /* Obsidiana suave — todas as páginas */
-  --sl-canvas: #14161C;
-  --sl-chrome: #1A1D24;
-  --sl-surface: #1E2128;
-  --sl-elevated: #262A33;
-  --sl-text: #ECECEF;
-  --sl-text-muted: #C4C8D0;
-  --sl-border: rgba(255, 255, 255, 0.06);
-  --sl-border-subtle: rgba(255, 255, 255, 0.05);
-  --sl-accent: #D98F7A;
-  --sl-accent-hover: #E5A08C;
-  --sl-accent-muted: rgba(217, 143, 122, 0.12);
-  --sl-urgent: #D98B8B;
-  --sl-attention: #C9A96E;
-  --sl-success: #7DB89A;
-  --sl-shadow: 0 1px 0 rgba(255, 255, 255, 0.02) inset;
-  --sl-shadow-lg: 0 4px 24px rgba(0, 0, 0, 0.35);
-  --sl-chart-meta: #1E2128;
-  --sl-chart-meta-border: rgba(255, 255, 255, 0.05);
-  --sl-chart-real-a: #D98F7A;
-  --sl-chart-real-b: #C9A96E;
-  --sl-chart-real-c: #7DB89A;
-  --sl-water-fill: #D98F7A;
-  --sl-water-fill-end: #C47E6A;
+  --sl-canvas: #1E1C18;
+  --sl-chrome: #25221D;
+  --sl-surface: #2C2923;
+  --sl-voice: #342F28;
+  --sl-elevated: #3E3931;
+  --sl-text: #EDE7DD;
+  --sl-text-muted: #A39B90;
+  --sl-text-faint: #8F877C;
+  --sl-border: rgba(237, 231, 221, 0.12);
+  --sl-border-subtle: rgba(237, 231, 221, 0.10);
+  /* Ação genérica = cream invertido — não é o laranja do AXEL */
+  --sl-accent: #EDE7DD;
+  --sl-accent-hover: #F5F0E8;
+  --sl-accent-muted: rgba(237, 231, 221, 0.10);
+  --sl-axel: #E8734A;
+  --sl-axel-hover: #F0845C;
+  --sl-axel-muted: rgba(232, 115, 74, 0.14);
+  --sl-axel-on-fill: #1E1C18;
+  --sl-health: #7FA37A;
+  --sl-health-muted: rgba(127, 163, 122, 0.14);
+  --sl-finance: #C9A15C;
+  --sl-finance-muted: rgba(201, 161, 92, 0.14);
+  --sl-tasks: #8B9BA8;
+  --sl-tasks-muted: rgba(139, 155, 168, 0.14);
+  --sl-urgent: #D47878;
+  --sl-attention: #C9A15C;
+  --sl-success: #B8A99A;
+  --sl-shadow: none;
+  --sl-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --sl-shadow-voice: 0 0 0 1px rgba(232, 115, 74, 0.22), 0 12px 40px rgba(232, 115, 74, 0.08);
+  --sl-chart-meta: #2C2923;
+  --sl-chart-meta-border: rgba(237, 231, 221, 0.10);
+  --sl-chart-real-a: #E8734A;
+  --sl-chart-real-b: #C9A15C;
+  --sl-chart-real-c: #7FA37A;
+  --sl-water-fill: #7FA37A;
+  --sl-water-fill-end: #5E8A5A;
 }
 
 @keyframes sl-shimmer {
@@ -204,7 +232,7 @@ body {
     background-color: var(--sl-canvas);
     color: var(--sl-text);
     @apply antialiased min-h-screen font-sans;
-    font-feature-settings: "ss01", "cv11";
+    font-feature-settings: "kern" 1;
   }
 
   h1, h2, h3 {
@@ -218,18 +246,51 @@ body {
 }
 
 @layer components {
-  /* Rótulo de seção — sans, não caixa alta mono */
+  /* Kicker de módulo — sans, nunca laranja, nunca mono */
   .sl-eyebrow {
-    @apply font-sans text-xs font-semibold tracking-tight;
-    color: var(--sl-accent);
+    @apply font-sans text-[11px] font-semibold uppercase tracking-wide;
+    color: var(--sl-text-muted);
   }
 
   .sl-panel {
     background-color: var(--sl-surface);
     border: 1px solid var(--sl-border-subtle);
     border-radius: var(--sl-radius);
-    box-shadow: var(--sl-shadow);
+    box-shadow: none;
     color: var(--sl-text);
+  }
+
+  /* Momento em que o AXEL fala — peso visual próprio */
+  .sl-voice {
+    background-color: var(--sl-voice);
+    border: none;
+    border-radius: var(--sl-radius-lg);
+    box-shadow: var(--sl-shadow-voice);
+    color: var(--sl-text);
+  }
+
+  .sl-voice-copy {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  .sl-metric {
+    @apply font-sans font-medium tabular-nums tracking-tight leading-none;
+    font-size: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .sl-metric {
+      font-size: 1.75rem;
+    }
+  }
+
+  /* CTA cream no escuro: texto grafite (AA). No claro o fill já é tinta. */
+  .dark .bg-accent.text-white,
+  .dark .text-white.bg-accent {
+    color: var(--sl-canvas);
   }
 
   .sl-chip {

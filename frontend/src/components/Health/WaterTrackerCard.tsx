@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Droplets, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -6,14 +6,17 @@ import { AGUA_PRESET } from '../../constants/healthPresets'
 import { isAguaRitualComplete } from '../../lib/healthRitual'
 import { WaterCupGrid } from './WaterCupGrid'
 import {
+  DEFAULT_AGUA_COPOS,
   DEFAULT_ML_POR_COPO,
+  formatLiters,
+  META_AGUA_ML,
   metaMl,
   mlPorCopo,
   registrosMl,
   resolveMlPresets,
   totalMlHoje,
 } from '../../lib/waterHydration'
-import { saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
+import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
@@ -25,12 +28,11 @@ export function WaterTrackerCard()
   const habitos = useTaskStore((s) => s.habitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
   const setAguaRegistros = useTaskStore((s) => s.setAguaRegistros)
-  const updateHabitoMeta = useTaskStore((s) => s.updateHabitoMeta)
 
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
   const entries = useMemo(() => registrosMl(agua), [agua])
   const current = entries.length
-  const goal = agua?.meta_diaria ?? 8
+  const goal = agua?.meta_diaria ?? DEFAULT_AGUA_COPOS
   const defaultMl = mlPorCopo(agua)
   const mlPresets = useMemo(() => resolveMlPresets(agua), [agua])
   const totalMl = totalMlHoje(agua)
@@ -41,10 +43,16 @@ export function WaterTrackerCard()
   const ritualOk = isAguaRitualComplete(current, goal)
   const restante = Math.max(0, goal - current)
 
+  useEffect(() =>
+  {
+    if (!agua) return
+    void promoteAguaMetaTo2L(agua)
+  }, [agua])
+
   const handleActivate = async () =>
   {
     await ensureHealthHabit(AGUA_PRESET)
-    toast.success('Meta de água ativada: 8 copos por dia')
+    toast.success(`Meta de água ativada: ${formatLiters(META_AGUA_ML)}`)
   }
 
   const persistEntries = async (next: number[]) =>
@@ -88,31 +96,28 @@ export function WaterTrackerCard()
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <Droplets className="w-4 h-4 text-accent shrink-0" strokeWidth={1.75} />
-              <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-accent">
+              <Droplets className="w-4 h-4 text-health shrink-0" strokeWidth={1.75} />
+              <h2 className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-health">
                 Hidratação
               </h2>
             </div>
             <p className={`text-2xl sm:text-3xl font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
-              {totalMl}
-              <span className="text-base sm:text-lg text-ink-muted font-normal"> ml</span>
-              <span className="text-base sm:text-lg text-ink-muted font-normal">
-                {' · '}{current}/{goal} copos
-                {extra > 0 && (
-                  <span className="text-sky-300"> +{extra}</span>
-                )}
-              </span>
+              {formatLiters(totalMl)}
+              <span className="text-base sm:text-lg text-ink-muted font-normal"> / {formatLiters(metaTotalMl)}</span>
             </p>
             <p className={`text-[12px] sm:text-[13px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+              {current}/{goal} copos
+              {extra > 0 ? ` · +${extra} extra` : ''}
+              {' · '}
               {done
                 ? extra > 0
-                  ? `Meta batida: ${totalMl} ml hoje.`
-                  : `Meta do dia: ${totalMl} / ${metaTotalMl} ml.`
+                  ? `meta batida`
+                  : `meta do dia`
                 : ritualOk
-                  ? `Ritual ok (80%): ${totalMl} ml.`
+                  ? `ritual ok (80%)`
                   : restante === 1
-                    ? `Falta 1 copo · ${totalMl} ml.`
-                    : `${restante} copos restantes · ${totalMl} ml.`}
+                    ? `falta 1 copo`
+                    : `${restante} copos restantes`}
             </p>
           </div>
           {agua && (
@@ -151,7 +156,7 @@ export function WaterTrackerCard()
             onClick={() => void handleActivate()}
             className={`w-full py-4 font-mono text-[11px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
           >
-            Começar meta de 8 copos
+            Começar meta de {formatLiters(META_AGUA_ML)}
           </button>
         ) : (
           <>

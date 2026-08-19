@@ -3,7 +3,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { normalizePinnedModules } from './slices/uiSlice';
-import { syncColorSchemeAfterRehydrate } from '../utils/themeBootstrap';
+import { overlayRememberedColorScheme, syncColorSchemeAfterRehydrate } from '../utils/themeBootstrap';
+import { parseColorScheme, persistColorScheme, readDedicatedColorScheme } from '../utils/applyColorScheme';
 import { localTodayIso, resetHabitosParaHoje } from '../lib/healthDayBoundary';
 import { getActiveStorageUserId, getPersistStorageKey } from '../lib/userScopedStorage';
 
@@ -137,6 +138,22 @@ export const useTaskStore = create<TaskStore>()(
         personalVelocityFactor: state.personalVelocityFactor,
         velocitySamplesByTag: state.velocitySamplesByTag,
       }),
+      merge: (persistedState, currentState) =>
+      {
+        if (!persistedState) return currentState
+        const persisted = persistedState as Partial<typeof currentState>
+        const remembered = readDedicatedColorScheme()
+        const fromPersist = parseColorScheme(persisted.accessibility?.colorScheme)
+        return {
+          ...currentState,
+          ...persisted,
+          accessibility: {
+            ...currentState.accessibility,
+            ...persisted.accessibility,
+            colorScheme: remembered ?? fromPersist ?? currentState.accessibility.colorScheme,
+          },
+        }
+      },
       onRehydrateStorage: () => (state) =>
       {
         if (!state) return
@@ -151,10 +168,11 @@ export const useTaskStore = create<TaskStore>()(
         state.despesas = []
         state.reservedBills = []
         state.billSettlements = []
-        const acc = state.accessibility as { colorScheme?: string } | undefined
-        if (acc?.colorScheme === 'sepia')
+        overlayRememberedColorScheme(state.accessibility)
+        const remembered = parseColorScheme(state.accessibility?.colorScheme)
+        if (!readDedicatedColorScheme() && getActiveStorageUserId() && remembered)
         {
-          acc.colorScheme = 'light'
+          persistColorScheme(remembered)
         }
         syncColorSchemeAfterRehydrate()
         if (Array.isArray(state.pinnedModules))

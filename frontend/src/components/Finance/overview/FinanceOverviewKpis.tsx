@@ -16,7 +16,7 @@ interface FinanceOverviewKpisProps
 
 export function FinanceOverviewKpis({ receita, despesas, saldo }: FinanceOverviewKpisProps)
 {
-  const saldoTone = saldo >= 0 ? 'text-accent' : 'text-urgente'
+  const saldoTone = saldo >= 0 ? 'text-finance' : 'text-urgente'
 
   return (
     <section className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -40,7 +40,7 @@ export function FinanceOverviewKpis({ receita, despesas, saldo }: FinanceOvervie
       </div>
       <div className={`${AXEL_BORDERLESS_PANEL} relative overflow-hidden`}>
         <div
-          className="absolute inset-0 bg-gradient-to-br from-accent/6 via-transparent to-transparent pointer-events-none"
+          className="absolute inset-0 bg-gradient-to-br from-finance/8 via-transparent to-transparent pointer-events-none"
           aria-hidden
         />
         <p className={`${AXEL_SECTION_TITLE} relative`}>Saldo do mês</p>

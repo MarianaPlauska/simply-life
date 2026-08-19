@@ -115,16 +115,6 @@ export function FinanceHomeTab({
 
   return (
     <div className="space-y-3 pt-2 sm:pt-3">
-      {monthOffset === 0 && !pastMonthEmpty && (
-        <FinanceGlobalMoodBanner
-          monthLabel={monthLabel}
-          monthOffset={monthOffset}
-          monthTransactions={monthTransactions}
-          allTransactions={transactions}
-          saldoInicial={cashAccount.saldo_inicial}
-        />
-      )}
-
       {pastMonthEmpty ? (
         <div className="rounded-sl border border-dashed border-line bg-card px-4 py-8 text-center space-y-2">
           <CalendarOff className="w-8 h-8 mx-auto text-ink-muted opacity-60" aria-hidden />
@@ -132,7 +122,7 @@ export function FinanceHomeTab({
             Sem lançamentos em {monthLabel}
           </p>
           <p className={`text-[12px] leading-relaxed max-w-sm mx-auto ${AXEL_TEXT_SECONDARY}`}>
-            Não há movimentos registrados neste mês. Escolha outro período no calendário ou comece a lançar a partir do mês atual.
+            Não há movimentos neste mês. Escolha outro período ou lance a partir do mês atual.
           </p>
         </div>
       ) : (
@@ -143,7 +133,7 @@ export function FinanceHomeTab({
             despesas={kpiDespesas}
             saldoMes={kpiSaldoMes}
             balanceToneClass={isFutureMonth
-              ? (outlook.tone === 'urgent' ? 'text-urgente' : outlook.tone === 'caution' ? 'text-atencao' : 'text-concluido')
+              ? (outlook.tone === 'urgent' ? 'text-urgente' : outlook.tone === 'caution' ? 'text-atencao' : 'text-finance')
               : BALANCE_TONE_TEXT[cashTone]}
             compact
             hideValues={hideValues}
@@ -156,7 +146,17 @@ export function FinanceHomeTab({
             }
           />
 
-          <p className={`font-mono text-[9px] ${AXEL_TEXT_SECONDARY}`}>
+          {monthOffset === 0 && (
+            <FinanceGlobalMoodBanner
+              monthLabel={monthLabel}
+              monthOffset={monthOffset}
+              monthTransactions={monthTransactions}
+              allTransactions={transactions}
+              saldoInicial={cashAccount.saldo_inicial}
+            />
+          )}
+
+          <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
             {isFutureMonth
               ? `Projeção encadeada · reservado ${maskFinanceValue(hideValues, fmt(position.reservaRestante))}`
               : `${monthLabel} · reservado ${maskFinanceValue(hideValues, fmt(position.reservaRestante))} · projetado ${maskFinanceValue(hideValues, fmt(position.saldoProjetadoDisponivel))}`}

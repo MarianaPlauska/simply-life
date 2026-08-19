@@ -3,15 +3,14 @@ import { DashboardAxelFocus } from './DashboardAxelFocus'
 import { useTaskStore } from '../../store/useTaskStore'
 import { buildOffensiveChecklist } from '../../lib/offensiveToday'
 
-// Hero do dashboard — ofensiva + main quest no mesmo painel
+// Hero do dashboard · ofensiva + main quest no mesmo painel
 
 interface DashboardHeroPanelProps
 {
   onOpenTask?: (taskId: number) => void
-  onExecuteTask?: (taskId: number) => void
 }
 
-export function DashboardHeroPanel({ onOpenTask, onExecuteTask }: DashboardHeroPanelProps)
+export function DashboardHeroPanel({ onOpenTask }: DashboardHeroPanelProps)
 {
   const streakCount = useTaskStore((s) => s.streakCount)
   const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
@@ -30,11 +29,7 @@ export function DashboardHeroPanel({ onOpenTask, onExecuteTask }: DashboardHeroP
     >
       <DailyEngagementCard variant="strip" />
       <div className="border-t border-line">
-        <DashboardAxelFocus
-          embedded
-          onOpenTask={onOpenTask}
-          onExecuteTask={onExecuteTask}
-        />
+        <DashboardAxelFocus onOpenTask={onOpenTask} />
       </div>
     </section>
   )

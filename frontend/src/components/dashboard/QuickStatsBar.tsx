@@ -116,7 +116,7 @@ export function QuickStatsBar()
         title="Hidratação"
         Icon={Droplets}
         iconClass="text-sky-400"
-        primary={`${agua?.progresso_atual ?? 0}/${agua?.meta_diaria ?? 8} copos`}
+        primary={`${agua?.progresso_atual ?? 0}/${agua?.meta_diaria ?? 10} copos`}
         secondary={aguaPct >= 100 ? 'Meta do dia ✓' : `${aguaPct}% · card com ondas no topo`}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       />

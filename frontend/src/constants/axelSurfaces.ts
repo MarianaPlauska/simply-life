@@ -12,8 +12,7 @@ export const AXEL_CHROME_PLANE = 'bg-chrome'
 
 /** Estúdio de vidro — header e bottom nav (conteúdo rola por baixo) */
 export const AXEL_GLASS_CHROME =
-  'bg-card/75 backdrop-blur-lg backdrop-saturate-150 border-line ' +
-  'dark:bg-[#1E2128]/80 dark:border-white/[0.04]'
+  'bg-chrome border-line'
 
 /** Resposta física ao toque — botões, chips e itens de menu */
 export const AXEL_TOUCH_PRESS =
@@ -27,9 +26,9 @@ export const AXEL_NAV_PLANE =
 export const AXEL_FOOTER_PLANE =
   `${AXEL_CHROME_PLANE} border-t border-line`
 
-/** Botão de ação rápida no header */
+/** Botão de ícone no header — só o glifo, sem caixa */
 export const AXEL_HEADER_ACTION =
-  `p-2.5 rounded-sl bg-chrome hover:bg-elevated border border-line shadow-sl text-ink-muted hover:text-ink ${AXEL_TOUCH_PRESS}`
+  `inline-flex items-center justify-center w-10 h-10 rounded-sl text-ink-muted hover:text-ink hover:bg-elevated ${AXEL_TOUCH_PRESS}`
 
 /** Padding inferior do main — barra mobile + safe area iOS */
 export const AXEL_MAIN_PB_MOBILE =
@@ -82,7 +81,7 @@ export const AXEL_SECTION_TITLE =
 export const AXEL_LINE = 'border-b border-line/80'
 
 /** Barra de progresso */
-export const AXEL_PROGRESS = 'bg-accent rounded-pill'
+export const AXEL_PROGRESS = 'bg-health rounded-pill'
 
 /** Barra de progresso grossa */
 export const AXEL_PROGRESS_THICK = 'h-2 rounded-pill overflow-hidden bg-chrome'
@@ -148,10 +147,10 @@ export const AXEL_NAV_MAIN_IDLE =
 
 /** Sub-nav (Diário / Lista / Cartões) — texto + sublinhado, sem caixa */
 export const AXEL_NAV_SUB =
-  'shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-wide transition-colors border-b-2'
+  'shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-sans transition-colors border-b-2'
 
 export const AXEL_NAV_SUB_ACTIVE =
-  `${AXEL_NAV_SUB} border-accent text-accent font-semibold`
+  `${AXEL_NAV_SUB} border-ink text-ink font-semibold`
 
 export const AXEL_NAV_SUB_IDLE =
   `${AXEL_NAV_SUB} border-transparent text-ink-muted hover:text-ink hover:border-line`
@@ -201,7 +200,7 @@ export const AXEL_AVATAR_RING = AXEL_AVATAR
 
 /** Item de nav ativo — faixa lateral arredondada */
 export const AXEL_NAV_ACTIVE =
-  'text-ink bg-accent-muted border-l-[3px] border-accent rounded-r-sl-sm'
+  'text-ink bg-chrome border-l-[3px] border-ink rounded-r-sl-sm'
 
 /** Item de nav inativo */
 export const AXEL_NAV_IDLE =
@@ -213,13 +212,13 @@ export const AXEL_TOUCH_ROW = 'min-h-[44px] py-3'
 /** Gap vertical mobile */
 export const AXEL_STACK_GAP = 'gap-6'
 
-/** Botão primário — cápsula, alto contraste */
+/** Botão primário — cream/grafite invertido, sem laranja */
 export const AXEL_BTN_PRIMARY =
-  `bg-accent hover:bg-accent-hover text-white font-bold rounded-pill shadow-sm hover:shadow-md ${AXEL_TOUCH_PRESS}`
+  `bg-ink text-fundo hover:opacity-90 font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
 
 /** Botão primário compacto — modais e formulários */
 export const AXEL_BTN_PRIMARY_COMPACT =
-  `bg-accent hover:bg-accent-hover text-white font-bold rounded-sl shadow-sm text-[9px] font-mono uppercase tracking-wide ${AXEL_TOUCH_PRESS}`
+  `bg-ink text-fundo hover:opacity-90 font-sans font-semibold rounded-sl text-[12px] ${AXEL_TOUCH_PRESS}`
 
 /** Link discreto */
 export const AXEL_LINK =
@@ -235,7 +234,7 @@ export const AXEL_DROPDOWN =
 
 /** Número KPI grande */
 export const AXEL_DISPLAY_STAT =
-  'text-2xl font-sans font-semibold tabular-nums text-ink tracking-tight'
+  'sl-metric text-ink'
 
 /** Separador de seção no dashboard */
 export const AXEL_SECTION_DIVIDER = 'border-t border-line/80 pt-8'
