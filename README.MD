@@ -5,6 +5,8 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/MarianaPlauska/simply-life/actions/workflows/ci.yml"><img src="https://github.com/MarianaPlauska/simply-life/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <img src="https://img.shields.io/badge/coverage-Vitest-0A0?logo=vitest" alt="Cobertura Vitest" />
   <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white" alt="Supabase" />
