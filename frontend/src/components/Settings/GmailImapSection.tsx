@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import {
   fetchGmailImapStatus,
   saveGmailImapSettings,
+  sendGmailImapTestMail,
   syncGmailImap,
 } from '../../lib/gmailImapApi'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -15,12 +16,14 @@ export function GmailImapSection()
 
   const [email, setEmail] = useState('')
   const [appPassword, setAppPassword] = useState('')
+  const [folder, setFolder] = useState('INBOX')
   const [configured, setConfigured] = useState(false)
   const [savedEmail, setSavedEmail] = useState<string | null>(null)
   const [lastSync, setLastSync] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [syncing, setSyncing] = useState(false)
+  const [testingMail, setTestingMail] = useState(false)
 
   useEffect(() =>
   {
@@ -30,6 +33,7 @@ export function GmailImapSection()
       setSavedEmail(s.email)
       setLastSync(s.last_sync_at)
       if (s.email) setEmail(s.email)
+      if (s.mailbox_folder) setFolder(s.mailbox_folder)
       setLoading(false)
     })
   }, [])
@@ -45,7 +49,7 @@ export function GmailImapSection()
     setSaving(true)
     try
     {
-      await saveGmailImapSettings(email.trim(), appPassword.trim())
+      await saveGmailImapSettings(email.trim(), appPassword.trim(), folder.trim() || 'INBOX')
       setConfigured(true)
       setSavedEmail(email.trim().toLowerCase())
       setAppPassword('')
@@ -80,6 +84,24 @@ export function GmailImapSection()
     finally
     {
       setSyncing(false)
+    }
+  }
+
+  const handleTestMail = async () =>
+  {
+    setTestingMail(true)
+    try
+    {
+      await sendGmailImapTestMail()
+      toast.success('E-mail de teste enviado para a sua caixa')
+    }
+    catch (err)
+    {
+      toast.error(err instanceof Error ? err.message : 'Falha no SMTP')
+    }
+    finally
+    {
+      setTestingMail(false)
     }
   }
 
@@ -155,6 +177,20 @@ export function GmailImapSection()
           </label>
         </div>
 
+        <label className="block mb-3">
+          <span className="text-[10px] uppercase tracking-wide text-zinc-500">Pasta IMAP (opcional)</span>
+          <input
+            type="text"
+            value={folder}
+            onChange={(e) => setFolder(e.target.value)}
+            placeholder="INBOX ou Simply-Life"
+            className="mt-1 w-full px-3 py-2 min-h-11 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white outline-none focus:border-violet-500/50"
+          />
+          <span className="mt-1 block text-[11px] text-zinc-500">
+            Se a pasta não existir, o sync usa a Inbox. Crie o rótulo Simply-Life no Gmail para filtrar newsletters.
+          </span>
+        </label>
+
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -173,6 +209,17 @@ export function GmailImapSection()
             >
               {syncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               Sync Gmail agora
+            </button>
+          )}
+          {configured && (
+            <button
+              type="button"
+              disabled={testingMail}
+              onClick={() => void handleTestMail()}
+              className="inline-flex items-center gap-2 min-h-11 px-4 py-2 text-[13px] font-medium rounded-xl border border-zinc-700 text-zinc-300 hover:bg-zinc-800 disabled:opacity-40"
+            >
+              {testingMail ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+              Enviar e-mail de teste
             </button>
           )}
         </div>

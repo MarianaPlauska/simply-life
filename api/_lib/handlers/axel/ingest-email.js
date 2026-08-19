@@ -66,7 +66,7 @@ export default async function handler(req, res)
         prioridade: parsed.prioridade,
         titulo: parsed.titulo,
         snippet: (email.body || email.subject || '').slice(0, 100),
-        itemOrigem: 'gmail',
+        itemOrigem: 'email',
       }
 
       const extra = {
@@ -83,7 +83,7 @@ export default async function handler(req, res)
         {
           titulo: parsed.titulo,
           body: email.body || email.subject,
-          origem: 'gmail',
+          origem: 'email',
         },
         scored,
         extra,

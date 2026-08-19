@@ -5,6 +5,7 @@ import { resolveGoogleAccessToken } from '../../googleOAuth.js';
 import { fetchUnreadEmails } from '../../gmailClient.js';
 import { fetchUnreadViaImap } from '../../gmailImap.js';
 import { ingestGmailBatch } from '../../gmailIngestRunner.js';
+import { imapPasswordFromRow } from '../../mailer.js';
 
 export default async function handler(req, res)
 {
@@ -89,14 +90,19 @@ export default async function handler(req, res)
 
   const { data: imapRows } = await supabase
     .from('gmail_imap_settings')
-    .select('user_id, email, app_password')
+    .select('user_id, email, app_password, mailbox_folder')
     .eq('enabled', true);
 
   for (const row of imapRows || [])
   {
     try
     {
-      const emails = await fetchUnreadViaImap(row.email, row.app_password, 15);
+      const emails = await fetchUnreadViaImap(
+        row.email,
+        imapPasswordFromRow(row),
+        15,
+        row.mailbox_folder || 'INBOX',
+      );
       if (emails.length === 0)
       {
         summary.push({ user_id: row.user_id, mode: 'imap', processed: 0, succeeded: 0 });

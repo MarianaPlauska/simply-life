@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { fetchUnreadViaImap } from '../../gmailImap.js'
 import { ingestGmailBatch } from '../../gmailIngestRunner.js'
 import { corsJson, getUserFromBearer } from '../../supabaseUser.js'
+import { imapPasswordFromRow } from '../../mailer.js'
 
 export default async function handler(req, res)
 {
@@ -25,7 +26,7 @@ export default async function handler(req, res)
 
   const { data: settings, error: settingsErr } = await supabase
     .from('gmail_imap_settings')
-    .select('email, app_password, enabled')
+    .select('email, app_password, enabled, mailbox_folder')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -40,8 +41,9 @@ export default async function handler(req, res)
   {
     const emails = await fetchUnreadViaImap(
       settings.email,
-      settings.app_password,
+      imapPasswordFromRow(settings),
       30,
+      settings.mailbox_folder || 'INBOX',
     )
 
     const { data: keywords } = await supabase

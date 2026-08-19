@@ -23,7 +23,7 @@ export default async function handler(req, res)
 
   const { data } = await supabase
     .from('gmail_imap_settings')
-    .select('email, enabled, last_sync_at')
+    .select('email, enabled, last_sync_at, mailbox_folder')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -31,5 +31,6 @@ export default async function handler(req, res)
     configured: Boolean(data?.enabled),
     email: data?.email ?? null,
     last_sync_at: data?.last_sync_at ?? null,
+    mailbox_folder: data?.mailbox_folder ?? 'INBOX',
   })
 }

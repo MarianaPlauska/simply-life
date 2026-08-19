@@ -7,6 +7,7 @@ import gmailSync from '../../../_lib/handlers/integrations/gmail-sync.js';
 import gmailImapSettings from '../../../_lib/handlers/integrations/gmail-imap-settings.js';
 import gmailImapStatus from '../../../_lib/handlers/integrations/gmail-imap-status.js';
 import gmailImapSync from '../../../_lib/handlers/integrations/gmail-imap-sync.js';
+import gmailImapTestMail from '../../../_lib/handlers/integrations/gmail-imap-test-mail.js';
 
 const ROUTES = {
   'google|status': googleStatus,
@@ -17,6 +18,7 @@ const ROUTES = {
   'gmail|imap-settings': gmailImapSettings,
   'gmail|imap-status': gmailImapStatus,
   'gmail|imap-sync': gmailImapSync,
+  'gmail|imap-test-mail': gmailImapTestMail,
 };
 
 function pickQuery(value)

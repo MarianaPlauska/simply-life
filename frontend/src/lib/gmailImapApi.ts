@@ -16,6 +16,7 @@ export interface GmailImapStatus
   configured: boolean
   email: string | null
   last_sync_at: string | null
+  mailbox_folder: string | null
 }
 
 export async function fetchGmailImapStatus(): Promise<GmailImapStatus>
@@ -26,13 +27,17 @@ export async function fetchGmailImapStatus(): Promise<GmailImapStatus>
 
   if (!res.ok)
   {
-    return { configured: false, email: null, last_sync_at: null }
+    return { configured: false, email: null, last_sync_at: null, mailbox_folder: 'INBOX' }
   }
 
   return res.json() as Promise<GmailImapStatus>
 }
 
-export async function saveGmailImapSettings(email: string, appPassword: string): Promise<void>
+export async function saveGmailImapSettings(
+  email: string,
+  appPassword: string,
+  mailboxFolder = 'INBOX',
+): Promise<void>
 {
   const res = await fetch('/api/integrations/gmail/imap-settings', {
     method: 'POST',
@@ -40,7 +45,11 @@ export async function saveGmailImapSettings(email: string, appPassword: string):
       ...(await authHeaders()),
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, app_password: appPassword }),
+    body: JSON.stringify({
+      email,
+      app_password: appPassword,
+      mailbox_folder: mailboxFolder,
+    }),
   })
 
   if (!res.ok)
@@ -71,5 +80,29 @@ export async function syncGmailImap(): Promise<{ emails_lidos: number; tarefas_g
   return {
     emails_lidos: data.emails_lidos ?? 0,
     tarefas_geradas: data.tarefas_geradas ?? 0,
+  }
+}
+
+export async function sendGmailImapTestMail(): Promise<void>
+{
+  const res = await fetch('/api/integrations/gmail/imap-test-mail', {
+    method: 'POST',
+    headers: await authHeaders(),
+  })
+
+  const data = await res.json().catch(() => ({})) as {
+    error?: string
+    oauth_required?: boolean
+  }
+
+  if (!res.ok)
+  {
+    if (data.oauth_required)
+    {
+      throw new Error(
+        'O Gmail recusou SMTP com senha de app. Não usamos OAuth pago — o resumo semanal cairá só em push.',
+      )
+    }
+    throw new Error(data.error || 'Falha ao enviar e-mail de teste')
   }
 }

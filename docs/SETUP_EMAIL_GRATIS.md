@@ -7,10 +7,8 @@ Siga **nesta ordem**. São 4 passos.
 ## Passo 1 — Banco (Supabase) — 2 min
 
 1. Abra: https://supabase.com/dashboard/project/zuxkqmooxvnulgllduhr/sql/new
-2. Cole o conteúdo de **`supabase/migrations/012_deadline_proposals_gmail_sync.sql`**
-3. Clique **Run**
-4. Cole o conteúdo de **`supabase/migrations/013_gmail_imap_free.sql`**
-5. Clique **Run** de novo
+2. Cole **`012`**, **`013`** e **`048_imap_encrypt_dedup.sql`** (pasta + cifração + dedup)
+3. Clique **Run** em cada um
 
 Pronto quando aparecer `Success` nos dois.
 
@@ -25,12 +23,11 @@ Vercel → seu projeto → **Settings** → **Environment Variables**
 | `GROQ_API_KEY` | Chave em https://console.groq.com/keys (grátis) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → **service_role** → Reveal |
 | `VITE_SUPABASE_URL` | `https://zuxkqmooxvnulgllduhr.supabase.co` |
+| `ENCRYPTION_KEY` | 32 bytes hex (64 chars) ou base64 — cifra a senha de app IMAP |
 
-Opcional: `CRON_SECRET` (qualquer texto longo) — sync automático a cada 6h.
+Opcional: `CRON_SECRET` (qualquer texto longo) — sync automático no cron diário.
 
-Depois: **Deployments** → **Redeploy** do último deploy.
-
-**Não precisa** de Google Cloud, `GOOGLE_CLIENT_ID`, nem cartão.
+A senha **não** volta no GET de status. Sem `ENCRYPTION_KEY` o save responde 503 (não grava texto puro).
 
 ---
 
@@ -47,10 +44,10 @@ Depois: **Deployments** → **Redeploy** do último deploy.
 
 1. Faça login no Simply-Life
 2. **Configurações** → aba **Integrações**
-3. Seção **Gmail — plano gratuito** → cole e-mail + senha de app → **Salvar Gmail**
-4. **Sync Gmail agora** (ou no Kanban: botão **Sync Gmail** no topo)
+3. Seção **Gmail — plano gratuito** → cole e-mail + senha de app (pasta opcional `Simply-Life`) → **Salvar Gmail**
+4. **Sync Gmail agora** e, se quiser, **Enviar e-mail de teste** (SMTP da mesma senha)
 
-E-mails não lidos viram tarefas no Kanban com score de urgência (Groq).
+E-mails não lidos viram tarefas com origem `email`, `score_reason` “Ingestão por e-mail” e evento no histórico AXEL. Duplicatas usam Message-ID.
 
 ---
 
