@@ -1,4 +1,6 @@
 // tipos internos do store — tudo que não vai em types/index.ts
+import type { AcademySessionDetail } from '../lib/academySessionDetail'
+
 export type ActiveView =
   | 'dashboard'
   | 'kanban'
@@ -321,6 +323,11 @@ export interface SessaoTreino {
   finalizado_em: string | null;
   duracao_real_min: number | null;
   concluido: boolean;
+  /** Código estável do treino no plano (A, B, 01…) — coluna 043 */
+  treino_codigo: string | null;
+  /** Volume da sessão: soma de (peso_kg × reps) */
+  volume_kg: number | null;
+  detalhe: AcademySessionDetail | null;
 }
 
 export interface Notificacao {

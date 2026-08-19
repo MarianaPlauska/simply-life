@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, Loader2, Mail } from 'lucide-react'
+import { Loader2, Mail } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 

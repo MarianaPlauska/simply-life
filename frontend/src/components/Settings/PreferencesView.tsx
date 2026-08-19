@@ -4,7 +4,7 @@ import {
   Plus, Search, Trash2, Brain, Filter, SlidersHorizontal,
   Bell, Shield, Eye, Globe, Moon, Sun, Zap, Layout, Monitor,
   Smartphone, Clock, Palette, AlertTriangle, Info, Sparkles, KeyRound,
-  Fingerprint, RefreshCw, Volume2, VolumeX, CheckCircle, Key,
+  RefreshCw, Volume2, VolumeX, CheckCircle, Key,
   Lock as LockIcon,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -14,6 +14,7 @@ import { useTaskStore } from '../../store/useTaskStore';
 import { supabase } from '../../lib/supabase';
 import { MfaEnrollPanel } from '../Auth/MfaEnrollPanel';
 import { WeeklyDigestPrefs } from './WeeklyDigestPrefs';
+import { AxelSystemGuide } from '../axel/AxelSystemGuide';
 import {
   MOBILE_NAV_HOME_ID,
   MOBILE_NAV_OPTIONAL_CATALOG,
