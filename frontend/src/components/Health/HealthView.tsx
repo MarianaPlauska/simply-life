@@ -15,7 +15,14 @@ import { HealthTodayPanel } from './HealthTodayPanel'
 import { HealthCuidadosPanel } from './HealthCuidadosPanel'
 import { HealthNutritionStrip } from './HealthNutritionStrip'
 import { healthHeaderSubtitle } from './healthSectionMeta'
-import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT, AXEL_PAGE_SHELL_READING, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
+import {
+  AXEL_CANVAS,
+  AXEL_MAIN_PB_MOBILE,
+  AXEL_MAIN_PT,
+  AXEL_NAV_SUB_ACTIVE,
+  AXEL_NAV_SUB_IDLE,
+  AXEL_PAGE_SHELL_READING,
+} from '../../constants/axelSurfaces'
 import { BentoGridSkeleton } from '../ui/Skeleton'
 
 // HealthView — hub: Hoje, Cuidados e Diário
@@ -155,13 +162,10 @@ export function HealthView()
             <h1 className="text-xl sm:text-2xl font-display font-semibold text-ink tracking-tight">
               Saúde
             </h1>
-            <p className="text-[12px] sm:text-[13px] text-ink-muted leading-relaxed">
-              Vitalidade no seu ritmo.
+            <p className="text-[13px] text-ink-muted leading-relaxed">
+              {headerLine}
             </p>
           </div>
-          <p className="font-mono text-[10px] text-ink-muted tabular-nums leading-relaxed">
-            {headerLine}
-          </p>
           <HealthNutritionStrip />
         </header>
 
@@ -169,7 +173,7 @@ export function HealthView()
           className="mt-3"
           aria-label="Seções de saúde"
         >
-          <div className="flex gap-1 p-1 rounded-sl bg-chrome border border-line overflow-x-auto scrollbar-none">
+          <div className="flex gap-0.5 overflow-x-auto scrollbar-none -mx-0.5">
             {SECTIONS.map(({ id, label, short, Icon }) =>
             {
               const active = section === id
@@ -178,12 +182,7 @@ export function HealthView()
                   key={id}
                   type="button"
                   onClick={() => selectSection(id)}
-                  className={[
-                    `sl-touch flex-1 flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-sl text-[11px] font-mono whitespace-nowrap min-h-[44px] ${AXEL_TOUCH_PRESS}`,
-                    active
-                      ? 'bg-card text-ink border border-line shadow-sm'
-                      : 'text-ink-muted border border-transparent hover:text-ink',
-                  ].join(' ')}
+                  className={`${active ? AXEL_NAV_SUB_ACTIVE : AXEL_NAV_SUB_IDLE} min-h-[44px]`}
                 >
                   <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-accent' : ''}`} />
                   <span className="sm:hidden">{short}</span>

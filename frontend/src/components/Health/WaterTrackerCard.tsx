@@ -19,6 +19,7 @@ import {
 import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
 import {
   AXEL_BTN_PRIMARY,
+  AXEL_METRIC_HAIRLINE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -89,71 +90,69 @@ export function WaterTrackerCard()
 
   return (
     <section
-      className="rounded-sl border border-line bg-card overflow-hidden shadow-sm"
+      className="space-y-4"
       aria-label="Hidratação"
       id="hidratacao"
     >
-      <div className="px-4 sm:px-5 pt-4 pb-3 border-b border-line bg-gradient-to-br from-sky-950/20 via-card to-transparent">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Droplets className="w-4 h-4 text-health shrink-0" strokeWidth={1.75} />
-              <h2 className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-health">
-                Hidratação
-              </h2>
-            </div>
-            <p className={`text-2xl sm:text-3xl font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
-              {formatLiters(totalMl)}
-              <span className="text-base sm:text-lg text-ink-muted font-normal"> / {formatLiters(metaTotalMl)}</span>
-            </p>
-            <p className={`text-[12px] sm:text-[13px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-              {current}/{goal} copos
-              {extra > 0 ? ` · +${extra} extra` : ''}
-              {' · '}
-              {done
-                ? extra > 0
-                  ? `meta batida`
-                  : `meta do dia`
-                : ritualOk
-                  ? `ritual ok (80%)`
-                  : restante === 1
-                    ? `falta 1 copo`
-                    : `${restante} copos restantes`}
-            </p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <Droplets className="w-4 h-4 text-health shrink-0" strokeWidth={1.75} />
+            <h2 className="font-sans text-[11px] font-medium uppercase tracking-[0.12em] text-health">
+              Hidratação
+            </h2>
           </div>
-          {agua && (
-            <div className="shrink-0 flex items-start gap-2">
-              {current > 0 && (
-                <button
-                  type="button"
-                  onClick={() => void handleClear()}
-                  className="inline-flex items-center justify-center w-9 h-9 rounded-sl border border-line text-ink-muted hover:text-atencao hover:border-atencao/40 transition-colors"
-                  title="Zerar água de hoje"
-                  aria-label="Zerar água de hoje"
-                >
-                  <X size={15} strokeWidth={2} />
-                </button>
-              )}
-              <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted">
-              Meta copos
-              <input
-                type="number"
-                min={4}
-                max={20}
-                value={goal}
-                onChange={(e) =>
-                {
-                  void updateHabitoMeta(agua.id, Math.max(4, parseInt(e.target.value, 10) || 8))
-                }}
-                className="w-12 bg-chrome border border-line rounded-sl px-1 py-0.5 text-ink text-center text-[11px]"
-              />
-            </label>
-            </div>
-          )}
+          <p className={`text-2xl sm:text-3xl font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
+            {formatLiters(totalMl)}
+            <span className="text-base sm:text-lg text-ink-muted font-normal"> / {formatLiters(metaTotalMl)}</span>
+          </p>
+          <p className={`text-[12px] sm:text-[13px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+            {current}/{goal} copos
+            {extra > 0 ? ` · +${extra} extra` : ''}
+            {' · '}
+            {done
+              ? extra > 0
+                ? `meta batida`
+                : `meta do dia`
+              : ritualOk
+                ? `ritual ok (80%)`
+                : restante === 1
+                  ? `falta 1 copo`
+                  : `${restante} copos restantes`}
+          </p>
         </div>
+        {agua && (
+          <div className="shrink-0 flex items-start gap-2">
+            {current > 0 && (
+              <button
+                type="button"
+                onClick={() => void handleClear()}
+                className="inline-flex items-center justify-center w-11 h-11 rounded-sl text-ink-muted hover:text-atencao transition-colors"
+                title="Zerar água de hoje"
+                aria-label="Zerar água de hoje"
+              >
+                <X size={15} strokeWidth={2} />
+              </button>
+            )}
+            <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted">
+            Meta copos
+            <input
+              type="number"
+              min={4}
+              max={20}
+              value={goal}
+              onChange={(e) =>
+              {
+                void updateHabitoMeta(agua.id, Math.max(4, parseInt(e.target.value, 10) || 8))
+              }}
+              className="w-12 bg-transparent border-b border-line px-1 py-0.5 text-ink text-center text-[11px]"
+            />
+          </label>
+          </div>
+        )}
       </div>
 
-      <div className="p-4 sm:p-5 space-y-4">
+      <div className={`${AXEL_METRIC_HAIRLINE} space-y-4`}>
         {!agua ? (
           <button
             type="button"
