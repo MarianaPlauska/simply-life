@@ -181,7 +181,7 @@ export function KanbanCommandBar({
               <AlertTriangle className="w-3 h-3" strokeWidth={1.75} />
               {critical > 0 && `${critical} crítico${critical > 1 ? 's' : ''}`}
               {critical > 0 && gargalos > 0 && ' · '}
-              {gargalos > 0 && `${gargalos} atrasado${gargalos > 1 ? 's' : ''}`}
+              {gargalos > 0 && `${gargalos} passou da data`}
             </span>
           )}
         </div>

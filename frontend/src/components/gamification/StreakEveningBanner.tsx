@@ -42,25 +42,25 @@ export function StreakEveningBanner()
 
   return (
     <div
-      className="flex flex-wrap items-center gap-3 px-4 py-3 rounded-sl border border-orange-500/30 bg-orange-500/10"
+      className="flex flex-wrap items-center gap-3 px-4 py-3 rounded-sl border border-line bg-chrome/40"
       role="status"
     >
-      <Flame className="w-5 h-5 text-orange-500 shrink-0" />
+      <Flame className="w-5 h-5 text-ink-muted shrink-0" />
       <div className="flex-1 min-w-[200px]">
-        <p className="font-mono text-[11px] uppercase tracking-wide text-orange-600 dark:text-orange-400">
-          Ofensiva em risco
+        <p className="font-mono text-[11px] uppercase tracking-wide text-ink-muted">
+          Quando fizer sentido
         </p>
         <p className="text-sm text-ink mt-0.5">
-          Você tem <strong>{streakCount}</strong> {streakCount === 1 ? 'dia' : 'dias'} de sequência.
-          Complete 1 tarefa ou registre humor hoje para não perder.
+          Você tem <strong>{streakCount}</strong> {streakCount === 1 ? 'dia' : 'dias'} de sequência —
+          ela pausa, não zera. Abrir o resumo do dia já conta.
         </p>
       </div>
       <button
         type="button"
-        onClick={() => navigate('/kanban')}
-        className="font-mono text-[11px] uppercase tracking-wide px-3 py-2 rounded-sl bg-orange-500/20 text-orange-700 dark:text-orange-300 hover:bg-orange-500/30"
+        onClick={() => navigate('/')}
+        className="font-mono text-[11px] uppercase tracking-wide px-3 py-2 rounded-sl border border-line text-ink hover:bg-chrome min-h-[44px]"
       >
-        Executar agora
+        Ver o dia
       </button>
       <button
         type="button"

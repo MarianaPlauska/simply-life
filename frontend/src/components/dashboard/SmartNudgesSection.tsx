@@ -211,9 +211,9 @@ function generateNudges({
         id: `conta-fixa-${conta.id}`,
         icon: Receipt,
         title: `Conta ${conta.nome} vence em ${dias} dia${dias !== 1 ? 's' : ''} — ${conta.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
-        body: `A conta fixa ${conta.nome} está próxima do vencimento. Verifique o pagamento.`,
-        accent: 'from-rose-500/20 to-red-500/10',
-        accentBorder: 'hover:border-rose-500/20',
+        body: `A conta fixa ${conta.nome} está próxima do vencimento. Quando fizer sentido, dá uma olhada.`,
+        accent: 'from-chrome to-transparent',
+        accentBorder: 'hover:border-line',
         action: { label: 'Ver Financeiro', view: 'financeiro' },
       });
     }
@@ -229,10 +229,10 @@ function generateNudges({
       nudges.push({
         id: `med-atrasado-${med.id}`,
         icon: Clock,
-        title: `${med.nome} — atrasado (era às ${med.horario})`,
-        body: `O medicamento ${med.nome} deveria ter sido tomado às ${med.horario}. Registre assim que possível.`,
-        accent: 'from-red-500/20 to-rose-500/10',
-        accentBorder: 'hover:border-red-500/20',
+        title: `${med.nome} — horário das ${med.horario}`,
+        body: `Quando fizer sentido, registra ${med.nome}. Sem pressa.`,
+        accent: 'from-chrome to-transparent',
+        accentBorder: 'hover:border-line',
         action: { label: 'Ir para Saude', view: 'saude' },
       });
     }

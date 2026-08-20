@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertTriangle, ChevronRight } from 'lucide-react'
+import { CalendarDays, ChevronRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { listTarefasAtrasadas } from '../../lib/notificacaoUtils'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
@@ -31,18 +31,18 @@ export function DashboardOverdueAlert()
     <button
       type="button"
       onClick={() => navigate('/kanban?bucket=vencido')}
-      className="w-full flex items-center gap-2.5 py-2.5 border-t-[0.5px] border-urgente/40 text-left hover:bg-urgente/5 transition-colors min-h-[44px]"
+      className="w-full flex items-center gap-2.5 py-2.5 border-t-[0.5px] border-line text-left hover:bg-chrome/40 transition-colors min-h-[44px]"
     >
-      <AlertTriangle className="w-4 h-4 text-urgente shrink-0" />
+      <CalendarDays className="w-4 h-4 text-ink-muted shrink-0" />
       <div className="min-w-0 flex-1">
-        <p className={`text-[13px] font-semibold ${AXEL_TEXT_PRIMARY}`}>
-          {overdue.length} tarefa{overdue.length !== 1 ? 's' : ''} atrasada{overdue.length !== 1 ? 's' : ''}. Precisa de atenção
+        <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
+          {overdue.length} item{overdue.length !== 1 ? 's' : ''} passou da data
         </p>
         <p className={`text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
-          {preview}{extra}
+          {preview}{extra} · quando fizer sentido, dá uma olhada
         </p>
       </div>
-      <ChevronRight className="w-5 h-5 text-urgente shrink-0" />
+      <ChevronRight className="w-5 h-5 text-ink-muted shrink-0" />
     </button>
   )
 }

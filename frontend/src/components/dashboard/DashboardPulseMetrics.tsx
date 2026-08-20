@@ -37,8 +37,12 @@ export function DashboardPulseMetrics()
       <DashboardMetricTile
         label="Execução"
         value={String(pendentes)}
-        hint={atrasadas > 0 ? `${atrasadas} atrasada${atrasadas !== 1 ? 's' : ''}` : `${criticas} crítica${criticas !== 1 ? 's' : ''}`}
-        tone={atrasadas > 0 || criticas > 0 ? 'urgent' : 'tasks'}
+        hint={
+          atrasadas > 0
+            ? `${atrasadas} passou da data`
+            : `${criticas} com carga alta`
+        }
+        tone="tasks"
         icon={ListChecks}
         onClick={() => navigate(atrasadas > 0 ? '/kanban?bucket=vencido' : '/kanban')}
       />

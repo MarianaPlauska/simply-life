@@ -1,6 +1,5 @@
 import { useDroppable } from '@dnd-kit/core'
 import {
-  AlertTriangle,
   CalendarDays,
   CalendarRange,
   CheckCircle2,
@@ -37,7 +36,7 @@ const TONE_CLASS: Record<string, string> = {
 }
 
 const BUCKET_ICON: Record<DueBucket, typeof Sun> = {
-  vencido: AlertTriangle,
+  vencido: CalendarDays,
   hoje: Sun,
   esta_semana: CalendarDays,
   proxima_semana: CalendarRange,

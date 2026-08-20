@@ -21,6 +21,14 @@ export function PrivacyView()
           <li>Saúde que você registra (humor, hábitos, treinos, medicamentos).</li>
           <li>Opcional: senha de app IMAP (criptografada no servidor) e inscrição de push.</li>
         </ul>
+        <h2 className={`text-[15px] font-semibold ${AXEL_TEXT_PRIMARY}`}>Humor e estado emocional</h2>
+        <p>
+          Check-ins de humor e qualquer leitura de estado emocional que o AXEL usa para
+          ajustar prioridade ficam <strong className={AXEL_TEXT_PRIMARY}>estritamente dentro do produto</strong>.
+          Esse dado nunca vai para analytics de terceiro, rede de anúncio, parceiro comercial
+          nem insight vendável. Se alguma feature futura precisar sair do app, paramos e
+          pedimos consentimento explícito antes.
+        </p>
         <h2 className={`text-[15px] font-semibold ${AXEL_TEXT_PRIMARY}`}>Como protegemos</h2>
         <ul className="list-disc pl-5 space-y-1">
           <li>Row Level Security no Postgres (`user_id = auth.uid()`).</li>

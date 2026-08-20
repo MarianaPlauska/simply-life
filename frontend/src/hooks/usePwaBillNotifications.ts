@@ -104,9 +104,9 @@ export function usePwaBillNotifications(enabled = true): void
       if (wasPushed(bill.id)) continue
 
       const title = bill.daysUntil === 0
-        ? `Boleto vence hoje`
-        : `Boleto em ${bill.daysUntil} dia(s)`
-      const body = `${bill.label} — ${bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`
+        ? `Uma conta vence hoje`
+        : `Uma conta em ${bill.daysUntil} dia(s)`
+      const body = `${bill.label} — ${bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}. Quando fizer sentido, dá uma olhada.`
 
       void showBillNotification(title, body).then(() => markPushed(bill.id))
     }

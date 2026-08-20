@@ -675,9 +675,9 @@ export function KanbanView()
                     <button
                       type="button"
                       onClick={() => jumpToDueBucket('vencido')}
-                      className="text-urgente tabular-nums hover:underline"
+                      className="text-ink-muted tabular-nums hover:underline"
                     >
-                      {dueBuckets.vencido.length} atrasadas
+                      {dueBuckets.vencido.length} passou da data
                     </button>
                   </>
                 )}

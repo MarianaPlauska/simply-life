@@ -88,12 +88,12 @@ export function DashboardPulseStrip()
         onClick={() => navigate('/kanban?bucket=hoje')}
       />
       <PulseCard
-        label="Atrasadas"
+        label="Passou da data"
         value={String(stats.atrasadas)}
-        hint="Precisam de data ou ação"
+        hint="Quando fizer sentido, dá uma olhada"
         Icon={AlertTriangle}
-        iconClass="text-urgente"
-        variant={stats.atrasadas > 0 ? 'urgent' : 'default'}
+        iconClass="text-ink-muted"
+        variant="default"
         onClick={() => navigate('/kanban?bucket=vencido')}
       />
       <PulseCard

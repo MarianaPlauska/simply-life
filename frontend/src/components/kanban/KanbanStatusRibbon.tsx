@@ -74,7 +74,7 @@ export function KanbanStatusRibbon({
         onClick={onExecJump}
       />
       <span className="w-px h-4 bg-white/[0.06] hidden sm:block" aria-hidden />
-      <RibbonChip label="Atrasadas" count={overdue} tone="urgent" onClick={onJump ? jump('vencido') : undefined} />
+      <RibbonChip label="Passou da data" count={overdue} tone="muted" onClick={onJump ? jump('vencido') : undefined} />
       <RibbonChip label="Hoje" count={dueToday} tone="warn" onClick={onJump ? jump('hoje') : undefined} />
       <RibbonChip label="Semana" count={thisWeek} tone="neutral" onClick={onJump ? jump('esta_semana') : undefined} />
       <RibbonChip label="Sem data" count={noDate} tone="muted" onClick={onJump ? jump('sem_prazo') : undefined} />

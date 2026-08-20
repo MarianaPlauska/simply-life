@@ -22,9 +22,9 @@ export function dueDateInfo (dateStr: string | null)
   const venc = new Date(dateStr); venc.setHours(0, 0, 0, 0);
   const diff = Math.ceil((venc.getTime() - hoje.getTime()) / 86400000);
 
-  if ( diff < 0 )  return { text: `${Math.abs(diff)}d atrasado`, color: 'text-red-400',    bg: 'bg-red-500/10'    };
-  if ( diff === 0 ) return { text: 'Vence hoje',                  color: 'text-amber-400',  bg: 'bg-amber-500/10'  };
-  if ( diff <= 2 )  return { text: `Vence em ${diff}d`,           color: 'text-orange-400', bg: 'bg-orange-500/10' };
+  if ( diff < 0 )  return { text: `${Math.abs(diff)}d além da data`, color: 'text-ink-muted', bg: 'bg-chrome/50' };
+  if ( diff === 0 ) return { text: 'Vence hoje',                  color: 'text-atencao',  bg: 'bg-atencao/10'  };
+  if ( diff <= 2 )  return { text: `Vence em ${diff}d`,           color: 'text-ink-muted', bg: 'bg-chrome/50' };
   return { text: formatDate(dateStr), color: 'text-zinc-400', bg: 'bg-zinc-800/50' };
 }
 

@@ -29,7 +29,7 @@ export const DUE_BUCKET_ALWAYS_VISIBLE: DueBucket[] = [
 ]
 
 export const DUE_BUCKET_LABELS: Record<DueBucket, string> = {
-  vencido: 'Atrasadas',
+  vencido: 'Passou da data',
   hoje: 'Prazo: hoje',
   esta_semana: 'Esta semana',
   proxima_semana: 'Próximas semanas',
@@ -39,8 +39,8 @@ export const DUE_BUCKET_LABELS: Record<DueBucket, string> = {
 
 /** Explicação curta — o que entra em cada faixa (só prazo, não fila de execução). */
 export const DUE_BUCKET_HINTS: Record<DueBucket, string> = {
-  vencido: 'Data limite já passou e a tarefa segue aberta.',
-  hoje: 'A data de vencimento é hoje — precisa sair até o fim do dia.',
+  vencido: 'A data passou e o item segue aberto. O AXEL já reclassificou a carga — sem alarme.',
+  hoje: 'A data de vencimento é hoje.',
   esta_semana: 'Vence entre amanhã e os próximos 7 dias.',
   proxima_semana: 'Vence daqui a mais de uma semana.',
   sem_prazo: 'Nenhuma data marcada — fica no backlog até você definir prazo.',
@@ -51,7 +51,7 @@ export const DUE_BUCKET_META: Record<
   DueBucket,
   { index: string; tone: 'urgente' | 'atencao' | 'accent' | 'muted' }
 > = {
-  vencido: { index: 'A', tone: 'urgente' },
+  vencido: { index: 'A', tone: 'muted' },
   hoje: { index: 'B', tone: 'atencao' },
   esta_semana: { index: 'C', tone: 'accent' },
   proxima_semana: { index: 'D', tone: 'muted' },

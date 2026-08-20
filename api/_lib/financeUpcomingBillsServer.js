@@ -99,11 +99,11 @@ export function billsForPushWindow(bills)
 export function formatBillPushPayload(bill)
 {
   const title = bill.daysUntil === 0
-    ? 'Boleto vence hoje'
-    : `Boleto em ${bill.daysUntil} dia(s)`;
+    ? 'Uma conta vence hoje'
+    : `Uma conta em ${bill.daysUntil} dia(s)`;
 
   const valor = bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const body = `${bill.label} — ${valor}`;
+  const body = `${bill.label} — ${valor}. Quando fizer sentido, dá uma olhada.`;
 
   return {
     title,

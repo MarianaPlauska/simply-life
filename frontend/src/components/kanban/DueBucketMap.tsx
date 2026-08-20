@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarDays, CalendarRange, CircleDashed, Sun } from 'lucide-react'
+import { CalendarDays, CalendarRange, CircleDashed, Sun } from 'lucide-react'
 import { DUE_BUCKET_LABELS, type DueBucket } from '../../lib/dueBucket'
 
 // Navegação compacta entre faixas de prazo — grade sem scroll horizontal
@@ -17,7 +17,7 @@ const NAV_BUCKETS: DueBucket[] = [
 ]
 
 const BUCKET_SHORT: Partial<Record<DueBucket, string>> = {
-  vencido: 'Atraso',
+  vencido: 'Passou',
   hoje: 'Hoje',
   esta_semana: 'Semana',
   proxima_semana: 'Próx.',
@@ -26,8 +26,8 @@ const BUCKET_SHORT: Partial<Record<DueBucket, string>> = {
 
 const BUCKET_CHIP: Record<DueBucket, { Icon: typeof Sun; active: string; idle: string }> = {
   vencido: {
-    Icon: AlertTriangle,
-    active: 'border-white/10 bg-zinc-800/70 text-red-300/90',
+    Icon: CalendarDays,
+    active: 'border-white/10 bg-zinc-800/70 text-zinc-300',
     idle: 'border-white/[0.04] bg-zinc-900/30 text-zinc-500',
   },
   hoje: {
