@@ -68,7 +68,8 @@ export function KanbanMorningBrief({
           )}
         </div>
         <p className={`text-[11px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-          {brief.detail}
+          {brief.loadLine}
+          {brief.detail ? ` · ${brief.detail}` : ''}
         </p>
       </div>
     </section>

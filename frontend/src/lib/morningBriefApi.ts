@@ -35,6 +35,7 @@ export async function fetchMorningBrief(
     const data = await res.json()
     return {
       headline: data.headline ?? local.headline,
+      loadLine: data.loadLine ?? local.loadLine,
       detail: data.detail ?? local.detail,
       criticalCount: data.criticalCount ?? local.criticalCount,
       loadPercent: data.loadPercent ?? local.loadPercent,

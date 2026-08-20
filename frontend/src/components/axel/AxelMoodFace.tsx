@@ -5,6 +5,8 @@ type MoodValue = 1 | 2 | 3 | 4 | 5
 interface AxelMoodFaceProps
 {
   level: number
+  /** Presença da Home — sobrepõe o humor 1–5 quando informada */
+  presence?: 'calmo' | 'atento' | 'positivo'
   size?: number
   className?: string
   title?: string
@@ -25,16 +27,27 @@ function clampMood(level: number): MoodValue
   return level as MoodValue
 }
 
+const PRESENCE_MOUTH: Record<'calmo' | 'atento' | 'positivo', MoodValue> = {
+  calmo: 4,
+  atento: 3,
+  positivo: 5,
+}
+
 /** Rosto-assinatura do AXEL — brasa laranja em todos os estados, sem emoji */
 export function AxelMoodFace({
   level,
+  presence,
   size = AXEL_MOOD.sizeInVoice,
   className = '',
   title,
 }: AxelMoodFaceProps)
 {
-  const mood = clampMood(Math.round(level))
-  const label = Object.values(AXEL_MOOD.states).find((s) => s.value === mood)?.label ?? 'Sereno'
+  const mood = presence
+    ? PRESENCE_MOUTH[presence]
+    : clampMood(Math.round(level))
+  const label = presence
+    ? (presence === 'calmo' ? 'Calmo' : presence === 'atento' ? 'Atento' : 'Positivo')
+    : (Object.values(AXEL_MOOD.states).find((s) => s.value === mood)?.label ?? 'Sereno')
   const eyeY = mood <= 2 ? 10.4 : 10
   const eyeR = mood === 1 ? 0.95 : 1.15
 
@@ -44,9 +57,9 @@ export function AxelMoodFace({
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      className={`shrink-0 text-ink ${className}`}
+      className={`shrink-0 text-axel ${className}`}
       role="img"
-      aria-label={title ?? `Humor AXEL: ${label}`}
+      aria-label={title ?? `AXEL: ${label}`}
     >
       <rect
         x="3.25"
@@ -65,7 +78,7 @@ export function AxelMoodFace({
         strokeWidth={AXEL_MOOD.stroke}
         strokeLinecap="round"
       />
-      <circle cx="18.2" cy="18.2" r="1.45" fill="var(--sl-axel)" />
+      <circle cx="18.2" cy="18.2" r="2.1" fill="var(--sl-axel)" />
     </svg>
   )
 }

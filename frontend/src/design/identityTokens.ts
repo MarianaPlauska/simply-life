@@ -241,6 +241,8 @@ export const ICON = {
  * - “brasa”: círculo 3px em `COLOR.axel` no canto inferior direito
  *   (marca registrada — presente em TODOS os estados)
  *
+ * Presença na Home (calmo / atento / positivo):
+ * mesmo esqueleto, boca 4 / 3 / 5, sempre `text-axel` — nunca cinza triste.
  * Os SVG entram na etapa 2 (Home), neste arquivo só a regra.
  */
 export const AXEL_MOOD = {

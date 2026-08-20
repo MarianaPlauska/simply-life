@@ -14,31 +14,37 @@ function buildFallbackBrief(ctx)
   let headline
   if (hojeCount === 0)
   {
-    headline = 'Fila de execução vazia — bom momento para planejar a semana.'
+    headline = 'Como você está hoje? A fila de Hoje está quieta — dá para respirar.'
   }
   else if (overdue > 0)
   {
-    headline = `${overdue} atrasada(s) · ${dueToday} vencem hoje — comece pelo mais crítico.`
-  }
-  else if (criticalCount >= 3)
-  {
-    headline = `${criticalCount} críticas na fila — priorize uma de cada vez.`
+    headline = 'Tem item que passou da data. Quando fizer sentido, dá uma olhada.'
   }
   else if (loadPercent >= 90)
   {
-    headline = `Carga em ${loadPercent}% — considere adiar o excesso.`
+    headline = 'O dia está cheio. A gente olha o essencial primeiro, sem pressa.'
+  }
+  else if (hojeCount === 1)
+  {
+    headline = 'Tem uma coisa em Hoje, no seu ritmo.'
   }
   else
   {
-    headline = `${hojeCount} na fila · carga ${loadPercent}% — ritmo sustentável.`
+    headline = `Tem ${hojeCount} em Hoje, no seu ritmo.`
   }
 
+  const ritmo = loadPercent >= 90 ? 'dia cheio' : loadPercent >= 80 ? 'ritmo justo' : 'ritmo ok'
+  const loadLine = hojeCount === 0
+    ? `Nada na fila de Hoje · carga ${loadPercent}%`
+    : `${hojeCount === 1 ? '1 coisa em Hoje' : `${hojeCount} em Hoje`} · carga ${loadPercent}% · ${ritmo}`
+
   const detail = topTaskTitle
-    ? `Foco sugerido: ${topTaskTitle.slice(0, 56)}`
-    : 'AXEL ordenou por score — comece pela primeira da fila.'
+    ? `Se couber, começa por: ${topTaskTitle.slice(0, 56)}`
+    : 'Quando fizer sentido, dá uma olhada no que está em Hoje.'
 
   return {
     headline,
+    loadLine,
     detail,
     criticalCount,
     loadPercent,
@@ -50,9 +56,9 @@ function buildFallbackBrief(ctx)
 async function briefWithAI(ctx, keys)
 {
   const userPayload = JSON.stringify(ctx)
-  const systemPrompt = `Você é o AXEL. Gere um brief matinal em PT-BR, tom de parceiro.
-Responda APENAS JSON: {"headline":"1 frase direta","detail":"1 frase com foco sugerido"}
-Máximo 2 frases no total. Sem emojis excessivos.`
+  const systemPrompt = `Você é o AXEL. Gere um brief matinal em PT-BR, tom de parceiro que convida, nunca cobra.
+Responda APENAS JSON: {"headline":"1 frase de conversa (como você está / no seu ritmo)","detail":"1 frase com foco sugerido, sem culpa"}
+Carga percentual NÃO entra na headline. Sem emojis. Sem "atrasado", "crítico" ou "você precisa".`
 
   if (keys.groqKey)
   {
@@ -78,6 +84,7 @@ Máximo 2 frases no total. Sem emojis excessivos.`
     const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}')
     return {
       headline: parsed.headline || buildFallbackBrief(ctx).headline,
+      loadLine: buildFallbackBrief(ctx).loadLine,
       detail: parsed.detail || buildFallbackBrief(ctx).detail,
       criticalCount: ctx.criticalCount,
       loadPercent: ctx.loadPercent,
@@ -107,6 +114,7 @@ Máximo 2 frases no total. Sem emojis excessivos.`
     const parsed = JSON.parse(raw)
     return {
       headline: parsed.headline || buildFallbackBrief(ctx).headline,
+      loadLine: buildFallbackBrief(ctx).loadLine,
       detail: parsed.detail || buildFallbackBrief(ctx).detail,
       criticalCount: ctx.criticalCount,
       loadPercent: ctx.loadPercent,

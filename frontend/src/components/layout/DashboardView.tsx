@@ -1,9 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import {
-  fetchHomeVoiceLine,
   hydrateHomeEssential,
   scheduleHomeSecondary,
 } from '../../lib/hydrateHome'
@@ -31,7 +30,6 @@ function getGreeting(): string
 export function DashboardView()
 {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [voiceLine, setVoiceLine] = useState<string | null>(null)
   const storeTarefas = useTaskStore((s) => s.tarefas)
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const loading = useTaskStore((s) => s.dashboardLoading)
@@ -51,11 +49,6 @@ export function DashboardView()
         return
       }
       scheduleHomeSecondary()
-      const line = await fetchHomeVoiceLine()
-      if (!cancelled)
-      {
-        setVoiceLine(line)
-      }
     })()
     return () =>
     {
@@ -113,7 +106,6 @@ export function DashboardView()
         <DashboardCommandBar
           greeting={greeting}
           firstName={firstName}
-          voiceLine={voiceLine}
           onOpenTask={openTask}
         />
 

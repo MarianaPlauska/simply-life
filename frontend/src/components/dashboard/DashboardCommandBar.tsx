@@ -4,6 +4,8 @@ import { mergeDashboardTasks } from '../../data/mockDashboardData'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import { buildDayCapacity } from '../../lib/dayCapacity'
 import { useMoodOrchestration } from '../../hooks/useMoodOrchestration'
+import { resolveAxelPresence } from '../../lib/axelPresence'
+import { buildMorningBrief } from '../../lib/morningBrief'
 import { AxelMoodFace } from '../axel/AxelMoodFace'
 import { DashboardAxelFocus } from './DashboardAxelFocus'
 
@@ -11,14 +13,12 @@ interface DashboardCommandBarProps
 {
   greeting: string
   firstName: string
-  voiceLine?: string | null
   onOpenTask?: (taskId: number) => void
 }
 
 export function DashboardCommandBar({
   greeting,
   firstName,
-  voiceLine,
   onOpenTask,
 }: DashboardCommandBarProps)
 {
@@ -61,20 +61,38 @@ export function DashboardCommandBar({
     ],
   )
 
+  const hasMoodToday = humorHojeLista.length > 0
   const humorHoje = humorHojeLista[humorHojeLista.length - 1]?.humor ?? 3
-  const phrase = voiceLine?.trim() || capacity.axelPhrase
+  const presence = resolveAxelPresence({
+    hasMoodToday,
+    moodLevel: humorHoje,
+    capacityMode: capacity.mode,
+  })
+  const brief = useMemo(
+    () => buildMorningBrief(hojeTasks, dailyScoreCap, mood),
+    [hojeTasks, dailyScoreCap, mood],
+  )
+  const phrase = brief.headline || capacity.axelPhrase
 
   return (
     <section aria-label="Mensagem do AXEL">
       <div className="flex items-start gap-2.5">
-        <AxelMoodFace level={humorHoje} size={32} className="mt-0.5" />
+        <AxelMoodFace
+          level={humorHoje}
+          presence={presence}
+          size={36}
+          className="mt-0.5"
+        />
         <div className="min-w-0 flex-1">
           <p className="sl-eyebrow text-axel">AXEL</p>
           <h1 className="font-display font-medium text-[1.35rem] sm:text-[1.5rem] leading-[1.2] text-ink mt-0.5">
             {firstName ? `${greeting}, ${firstName}.` : `${greeting}.`}
           </h1>
-          <p className="sl-voice-copy text-ink-muted mt-1">
+          <p className="sl-voice-copy text-ink mt-1">
             {phrase}
+          </p>
+          <p className="text-[12px] sm:text-[13px] text-ink-muted mt-1 leading-relaxed">
+            {brief.loadLine}
           </p>
         </div>
       </div>
