@@ -3,8 +3,8 @@ import { Wallet, Plus, Loader2, X, SlidersHorizontal } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { toast } from 'sonner'
 import {
-  AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY_COMPACT,
+  AXEL_METRIC_HAIRLINE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -132,7 +132,7 @@ export function FinanceCashAccountCard({
   }
 
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL}`}>
+    <section>
       <header className="mb-3 space-y-3">
         <div className="flex items-center gap-2 min-w-0">
           <Wallet size={14} className="text-accent shrink-0" />
@@ -185,7 +185,7 @@ export function FinanceCashAccountCard({
       </header>
 
       {needsSetup && (
-        <div className="mb-3 rounded-sl border border-accent/35 bg-accent/10 px-3 py-3">
+        <div className={`${AXEL_METRIC_HAIRLINE} mb-3`}>
           <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
             Quanto você tem livre na conta hoje?
           </p>
@@ -199,7 +199,7 @@ export function FinanceCashAccountCard({
       <button
         type="button"
         onClick={() => setBalanceEditorOpen(true)}
-        className="w-full rounded-sl border border-accent/30 bg-accent/8 px-4 py-3 text-left hover:border-accent/50 transition-colors min-h-[44px] mb-2"
+        className="w-full text-left hover:opacity-90 transition-opacity min-h-[44px] mb-1"
       >
         <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Disponível agora</p>
         {needsSetup ? (
@@ -207,9 +207,7 @@ export function FinanceCashAccountCard({
             Configure abaixo
           </p>
         ) : (
-          <p className={`text-2xl sm:text-3xl font-display tabular-nums mt-0.5 ${
-            saldoDisponivel < 0 ? 'text-urgente' : AXEL_TEXT_PRIMARY
-          }`}>
+          <p className={`text-3xl sm:text-4xl font-display tabular-nums tracking-tight mt-1 ${AXEL_TEXT_PRIMARY}`}>
             {fmt(saldoDisponivel)}
           </p>
         )}
@@ -221,24 +219,22 @@ export function FinanceCashAccountCard({
         )}
       </button>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className={`grid grid-cols-2 ${AXEL_METRIC_HAIRLINE} mt-3`}>
         <button
           type="button"
           onClick={() => setBalanceEditorOpen(true)}
-          className="border border-line rounded-sl bg-chrome/40 px-3 py-2 text-left hover:border-accent/40 transition-colors min-h-[44px]"
+          className="text-left min-h-[44px] pr-4 border-r-[0.5px] border-line hover:opacity-90 transition-opacity"
         >
           <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Comprometido</p>
-          <p className="text-lg font-display tabular-nums text-atencao">{fmt(reservaRestante)}</p>
+          <p className={`text-lg font-display tabular-nums mt-0.5 ${AXEL_TEXT_PRIMARY}`}>{fmt(reservaRestante)}</p>
         </button>
         <button
           type="button"
           onClick={() => setBalanceEditorOpen(true)}
-          className="border border-line rounded-sl bg-chrome/40 px-3 py-2 text-left hover:border-accent/40 transition-colors min-h-[44px]"
+          className="text-left min-h-[44px] pl-4 hover:opacity-90 transition-opacity"
         >
           <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>Projetado livre</p>
-          <p className={`text-lg font-display tabular-nums ${
-            saldoProjetadoDisponivel < 0 ? 'text-urgente' : AXEL_TEXT_PRIMARY
-          }`}>
+          <p className={`text-lg font-display tabular-nums mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
             {fmt(saldoProjetadoDisponivel)}
           </p>
         </button>
