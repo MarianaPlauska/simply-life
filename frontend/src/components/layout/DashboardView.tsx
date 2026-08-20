@@ -15,7 +15,7 @@ import { DashboardMaisBody } from '../dashboard/DashboardMaisBody'
 import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { DashboardQuickWidget } from '../dashboard/DashboardQuickWidget'
-import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces'
+import { AXEL_PAGE_SHELL_READING } from '../../constants/axelSurfaces'
 import { friendlyCallName } from '../../lib/friendlyCallName'
 import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
 
@@ -100,7 +100,7 @@ export function DashboardView()
     return (
       <div className="w-full flex flex-col">
         <div className="h-40 sl-shimmer border-b border-line" />
-        <div className={`px-4 lg:px-8 py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-3`}>
+        <div className={`px-3 sm:px-4 py-4 ${AXEL_PAGE_SHELL_READING} flex flex-col gap-3`}>
           <BentoGridSkeleton variant="default" />
         </div>
       </div>
@@ -109,7 +109,7 @@ export function DashboardView()
 
   return (
     <div className="w-full flex flex-col flex-1 min-h-0">
-      <div className={`px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4 ${AXEL_PAGE_SHELL} flex flex-col gap-5 sm:gap-6 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
+      <div className={`px-3 sm:px-4 py-3 sm:py-4 ${AXEL_PAGE_SHELL_READING} flex flex-col gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
         <DashboardCommandBar
           greeting={greeting}
           firstName={firstName}

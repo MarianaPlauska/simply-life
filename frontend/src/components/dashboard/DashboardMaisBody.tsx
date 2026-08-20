@@ -10,6 +10,7 @@ import { DayCapacityCard } from './DayCapacityCard'
 import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
 import { resolveDashboardWidgets } from '../../lib/dashboardWidgets'
 import { useTaskStore } from '../../store/useTaskStore'
+import { AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
 
 /** Tudo que não é o check-in do dia — métricas e atalhos */
 export function DashboardMaisBody()
@@ -31,31 +32,37 @@ export function DashboardMaisBody()
     ],
   )
 
-  const quickGridClass = quickWidgets.length <= 2
-    ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-3xl items-start'
-    : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full items-start'
-
   return (
-    <div className="flex flex-col gap-5">
-      <DayCapacityCard />
-      <DashboardPulseMetrics />
-      <YesterdayLetterCard />
-      <AxelWeekForecastCard />
-      <StreakEveningBanner />
+    <div className="flex flex-col">
+      <div className={AXEL_METRIC_HAIRLINE}>
+        <DayCapacityCard />
+      </div>
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
+        <DashboardPulseMetrics />
+      </div>
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
+        <YesterdayLetterCard />
+      </div>
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
+        <AxelWeekForecastCard />
+      </div>
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
+        <StreakEveningBanner />
+      </div>
 
-      {quickWidgets.length > 0 && (
-        <div className={quickGridClass}>
-          {quickWidgets.map((id) => (
-            <div key={id} className="min-w-0 flex flex-col">
-              <DashboardQuickWidget id={id} />
-            </div>
-          ))}
+      {quickWidgets.map((id) => (
+        <div key={id} className={`${AXEL_METRIC_HAIRLINE} mt-3 min-w-0 empty:hidden`}>
+          <DashboardQuickWidget id={id} />
         </div>
-      )}
+      ))}
 
-      <DashboardModulesRegistry excludeIds={['exec', 'fin', 'saude']} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
+        <DashboardModulesRegistry excludeIds={['exec', 'fin', 'saude']} />
+      </div>
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
         <InboxIACard embedded />
+      </div>
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
         <AtividadeRecenteCard embedded />
       </div>
     </div>

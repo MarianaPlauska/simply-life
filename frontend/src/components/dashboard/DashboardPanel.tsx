@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import {
   AXEL_BORDERLESS_PANEL,
+  AXEL_METRIC_HAIRLINE,
   AXEL_LINK,
   AXEL_SECTION_TITLE,
   AXEL_TEXT_PRIMARY,
@@ -18,6 +19,8 @@ interface DashboardPanelProps
   children: ReactNode
   className?: string
   noPadding?: boolean
+  /** Sem caixa — só hairline de métrica */
+  hairline?: boolean
 }
 
 export function DashboardPanel({
@@ -28,11 +31,16 @@ export function DashboardPanel({
   children,
   className = '',
   noPadding = false,
+  hairline = false,
 }: DashboardPanelProps)
 {
+  const shell = hairline ? AXEL_METRIC_HAIRLINE : AXEL_BORDERLESS_PANEL
+
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} ${noPadding ? 'p-0 overflow-hidden' : ''} ${className}`}>
-      <header className={`flex items-start justify-between gap-3 ${noPadding ? 'px-4 pt-4 pb-3 border-b border-line' : 'mb-4'}`}>
+    <section className={`${shell} ${noPadding && !hairline ? 'p-0 overflow-hidden' : ''} ${className}`}>
+      <header className={`flex items-start justify-between gap-3 ${
+        hairline ? 'mb-2' : noPadding ? 'px-4 pt-4 pb-3 border-b border-line' : 'mb-4'
+      }`}>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             {section && (

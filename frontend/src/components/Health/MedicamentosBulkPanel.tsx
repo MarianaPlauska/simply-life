@@ -13,7 +13,7 @@ import {
   labelDiasSemana,
 } from '../../lib/medicamentosCatalog'
 import type { MedicamentoCategoria, MedicamentoPeriodo } from '../../store/storeTypes'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
 
 interface MedicamentosBulkPanelProps
 {
@@ -243,7 +243,7 @@ export function MedicamentosBulkPanel({
 
   return (
     <div className={`space-y-3 ${compact || cadastro ? '' : 'mt-4'}`}>
-      <div className="sl-panel p-3 sm:p-4 space-y-3">
+      <div className={`${compact ? `${AXEL_METRIC_HAIRLINE} py-3` : 'sl-panel p-3 sm:p-4'} space-y-3`}>
         {!cadastro && (
           <>
             <div className="flex items-center gap-2">
@@ -476,7 +476,7 @@ export function MedicamentosBulkPanel({
       </div>
 
       {queuePreview.length > 0 && (
-        <div className="sl-panel overflow-hidden">
+        <div className={compact ? `${AXEL_METRIC_HAIRLINE} overflow-hidden` : 'sl-panel overflow-hidden'}>
           <header className="px-3 py-2 border-b border-line">
             <p className="font-mono text-[9px] uppercase text-ink-muted">
               {queuePreview.length} na fila
@@ -523,7 +523,7 @@ export function MedicamentosBulkPanel({
       )}
 
       {medicamentos.length > 0 && !cadastro && (
-        <div className="sl-panel overflow-hidden">
+        <div className={compact ? `${AXEL_METRIC_HAIRLINE} overflow-hidden` : 'sl-panel overflow-hidden'}>
           <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line">
             <p className={`text-[11px] font-mono uppercase ${AXEL_TEXT_SECONDARY}`}>
               Cadastrados ({medicamentos.length})

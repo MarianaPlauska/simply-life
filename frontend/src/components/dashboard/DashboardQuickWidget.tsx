@@ -12,11 +12,7 @@ export function DashboardQuickWidget({ id }: { id: DashboardWidgetId })
     case 'wellbeing':
       return <WellbeingDashboardCard />
     case 'water':
-      return (
-        <div id="dashboard-water" className="scroll-mt-20 min-w-0">
-          <WaterWaveCard hero={false} className="w-full" />
-        </div>
-      )
+      return <WaterWaveCard embedded className="w-full" />
     case 'medicamentos':
       return <MedicamentosBulkPanel variant="compact" />
     case 'critical_tasks':

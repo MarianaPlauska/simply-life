@@ -122,7 +122,7 @@ export function HealthRitualStrip()
   const ritualItems = snapshot.items.filter((i) => i.applies && i.id !== 'agua')
 
   return (
-    <section className="min-w-0" aria-label="Seu cuidado hoje">
+    <section className="min-w-0 border-t-[0.5px] border-line pt-3" aria-label="Seu cuidado hoje">
       <p className="text-[13px] font-medium text-ink-muted">
         Cuidado hoje
       </p>

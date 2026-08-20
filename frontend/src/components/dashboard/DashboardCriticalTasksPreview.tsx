@@ -38,6 +38,7 @@ export function DashboardCriticalTasksPreview()
       subtitle={`Top ${PREVIEW_LIMIT} · motor de urgência`}
       action={<DashboardPanelLink label="Kanban →" onClick={() => navigate('/kanban')} />}
       noPadding
+      hairline
       className="h-full"
     >
       <ul className="divide-y divide-line">
@@ -51,7 +52,7 @@ export function DashboardCriticalTasksPreview()
               <button
                 type="button"
                 onClick={() => navigate('/kanban')}
-                className={`w-full flex items-center gap-3 py-3 px-4 text-left ${AXEL_ROW_HOVER}`}
+                className={`w-full flex items-center gap-3 py-2.5 text-left ${AXEL_ROW_HOVER}`}
               >
                 <span className={`font-mono text-[12px] tabular-nums w-6 shrink-0 ${AXEL_TEXT_SECONDARY}`}>
                   {String(idx + 1).padStart(2, '0')}

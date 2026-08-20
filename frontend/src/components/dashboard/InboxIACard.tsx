@@ -66,7 +66,7 @@ export function InboxIACard({ embedded = false }: { embedded?: boolean })
         </header>
       )}
 
-      <div className="flex-1 min-h-[80px] flex flex-col">
+      <div className="flex-1 min-h-0 flex flex-col">
         {!top && (
           <p className={`py-3 text-[13px] flex-1 ${AXEL_TEXT_SECONDARY}`}>
             Fila vazia — aguardando ingestão

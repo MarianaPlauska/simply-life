@@ -6,6 +6,7 @@ import { buildFinanceDailyBrief } from '../../../lib/financeDailyBrief'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_BTN_PRIMARY,
+  AXEL_METRIC_HAIRLINE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
@@ -42,18 +43,24 @@ export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCard
     [transactions, cashAccount.saldo_inicial, reservedBills, contasFixas, cards, categories, budgetLimits],
   )
 
+  const shell = compact
+    ? `${AXEL_METRIC_HAIRLINE} flex flex-col`
+    : `${AXEL_BORDERLESS_PANEL} border-l-[3px] border-l-accent bg-gradient-to-br from-accent/8 to-transparent flex flex-col`
+
   return (
     <div id="dashboard-finance-launch" className="flex flex-col gap-2 min-w-0 scroll-mt-20">
-      <section className={`${AXEL_BORDERLESS_PANEL} border-l-[3px] border-l-accent bg-gradient-to-br from-accent/8 to-transparent flex flex-col`}>
+      <section className={shell}>
         <button
           type="button"
           onClick={() => navigate('/financeiro')}
           className="w-full text-left"
         >
           <div className="flex items-start gap-3">
-            <div className="shrink-0 w-8 h-8 rounded-sl border border-line bg-chrome/50 flex items-center justify-center">
-              <Sparkles size={14} className="text-accent" />
-            </div>
+            {!compact && (
+              <div className="shrink-0 w-8 h-8 rounded-sl border border-line bg-chrome/50 flex items-center justify-center">
+                <Sparkles size={14} className="text-accent" />
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p className={`font-mono text-[9px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
                 Axel · finanças
