@@ -9,7 +9,9 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 import { countLedgerDuplicates } from '../../lib/financeTransactionDedup'
+import { resolveCashTone } from '../../lib/financeBalanceTone'
 import { CashBalanceEditor } from './CashBalanceEditor'
+import { FinanceStabilityMeter } from './FinanceStabilityMeter'
 import { MoneyInput } from '../ui/MoneyInput'
 import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 
@@ -75,6 +77,7 @@ export function FinanceCashAccountCard({
     reservado: computedReservado ?? reservaRestante,
     projetado: computedProjetado ?? saldoProjetadoDisponivel,
   }
+  const cashTone = resolveCashTone(saldoDisponivel, saldoProjetadoDisponivel)
 
   useEffect(() =>
   {
@@ -212,10 +215,13 @@ export function FinanceCashAccountCard({
           </p>
         )}
         {!needsSetup && (
-          <p className={`text-[10px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-            Entrou {fmt(saldoInicial + receitasPagas)} · Pagou {fmt(despesasPagas)}
-            {reservaRestante > 0 && <> · Comprometido {fmt(reservaRestante)}</>}
-          </p>
+          <>
+            <FinanceStabilityMeter tone={cashTone} showHint className="mt-2" />
+            <p className={`text-[10px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
+              Entrou {fmt(saldoInicial + receitasPagas)} · Pagou {fmt(despesasPagas)}
+              {reservaRestante > 0 && <> · Comprometido {fmt(reservaRestante)}</>}
+            </p>
+          </>
         )}
       </button>
 

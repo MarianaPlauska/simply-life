@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { CalendarOff } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useCashPosition } from '../../hooks/useCashPosition'
-import { resolveCashTone, BALANCE_TONE_TEXT } from '../../lib/financeBalanceTone'
+import { resolveCashTone, outlookToneToBalance } from '../../lib/financeBalanceTone'
 import { countLedgerDuplicates } from '../../lib/financeTransactionDedup'
 import { buildMonthOutlook, monthHasLedgerData } from '../../lib/financeMonthOutlook'
 import { maskFinanceValue } from '../../lib/financeHideValues'
@@ -133,9 +133,7 @@ export function FinanceHomeTab({
             receita={kpiReceita}
             despesas={kpiDespesas}
             saldoMes={kpiSaldoMes}
-            balanceToneClass={isFutureMonth
-              ? (outlook.tone === 'urgent' ? 'text-urgente' : outlook.tone === 'caution' ? 'text-atencao' : 'text-finance')
-              : BALANCE_TONE_TEXT[cashTone]}
+            stabilityTone={isFutureMonth ? outlookToneToBalance(outlook.tone) : cashTone}
             compact
             hideValues={hideValues}
             projectionLabels={isFutureMonth}

@@ -1,5 +1,7 @@
 import { maskFinanceValue } from '../../../lib/financeHideValues'
-import { AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
+import type { BalanceTone } from '../../../lib/financeBalanceTone'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
+import { FinanceStabilityMeter } from '../FinanceStabilityMeter'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -10,7 +12,7 @@ interface FinanceMonthKpisRowProps
   receita: number
   despesas: number
   saldoMes?: number
-  balanceToneClass?: string
+  stabilityTone?: BalanceTone
   compact?: boolean
   hideValues?: boolean
   projectionLabels?: boolean
@@ -23,7 +25,7 @@ export function FinanceMonthKpisRow({
   receita,
   despesas,
   saldoMes,
-  balanceToneClass = 'text-finance',
+  stabilityTone,
   compact = false,
   hideValues = false,
   projectionLabels = false,
@@ -80,9 +82,12 @@ export function FinanceMonthKpisRow({
 
       <div className={AXEL_METRIC_HAIRLINE}>
         <p className="sl-eyebrow text-finance">{heroLabel}</p>
-        <p className={`${compact ? 'text-[1.65rem]' : 'sl-metric'} font-sans font-medium tabular-nums tracking-tight mt-1 ${hideValues ? 'text-ink-muted' : balanceToneClass}`}>
+        <p className={`${compact ? 'text-[1.65rem]' : 'sl-metric'} font-sans font-medium tabular-nums tracking-tight mt-1 ${hideValues ? 'text-ink-muted' : AXEL_TEXT_PRIMARY}`}>
           {maskFinanceValue(hideValues, fmt(saldoDisponivel))}
         </p>
+        {stabilityTone && !hideValues && (
+          <FinanceStabilityMeter tone={stabilityTone} className="mt-2" />
+        )}
       </div>
 
       <div className={`grid gap-3 ${rest.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} ${AXEL_METRIC_HAIRLINE} mt-2`}>

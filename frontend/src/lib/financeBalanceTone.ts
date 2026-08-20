@@ -1,26 +1,53 @@
-// Tom visual do saldo — verde / amarelo / vermelho
+// Tom de estabilidade do caixa — sage / âmbar / grafite (sem vermelho de alarme)
 
 export type BalanceTone = 'ok' | 'caution' | 'danger'
 
 export const BALANCE_TONE_TEXT: Record<BalanceTone, string> = {
   ok: 'text-concluido',
   caution: 'text-atencao',
-  danger: 'text-urgente',
+  danger: 'text-ink-muted',
 }
 
 export const BALANCE_TONE_BG: Record<BalanceTone, string> = {
-  ok: 'border-concluido/35 bg-concluido/10',
-  caution: 'border-atencao/35 bg-atencao/10',
-  danger: 'border-urgente/35 bg-urgente/10',
+  ok: 'border-concluido/25 bg-concluido/8',
+  caution: 'border-atencao/30 bg-atencao/8',
+  danger: 'border-line bg-chrome/40',
 }
 
 export const BALANCE_TONE_LABEL: Record<BalanceTone, string> = {
-  ok: 'Saudável',
+  ok: 'Tranquilo',
   caution: 'Atenção',
-  danger: 'Crítico',
+  danger: 'Apertado',
 }
 
-/** Caixa corrente — negativo ou muitas pendências puxam para amarelo/vermelho */
+export const STABILITY_HINT: Record<BalanceTone, string> = {
+  ok: 'Folga confortável neste momento.',
+  caution: 'Folga estreita — gaste com calma.',
+  danger: 'Caixa apertado — priorize o essencial.',
+}
+
+export const STABILITY_BAR: Record<BalanceTone, string> = {
+  ok: 'bg-concluido',
+  caution: 'bg-atencao',
+  danger: 'bg-ink-muted',
+}
+
+const STABILITY_BANDS: BalanceTone[] = ['ok', 'caution', 'danger']
+
+export function stabilityBands(): readonly BalanceTone[]
+{
+  return STABILITY_BANDS
+}
+
+/** Projeção do mês futuro (ok / caution / urgent) → faixa de estabilidade */
+export function outlookToneToBalance(tone: 'ok' | 'caution' | 'urgent'): BalanceTone
+{
+  if (tone === 'urgent') return 'danger'
+  if (tone === 'caution') return 'caution'
+  return 'ok'
+}
+
+/** Caixa corrente — negativo ou folga estreita puxam para atenção/apertado */
 export function resolveCashTone(
   saldoCorrente: number,
   saldoProjetado?: number,
