@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
-import { Zap, Search, Loader2, Sparkles, Radio } from 'lucide-react'
+import { Search, Loader2, Sparkles, Radio } from 'lucide-react'
 import { toast } from 'sonner'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces'
 import { useSuperhumanTasks } from '../../hooks/useSuperhumanTasks'
 import { SuperhumanTaskRow } from './SuperhumanTaskRow'
+import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
 // Modo Superhuman — lista hiperdensa por score (§2.4 "tudo é linha")
 
@@ -44,7 +45,7 @@ export function SuperhumanView()
       <header className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-            <Zap className="w-5 h-5 text-violet-400" />
+            <SimplyLifeMark variant="icon" className="w-8 h-8 shrink-0" />
             Modo Superhuman
             <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 normal-case">
               <Radio className="w-3.5 h-3.5" />

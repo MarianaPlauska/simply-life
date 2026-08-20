@@ -1,10 +1,11 @@
 // tela de redefinição de senha — quando o user clica no link do email de recuperação
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Lock, Eye, EyeOff, Zap, CheckCircle2, Loader2 } from 'lucide-react'
+import { AlertCircle, Lock, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { supabase } from '../../lib/supabase'
 import { AxelLoader } from '../ui/AxelLoader'
+import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
 export function ResetPasswordView ()
 {
@@ -110,9 +111,7 @@ export function ResetPasswordView ()
       <div className="relative z-10 w-full max-w-md mx-4">
         {/* logo */}
         <div className="flex flex-col items-center mb-10">
-          <div className="p-3.5 rounded-2xl bg-zinc-900/60 border border-white/[0.06] backdrop-blur-sm mb-4 shadow-[0_0_40px_rgba(139,92,246,0.06)]">
-            <Zap className="w-8 h-8 text-violet-400" aria-hidden="true" />
-          </div>
+          <SimplyLifeMark variant="lockup" className="mb-5" />
           <h1 className="text-[26px] font-bold text-white tracking-tight">Redefinir Senha</h1>
           <p className="text-[13px] text-zinc-500 mt-1.5 tracking-wide">
             {hasSession ? 'Escolha uma nova senha para sua conta' : 'Link inválido ou expirado'}
