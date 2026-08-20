@@ -42,13 +42,13 @@ export function AxelKanbanColumn({
 
   const shellClass = embedded
     ? `${AXEL_KANBAN_COLUMN_EMBEDDED} ${isOver ? 'bg-accent-muted/20' : ''}`
-    : `${AXEL_KANBAN_COLUMN} p-2 min-h-[320px] flex-1 ${isOver ? 'bg-accent-muted/30 border-accent/30' : ''}`
+    : `${AXEL_KANBAN_COLUMN} ${isOver ? 'bg-accent-muted/30' : ''}`
 
   return (
     <section
       ref={setNodeRef}
       aria-labelledby={`kanban-col-${id}`}
-      className={`flex flex-col min-w-0 w-full h-full ${shellClass}`}
+      className={`flex flex-col min-w-0 ${shellClass}`}
     >
       <header
         id={`kanban-col-${id}`}
@@ -75,15 +75,15 @@ export function AxelKanbanColumn({
       >
         {isEmpty ? (
           <div
-            className={`flex flex-col items-center justify-center flex-1 min-h-[120px] px-2 py-8 text-center ${
+            className={`px-1 py-2 text-left ${
               isOver ? 'text-ink' : AXEL_TEXT_SECONDARY
             }`}
           >
             <p className="text-[13px] font-medium">
               {isOver ? 'Soltar aqui' : 'Nada aqui'}
             </p>
-            <p className={`text-[12px] mt-1.5 max-w-[200px] ${AXEL_TEXT_SECONDARY}`}>
-              {onAddTask ? 'Adicione uma tarefa' : 'Arraste uma tarefa para cá'}
+            <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+              {onAddTask ? 'Adicione uma tarefa' : 'Arraste para cá'}
             </p>
           </div>
         ) : (

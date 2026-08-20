@@ -99,8 +99,8 @@ export function AxelKanbanCard({
       tabIndex={dependencyBlocked ? -1 : 0}
       aria-disabled={dependencyBlocked}
       className={[
-        'group relative flex items-center gap-2.5 w-full text-left min-h-12 py-1.5 px-1 rounded-sl',
-        'hover:bg-chrome/70',
+        'group relative flex items-center gap-2.5 w-full text-left min-h-12 py-1.5 px-2 rounded-sl',
+        'border-[0.5px] border-line hover:border-ink-muted/40',
         featured || isTimerHere ? 'bg-chrome/50' : '',
         dependencyBlocked ? 'opacity-45 pointer-events-none cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
         snoozed ? 'opacity-55' : '',

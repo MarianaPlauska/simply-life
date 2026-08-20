@@ -65,7 +65,7 @@ import {
   AXEL_KANBAN_GLOW,
   AXEL_KANBAN_PAGE,
 } from '../../constants/axelKanbanTheme'
-import { AXEL_BTN_PRIMARY, AXEL_MAIN_PB_MOBILE } from '../../constants/axelSurfaces'
+import { AXEL_BTN_PRIMARY, AXEL_MAIN_PB_MOBILE, AXEL_PAGE_SHELL_FLUID } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
 // Orquestrador Temporal · colunas por horizonte (Bitrix logic)
@@ -658,7 +658,7 @@ export function KanbanView()
       <div className={AXEL_KANBAN_GLOW} aria-hidden />
 
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
-        <div className="shrink-0 max-w-[1680px] mx-auto w-full px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-2 flex items-center gap-2 border-b border-line">
+        <div className={`shrink-0 ${AXEL_PAGE_SHELL_FLUID} px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-2 flex items-center gap-2 border-b border-line`}>
           <div className="min-w-0 flex-1">
             <h1 className="text-[20px] sm:text-[22px] font-sans font-semibold tracking-tight text-ink leading-tight">
               Tarefas
@@ -704,7 +704,7 @@ export function KanbanView()
         </div>
 
         <div
-          className={`flex-1 min-h-0 flex flex-col px-3 sm:px-5 lg:px-7 pb-4 max-w-[1680px] mx-auto w-full transition-opacity duration-200 ${
+          className={`flex-1 min-h-0 flex flex-col px-3 sm:px-5 lg:px-7 pb-4 ${AXEL_PAGE_SHELL_FLUID} transition-opacity duration-200 ${
             viewVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >

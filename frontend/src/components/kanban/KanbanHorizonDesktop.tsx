@@ -1,5 +1,6 @@
 import { AxelKanbanCard } from './AxelKanbanCard'
 import { AxelKanbanColumn } from './AxelKanbanColumn'
+import { AXEL_KANBAN_COL_WIDTH } from '../../constants/axelKanbanTheme'
 import { HORIZON_LABELS, type TemporalHorizon } from '../../lib/temporalHorizon'
 import type { TarefaUnificada } from '../../types'
 
@@ -24,7 +25,7 @@ export function KanbanHorizonDesktop({
 {
   return (
     <div
-      className="hidden lg:flex flex-1 min-h-0 flex-row gap-4 w-full items-stretch overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x"
+      className="hidden lg:flex flex-1 min-h-0 flex-row gap-3 w-full items-start overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x"
       role="region"
       aria-label="Quadro por horizonte"
     >
@@ -36,7 +37,7 @@ export function KanbanHorizonDesktop({
         return (
           <div
             key={horizon}
-            className="w-full lg:w-1/3 lg:min-w-[300px] flex flex-col min-h-0 h-full"
+            className={`${AXEL_KANBAN_COL_WIDTH} flex flex-col min-h-0`}
           >
             <AxelKanbanColumn
               id={horizon}

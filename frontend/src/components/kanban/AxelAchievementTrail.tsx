@@ -82,7 +82,7 @@ export function AxelAchievementTrail()
       className={`shrink-0 border-t border-line ${AXEL_CHROME_PLANE}`}
       aria-label="Concluídas recentemente"
     >
-      <div className="px-5 lg:px-7 py-3 max-w-[1680px] mx-auto w-full">
+      <div className="px-3 sm:px-5 lg:px-7 py-3 w-full">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
           <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
             <h2 className="text-[13px] font-medium text-ink-muted">

@@ -107,7 +107,7 @@ export function KanbanTodayPanel({
               <button
                 type="button"
                 onClick={onReorganize}
-                className="mt-4 min-h-[44px] px-3 text-[13px] font-semibold text-ink hover:bg-chrome rounded-sl"
+                className="mt-2 min-h-[44px] px-3 text-[13px] font-semibold text-ink hover:bg-chrome rounded-sl"
               >
                 AXEL montar fila
               </button>
