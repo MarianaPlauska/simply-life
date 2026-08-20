@@ -59,7 +59,7 @@ export function FinanceMonthKpisRow({
           <button
             type="button"
             onClick={onReconcile}
-            className="text-[12px] px-2.5 py-1.5 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors min-h-[36px]"
+            className="text-[12px] px-2.5 py-1.5 rounded-sl border border-line text-ink-muted hover:text-ink hover:border-line transition-colors min-h-[44px]"
           >
             Recalcular duplicatas
           </button>

@@ -4,11 +4,17 @@ export function healthHeaderSubtitle(
   section: HealthSection,
   cuidados: CuidadosTab,
   stats: { ritualPct: number; ritualDone: number; ritualTotal: number },
+  nut?: { gramas: number; kcal: number },
 ): string
 {
   if (section === 'hoje')
   {
-    return `${stats.ritualDone}/${stats.ritualTotal} cuidados hoje · ${stats.ritualPct}% do ritual`
+    const ritual = `${stats.ritualDone} de ${stats.ritualTotal} cuidados hoje`
+    if (nut && (nut.gramas > 0 || nut.kcal > 0))
+    {
+      return `${ritual} · ${nut.gramas}g proteína · ${nut.kcal} kcal`
+    }
+    return ritual
   }
   if (section === 'diario')
   {
@@ -17,7 +23,9 @@ export function healthHeaderSubtitle(
 
   const labels: Record<CuidadosTab, string> = {
     hidratacao: 'Hidratação · meta alinhada ao ritual do dashboard',
-    alimentacao: 'Alimentação · proteína e refeições do dia',
+    alimentacao: nut && (nut.gramas > 0 || nut.kcal > 0)
+      ? `Alimentação · ${nut.gramas}g proteína · ${nut.kcal} kcal`
+      : 'Alimentação · proteína e refeições do dia',
     academia: 'Academia · treino de hoje ou configurar plano',
     medicamentos: 'Medicamentos · doses e lembretes no horário',
   }

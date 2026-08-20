@@ -11,7 +11,7 @@ interface FinanceReconcileButtonProps
 /** Dispara limpeza de duplicatas, reservas quitadas e lançamentos órfãos */
 export function FinanceReconcileButton({
   label = 'Limpar duplicatas',
-  className = 'font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors min-h-[32px] disabled:opacity-50 disabled:pointer-events-none',
+  className = 'font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-ink hover:border-line transition-colors min-h-[44px] disabled:opacity-50 disabled:pointer-events-none',
 }: FinanceReconcileButtonProps)
 {
   const reconcileFinanceLedger = useTaskStore((s) => s.reconcileFinanceLedger)

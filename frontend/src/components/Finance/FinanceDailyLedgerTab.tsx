@@ -290,7 +290,7 @@ export function FinanceDailyLedgerTab({
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {duplicateCount > 0 && (
-            <FinanceReconcileButton className="font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors" />
+            <FinanceReconcileButton className="font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-ink hover:border-line transition-colors min-h-[44px]" />
           )}
           <p className={`font-mono text-[10px] tabular-nums ${dayNet >= 0 ? 'text-concluido' : 'text-urgente'}`}>
             {dayNet >= 0 ? '+' : ''}{fmt(dayNet)}

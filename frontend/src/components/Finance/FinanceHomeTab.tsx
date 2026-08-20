@@ -17,6 +17,7 @@ import type { FinanceAlertTab } from '../../lib/financeAlerts'
 import { useFinanceAlerts } from '../../hooks/useFinanceAlerts'
 import { FinanceAlertsPanel } from './goals/FinanceAlertsPanel'
 import { FinanceMonthGoalWidget } from './overview/FinanceMonthGoalWidget'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import type { Transaction } from '../../store/storeTypes'
 import type { PlannerLeafTab } from '../../lib/financePlannerNav'
 
@@ -162,11 +163,17 @@ export function FinanceHomeTab({
           </p>
 
           {!isFutureMonth && (
-            <FinanceMonthGoalWidget monthTransactions={monthTransactions} monthOffset={monthOffset} />
-          )}
-
-          {criticalAlerts.length > 0 && !isFutureMonth && (
-            <FinanceAlertsPanel alerts={criticalAlerts} compact onNavigate={onNavigate} />
+            <DashboardCollapsible
+              title="Mais"
+              subtitle="Meta do mês e avisos"
+              borderless
+              defaultOpen={false}
+            >
+              <FinanceMonthGoalWidget monthTransactions={monthTransactions} monthOffset={monthOffset} />
+              {criticalAlerts.length > 0 && (
+                <FinanceAlertsPanel alerts={criticalAlerts} compact onNavigate={onNavigate} />
+              )}
+            </DashboardCollapsible>
           )}
         </>
       )}

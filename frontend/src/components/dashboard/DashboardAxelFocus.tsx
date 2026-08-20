@@ -54,7 +54,7 @@ export function DashboardAxelFocus({ onOpenTask }: DashboardAxelFocusProps)
           <button
             type="button"
             onClick={() => onOpenTask?.(topTask.id)}
-            className={`text-left w-full min-w-0 mt-0.5 ${AXEL_TEXT_PRIMARY}`}
+            className={`text-left w-full min-w-0 mt-0.5 min-h-[44px] ${AXEL_TEXT_PRIMARY}`}
           >
             <span className="font-display text-[15px] leading-snug line-clamp-2">
               {title}

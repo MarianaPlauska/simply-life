@@ -13,8 +13,8 @@ import {
 import { HealthDiaryTab } from './HealthDiaryTab'
 import { HealthTodayPanel } from './HealthTodayPanel'
 import { HealthCuidadosPanel } from './HealthCuidadosPanel'
-import { HealthNutritionStrip } from './HealthNutritionStrip'
 import { healthHeaderSubtitle } from './healthSectionMeta'
+import { snapshotNutricaoHoje } from '../../lib/healthNutrition'
 import {
   AXEL_CANVAS,
   AXEL_MAIN_PB_MOBILE,
@@ -145,12 +145,14 @@ export function HealthView()
   ])
 
   const ritualSnapshot = useHealthRitualSnapshot()
+  const habitos = useTaskStore((s) => s.habitos)
+  const nut = useMemo(() => snapshotNutricaoHoje(habitos), [habitos])
 
   const headerLine = healthHeaderSubtitle(section, cuidadosTab, {
     ritualPct: ritualSnapshot.percent,
     ritualDone: ritualSnapshot.doneCount,
     ritualTotal: ritualSnapshot.totalApplicable,
-  })
+  }, { gramas: nut.gramas, kcal: nut.kcal })
 
   const showHealthSkeleton = !sessionBooted && !userSessionReady
 
@@ -166,7 +168,6 @@ export function HealthView()
               {headerLine}
             </p>
           </div>
-          <HealthNutritionStrip />
         </header>
 
         <nav
@@ -182,7 +183,7 @@ export function HealthView()
                   key={id}
                   type="button"
                   onClick={() => selectSection(id)}
-                  className={`${active ? AXEL_NAV_SUB_ACTIVE : AXEL_NAV_SUB_IDLE} min-h-[44px]`}
+                  className={`${active ? AXEL_NAV_SUB_ACTIVE : AXEL_NAV_SUB_IDLE}`}
                 >
                   <Icon className={`w-3.5 h-3.5 shrink-0 ${active ? 'text-accent' : ''}`} />
                   <span className="sm:hidden">{short}</span>

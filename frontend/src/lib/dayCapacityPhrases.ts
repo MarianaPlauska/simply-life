@@ -75,20 +75,20 @@ const CUIDADO_PHRASES: PhraseTemplate[] = [
 const CUIDADO_MOOD_PHRASES: PhraseTemplate[] = [
   (c) => `Recuperação em curso · ${tasks(c.importantTasks)} e zero cobrança extra.`,
   (c) => `Corpo pedindo cuidado. ${c.bottleneckDetail}`,
-  (c) => `Proteja o básico hoje. O resto espera.`,
+  () => 'Proteja o básico hoje. O resto espera.',
 ]
 
 const CRITICO_PHRASES: PhraseTemplate[] = [
-  (c) => `Hoje pede o essencial, no seu tempo.`,
+  () => 'Hoje pede o essencial, no seu tempo.',
   (c) => `Uma prioridade basta. ${c.bottleneckDetail}`,
-  (c) => `Não force a barra. Quando fizer sentido, olha o básico.`,
-  (c) => `Dia curto de propósito. Estou com você.`,
+  () => 'Não force a barra. Quando fizer sentido, olha o básico.',
+  () => 'Dia curto de propósito. Estou com você.',
   (c) => `Só o que importa agora. ${c.bottleneckDetail}`,
 ]
 
 const SEM_HUMOR_PHRASES: PhraseTemplate[] = [
-  (c) => `Como você está hoje?`,
-  (c) => `Bom te ver. Como você está?`,
+  () => 'Como você está hoje?',
+  () => 'Bom te ver. Como você está?',
   (c) => `Tem ${tasks(c.importantTasks)} em Hoje. Como você está?`,
 ]
 

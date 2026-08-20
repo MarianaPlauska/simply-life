@@ -166,7 +166,7 @@ export function FinanceReservedBillsTab({
               </p>
             </div>
           </div>
-          <FinanceReconcileButton className="font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-urgente hover:border-urgente/40 transition-colors shrink-0" />
+          <FinanceReconcileButton className="font-mono text-[8px] uppercase tracking-wide px-2 py-1 rounded-sl border border-line text-ink-muted hover:text-ink hover:border-line transition-colors shrink-0 min-h-[44px]" />
         </header>
 
         {isDemoData && (

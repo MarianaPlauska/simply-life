@@ -147,7 +147,7 @@ export const AXEL_NAV_MAIN_IDLE =
 
 /** Sub-nav (Diário / Lista / Cartões) — texto + sublinhado, sem caixa */
 export const AXEL_NAV_SUB =
-  'shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-sans transition-colors border-b-2'
+  'shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-sans transition-colors border-b-2 min-h-[44px]'
 
 export const AXEL_NAV_SUB_ACTIVE =
   `${AXEL_NAV_SUB} border-ink text-ink font-semibold`
