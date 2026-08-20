@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react'
 import { Eye, EyeOff, Settings2 } from 'lucide-react'
-import { FinanceMonthStrip } from './FinanceMonthStrip'
-import type { FinanceMonthNavBounds } from '../../lib/financeMonthOutlook'
 import {
   AXEL_PAGE_SHELL,
   AXEL_TEXT_PRIMARY,
@@ -19,33 +17,29 @@ interface FinancePlannerShellProps
 {
   monthLabel: string
   monthOffset: number
-  monthBounds: FinanceMonthNavBounds
-  onMonthSelect: (offset: number) => void
   tabs: FinanceTab[]
   activeTab: string
   onTabChange: (id: string) => void
   onManageCategories: () => void
   hideValues?: boolean
   onToggleHideValues?: () => void
+  viewMenu?: ReactNode
   children: ReactNode
 }
 
 export function FinancePlannerShell({
   monthLabel,
   monthOffset,
-  monthBounds,
-  onMonthSelect,
   tabs,
   activeTab,
   onTabChange,
   onManageCategories,
   hideValues = false,
   onToggleHideValues,
+  viewMenu,
   children,
 }: FinancePlannerShellProps)
 {
-  const showMonthStrip = monthBounds.maxOffset > monthBounds.minOffset
-
   return (
     <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 relative pt-2 sm:pt-3 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-6`}>
       <header className="flex items-center justify-between gap-2 pb-2 border-b border-line">
@@ -59,12 +53,13 @@ export function FinancePlannerShell({
             {monthOffset < 0 && ' · histórico'}
           </p>
         </div>
-        <div className="flex items-center gap-0.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
+          {viewMenu}
           {onToggleHideValues && (
             <button
               type="button"
               onClick={onToggleHideValues}
-              className="p-1.5 rounded-sl border border-line hover:bg-chrome text-ink-muted hover:text-ink"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-sl border border-line hover:bg-chrome text-ink-muted hover:text-ink"
               aria-label={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
               title={hideValues ? 'Mostrar valores' : 'Ocultar valores'}
             >
@@ -74,7 +69,7 @@ export function FinancePlannerShell({
           <button
             type="button"
             onClick={onManageCategories}
-            className="p-1.5 rounded-sl border border-line hover:bg-chrome text-ink-muted"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-sl border border-line hover:bg-chrome text-ink-muted"
             aria-label="Categorias"
             title="Categorias"
           >
@@ -83,40 +78,28 @@ export function FinancePlannerShell({
         </div>
       </header>
 
-      <div className="mb-3">
-        <nav className="flex gap-0.5 overflow-x-auto scrollbar-none border-b border-line" aria-label="Seções financeiras">
-          {tabs.map(({ id, label, icon: Icon }) =>
-          {
-            const active = activeTab === id
-            return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => onTabChange(id)}
-                className={[
-                  'shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-sans sl-touch transition-colors',
-                  active
-                    ? 'font-semibold text-ink border-b-2 border-ink'
-                    : 'text-ink-muted border-b-2 border-transparent hover:text-ink',
-                ].join(' ')}
-              >
-                <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
-                {label}
-              </button>
-            )
-          })}
-        </nav>
-
-        {showMonthStrip && (
-          <div className="border-t border-line px-0.5 pb-1">
-            <FinanceMonthStrip
-              monthOffset={monthOffset}
-              bounds={monthBounds}
-              onSelect={onMonthSelect}
-            />
-          </div>
-        )}
-      </div>
+      <nav className="mb-3 flex gap-0.5 overflow-x-auto scrollbar-none border-b border-line" aria-label="Seções financeiras">
+        {tabs.map(({ id, label, icon: Icon }) =>
+        {
+          const active = activeTab === id
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onTabChange(id)}
+              className={[
+                'shrink-0 inline-flex items-center gap-1.5 px-3 py-2 text-[13px] font-sans min-h-[44px] transition-colors',
+                active
+                  ? 'font-semibold text-ink border-b-2 border-ink'
+                  : 'text-ink-muted border-b-2 border-transparent hover:text-ink',
+              ].join(' ')}
+            >
+              <Icon className="w-3.5 h-3.5" strokeWidth={1.75} />
+              {label}
+            </button>
+          )
+        })}
+      </nav>
 
       <div className="min-w-0 pt-1">{children}</div>
     </div>

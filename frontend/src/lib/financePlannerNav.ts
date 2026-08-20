@@ -48,7 +48,6 @@ export const FINANCE_SUB_TABS: Record<Exclude<PlannerGroup, 'inicio'>, FinanceSu
     { id: 'conta', label: 'Conta' },
     { id: 'cartoes', label: 'Cartões' },
     { id: 'faturas', label: 'A pagar' },
-    { id: 'pagos', label: 'Pagos' },
     { id: 'contas-fixas', label: 'Fixas' },
   ],
   analise: [
@@ -93,14 +92,19 @@ export function defaultSubForGroup(group: PlannerGroup): PlannerLeafTab | null
 export function resolveLeafTab(group: PlannerGroup, sub: PlannerLeafTab | null): PlannerLeafTab
 {
   if (group === 'inicio') return 'inicio'
-  // Legado: aba Configurar virou Conta; Extras integrado em Conta
+  // Legado: aba Configurar virou Conta; Extras integrado em Conta; Pagos vive em A pagar
   if (sub === 'config' || sub === 'extras') return 'conta'
+  if (sub === 'pagos') return 'faturas'
   if (sub && LEAF_TO_GROUP[sub] === group) return sub
   return DEFAULT_SUB[group]
 }
 
 export function navigateToLeaf(leaf: PlannerLeafTab): { group: PlannerGroup; sub: PlannerLeafTab }
 {
+  if (leaf === 'pagos')
+  {
+    return { group: 'contas', sub: 'faturas' }
+  }
   const group = groupFromLeaf(leaf)
   return {
     group,

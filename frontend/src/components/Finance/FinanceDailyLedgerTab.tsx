@@ -64,19 +64,21 @@ interface FinanceDailyLedgerTabProps
 {
   transactions: Transaction[]
   activeCategories: Category[]
-  monthTransactions: Transaction[]
+  dayKey: string
+  onDayKeyChange: (dayKey: string) => void
 }
 
 export function FinanceDailyLedgerTab({
   transactions,
   activeCategories,
+  dayKey,
+  onDayKeyChange,
 }: FinanceDailyLedgerTabProps)
 {
   const addTransaction = useTaskStore((s) => s.addTransaction)
   const cards = useTaskStore((s) => s.cards)
 
   const todayKey = new Date().toISOString().slice(0, 10)
-  const [dayKey, setDayKey] = useState(todayKey)
   const [quickDesc, setQuickDesc] = useState('')
   const [quickVal, setQuickVal] = useState('')
   const [quickCatId, setQuickCatId] = useState<number | ''>('')
@@ -412,8 +414,8 @@ export function FinanceDailyLedgerTab({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setDayKey((k) => shiftDayKey(k, -1))}
-            className="p-2 rounded-sl border border-line hover:bg-chrome text-ink-muted shrink-0"
+            onClick={() => onDayKeyChange(shiftDayKey(dayKey, -1))}
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-sl border border-line hover:bg-chrome text-ink-muted shrink-0"
             aria-label="Dia anterior"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -429,8 +431,8 @@ export function FinanceDailyLedgerTab({
             ) : (
               <button
                 type="button"
-                onClick={() => setDayKey(todayKey)}
-                className="font-mono text-[10px] uppercase text-accent hover:underline mt-0.5"
+                onClick={() => onDayKeyChange(todayKey)}
+                className="font-mono text-[10px] uppercase text-accent hover:underline mt-0.5 min-h-[44px]"
               >
                 Voltar para hoje
               </button>
@@ -438,23 +440,13 @@ export function FinanceDailyLedgerTab({
           </div>
           <button
             type="button"
-            onClick={() => setDayKey((k) => shiftDayKey(k, 1))}
-            className="p-2 rounded-sl border border-line hover:bg-chrome text-ink-muted shrink-0"
+            onClick={() => onDayKeyChange(shiftDayKey(dayKey, 1))}
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-sl border border-line hover:bg-chrome text-ink-muted shrink-0"
             aria-label="Próximo dia"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-        <label className={`block mt-2.5 font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
-          Outra data
-          <input
-            type="date"
-            value={dayKey}
-            onChange={(e) => setDayKey(e.target.value)}
-            className={`mt-1 w-full ${AXEL_FIELD_INPUT} py-2 text-sm`}
-            aria-label="Escolher data"
-          />
-        </label>
       </section>
 
       {dayListSection}

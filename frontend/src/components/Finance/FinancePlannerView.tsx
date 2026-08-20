@@ -27,6 +27,7 @@ import {
 import { useTaskStore } from '../../store/useTaskStore';
 import { FinancePlannerShell } from './FinancePlannerShell';
 import { FinanceSectionNav } from './FinanceSectionNav';
+import { FinanceViewMenu } from './FinanceViewMenu';
 import { FinanceCategories } from './FinanceCategories';
 import { FinanceOverviewTab } from './FinanceOverviewTab';
 import { FinanceTransactionsTab } from './FinanceTransactionsTab';
@@ -40,12 +41,23 @@ import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 import { clampFinanceMonthOffset, getFinanceMonthNavBounds } from '../../lib/financeMonthOutlook';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
 import { FinanceCashTab } from './FinanceCashTab';
-import { FinanceKanbanPaymentsPanel } from './overview/FinanceKanbanPaymentsPanel';
 import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup';
 import { NewGoalModal } from './NewGoalModal';
 import { BentoGridSkeleton } from '../ui/Skeleton';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+function todayIsoKey(): string
+{
+  return new Date().toISOString().slice(0, 10)
+}
+
+function monthOffsetFromDayKey(dayKey: string): number
+{
+  const d = new Date(`${dayKey}T12:00:00`)
+  const now = new Date()
+  return (d.getFullYear() - now.getFullYear()) * 12 + (d.getMonth() - now.getMonth())
+}
 
 export function FinancePlannerView() {
   const transactions = useTaskStore((s) => s.transactions);
@@ -70,6 +82,12 @@ export function FinancePlannerView() {
     setNavGroup(group);
     const def = defaultSubForGroup(group);
     if (def) setLeafTab(def);
+    // Abrir Movimentos já no Diário de hoje, sem chrome extra
+    if (group === 'movimentos')
+    {
+      setDayKey(todayIsoKey());
+      setMonthOffset(0);
+    }
   };
 
   const goToLeaf = (leaf: PlannerLeafTab) =>
@@ -82,6 +100,7 @@ export function FinancePlannerView() {
   const [showCatModal, setShowCatModal] = useState(false);
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
+  const [dayKey, setDayKey] = useState(todayIsoKey);
   const [filterCat, setFilterCat] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [editingBudget, setEditingBudget] = useState<number | null>(null);
@@ -110,9 +129,9 @@ export function FinancePlannerView() {
       }, { replace: true });
       return;
     }
-    if (aba === 'faturas')
+    if (aba === 'faturas' || aba === 'pagos')
     {
-      const target = navigateToLeaf('faturas');
+      const target = navigateToLeaf(aba === 'pagos' ? 'pagos' : 'faturas');
       setNavGroup(target.group);
       setLeafTab(target.sub);
       setSearchParams((prev) =>
@@ -264,21 +283,63 @@ export function FinancePlannerView() {
     setEditingBudget(null);
   };
 
-  const subTabs = navGroup !== 'inicio' ? FINANCE_SUB_TABS[navGroup] : undefined;
+  const subTabs = navGroup === 'contas' || navGroup === 'analise'
+    ? FINANCE_SUB_TABS[navGroup]
+    : undefined;
   const showFinanceSkeleton = financeLoading;
+
+  const applyDayKey = (key: string) =>
+  {
+    setDayKey(key);
+    setMonthOffset(clampFinanceMonthOffset(monthOffsetFromDayKey(key), monthBounds));
+  };
+
+  const applyMonthOffset = (offset: number) =>
+  {
+    setMonthOffset(clampFinanceMonthOffset(offset, monthBounds));
+  };
 
   return (
     <FinancePlannerShell
       monthLabel={monthLabel}
       monthOffset={monthOffset}
-      monthBounds={monthBounds}
-      onMonthSelect={(o) => setMonthOffset(clampFinanceMonthOffset(o, monthBounds))}
       tabs={FINANCE_MAIN_TABS}
       activeTab={navGroup}
       onTabChange={(id) => goToGroup(id as PlannerGroup)}
       onManageCategories={() => setShowCatModal(true)}
       hideValues={hideValues}
       onToggleHideValues={toggleHideValues}
+      viewMenu={(
+        <FinanceViewMenu
+          monthOffset={monthOffset}
+          monthBounds={monthBounds}
+          monthLabel={monthLabel}
+          dayKey={dayKey}
+          activeLeaf={activeLeaf}
+          showFormats={navGroup === 'movimentos'}
+          onSelectToday={() =>
+          {
+            applyDayKey(todayIsoKey());
+            if (navGroup === 'movimentos') setLeafTab('diario');
+          }}
+          onSelectThisMonth={() =>
+          {
+            applyMonthOffset(0);
+            if (navGroup === 'movimentos') setLeafTab('tabela');
+          }}
+          onSelectMonth={(offset) =>
+          {
+            applyMonthOffset(offset);
+            if (navGroup === 'movimentos') setLeafTab('tabela');
+          }}
+          onSelectDay={(key) =>
+          {
+            applyDayKey(key);
+            goToLeaf('diario');
+          }}
+          onSelectFormat={(leaf) => setLeafTab(leaf)}
+        />
+      )}
     >
       {showFinanceSkeleton ? (
         <BentoGridSkeleton variant="finance" />
@@ -357,7 +418,8 @@ export function FinancePlannerView() {
         <FinanceDailyLedgerTab
           transactions={transactions}
           activeCategories={activeCategories}
-          monthTransactions={monthTx}
+          dayKey={dayKey}
+          onDayKeyChange={applyDayKey}
         />
       )}
 
@@ -430,11 +492,7 @@ export function FinancePlannerView() {
       )}
 
       {activeLeaf === 'faturas' && (
-        <FinanceReservedBillsTab />
-      )}
-
-      {activeLeaf === 'pagos' && (
-        <FinanceKanbanPaymentsPanel
+        <FinanceReservedBillsTab
           monthLabel={monthLabel}
           viewYear={viewYear}
           viewMonth={viewMonth}

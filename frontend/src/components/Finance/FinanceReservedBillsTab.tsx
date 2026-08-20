@@ -16,6 +16,8 @@ import { ReservedBillsSummaryBar } from './reserved-bills/ReservedBillsSummaryBa
 import { UpcomingPayablesSection } from './UpcomingPayablesSection'
 import { PaymentMethodPicker } from './PaymentMethodPicker'
 import { FinanceReconcileButton } from './FinanceReconcileButton'
+import { FinanceKanbanPaymentsPanel } from './overview/FinanceKanbanPaymentsPanel'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { MoneyInput } from '../ui/MoneyInput'
 import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 import { isPaidInSettlements } from '../../lib/financeLedgerReconcile'
@@ -27,7 +29,18 @@ import {
 
 const todayIso = () => new Date().toISOString().slice(0, 10)
 
-export function FinanceReservedBillsTab()
+interface FinanceReservedBillsTabProps
+{
+  monthLabel?: string
+  viewYear?: number
+  viewMonth?: number
+}
+
+export function FinanceReservedBillsTab({
+  monthLabel,
+  viewYear,
+  viewMonth,
+}: FinanceReservedBillsTabProps)
 {
   const cards = useTaskStore((s) => s.cards)
   const reservedBills = useTaskStore((s) => s.reservedBills)
@@ -253,6 +266,19 @@ export function FinanceReservedBillsTab()
           </ul>
         )}
       </section>
+
+      <DashboardCollapsible
+        title="Já pagos"
+        subtitle="Quitados neste mês — toque para abrir o registro"
+        borderless
+        defaultOpen={false}
+      >
+        <FinanceKanbanPaymentsPanel
+          monthLabel={monthLabel}
+          viewYear={viewYear}
+          viewMonth={viewMonth}
+        />
+      </DashboardCollapsible>
 
       {!showForm && (
         <button
