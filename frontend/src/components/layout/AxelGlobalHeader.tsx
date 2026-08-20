@@ -21,6 +21,7 @@ import {
 } from '../../constants/axelSurfaces'
 
 import { normalizePinnedModules, PINNED_DASHBOARD_ID } from '../../store/slices/uiSlice'
+import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
 // Header global AXEL — navegação, notificações e acessibilidade em todas as páginas
 
@@ -168,6 +169,7 @@ export function AxelGlobalHeader()
           <AxelPageBack />
           {showBreadcrumbPage && (
             <>
+              <SimplyLifeMark variant="icon" className="w-7 h-7 hidden md:block" />
               <span className={`text-[11px] font-sans tracking-wide hidden md:inline ${AXEL_TEXT_SECONDARY}`}>Simply-Life</span>
               <span className="text-ink-muted hidden md:inline">/</span>
               <span className={`text-[13px] sm:text-[14px] font-display truncate max-w-[7rem] sm:max-w-[12rem] md:max-w-none ${AXEL_TEXT_PRIMARY}`}>

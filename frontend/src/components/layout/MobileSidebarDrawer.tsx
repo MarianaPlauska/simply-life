@@ -3,7 +3,8 @@ import { X } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { NAV_GROUPS } from './Sidebar'
 import { useTaskStore } from '../../store/useTaskStore'
-import { AXEL_NAV_PLANE, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE, AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
+import { AXEL_NAV_PLANE, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE } from '../../constants/axelSurfaces'
+import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
 // Drawer de navegação no mobile — mesma estrutura da sidebar desktop
 
@@ -54,7 +55,7 @@ export function MobileSidebarDrawer()
       />
       <aside className={`absolute inset-y-0 left-0 w-[min(18rem,88vw)] flex flex-col shadow-2xl ${AXEL_NAV_PLANE}`}>
         <div className="h-14 px-4 flex items-center justify-between border-b border-line shrink-0">
-          <span className={`text-[14px] font-display ${AXEL_TEXT_PRIMARY}`}>Simply-Life</span>
+          <SimplyLifeMark variant="lockup" />
           <button
             type="button"
             onClick={() => setOpen(false)}

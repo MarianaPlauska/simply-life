@@ -10,6 +10,7 @@ import {
   AXEL_NAV_PLANE, AXEL_TEXT_PRIMARY, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE,
   AXEL_AVATAR, AXEL_AVATAR_INITIALS, AXEL_BTN_PRIMARY,
 } from '../../constants/axelSurfaces'
+import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
 // Sidebar — plano de navegação (#121214) separado do conteúdo (#09090B)
 
@@ -136,15 +137,7 @@ export function Sidebar()
   return (
     <aside className={`hidden md:flex w-60 shrink-0 min-h-screen sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col overflow-hidden`}>
       <div className="px-5 h-16 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2.5">
-          <div className="w-2 h-2 rounded-sl bg-accent shrink-0" />
-          <div className="flex flex-col leading-tight">
-            <span className={`text-[13px] font-display tracking-tight ${AXEL_TEXT_PRIMARY}`}>
-              Simply-Life
-            </span>
-            <span className="font-mono text-[9px] tracking-[0.2em] text-ink-muted mt-0.5 uppercase">OS</span>
-          </div>
-        </div>
+        <SimplyLifeMark variant="lockup" />
         <button onClick={toggleSidebar} className="p-1.5 text-ink-muted hover:text-ink hover:bg-chrome transition-colors">
           <PanelLeftClose className="w-4 h-4" />
         </button>

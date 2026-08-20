@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2 } from 'lucide-react'
+import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
 const FEATURE_KEYS = [
   'login.hero_feature_1',
@@ -13,7 +14,7 @@ export function LoginHero()
 
   return (
     <div className="hidden lg:flex flex-col justify-center px-12 xl:px-16 py-12 max-w-lg">
-      <p className="sl-eyebrow mb-5">Simply-Life OS</p>
+      <SimplyLifeMark variant="lockup" className="mb-6" />
       <h1 className="text-[36px] xl:text-[42px] font-display text-ink leading-[1.1] tracking-tight">
         {t('login.hero_title')}
       </h1>

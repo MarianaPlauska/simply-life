@@ -16,6 +16,7 @@ import { isLocalGuestUser } from '../../lib/authSession';
 import { demoLoginEmail, demoLoginPassword, resetDemoWorkspaceOnLogin } from '../../lib/demoWorkspace';
 import { LoginHero } from './LoginHero';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
+import { SimplyLifeMark } from '../brand/SimplyLifeMark';
 import { getPendingTotpFactorId, verifyTotpCode } from '../../lib/mfaAssurance';
 
 function GoogleLogo({ className }: { className?: string })
@@ -349,6 +350,9 @@ export function LoginView()
 
           <div className="w-full max-w-md mx-auto lg:max-w-none">
             <div className="lg:hidden mb-8 text-center">
+              <div className="flex justify-center mb-4">
+                <SimplyLifeMark variant="icon" className="w-14 h-14" />
+              </div>
               <p className="sl-eyebrow mb-3">Simply-Life OS</p>
               <h1 className="text-[26px] font-display text-ink leading-tight">{t('login.title')}</h1>
               <p className="text-[13px] text-ink-muted mt-2">{t('login.subtitle')}</p>
