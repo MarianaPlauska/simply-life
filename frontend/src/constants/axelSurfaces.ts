@@ -239,9 +239,21 @@ export const AXEL_DISPLAY_STAT =
 /** Separador de seção no dashboard */
 export const AXEL_SECTION_DIVIDER = 'border-t border-line/80 pt-8'
 
+/** Métrica / resumo — hairline, sem caixa fechada */
+export const AXEL_METRIC_HAIRLINE =
+  'border-t-[0.5px] border-line pt-3'
+
 /** Contêiner de página — desktop fluido; mobile sem restrição extra além do viewport */
 export const AXEL_PAGE_SHELL =
   'w-full max-w-none lg:max-w-[1400px] xl:max-w-[1600px] mx-auto'
+
+/** Coluna de leitura — Home, overview Finanças, Saúde */
+export const AXEL_PAGE_SHELL_READING =
+  'w-full max-w-[720px] mx-auto'
+
+/** Kanban e boards — ocupa o main inteiro, sem cap de largura */
+export const AXEL_PAGE_SHELL_FLUID =
+  'w-full max-w-none mx-auto'
 
 /** Mobile com coluna estreita (saúde, perfil) — só expande a partir de lg */
 export const AXEL_PAGE_SHELL_MOBILE_NARROW =
