@@ -2,6 +2,7 @@ import {
   CARD_QUICK_SUBTYPES,
   type CardQuickSubtype,
 } from '../../lib/financeCardQuickSubtypes'
+import { AXEL_ICON_STROKE, resolveAxelIcon } from '../../lib/axelIconMap'
 import {
   AXEL_FILTER_PILL_ACTIVE,
   AXEL_FILTER_PILL_IDLE,
@@ -58,6 +59,7 @@ function renderSubtypeButton(
   const tone = active
     ? `${AXEL_FILTER_PILL_ACTIVE} border-accent/40`
     : `${AXEL_FILTER_PILL_IDLE} border-line hover:bg-chrome`
+  const Icon = resolveAxelIcon(st.icon)
 
   if (layout === 'scroll')
   {
@@ -66,9 +68,9 @@ function renderSubtypeButton(
         key={st.id}
         type="button"
         onClick={() => onSelect(st)}
-        className={`shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-sl border min-h-[34px] transition-colors ${tone}`}
+        className={`shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-sl border min-h-[44px] transition-colors ${tone}`}
       >
-        <span className="text-sm leading-none" aria-hidden>{st.emoji}</span>
+        <Icon className="w-4 h-4 text-ink-muted" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
         <span className="font-mono text-[9px] uppercase whitespace-nowrap">{st.label}</span>
       </button>
     )
@@ -81,7 +83,7 @@ function renderSubtypeButton(
       onClick={() => onSelect(st)}
       className={`flex flex-col items-center justify-center gap-0.5 min-h-[48px] rounded-sl border px-1 py-1.5 transition-colors ${tone}`}
     >
-      <span className="text-base leading-none" aria-hidden>{st.emoji}</span>
+      <Icon className="w-4 h-4 text-ink-muted" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
       <span className="font-mono text-[8px] uppercase leading-tight text-center">
         {st.label}
       </span>

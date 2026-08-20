@@ -4,22 +4,22 @@ export interface CardQuickSubtype
 {
   id: string
   label: string
-  emoji: string
+  icon: string
   categoria: string
 }
 
 export const CARD_QUICK_SUBTYPES: CardQuickSubtype[] = [
-  { id: 'lanche', label: 'Lanche', emoji: '🥪', categoria: 'alimentacao' },
-  { id: 'almoco', label: 'Almoço', emoji: '🍽️', categoria: 'alimentacao' },
-  { id: 'mercado', label: 'Mercado', emoji: '🛒', categoria: 'alimentacao' },
-  { id: 'cafe', label: 'Café', emoji: '☕', categoria: 'alimentacao' },
-  { id: 'roupa', label: 'Roupa', emoji: '👕', categoria: 'vestuario' },
-  { id: 'presente', label: 'Presente', emoji: '🎁', categoria: 'outros' },
-  { id: 'transporte', label: 'Transporte', emoji: '🚗', categoria: 'transporte' },
-  { id: 'farmacia', label: 'Farmácia', emoji: '💊', categoria: 'saude' },
-  { id: 'lazer', label: 'Lazer', emoji: '🎬', categoria: 'lazer' },
-  { id: 'assinatura', label: 'Assinatura', emoji: '📱', categoria: 'internet' },
-  { id: 'outro', label: 'Outro', emoji: '✏️', categoria: 'outros' },
+  { id: 'lanche', label: 'Lanche', icon: 'lanche', categoria: 'alimentacao' },
+  { id: 'almoco', label: 'Almoço', icon: 'almoco', categoria: 'alimentacao' },
+  { id: 'mercado', label: 'Mercado', icon: 'mercado', categoria: 'alimentacao' },
+  { id: 'cafe', label: 'Café', icon: 'cafe', categoria: 'alimentacao' },
+  { id: 'roupa', label: 'Roupa', icon: 'roupa', categoria: 'vestuario' },
+  { id: 'presente', label: 'Presente', icon: 'presente', categoria: 'outros' },
+  { id: 'transporte', label: 'Transporte', icon: 'transporte', categoria: 'transporte' },
+  { id: 'farmacia', label: 'Farmácia', icon: 'farmacia', categoria: 'saude' },
+  { id: 'lazer', label: 'Lazer', icon: 'lazer', categoria: 'lazer' },
+  { id: 'assinatura', label: 'Assinatura', icon: 'assinatura', categoria: 'internet' },
+  { id: 'outro', label: 'Outro', icon: 'outro', categoria: 'outros' },
 ]
 
 /** Valores comuns para toque rápido (VR, lanches, etc.) */

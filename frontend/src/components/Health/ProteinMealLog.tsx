@@ -11,6 +11,7 @@ import {
 import { fetchProteinEstimate } from '../../lib/estimateProteinApi'
 import { kcalFromProteinGrams } from '../../lib/healthNutrition'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_ICON_STROKE, resolveAxelIcon } from '../../lib/axelIconMap'
 import { ProteinFoodQuickAdd } from './ProteinFoodQuickAdd'
 
 export function ProteinMealLog()
@@ -152,6 +153,7 @@ export function ProteinMealLog()
         {
           const ativo = r.id === refeicao
           const sub = porRefeicao[r.id] ?? 0
+          const Icon = resolveAxelIcon(r.icon)
           return (
             <button
               key={r.id}
@@ -163,7 +165,7 @@ export function ProteinMealLog()
                   : 'border-zinc-200/80 dark:border-line bg-transparent text-zinc-500 hover:text-zinc-700 dark:hover:bg-chrome/60'
               }`}
             >
-              <span className="text-lg">{r.emoji}</span>
+              <Icon className="w-5 h-5" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
               <span className="font-mono text-[8px] uppercase">{r.label}</span>
               {sub > 0 && (
                 <span className="font-mono text-[9px] text-amber-600 dark:text-amber-300 tabular-nums">{sub}g</span>

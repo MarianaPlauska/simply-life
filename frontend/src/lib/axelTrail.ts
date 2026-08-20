@@ -10,7 +10,7 @@ export interface XpSourceRule
 {
   id: string
   module: XpModule
-  emoji: string
+  icon: string
   action: string
   xp: string
   hint: string
@@ -32,7 +32,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'task',
     module: 'foco',
-    emoji: '⚡',
+    icon: 'task',
     action: 'Concluir tarefa no Kanban',
     xp: '+8 a +28',
     hint: 'Score de urgência com teto — não pula níveis de uma vez.',
@@ -40,7 +40,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'focus',
     module: 'foco',
-    emoji: '🎯',
+    icon: 'focus',
     action: 'Sessão de foco / Pomodoro',
     xp: '+12',
     hint: 'Minutos registrados somam ao módulo Foco.',
@@ -48,7 +48,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'streak',
     module: 'foco',
-    emoji: '🔥',
+    icon: 'streak',
     action: 'Salvar a ofensiva do dia',
     xp: 'ofensiva',
     hint: '1 tarefa + humor/ritual = dia válido (sem XP extra automático).',
@@ -56,7 +56,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'water',
     module: 'vitalidade',
-    emoji: '💧',
+    icon: 'water',
     action: 'Registrar água, medicamento ou treino',
     xp: '+5 a +12',
     hint: 'Pequenas vitórias contam — estilo Finch.',
@@ -64,7 +64,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'mood',
     module: 'vitalidade',
-    emoji: '💛',
+    icon: 'mood',
     action: 'Check-in de humor',
     xp: '+5',
     hint: 'Calibrar o AXEL para o seu dia.',
@@ -72,7 +72,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'finance',
     module: 'estabilidade',
-    emoji: '💰',
+    icon: 'finance',
     action: 'Lançar movimento financeiro',
     xp: '+5 a +15',
     hint: 'Reconciliar e fechar mês valem um pouco mais.',
@@ -80,7 +80,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'quest',
     module: 'foco',
-    emoji: '📜',
+    icon: 'quest',
     action: 'Completar missão diária',
     xp: '+5 a +8',
     hint: 'Aparece no dashboard e no Kanban.',
@@ -88,7 +88,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'daily_cap',
     module: 'foco',
-    emoji: '⏳',
+    icon: 'daily_cap',
     action: 'Teto diário de XP',
     xp: `${DAILY_XP_CAP}/dia`,
     hint: `${XP_PER_LEVEL} XP por nível — ~6 dias ativos para subir.`,
@@ -101,25 +101,25 @@ export interface TrailSkillNode
   module: XpModule
   skill: string
   unlock: string
-  emoji: string
+  icon: string
 }
 
 /** Trilha estilo Duolingo — nós de habilidade por nível */
 export const TRAIL_SKILL_PATH: TrailSkillNode[] = [
-  { level: 1, module: 'foco', skill: 'Ofensiva', unlock: 'Dashboard + streak', emoji: '🔥' },
-  { level: 2, module: 'vitalidade', skill: 'Hidratação', unlock: 'Widget água', emoji: '💧' },
-  { level: 3, module: 'foco', skill: 'Consulta AXEL', unlock: 'Posso fazer hoje?', emoji: '💬' },
-  { level: 3, module: 'vitalidade', skill: 'Capacidade', unlock: 'Termômetro do dia', emoji: '🌡️' },
-  { level: 4, module: 'foco', skill: 'Episódio', unlock: 'Narrativa semanal', emoji: '📖' },
-  { level: 5, module: 'estabilidade', skill: 'Círculo', unlock: 'Convidar amigos', emoji: '👥' },
-  { level: 5, module: 'estabilidade', skill: 'Posso comprar?', unlock: 'E11 no lançamento', emoji: '🛒' },
-  { level: 7, module: 'foco', skill: 'Coach IA', unlock: 'Tom direto + layout', emoji: '🎯' },
-  { level: 8, module: 'vitalidade', skill: 'Sinais', unlock: 'Notas → nudges', emoji: '📝' },
-  { level: 9, module: 'estabilidade', skill: 'Previsão', unlock: 'Mini forecast 7 dias', emoji: '📅' },
-  { level: 10, module: 'foco', skill: 'Veterano', unlock: 'Molduras + badge', emoji: '🛡️' },
-  { level: 11, module: 'vitalidade', skill: 'Recuperação', unlock: 'Modo automático Finch', emoji: '🌿' },
-  { level: 15, module: 'vitalidade', skill: 'Aura', unlock: 'Recap com estilo', emoji: '✨' },
-  { level: 20, module: 'foco', skill: 'Mestre', unlock: 'Endgame cosmético', emoji: '👑' },
+  { level: 1, module: 'foco', skill: 'Ofensiva', unlock: 'Dashboard + streak', icon: 'streak' },
+  { level: 2, module: 'vitalidade', skill: 'Hidratação', unlock: 'Widget água', icon: 'water' },
+  { level: 3, module: 'foco', skill: 'Consulta AXEL', unlock: 'Posso fazer hoje?', icon: 'chat' },
+  { level: 3, module: 'vitalidade', skill: 'Capacidade', unlock: 'Termômetro do dia', icon: 'thermometer' },
+  { level: 4, module: 'foco', skill: 'Episódio', unlock: 'Narrativa semanal', icon: 'book' },
+  { level: 5, module: 'estabilidade', skill: 'Círculo', unlock: 'Convidar amigos', icon: 'users' },
+  { level: 5, module: 'estabilidade', skill: 'Posso comprar?', unlock: 'E11 no lançamento', icon: 'shopping-cart' },
+  { level: 7, module: 'foco', skill: 'Coach IA', unlock: 'Tom direto + layout', icon: 'focus' },
+  { level: 8, module: 'vitalidade', skill: 'Sinais', unlock: 'Notas → nudges', icon: 'quest' },
+  { level: 9, module: 'estabilidade', skill: 'Previsão', unlock: 'Mini forecast 7 dias', icon: 'calendar' },
+  { level: 10, module: 'foco', skill: 'Veterano', unlock: 'Molduras + badge', icon: 'shield' },
+  { level: 11, module: 'vitalidade', skill: 'Recuperação', unlock: 'Modo automático Finch', icon: 'leaf' },
+  { level: 15, module: 'vitalidade', skill: 'Aura', unlock: 'Recap com estilo', icon: 'sparkles' },
+  { level: 20, module: 'foco', skill: 'Mestre', unlock: 'Endgame cosmético', icon: 'crown' },
 ]
 
 export const TRAIL_MILESTONES: TrailMilestone[] = [

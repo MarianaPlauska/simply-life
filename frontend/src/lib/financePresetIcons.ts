@@ -1,43 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
-import {
-  Car,
-  Clapperboard,
-  Coffee,
-  Fuel,
-  Pill,
-  QrCode,
-  ShoppingCart,
-  Smartphone,
-  Utensils,
-  Wallet,
-} from 'lucide-react'
 import type { Category } from '../store/storeTypes'
 import type { ExpensePreset } from './financeExpensePresets'
-
-const ICONS: Record<string, LucideIcon> = {
-  'qr-code': QrCode,
-  car: Car,
-  utensils: Utensils,
-  coffee: Coffee,
-  'shopping-cart': ShoppingCart,
-  pill: Pill,
-  smartphone: Smartphone,
-  fuel: Fuel,
-  clapperboard: Clapperboard,
-  wallet: Wallet,
-}
-
-const BY_PRESET_ID: Record<string, LucideIcon> = {
-  'preset-pix': QrCode,
-  'preset-uber': Car,
-  'preset-almoco': Utensils,
-  'preset-cafe': Coffee,
-  'preset-mercado': ShoppingCart,
-  'preset-farmacia': Pill,
-  'preset-assinatura': Smartphone,
-  'preset-gasolina': Fuel,
-  'preset-lazer': Clapperboard,
-}
+import { resolveAxelIcon } from './axelIconMap'
 
 const FALLBACK_COLORS: Record<string, string> = {
   outros: '#6366F1',
@@ -50,11 +14,7 @@ const FALLBACK_COLORS: Record<string, string> = {
 
 export function resolvePresetIcon(preset: ExpensePreset): LucideIcon
 {
-  if (preset.icon && ICONS[preset.icon])
-  {
-    return ICONS[preset.icon]
-  }
-  return BY_PRESET_ID[preset.id] ?? Wallet
+  return resolveAxelIcon(preset.icon ?? preset.id)
 }
 
 export function resolvePresetColor(preset: ExpensePreset, categories: Category[]): string

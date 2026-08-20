@@ -13,6 +13,7 @@ import {
   type XpModule,
 } from '../../lib/axelTrail'
 import { computeUnlockedCosmeticIds } from '../../lib/axelCosmetics'
+import { AXEL_ICON_STROKE, resolveAxelIcon } from '../../lib/axelIconMap'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_PROGRESS,
@@ -118,12 +119,13 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
             {XP_SOURCE_RULES.map((rule) =>
             {
               const Icon = MODULE_ICON[rule.module]
+              const RuleIcon = resolveAxelIcon(rule.icon)
               return (
                 <li
                   key={rule.id}
                   className="flex gap-3 p-2.5 rounded-sl border border-line/80 bg-chrome/20"
                 >
-                  <span className="text-lg shrink-0" aria-hidden>{rule.emoji}</span>
+                  <RuleIcon className="w-5 h-5 shrink-0 text-ink-muted mt-0.5" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
@@ -152,6 +154,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
           {
             const unlocked = profile.level >= node.level
             const Icon = MODULE_ICON[node.module]
+            const NodeIcon = resolveAxelIcon(node.icon)
             return (
               <li key={`${node.level}-${node.skill}`} className="relative">
                 <span
@@ -162,7 +165,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
                 />
                 <div className={`p-2.5 rounded-sl border ${unlocked ? 'border-accent/30 bg-accent/5' : 'border-line bg-chrome/20 opacity-80'}`}>
                   <div className="flex items-center gap-2">
-                    <span className="text-base" aria-hidden>{node.emoji}</span>
+                    <NodeIcon className="w-5 h-5 shrink-0 text-ink-muted" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
                     <div className="min-w-0 flex-1">
                       <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
                         Nv {node.level} · {node.skill}

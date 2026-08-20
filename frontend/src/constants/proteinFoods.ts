@@ -11,11 +11,11 @@ export interface ProteinFood
   kcal: number
 }
 
-export const REFEICOES_PROTEINA: { id: RefeicaoId; label: string; emoji: string }[] = [
-  { id: 'cafe', label: 'Café', emoji: '☕' },
-  { id: 'almoco', label: 'Almoço', emoji: '🍽️' },
-  { id: 'jantar', label: 'Jantar', emoji: '🌙' },
-  { id: 'lanche', label: 'Lanche', emoji: '🥤' },
+export const REFEICOES_PROTEINA: { id: RefeicaoId; label: string; icon: string }[] = [
+  { id: 'cafe', label: 'Café', icon: 'cafe' },
+  { id: 'almoco', label: 'Almoço', icon: 'almoco' },
+  { id: 'jantar', label: 'Jantar', icon: 'jantar' },
+  { id: 'lanche', label: 'Lanche', icon: 'lanche' },
 ]
 
 export const ALIMENTOS_PROTEINA: Record<RefeicaoId, ProteinFood[]> = {

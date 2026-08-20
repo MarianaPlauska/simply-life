@@ -11,7 +11,7 @@ export interface ExpensePreset
 {
   id: string
   label: string
-  /** Chave do ícone Lucide — ver financePresetIcons */
+  /** Chave do ícone Lucide — ver axelIconMap */
   icon?: string
   /** @deprecated migrado para icon */
   emoji?: string

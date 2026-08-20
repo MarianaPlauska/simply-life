@@ -1,11 +1,12 @@
 import { useTaskStore } from '../../store/useTaskStore'
 import { upsertHabitHistorico } from '../../lib/habitHistorico'
 import { AXEL_FILTER_PILL_IDLE, AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
+import { AXEL_ICON_STROKE, resolveAxelIcon } from '../../lib/axelIconMap'
 
 const REFEICOES = [
-  { id: 'cafe', label: 'Café', emoji: '☕' },
-  { id: 'almoco', label: 'Almoço', emoji: '🍽️' },
-  { id: 'jantar', label: 'Jantar', emoji: '🌙' },
+  { id: 'cafe', label: 'Café', icon: 'cafe' },
+  { id: 'almoco', label: 'Almoço', icon: 'almoco' },
+  { id: 'jantar', label: 'Jantar', icon: 'jantar' },
 ] as const
 
 // MVP refeições — registro rápido na aba Alimentação
@@ -40,17 +41,21 @@ export function HealthMealsQuickLog()
     <section className="rounded-sl border border-line bg-card p-4 space-y-3">
       <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Refeições de hoje</p>
       <div className="grid grid-cols-3 gap-2">
-        {REFEICOES.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => void handleLog(r.id, r.label)}
-            className={`flex flex-col items-center gap-1 py-3 rounded-sl ${AXEL_FILTER_PILL_IDLE} hover:bg-chrome`}
-          >
-            <span className="text-xl">{r.emoji}</span>
-            <span className="font-mono text-[9px] uppercase">{r.label}</span>
-          </button>
-        ))}
+        {REFEICOES.map((r) =>
+        {
+          const Icon = resolveAxelIcon(r.icon)
+          return (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => void handleLog(r.id, r.label)}
+              className={`flex flex-col items-center justify-center gap-1 py-3 min-h-[44px] rounded-sl ${AXEL_FILTER_PILL_IDLE} hover:bg-chrome`}
+            >
+              <Icon className="w-5 h-5 text-ink-muted" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
+              <span className="font-mono text-[9px] uppercase">{r.label}</span>
+            </button>
+          )
+        })}
       </div>
     </section>
   )
