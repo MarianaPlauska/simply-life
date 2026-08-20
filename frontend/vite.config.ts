@@ -53,7 +53,7 @@ export default defineConfig({
     devOrchestrateMock(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512.png', 'og-image.png'],
+      includeAssets: ['favicon.ico', 'favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512.png', 'og-image.png'],
       manifest: {
         name: 'Simply-Life OS',
         short_name: 'Simply-Life',
@@ -80,7 +80,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,webmanifest}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
         importScripts: ['push-sw-handler.js'],
@@ -88,6 +88,14 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         runtimeCaching: [
+          {
+            urlPattern: /(?:favicon\.(?:ico|svg)|pwa-(?:192x192|512x512|maskable-512)\.png)/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'brand-icons',
+              expiration: { maxEntries: 12, maxAgeSeconds: 60 * 60 },
+            },
+          },
           {
             urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|woff2?|ttf|eot)$/,
             handler: 'CacheFirst',

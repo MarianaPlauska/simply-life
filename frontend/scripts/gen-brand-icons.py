@@ -45,6 +45,17 @@ def main() -> None:
         make_icon(size, pad).save(out / name, 'PNG')
         print('wrote', name)
 
+    # Chromium guarda .ico antigo — gera 16/32/48 a partir da marca SL
+    ico_sizes = [16, 32, 48]
+    ico_imgs = [make_icon(s).convert('RGBA') for s in ico_sizes]
+    ico_imgs[0].save(
+        out / 'favicon.ico',
+        format='ICO',
+        sizes=[(s, s) for s in ico_sizes],
+        append_images=ico_imgs[1:],
+    )
+    print('wrote favicon.ico')
+
     og = Image.new('RGB', (1200, 630), CANVAS)
     draw = ImageDraw.Draw(og)
     icon = make_icon(280)
