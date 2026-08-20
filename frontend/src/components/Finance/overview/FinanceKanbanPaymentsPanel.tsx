@@ -1,13 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CheckCircle2, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { CheckCircle2, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
 import { useTaskStore } from '../../../store/useTaskStore'
 import { settlementCanonicalKey } from '../../../lib/financeBillTaskDedup'
 import { FinanceReconcileButton } from '../FinanceReconcileButton'
-import {
-  AXEL_BORDERLESS_PANEL,
-  AXEL_TEXT_PRIMARY,
-  AXEL_TEXT_SECONDARY,
-} from '../../../constants/axelSurfaces'
+import { AxelListRow } from '../../ui/AxelListRow'
+import { AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 import type { FinanceBillSettlement } from '../../../store/storeTypes'
 
 const PAGE_SIZE = 5
@@ -20,9 +17,8 @@ const fmtWhen = (iso: string) =>
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return '—'
   return d.toLocaleString('pt-BR', {
-    weekday: 'short',
     day: '2-digit',
-    month: 'short',
+    month: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
   })
@@ -154,6 +150,7 @@ export function FinanceKanbanPaymentsPanel({
   const [query, setQuery] = useState('')
   const [filterDay, setFilterDay] = useState('')
   const [page, setPage] = useState(0)
+  const [showFilter, setShowFilter] = useState(false)
 
   const selectedMonthKey = viewYear != null && viewMonth != null
     ? `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}`
@@ -226,60 +223,46 @@ export function FinanceKanbanPaymentsPanel({
     return filtered.slice(start, start + PAGE_SIZE)
   }, [filtered, page])
 
-  const periodLabel = monthLabel
-    ? `${monthLabel} — quitados no Kanban ou em Finanças`
-    : 'Data, horário e valor — Kanban ou Marcar pago'
+  const totalShown = selectedMonthKey
+    ? totalMes
+    : deduped.reduce((s, r) => s + r.valor, 0)
+  const countShown = monthRows.length
+  const summaryLine = `${fmtBRL(filtered.length !== monthRows.length ? totalFiltrado : totalShown)} · ${
+    (filtered.length !== monthRows.length ? filtered.length : countShown)
+  } pagamento${(filtered.length !== monthRows.length ? filtered.length : countShown) === 1 ? '' : 's'}`
 
   return (
-    <section className={`${AXEL_BORDERLESS_PANEL} p-0 overflow-hidden`}>
-      <header className="px-4 py-5 sm:py-6 border-b border-line bg-chrome/30 space-y-4">
-        <div className="flex flex-col items-center text-center gap-2 max-w-lg mx-auto">
-          <CheckCircle2 size={28} className="text-concluido shrink-0" strokeWidth={1.75} aria-hidden />
-          <div>
-            <p className={`font-mono text-[11px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-              Pagos
-            </p>
-            <p className={`text-base sm:text-lg font-medium mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-              Registro permanente
-            </p>
-            <p className={`text-[12px] sm:text-[13px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-              {periodLabel}
-            </p>
-          </div>
-          <div className="pt-1">
-            <p className="text-xl sm:text-2xl font-display tabular-nums text-ink">
-              {selectedMonthKey ? fmtBRL(totalMes) : fmtBRL(deduped.reduce((s, r) => s + r.valor, 0))}
-            </p>
-            <p className={`font-mono text-[10px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-              {selectedMonthKey ? `Total de ${monthLabel ?? 'mês'}` : 'Total geral'}
-              {filtered.length !== monthRows.length && (
-                <span className="text-ink-muted">
-                  {' '}· filtro {fmtBRL(totalFiltrado)}
-                </span>
-              )}
-            </p>
-            <p className={`font-mono text-[10px] mt-0.5 tabular-nums ${AXEL_TEXT_SECONDARY}`}>
-              {monthRows.length} pagamento{monthRows.length === 1 ? '' : 's'}
-              {monthRows.length !== billSettlements.length
-                ? ` de ${billSettlements.length} no histórico`
-                : ''}
-            </p>
-          </div>
+    <section>
+      <header className="flex items-center justify-between gap-2 min-h-[44px] py-1">
+        <p className="text-[13px] tabular-nums text-ink truncate">
+          {summaryLine}
+        </p>
+        <div className="flex items-center gap-1 shrink-0">
           <FinanceReconcileButton />
+          <button
+            type="button"
+            onClick={() => setShowFilter((v) => !v)}
+            className="inline-flex items-center gap-1 min-h-[44px] px-2 rounded-sl text-[12px] text-ink-muted hover:text-ink hover:bg-chrome"
+            aria-expanded={showFilter}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={1.75} />
+            Filtrar
+          </button>
         </div>
+      </header>
 
-        <label className="relative block max-w-md mx-auto w-full">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nome, valor ou origem…"
-            className="w-full pl-9 pr-3 py-2.5 rounded-sl border border-line bg-card text-[13px] text-ink placeholder:text-ink-muted min-h-[44px]"
-          />
-        </label>
-
-        <div className="flex flex-wrap items-center justify-center gap-2">
+      {showFilter && (
+        <div className="space-y-2 pb-2">
+          <label className="relative block">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Buscar por nome, valor ou origem…"
+              className="w-full pl-9 pr-3 py-2.5 rounded-sl border border-line bg-card text-[13px] text-ink placeholder:text-ink-muted min-h-[44px]"
+            />
+          </label>
           <label className="inline-flex items-center gap-1.5 font-mono text-[10px] text-ink-muted">
             <span className="uppercase tracking-wide">Dia</span>
             <input
@@ -289,20 +272,11 @@ export function FinanceKanbanPaymentsPanel({
               className="rounded-sl border border-line bg-card px-2.5 py-2 text-[12px] text-ink min-h-[44px]"
             />
           </label>
-          {filterDay && (
-            <button
-              type="button"
-              onClick={() => setFilterDay('')}
-              className="font-mono text-[9px] uppercase text-ink-muted hover:text-urgente min-h-[44px] px-2"
-            >
-              Limpar dia
-            </button>
-          )}
         </div>
-      </header>
+      )}
 
       {filtered.length === 0 ? (
-        <p className={`px-4 py-10 text-[13px] text-center ${AXEL_TEXT_SECONDARY}`}>
+        <p className={`py-6 text-[13px] text-center ${AXEL_TEXT_SECONDARY}`}>
           {monthRows.length === 0
             ? selectedMonthKey
               ? `Nenhum pagamento em ${monthLabel ?? 'este mês'}.`
@@ -311,68 +285,43 @@ export function FinanceKanbanPaymentsPanel({
         </p>
       ) : (
         <>
-          <ul className="divide-y divide-line">
+          <ul>
             {pageRows.map((row) =>
             {
               const display = describeSettlement(row)
-              const titulo = cleanSettlementTitle(row.titulo)
-
+              const bits = [display.channel, fmtWhen(row.pago_em)]
+              if (display.note) bits.push(display.note)
               return (
-                <li
+                <AxelListRow
                   key={row.id}
-                  className="flex items-start justify-between gap-4 px-4 py-3.5 sm:py-4 bg-card/40"
-                >
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <p className="text-[14px] sm:text-[15px] font-medium text-ink break-words">
-                      {titulo}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="inline-flex items-center rounded-sl border border-line bg-chrome/50 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wide text-accent">
-                        {display.channel}
-                      </span>
-                      <span className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                        {fmtWhen(row.pago_em)}
-                      </span>
-                    </div>
-                    <p className={`text-[11px] leading-snug ${AXEL_TEXT_SECONDARY}`}>
-                      {display.detail}
-                    </p>
-                    {display.note && (
-                      <p className={`text-[11px] leading-snug text-ink-muted italic`}>
-                        {display.note}
-                      </p>
-                    )}
-                  </div>
-                  <span className="shrink-0 font-display text-base sm:text-lg tabular-nums text-urgente pt-0.5">
-                    {fmtBRL(row.valor)}
-                  </span>
-                </li>
+                  icon={CheckCircle2}
+                  title={cleanSettlementTitle(row.titulo)}
+                  subtitle={bits.join(' · ')}
+                  trailing={fmtBRL(row.valor)}
+                />
               )
             })}
           </ul>
 
           {filtered.length > PAGE_SIZE && (
-            <footer className="flex items-center justify-between gap-2 px-4 py-3 border-t border-line bg-chrome/30">
+            <footer className="flex items-center justify-between gap-2 py-2">
               <button
                 type="button"
                 disabled={page <= 0}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
-                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted hover:text-accent disabled:opacity-40 min-h-[44px] px-2 rounded-sl border border-line bg-card"
+                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted disabled:opacity-40 min-h-[44px] px-2"
               >
                 <ChevronLeft size={14} aria-hidden />
                 Anterior
               </button>
-              <span className="font-mono text-[10px] text-ink-muted tabular-nums text-center">
-                Página {page + 1} de {pageCount}
-                <span className="block text-ink-muted/70 mt-0.5">
-                  {filtered.length} itens
-                </span>
+              <span className={`font-mono text-[10px] tabular-nums ${AXEL_TEXT_SECONDARY}`}>
+                {page + 1}/{pageCount}
               </span>
               <button
                 type="button"
                 disabled={page >= pageCount - 1}
                 onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted hover:text-accent disabled:opacity-40 min-h-[44px] px-2 rounded-sl border border-line bg-card"
+                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase text-ink-muted disabled:opacity-40 min-h-[44px] px-2"
               >
                 Próxima
                 <ChevronRight size={14} aria-hidden />

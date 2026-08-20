@@ -22,14 +22,15 @@ import {
 } from '../../constants/axelSurfaces'
 import { paymentMethodLabel } from '../../lib/financePaymentMethod'
 import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup'
-import { FinanceTxLabel } from './overview/FinanceTxLabel'
+import { AxelListRow } from '../ui/AxelListRow'
 import type { Category, CategoryGrupo, Transaction } from '../../store/storeTypes'
+import type { LucideIcon } from 'lucide-react'
 
 // FinanceTransactionsTab — tabela densa estilo Excel/Bloomberg
 // Sem caixas, sem rounded-lg pesado, sem hover que cresce
 // Zebra stripe sutil + sticky header + fonte mono para numeros
 
-const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> =
+const ICON_MAP: Record<string, LucideIcon> =
 {
   Home, Utensils, Car, Gamepad2, Wifi, Heart, GraduationCap, ShoppingCart, Zap, Wallet, Shield, Target, Briefcase,
 }
@@ -243,7 +244,7 @@ export function FinanceTransactionsTab({
 
         {mobileOpen && (
           <>
-            <ul className="divide-y divide-line max-h-[min(55vh,480px)] overflow-y-auto custom-scrollbar">
+            <ul className="max-h-[min(55vh,480px)] overflow-y-auto custom-scrollbar">
               {rows.length === 0 && (
                 <li className={`py-3 text-center text-[13px] px-3 ${AXEL_TEXT_SECONDARY}`}>
                   Nenhum lançamento para os filtros atuais.
@@ -253,54 +254,30 @@ export function FinanceTransactionsTab({
               {
                 const isRec = t.tipo === 'receita'
                 const cat = activeCategories.find((c) => c.id === t.categoria_id || c.nome === t.categoria)
+                const CatIcon = cat ? (ICON_MAP[cat.icone] || Wallet) : DollarSign
                 const statusKey = (t.status_pagamento || 'pendente') as keyof typeof STATUS_CONFIG
                 const status = STATUS_CONFIG[statusKey] || STATUS_CONFIG.pendente
-                const StatusIcon = status.icon
-                const { before, after } = balancePair(t, accumulated)
 
                 return (
-                  <li key={t.id} className={`px-3 py-3 space-y-2 ${AXEL_ROW_HOVER}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <FinanceTxLabel label={t.descricao} observacao={t.observacao} className="text-[13px]" />
-                        <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-                          {fmtDate(t.data)}
-                          {' · '}
-                          {paymentMethodLabel(t)}
-                          {' · '}
-                          {isRec ? (cat?.nome ?? 'Receita') : (cat?.nome || '-')}
-                        </p>
-                      </div>
-                      <span className={`font-mono tabular-nums font-semibold shrink-0 text-[13px] ${
-                        isRec ? 'text-concluido' : AXEL_TEXT_PRIMARY
-                      }`}>
+                  <AxelListRow
+                    key={t.id}
+                    icon={CatIcon}
+                    title={t.descricao}
+                    subtitle={`${fmtDate(t.data)} · ${paymentMethodLabel(t)} · ${status.label}`}
+                    trailing={(
+                      <span className="inline-flex items-center gap-1">
                         {isRec ? '+' : '−'}{fmt(t.valor)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${status.text}`}>
-                        <StatusIcon className="w-3 h-3" />
-                        {status.label}
-                      </span>
-                      <span className="flex items-center gap-2">
-                        <span className={`font-mono tabular-nums text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-                          {fmt(before)}
-                          <span className="mx-1 opacity-60">→</span>
-                          <span className={after >= 0 ? AXEL_TEXT_PRIMARY : 'text-urgente'}>
-                            {fmt(after)}
-                          </span>
-                        </span>
                         <button
                           type="button"
                           onClick={() => removeTransaction(t.id)}
-                          className="p-2 text-ink-muted hover:text-urgente min-w-[40px] min-h-[40px] flex items-center justify-center"
+                          className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] text-ink-muted hover:text-ink"
                           aria-label="Remover lançamento"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </span>
-                    </div>
-                  </li>
+                    )}
+                  />
                 )
               })}
             </ul>

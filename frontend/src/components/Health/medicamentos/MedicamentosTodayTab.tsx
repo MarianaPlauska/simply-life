@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
-import { Check, Clock, Pill, CalendarClock } from 'lucide-react'
+import { Check, Pill, CalendarClock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../../store/useTaskStore'
-import { EmptyState } from '../../ui/EmptyState'
+import { AxelListRow } from '../../ui/AxelListRow'
 import {
   buildDosesHoje,
   mensagemGentilDose,
@@ -114,47 +114,36 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
         ) : doses.length === 0 ? (
           <p className="px-4 py-4 text-[12px] text-ink-muted">Nenhuma dose prevista para hoje.</p>
         ) : (
-          <ul className="divide-y divide-line">
+          <ul>
             {doses.map((dose) =>
             {
               const key = `${dose.medicamentoId}-${dose.horario}`
               const tomado = dose.status === 'tomado'
+              const sub = tomado && dose.tomada
+                ? `Tomado às ${new Date(dose.tomada.tomado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+                : dose.status === 'futuro'
+                  ? 'Ainda não é hora'
+                  : dose.status === 'janela'
+                    ? 'Na janela do horário'
+                    : 'Horário passou. Registre quando puder'
               return (
-                <li key={key}>
-                  <button
-                    type="button"
-                    disabled={tomado}
-                    onClick={() => void handleTomar(dose.medicamentoId, dose.horario)}
-                    className={[
-                      'w-full flex items-center gap-3 px-4 py-3.5 min-h-[56px] text-left transition-colors',
-                      tomado ? 'opacity-70' : 'hover:bg-chrome/30 active:bg-chrome/50',
-                      dose.status === 'atrasado' && !tomado ? 'border-l-[3px] border-l-amber-500/70' : 'border-l-[3px] border-l-transparent',
-                    ].join(' ')}
-                  >
-                    <div className={[
+                <AxelListRow
+                  key={key}
+                  title={dose.nome}
+                  subtitle={sub}
+                  titleClassName={tomado ? 'text-ink-muted line-through' : undefined}
+                  disabled={tomado}
+                  onClick={() => void handleTomar(dose.medicamentoId, dose.horario)}
+                  trailing={dose.horario}
+                  iconNode={(
+                    <span className={[
                       'w-5 h-5 rounded-sl border-2 flex items-center justify-center shrink-0',
                       tomado ? 'bg-accent border-accent' : 'border-line',
                     ].join(' ')}>
                       {tomado && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-[14px] truncate ${tomado ? 'text-ink-muted line-through' : 'text-ink'}`}>
-                        {dose.nome}
-                      </p>
-                      <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-                        {tomado && dose.tomada
-                          ? `Tomado às ${new Date(dose.tomada.tomado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
-                          : dose.status === 'futuro'
-                            ? 'Ainda não é hora'
-                            : dose.status === 'janela'
-                              ? 'Na janela do horário'
-                              : 'Horário passou. Registre quando puder'}
-                      </p>
-                    </div>
-                    <Clock className="w-3.5 h-3.5 text-ink-muted shrink-0" />
-                    <span className="font-mono text-[12px] tabular-nums text-ink-muted shrink-0">{dose.horario}</span>
-                  </button>
-                </li>
+                    </span>
+                  )}
+                />
               )
             })}
           </ul>

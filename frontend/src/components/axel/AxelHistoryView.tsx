@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import {
+  Archive,
+  ArrowUp,
+  Clock,
+  Hand,
+  Mail,
+} from 'lucide-react'
+import {
   AXEL_KIND_LABEL,
   countByKind,
   fetchAxelDecisions,
@@ -10,6 +17,8 @@ import {
   type AxelDecisionKind,
 } from '../../lib/axelDecisionLog'
 import { AXEL_PAGE_SHELL, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AxelListRow } from '../ui/AxelListRow'
+import type { LucideIcon } from 'lucide-react'
 
 type Period = 'hoje' | 'semana' | 'mes'
 
@@ -25,6 +34,26 @@ const STACK_COLORS: Record<AxelDecisionKind, string> = {
   decay_backlog: '#7A8499',
   manual_override: '#7DB89A',
   email_ingest: '#8B9DC3',
+}
+
+const KIND_ICON: Record<AxelDecisionKind, LucideIcon> = {
+  promoted_hoje: ArrowUp,
+  deferred_load: Clock,
+  decay_backlog: Archive,
+  manual_override: Hand,
+  email_ingest: Mail,
+}
+
+function fmtEventWhen(iso: string): string
+{
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return '—'
+  return d.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 export function AxelHistoryView()
@@ -51,6 +80,10 @@ export function AxelHistoryView()
   const counts = useMemo(() => countByKind(events), [events])
   const chart = useMemo(() => stackByDay(events), [events])
   const copy = useMemo(() => periodCopy(counts, PERIOD_LABEL[period]), [counts, period])
+  const recentEvents = useMemo(
+    () => [...events].sort((a, b) => b.created_at.localeCompare(a.created_at)),
+    [events],
+  )
 
   return (
     <div className={`${AXEL_PAGE_SHELL} max-w-4xl mx-auto px-4 py-6 sm:py-8`}>
@@ -111,6 +144,20 @@ export function AxelHistoryView()
           </ResponsiveContainer>
         )}
       </div>
+
+      {!loading && recentEvents.length > 0 && (
+        <ul className="mt-4">
+          {recentEvents.slice(0, 24).map((event) => (
+            <AxelListRow
+              key={event.id}
+              icon={KIND_ICON[event.kind]}
+              title={AXEL_KIND_LABEL[event.kind]}
+              subtitle={[fmtEventWhen(event.created_at), event.rationale].filter(Boolean).join(' · ')}
+              trailing={event.score != null ? String(event.score) : undefined}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

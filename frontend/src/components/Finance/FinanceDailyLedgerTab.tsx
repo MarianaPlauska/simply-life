@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Plus, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, ArrowDownRight, ArrowUpRight } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import {
   filterTransactionsByDay,
@@ -33,6 +33,7 @@ import {
 } from '../../constants/axelSurfaces'
 import type { Category, Transaction } from '../../store/storeTypes'
 import { MoneyInput } from '../ui/MoneyInput'
+import { AxelListRow } from '../ui/AxelListRow'
 import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 
 const fmt = (v: number) =>
@@ -299,7 +300,7 @@ export function FinanceDailyLedgerTab({
 
       <div className="max-h-[min(420px,50dvh)] overflow-y-auto custom-scrollbar">
 
-      <ul className="md:hidden divide-y divide-line">
+      <ul className="md:hidden">
         {dayTx.length === 0 && (
           <li className={`py-3 text-center text-[13px] ${AXEL_TEXT_SECONDARY}`}>
             Nada registrado neste dia
@@ -311,23 +312,16 @@ export function FinanceDailyLedgerTab({
             ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
             : t.categoria
           const status = t.status_pagamento ?? 'pendente'
+          const bits = [cat ?? '—', paymentMethodLabel(t)]
+          if (status !== 'pago') bits.push(STATUS_LABEL[status] ?? status)
           return (
-            <li key={t.id} className={`px-3 py-3 flex items-start justify-between gap-3 ${AXEL_ROW_HOVER}`}>
-              <div className="min-w-0 flex-1">
-                <p className={`text-[13px] font-medium break-words ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</p>
-                <p className={`font-mono text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-                  {cat ?? '—'}
-                  {' · '}
-                  {paymentMethodLabel(t)}
-                  {status !== 'pago' && ` · ${STATUS_LABEL[status] ?? status}`}
-                </p>
-              </div>
-              <span className={`font-mono tabular-nums shrink-0 text-[13px] ${
-                t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
-              }`}>
-                {t.tipo === 'receita' ? '+' : '-'}{fmt(t.valor)}
-              </span>
-            </li>
+            <AxelListRow
+              key={t.id}
+              icon={t.tipo === 'receita' ? ArrowUpRight : ArrowDownRight}
+              title={t.descricao}
+              subtitle={bits.join(' · ')}
+              trailing={`${t.tipo === 'receita' ? '+' : '−'}${fmt(t.valor)}`}
+            />
           )
         })}
       </ul>
@@ -366,10 +360,8 @@ export function FinanceDailyLedgerTab({
                       <span className="text-ink-muted ml-1">· {STATUS_LABEL[status] ?? status}</span>
                     )}
                   </td>
-                  <td className={`px-3 py-2 text-right font-mono tabular-nums ${
-                    t.tipo === 'receita' ? 'text-concluido' : 'text-urgente'
-                  }`}>
-                    {t.tipo === 'receita' ? '+' : '-'}{fmt(t.valor)}
+                  <td className={`px-3 py-2 text-right font-mono tabular-nums ${AXEL_TEXT_PRIMARY}`}>
+                    {t.tipo === 'receita' ? '+' : '−'}{fmt(t.valor)}
                   </td>
                 </tr>
               )
