@@ -5,6 +5,7 @@ import {
   formatSenderLabel,
   resolveInfluenceWeight,
 } from './influenceMap.js';
+import { analyzeTaskIntent } from './intentAnalyzer.js';
 
 const HIGH_PRIORITY_TERMS = [
   { term: 'urgente', label: 'Urgência' },
@@ -127,7 +128,13 @@ export function calculateUrgency(task, sender, options = {})
   const semanticPts = semanticNorm * 40;
   const deadlinePts = (deadlineFactor / 100) * 20;
 
-  const score = Math.min(100, Math.max(0, Math.round(influencePts + semanticPts + deadlinePts)));
+  let score = Math.min(100, Math.max(0, Math.round(influencePts + semanticPts + deadlinePts)));
+
+  const intent = analyzeTaskIntent(task, remetente);
+  if (intent.forceMinScore != null)
+  {
+    score = Math.max(score, intent.forceMinScore);
+  }
 
   const senderLabel = formatSenderLabel(remetente);
   const termLabel =
@@ -153,7 +160,8 @@ export function calculateUrgency(task, sender, options = {})
 
   return {
     score,
-    reason,
+    reason: intent.forceMinScore != null ? intent.urgencyReason : reason,
+    intent,
     log: {
       influenceWeight,
       influenceLabel: senderLabel,

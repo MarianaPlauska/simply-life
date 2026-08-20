@@ -1,5 +1,6 @@
 import { formatSenderLabel, resolveInfluenceWeight } from './influenceMap'
 import { DEFAULT_INFLUENCE_MAP } from './influenceMap'
+import { HOJE_SCORE_FLOOR } from './temporalHorizon'
 import type { TarefaUnificada } from '../types'
 
 // IntentAnalyzer — classifica intenção a partir do texto e metadados do e-mail
@@ -59,8 +60,19 @@ const EXECUCAO_TERMS = [
   { term: 'concluir', signal: 'fechamento' },
 ] as const
 
+const URGENTE_TERMS = [
+  { term: 'urgente', signal: 'urgência no título' },
+  { term: 'urgent', signal: 'urgência no título' },
+  { term: 'asap', signal: 'prazo imediato' },
+  { term: 'p0', signal: 'prioridade P0' },
+  { term: 'p1', signal: 'prioridade P1' },
+  { term: 'hotfix', signal: 'hotfix' },
+  { term: 'imediato', signal: 'ação imediata' },
+] as const
+
 const KEY_SENDER_WEIGHT = 0.85
-const BLOQUEIO_MIN_SCORE = 92
+const BLOQUEIO_MIN_SCORE = HOJE_SCORE_FLOOR
+const URGENTE_MIN_SCORE = HOJE_SCORE_FLOOR
 
 function normalizeText(...parts: Array<string | null | undefined>): string
 {
@@ -109,6 +121,17 @@ function buildUrgencyReason(
   }
 }
 
+function buildUrgenteReason(
+  senderLabel: string,
+  isKeySender: boolean,
+  signals: string[],
+): string
+{
+  const detail = signals[0] ?? 'sinal de urgência'
+  const senderPart = isKeySender ? 'remetente chave' : `remetente [${senderLabel}]`
+  return `Promovido a Hoje: ${senderPart} · ${detail}.`
+}
+
 /** Analisa título, descrição, notas e metadados do remetente */
 export function analyzeTaskIntent(
   task: TarefaUnificada,
@@ -128,6 +151,7 @@ export function analyzeTaskIntent(
   )
 
   const bloqueioHits = matchTerms(text, BLOQUEIO_TERMS)
+  const urgenteHits = matchTerms(text, URGENTE_TERMS)
   const alinhamentoHits = matchTerms(text, ALINHAMENTO_TERMS)
   const execucaoHits = matchTerms(text, EXECUCAO_TERMS)
 
@@ -144,6 +168,23 @@ export function analyzeTaskIntent(
       forceMinScore: BLOQUEIO_MIN_SCORE,
       ignoreDeadline: true,
       flowAlert: 'Esta tarefa está travando o fluxo',
+      matchedSignals: signals,
+    }
+  }
+
+  if (urgenteHits.length > 0 || isKeySender)
+  {
+    const signals = urgenteHits.length > 0
+      ? urgenteHits
+      : ['remetente importante']
+
+    return {
+      category: 'execucao',
+      categoryLabel: 'Execução',
+      urgencyReason: buildUrgenteReason(senderLabel, isKeySender, signals),
+      forceMinScore: URGENTE_MIN_SCORE,
+      ignoreDeadline: false,
+      flowAlert: null,
       matchedSignals: signals,
     }
   }

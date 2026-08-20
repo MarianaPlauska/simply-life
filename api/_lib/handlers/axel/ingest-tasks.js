@@ -7,8 +7,15 @@ import { applyCors } from '../../cors.js'
 import { fetchUserKeywords, matchUserKeywords } from '../../keywordBoost.js'
 import { scoreFromItem } from '../../triageScore.js'
 import { insertTriagedTask } from '../../insertTriagedTask.js'
+import { resolveInfluenceWeight, DEFAULT_INFLUENCE_MAP } from '../../influenceMap.js'
 
 const URGENCY_WORDS = ['urgente', 'urgent', 'asap', 'critico', 'crítico', 'p0', 'hotfix']
+const KEY_SENDER_WEIGHT = 0.85
+
+function isKeySender(sender)
+{
+  return resolveInfluenceWeight(sender || '', DEFAULT_INFLUENCE_MAP) >= KEY_SENDER_WEIGHT
+}
 
 function defaultAi(item)
 {
@@ -20,7 +27,7 @@ function defaultAi(item)
     titulo: subject || '(sem título)',
     snippet: (body || subject || '').substring(0, 100),
     is_urgent: URGENCY_WORDS.some((kw) => text.includes(kw)),
-    is_vip: false,
+    is_vip: isKeySender(item.sender),
     is_bug: text.includes('bug') || text.includes('erro'),
     is_noise: false,
     acao: 'fazer',
@@ -99,6 +106,10 @@ export default async function handler(req, res)
     for (const item of items)
     {
       const aiResult = await triageWithGemini(item, apiKey)
+      aiResult.is_vip = Boolean(aiResult.is_vip) || isKeySender(item.sender)
+      aiResult.is_urgent = Boolean(aiResult.is_urgent) || URGENCY_WORDS.some(
+        (kw) => `${item.subject || ''} ${item.body || ''}`.toLowerCase().includes(kw),
+      )
       const rawText = `${item.sender || ''} ${item.subject || ''} ${item.body || ''}`
       const { boost, matched } = matchUserKeywords(rawText, userKeywords)
       const scored = scoreFromItem({ ...item, origem: item.origem || 'email' }, aiResult, boost)

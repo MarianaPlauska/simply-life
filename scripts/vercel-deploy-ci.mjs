@@ -130,6 +130,29 @@ async function findSimplyLifeProject(teams)
   process.exit(1)
 }
 
+/** Pasta api/ só sobe se o Root Directory da Vercel for a raiz do repo */
+async function ensureRepoRootDirectory(teamId, projectId)
+{
+  const { res, json } = await vercelFetch(`/v9/projects/${projectId}?teamId=${teamId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      rootDirectory: null,
+      framework: 'vite',
+      buildCommand: 'cd frontend && npm run build',
+      outputDirectory: 'frontend/dist',
+      installCommand: 'npm install --no-audit --no-fund && cd frontend && npm install --no-audit --no-fund',
+    }),
+  })
+
+  if (!res.ok)
+  {
+    console.warn(`::warning::Não foi possível ajustar Root Directory (HTTP ${res.status}): ${JSON.stringify(json)}`)
+    return
+  }
+
+  console.log('Root Directory do projeto: raiz do repositório (api/ + frontend/).')
+}
+
 async function deployFromGit(teamId, projectId, repoId)
 {
   const body = {
@@ -208,6 +231,8 @@ async function main()
   console.log(`\nDeploying: ${project.name}`)
   console.log(`  Project ID: ${project.id}`)
   console.log(`  Team: ${team.slug} (${team.id})\n`)
+
+  await ensureRepoRootDirectory(team.id, project.id)
 
   const repoId = await getGithubRepoId()
   if (repoId)

@@ -10,6 +10,7 @@ import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
 import { isThermalDecay, resolveDaysStagnant } from '../../lib/taskDecay'
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { ICON } from '../../design/identityTokens'
+import { checklistRingClass, urgencyHairlineClass } from '../../lib/kanbanVisual'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -63,6 +64,7 @@ export function AxelKanbanCard({
     !snoozed &&
     status !== 'concluida' &&
     tarefa.id !== 0
+  const score = tarefa.score_urgencia ?? 0
   const checklist = layout === 'checklist'
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
@@ -113,6 +115,13 @@ export function AxelKanbanCard({
         </span>
       )}
 
+      {score > 70 && (
+        <span
+          aria-hidden
+          className={`absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full ${urgencyHairlineClass(score)}`}
+        />
+      )}
+
       {checklist && (
         <button
           type="button"
@@ -124,9 +133,7 @@ export function AxelKanbanCard({
           }}
           className={`
             shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center
-            ${status === 'concluida'
-              ? 'border-concluido bg-concluido/20 text-concluido'
-              : 'border-line text-transparent hover:border-concluido'}
+            ${checklistRingClass(score, status === 'concluida')}
           `}
           aria-label="Concluir tarefa"
         >

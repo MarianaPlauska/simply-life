@@ -4,6 +4,7 @@ import { Lock, Play } from 'lucide-react'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
 import { ICON } from '../../design/identityTokens'
+import { checklistRingClass, urgencyHairlineClass } from '../../lib/kanbanVisual'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -30,6 +31,7 @@ export function DueBucketTaskRow({
 {
   const blocked = isTaskDependencyBlocked(tarefa, allTasks)
   const canExecute = !blocked && tarefa.status !== 'concluida' && tarefa.id !== 0
+  const score = tarefa.score_urgencia ?? 0
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: tarefa.id,
@@ -49,13 +51,20 @@ export function DueBucketTaskRow({
       {...(blocked ? {} : listeners)}
       {...(blocked ? {} : attributes)}
       className={[
-        'group flex items-center gap-2.5 px-1 py-1.5 min-h-12 rounded-sl text-left w-full',
+        'group relative flex items-center gap-2.5 px-1 py-1.5 min-h-12 rounded-sl text-left w-full',
         'hover:bg-chrome/70',
         isExecuting ? 'bg-chrome/50' : '',
         blocked ? 'opacity-45' : 'cursor-grab active:cursor-grabbing',
         isDragging ? 'opacity-50' : '',
       ].join(' ')}
     >
+      {score > 70 && (
+        <span
+          aria-hidden
+          className={`absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full ${urgencyHairlineClass(score)}`}
+        />
+      )}
+
       {canExecute ? (
         <button
           type="button"
@@ -64,7 +73,7 @@ export function DueBucketTaskRow({
             e.stopPropagation()
             void axelCompleteTask(tarefa)
           }}
-          className="shrink-0 w-6 h-6 rounded-full border-2 border-line hover:border-concluido"
+          className={`shrink-0 w-6 h-6 rounded-full border-2 ${checklistRingClass(score)}`}
           aria-label="Concluir tarefa"
         />
       ) : (

@@ -1,5 +1,7 @@
 // Parser estruturado de e-mail — Groq/Gemini (score, prazo, intenção)
 
+import { applyHojeFloor, mapScoreToPrioridade } from './triageScore.js';
+
 /**
  * @param {{ sender?: string, subject?: string, body?: string, userKeywords?: string[] }} email
  * @param {{ groqKey?: string, geminiKey?: string }} keys
@@ -30,7 +32,7 @@ Regras:
 - FYI/newsletter → alinhamento, score baixo, due_at null
 - Bloqueio/impedimento → bloqueio, score alto
 - Prazo explícito no texto → due_at correspondente
-- Remetente crítico ou [URGENTE] → score alto`
+- Título com urgente/asap/p0/hotfix ou remetente importante (chefe, gestor, cliente, diretoria) → score mínimo 92`
 
   if (keys.groqKey)
   {
@@ -100,10 +102,17 @@ function normalizeEmailParse(parsed, email)
     ? parsed.intent_category
     : 'execucao'
 
+  const floored = applyHojeFloor(
+    score,
+    {},
+    `${email.sender || ''} ${email.subject || ''} ${email.body || ''}`,
+    email.sender,
+  )
+
   return {
     titulo: (parsed.titulo || email.subject || '(sem título)').slice(0, 200),
-    score,
-    prioridade,
+    score: floored,
+    prioridade: floored !== score ? mapScoreToPrioridade(floored) : prioridade,
     intent_category: intent,
     due_at: dueAt,
     rationale: parsed.rationale || 'Triagem automática',
@@ -138,10 +147,17 @@ export function heuristicEmailParse(email)
     dueAt = d.toISOString()
   }
 
+  const floored = applyHojeFloor(
+    Math.min(100, score),
+    {},
+    `${email.sender || ''} ${subject} ${body}`,
+    email.sender,
+  )
+
   return {
     titulo: subject || body.slice(0, 80) || '(sem título)',
-    score: Math.min(100, score),
-    prioridade: score >= 80 ? 'critica' : score >= 55 ? 'alta' : 'media',
+    score: floored,
+    prioridade: mapScoreToPrioridade(floored),
     intent_category: /bloqueio|blocked/.test(text) ? 'bloqueio' : /fyi|conhecimento/.test(text) ? 'alinhamento' : 'execucao',
     due_at: dueAt,
     rationale: 'Triagem heurística (IA indisponível)',

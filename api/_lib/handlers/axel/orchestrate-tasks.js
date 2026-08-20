@@ -21,6 +21,10 @@ export default async function handler(req, res)
     methods: 'POST, GET, OPTIONS',
     headers: 'Content-Type, Authorization',
   });
+  res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  res.setHeader('CDN-Cache-Control', 'no-store');
+  res.setHeader('Vercel-CDN-Cache-Control', 'no-store');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
   if (req.method === 'OPTIONS')
   {

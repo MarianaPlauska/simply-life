@@ -12,8 +12,10 @@ const ALINHAMENTO_TERMS = [
   'sugestao', 'sugestão', 'informacao', 'informação', 'status', 'update',
 ];
 
+const URGENTE_TERMS = ['urgente', 'urgent', 'asap', 'p0', 'p1', 'hotfix', 'imediato'];
+
 const KEY_SENDER_WEIGHT = 0.85;
-const BLOQUEIO_MIN_SCORE = 92;
+const HOJE_MIN_SCORE = 92;
 
 function normalizeText(...parts)
 {
@@ -42,6 +44,7 @@ export function analyzeTaskIntent(task, senderOverride)
   );
 
   const hasBloqueio = BLOQUEIO_TERMS.some((t) => text.includes(t));
+  const hasUrgente = URGENTE_TERMS.some((t) => text.includes(t));
   const hasAlinhamento = ALINHAMENTO_TERMS.some((t) => text.includes(t));
 
   if (hasBloqueio || (isKeySender && text.includes('erro')))
@@ -52,9 +55,23 @@ export function analyzeTaskIntent(task, senderOverride)
       category: 'bloqueio',
       categoryLabel: 'Bloqueio',
       urgencyReason: `Classificado como Bloqueio: ${senderPart} menciona ${detail}.`,
-      forceMinScore: BLOQUEIO_MIN_SCORE,
+      forceMinScore: HOJE_MIN_SCORE,
       ignoreDeadline: true,
       flowAlert: 'Esta tarefa está travando o fluxo',
+    };
+  }
+
+  if (hasUrgente || isKeySender)
+  {
+    const detail = hasUrgente ? 'urgência no título' : 'remetente importante';
+    const senderPart = isKeySender ? 'remetente chave' : `remetente [${senderLabel}]`;
+    return {
+      category: 'execucao',
+      categoryLabel: 'Execução',
+      urgencyReason: `Promovido a Hoje: ${senderPart} · ${detail}.`,
+      forceMinScore: HOJE_MIN_SCORE,
+      ignoreDeadline: false,
+      flowAlert: null,
     };
   }
 

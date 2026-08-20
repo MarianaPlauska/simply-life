@@ -29,7 +29,7 @@ export function localScoreFromText(text: string, basePrio?: string): LocalScoreR
 
   if (URGENCY_KEYWORDS.some((kw) => t.includes(kw)))
   {
-    return { score: 85, prioridade: 'critica' }
+    return { score: 92, prioridade: 'critica' }
   }
 
   if (ALTA_KEYWORDS.some((kw) => t.includes(kw)))
@@ -43,7 +43,7 @@ export function localScoreFromText(text: string, basePrio?: string): LocalScoreR
   }
 
   // tarefa neutra entra como "Nesta Semana" mas com score visível
-  const fallback = basePrio === 'critica' ? 85
+  const fallback = basePrio === 'critica' ? 92
     : basePrio === 'alta' ? 65
       : basePrio === 'baixa' ? 20
         : 35

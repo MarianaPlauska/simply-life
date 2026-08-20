@@ -1,5 +1,7 @@
 // Motor de score compartilhado — ingest-tasks e webhook-ingest
 
+import { resolveInfluenceWeight, DEFAULT_INFLUENCE_MAP } from './influenceMap.js';
+
 export const ORIGIN_WEIGHTS = {
   meeting: 50,
   google_cal: 50,
@@ -60,6 +62,27 @@ export function clampScore(score)
   return Math.max(0, Math.min(100, score));
 }
 
+const HOJE_FLOOR = 92;
+const KEY_SENDER_WEIGHT = 0.85;
+
+export function shouldForceHoje(aiFlags, rawText, sender)
+{
+  if (aiFlags?.is_urgent || aiFlags?.is_vip) return true;
+  const textLower = (rawText || '').toLowerCase();
+  if (URGENCY_KEYWORDS.some((kw) => textLower.includes(kw))) return true;
+  return resolveInfluenceWeight(sender || '', DEFAULT_INFLUENCE_MAP) >= KEY_SENDER_WEIGHT;
+}
+
+/** Piso de Hoje após a IA ler o e-mail — urgente/VIP não ficam na Semana */
+export function applyHojeFloor(score, aiFlags, rawText, sender)
+{
+  if (shouldForceHoje(aiFlags, rawText, sender))
+  {
+    return Math.max(score, HOJE_FLOOR);
+  }
+  return score;
+}
+
 export function mapScoreToPrioridade(score)
 {
   if (score >= 80) return 'critica';
@@ -76,7 +99,8 @@ export function scoreFromItem(item, aiResult = {}, keywordBoost = 0)
   const baseScore = calcBaseScore(itemOrigem);
   const contextMod = calcContextModifiers(aiResult, rawText, keywordBoost);
   const temporalMod = calcTemporalFactor(created_at);
-  const finalScore = clampScore(baseScore + contextMod + temporalMod);
+  let finalScore = clampScore(baseScore + contextMod + temporalMod);
+  finalScore = applyHojeFloor(finalScore, aiResult, rawText, sender);
   const prioridade = mapScoreToPrioridade(finalScore);
 
   return {

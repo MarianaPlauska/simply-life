@@ -23,6 +23,26 @@ export function urgencyDotClass(score: number): string
   return 'bg-line'
 }
 
+/** Anel do checklist — urgente / atenção / neutro, sem caixa */
+export function checklistRingClass(score: number, completed = false): string
+{
+  if (completed)
+  {
+    return 'border-concluido bg-concluido/20 text-concluido'
+  }
+  if (score > 90) return 'border-urgente text-transparent hover:border-concluido'
+  if (score > 70) return 'border-atencao text-transparent hover:border-concluido'
+  return 'border-line text-transparent hover:border-concluido'
+}
+
+/** Filete esquerdo discreto na linha da tarefa */
+export function urgencyHairlineClass(score: number): string
+{
+  if (score > 90) return 'bg-urgente'
+  if (score > 70) return 'bg-atencao'
+  return 'bg-transparent'
+}
+
 export function formatTaskRef(id: number): string
 {
   if (id <= 0) return 'DRAFT'

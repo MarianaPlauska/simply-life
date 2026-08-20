@@ -57,10 +57,12 @@ export function calculateAdaptiveUrgency(task, allTasks, sender)
   }
 
   const adjustedScore = Math.min(100, base.score + boost);
+  const floor = base.intent?.forceMinScore;
+  const withFloor = floor != null ? Math.max(adjustedScore, floor) : adjustedScore;
 
   return {
     ...base,
-    adjustedScore,
+    adjustedScore: withFloor,
     orchestrationNotes: notes,
   };
 }

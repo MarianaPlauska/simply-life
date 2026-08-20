@@ -11,6 +11,9 @@ export const HORIZON_LABELS: Record<TemporalHorizon, string> = {
   backlog: 'Entrada',
 }
 
+/** Score mínimo para cair em Hoje (resolve usa `score > 90`) */
+export const HOJE_SCORE_FLOOR = 92
+
 function startOfDay(d: Date): Date
 {
   const x = new Date(d)
@@ -47,7 +50,7 @@ export function horizonPersistPatch(horizon: TemporalHorizon): {
 {
   if (horizon === 'hoje')
   {
-    return { horizon_override: 'hoje', score_urgencia: 92, status: 'em_progresso' }
+    return { horizon_override: 'hoje', score_urgencia: HOJE_SCORE_FLOOR, status: 'em_progresso' }
   }
   if (horizon === 'semana')
   {

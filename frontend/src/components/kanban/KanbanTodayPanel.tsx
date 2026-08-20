@@ -2,7 +2,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { ListOrdered } from 'lucide-react'
 import type { LoadBalanceEntry } from '../../lib/adaptiveOrchestration'
 import { AXEL_KANBAN_EXEC_COLUMN } from '../../constants/axelKanbanTheme'
-import { WIP_HOJE_EXEC } from '../../lib/kanbanVisual'
+import { WIP_HOJE_EXEC, checklistRingClass, urgencyHairlineClass } from '../../lib/kanbanVisual'
 import { KanbanTaskDetailStrip } from './KanbanTaskDetailStrip'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
@@ -120,20 +120,27 @@ export function KanbanTodayPanel({
               const selected = selectedId === t.id
               const executing = executingId === t.id
               const snoozed = loadBalance?.get(t.id)?.snoozed
+              const score = t.score_urgencia ?? 0
 
               return (
                 <li key={t.id}>
                   <div
                     className={[
-                      'flex items-center gap-2.5 w-full px-3 py-2 min-h-12',
+                      'relative flex items-center gap-2.5 w-full px-3 py-2 min-h-12',
                       executing || selected ? 'bg-chrome/60' : '',
                       snoozed ? 'opacity-60' : '',
                     ].join(' ')}
                   >
+                    {score > 70 && (
+                      <span
+                        aria-hidden
+                        className={`absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full ${urgencyHairlineClass(score)}`}
+                      />
+                    )}
                     <button
                       type="button"
                       onClick={() => void axelCompleteTask(t)}
-                      className="shrink-0 w-6 h-6 rounded-full border-2 border-line hover:border-concluido"
+                      className={`shrink-0 w-6 h-6 rounded-full border-2 ${checklistRingClass(score)}`}
                       aria-label="Concluir tarefa"
                     />
                     <button

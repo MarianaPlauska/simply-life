@@ -4,6 +4,7 @@ import { recordOrchestrationMetrics } from '../lib/contextRationale'
 import { fetchIntelligenceStatus, type IntelligenceMode } from '../lib/orchestrateApi'
 import { computeDeadlineProposals } from '../lib/deadlineProposal'
 import { runPipelineOrchestration } from '../lib/orchestratePipeline'
+import { loadMoodCareShiftedIds, markMoodCareShifted } from '../lib/moodCareDates'
 import type { TemporalHorizon } from '../lib/temporalHorizon'
 import type { TarefaUnificada } from '../types'
 import type { MoodOrchestrationContext } from '../lib/moodOrchestration'
@@ -141,17 +142,21 @@ export function useKanbanOrchestration({
       const adaptive = task ? calculateAdaptiveUrgency(task, tasks) : null
       const reason = entry.rationale ?? adaptive?.reason
       const intent = adaptive?.intent
+      const dueShift = (result.dueShifts ?? []).find((s) => s.taskId === entry.taskId)
+      const nextScore = intent?.forceMinScore != null
+        ? Math.max(entry.score, intent.forceMinScore)
+        : entry.score
 
       if (entry.taskId > 0)
       {
         await updateTarefa(entry.taskId, {
-          score_urgencia: intent?.forceMinScore != null
-            ? Math.max(entry.score, intent.forceMinScore)
-            : entry.score,
+          score_urgencia: nextScore,
           score_reason: reason ?? null,
           urgency_reason: intent?.urgencyReason ?? null,
           intent_category: intent?.category ?? null,
+          ...(dueShift ? { data_vencimento: dueShift.nextDue } : {}),
         })
+        if (dueShift) markMoodCareShifted(entry.taskId)
       }
       else if (task && adaptive?.intent)
       {
@@ -160,10 +165,10 @@ export function useKanbanOrchestration({
           score_reason: reason,
           urgency_reason: mockIntent.urgencyReason,
           intent_category: mockIntent.category,
-          score_urgencia: mockIntent.forceMinScore != null
-            ? Math.max(entry.score, mockIntent.forceMinScore)
-            : entry.score,
+          score_urgencia: nextScore,
+          ...(dueShift ? { data_vencimento: dueShift.nextDue } : {}),
         })
+        if (dueShift) markMoodCareShifted(entry.taskId)
       }
     }
 
@@ -282,6 +287,8 @@ export function useKanbanOrchestration({
         lastMovedAt: resolveLastMovedAt,
         moodSnoozeReason: moodContext?.snoozeReason,
         moodCapNote: moodContext?.hasMoodToday ? moodContext.profileLabel : undefined,
+        moodProfile: moodContext?.profile,
+        alreadyMoodShifted: loadMoodCareShiftedIds(),
       })
       await applyPipelineResult(result, pipelineTasks)
       return result

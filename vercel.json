@@ -16,6 +16,16 @@
       "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8"
     }
   },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, must-revalidate" },
+        { "key": "CDN-Cache-Control", "value": "no-store" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/api/webhook-ingest", "destination": "/api/webhooks/m2m" },
     { "source": "/api/push-subscribe", "destination": "/api/webhooks/push-subscribe" },
@@ -34,8 +44,7 @@
     { "source": "/api/generate-greeting", "destination": "/api/axel/generate-greeting" },
     { "source": "/api/today-verdict", "destination": "/api/axel/today-verdict" },
     { "source": "/api/weekly-digest-test", "destination": "/api/axel/weekly-digest-test" },
-    { "source": "/api/:path*", "destination": "/api/:path*" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [
     {

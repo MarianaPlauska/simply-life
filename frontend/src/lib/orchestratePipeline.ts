@@ -11,6 +11,12 @@ import {
   type UrgencyScoreEntry,
 } from './urgencyEngine'
 import { resolveTemporalHorizon, type TemporalHorizon } from './temporalHorizon'
+import {
+  applyMoodCareDueShifts,
+  computeMoodCareDueShifts,
+  type MoodCareDueShift,
+} from './moodCareDates'
+import type { MoodProfile } from './moodOrchestration'
 import type { TarefaUnificada } from '../types'
 
 const STAGNATION_DAYS = 3
@@ -32,16 +38,18 @@ export interface PipelineOrchestrationResult
   autoHorizons: Record<number, TemporalHorizon>
   loadBalance: Map<number, LoadBalanceEntry>
   decisions: OrchestrationDecision[]
+  dueShifts: MoodCareDueShift[]
   hojeCount: number
   source: 'ai' | 'mock'
 }
 
 /** Regras exibidas na UI — o usuário entende por que o AXEL decidiu */
 export const AXEL_PLACEMENT_RULES = [
-  { id: 'hoje', label: 'Hoje', rule: 'Score acima de 90 ou prazo vence hoje' },
+  { id: 'hoje', label: 'Hoje', rule: 'Score acima de 90, prazo hoje, urgente no título ou remetente chave' },
   { id: 'semana', label: 'Semana', rule: 'Score acima de 70, em progresso ou prazo em 7 dias' },
-  { id: 'backlog', label: 'Backlog', rule: 'Demais demandas aguardando sinal' },
+  { id: 'backlog', label: 'Entrada', rule: 'Demais demandas aguardando sinal' },
   { id: 'carga', label: 'Carga mental', rule: 'Excesso em Hoje adia automaticamente para Semana' },
+  { id: 'cuidado', label: 'Cuidado', rule: 'Humor baixo adia prazos leves — urgente e VIP ficam' },
 ] as const
 
 /** Mescla horizonte automático com override manual (manual vence) */
@@ -58,6 +66,8 @@ export interface HorizonAssignOptions
   lastMovedAt?: (taskId: number, createdAt: string | null) => string | null
   moodSnoozeReason?: string
   moodCapNote?: string
+  moodProfile?: MoodProfile
+  alreadyMoodShifted?: Set<number>
 }
 
 /** Penaliza score de tarefas paradas e aplica bônus de aprendizado por drag */
@@ -198,12 +208,30 @@ export async function runPipelineOrchestration(
   )
   scoredTasks = adjustedTasks
 
+  const dueShifts = computeMoodCareDueShifts(
+    scoredTasks,
+    options.moodProfile ?? 'sem_registro',
+    { skipIds: options.alreadyMoodShifted },
+  )
+  scoredTasks = applyMoodCareDueShifts(scoredTasks, dueShifts)
+
   const { autoHorizons, loadBalance, decisions: horizonDecisions } = assignOrchestratedHorizons(
     scoredTasks,
     dailyScoreCap,
     options,
   )
   const decisions = [...adjustDecisions, ...horizonDecisions]
+  if (dueShifts.length > 0)
+  {
+    const n = dueShifts.length
+    decisions.push({
+      taskId: dueShifts[0].taskId,
+      kind: 'deferred_load',
+      message: n === 1
+        ? 'Adiei 1 prazo leve — seu humor pede menos pressão hoje.'
+        : `Adiei ${n} prazos leves — seu humor pede menos pressão hoje.`,
+    })
+  }
 
   const hojeCount = Object.values(autoHorizons).filter((h) => h === 'hoje').length
   const source = scores.some((s) => s.source === 'ai') ? 'ai' : 'mock'
@@ -214,6 +242,7 @@ export async function runPipelineOrchestration(
     autoHorizons,
     loadBalance,
     decisions,
+    dueShifts,
     hojeCount,
     source,
   }

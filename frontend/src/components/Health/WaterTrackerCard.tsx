@@ -28,6 +28,7 @@ export function WaterTrackerCard()
   const habitos = useTaskStore((s) => s.habitos)
   const ensureHealthHabit = useTaskStore((s) => s.ensureHealthHabit)
   const setAguaRegistros = useTaskStore((s) => s.setAguaRegistros)
+  const updateHabitoMeta = useTaskStore((s) => s.updateHabitoMeta)
 
   const agua = useMemo(() => habitos.find((h) => h.tipo === 'agua'), [habitos])
   const entries = useMemo(() => registrosMl(agua), [agua])
@@ -140,7 +141,10 @@ export function WaterTrackerCard()
                 min={4}
                 max={20}
                 value={goal}
-                onChange={(e) => updateHabitoMeta(agua.id, Math.max(4, parseInt(e.target.value, 10) || 8))}
+                onChange={(e) =>
+                {
+                  void updateHabitoMeta(agua.id, Math.max(4, parseInt(e.target.value, 10) || 8))
+                }}
                 className="w-12 bg-chrome border border-line rounded-sl px-1 py-0.5 text-ink text-center text-[11px]"
               />
             </label>
