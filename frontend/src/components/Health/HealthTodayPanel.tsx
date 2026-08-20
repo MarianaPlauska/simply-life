@@ -6,7 +6,7 @@ import { ritualHeadline, isAguaRitualComplete, aguaDisplaySnapshot } from '../..
 import { useHealthRitualSnapshot } from '../../hooks/useHealthRitualSnapshot'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
 import { snapshotNutricaoHoje } from '../../lib/healthNutrition'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
 import { HealthQuickTile } from './HealthQuickTile'
 
 // Hub "Hoje" — visão leve no celular: ritual + atalhos de 1 toque (padrão Finch/Rise)
@@ -41,9 +41,9 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
   const nut = snapshotNutricaoHoje(habitos)
 
   return (
-    <div className="space-y-4">
-      <section className="rounded-sl border border-line bg-card p-4 sm:p-5">
-        <div className="flex items-start justify-between gap-3 mb-3">
+    <div className="space-y-1">
+      <section className={AXEL_METRIC_HAIRLINE}>
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent mb-1">
               Ritual de hoje
@@ -97,7 +97,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
         </div>
       </section>
 
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4 lg:gap-4 w-full">
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 flex flex-col`}>
         <HealthQuickTile
           icon={Droplets}
           label="Água"

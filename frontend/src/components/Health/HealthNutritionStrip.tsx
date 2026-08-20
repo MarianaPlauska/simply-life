@@ -1,7 +1,7 @@
 import { Beef, Flame } from 'lucide-react'
 import { snapshotNutricaoHoje } from '../../lib/healthNutrition'
 import { useTaskStore } from '../../store/useTaskStore'
-import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
 
 /** Faixa no topo de Saúde — proteína e kcal consumidos hoje */
 export function HealthNutritionStrip()
@@ -12,7 +12,7 @@ export function HealthNutritionStrip()
 
   return (
     <section
-      className="rounded-sl border border-line bg-card/80 px-3 py-2.5 sm:px-4 flex flex-wrap items-center gap-x-4 gap-y-2"
+      className={`${AXEL_METRIC_HAIRLINE} flex flex-wrap items-center gap-x-4 gap-y-2`}
       aria-label="Nutrição de hoje"
     >
       <div className="flex items-center gap-2 min-w-0">

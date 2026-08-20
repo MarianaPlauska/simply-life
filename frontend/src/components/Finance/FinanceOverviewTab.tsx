@@ -3,6 +3,7 @@ import { FinanceBudgetPanel } from './overview/FinanceBudgetPanel'
 import { FinanceRecurringIncomePanel } from './overview/FinanceRecurringIncomePanel'
 import { FinanceMonthOutlookPanel } from './overview/FinanceMonthOutlookPanel'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
+import { AXEL_PAGE_SHELL_READING } from '../../constants/axelSurfaces'
 import type { Category, Transaction } from '../../store/storeTypes'
 import type { CategoryBudgetRow } from '../../lib/financeCategoryBudget'
 
@@ -58,7 +59,7 @@ export function FinanceOverviewTab({
   void _monthTx
 
   return (
-    <div className="space-y-3">
+    <div className={`${AXEL_PAGE_SHELL_READING} space-y-3`}>
       <FinanceOverviewCharts
         saldo={saldo}
         diffDespesas={diffDespesas}
@@ -74,6 +75,7 @@ export function FinanceOverviewTab({
         title="Orçamento por categoria"
         subtitle="Limites e uso do mês"
         defaultOpen={false}
+        borderless
       >
         <FinanceBudgetPanel
           rows={budgetRows}
@@ -90,6 +92,7 @@ export function FinanceOverviewTab({
         title="Projeção do mês"
         subtitle="Contas e faturas previstas"
         defaultOpen={false}
+        borderless
       >
         <FinanceMonthOutlookPanel monthOffset={monthOffset} />
       </DashboardCollapsible>
@@ -98,6 +101,7 @@ export function FinanceOverviewTab({
         title="Receitas recorrentes"
         subtitle="Salário e entradas fixas"
         defaultOpen={false}
+        borderless
       >
         <FinanceRecurringIncomePanel activeCategories={activeCategories} />
       </DashboardCollapsible>

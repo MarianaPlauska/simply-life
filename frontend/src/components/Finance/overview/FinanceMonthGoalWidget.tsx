@@ -12,6 +12,7 @@ import {
   AXEL_PROGRESS_THICK,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
+  AXEL_METRIC_HAIRLINE,
 } from '../../../constants/axelSurfaces'
 import { MoneyInput } from '../../ui/MoneyInput'
 import { formatCentsToBrl, parseMoneyInputToNumber } from '../../../lib/currencyInput'
@@ -85,8 +86,8 @@ export function FinanceMonthGoalWidget({
       <button
         type="button"
         onClick={startEdit}
-        className={`w-full rounded-sl border border-dashed border-line bg-card/50 text-left hover:bg-chrome/30 transition-colors ${
-          compact ? 'p-2.5' : 'p-3'
+        className={`w-full ${AXEL_METRIC_HAIRLINE} text-left hover:bg-chrome/30 transition-colors min-h-[44px] ${
+          compact ? 'pb-2.5' : 'pb-3'
         }`}
       >
         <div className="flex items-center gap-2">
@@ -107,7 +108,7 @@ export function FinanceMonthGoalWidget({
   if (editing)
   {
     return (
-      <section className={`rounded-sl border border-line bg-card space-y-2 ${compact ? 'p-2.5' : 'p-3'}`}>
+      <section className={`${AXEL_METRIC_HAIRLINE} space-y-2 ${compact ? 'pb-2.5' : 'pb-3'}`}>
         <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
           Meta de poupança
         </p>
@@ -149,7 +150,7 @@ export function FinanceMonthGoalWidget({
       : 'bg-atencao'
 
   return (
-    <section className={`rounded-sl border border-line bg-card space-y-2 ${compact ? 'p-2.5' : 'p-3'}`}>
+    <section className={`${AXEL_METRIC_HAIRLINE} space-y-2 ${compact ? 'pb-2.5' : 'pb-3'}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">

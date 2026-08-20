@@ -15,7 +15,7 @@ import { HealthTodayPanel } from './HealthTodayPanel'
 import { HealthCuidadosPanel } from './HealthCuidadosPanel'
 import { HealthNutritionStrip } from './HealthNutritionStrip'
 import { healthHeaderSubtitle } from './healthSectionMeta'
-import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT, AXEL_PAGE_SHELL_MOBILE_NARROW, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
+import { AXEL_CANVAS, AXEL_MAIN_PB_MOBILE, AXEL_MAIN_PT, AXEL_PAGE_SHELL_READING, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
 import { BentoGridSkeleton } from '../ui/Skeleton'
 
 // HealthView — hub: Hoje, Cuidados e Diário
@@ -149,7 +149,7 @@ export function HealthView()
 
   return (
     <div className={`w-full min-h-0 flex flex-col ${AXEL_CANVAS} ${AXEL_MAIN_PT} ${AXEL_MAIN_PB_MOBILE}`}>
-      <div className={`${AXEL_PAGE_SHELL_MOBILE_NARROW} px-4 sm:px-6 lg:px-8 flex flex-col flex-1 min-h-0`}>
+      <div className={`${AXEL_PAGE_SHELL_READING} px-3 sm:px-4 flex flex-col flex-1 min-h-0`}>
         <header className="space-y-2 shrink-0">
           <div className="flex flex-col gap-0.5">
             <h1 className="text-xl sm:text-2xl font-display font-semibold text-ink tracking-tight">

@@ -11,6 +11,7 @@ import { FinanceGlobalMoodBanner } from './FinanceGlobalMoodBanner'
 import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
+  AXEL_PAGE_SHELL_READING,
 } from '../../constants/axelSurfaces'
 import type { FinanceAlertTab } from '../../lib/financeAlerts'
 import { useFinanceAlerts } from '../../hooks/useFinanceAlerts'
@@ -114,9 +115,9 @@ export function FinanceHomeTab({
   const kpiSaldoMes = isFutureMonth ? outlook.sobraParaGastar : saldo
 
   return (
-    <div className="space-y-3 pt-2 sm:pt-3">
+    <div className={`${AXEL_PAGE_SHELL_READING} space-y-3 pt-2 sm:pt-3`}>
       {pastMonthEmpty ? (
-        <div className="rounded-sl border border-dashed border-line bg-card px-4 py-8 text-center space-y-2">
+        <div className="border-t-[0.5px] border-line py-4 text-center space-y-1.5">
           <CalendarOff className="w-8 h-8 mx-auto text-ink-muted opacity-60" aria-hidden />
           <p className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>
             Sem lançamentos em {monthLabel}

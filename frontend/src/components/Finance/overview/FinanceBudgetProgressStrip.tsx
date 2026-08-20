@@ -5,7 +5,7 @@ import {
   filterActiveBudgetRows,
   budgetAlertLabel,
 } from '../../../lib/financeCategoryBudget'
-import { AXEL_PROGRESS_THICK, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
+import { AXEL_PROGRESS_THICK, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
 import type { BudgetLimit, Category, Transaction } from '../../../store/storeTypes'
 
 const fmt = (v: number) =>
@@ -37,7 +37,7 @@ export function FinanceBudgetProgressStrip({
   if (rows.length === 0) return null
 
   return (
-    <section className="rounded-sl border border-line bg-card p-3 space-y-2">
+    <section className={`${AXEL_METRIC_HAIRLINE} space-y-2`}>
       <div className="flex items-center justify-between gap-2">
         <p className={`font-mono text-[9px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
           Orçamento por categoria

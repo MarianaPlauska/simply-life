@@ -1,5 +1,5 @@
 import { maskFinanceValue } from '../../../lib/financeHideValues'
-import { AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
+import { AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -78,16 +78,16 @@ export function FinanceMonthKpisRow({
         </button>
       )}
 
-      <div className="rounded-sl bg-card px-3 py-3">
+      <div className={AXEL_METRIC_HAIRLINE}>
         <p className="sl-eyebrow text-finance">{heroLabel}</p>
         <p className={`${compact ? 'text-[1.65rem]' : 'sl-metric'} font-sans font-medium tabular-nums tracking-tight mt-1 ${hideValues ? 'text-ink-muted' : balanceToneClass}`}>
           {maskFinanceValue(hideValues, fmt(saldoDisponivel))}
         </p>
       </div>
 
-      <div className={`grid gap-2 ${rest.length === 3 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+      <div className={`grid gap-3 ${rest.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} ${AXEL_METRIC_HAIRLINE} mt-2`}>
         {rest.map(({ label, value }) => (
-          <div key={label} className="rounded-sl bg-card px-2.5 py-2">
+          <div key={label}>
             <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{label}</p>
             <p className={`text-[13px] sm:text-sm font-sans tabular-nums mt-0.5 ${hideValues ? 'text-ink-muted' : 'text-ink'}`}>
               {maskFinanceValue(hideValues, fmt(value))}

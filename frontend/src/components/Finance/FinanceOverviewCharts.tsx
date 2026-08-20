@@ -17,7 +17,7 @@ import {
   Cell,
 } from 'recharts'
 import {
-  AXEL_BORDERLESS_PANEL,
+  AXEL_METRIC_HAIRLINE,
   AXEL_SECTION_TITLE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
@@ -89,8 +89,8 @@ export function FinanceOverviewCharts({
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <section className={`lg:col-span-3 ${AXEL_BORDERLESS_PANEL}`}>
+      <div className="flex flex-col gap-4">
+        <section className={AXEL_METRIC_HAIRLINE}>
           <div className="flex items-center justify-between pb-3 border-b border-line mb-4">
             <div>
               <h2 className={AXEL_SECTION_TITLE}>Resumo do mês</h2>
@@ -194,7 +194,7 @@ export function FinanceOverviewCharts({
           </div>
         </section>
 
-        <aside className={`${AXEL_BORDERLESS_PANEL} relative overflow-hidden flex flex-col justify-between`}>
+        <aside className={`${AXEL_METRIC_HAIRLINE} relative overflow-hidden flex flex-col justify-between`}>
           <div
             className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-chrome/30 pointer-events-none"
             aria-hidden
@@ -225,7 +225,7 @@ export function FinanceOverviewCharts({
         </aside>
       </div>
 
-      <section className={AXEL_BORDERLESS_PANEL}>
+      <section className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
             <h2 className={AXEL_SECTION_TITLE}>Evolução financeira</h2>

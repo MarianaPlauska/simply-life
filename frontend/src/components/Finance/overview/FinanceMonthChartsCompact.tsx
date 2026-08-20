@@ -12,7 +12,7 @@ import {
 } from 'recharts'
 import { BarChart3 } from 'lucide-react'
 import { useFinanceChartTheme } from '../../../lib/financeChartTheme'
-import { AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
+import { AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -31,7 +31,7 @@ export function FinanceMonthChartsCompact({
   const chart = useFinanceChartTheme()
 
   return (
-    <section className="rounded-sl border border-line bg-card p-3 space-y-3">
+    <section className={`${AXEL_METRIC_HAIRLINE} space-y-3`}>
       <div className="flex items-center gap-2">
         <BarChart3 size={14} className="text-accent shrink-0" />
         <div>
