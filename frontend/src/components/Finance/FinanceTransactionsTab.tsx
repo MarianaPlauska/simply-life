@@ -12,10 +12,10 @@ import { CATEGORY_GRUPO_LABELS } from '../../lib/financeDefaultCategories'
 import { filterTransactionsByGrupo, GRUPO_ORDER } from '../../lib/financeGroupRollup'
 import { resolveFinancePeriod, type FinancePeriodConfig } from '../../lib/financePeriodFilter'
 import {
-  AXEL_BENTO_PANEL,
   AXEL_FIELD_INPUT,
   AXEL_LIST_FILTER_ACTIVE,
   AXEL_LIST_FILTER_IDLE,
+  AXEL_METRIC_HAIRLINE,
   AXEL_ROW_HOVER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
@@ -217,7 +217,7 @@ export function FinanceTransactionsTab({
         title="Resumo por grupo"
         subtitle={periodLabel}
         defaultOpen={false}
-        className={AXEL_BENTO_PANEL}
+        borderless
         bodyClassName="pt-0"
       >
         <FinanceGroupedRollupTable
@@ -245,7 +245,7 @@ export function FinanceTransactionsTab({
           <>
             <ul className="divide-y divide-line max-h-[min(55vh,480px)] overflow-y-auto custom-scrollbar">
               {rows.length === 0 && (
-                <li className={`py-12 text-center text-[12px] px-4 ${AXEL_TEXT_SECONDARY}`}>
+                <li className={`py-3 text-center text-[13px] px-3 ${AXEL_TEXT_SECONDARY}`}>
                   Nenhum lançamento para os filtros atuais.
                 </li>
               )}
@@ -405,7 +405,7 @@ export function FinanceTransactionsTab({
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className={`py-16 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+                <td colSpan={8} className={`py-3 text-center text-[13px] ${AXEL_TEXT_SECONDARY}`}>
                   Nenhum lançamento para os filtros atuais.
                 </td>
               </tr>
@@ -497,62 +497,80 @@ function Toolbar({
   setFilterGrupo,
 }: ToolbarProps)
 {
+  const [filtersOpen, setFiltersOpen] = useState(false)
+  const advancedOn = filterGrupo !== 'all' || filterCat !== 'all' || filterStatus !== 'all'
+
   return (
-    <section className={`${AXEL_BENTO_PANEL} p-3 space-y-3`}>
-      <div className={`flex items-center gap-2 min-h-[44px] ${AXEL_FIELD_INPUT} py-1.5`}>
-        <Search className={`w-3.5 h-3.5 shrink-0 ${AXEL_TEXT_SECONDARY}`} />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar lançamento..."
-          className={`bg-transparent text-[12px] placeholder:text-ink-muted outline-none w-full ${AXEL_TEXT_PRIMARY}`}
-        />
+    <section className={`${AXEL_METRIC_HAIRLINE} space-y-3 py-3`}>
+      <div className="flex items-center gap-2">
+        <div className={`flex items-center gap-2 min-h-[44px] flex-1 ${AXEL_FIELD_INPUT} py-1.5`}>
+          <Search className={`w-3.5 h-3.5 shrink-0 ${AXEL_TEXT_SECONDARY}`} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar lançamento..."
+            className={`bg-transparent text-[12px] placeholder:text-ink-muted outline-none w-full ${AXEL_TEXT_PRIMARY}`}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((o) => !o)}
+          className="shrink-0 inline-flex items-center min-h-[44px] px-3 text-[13px] font-medium text-ink-muted hover:text-ink"
+          aria-expanded={filtersOpen}
+        >
+          Filtrar
+          {advancedOn && <span className="ml-1 tabular-nums text-ink">·</span>}
+        </button>
       </div>
 
-      <FilterRow label="Grupo">
-        <FilterChip active={filterGrupo === 'all'} onClick={() => setFilterGrupo('all')}>
-          Todos
-        </FilterChip>
-        {GRUPO_ORDER.map((g) => (
-          <FilterChip
-            key={g}
-            active={filterGrupo === g}
-            onClick={() => setFilterGrupo(g)}
-          >
-            {CATEGORY_GRUPO_LABELS[g]}
-          </FilterChip>
-        ))}
-      </FilterRow>
+      {filtersOpen && (
+        <div className="space-y-3">
+          <FilterRow label="Grupo">
+            <FilterChip active={filterGrupo === 'all'} onClick={() => setFilterGrupo('all')}>
+              Todos
+            </FilterChip>
+            {GRUPO_ORDER.map((g) => (
+              <FilterChip
+                key={g}
+                active={filterGrupo === g}
+                onClick={() => setFilterGrupo(g)}
+              >
+                {CATEGORY_GRUPO_LABELS[g]}
+              </FilterChip>
+            ))}
+          </FilterRow>
 
-      <FilterRow label="Categoria">
-        <FilterChip active={filterCat === 'all'} onClick={() => setFilterCat('all')}>
-          Todas
-        </FilterChip>
-        <FilterChip active={filterCat === 'receita'} onClick={() => setFilterCat('receita')}>
-          Receitas
-        </FilterChip>
-        {activeCategories.slice(0, 8).map((cat) => (
-          <FilterChip
-            key={cat.id}
-            active={filterCat === String(cat.id)}
-            onClick={() => setFilterCat(String(cat.id))}
-          >
-            {cat.nome}
-          </FilterChip>
-        ))}
-      </FilterRow>
+          <FilterRow label="Categoria">
+            <FilterChip active={filterCat === 'all'} onClick={() => setFilterCat('all')}>
+              Todas
+            </FilterChip>
+            <FilterChip active={filterCat === 'receita'} onClick={() => setFilterCat('receita')}>
+              Receitas
+            </FilterChip>
+            {activeCategories.slice(0, 8).map((cat) => (
+              <FilterChip
+                key={cat.id}
+                active={filterCat === String(cat.id)}
+                onClick={() => setFilterCat(String(cat.id))}
+              >
+                {cat.nome}
+              </FilterChip>
+            ))}
+          </FilterRow>
 
-      <FilterRow label="Status">
-        {(['all', 'pago', 'pendente', 'agendado'] as const).map((st) => (
-          <FilterChip
-            key={st}
-            active={filterStatus === st}
-            onClick={() => setFilterStatus(st)}
-          >
-            {st === 'all' ? 'Todos' : STATUS_CONFIG[st].label}
-          </FilterChip>
-        ))}
-      </FilterRow>
+          <FilterRow label="Status">
+            {(['all', 'pago', 'pendente', 'agendado'] as const).map((st) => (
+              <FilterChip
+                key={st}
+                active={filterStatus === st}
+                onClick={() => setFilterStatus(st)}
+              >
+                {st === 'all' ? 'Todos' : STATUS_CONFIG[st].label}
+              </FilterChip>
+            ))}
+          </FilterRow>
+        </div>
+      )}
     </section>
   )
 }

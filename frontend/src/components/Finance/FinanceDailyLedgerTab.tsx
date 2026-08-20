@@ -22,8 +22,8 @@ import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { dedupeLedgerEntries, countLedgerDuplicates } from '../../lib/financeTransactionDedup'
 import {
   AXEL_BTN_PRIMARY_COMPACT,
-  AXEL_BENTO_PANEL,
   AXEL_FIELD_INPUT,
+  AXEL_METRIC_HAIRLINE,
   AXEL_ROW_HOVER,
   AXEL_FORM_SEG_ACTIVE,
   AXEL_FORM_SEG_IDLE,
@@ -275,8 +275,8 @@ export function FinanceDailyLedgerTab({
   ) : null
 
   const dayListSection = (
-    <section className={AXEL_BENTO_PANEL}>
-      <header className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-line">
+    <section>
+      <header className={`flex items-center justify-between gap-2 py-2 ${AXEL_METRIC_HAIRLINE}`}>
         <div className="min-w-0">
           <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
             {formattedDay} · {dayTx.length} item{dayTx.length !== 1 ? 's' : ''}
@@ -299,7 +299,7 @@ export function FinanceDailyLedgerTab({
 
       <ul className="md:hidden divide-y divide-line">
         {dayTx.length === 0 && (
-          <li className={`px-3 py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+          <li className={`py-3 text-center text-[13px] ${AXEL_TEXT_SECONDARY}`}>
             Nada registrado neste dia
           </li>
         )}
@@ -343,7 +343,7 @@ export function FinanceDailyLedgerTab({
           <tbody>
             {dayTx.length === 0 && (
               <tr>
-                <td colSpan={4} className={`px-3 py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+                <td colSpan={4} className={`py-3 text-center text-[13px] ${AXEL_TEXT_SECONDARY}`}>
                   Nada registrado neste dia
                 </td>
               </tr>
@@ -406,9 +406,9 @@ export function FinanceDailyLedgerTab({
   )
 
   return (
-    <div className="space-y-3">
+    <div>
       {categoryModal}
-      <section className={`${AXEL_BENTO_PANEL} p-3`}>
+      <section>
         <div className="flex items-center gap-2">
           <button
             type="button"
@@ -462,13 +462,13 @@ export function FinanceDailyLedgerTab({
       <DashboardCollapsible
         title="Lançar neste dia"
         subtitle={`${isToday(dayKey) ? 'Hoje' : formattedDay} · dia ${dayNet >= 0 ? '+' : ''}${fmt(dayNet)}`}
-        className={AXEL_BENTO_PANEL}
+        borderless
         bodyClassName="space-y-2.5"
       >
         {entryForm}
       </DashboardCollapsible>
 
-      <section className={`${AXEL_BENTO_PANEL} p-2 md:p-3`}>
+      <section className={`${AXEL_METRIC_HAIRLINE} py-2`}>
         <FinanceQuickPresets />
       </section>
     </div>
