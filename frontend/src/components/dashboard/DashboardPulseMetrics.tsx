@@ -16,6 +16,7 @@ export function DashboardPulseMetrics()
   const resumo = useTaskStore((s) => s.dashboardResumo)
   const storeTarefas = useTaskStore((s) => s.tarefas)
   const streakCount = useTaskStore((s) => s.streakCount)
+  const streakPaused = useTaskStore((s) => s.streakPaused)
   const isStreakSafeToday = useTaskStore((s) => s.isStreakSafeToday)
 
   const tarefas = useMemo(() => mergeDashboardTasks(storeTarefas), [storeTarefas])
@@ -44,7 +45,13 @@ export function DashboardPulseMetrics()
       <DashboardMetricTile
         label="Progresso"
         value={`${streakCount}`}
-        hint={isStreakSafeToday() ? 'dia(s) · registrado hoje' : 'Registre uma tarefa ou humor'}
+        hint={
+          streakPaused
+            ? 'pausada — não zerou'
+            : isStreakSafeToday()
+              ? 'dia(s) · você passou por aqui'
+              : 'abrir o dia já conta'
+        }
         tone="ink"
         icon={TrendingUp}
         onClick={() => navigate('/kanban?panel=executar')}

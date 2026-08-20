@@ -127,6 +127,8 @@ export const useTaskStore = create<TaskStore>()(
         lastActiveDate: state.lastActiveDate,
         hasCompletedTaskToday: state.hasCompletedTaskToday,
         hasWellbeingToday: state.hasWellbeingToday,
+        hasDayCheckinToday: state.hasDayCheckinToday,
+        streakPaused: state.streakPaused,
         streakFreezes: state.streakFreezes,
         streakSavedDays: state.streakSavedDays,
         lastMonthlyFreezeClaim: state.lastMonthlyFreezeClaim,

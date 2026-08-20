@@ -47,9 +47,19 @@ export function mergeOfensivaFromRow(
   const useServerStreak = serverStreak >= localStreak
     || Boolean(row.ofensiva_last_active_date && row.ofensiva_last_active_date >= (local.lastActiveDate ?? ''))
 
+  const serverLast = row.ofensiva_last_active_date ?? null
+  const localLast = local.lastActiveDate
+  const lastActiveDate = !serverLast
+    ? localLast
+    : !localLast
+      ? serverLast
+      : serverLast >= localLast
+        ? serverLast
+        : localLast
+
   return {
     streakCount: useServerStreak ? serverStreak : localStreak,
-    lastActiveDate: row.ofensiva_last_active_date ?? local.lastActiveDate,
+    lastActiveDate,
     streakFreezes: Math.max(row.ofensiva_freezes ?? 0, local.streakFreezes),
     lastMonthlyFreezeClaim: row.ofensiva_freeze_claim_month ?? local.lastMonthlyFreezeClaim,
     streakSavedDays: mergedSaved,

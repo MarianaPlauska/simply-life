@@ -20,6 +20,10 @@ export interface AxelStreakSlice
   lastActiveDate: string | null
   hasCompletedTaskToday: boolean
   hasWellbeingToday: boolean
+  /** Abrir o resumo do dia já conta como check-in */
+  hasDayCheckinToday: boolean
+  /** Ausência não zera — a sequência espera o próximo check-in */
+  streakPaused: boolean
   streakPulseNonce: number
   streakFreezes: number
   /** Dias em que a ofensiva foi salva (ISO date → true) */
@@ -35,6 +39,7 @@ export interface AxelStreakSlice
     proof: ProofOfWorkEvaluation,
   ) => { incremented: boolean; streakCount: number; streakQualified: boolean }
   recordWellbeingForStreak: () => { incremented: boolean; streakCount: number; streakQualified: boolean }
+  recordDayCheckin: () => { incremented: boolean; streakCount: number; streakQualified: boolean }
   getTotalXp: () => number
   purchaseStreakFreeze: () => Promise<{ ok: boolean; message: string }>
   canClaimMonthlyStreakFreeze: () => boolean
@@ -83,7 +88,7 @@ function markStreakDaySaved(
 function bumpDailyStreak(
   get: () => StreakStore,
   set: (partial: Partial<AxelStreakSlice> | ((s: AxelStreakSlice) => Partial<AxelStreakSlice>)) => void,
-  flag: 'hasCompletedTaskToday' | 'hasWellbeingToday',
+  flag: 'hasCompletedTaskToday' | 'hasWellbeingToday' | 'hasDayCheckinToday',
   onChanged?: () => void,
 ): StreakBumpResult
 {
@@ -91,11 +96,12 @@ function bumpDailyStreak(
 
   const today = todayIsoDate()
   const yesterday = yesterdayIsoDate()
-  const alreadySafe = get().hasCompletedTaskToday || get().hasWellbeingToday
+  const alreadySafe =
+    get().hasCompletedTaskToday || get().hasWellbeingToday || get().hasDayCheckinToday
 
   if (alreadySafe)
   {
-    set({ [flag]: true } as Partial<AxelStreakSlice>)
+    set({ [flag]: true, streakPaused: false } as Partial<AxelStreakSlice>)
     markStreakDaySaved(set, get, today)
     onChanged?.()
     return {
@@ -107,14 +113,20 @@ function bumpDailyStreak(
 
   let nextStreak = 1
   const last = get().lastActiveDate
+  const pausedCount = get().streakCount
 
   if (last === yesterday)
   {
-    nextStreak = get().streakCount + 1
+    nextStreak = pausedCount + 1
   }
   else if (last === today)
   {
-    nextStreak = get().streakCount
+    nextStreak = pausedCount
+  }
+  else if (pausedCount > 0)
+  {
+    // Pausa: retoma a sequência em vez de recomeçar do zero
+    nextStreak = pausedCount + 1
   }
   else
   {
@@ -124,6 +136,7 @@ function bumpDailyStreak(
   set({
     streakCount: nextStreak,
     lastActiveDate: today,
+    streakPaused: false,
     [flag]: true,
     streakPulseNonce: get().streakPulseNonce + 1,
     streakSavedDays: { ...get().streakSavedDays, [today]: true },
@@ -148,6 +161,8 @@ export const createAxelStreakSlice: StateCreator<
   lastActiveDate: null,
   hasCompletedTaskToday: false,
   hasWellbeingToday: false,
+  hasDayCheckinToday: false,
+  streakPaused: false,
   streakPulseNonce: 0,
   streakFreezes: 0,
   streakSavedDays: {},
@@ -216,7 +231,11 @@ export const createAxelStreakSlice: StateCreator<
     {
       if (last !== today)
       {
-        set({ hasCompletedTaskToday: false, hasWellbeingToday: false })
+        set({
+          hasCompletedTaskToday: false,
+          hasWellbeingToday: false,
+          hasDayCheckinToday: false,
+        })
       }
       flush()
       return
@@ -224,7 +243,11 @@ export const createAxelStreakSlice: StateCreator<
 
     if (accountableGap === 1)
     {
-      set({ hasCompletedTaskToday: false, hasWellbeingToday: false })
+      set({
+        hasCompletedTaskToday: false,
+        hasWellbeingToday: false,
+        hasDayCheckinToday: false,
+      })
       flush()
       return
     }
@@ -236,21 +259,24 @@ export const createAxelStreakSlice: StateCreator<
         lastActiveDate: yesterday,
         hasCompletedTaskToday: false,
         hasWellbeingToday: false,
+        hasDayCheckinToday: false,
       })
       flush()
       return
     }
 
     set({
-      streakCount: 0,
+      streakPaused: true,
       hasCompletedTaskToday: false,
       hasWellbeingToday: false,
+      hasDayCheckinToday: false,
     })
 
     flush()
   },
 
-  isStreakSafeToday: () => get().hasCompletedTaskToday || get().hasWellbeingToday,
+  isStreakSafeToday: () =>
+    get().hasCompletedTaskToday || get().hasWellbeingToday || get().hasDayCheckinToday,
 
   addDailyFocusMinutes: (minutes) =>
   {
@@ -284,6 +310,12 @@ export const createAxelStreakSlice: StateCreator<
   {
     const onChanged = () => scheduleOfensivaPersist(() => get().syncOfensivaToServer())
     return bumpDailyStreak(get, set, 'hasWellbeingToday', onChanged)
+  },
+
+  recordDayCheckin: () =>
+  {
+    const onChanged = () => scheduleOfensivaPersist(() => get().syncOfensivaToServer())
+    return bumpDailyStreak(get, set, 'hasDayCheckinToday', onChanged)
   },
 
   getTotalXp: () =>

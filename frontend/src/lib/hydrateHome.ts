@@ -2,6 +2,7 @@ import { useTaskStore } from '../store/useTaskStore'
 import { bucketByDueDate } from './dueBucket'
 import { fetchMorningBrief } from './morningBriefApi'
 import { resolveTemporalHorizon } from './temporalHorizon'
+import { grantDailyCheckinXp, recordHomeDayCheckin } from './dayCheckinReward'
 
 let secondaryStarted = false
 
@@ -22,6 +23,7 @@ export async function hydrateHomeEssential(): Promise<void>
     jobs.push(s.fetchHabitos())
   }
   await Promise.all(jobs)
+  recordHomeDayCheckin()
 }
 
 /** Inbox, prefs, checks — depois do primeiro paint */
@@ -33,6 +35,7 @@ export async function hydrateHomeSecondary(): Promise<void>
     s.fetchPreferencias(),
     s.fetchGamificacaoStats(),
   ])
+  await grantDailyCheckinXp()
   s.syncStreakCalendarDay()
   await Promise.all([
     s.fetchPalavrasChave(),

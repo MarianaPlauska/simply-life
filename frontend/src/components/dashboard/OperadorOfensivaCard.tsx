@@ -45,6 +45,7 @@ export function OperadorOfensivaCard()
   const navigate = useNavigate()
   const userStats = useTaskStore((s) => s.userStats)
   const streakCount = useTaskStore((s) => s.streakCount)
+  const streakPaused = useTaskStore((s) => s.streakPaused)
   const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
   const streakFreezes = useTaskStore((s) => s.streakFreezes)
   const focusMinutesByDate = useTaskStore((s) => s.focusMinutesByDate)
@@ -94,6 +95,11 @@ export function OperadorOfensivaCard()
           {streakFreezes > 0 && (
             <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               {streakFreezes} escudo{streakFreezes > 1 ? 's' : ''}
+            </p>
+          )}
+          {streakPaused && (
+            <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+              Pausada — não zerou
             </p>
           )}
         </div>

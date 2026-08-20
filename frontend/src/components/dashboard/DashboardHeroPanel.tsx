@@ -15,11 +15,13 @@ export function DashboardHeroPanel({ onOpenTask }: DashboardHeroPanelProps)
   const streakCount = useTaskStore((s) => s.streakCount)
   const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
   const hasWellbeingToday = useTaskStore((s) => s.hasWellbeingToday)
+  const hasDayCheckinToday = useTaskStore((s) => s.hasDayCheckinToday)
 
   const offensive = buildOffensiveChecklist(
     hasCompletedTaskToday,
     hasWellbeingToday,
     streakCount,
+    hasDayCheckinToday,
   )
 
   return (

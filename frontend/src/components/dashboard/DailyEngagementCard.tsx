@@ -18,8 +18,10 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
 {
   const navigate = useNavigate()
   const streakCount = useTaskStore((s) => s.streakCount)
+  const streakPaused = useTaskStore((s) => s.streakPaused)
   const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
   const hasWellbeingToday = useTaskStore((s) => s.hasWellbeingToday)
+  const hasDayCheckinToday = useTaskStore((s) => s.hasDayCheckinToday)
   const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
   const userQuests = useTaskStore((s) => s.userQuests)
   const fetchQuests = useTaskStore((s) => s.fetchQuests)
@@ -45,17 +47,19 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
     hasCompletedTaskToday,
     hasWellbeingToday,
     streakCount,
+    hasDayCheckinToday,
   )
 
   useEffect(() =>
   {
-    if (!wasSafeRef.current && offensive.safe)
+    const proofSafe = offensive.taskDone || offensive.wellbeingDone
+    if (!wasSafeRef.current && proofSafe)
     {
       setShowStreakCare(true)
       triggerStreakCare()
     }
-    wasSafeRef.current = offensive.safe
-  }, [offensive.safe, triggerStreakCare])
+    wasSafeRef.current = proofSafe
+  }, [offensive.taskDone, offensive.wellbeingDone, triggerStreakCare])
 
   const dailyQuest = userQuests.find((q) => q.tipo === 'diaria' && !q.concluida)
     ?? userQuests.find((q) => !q.concluida)
@@ -103,7 +107,11 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
               <span className="text-xs font-normal text-ink-muted ml-1">dias</span>
             </p>
             <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-              {offensive.safe ? 'Dia salvo' : 'Salve o dia com 1 ação'}
+              {streakPaused
+                ? 'Pausada — não zerou'
+                : offensive.safe
+                  ? 'Você passou por aqui hoje'
+                  : 'Quando fizer sentido, dá uma olhada'}
             </p>
           </div>
         </div>
@@ -187,9 +195,11 @@ export function DailyEngagementCard({ variant = 'card' }: DailyEngagementCardPro
             <span className="text-sm font-normal text-ink-muted ml-1">dias</span>
           </p>
           <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-            {offensive.safe
-              ? 'Volte amanhã para continuar a sequência'
-              : 'Faça 1 item abaixo para manter a ofensiva'}
+            {streakPaused
+              ? 'A sequência está pausada — não zerou. Abrir o dia já conta.'
+              : offensive.safe
+                ? 'Você passou por aqui hoje'
+                : 'Quando fizer sentido, 1 item abaixo continua a sequência'}
           </p>
         </div>
       </div>

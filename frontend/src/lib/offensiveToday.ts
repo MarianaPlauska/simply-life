@@ -12,9 +12,10 @@ export function buildOffensiveChecklist(
   hasCompletedTaskToday: boolean,
   hasWellbeingToday: boolean,
   streakCount: number,
+  hasDayCheckinToday = false,
 ): OffensiveChecklist
 {
-  const safe = hasCompletedTaskToday || hasWellbeingToday
+  const safe = hasCompletedTaskToday || hasWellbeingToday || hasDayCheckinToday
   return {
     taskDone: hasCompletedTaskToday,
     wellbeingDone: hasWellbeingToday,
