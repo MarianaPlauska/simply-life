@@ -2,7 +2,7 @@ import type { ColorScheme } from '../store/storeTypes'
 
 const THEME_COLOR: Record<ColorScheme, string> = {
   dark: '#1E1C18',
-  light: '#F4EFE6',
+  light: '#F7F5F2',
 }
 
 /** Chave de dispositivo — escrita na hora, sem esperar o persist Zustand. */
@@ -67,6 +67,6 @@ export function rememberAndApplyColorScheme(scheme: ColorScheme): void
 }
 
 export const COLOR_SCHEME_OPTIONS: { id: ColorScheme; label: string; hint: string }[] = [
-  { id: 'light', label: 'Claro', hint: 'Papel quente + voz do AXEL' },
+  { id: 'light', label: 'Claro', hint: 'Off-white + voz do AXEL' },
   { id: 'dark', label: 'Escuro', hint: 'Grafite à noite' },
 ]

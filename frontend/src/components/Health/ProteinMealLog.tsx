@@ -140,7 +140,7 @@ export function ProteinMealLog()
   const refeicaoLabel = REFEICOES_PROTEINA.find((r) => r.id === refeicao)?.label ?? refeicao
 
   return (
-    <section className="rounded-sl border border-zinc-200/80 dark:border-line bg-white dark:bg-card p-4 space-y-4 shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-none">
+    <section className="rounded-sl border border-line bg-card p-4 space-y-4">
       <div>
         <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>O que você comeu</p>
         <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
@@ -161,8 +161,8 @@ export function ProteinMealLog()
               onClick={() => setRefeicao(r.id)}
               className={`flex flex-col items-center gap-0.5 py-2 rounded-sl border text-center transition-colors min-h-[52px] ${
                 ativo
-                  ? 'border-amber-500/35 bg-zinc-100 dark:bg-amber-500/10 text-zinc-900 dark:text-ink'
-                  : 'border-zinc-200/80 dark:border-line bg-transparent text-zinc-500 hover:text-zinc-700 dark:hover:bg-chrome/60'
+                  ? 'border-amber-500/35 bg-chrome text-ink'
+                  : 'border-line bg-transparent text-ink-muted hover:text-ink hover:bg-chrome/60'
               }`}
             >
               <Icon className="w-5 h-5" strokeWidth={AXEL_ICON_STROKE} aria-hidden />
@@ -184,7 +184,7 @@ export function ProteinMealLog()
           onChange={(e) => setJournalText(e.target.value)}
           placeholder="Ex.: arroz, feijão, frango grelhado e salada"
           rows={2}
-          className="w-full px-3 py-2.5 rounded-sl border border-line bg-white dark:bg-chrome text-[13px] text-ink outline-none focus:border-amber-500/40 resize-none min-h-[72px]"
+          className="w-full px-3 py-2.5 rounded-sl border border-line bg-elevated text-[13px] text-ink outline-none focus:border-amber-500/40 resize-none min-h-[72px]"
         />
         <button
           type="button"

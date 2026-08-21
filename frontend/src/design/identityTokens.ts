@@ -73,30 +73,33 @@ export const COLOR = {
   done: '#B8A99A',
 } as const
 
-/* ── Claro (mesmo caráter, papel quente — não cinza-100) ──── */
+/* ── Claro (off-white neutro — Instagram/X, não sépia) ──── */
 
 export const COLOR_LIGHT = {
-  canvas: '#F4EFE6',
-  chrome: '#EBE4D8',
-  surface: '#FFFBF5',
-  voice: '#F7EDE4',
-  elevated: '#FFFFFF',
-  ink: '#1C1916',
-  inkMuted: '#5C564E',
-  inkFaint: '#6F6860',
-  hairline: 'rgba(28, 25, 22, 0.10)',
-  hairlineStrong: 'rgba(28, 25, 22, 0.16)',
-  /** No papel claro o laranja/sálvia/ouro originais falham como texto */
-  axel: '#C45A32',
+  canvas: '#F7F5F2',
+  chrome: '#EFECE8',
+  surface: '#FBFAF8',
+  voice: '#F3EBE4',
+  elevated: '#FDFCFA',
+  ink: '#2A2622',
+  inkMuted: '#6A645C',
+  inkFaint: '#7A746C',
+  hairline: 'rgba(42, 38, 34, 0.09)',
+  hairlineStrong: 'rgba(42, 38, 34, 0.14)',
+  /**
+   * #C45A32 no canvas novo fica 3,97:1 (falha AA texto).
+   * #B8502C é o mesmo matiz, um degrau mais fechado: 4,57:1.
+   */
+  axel: '#B8502C',
   health: '#4F6F4C',
   finance: '#8A6A2E',
   tasks: '#4A5C68',
   danger: '#A33D3D',
-  done: '#5C564E',
-  axelOnFill: '#FFFBF5',
-  healthOnFill: '#FFFBF5',
-  financeOnFill: '#FFFBF5',
-  tasksOnFill: '#FFFBF5',
+  done: '#6A645C',
+  axelOnFill: '#F7F5F2',
+  healthOnFill: '#F7F5F2',
+  financeOnFill: '#F7F5F2',
+  tasksOnFill: '#F7F5F2',
 } as const
 
 /* ── WCAG 2.2 AA — pares que a UI pode usar ─────────────────

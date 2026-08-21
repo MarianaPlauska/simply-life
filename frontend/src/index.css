@@ -20,23 +20,24 @@ body {
 }
 
 :root {
-  --sl-canvas: #F4EFE6;
-  --sl-chrome: #EBE4D8;
-  --sl-surface: #FFFBF5;
-  --sl-voice: #F7EDE4;
-  --sl-elevated: #FFFFFF;
-  --sl-text: #1C1916;
-  --sl-text-muted: #5C564E;
-  --sl-text-faint: #6F6860;
-  --sl-border: rgba(28, 25, 22, 0.10);
-  --sl-border-subtle: rgba(28, 25, 22, 0.08);
-  --sl-accent: #1C1916;
-  --sl-accent-hover: #2A2623;
-  --sl-accent-muted: rgba(28, 25, 22, 0.08);
-  --sl-axel: #C45A32;
-  --sl-axel-hover: #D46840;
-  --sl-axel-muted: rgba(196, 90, 50, 0.12);
-  --sl-axel-on-fill: #FFFBF5;
+  --sl-canvas: #F7F5F2;
+  --sl-chrome: #EFECE8;
+  --sl-surface: #FBFAF8;
+  --sl-voice: #F3EBE4;
+  --sl-elevated: #FDFCFA;
+  --sl-text: #2A2622;
+  --sl-text-muted: #6A645C;
+  --sl-text-faint: #7A746C;
+  --sl-border: rgba(42, 38, 34, 0.09);
+  --sl-border-subtle: rgba(42, 38, 34, 0.09);
+  /* CTA = laranja AXEL (AA no canvas: #B8502C, não #C45A32) */
+  --sl-accent: #B8502C;
+  --sl-accent-hover: #C45A32;
+  --sl-accent-muted: rgba(184, 80, 44, 0.12);
+  --sl-axel: #B8502C;
+  --sl-axel-hover: #C45A32;
+  --sl-axel-muted: rgba(184, 80, 44, 0.12);
+  --sl-axel-on-fill: #F7F5F2;
   --sl-health: #4F6F4C;
   --sl-health-muted: rgba(79, 111, 76, 0.12);
   --sl-finance: #8A6A2E;
@@ -45,17 +46,17 @@ body {
   --sl-tasks-muted: rgba(74, 92, 104, 0.12);
   --sl-urgent: #A33D3D;
   --sl-attention: #8A6A2E;
-  --sl-success: #5C564E;
+  --sl-success: #6A645C;
   --sl-radius-sm: 12px;
   --sl-radius: 16px;
   --sl-radius-lg: 24px;
   --sl-radius-pill: 9999px;
   --sl-shadow: none;
-  --sl-shadow-lg: 0 16px 48px rgba(28, 25, 22, 0.08);
-  --sl-shadow-voice: 0 0 0 1px rgba(196, 90, 50, 0.22), 0 12px 40px rgba(196, 90, 50, 0.08);
-  --sl-chart-meta: #FFFBF5;
-  --sl-chart-meta-border: rgba(28, 25, 22, 0.10);
-  --sl-chart-real-a: #C45A32;
+  --sl-shadow-lg: 0 16px 48px rgba(42, 38, 34, 0.08);
+  --sl-shadow-voice: 0 0 0 1px rgba(184, 80, 44, 0.22), 0 12px 40px rgba(184, 80, 44, 0.08);
+  --sl-chart-meta: #FBFAF8;
+  --sl-chart-meta-border: rgba(42, 38, 34, 0.09);
+  --sl-chart-real-a: #B8502C;
   --sl-chart-real-b: #8A6A2E;
   --sl-chart-real-c: #4F6F4C;
   --sl-water-fill: #4F6F4C;

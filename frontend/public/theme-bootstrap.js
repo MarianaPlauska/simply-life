@@ -2,7 +2,7 @@
 (function ()
 {
   var THEME_DARK = '#1E1C18'
-  var THEME_LIGHT = '#F4EFE6'
+  var THEME_LIGHT = '#F7F5F2'
   var STORE = 'simply-life-store'
   var DEDICATED = 'simply-life-color-scheme'
 

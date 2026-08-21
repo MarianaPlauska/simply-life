@@ -62,7 +62,7 @@ function AvatarFrame({
   )
 }
 
-const AVATAR_PLATE = 'var(--sl-surface, #FFFFFF)'
+const AVATAR_PLATE = 'var(--sl-surface, #FBFAF8)'
 const AVATAR_PLATE_STROKE = 'var(--sl-border-subtle, rgba(228,228,231,0.55))'
 
 function AvatarPlate()

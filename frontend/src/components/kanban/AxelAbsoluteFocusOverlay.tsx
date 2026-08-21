@@ -195,13 +195,13 @@ export function AxelAbsoluteFocusOverlay({
           <button
             type="button"
             onClick={() => setZenFocusActive(false)}
-            className="mt-8 px-5 py-2.5 rounded-full text-sm text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/[0.04] transition-colors"
+            className="mt-8 px-5 py-2.5 rounded-full text-sm text-ink-muted border border-line hover:bg-chrome transition-colors"
           >
             Voltar ao Kanban
           </button>
         </div>
       ) : breathing ? (
-        <div className="relative w-full max-w-lg text-center px-8 py-14 rounded-3xl border border-zinc-200/80 dark:border-white/[0.06] bg-white/90 dark:bg-[#1E1E28]/95 shadow-2xl shadow-indigo-500/5 backdrop-blur-sm">
+        <div className="relative w-full max-w-lg text-center px-8 py-14 rounded-3xl border border-line bg-elevated">
           <p className="text-base text-zinc-600 dark:text-zinc-300 leading-relaxed">
             {BREATHE_MESSAGE}
           </p>
@@ -215,7 +215,7 @@ export function AxelAbsoluteFocusOverlay({
           </button>
         </div>
       ) : (
-        <article className="relative w-full max-w-xl rounded-3xl border border-zinc-200/80 dark:border-white/[0.06] bg-white dark:bg-[#1E1E28] px-10 py-12 sm:px-12 sm:py-14 shadow-2xl shadow-indigo-500/5 flex flex-col gap-8">
+        <article className="relative w-full max-w-xl rounded-3xl border border-line bg-elevated px-10 py-12 sm:px-12 sm:py-14 flex flex-col gap-8">
           <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed text-center max-w-md mx-auto">
             {ZEN_REASSURANCE}
           </p>

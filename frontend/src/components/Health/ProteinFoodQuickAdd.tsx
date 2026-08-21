@@ -151,7 +151,7 @@ export function ProteinFoodQuickAdd({
       </div>
 
       {showForm && (
-        <div className="rounded-sl border border-line bg-white dark:bg-chrome p-3 space-y-2 shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-none">
+        <div className="rounded-sl border border-line bg-elevated p-3 space-y-2">
           <p className={`text-[11px] font-medium ${AXEL_TEXT_PRIMARY}`}>
             {editingId ? 'Editar alimento' : 'Novo alimento'}
           </p>
@@ -160,7 +160,7 @@ export function ProteinFoodQuickAdd({
             value={formNome}
             onChange={(e) => setFormNome(e.target.value)}
             placeholder="Nome (ex.: Whey caseiro)"
-            className="w-full px-3 py-2 rounded-sl border border-line bg-white dark:bg-chrome text-[12px] text-ink outline-none focus:border-amber-500/40 min-h-[44px]"
+            className="w-full px-3 py-2 rounded-sl border border-line bg-elevated text-[12px] text-ink outline-none focus:border-amber-500/40 min-h-[44px]"
           />
           <input
             type="number"
@@ -169,7 +169,7 @@ export function ProteinFoodQuickAdd({
             value={formGramas}
             onChange={(e) => setFormGramas(e.target.value)}
             placeholder="Proteína por porção (g)"
-            className="w-full px-3 py-2 rounded-sl border border-line bg-white dark:bg-chrome text-[12px] text-ink outline-none focus:border-amber-500/40 min-h-[44px]"
+            className="w-full px-3 py-2 rounded-sl border border-line bg-elevated text-[12px] text-ink outline-none focus:border-amber-500/40 min-h-[44px]"
           />
           <div className="flex gap-2">
             <button
@@ -201,7 +201,7 @@ export function ProteinFoodQuickAdd({
           return (
             <li
               key={food.id}
-              className="flex items-stretch gap-1.5 rounded-sl border border-zinc-200/80 dark:border-line bg-white dark:bg-chrome shadow-[0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-none overflow-hidden"
+              className="flex items-stretch gap-1.5 rounded-sl border border-line bg-elevated overflow-hidden"
             >
               <button
                 type="button"

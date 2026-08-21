@@ -45,9 +45,9 @@ export const AXEL_MAIN_PT =
 /** Painel Bento — branco puro sobre fundo cinza */
 export const AXEL_BENTO_PANEL = 'sl-panel'
 
-/** Chip / micro-botão em painel — branco no claro, superfície no escuro */
+/** Chip / micro-botão em painel */
 export const AXEL_BENTO_CHIP =
-  'bg-white border border-zinc-200/80 rounded-sl shadow-[0_1px_2px_rgba(0,0,0,0.05)] transition-colors hover:bg-zinc-50 dark:bg-card dark:border-line dark:shadow-none dark:hover:bg-chrome/80'
+  'bg-elevated border border-line rounded-sl transition-colors hover:bg-chrome dark:bg-card dark:border-line dark:hover:bg-chrome/80'
 
 /** Shell de segmentos (Gasto/Receita, etc.) */
 export const AXEL_SEG_SHELL =
@@ -212,13 +212,13 @@ export const AXEL_TOUCH_ROW = 'min-h-[44px] py-3'
 /** Gap vertical mobile */
 export const AXEL_STACK_GAP = 'gap-6'
 
-/** Botão primário — cream/grafite invertido, sem laranja */
+/** Botão primário — laranja AXEL (claro) / cream invertido (escuro via --sl-accent) */
 export const AXEL_BTN_PRIMARY =
-  `bg-ink text-fundo hover:opacity-90 font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
+  `bg-accent text-fundo hover:bg-accent-hover font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
 
 /** Botão primário compacto — modais e formulários */
 export const AXEL_BTN_PRIMARY_COMPACT =
-  `bg-ink text-fundo hover:opacity-90 font-sans font-semibold rounded-sl text-[12px] ${AXEL_TOUCH_PRESS}`
+  `bg-accent text-fundo hover:bg-accent-hover font-sans font-semibold rounded-sl text-[12px] ${AXEL_TOUCH_PRESS}`
 
 /** Link discreto */
 export const AXEL_LINK =
