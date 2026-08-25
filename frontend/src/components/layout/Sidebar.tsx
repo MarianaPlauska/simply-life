@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import {
-  LayoutDashboard, KanbanSquare, CalendarDays, StickyNote, SlidersHorizontal,
-  Wallet, HardDrive, PanelLeftClose, PanelLeft, Settings,
-  Zap, Webhook, PlugZap, Inbox, HeartPulse, Search, ScrollText,
+  LayoutDashboard, KanbanSquare, CalendarDays, StickyNote,
+  Wallet, PanelLeftClose, PanelLeft, Settings,
+  Zap, HeartPulse, Search, ScrollText,
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore'
@@ -51,17 +51,12 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'Inteligência',
     items: [
       { id: 'anotacoes', label: 'Anotações', icon: StickyNote, moduleKey: 'anotacoes', path: '/anotacoes' },
-      { id: 'inbox', label: 'Inbox IA', icon: Inbox, moduleKey: 'inteligencia', path: '/inteligencia' },
       { id: 'axel-historico', label: 'Histórico AXEL', icon: ScrollText, path: '/axel/historico' },
-      { id: 'preferencias', label: 'Preferências IA', icon: SlidersHorizontal, moduleKey: 'inteligencia', path: '/preferencias' },
     ],
   },
   {
     label: 'Configurações',
     items: [
-      { id: 'carreira', label: 'Integrações', icon: PlugZap, moduleKey: 'carreira', path: '/carreira' },
-      { id: 'drive', label: 'Vault / Drive', icon: HardDrive, moduleKey: 'carreira', path: '/drive' },
-      { id: 'webhooks', label: 'Webhooks', icon: Webhook, moduleKey: 'configuracoes', path: '/configuracoes#webhooks' },
       { id: 'configuracoes', label: 'Configurações', icon: Settings, moduleKey: 'configuracoes', path: '/configuracoes' },
     ],
   },

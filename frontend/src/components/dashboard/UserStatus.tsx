@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ChevronDown, Settings, User, LogOut, Moon,
+  ChevronDown, Settings, User, LogOut,
 } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { computeGamificationProfile } from '../../lib/gamificationProfile'
@@ -135,7 +135,6 @@ function ProfileHeader({ nome, firstName, email, iniciais, level, onLogout }: Pr
           <div className={AXEL_LINE} />
           <MenuItem Icon={User} label="Perfil & ofensiva" onClick={() => { setOpen(false); navigate('/perfil') }} />
           <MenuItem Icon={Settings} label="Configurações" onClick={() => { setOpen(false); navigate('/configuracoes') }} />
-          <MenuItem Icon={Moon} label="Preferências IA" onClick={() => { setOpen(false); navigate('/preferencias') }} />
           <div className={AXEL_LINE} />
           <MenuItem Icon={LogOut} label="Sair" destructive onClick={() => { setOpen(false); onLogout?.() }} />
         </div>

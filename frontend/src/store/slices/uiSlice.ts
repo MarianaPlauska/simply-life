@@ -7,7 +7,9 @@ import { readDedicatedColorScheme, rememberAndApplyColorScheme } from '../../uti
 /** Dashboard fixo + até 2 atalhos no header */
 export function normalizePinnedModules(modules: string[]): string[]
 {
-  const migrated = modules.map((m) => (m === 'foco' ? 'saude' : m));
+  const migrated = modules
+    .map((m) => (m === 'foco' ? 'saude' : m))
+    .filter((m) => m !== 'inteligencia' && m !== 'preferencias');
   const extras = migrated.filter((m) => m !== PINNED_DASHBOARD_ID).slice(0, MAX_PINNED_MODULES - 1);
   return [PINNED_DASHBOARD_ID, ...extras];
 }
@@ -33,7 +35,6 @@ export const PINNABLE_VIEWS: { id: string; label: string }[] = [
   { id: 'anotacoes', label: 'Anotações' },
   { id: 'calendario', label: 'Calendário' },
   { id: 'superhuman', label: 'Foco Superhumano' },
-  { id: 'inteligencia', label: 'Inbox IA' },
   { id: 'configuracoes', label: 'Configurações' },
 ];
 
