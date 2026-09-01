@@ -1,5 +1,4 @@
-import { View, useWindowDimensions } from 'react-native'
-import { BREAKPOINT } from '@simply-life/ui-tokens'
+import { View } from 'react-native'
 import type { DashboardGlance } from '@simply-life/shared'
 import { PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -11,16 +10,12 @@ type Props = {
   onPressGlance?: (id: string) => void
 }
 
-/** Grid responsivo de glances — 2 colunas mobile/tablet, 3 col desktop */
+/** Grade de glances — 2 colunas (app mobile-only; desktop web usa o Vite) */
 export function GlanceGrid({ glances, toneColor, onPressGlance }: Props)
 {
   const { space } = useTheme()
-  const { width } = useWindowDimensions()
-  // Mobile/tablet: 2 colunas; desktop (≥1024): 3 colunas
-  const cols = width >= BREAKPOINT.desktop ? 3 : 2
   const gap = space.sm
-  // Porcentagens deixam o pai com padding controlar a largura real
-  const itemBasis = cols === 3 ? '31.5%' : '47%'
+  const itemBasis = '47%'
 
   return (
     <View
@@ -38,7 +33,6 @@ export function GlanceGrid({ glances, toneColor, onPressGlance }: Props)
         const wrapStyle = {
           flexGrow: 0,
           flexShrink: 0,
-          // ~2 col (47%) ou ~3 col (31.5%) com gap do pai
           flexBasis: itemBasis,
           width: itemBasis,
           maxWidth: itemBasis,
