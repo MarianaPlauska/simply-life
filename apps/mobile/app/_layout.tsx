@@ -1,19 +1,17 @@
 import { useEffect } from 'react'
-import { View, ActivityIndicator, Platform, useWindowDimensions } from 'react-native'
+import { View, ActivityIndicator } from 'react-native'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope'
 import { Fraunces_500Medium } from '@expo-google-fonts/fraunces'
-import { BREAKPOINT, COLOR_DARK } from '@simply-life/ui-tokens'
+import { COLOR_DARK } from '@simply-life/ui-tokens'
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
-import { DesktopWebRedirect } from '../src/components/DesktopWebRedirect'
 
 function RootNavigator()
 {
   const { mode, colors } = useTheme()
-  const { width } = useWindowDimensions()
   const hydrate = useAuthStore((s) => s.hydrate)
   const ready = useAuthStore((s) => s.ready)
   usePushBootstrap()
@@ -22,19 +20,6 @@ function RootNavigator()
   {
     void hydrate()
   }, [hydrate])
-
-  // Expo web em tela larga → redireciona para o app Vite (desktop de verdade).
-  // iOS/Android nativo nunca passam por este gate.
-  const isWideWeb = Platform.OS === 'web' && width >= BREAKPOINT.desktop
-  if (isWideWeb)
-  {
-    return (
-      <>
-        <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-        <DesktopWebRedirect />
-      </>
-    )
-  }
 
   if (!ready)
   {
