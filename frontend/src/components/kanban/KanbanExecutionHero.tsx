@@ -3,7 +3,7 @@ import type { EnergyPeriod } from '../../lib/energyOrchestration'
 import { formatTaskRef, urgencyScoreClass } from '../../lib/kanbanVisual'
 import { getProjectTag } from '../../lib/contextRationale'
 import { ZenFocusProgressRing } from './ZenFocusProgressRing'
-import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
+import { AXEL_BTN_MD, AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -114,7 +114,7 @@ export function KanbanExecutionHero({
                   type="button"
                   onClick={onExecute}
                   disabled={isExecuting}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 font-mono text-[11px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
+                  className={`${AXEL_BTN_MD} gap-2 font-mono text-[11px] uppercase tracking-wide ${AXEL_BTN_PRIMARY}`}
                 >
                   <Play size={14} strokeWidth={1.75} fill="currentColor" />
                   {isExecuting ? 'Em execução' : 'Executar agora'}
@@ -122,7 +122,7 @@ export function KanbanExecutionHero({
                 <button
                   type="button"
                   onClick={onOpen}
-                  className="inline-flex items-center gap-1.5 px-3 py-2.5 font-mono text-[11px] uppercase tracking-wide border border-line text-ink-muted hover:text-accent hover:border-accent/40 rounded-sl transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-2.5 min-h-11 font-mono text-[11px] uppercase tracking-wide border border-line text-ink-muted hover:text-ink hover:border-ink/40 rounded-sl transition-colors"
                 >
                   Abrir detalhes
                 </button>

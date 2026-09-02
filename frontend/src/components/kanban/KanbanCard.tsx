@@ -7,7 +7,10 @@ import {
 import type { TarefaUnificada } from '../../types'
 import { getOrigin } from '../../constants/kanbanConfig'
 import { getElapsed, getUrgencyBadge } from '../../utils/kanbanHelpers'
-import { prioStripClass } from '../../utils/prioStripClass'
+import {
+  kanbanOriginTone,
+  KANBAN_ORIGIN_BAR,
+} from '../../lib/kanbanCardGrammar'
 import { TaskLineRow } from './TaskLineRow'
 
 // KanbanCard — modo "classico" reescrito como card densa de 3 linhas
@@ -31,7 +34,7 @@ function DueDateChip({ date }: { date: string })
   const diff = Math.ceil((venc.getTime() - hoje.getTime()) / 86400000)
 
   let cor = 'text-zinc-500'
-  if (diff < 0) cor = 'text-red-400'
+  if (diff < 0) cor = 'text-urgente'
   else if (diff === 0) cor = 'text-amber-400'
   else if (diff <= 2) cor = 'text-orange-400'
 
@@ -87,9 +90,9 @@ export function KanbanCard({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kanb
       aria-label={`Tarefa: ${tarefa.titulo}`}
       className={[
         // visual plano: card mas com prioridade pela borda esquerda
-        'group relative bg-card border border-zinc-900 border-l-2 rounded-sm',
+        'group relative bg-card border border-zinc-900 rounded-sm',
         'hover:border-violet-500/30 transition-colors cursor-grab active:cursor-grabbing',
-        prioStripClass(tarefa.prioridade),
+        KANBAN_ORIGIN_BAR[kanbanOriginTone(tarefa.origem)],
         isDragging ? 'opacity-60' : '',
       ].join(' ')}
       tabIndex={0}

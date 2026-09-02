@@ -7,10 +7,12 @@ import {
   BarChart3, Calendar, ArrowUpRight, ArrowDownRight,
   Star, CheckCircle2, Brain,
 } from 'lucide-react';
-import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
+import { AXEL_PAGE_GUTTER, AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
+import { PageIntro } from '../layout/PageIntro';
 import { useTaskStore, type AnalyticsReport, type TrendPoint, type RankingItem } from '../../store/useTaskStore';
 import { PrintButton } from '../ui/PrintButton';
 import { AcademyAnalyticsSection } from '../dashboard/AcademyAnalyticsSection';
+import { DashboardConsistencyStrip } from '../dashboard/DashboardConsistencyStrip';
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-40px' }, transition: { duration: 0.5 } };
 
@@ -31,7 +33,7 @@ function BarChart({ data, color = '#10b981', height = 120 }: {
         const isLast = i === data.length - 1;
         return (
           <div key={d.label} className="flex flex-col items-center gap-1 flex-1">
-            <span className="text-[9px] text-zinc-500 font-medium">{Math.round(d.valor)}</span>
+            <span className="text-[9px] text-ink-muted font-medium">{Math.round(d.valor)}</span>
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: Math.max(h, 2) }}
@@ -42,7 +44,7 @@ function BarChart({ data, color = '#10b981', height = 120 }: {
                 minWidth: 8,
               }}
             />
-            <span className="text-[9px] text-zinc-600">{d.label}</span>
+            <span className="text-[9px] text-ink-faint">{d.label}</span>
           </div>
         );
       })}
@@ -96,7 +98,7 @@ function VariacaoBadge({ valor }: { valor: number }) {
       <ArrowDownRight className="w-3 h-3" />{Math.abs(valor)}%
     </span>
   );
-  return <span className="text-[11px] text-zinc-500">—</span>;
+  return <span className="text-[11px] text-ink-muted">—</span>;
 }
 
 /* ── Score Ring ───────────────────────────────────────────── */
@@ -105,13 +107,13 @@ function ScoreRing({ score, label, size = 120 }: { score: number; label: string;
   const circumference = 2 * Math.PI * r;
   const strokeDash = (score / 100) * circumference;
 
-  const color = score >= 80 ? '#f59e0b' : score >= 60 ? '#10b981' : score >= 40 ? '#3b82f6' : '#8b5cf6';
+  const color = score >= 80 ? '#C9A15C' : score >= 60 ? '#7FA37A' : score >= 40 ? '#8B9BA8' : '#B0A89C';
 
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="transform -rotate-90">
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgb(39 39 42 / 0.4)" strokeWidth="8" />
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--sl-border)" strokeWidth="8" />
           <motion.circle
             cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth="8"
             strokeLinecap="round"
@@ -121,10 +123,10 @@ function ScoreRing({ score, label, size = 120 }: { score: number; label: string;
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-black tracking-tighter text-zinc-100">{score}</span>
+          <span className="text-3xl font-display font-semibold tracking-tight text-ink">{score}</span>
         </div>
       </div>
-      <span className="text-[11px] text-zinc-400 uppercase tracking-wider font-medium">{label}</span>
+      <span className="text-[11px] text-ink-muted uppercase tracking-wider font-medium">{label}</span>
     </div>
   );
 }
@@ -140,8 +142,8 @@ function RankingBar({ items, maxVal, unit = '' }: { items: RankingItem[]; maxVal
             style={{ backgroundColor: item.cor + '33' }}>
             #{item.posicao}
           </span>
-          <span className="text-sm text-zinc-300 w-12 font-medium">{item.nome}</span>
-          <div className="flex-1 h-2 bg-zinc-800/50 rounded-full overflow-hidden">
+          <span className="text-sm text-ink w-12 font-medium">{item.nome}</span>
+          <div className="flex-1 h-2 bg-chrome rounded-full overflow-hidden">
             <motion.div
               className="h-full rounded-full"
               style={{ backgroundColor: item.cor }}
@@ -150,7 +152,7 @@ function RankingBar({ items, maxVal, unit = '' }: { items: RankingItem[]; maxVal
               transition={{ duration: 0.6, delay: item.posicao * 0.1 }}
             />
           </div>
-          <span className="text-[11px] text-zinc-500 w-10 text-right">{Math.round(item.valor)}{unit}</span>
+          <span className="text-[11px] text-ink-muted w-10 text-right">{Math.round(item.valor)}{unit}</span>
         </div>
       ))}
     </div>
@@ -185,90 +187,87 @@ export function RelatoriosView() {
   if (loading && !report) {
     return (
       <div className={`${AXEL_PAGE_SHELL} p-6 space-y-8`}>
-        <div className="h-10 w-72 bg-zinc-800/40 rounded-xl animate-pulse" />
+        <div className="h-10 w-72 bg-chrome rounded-xl animate-pulse" />
         <div className="grid grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-zinc-800/30 rounded-2xl animate-pulse" />)}
+          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-chrome rounded-2xl animate-pulse" />)}
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`${AXEL_PAGE_SHELL} p-6 space-y-12 pb-24 text-zinc-50`}>
-      {/* ── Header ──────────────────────────────────────── */}
-      <motion.div {...fadeUp} className="flex items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tighter">
-            Relatório de Performance
-          </h1>
-          <p className="text-zinc-500 text-sm mt-1">
-            {p ? `${p.inicio} — ${p.fim}` : 'Carregando...'}
-          </p>
-        </div>
-
-        {/* Toggle Semanal / Mensal */}
-        <div className="flex gap-1 bg-zinc-900/60 backdrop-blur-xl border border-white/5 rounded-xl p-1">
-          {(['semanal', 'mensal'] as const).map(per => (
-            <button
-              key={per}
-              onClick={() => setPeriodo(per)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
-                periodo === per
-                  ? 'bg-violet-600/20 text-violet-300 border border-violet-500/20'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              }`}
-            >
-              {per === 'semanal' ? 'Semanal' : 'Mensal'}
-            </button>
-          ))}
-        </div>
-
-        <PrintButton />
+    <div className={`${AXEL_PAGE_SHELL} ${AXEL_PAGE_GUTTER} space-y-8 pb-24 text-ink`}>
+      <motion.div {...fadeUp}>
+        <PageIntro
+          title="Relatórios"
+          lede={p ? `${p.inicio} — ${p.fim}` : 'Carregando…'}
+          actions={
+            <>
+              <div className="flex gap-1 bg-chrome border border-line rounded-sl p-1">
+                {(['semanal', 'mensal'] as const).map((per) => (
+                  <button
+                    key={per}
+                    type="button"
+                    onClick={() => setPeriodo(per)}
+                    className={`min-h-11 px-3 rounded-sl text-[13px] font-medium ${
+                      periodo === per
+                        ? 'bg-ink text-fundo'
+                        : 'text-ink-muted hover:text-ink'
+                    }`}
+                  >
+                    {per === 'semanal' ? 'Semanal' : 'Mensal'}
+                  </button>
+                ))}
+              </div>
+              <PrintButton />
+            </>
+          }
+        />
       </motion.div>
 
       {/* ── KPI Cards (3) ───────────────────────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Tarefas */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Tarefas Concluídas</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Tarefas Concluídas</span>
           </div>
           <div className="flex items-end gap-3">
-            <span className="text-4xl font-black tracking-tighter">{p?.tarefas_concluidas ?? 0}</span>
+            <span className="text-4xl font-display font-semibold tracking-tight">{p?.tarefas_concluidas ?? 0}</span>
             <VariacaoBadge valor={v.tarefas_concluidas ?? 0} />
           </div>
-          <p className="text-[11px] text-zinc-500 mt-1">
+          <p className="text-[11px] text-ink-muted mt-1">
             vs {ant?.periodo_label ?? 'anterior'}
           </p>
         </div>
 
         {/* Foco */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-cyan-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Minutos de Foco</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Minutos de Foco</span>
           </div>
           <div className="flex items-end gap-3">
-            <span className="text-4xl font-black tracking-tighter">{p?.minutos_foco_total ?? 0}</span>
+            <span className="text-4xl font-display font-semibold tracking-tight">{p?.minutos_foco_total ?? 0}</span>
             <VariacaoBadge valor={v.minutos_foco ?? 0} />
           </div>
-          <p className="text-[11px] text-zinc-500 mt-1">
+          <p className="text-[11px] text-ink-muted mt-1">
             {p?.sessoes_foco ?? 0} sessões · {p?.media_minutos_por_sessao ?? 0} min/sessão
           </p>
         </div>
 
         {/* XP */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-1">
             <Zap className="w-4 h-4 text-amber-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">XP Ganho</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">XP Ganho</span>
           </div>
           <div className="flex items-end gap-3">
-            <span className="text-4xl font-black tracking-tighter">{p?.xp_ganho ?? 0}</span>
+            <span className="text-4xl font-display font-semibold tracking-tight">{p?.xp_ganho ?? 0}</span>
             <VariacaoBadge valor={v.xp_ganho ?? 0} />
           </div>
-          <p className="text-[11px] text-zinc-500 mt-1">
+          <p className="text-[11px] text-ink-muted mt-1">
             Total all-time: {report?.total_xp?.toLocaleString() ?? 0} XP
           </p>
         </div>
@@ -277,29 +276,29 @@ export function RelatoriosView() {
       {/* ── Score de Eficiência + Tendência ──────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {/* Score Ring */}
-        <div className="md:col-span-2 bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl flex flex-col items-center justify-center gap-4">
+        <div className="md:col-span-2 sl-panel p-5 flex flex-col items-center justify-center gap-4">
           <ScoreRing score={p?.score_eficiencia ?? 0} label="Score de Eficiência" size={160} />
           <div className="flex items-center gap-2 text-xs">
             <VariacaoBadge valor={v.score_eficiencia ?? 0} />
-            <span className="text-zinc-500">vs {ant?.periodo_label ?? 'anterior'}</span>
+            <span className="text-ink-muted">vs {ant?.periodo_label ?? 'anterior'}</span>
           </div>
           <div className="grid grid-cols-2 gap-3 w-full mt-2">
             <div className="text-center">
-              <p className="text-lg font-bold text-zinc-200">{p?.taxa_conclusao_pct ?? 0}%</p>
-              <p className="text-[10px] text-zinc-500">Taxa Conclusão</p>
+              <p className="text-lg font-bold text-ink">{p?.taxa_conclusao_pct ?? 0}%</p>
+              <p className="text-[10px] text-ink-muted">Taxa Conclusão</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-zinc-200">{p?.habitos_taxa_pct ?? 0}%</p>
-              <p className="text-[10px] text-zinc-500">Hábitos</p>
+              <p className="text-lg font-bold text-ink">{p?.habitos_taxa_pct ?? 0}%</p>
+              <p className="text-[10px] text-ink-muted">Hábitos</p>
             </div>
           </div>
         </div>
 
         {/* Tendência de Score — últimas 8 semanas */}
-        <div className="md:col-span-3 bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="md:col-span-3 sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="w-4 h-4 text-violet-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Tendência — Últimas 8 Semanas</span>
+            <BarChart3 className="w-4 h-4 text-tasks" />
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Tendência — Últimas 8 Semanas</span>
           </div>
           {report?.tendencia_score && (
             <BarChart data={report.tendencia_score} color="#8b5cf6" height={140} />
@@ -310,10 +309,10 @@ export function RelatoriosView() {
       {/* ── Gráficos de Tarefas e Foco ──────────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Tarefas trend */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-4 h-4 text-emerald-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Tarefas Concluídas</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Tarefas Concluídas</span>
           </div>
           {report?.tendencia_tarefas && (
             <BarChart data={report.tendencia_tarefas} color="#10b981" height={100} />
@@ -321,10 +320,10 @@ export function RelatoriosView() {
         </div>
 
         {/* Foco trend */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Brain className="w-4 h-4 text-cyan-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Minutos de Foco</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Minutos de Foco</span>
           </div>
           {report?.tendencia_foco && (
             <BarChart data={report.tendencia_foco} color="#06b6d4" height={100} />
@@ -335,23 +334,23 @@ export function RelatoriosView() {
       {/* ── Rankings ─────────────────────────────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Dias mais produtivos */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-4 h-4 text-amber-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Top Dias Produtivos</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Top Dias Produtivos</span>
           </div>
           {report?.ranking_dias_semana && report.ranking_dias_semana.length > 0 ? (
             <RankingBar items={report.ranking_dias_semana} unit=" tarefas" />
           ) : (
-            <p className="text-zinc-600 text-sm">Sem dados suficientes</p>
+            <p className="text-ink-faint text-sm">Sem dados suficientes</p>
           )}
         </div>
 
         {/* Mix de Origens (como Traffic Mix do Last.fm) */}
-        <div className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Star className="w-4 h-4 text-violet-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Mix de Origens</span>
+            <Star className="w-4 h-4 text-finance" />
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Mix de Origens</span>
           </div>
           {report?.top_categorias_tarefa && report.top_categorias_tarefa.length > 0 ? (
             <div className="flex items-center gap-6">
@@ -360,8 +359,8 @@ export function RelatoriosView() {
                 {report.top_categorias_tarefa.map(item => (
                   <div key={item.nome} className="flex items-center gap-2 text-xs">
                     <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: item.cor }} />
-                    <span className="text-zinc-300">{item.nome}</span>
-                    <span className="text-zinc-500 ml-auto">
+                    <span className="text-ink">{item.nome}</span>
+                    <span className="text-ink-muted ml-auto">
                       {Math.round(item.valor / (report.top_categorias_tarefa.reduce((s, i) => s + i.valor, 0) || 1) * 100)}%
                     </span>
                   </div>
@@ -369,17 +368,17 @@ export function RelatoriosView() {
               </div>
             </div>
           ) : (
-            <p className="text-zinc-600 text-sm">Sem dados suficientes</p>
+            <p className="text-ink-faint text-sm">Sem dados suficientes</p>
           )}
         </div>
       </motion.div>
 
       {/* ── Distribuição da semana (heat map style) ──────── */}
       {p?.tarefas_por_dia && (
-        <motion.div {...fadeUp} className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+        <motion.div {...fadeUp} className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-4 h-4 text-emerald-400" />
-            <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Atividade por Dia da Semana</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Atividade por Dia da Semana</span>
           </div>
           <div className="grid grid-cols-7 gap-2">
             {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'].map(dia => {
@@ -389,17 +388,17 @@ export function RelatoriosView() {
               const intensity = tarefas / maxT;
               return (
                 <div key={dia} className="flex flex-col items-center gap-2">
-                  <span className="text-[10px] text-zinc-500 font-medium">{dia}</span>
+                  <span className="text-[10px] text-ink-muted font-medium">{dia}</span>
                   <div
-                    className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 border border-white/5 transition-colors"
+                    className="w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-0.5 border border-line transition-colors"
                     style={{
                       backgroundColor: intensity > 0
                         ? `rgba(16, 185, 129, ${0.1 + intensity * 0.5})`
                         : 'rgba(39, 39, 42, 0.3)',
                     }}
                   >
-                    <span className="text-lg font-bold text-zinc-200">{tarefas}</span>
-                    <span className="text-[9px] text-zinc-500">{foco}min</span>
+                    <span className="text-lg font-bold text-ink">{tarefas}</span>
+                    <span className="text-[9px] text-ink-muted">{foco}min</span>
                   </div>
                 </div>
               );
@@ -408,33 +407,38 @@ export function RelatoriosView() {
         </motion.div>
       )}
 
+      {/* ── Rotina (12 semanas) — não cabe no Kanban ─────── */}
+      <motion.div {...fadeUp} className="sl-panel p-5">
+        <DashboardConsistencyStrip />
+      </motion.div>
+
       {/* ── Saúde & Academia ─────────────────────────────── */}
-      <motion.div {...fadeUp} className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+      <motion.div {...fadeUp} className="sl-panel p-5">
         <AcademyAnalyticsSection />
       </motion.div>
 
       {/* ── All-time Stats Footer ───────────────────────── */}
-      <motion.div {...fadeUp} className="bg-zinc-900/30 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-2xl">
+      <motion.div {...fadeUp} className="sl-panel p-5">
         <div className="flex items-center gap-2 mb-4">
           <Flame className="w-4 h-4 text-orange-400" />
-          <span className="text-[11px] text-zinc-400 uppercase tracking-wider">Estatísticas All-Time</span>
+          <span className="text-[11px] text-ink-muted uppercase tracking-wider">Estatísticas All-Time</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="text-center">
-            <p className="text-2xl font-black tracking-tighter text-zinc-100">{report?.total_tarefas_concluidas ?? 0}</p>
-            <p className="text-[10px] text-zinc-500 mt-1">Tarefas Concluídas</p>
+            <p className="text-2xl font-display font-semibold tracking-tight text-ink">{report?.total_tarefas_concluidas ?? 0}</p>
+            <p className="text-[10px] text-ink-muted mt-1">Tarefas Concluídas</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black tracking-tighter text-zinc-100">{report?.total_minutos_foco ?? 0}</p>
-            <p className="text-[10px] text-zinc-500 mt-1">Minutos de Foco</p>
+            <p className="text-2xl font-display font-semibold tracking-tight text-ink">{report?.total_minutos_foco ?? 0}</p>
+            <p className="text-[10px] text-ink-muted mt-1">Minutos de Foco</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black tracking-tighter text-zinc-100">{(report?.total_xp ?? 0).toLocaleString()}</p>
-            <p className="text-[10px] text-zinc-500 mt-1">XP Total</p>
+            <p className="text-2xl font-display font-semibold tracking-tight text-ink">{(report?.total_xp ?? 0).toLocaleString()}</p>
+            <p className="text-[10px] text-ink-muted mt-1">XP Total</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black tracking-tighter text-zinc-100">{p?.streak_atual ?? 0}</p>
-            <p className="text-[10px] text-zinc-500 mt-1">Streak Atual</p>
+            <p className="text-2xl font-display font-semibold tracking-tight text-ink">{p?.streak_atual ?? 0}</p>
+            <p className="text-[10px] text-ink-muted mt-1">Streak Atual</p>
           </div>
         </div>
       </motion.div>

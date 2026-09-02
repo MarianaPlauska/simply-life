@@ -117,8 +117,6 @@ export function WaterCupGrid({
   // Sempre mostra a grade da meta (2 L) — extra só quando a meta já foi batida
   const cupCount = Math.min(Math.max(metaGoal, current >= metaGoal ? current + 1 : metaGoal), 16)
   const cols = columnCount(cupCount)
-  const colMin = compact ? '2.6rem' : '2.75rem'
-  const colMax = compact ? '3.4rem' : '3.6rem'
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
 
   const handleSlot = (index: number) =>
@@ -188,8 +186,8 @@ export function WaterCupGrid({
       {defaultMlPanel}
 
       <div
-        className={`grid w-full max-w-md justify-items-center ${gridGap}`}
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(${colMin}, ${colMax}))` }}
+        className={`grid w-full max-w-md min-w-0 justify-items-center ${gridGap}`}
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         role="group"
         aria-label={`${current} de ${metaGoal} copos — ${totalMl} de ${metaMl} ml`}
       >

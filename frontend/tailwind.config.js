@@ -44,6 +44,7 @@ export default {
         concluido: 'var(--sl-success)',
       },
       borderRadius: {
+        control: 'var(--sl-radius-control)',
         sl: 'var(--sl-radius)',
         'sl-sm': 'var(--sl-radius-sm)',
         'sl-lg': 'var(--sl-radius-lg)',

@@ -6,8 +6,9 @@ import {
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import type { AnotacaoTipo } from '../../store/slices/anotacoesSlice'
-import { AXEL_PAGE_SHELL, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_PAGE_GUTTER, AXEL_PAGE_SHELL, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { EmptyState } from '../ui/EmptyState'
+import { PageIntro } from '../layout/PageIntro'
 import { NotesMoodStrip } from './NotesMoodStrip'
 import {
   isChecklistNote,
@@ -157,18 +158,15 @@ export function AnotacoesView()
     : false
 
   return (
-    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16`}>
-      <header className="mb-3 sm:mb-4">
-        <p className="sl-eyebrow">Bloco de notas</p>
-        <h1 className={`text-xl sm:text-2xl font-display ${AXEL_TEXT_PRIMARY}`}>
-          Anotações
-        </h1>
-        <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-          Diário, listas e lembretes. Rápido como papel, salvo na nuvem.
-        </p>
-      </header>
+    <div className={`${AXEL_PAGE_SHELL} ${AXEL_PAGE_GUTTER} pb-16`}>
+      <PageIntro
+        title="Anotações"
+        lede="Diário, listas e lembretes — rápido como papel."
+      />
 
-      <NotesMoodStrip />
+      <div className="mt-4">
+        <NotesMoodStrip />
+      </div>
 
       <div className="mt-3 sm:mt-4 flex flex-col md:flex-row gap-0 md:gap-3 min-h-[min(70dvh,640px)] rounded-sl border border-line overflow-hidden bg-card">
         {/* Lista */}
@@ -194,7 +192,7 @@ export function AnotacoesView()
                 <button
                   type="button"
                   onClick={() => void handleNewNote('diario')}
-                  className="p-2 rounded-sl bg-accent text-white hover:bg-accent-hover"
+                  className="p-2 rounded-sl bg-ink text-fundo hover:opacity-90"
                   aria-label="Nova anotação"
                 >
                   <Plus className="w-4 h-4" />
@@ -392,7 +390,7 @@ export function AnotacoesView()
               <button
                 type="button"
                 onClick={() => void handleNewNote('diario')}
-                className="px-4 py-2 rounded-sl bg-accent text-white font-mono text-[10px] uppercase"
+                className="px-4 py-2 min-h-11 rounded-sl bg-ink text-fundo font-mono text-[10px] uppercase"
               >
                 Nova anotação
               </button>

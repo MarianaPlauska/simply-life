@@ -12,11 +12,11 @@ export interface MoodOption
 }
 
 export const MOODS: MoodOption[] = [
-  { value: 1, icon: Frown, label: 'Péssimo', shortLabel: 'Péssimo', colorClass: 'border-red-400/30 bg-red-400/8 text-red-400/90', hex: '#f87171' },
-  { value: 2, icon: Annoyed, label: 'Ruim', shortLabel: 'Ruim', colorClass: 'border-orange-400/30 bg-orange-400/8 text-orange-400/90', hex: '#fb923c' },
-  { value: 3, icon: Meh, label: 'Neutro', shortLabel: 'Neutro', colorClass: 'border-amber-400/30 bg-amber-400/8 text-amber-400/90', hex: '#fbbf24' },
-  { value: 4, icon: Smile, label: 'Bom', shortLabel: 'Bom', colorClass: 'border-sky-400/30 bg-sky-400/8 text-sky-400/90', hex: '#38bdf8' },
-  { value: 5, icon: Laugh, label: 'Ótimo', shortLabel: 'Ótimo', colorClass: 'border-cyan-400/30 bg-cyan-400/8 text-cyan-400/90', hex: '#22d3ee' },
+  { value: 1, icon: Frown, label: 'Péssimo', shortLabel: 'Péssimo', colorClass: 'border-urgente/30 bg-urgente/8 text-urgente', hex: '#D47878' },
+  { value: 2, icon: Annoyed, label: 'Ruim', shortLabel: 'Ruim', colorClass: 'border-atencao/30 bg-atencao/8 text-atencao', hex: '#C9A15C' },
+  { value: 3, icon: Meh, label: 'Neutro', shortLabel: 'Neutro', colorClass: 'border-line bg-chrome text-ink-muted', hex: '#B0A89C' },
+  { value: 4, icon: Smile, label: 'Bom', shortLabel: 'Bom', colorClass: 'border-health/30 bg-health-muted text-health', hex: '#7FA37A' },
+  { value: 5, icon: Laugh, label: 'Ótimo', shortLabel: 'Ótimo', colorClass: 'border-health/40 bg-health-muted text-ink', hex: '#7FA37A' },
 ]
 
 export const MOOD_HEX: Record<number, string> = Object.fromEntries(

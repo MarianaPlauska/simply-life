@@ -15,6 +15,7 @@ import { ICON } from '../../design/identityTokens'
 import {
   AXEL_GLASS_CHROME,
   AXEL_HEADER_ACTION,
+  AXEL_PAGE_GUTTER,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
   AXEL_TOUCH_PRESS,
@@ -34,14 +35,17 @@ const VIEW_TO_PATH: Record<string, string> = {
   financeiro: '/financeiro',
   saude: '/saude',
   inteligencia: '/inteligencia',
-  carreira: '/carreira',
+  carreira: '/configuracoes',
   preferencias: '/preferencias',
   planner: '/planner',
   calendario: '/calendario',
-  drive: '/drive',
+  drive: '/configuracoes',
   perfil: '/perfil',
   relatorios: '/relatorios',
 }
+
+/** Telas com título local — não repetir no breadcrumb/pin central */
+const MAIN_MODULE_VIEWS = new Set(['dashboard', 'kanban', 'financeiro', 'saude'])
 
 const VIEW_LABELS: Record<string, string> = {
   dashboard: 'Dashboard',
@@ -52,11 +56,11 @@ const VIEW_LABELS: Record<string, string> = {
   financeiro: 'Finanças',
   saude: 'Saúde',
   inteligencia: 'Inteligência',
-  carreira: 'Integrações',
+  carreira: 'Configurações',
   preferencias: 'Preferências IA',
   planner: 'Planejador',
   calendario: 'Calendário',
-  drive: 'Vault / Drive',
+  drive: 'Configurações',
   perfil: 'Meu Perfil',
   relatorios: 'Relatórios',
 }
@@ -89,8 +93,10 @@ export function AxelGlobalHeader()
 
   const isPinnedActive = pinnedModules.includes(activeView)
   const extraPins = pinnedModules.filter((id) => id !== PINNED_DASHBOARD_ID)
-  const showCenterNav = extraPins.length > 0 || (activeView !== 'dashboard' && !isPinnedActive)
-  const showBreadcrumbPage = !isPinnedActive && pinnedModules.length === 0
+  const localPageTitle = MAIN_MODULE_VIEWS.has(activeView)
+  const showCenterNav = extraPins.length > 0
+    || (activeView !== 'dashboard' && !isPinnedActive && !localPageTitle)
+  const showBreadcrumbPage = !isPinnedActive && pinnedModules.length === 0 && !localPageTitle
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [appearanceOpen, setAppearanceOpen] = useState(false)
@@ -144,8 +150,8 @@ export function AxelGlobalHeader()
   return (
     <>
       <MobileSidebarDrawer />
-      <header className={`sl-glass-chrome shrink-0 w-full border-b relative z-50 overflow-visible ${AXEL_GLASS_CHROME}`}>
-      <div className="px-3 sm:px-4 md:px-6 lg:px-8 min-h-14 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 sm:gap-x-3">
+      <header className={`sl-glass-chrome shrink-0 w-full border-b relative z-50 overflow-visible pt-[env(safe-area-inset-top,0px)] ${AXEL_GLASS_CHROME}`}>
+      <div className={`${AXEL_PAGE_GUTTER} min-h-12 md:min-h-14 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 sm:gap-x-3`}>
         <div className="flex items-center gap-0.5 sm:gap-1 min-w-0 justify-self-start">
           <button
             type="button"
@@ -203,7 +209,7 @@ export function AxelGlobalHeader()
                 </button>
               )
             })}
-            {activeView !== 'dashboard' && !isPinnedActive && (
+            {activeView !== 'dashboard' && !isPinnedActive && !localPageTitle && (
               <span
                 className="px-2.5 py-1.5 rounded-sl text-[13px] font-sans font-medium whitespace-nowrap border shrink-0 text-ink bg-chrome border-line"
                 aria-current="page"

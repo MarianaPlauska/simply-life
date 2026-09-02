@@ -235,7 +235,7 @@ export function AxelDrawerDetailsStrip({
                     onDeadlineChange(new Date(v).toISOString())
                   }}
                   className="text-xs font-mono text-ink bg-transparent border-none outline-none focus:ring-0 p-0 w-full min-w-0 disabled:cursor-not-allowed"
-                  title={semPrazo ? 'Sem prazo — vai para Sem data definida' : (deadline ? formatDrawerDate(deadline) : 'Definir prazo')}
+                  title={semPrazo ? 'Intenção — ainda sem hora' : (deadline ? formatDrawerDate(deadline) : 'Definir prazo')}
                 />
               </label>
             ) : (
@@ -262,7 +262,7 @@ export function AxelDrawerDetailsStrip({
                 }}
                 className="h-4 w-4 rounded border-line accent-accent shrink-0"
               />
-              <span className="text-[11px]">Sem prazo definido — vai para «Sem data definida»</span>
+              <span className="text-[11px]">Intenção sem hora — não é atraso. Agende quando couber.</span>
             </label>
           )}
         </div>

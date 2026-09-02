@@ -1,7 +1,7 @@
 import type { ColorScheme } from '../store/storeTypes'
 
 const THEME_COLOR: Record<ColorScheme, string> = {
-  dark: '#1E1C18',
+  dark: '#1E1E1E',
   light: '#F7F5F2',
 }
 
@@ -68,5 +68,5 @@ export function rememberAndApplyColorScheme(scheme: ColorScheme): void
 
 export const COLOR_SCHEME_OPTIONS: { id: ColorScheme; label: string; hint: string }[] = [
   { id: 'light', label: 'Claro', hint: 'Off-white + voz do AXEL' },
-  { id: 'dark', label: 'Escuro', hint: 'Grafite à noite' },
+  { id: 'dark', label: 'Escuro', hint: 'Como o editor — VS Code Dark+' },
 ]

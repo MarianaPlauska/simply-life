@@ -29,7 +29,11 @@ export interface TarefasSlice
   createTarefa: (
     titulo: string,
     notas?: string,
-    extras?: { data_vencimento?: string; origem?: string },
+    extras?: {
+      data_vencimento?: string
+      origem?: string
+      horizon_override?: 'hoje' | 'semana' | 'backlog'
+    },
   ) => Promise<number | undefined>
   createFinanceBillTask: (opts: {
     billId: string
@@ -182,6 +186,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
           origem: extras?.origem ?? 'manual',
           status: 'pendente',
           data_vencimento: extras?.data_vencimento ?? null,
+          horizon_override: extras?.horizon_override ?? null,
         })
         .select()
         .single()
@@ -312,6 +317,9 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
     const wasCompleted = snapshot?.status === 'concluida'
     const isCompletedNow = dados.status === 'concluida'
     const isCompleting = isCompletedNow && !wasCompleted
+    const isReopening = Boolean(
+      wasCompleted && dados.status && dados.status !== 'concluida',
+    )
 
     if (snapshot)
     {
@@ -355,6 +363,20 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
         if (isCompleting)
         {
           await applyTaskCompletionRewards(snapshot, get as unknown as () => Record<string, unknown>, set as unknown as (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void)
+        }
+        if (isReopening)
+        {
+          const { takeTaskGrant } = await import('../../lib/taskRewardLedger')
+          const grant = takeTaskGrant(id)
+          const anyGet = get() as {
+            undoXp?: (m: 'foco', n: number) => Promise<void>
+            addGold?: (n: number) => Promise<number>
+          }
+          if (grant)
+          {
+            await anyGet.undoXp?.('foco', grant.xp)
+            if (grant.ouro) await anyGet.addGold?.(-grant.ouro)
+          }
         }
       }
     }

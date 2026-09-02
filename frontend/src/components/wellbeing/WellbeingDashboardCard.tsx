@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { HeartPulse } from 'lucide-react'
+import { AXEL_BTN_LG, AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import { useTaskStore } from '../../store/useTaskStore'
 import { MoodQuickPicker } from './MoodQuickPicker'
 import { buildMoodOrchestrationContext } from '../../lib/moodOrchestration'
@@ -123,10 +124,10 @@ export function WellbeingDashboardCard()
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <HeartPulse className="w-4 h-4 text-axel shrink-0" strokeWidth={1.75} />
-          <p className="font-display text-[17px] text-ink">Como foi o dia?</p>
+          <HeartPulse className="sl-btn-icon text-ink-muted shrink-0" strokeWidth={1.75} />
+          <p className="sl-body font-medium text-ink">Como foi o dia?</p>
         </div>
-        <p className="text-[12px] text-ink-muted leading-relaxed">
+        <p className="sl-body-muted leading-relaxed">
           Uma linha ajuda a ver padrões na semana e no mês.
         </p>
         <textarea
@@ -140,37 +141,30 @@ export function WellbeingDashboardCard()
           <button
             type="button"
             onClick={() => navigate('/saude#diario')}
-            className="text-[13px] text-ink-muted hover:text-ink"
+            className="text-[13px] text-ink-muted hover:text-ink min-h-11"
           >
             Diário completo
           </button>
-          <button
-            type="button"
-            disabled={salvandoNota || !notaDia.trim()}
-            onClick={() => void saveDayNote()}
-            className="px-3 py-1.5 rounded-sl bg-ink text-fundo text-[13px] font-semibold disabled:opacity-50"
-          >
-            Guardar
-          </button>
         </div>
+        <button
+          type="button"
+          disabled={salvandoNota || !notaDia.trim()}
+          onClick={() => void saveDayNote()}
+          className={`${AXEL_BTN_LG} ${AXEL_BTN_PRIMARY} disabled:opacity-50`}
+        >
+          Guardar
+        </button>
       </div>
     )
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-2 mb-2.5">
-        <div className="min-w-0 flex items-center gap-2">
-          <div className="flex items-center gap-2 shrink-0">
-            <HeartPulse className="w-4 h-4 text-axel shrink-0" strokeWidth={1.75} />
-            <p className="sl-eyebrow text-axel">
-              AXEL
-            </p>
-          </div>
-          <h3 className="font-display text-[17px] sm:text-[18px] font-normal text-ink leading-tight truncate">
-            Como você está agora?
-          </h3>
-        </div>
+      <div className="mb-3">
+        <p className="sl-section-label">Humor</p>
+        <p className="sl-body font-semibold text-ink mt-1">
+          Como você está agora?
+        </p>
       </div>
 
       <MoodQuickPicker
@@ -181,7 +175,7 @@ export function WellbeingDashboardCard()
       />
 
       <div className="mt-2.5 space-y-1">
-        <p className="text-[11px] font-sans text-ink-muted">Nota rápida (opcional)</p>
+        <p className="sl-body-muted">Nota rápida (opcional)</p>
         <textarea
           value={notaAgora}
           onChange={(e) => setNotaAgora(e.target.value)}
@@ -192,14 +186,16 @@ export function WellbeingDashboardCard()
         />
       </div>
 
-      <button
-        type="button"
-        disabled={saving || !pendingMood}
-        onClick={() => void confirmMood()}
-        className="mt-2.5 w-full py-2.5 rounded-sl bg-ink text-fundo font-sans font-semibold text-[14px] disabled:opacity-40 hover:opacity-90 transition-opacity"
-      >
-        {saving ? 'Salvando…' : pendingMood ? `Registrar · ${pendingMood.label}` : 'Escolha o humor acima'}
-      </button>
+      {pendingMood && (
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => void confirmMood()}
+          className={`mt-3 ${AXEL_BTN_LG} ${AXEL_BTN_PRIMARY} disabled:opacity-40`}
+        >
+          {saving ? 'Salvando…' : `Registrar · ${pendingMood.label}`}
+        </button>
+      )}
     </div>
   )
 }

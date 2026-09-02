@@ -115,6 +115,13 @@ export function KanbanOrchestrationStatus({
         </div>
       </div>
 
+      {lastSource === 'mock' && (
+        <p className={`px-4 py-2 text-[12px] border-t border-line bg-chrome/40 ${AXEL_TEXT_SECONDARY}`}>
+          Esta rodada usou regras locais. A IA do servidor não pontuou as tarefas
+          (sem chave, cota Hobby ou falha).
+        </p>
+      )}
+
       {rulesOpen && (
         <div className="border-t border-line px-4 py-3 bg-chrome/30 space-y-3">
           <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>

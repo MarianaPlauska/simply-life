@@ -52,7 +52,7 @@ function KpiCell({
 
   return (
     <div className="px-3 py-2 sm:px-4 sm:py-3 border-r border-white/[0.04] last:border-r-0 min-w-[72px] sm:min-w-[88px] flex-1">
-      <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
+      <p className={`text-[13px] font-medium ${AXEL_TEXT_SECONDARY}`}>
         {label}
       </p>
       <p className={`${AXEL_DISPLAY_STAT} text-lg mt-0.5 leading-none ${valueClass}`}>
@@ -121,7 +121,7 @@ export function KanbanCommandBar({
           />
         )}
         <div className="px-4 py-3 border-r border-line min-w-[140px] flex-[1.2]">
-          <p className={`font-mono text-[9px] uppercase tracking-[0.12em] ${AXEL_TEXT_SECONDARY}`}>
+          <p className={`text-[13px] font-medium ${AXEL_TEXT_SECONDARY}`}>
             Carga mental
           </p>
           <div className="flex items-baseline gap-2 mt-1">

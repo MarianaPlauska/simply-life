@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Sidebar } from './Sidebar'
 import { MobileBottomNav } from './MobileBottomNav'
 import { AxelGlobalHeader } from './AxelGlobalHeader'
@@ -18,6 +19,7 @@ import { useFinanceSystemSync } from '../../hooks/useFinanceSystemSync'
 import { useFinanceBillKanbanSync } from '../../hooks/useFinanceBillKanbanSync'
 import { useMedicationScheduledNotifications } from '../../hooks/useMedicationScheduledNotifications'
 import { usePwaBillNotifications } from '../../hooks/usePwaBillNotifications'
+import { useTaskReminders } from '../../hooks/useTaskReminders'
 import { usePushSubscription } from '../../hooks/usePushSubscription'
 import { useHealthPushNotifications } from '../../hooks/useHealthPushNotifications'
 import { useHealthDayRollover } from '../../hooks/useHealthDayRollover'
@@ -30,7 +32,7 @@ import { NewTransactionModal } from '../Finance/NewTransactionModal'
 import { AxelLoader } from '../ui/AxelLoader'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
 
-// Layout global — sidebar, header, conteúdo (flex-1) e footer sticky
+// Layout global — sidebar, header, conteúdo (flex-1) e footer no fundo do viewport
 
 function PageLoader()
 {
@@ -65,6 +67,7 @@ export function AppLayout()
   usePushSubscription()
   useHealthPushNotifications()
   usePwaBillNotifications()
+  useTaskReminders()
   useHealthDayRollover()
 
   const reconcileCosmeticUnlocks = useTaskStore((s) => s.reconcileCosmeticUnlocks)
@@ -113,6 +116,9 @@ export function AppLayout()
   const isAxelAskOpen = useTaskStore((s) => s.isAxelAskOpen)
   const setAxelAskOpen = useTaskStore((s) => s.setAxelAskOpen)
   const hideChrome = zenFocusActive
+  const prefersReducedMotion = useReducedMotion()
+  const reducedMotionPref = useTaskStore((s) => s.accessibility.reducedMotion)
+  const skipMotion = Boolean(prefersReducedMotion || reducedMotionPref)
 
   return (
     <CaptureProvider>
@@ -137,10 +143,10 @@ export function AppLayout()
         Ir para o conteúdo
       </a>
 
-      <div className={`min-h-screen flex flex-col w-full ${AXEL_CANVAS}`}>
-        <div className="flex flex-1 min-h-screen w-full">
+      <div className={`min-h-dvh flex flex-col w-full ${AXEL_CANVAS}`}>
+        <div className="flex flex-1 min-h-dvh w-full">
           {!hideChrome && <Sidebar />}
-          <div className={`flex-1 flex flex-col min-w-0 min-h-screen ${AXEL_CANVAS}`}>
+          <div className={`flex-1 flex flex-col min-w-0 min-h-dvh ${AXEL_CANVAS}`}>
             {!hideChrome && <AxelGlobalHeader />}
             <main
               id="conteudo-principal"
@@ -151,9 +157,20 @@ export function AppLayout()
             >
               {!hideChrome && <DemoWorkspaceBanner />}
               <div className="flex flex-col flex-1 min-h-0 w-full">
-                <Suspense fallback={<PageLoader />}>
-                  <Outlet />
-                </Suspense>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    className="flex flex-col flex-1 min-h-0 w-full"
+                    initial={skipMotion ? false : { opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={skipMotion ? undefined : { opacity: 0 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                  >
+                    <Suspense fallback={<PageLoader />}>
+                      <Outlet />
+                    </Suspense>
+                  </motion.div>
+                </AnimatePresence>
               </div>
               {!hideChrome && (
                 <AxelSystemFooter

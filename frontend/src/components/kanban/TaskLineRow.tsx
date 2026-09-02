@@ -5,7 +5,11 @@ import { Sparkles, Bot } from 'lucide-react'
 import type { TarefaUnificada } from '../../types'
 import { getOrigin } from '../../constants/kanbanConfig'
 import { getUrgencyBadge } from '../../utils/kanbanHelpers'
-import { prioStripClass } from '../../utils/prioStripClass'
+import {
+  kanbanOriginTone,
+  KANBAN_ORIGIN_BAR,
+  kanbanDueTextClass,
+} from '../../lib/kanbanCardGrammar'
 
 // Linha de tarefa — "tudo é linha" com micro-estética (metadados à direita, IA-aware)
 
@@ -109,11 +113,11 @@ export function TaskLineRow({
       role="listitem"
       aria-label={`Tarefa: ${tarefa.titulo}`}
       className={[
-        'group flex items-center border-l-2 transition-colors tracking-tight min-w-0 overflow-hidden',
+        'group flex items-center transition-colors tracking-tight min-w-0 overflow-hidden',
         rich ? '' : ultraCompact ? '' : dense ? borderless ? '' : '' : '',
         rowPad,
         drag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
-        prioStripClass(tarefa.prioridade),
+        KANBAN_ORIGIN_BAR[kanbanOriginTone(tarefa.origem)],
         drag?.isDragging ? 'opacity-60' : '',
         className ?? '',
       ].join(' ')}
@@ -124,7 +128,7 @@ export function TaskLineRow({
       <div className="flex items-center gap-2 min-w-0 flex-1">
         {!rich && hora && (
           <>
-            <span className={`font-mono tabular-nums text-zinc-500 shrink-0 ${
+            <span className={`font-mono tabular-nums shrink-0 ${kanbanDueTextClass(tarefa.data_vencimento)} ${
               ultraCompact ? 'text-[10px] w-8' : 'text-[11px] w-10 text-zinc-400'
             }`}>{hora}</span>
             {!ultraCompact && <span className="text-zinc-700 shrink-0">─</span>}
@@ -146,7 +150,7 @@ export function TaskLineRow({
       {rich ? (
         <div className="flex items-center justify-end gap-2 shrink-0 ml-2 max-w-[45%] sm:max-w-[50%]">
           {hora && (
-            <span className="text-xs text-zinc-500 font-mono tabular-nums hidden sm:inline">
+            <span className={`text-xs font-mono tabular-nums hidden sm:inline ${kanbanDueTextClass(tarefa.data_vencimento)}`}>
               {hora}
             </span>
           )}

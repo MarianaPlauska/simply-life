@@ -7,6 +7,9 @@ import {
   markDeepWorkBonusGranted,
   isMorningDeepWorkWindow,
 } from '../../utils/deepWork'
+import { xpFromTaskScore } from '../../lib/xpEconomy'
+import { GOLD_PER_TASK, parseMedoNotas, xpWithFear } from '../../lib/goldEconomy'
+import { rememberTaskGrant } from '../../lib/taskRewardLedger'
 
 type StoreGet = () => Record<string, unknown>
 type StoreSet = (fn: (s: Record<string, unknown>) => Record<string, unknown>) => void
@@ -19,20 +22,20 @@ export async function applyTaskCompletionRewards(
 {
   if (!oldTarefa) return
 
-  const isUrgente =
-    oldTarefa.prioridade === 'alta' ||
-    oldTarefa.prioridade === 'critica' ||
-    (oldTarefa.score_urgencia && oldTarefa.score_urgencia > 80)
-
-  const scoreXp = oldTarefa.score_urgencia && oldTarefa.score_urgencia > 0
-    ? Math.round(oldTarefa.score_urgencia)
-    : null
-  const xpAmount = scoreXp ?? (isUrgente ? 25 : 15)
+  const xpAmount = xpWithFear(
+    xpFromTaskScore(oldTarefa.score_urgencia ?? 20),
+    parseMedoNotas(oldTarefa.notas_locais),
+  )
   const anyGet = get()
 
   if (typeof anyGet.addXP === 'function')
   {
-    await (anyGet.addXP as (m: string, n: number) => Promise<void>)('foco', xpAmount)
+    const granted = await (anyGet.addXP as (m: string, n: number) => Promise<number>)('foco', xpAmount)
+    if (typeof anyGet.addGold === 'function')
+    {
+      await (anyGet.addGold as (n: number) => Promise<number>)(GOLD_PER_TASK)
+    }
+    rememberTaskGrant(oldTarefa.id, { xp: granted || xpAmount, ouro: GOLD_PER_TASK })
   }
 
   if (typeof anyGet.incrementQuestProgress === 'function')

@@ -61,8 +61,8 @@ export function MedicamentosNotificationBanner({ compact = false }: Medicamentos
   if (granted)
   {
     return (
-      <section className="rounded-sl border border-accent/25 bg-accent/5 px-4 py-3 flex gap-3">
-        <Bell className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+      <section className="rounded-sl border border-health/25 bg-health-muted px-4 py-3 flex gap-3">
+        <Bell className="w-4 h-4 text-health shrink-0 mt-0.5" />
         <div>
           <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Lembretes no horário</p>
           <p className={`text-[11px] mt-0.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
@@ -74,9 +74,9 @@ export function MedicamentosNotificationBanner({ compact = false }: Medicamentos
   }
 
   return (
-    <section className="rounded-sl border border-accent/30 bg-accent/5 px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+    <section className="rounded-sl border border-health/30 bg-health-muted px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
       <div className="flex gap-3 flex-1 min-w-0">
-        <Bell className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+        <Bell className="w-4 h-4 text-health shrink-0 mt-0.5" />
         <div>
           <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Ativar lembretes no horário</p>
           <p className={`text-[11px] mt-0.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
@@ -87,7 +87,7 @@ export function MedicamentosNotificationBanner({ compact = false }: Medicamentos
       <button
         type="button"
         onClick={() => void enable()}
-        className="shrink-0 px-4 py-2.5 rounded-sl bg-accent/10 border border-accent/30 text-ink font-mono text-[10px] uppercase min-h-[44px] hover:bg-accent/15 transition-colors"
+        className="shrink-0 px-4 py-2.5 rounded-sl bg-health-muted border border-health/30 text-ink font-mono text-[10px] uppercase min-h-[44px] hover:bg-health-muted/80 transition-colors"
       >
         Permitir notificações
       </button>

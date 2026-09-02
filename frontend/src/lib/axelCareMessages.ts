@@ -1,4 +1,4 @@
-// Frases do AXEL — tom de apps como Wysa/Headspace: presença, sem julgamento
+// Frases do AXEL — tom Wysa/Headspace (espelho de packages/shared/src/axelCare.ts)
 // Rotação sincronizada via user_workspace_prefs.axel_care_rotation (Supabase)
 
 import { pickRotatingFromPool } from './axelCareRotation'
@@ -63,7 +63,6 @@ export const MOOD_CARE_BY_LEVEL: Record<MoodLevel, string[]> = {
   ],
 }
 
-/** 10 frases ao salvar a ofensiva */
 export const STREAK_CARE_MESSAGES: string[] = [
   'Dia salvo! Você cuidou de si — isso importa muito.',
   'Ofensiva mantida. Estou orgulhoso da sua constância gentil.',

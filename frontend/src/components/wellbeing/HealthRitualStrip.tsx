@@ -8,12 +8,15 @@ import { AxelCareNudge } from '../axel/AxelCareNudge'
 import { WaterWaveCard } from '../dashboard/WaterWaveCard'
 import { friendlyCallName } from '../../lib/friendlyCallName'
 import type { MoodLevel } from '../../lib/axelCareMessages'
+import { ModuleSection } from '../ui/ModuleSection'
+import { ActionFeedbackNumber } from '../ui/ActionFeedbackNumber'
 
 export function HealthRitualStrip()
 {
   const navigate = useNavigate()
   const location = useLocation()
   const fetchHumorHoje = useTaskStore((s) => s.fetchHumorHoje)
+  const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
   const fetchMedicamentos = useTaskStore((s) => s.fetchMedicamentos)
   const fetchHabitos = useTaskStore((s) => s.fetchHabitos)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
@@ -23,8 +26,10 @@ export function HealthRitualStrip()
   const [dataReady, setDataReady] = useState(false)
   const [celebrateMood, setCelebrateMood] = useState<MoodLevel | null>(null)
   const [celebrateKey, setCelebrateKey] = useState(0)
+  const [ritualPulse, setRitualPulse] = useState(0)
 
   const snapshot = useHealthRitualSnapshot()
+  const prevDoneCountRef = useRef(snapshot.doneCount)
 
   const displayName = friendlyCallName(
     workspacePrefs.axel_calls_you,
@@ -71,7 +76,21 @@ export function HealthRitualStrip()
       prevDoneRef.current[item.id] = item.done
     }
     ritualHydratedRef.current = true
-  }, [snapshot.items, dataReady])
+    prevDoneCountRef.current = snapshot.doneCount
+  }, [snapshot.items, dataReady, snapshot.doneCount])
+
+  useEffect(() =>
+  {
+    if (!ritualHydratedRef.current)
+    {
+      return
+    }
+    if (snapshot.doneCount > prevDoneCountRef.current)
+    {
+      setRitualPulse((k) => k + 1)
+    }
+    prevDoneCountRef.current = snapshot.doneCount
+  }, [snapshot.doneCount])
 
   const isStreakSafeToday = useTaskStore((s) => s.isStreakSafeToday)
   const recordWellbeingForStreak = useTaskStore((s) => s.recordWellbeingForStreak)
@@ -94,6 +113,13 @@ export function HealthRitualStrip()
   }, [snapshot.percent, isStreakSafeToday, recordWellbeingForStreak])
 
   const headline = ritualHeadline(snapshot)
+  const prioritizeMood = location.pathname === '/' && humorHojeLista.length === 0
+
+  // Humor pendente: check-in acima da dobra já cobre — evita bloco repetido no mobile
+  if (prioritizeMood)
+  {
+    return null
+  }
 
   const scrollOnDashboard = (itemId: RitualItemId) =>
   {
@@ -119,15 +145,32 @@ export function HealthRitualStrip()
     navigate(item.path)
   }
 
-  const ritualItems = snapshot.items.filter((i) => i.applies && i.id !== 'agua')
+  const ritualItems = snapshot.items.filter((i) =>
+  {
+    if (!i.applies || i.id === 'agua')
+    {
+      return false
+    }
+    // Humor já está no check-in acima — não repetir a linha
+    if (i.id === 'humor' && location.pathname === '/')
+    {
+      return false
+    }
+    return true
+  })
 
   return (
-    <section className="min-w-0 border-t-[0.5px] border-line pt-3" aria-label="Seu cuidado hoje">
-      <p className="text-[13px] font-medium text-ink-muted">
-        Cuidado hoje
-      </p>
-      <p className="text-[16px] font-semibold text-ink leading-snug mt-0.5">
+    <ModuleSection tone="health" label="Cuidado hoje" className="min-w-0">
+      <p className="sl-body font-medium text-ink leading-snug">
         {headline}
+        {snapshot.totalApplicable > 0 && (
+          <span className="sl-body-muted ml-2">
+            ·{' '}
+            <ActionFeedbackNumber pulseToken={ritualPulse} className="text-health font-medium">
+              {snapshot.doneCount}/{snapshot.totalApplicable}
+            </ActionFeedbackNumber>
+          </span>
+        )}
       </p>
 
       {celebrateMood !== null && (
@@ -163,10 +206,10 @@ export function HealthRitualStrip()
                   {item.done && <Check size={14} strokeWidth={2.5} />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[15px] font-medium text-ink">
+                  <span className="block sl-body font-medium text-ink">
                     {item.label}
                   </span>
-                  <span className="block text-[13px] text-ink-muted truncate">
+                  <span className="block sl-body-muted truncate">
                     {item.done ? 'Concluído hoje' : item.detail}
                   </span>
                 </span>
@@ -176,10 +219,9 @@ export function HealthRitualStrip()
         </ul>
       )}
 
-      <div id="dashboard-water" className="mt-1 scroll-mt-20">
-        <p className="text-[15px] font-medium text-ink">Água</p>
-        <WaterWaveCard embedded className="mt-1" />
+      <div id="dashboard-water" className="mt-3 scroll-mt-20">
+        <WaterWaveCard embedded className="mt-0" />
       </div>
-    </section>
+    </ModuleSection>
   )
 }

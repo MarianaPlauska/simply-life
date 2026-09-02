@@ -7,7 +7,9 @@ import {
   billDeliveryKey,
   formatBillPushPayload,
 } from '../../financeUpcomingBillsServer.js';
-import { sendWebPush, isWebPushConfigured, isExpiredSubscriptionError } from '../../webPush.js';
+import { sendPushToSubscriptions } from '../../sendPushFanout.js';
+import { enrichPushPayload } from '../../pushActionPayload.js';
+import { isPushSnoozed } from '../../pushSnooze.js';
 
 export default async function handler(req, res)
 {
@@ -23,14 +25,6 @@ export default async function handler(req, res)
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (!isWebPushConfigured())
-  {
-    return res.status(200).json({
-      status: 'skipped',
-      reason: 'VAPID não configurado',
-    });
-  }
-
   const supabase = getSupabaseAdmin();
   if (!supabase)
   {
@@ -39,7 +33,7 @@ export default async function handler(req, res)
 
   const { data: subs, error: subsErr } = await supabase
     .from('push_subscriptions')
-    .select('id, user_id, endpoint, p256dh, auth_key');
+    .select('id, user_id, endpoint, p256dh, auth_key, provider');
 
   if (subsErr)
   {
@@ -88,29 +82,21 @@ export default async function handler(req, res)
           continue;
         }
 
-        const payload = formatBillPushPayload(bill);
-        let anyOk = false;
-
-        for (const subRow of userSubs)
+        if (await isPushSnoozed(supabase, userId, key, reference))
         {
-          try
-          {
-            await sendWebPush(subRow, payload);
-            anyOk = true;
-          }
-          catch (err)
-          {
-            if (isExpiredSubscriptionError(err))
-            {
-              await supabase
-                .from('push_subscriptions')
-                .delete()
-                .eq('id', subRow.id);
-            }
-          }
+          skipped += 1;
+          continue;
         }
 
-        if (anyOk)
+        const payload = enrichPushPayload(formatBillPushPayload(bill), {
+          userId,
+          kind: 'bill',
+          snoozeKey: key,
+          billKey: key,
+        });
+        const fanout = await sendPushToSubscriptions(supabase, userSubs, payload);
+          const anyOk = fanout.sent > 0;
+          if (anyOk)
         {
           await supabase.from('push_bill_deliveries').upsert({
             user_id: userId,

@@ -35,15 +35,15 @@ export function parseHealthRoute(hash: string): HealthRoute
   }
   if (raw.startsWith('medicamentos'))
   {
-    return { section: 'cuidados', cuidados: 'medicamentos' }
+    return { section: 'hoje', cuidados: 'medicamentos' }
   }
   if (raw.startsWith('academia'))
   {
-    return { section: 'cuidados', cuidados: 'academia' }
+    return { section: 'hoje', cuidados: 'academia' }
   }
   if (isCuidadosTab(raw))
   {
-    return { section: 'cuidados', cuidados: raw }
+    return { section: 'hoje', cuidados: raw }
   }
 
   return { section: 'hoje', cuidados: 'hidratacao' }
@@ -51,19 +51,19 @@ export function parseHealthRoute(hash: string): HealthRoute
 
 export function healthSectionHash(section: HealthSection, cuidados: CuidadosTab): string
 {
-  if (section === 'hoje')
-  {
-    return 'hoje'
-  }
-  if (section === 'diario')
+  if (section === 'diario' || section === 'bem_estar')
   {
     return 'diario'
   }
-  if (section === 'bem_estar')
+  if (section === 'cuidados')
   {
-    return 'bem_estar'
+    return cuidados
   }
-  return cuidados
+  if (cuidados !== 'hidratacao')
+  {
+    return cuidados
+  }
+  return 'hoje'
 }
 
 export function cuidadosTabHash(tab: CuidadosTab): string

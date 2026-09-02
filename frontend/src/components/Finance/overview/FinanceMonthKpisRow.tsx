@@ -1,6 +1,13 @@
 import { maskFinanceValue } from '../../../lib/financeHideValues'
 import type { BalanceTone } from '../../../lib/financeBalanceTone'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
+import {
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+  AXEL_METRIC_HAIRLINE,
+  MODULE_HERO,
+  MODULE_METRIC,
+  MODULE_WASH,
+} from '../../../constants/axelSurfaces'
 import { FinanceStabilityMeter } from '../FinanceStabilityMeter'
 
 const fmt = (v: number) =>
@@ -81,24 +88,50 @@ export function FinanceMonthKpisRow({
       )}
 
       <div className={AXEL_METRIC_HAIRLINE}>
-        <p className="sl-eyebrow text-finance">{heroLabel}</p>
-        <p className={`${compact ? 'text-[1.65rem]' : 'sl-metric'} font-sans font-medium tabular-nums tracking-tight mt-1 ${hideValues ? 'text-ink-muted' : AXEL_TEXT_PRIMARY}`}>
-          {maskFinanceValue(hideValues, fmt(saldoDisponivel))}
-        </p>
+        {onConfigureSaldo && !projectionLabels ? (
+          <button
+            type="button"
+            onClick={onConfigureSaldo}
+            className="w-full text-left rounded-sl hover:bg-chrome/50 -mx-1 px-1 py-1 min-h-11"
+          >
+            <p className="sl-eyebrow text-finance">{heroLabel}</p>
+            <div className={`inline-block mt-1 ${MODULE_WASH.finance}`}>
+              <p className={`${compact ? 'text-[1.65rem]' : MODULE_HERO.finance} ${hideValues ? 'text-ink-muted' : ''}`}>
+                {maskFinanceValue(hideValues, fmt(saldoDisponivel))}
+              </p>
+            </div>
+            <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+              Toque para ajustar o valor na conta
+            </p>
+          </button>
+        ) : (
+          <>
+            <p className="sl-eyebrow text-finance">{heroLabel}</p>
+            <div className={`inline-block mt-1 ${MODULE_WASH.finance}`}>
+              <p className={`${compact ? 'text-[1.65rem]' : MODULE_HERO.finance} ${hideValues ? 'text-ink-muted' : ''}`}>
+                {maskFinanceValue(hideValues, fmt(saldoDisponivel))}
+              </p>
+            </div>
+          </>
+        )}
         {stabilityTone && !hideValues && (
           <FinanceStabilityMeter tone={stabilityTone} className="mt-2" />
         )}
       </div>
 
       <div className={`grid gap-3 ${rest.length === 3 ? 'grid-cols-3' : 'grid-cols-2'} ${AXEL_METRIC_HAIRLINE} mt-2`}>
-        {rest.map(({ label, value }) => (
+        {rest.map(({ label, value }) =>
+        {
+          const negative = label === 'Saldo do mês' && value < 0
+          return (
           <div key={label}>
             <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>{label}</p>
-            <p className={`text-[13px] sm:text-sm font-sans tabular-nums mt-0.5 ${hideValues ? 'text-ink-muted' : 'text-ink'}`}>
+            <p className={`mt-0.5 ${hideValues ? 'text-ink-muted text-[13px] sm:text-sm font-sans tabular-nums' : negative ? 'text-[13px] sm:text-sm font-sans tabular-nums text-urgente' : MODULE_METRIC.finance}`}>
               {maskFinanceValue(hideValues, fmt(value))}
             </p>
           </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

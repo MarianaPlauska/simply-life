@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, Link } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { resolveTemporalHorizon } from '../../lib/temporalHorizon'
 import {
@@ -9,14 +9,23 @@ import {
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
 import { BentoGridSkeleton } from '../dashboard/DashboardPrimitives'
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
-import { DashboardOverdueAlert } from '../dashboard/DashboardOverdueAlert'
+import { useDashboardMobileLayout } from '../../lib/dashboardMobilePriority'
+import { DashboardMobilePriorityCard } from '../dashboard/DashboardMobilePriorityCard'
+import { DashboardGlanceStrip } from '../dashboard/DashboardGlanceStrip'
+import { DashboardQuickActionsCompact } from '../dashboard/DashboardQuickActionsCompact'
+import { DashboardContextHero } from '../dashboard/DashboardContextHero'
+import { DashboardDesktopMainFeed } from '../dashboard/DashboardDesktopMainFeed'
 import { DashboardMaisBody } from '../dashboard/DashboardMaisBody'
 import { AxelPostMoodCare } from '../wellbeing/AxelPostMoodCare'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
-import { DashboardQuickWidget } from '../dashboard/DashboardQuickWidget'
-import { AXEL_PAGE_SHELL_READING } from '../../constants/axelSurfaces'
+import { AXEL_DESKTOP_WORKSPACE, AXEL_DASHBOARD_SCOPE, AXEL_PAGE_GUTTER, AXEL_PAGE_SHELL_READING } from '../../constants/axelSurfaces'
+import { DashboardDesktopRail } from '../dashboard/DashboardDesktopRail'
 import { friendlyCallName } from '../../lib/friendlyCallName'
 import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
+import { maybeNudgeIntencoes } from '../../lib/intencaoNudge'
+import { DashboardQuickActions } from '../dashboard/DashboardQuickActions'
+import { SetupQuestsSection } from '../dashboard/SetupQuestsSection'
+import { DashboardChosenWidgets } from '../dashboard/DashboardChosenWidgets'
 
 function getGreeting(): string
 {
@@ -35,8 +44,7 @@ export function DashboardView()
   const loading = useTaskStore((s) => s.dashboardLoading)
   const userProfile = useTaskStore((s) => s.userProfile)
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
-  const humorHojeLista = useTaskStore((s) => s.humorHojeLista)
-  const wellbeingPending = humorHojeLista.length === 0
+  const mobileLayout = useDashboardMobileLayout()
 
   useEffect(() =>
   {
@@ -49,6 +57,7 @@ export function DashboardView()
         return
       }
       scheduleHomeSecondary()
+      maybeNudgeIntencoes(useTaskStore.getState().tarefas)
     })()
     return () =>
     {
@@ -93,7 +102,7 @@ export function DashboardView()
     return (
       <div className="w-full flex flex-col">
         <div className="h-40 sl-shimmer border-b border-line" />
-        <div className={`px-3 sm:px-4 py-4 ${AXEL_PAGE_SHELL_READING} flex flex-col gap-3`}>
+        <div className={`${AXEL_PAGE_GUTTER} py-4 ${AXEL_PAGE_SHELL_READING} flex flex-col gap-3`}>
           <BentoGridSkeleton variant="default" />
         </div>
       </div>
@@ -101,28 +110,83 @@ export function DashboardView()
   }
 
   return (
-    <div className="w-full flex flex-col flex-1 min-h-0">
-      <div className={`px-3 sm:px-4 py-3 sm:py-4 ${AXEL_PAGE_SHELL_READING} flex flex-col gap-4 flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-4`}>
+    <div className={`w-full flex flex-col flex-1 min-h-0 ${AXEL_DASHBOARD_SCOPE}`}>
+      <div className={`${AXEL_PAGE_GUTTER} py-3 pt-4 md:py-6 lg:py-8 ${AXEL_PAGE_SHELL_READING} ${AXEL_DESKTOP_WORKSPACE} flex-1 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-6`}>
+        <div className="sl-stack-gap min-w-0">
         <DashboardCommandBar
           greeting={greeting}
           firstName={firstName}
           onOpenTask={openTask}
         />
 
-        <DashboardOverdueAlert />
+        <SetupQuestsSection />
 
-        {wellbeingPending && (
-          <section id="dashboard-wellbeing" className="scroll-mt-20 min-w-0" aria-label="Humor de hoje">
-            <DashboardQuickWidget id="wellbeing" />
-          </section>
-        )}
+        <DashboardChosenWidgets />
+
+        <nav className="flex flex-wrap gap-2" aria-label="Módulos">
+          <Link to="/preferencias" className="text-[13px] text-ink-muted underline-offset-2 hover:underline min-h-11 inline-flex items-center">
+            Preferências
+          </Link>
+          <Link to="/inteligencia" className="text-[13px] text-ink-muted underline-offset-2 hover:underline min-h-11 inline-flex items-center">
+            Inteligência
+          </Link>
+          <Link to="/relatorios" className="text-[13px] text-ink-muted underline-offset-2 hover:underline min-h-11 inline-flex items-center">
+            Relatórios
+          </Link>
+          <Link to="/calendario" className="text-[13px] text-ink-muted underline-offset-2 hover:underline min-h-11 inline-flex items-center">
+            Calendário
+          </Link>
+          <Link to="/anotacoes" className="text-[13px] text-ink-muted underline-offset-2 hover:underline min-h-11 inline-flex items-center">
+            Anotações
+          </Link>
+        </nav>
+
+        <div className="hidden xl:block">
+          <DashboardContextHero
+            overdueCount={mobileLayout.overdueCount}
+            saldoDisponivel={mobileLayout.cash.saldoDisponivel}
+          />
+        </div>
+
+        <div className="xl:hidden space-y-3">
+          <DashboardMobilePriorityCard
+            priority={mobileLayout.priority}
+            overdueList={mobileLayout.overdueList}
+            onOpenTask={openTask}
+          />
+          <DashboardGlanceStrip
+            chips={mobileLayout.glanceChips}
+            saldoDisponivel={mobileLayout.cash.saldoDisponivel}
+            aguaLabel={mobileLayout.aguaSnap ? `${mobileLayout.aguaSnap.copos}/${mobileLayout.aguaSnap.meta}` : null}
+            careDone={mobileLayout.ritual.doneCount}
+            careTotal={mobileLayout.ritual.totalApplicable}
+            dueTotal={
+              mobileLayout.dueBuckets.vencido.length
+              + mobileLayout.dueBuckets.hoje.length
+              + mobileLayout.dueBuckets.esta_semana.length
+            }
+            overdueCount={mobileLayout.overdueCount}
+          />
+          {mobileLayout.showCompactQuickActions && (
+            <DashboardQuickActionsCompact />
+          )}
+        </div>
+
+        <div className="hidden xl:block">
+          <DashboardQuickActions />
+        </div>
+
+        <DashboardDesktopMainFeed />
+
         <AxelPostMoodCare />
 
-        <HealthRitualStrip />
+        <div className="hidden xl:block">
+          <HealthRitualStrip />
+        </div>
 
         <DashboardCollapsible
           title="Mais"
-          subtitle="Métricas e atalhos"
+          subtitle="O que não precisa agora"
           borderless
         >
           <DashboardMaisBody />
@@ -135,6 +199,8 @@ export function DashboardView()
             onClose={closeTaskDrawer}
           />
         )}
+        </div>
+        <DashboardDesktopRail />
       </div>
     </div>
   )

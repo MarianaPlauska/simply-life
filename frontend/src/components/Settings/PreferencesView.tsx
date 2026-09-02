@@ -11,6 +11,7 @@ import type { LucideIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
 import { useTaskStore } from '../../store/useTaskStore';
+import { PINNED_DASHBOARD_ID } from '../../store/slices/uiSlice';
 import { supabase } from '../../lib/supabase';
 import { MfaEnrollPanel } from '../Auth/MfaEnrollPanel';
 import { WeeklyDigestPrefs } from './WeeklyDigestPrefs';
@@ -22,6 +23,13 @@ import {
   toggleMobileNavModule,
   type MobileNavModuleId,
 } from '../../lib/mobileBottomNav';
+import { Link } from 'react-router-dom';
+import {
+  ACCENT_PALETTES,
+  type AccentId,
+} from '../../lib/userWorkspacePrefs';
+import { applyAccentTheme } from '../../lib/applyAccentTheme';
+import { canUseAccent } from '../../lib/axelPrivileges';
 
 /* ── Tipos ────────────────────────────────────────────────── */
 type SettingsTab = 'geral' | 'ia' | 'aparencia' | 'notificacoes' | 'seguranca';
@@ -121,10 +129,13 @@ export function PreferencesView() {
   const setAccessibility = useTaskStore((s) => s.setAccessibility);
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs);
   const patchWorkspacePrefs = useTaskStore((s) => s.patchWorkspacePrefs);
+  const pinnedModules = useTaskStore((s) => s.pinnedModules);
+  const togglePin = useTaskStore((s) => s.togglePin);
+  const timerConfig = useTaskStore((s) => s.timerConfig);
+  const setTimerConfig = useTaskStore((s) => s.setTimerConfig);
 
   const [activeTab, setActiveTab] = useState<SettingsTab>('geral');
   const [inputValue, setInputValue] = useState('');
-  const [modulosFixados, setModulosFixados] = useState<string[]>(['dashboard', 'kanban']);
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [keywordFilter, setKeywordFilter] = useState('');
@@ -187,9 +198,8 @@ export function PreferencesView() {
   };
 
   const toggleModulo = (id: string) => {
-    setModulosFixados((prev) =>
-      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
-    );
+    if (id === PINNED_DASHBOARD_ID) return;
+    togglePin(id);
   };
 
   const mobileNavModules = workspacePrefs.mobile_bottom_nav ?? ['home', 'kanban', 'financeiro', 'saude'];
@@ -220,7 +230,7 @@ export function PreferencesView() {
         .upsert({
           user_id: uid,
           palavras_chave_email: storeKeywords.join(','),
-          modulos_fixados: modulosFixados.join(','),
+          modulos_fixados: pinnedModules.join(','),
         }, { onConflict: 'user_id' });
       if (error) throw error;
       toast.success('Preferências salvas com sucesso!');
@@ -252,7 +262,7 @@ export function PreferencesView() {
         <SectionHeader icon={Layout} title="Módulos do Header" subtitle="Escolha quais módulos ficam fixados no topo para acesso rápido." />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {MODULOS_FIXAVEIS.map(({ id, label, icon: Icon, desc }) => {
-            const active = modulosFixados.includes(id);
+            const active = pinnedModules.includes(id);
             return (
               <div
                 key={id}
@@ -326,7 +336,11 @@ export function PreferencesView() {
         <SectionHeader icon={Clock} title="Pomodoro & Tempo" subtitle="Ajuste os intervalos do temporizador de foco." iconColor="text-emerald-400" />
         <div className="divide-y divide-zinc-800/50">
           <SettingRow icon={Crosshair} label="Tempo de foco" desc="Duração de cada sessão Pomodoro" iconColor="text-emerald-400">
-            <select className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30">
+            <select
+              value={timerConfig.pomodoroTime}
+              onChange={(e) => setTimerConfig('pomodoroTime', Number(e.target.value))}
+              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30"
+            >
               <option value={25}>25 min</option>
               <option value={30}>30 min</option>
               <option value={45}>45 min</option>
@@ -334,7 +348,11 @@ export function PreferencesView() {
             </select>
           </SettingRow>
           <SettingRow icon={RefreshCw} label="Pausa curta" desc="Intervalo entre sessões" iconColor="text-blue-400">
-            <select className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30">
+            <select
+              value={timerConfig.shortBreak}
+              onChange={(e) => setTimerConfig('shortBreak', Number(e.target.value))}
+              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30"
+            >
               <option value={5}>5 min</option>
               <option value={10}>10 min</option>
               <option value={15}>15 min</option>
@@ -471,14 +489,21 @@ export function PreferencesView() {
   );
 
   /* ── Tab: Aparência ─────────────────────────────────────── */
-  const renderAparencia = () => (
+  const renderAparencia = () =>
+  {
+    const scheme = accessibility.colorScheme === 'light' ? 'light' : 'dark'
+    const currentAccent = (workspacePrefs.accent ?? 'copper') as AccentId
+    const level = useTaskStore.getState().userStats?.level ?? 1
+    const privilegeCtx = { level, streakCount: useTaskStore.getState().streakCount ?? 0 }
+
+    return (
     <div className="space-y-6">
       <SectionCard>
         <SectionHeader icon={Palette} title="Tema" subtitle="Escolha o esquema de cores do aplicativo." iconColor="text-pink-400" />
         <div className="grid grid-cols-2 gap-3">
           {([
-            { id: 'dark' as const, label: 'Escuro', icon: Moon, desc: 'Grafite à noite' },
-            { id: 'light' as const, label: 'Claro', icon: Sun, desc: 'Papel quente' },
+            { id: 'dark' as const, label: 'Escuro', icon: Moon, desc: 'Ember à noite' },
+            { id: 'light' as const, label: 'Claro', icon: Sun, desc: 'Creme do guia' },
           ]).map((t) => (
             <button
               key={t.id}
@@ -496,6 +521,55 @@ export function PreferencesView() {
             </button>
           ))}
         </div>
+      </SectionCard>
+
+      <SectionCard>
+        <SectionHeader
+          icon={Sparkles}
+          title="Cor do sistema"
+          subtitle="Acento do AXEL — a mesma escolha do primeiro setup."
+          iconColor="text-orange-400"
+        />
+        <div className="flex flex-wrap gap-2 mb-4">
+          {(Object.keys(ACCENT_PALETTES) as AccentId[]).map((id) =>
+          {
+            const unlocked = canUseAccent(id, privilegeCtx)
+            const selected = currentAccent === id
+            const swatch = scheme === 'dark' ? ACCENT_PALETTES[id].dark : ACCENT_PALETTES[id].light
+            return (
+              <button
+                key={id}
+                type="button"
+                disabled={!unlocked}
+                onClick={() =>
+                {
+                  applyAccentTheme(id, scheme)
+                  void patchWorkspacePrefs({ accent: id })
+                  toast.success(`Cor: ${ACCENT_PALETTES[id].label}`)
+                }}
+                title={ACCENT_PALETTES[id].label}
+                className={`flex items-center gap-2 px-3 py-2 min-h-[44px] rounded-xl border text-[12px] transition-all disabled:opacity-40 ${
+                  selected
+                    ? 'border-accent bg-accent/10 text-white'
+                    : 'border-zinc-700/50 text-zinc-400 hover:border-zinc-500'
+                }`}
+              >
+                <span
+                  className="w-4 h-4 rounded-full shrink-0 border border-white/20"
+                  style={{ backgroundColor: swatch }}
+                />
+                {ACCENT_PALETTES[id].label}
+              </button>
+            )
+          })}
+        </div>
+        <Link
+          to="/setup?edit=1"
+          className="inline-flex items-center gap-2 text-[12px] text-accent hover:underline min-h-[44px]"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Refazer montagem do AXEL (cor, mascote, atalhos)
+        </Link>
       </SectionCard>
 
       <SectionCard>
@@ -526,7 +600,8 @@ export function PreferencesView() {
         </div>
       </SectionCard>
     </div>
-  );
+    )
+  }
 
   /* ── Tab: Notificações ──────────────────────────────────── */
   const renderNotificacoes = () => (

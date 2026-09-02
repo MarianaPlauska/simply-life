@@ -17,6 +17,7 @@ import {
   totalMlHoje,
 } from '../../lib/waterHydration'
 import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
+import { emitCareRegistered } from '../../lib/healthVitality'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_METRIC_HAIRLINE,
@@ -61,7 +62,12 @@ export function WaterTrackerCard()
   {
     const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
     if (!ensured) return
+    const prevLen = entries.length
     await setAguaRegistros(ensured.id, next)
+    if (next.length > prevLen)
+    {
+      emitCareRegistered()
+    }
   }
 
   const handleQuickAdd = async () =>
@@ -90,11 +96,11 @@ export function WaterTrackerCard()
 
   return (
     <section
-      className="space-y-4"
+      className="space-y-4 min-w-0 w-full overflow-x-hidden"
       aria-label="Hidratação"
       id="hidratacao"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 min-w-0 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             <Droplets className="w-4 h-4 text-health shrink-0" strokeWidth={1.75} />
@@ -102,7 +108,7 @@ export function WaterTrackerCard()
               Hidratação
             </h2>
           </div>
-          <p className={`text-2xl sm:text-3xl font-display tabular-nums leading-none ${AXEL_TEXT_PRIMARY}`}>
+          <p className={`text-2xl sm:text-3xl font-display tabular-nums leading-none break-words ${AXEL_TEXT_PRIMARY}`}>
             {formatLiters(totalMl)}
             <span className="text-base sm:text-lg text-ink-muted font-normal"> / {formatLiters(metaTotalMl)}</span>
           </p>
@@ -122,7 +128,7 @@ export function WaterTrackerCard()
           </p>
         </div>
         {agua && (
-          <div className="shrink-0 flex items-start gap-2">
+          <div className="flex items-center gap-2 sm:shrink-0">
             {current > 0 && (
               <button
                 type="button"
@@ -134,20 +140,20 @@ export function WaterTrackerCard()
                 <X size={15} strokeWidth={2} />
               </button>
             )}
-            <label className="flex flex-col items-end gap-0.5 font-mono text-[10px] text-ink-muted">
-            Meta copos
-            <input
-              type="number"
-              min={4}
-              max={20}
-              value={goal}
-              onChange={(e) =>
-              {
-                void updateHabitoMeta(agua.id, Math.max(4, parseInt(e.target.value, 10) || 8))
-              }}
-              className="w-12 bg-transparent border-b border-line px-1 py-0.5 text-ink text-center text-[11px]"
-            />
-          </label>
+            <label className="flex flex-col items-start sm:items-end gap-0.5 font-mono text-[10px] text-ink-muted">
+              Meta copos
+              <input
+                type="number"
+                min={4}
+                max={20}
+                value={goal}
+                onChange={(e) =>
+                {
+                  void updateHabitoMeta(agua.id, Math.max(4, parseInt(e.target.value, 10) || 8))
+                }}
+                className="w-14 bg-transparent border-b border-line px-1 py-0.5 text-ink text-center text-[11px]"
+              />
+            </label>
           </div>
         )}
       </div>
@@ -179,7 +185,7 @@ export function WaterTrackerCard()
               <button
                 type="button"
                 onClick={() => void handleQuickAdd()}
-                className={`flex-1 sm:flex-none sm:max-w-[9.5rem] inline-flex items-center justify-center gap-2 sm:gap-1 py-2.5 sm:py-1.5 px-4 sm:px-2.5 rounded-sl font-mono text-[11px] sm:text-[9px] uppercase tracking-wide transition-all active:scale-[0.98] border border-sky-500/25 bg-sky-500/10 text-sky-200 hover:bg-sky-500/15 ${
+                className={`self-start inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-sl font-mono text-[11px] uppercase tracking-wide transition-all active:scale-[0.98] border border-health/30 bg-health-muted text-ink hover:bg-health-muted/80 ${
                   done ? 'border-dashed' : ''
                 }`}
               >

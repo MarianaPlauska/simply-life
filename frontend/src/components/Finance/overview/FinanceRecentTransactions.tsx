@@ -1,4 +1,3 @@
-import { DollarSign, Wallet } from 'lucide-react'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_ROW_HOVER,
@@ -6,7 +5,7 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
-import { FINANCE_CATEGORY_ICONS } from '../financeCategoryIcons'
+import { CategoryIconCircle } from '../categories/CategoryIconCircle'
 import { FinanceTxLabel } from './FinanceTxLabel'
 import type { Category, Transaction } from '../../../store/storeTypes'
 
@@ -61,17 +60,20 @@ export function FinanceRecentTransactions({
         {recent.map((t) =>
         {
           const cat = activeCategories.find((c) => c.id === t.categoria_id)
-          const CatIcon = cat ? (FINANCE_CATEGORY_ICONS[cat.icone] ?? Wallet) : DollarSign
           const isRec = t.tipo === 'receita'
 
           return (
             <div key={t.id} className={`flex items-center gap-3 py-3 ${AXEL_ROW_HOVER}`}>
-              <div
-                className="w-8 h-8 rounded-sl flex items-center justify-center border border-line bg-chrome shrink-0"
-                style={{ color: isRec ? undefined : cat?.cor }}
-              >
-                <CatIcon className={`w-3.5 h-3.5 ${isRec ? 'text-concluido' : ''}`} />
-              </div>
+              {cat ? (
+                <CategoryIconCircle
+                  icone={cat.icone}
+                  cor={cat.cor}
+                  size="md"
+                  receita={isRec}
+                />
+              ) : (
+                <CategoryIconCircle icone="CircleDollarSign" size="md" receita={isRec} />
+              )}
               <div className="flex-1 min-w-0">
                 <FinanceTxLabel label={t.descricao} observacao={t.observacao} />
                 <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>{fmtDate(t.data)}</p>

@@ -13,6 +13,7 @@ import { wellbeingHiddenUntilIso } from '../../lib/axelCareRotation'
 import { pickMoodCareMessage, type MoodLevel } from '../../lib/axelCareMessages'
 import { AXEL_MOOD_CARE_DURATION_MS, type AxelMoodCareSession } from '../../lib/axelMoodCare'
 import { isNovoDiaDeSaude, localTodayIso, writeStoredHealthDay } from '../../lib/healthDayBoundary'
+import { hapticTap } from '../../lib/haptic'
 import type { HabitoDiario } from '../storeTypes'
 
 // ── types ────────────────────────────────────────────────────
@@ -278,6 +279,8 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       }
     })
 
+    hapticTap()
+
     try
     {
       let saved: HumorRegistro | null = null
@@ -324,6 +327,9 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       })
 
       await refreshHumorRanges(set)
+
+      const { emitCareRegistered } = await import('../../lib/healthVitality')
+      emitCareRegistered()
 
       get().recordWellbeingForStreak()
       const anyGet = get() as BemEstarStore

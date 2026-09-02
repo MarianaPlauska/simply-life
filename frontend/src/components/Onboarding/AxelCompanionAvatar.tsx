@@ -105,7 +105,7 @@ export function AxelCompanionAvatar({
     return (
       <AvatarFrame box={box} className={className}>
         <div
-          className={`w-full h-full rounded-sl bg-accent/15 border border-accent/30 flex items-center justify-center font-display text-accent ${textClass}`}
+          className={`w-full h-full rounded-sl bg-axel-muted border border-axel/30 flex items-center justify-center font-display text-axel ${textClass}`}
         >
           {text}
         </div>

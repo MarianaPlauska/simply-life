@@ -28,7 +28,7 @@ export const AXEL_FOOTER_PLANE =
 
 /** Botão de ícone no header — só o glifo, sem caixa */
 export const AXEL_HEADER_ACTION =
-  `inline-flex items-center justify-center w-10 h-10 rounded-sl text-ink-muted hover:text-ink hover:bg-elevated ${AXEL_TOUCH_PRESS}`
+  `inline-flex items-center justify-center w-11 h-11 rounded-sl text-ink-muted hover:text-ink hover:bg-elevated ${AXEL_TOUCH_PRESS}`
 
 /** Padding inferior do main — barra mobile + safe area iOS */
 export const AXEL_MAIN_PB_MOBILE =
@@ -150,7 +150,7 @@ export const AXEL_NAV_SUB =
   'shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 text-[13px] font-sans transition-colors border-b-2 min-h-[44px]'
 
 export const AXEL_NAV_SUB_ACTIVE =
-  `${AXEL_NAV_SUB} border-ink text-ink font-semibold`
+  `${AXEL_NAV_SUB} border-axel text-ink font-semibold`
 
 export const AXEL_NAV_SUB_IDLE =
   `${AXEL_NAV_SUB} border-transparent text-ink-muted hover:text-ink hover:border-line`
@@ -198,9 +198,9 @@ export const AXEL_AVATAR_INITIALS =
 /** @deprecated use AXEL_AVATAR */
 export const AXEL_AVATAR_RING = AXEL_AVATAR
 
-/** Item de nav ativo — faixa lateral arredondada */
+/** Item de nav ativo — faixa âmbar AXEL (marcador, não preenchimento) */
 export const AXEL_NAV_ACTIVE =
-  'text-ink bg-chrome border-l-[3px] border-ink rounded-r-sl-sm'
+  'text-ink bg-chrome border-l-[3px] border-axel rounded-r-sl-sm'
 
 /** Item de nav inativo */
 export const AXEL_NAV_IDLE =
@@ -212,17 +212,40 @@ export const AXEL_TOUCH_ROW = 'min-h-[44px] py-3'
 /** Gap vertical mobile */
 export const AXEL_STACK_GAP = 'gap-6'
 
-/** Botão primário — laranja AXEL (claro) / cream invertido (escuro via --sl-accent) */
-export const AXEL_BTN_PRIMARY =
-  `bg-accent text-fundo hover:bg-accent-hover font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
+/**
+ * Escala de botão
+ * sm — chips / linhas densas
+ * md — CTA na tela (hug, 44px)
+ * lg — folha/modal (largura total)
+ */
+export const AXEL_BTN_SM =
+  'inline-flex items-center justify-center min-h-8 px-2.5 text-[12px]'
 
-/** Botão primário compacto — modais e formulários */
+export const AXEL_BTN_MD =
+  'inline-flex items-center justify-center min-h-11 px-4 text-[14px]'
+
+export const AXEL_BTN_LG =
+  'inline-flex items-center justify-center w-full min-h-11 px-4 py-2.5 text-[14px]'
+
+/** CTA primário — tinta invertida. Laranja só na voz do AXEL. */
+export const AXEL_BTN_PRIMARY =
+  `bg-ink text-fundo hover:opacity-90 font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
+
+/** CTA Executar — único botão na tinta da voz AXEL */
+export const AXEL_BTN_EXECUTE =
+  `bg-axel hover:bg-axel-hover text-[color:var(--sl-axel-on-fill)] font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
+
+/** CTA compacto — modais e formulários */
 export const AXEL_BTN_PRIMARY_COMPACT =
-  `bg-accent text-fundo hover:bg-accent-hover font-sans font-semibold rounded-sl text-[12px] ${AXEL_TOUCH_PRESS}`
+  `inline-flex items-center justify-center min-h-10 px-3 text-[12px] bg-ink text-fundo hover:opacity-90 font-sans font-semibold rounded-sl ${AXEL_TOUCH_PRESS}`
+
+/** Busca / ação secundária — sem preenchimento de destaque */
+export const AXEL_BTN_GHOST =
+  `inline-flex items-center justify-center min-h-11 px-3 gap-2 border border-line bg-transparent text-ink hover:bg-chrome font-sans font-medium rounded-sl text-[13px] ${AXEL_TOUCH_PRESS}`
 
 /** Link discreto */
 export const AXEL_LINK =
-  'text-ink-muted hover:text-accent transition-colors'
+  'text-ink-muted hover:text-ink transition-colors'
 
 /** Linha interativa */
 export const AXEL_ROW_HOVER =
@@ -236,6 +259,42 @@ export const AXEL_DROPDOWN =
 export const AXEL_DISPLAY_STAT =
   'sl-metric text-ink'
 
+/** Módulo de dado — faixa 2px à esquerda da seção */
+export const MODULE_STRIP = {
+  finance: 'border-l-2 border-finance pl-3',
+  health: 'border-l-2 border-health pl-3',
+  tasks: 'border-l-2 border-tasks pl-3',
+} as const
+
+/** Wash 8–14% só na linha do número */
+export const MODULE_WASH = {
+  finance: 'rounded-sl px-2 py-1.5 bg-finance-muted',
+  health: 'rounded-sl px-2 py-1.5 bg-health-muted',
+  tasks: 'rounded-sl px-2 py-1.5 bg-tasks-muted',
+} as const
+
+/** Tier 1 — um único dado herói por tela */
+export const MODULE_SCREEN_HERO = {
+  finance: 'sl-screen-hero text-finance',
+  health: 'sl-screen-hero text-health',
+  tasks: 'sl-screen-hero text-tasks',
+  urgent: 'sl-screen-hero text-urgente',
+} as const
+
+/** Tier 2 — KPI com wash/legenda ao redor */
+export const MODULE_HERO = {
+  finance: 'sl-module-highlight text-finance',
+  health: 'sl-module-highlight text-health',
+  tasks: 'sl-module-highlight text-tasks',
+} as const
+
+/** Número secundária na cor do módulo */
+export const MODULE_METRIC = {
+  finance: 'sl-module-metric text-finance',
+  health: 'sl-module-metric text-health',
+  tasks: 'sl-module-metric text-tasks',
+} as const
+
 /** Separador de seção no dashboard */
 export const AXEL_SECTION_DIVIDER = 'border-t border-line/80 pt-8'
 
@@ -243,13 +302,45 @@ export const AXEL_SECTION_DIVIDER = 'border-t border-line/80 pt-8'
 export const AXEL_METRIC_HAIRLINE =
   'border-t-[0.5px] border-line pt-3'
 
-/** Contêiner de página — desktop fluido; mobile sem restrição extra além do viewport */
+/** Recuo horizontal — o mesmo no header global e nas páginas */
+export const AXEL_PAGE_GUTTER = 'px-3 sm:px-4 md:px-6 lg:px-8'
 export const AXEL_PAGE_SHELL =
   'w-full max-w-none lg:max-w-[1400px] xl:max-w-[1600px] mx-auto'
 
-/** Coluna de leitura — Home, overview Finanças, Saúde */
+/** Coluna de leitura — mobile/tablet; a partir de md preenche o main (sem cap 720) */
 export const AXEL_PAGE_SHELL_READING =
-  'w-full max-w-[720px] mx-auto'
+  'w-full max-w-none mx-auto'
+
+/** Diário / reflexão — coluna estreita no desktop (menos sobrecarga visual) */
+export const AXEL_PAGE_SHELL_DIARY =
+  'w-full max-w-3xl lg:max-w-5xl mx-auto'
+
+/** Área de conteúdo das abas Hoje/Diário — preenche o viewport abaixo do header */
+export const AXEL_HEALTH_TAB_BODY =
+  'flex-1 py-3 sm:py-4 min-h-[calc(100dvh-12.5rem)]'
+
+/** Workspace desktop — coluna principal + rail a partir de lg */
+export const AXEL_DESKTOP_WORKSPACE =
+  'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:gap-6 xl:gap-8 lg:items-start lg:content-start'
+
+/** Rail lateral do workspace — visível em lg+ */
+export const AXEL_DESKTOP_RAIL = 'hidden lg:flex flex-col min-w-0 self-start gap-4'
+
+/** Escopo visual premium — aplicar na raiz do Dashboard */
+export const AXEL_DASHBOARD_SCOPE = 'sl-dashboard-scope'
+
+/** Botão premium — 40px desktop / 44px mobile, radius 7px */
+export const PREMIUM_BTN =
+  'sl-btn active:scale-[0.98] transition-transform'
+
+export const PREMIUM_BTN_GHOST =
+  `${PREMIUM_BTN} bg-transparent text-ink hover:bg-chrome border-line`
+
+export const PREMIUM_BTN_MODULE = {
+  health: `${PREMIUM_BTN} bg-health-muted text-ink border-health/20 hover:opacity-90`,
+  finance: `${PREMIUM_BTN} bg-finance-muted text-ink border-finance/20 hover:opacity-90`,
+  tasks: `${PREMIUM_BTN} bg-tasks-muted text-ink border-tasks/20 hover:opacity-90`,
+} as const
 
 /** Kanban e boards — ocupa o main inteiro, sem cap de largura */
 export const AXEL_PAGE_SHELL_FLUID =

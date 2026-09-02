@@ -28,6 +28,7 @@ function devOrchestrateMock(): Plugin
           res.end(JSON.stringify({
             intelligence: 'local_only',
             providers: { groq: false, gemini: false },
+            quota: { orchestrate_per_minute: 30, orchestrate_per_day: 40 },
           }))
           return
         }
@@ -65,8 +66,8 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
-        theme_color: '#1E1C18',
-        background_color: '#1E1C18',
+        theme_color: '#1E1E1E',
+        background_color: '#1E1E1E',
         categories: ['productivity', 'lifestyle', 'finance'],
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

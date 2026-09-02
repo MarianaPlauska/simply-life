@@ -7,6 +7,7 @@ export interface SpendingBarItem
   label: string
   value: number
   color: string
+  icone?: string
 }
 
 export interface WeekRange
@@ -58,6 +59,15 @@ export function filterTransactionsByRange(
   })
 }
 
+function resolveIcon(t: Transaction, categories: Category[]): string | undefined
+{
+  if (t.categoria_id)
+  {
+    return categories.find((c) => c.id === t.categoria_id)?.icone
+  }
+  return undefined
+}
+
 function resolveLabel(t: Transaction, categories: Category[]): string
 {
   if (t.categoria_id)
@@ -105,6 +115,50 @@ export function topWeeklySpendingByCategory(
         label: resolveLabel(t, categories),
         value: t.valor,
         color: resolveColor(t, categories),
+        icone: resolveIcon(t, categories),
+      })
+    }
+  }
+
+  return [...map.values()]
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit)
+}
+
+/** Maiores gastos do mês corrente agrupados por categoria */
+export function topMonthlySpendingByCategory(
+  transactions: Transaction[],
+  categories: Category[],
+  limit = 5,
+  reference = new Date(),
+): SpendingBarItem[]
+{
+  const y = reference.getFullYear()
+  const m = reference.getMonth()
+  const start = fmtDay(new Date(y, m, 1))
+  const end = fmtDay(new Date(y, m + 1, 0))
+
+  const monthTx = filterTransactionsByRange(transactions, start, end)
+    .filter((t) => t.tipo === 'despesa')
+
+  const map = new Map<string, SpendingBarItem>()
+
+  for (const t of monthTx)
+  {
+    const key = t.categoria_id ? `cat-${t.categoria_id}` : `raw-${t.categoria || t.descricao}`
+    const existing = map.get(key)
+    if (existing)
+    {
+      existing.value += t.valor
+    }
+    else
+    {
+      map.set(key, {
+        id: key,
+        label: resolveLabel(t, categories),
+        value: t.valor,
+        color: resolveColor(t, categories),
+        icone: resolveIcon(t, categories),
       })
     }
   }
@@ -149,6 +203,7 @@ export function topCardSpending(
         label: resolveLabel(t, categories),
         value: t.valor,
         color: resolveColor(t, categories),
+        icone: resolveIcon(t, categories),
       })
     }
   }

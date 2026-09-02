@@ -1,66 +1,45 @@
-import { useMemo } from 'react'
-import { YesterdayLetterCard } from './YesterdayLetterCard'
-import { AxelWeekForecastCard } from './AxelWeekForecastCard'
-import { InboxIACard } from './InboxIACard'
+import { DashboardFocusToday } from './DashboardFocusToday'
+import { DashboardConsistencyStrip } from './DashboardConsistencyStrip'
+import { IntentionStrip } from './IntentionStrip'
+import { DashboardMoodWeek } from './DashboardMoodWeek'
+import { DashboardTaskDueSection } from './DashboardTaskDueBars'
 import { AtividadeRecenteCard } from './AtividadeRecenteCard'
-import { DashboardModulesRegistry } from './DashboardModulesRegistry'
-import { DashboardQuickWidget } from './DashboardQuickWidget'
-import { DashboardPulseMetrics } from './DashboardPulseMetrics'
-import { DayCapacityCard } from './DayCapacityCard'
-import { StreakEveningBanner } from '../gamification/StreakEveningBanner'
-import { resolveDashboardWidgets } from '../../lib/dashboardWidgets'
-import { useTaskStore } from '../../store/useTaskStore'
+import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
 import { AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
+import { ModuleSection } from '../ui/ModuleSection'
 
-/** Tudo que não é o check-in do dia — métricas e atalhos */
+/**
+ * Abaixo da dobra: só o que o mercado usa para voltar amanhã.
+ * No mobile a rail some — prazos, humor e foco reaparecem aqui.
+ */
 export function DashboardMaisBody()
 {
-  const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
-
-  const quickWidgets = useMemo(
-    () =>
-    {
-      const widgets = resolveDashboardWidgets(
-        workspacePrefs.dashboard_quick_widgets,
-        workspacePrefs.dashboard_priority ?? 'tasks',
-      )
-      return widgets.filter((id) => id !== 'wellbeing' && id !== 'water')
-    },
-    [
-      workspacePrefs.dashboard_quick_widgets,
-      workspacePrefs.dashboard_priority,
-    ],
-  )
-
   return (
     <div className="flex flex-col">
-      <div className={AXEL_METRIC_HAIRLINE}>
-        <DayCapacityCard />
+      <div className={`xl:hidden ${AXEL_METRIC_HAIRLINE}`}>
+        <ModuleSection tone="tasks" label="Foco hoje">
+          <DashboardFocusToday metricVariant="module" />
+        </ModuleSection>
+      </div>
+      <div className={`xl:hidden ${AXEL_METRIC_HAIRLINE} mt-3`}>
+        <DashboardTaskDueSection />
+      </div>
+      <div className={`xl:hidden ${AXEL_METRIC_HAIRLINE} mt-3`}>
+        <DashboardMoodWeek />
+      </div>
+      <div className={`xl:hidden ${AXEL_METRIC_HAIRLINE} mt-3`}>
+        <HealthRitualStrip />
       </div>
       <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
-        <DashboardPulseMetrics />
-      </div>
-      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
-        <YesterdayLetterCard />
-      </div>
-      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
-        <AxelWeekForecastCard />
-      </div>
-      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
-        <StreakEveningBanner />
-      </div>
-
-      {quickWidgets.map((id) => (
-        <div key={id} className={`${AXEL_METRIC_HAIRLINE} mt-3 min-w-0 empty:hidden`}>
-          <DashboardQuickWidget id={id} />
+        <div className="xl:hidden">
+          <DashboardConsistencyStrip compact />
         </div>
-      ))}
-
-      <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
-        <DashboardModulesRegistry excludeIds={['exec', 'fin', 'saude']} />
+        <div className="hidden xl:block max-w-xs opacity-90">
+          <DashboardConsistencyStrip compact />
+        </div>
       </div>
-      <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
-        <InboxIACard embedded />
+      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 empty:hidden`}>
+        <IntentionStrip />
       </div>
       <div className={`${AXEL_METRIC_HAIRLINE} mt-3`}>
         <AtividadeRecenteCard embedded />

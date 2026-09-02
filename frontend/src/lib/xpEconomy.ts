@@ -76,6 +76,18 @@ export function capXpGrant(requested: number): { granted: number; capped: boolea
   return { granted, capped: granted < requested }
 }
 
+/** Devolve XP ao teto diário quando a conclusão é desfeita */
+export function refundDailyXp(amount: number): void
+{
+  if (amount <= 0) return
+  try
+  {
+    const next = Math.max(0, getDailyXpUsed() - amount)
+    localStorage.setItem(dailyStorageKey(), String(next))
+  }
+  catch { /* ignore */ }
+}
+
 /** XP por conclusão de tarefa — score alto não pula níveis */
 export function xpFromTaskScore(score: number): number
 {

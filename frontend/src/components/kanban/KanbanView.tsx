@@ -26,10 +26,12 @@ import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
 import { AxelKanbanListView } from './AxelKanbanListView'
 import { KanbanCalendarView } from './KanbanCalendarView'
 import { GanttView } from './GanttView'
+import { KanbanDayTimelineView } from './KanbanDayTimelineView'
+import { KanbanDesktopRail } from './KanbanDesktopRail'
 import { KanbanMobileBoardShell, type MobileBoardTab } from './KanbanMobileBoardShell'
 import { resolveKanbanDragIntent } from './KanbanDragSemantics'
 import type { DueBucket } from '../../lib/dueBucket'
-import { KanbanViewSwitcher, type KanbanViewMode } from './KanbanViewSwitcher'
+import { KanbanViewSwitcher, parseKanbanViewParam, kanbanViewParam, type KanbanViewMode } from './KanbanViewSwitcher'
 import { AxelKanbanCard } from './AxelKanbanCard'
 import { DueBucketBoard } from './DueBucketBoard'
 import { AxelTaskDrawer } from './AxelTaskDrawer'
@@ -65,7 +67,8 @@ import {
   AXEL_KANBAN_GLOW,
   AXEL_KANBAN_PAGE,
 } from '../../constants/axelKanbanTheme'
-import { AXEL_BTN_PRIMARY, AXEL_MAIN_PB_MOBILE, AXEL_PAGE_SHELL_FLUID } from '../../constants/axelSurfaces'
+import { AXEL_BTN_PRIMARY, AXEL_DESKTOP_WORKSPACE, AXEL_MAIN_PB_MOBILE, AXEL_PAGE_SHELL_FLUID } from '../../constants/axelSurfaces'
+import { BentoGridSkeleton } from '../ui/Skeleton'
 import type { TarefaUnificada } from '../../types'
 
 // Orquestrador Temporal · colunas por horizonte (Bitrix logic)
@@ -147,9 +150,26 @@ export function KanbanView()
   const webhookListening =
     realtimeStatus === 'live' || axelIngestionPolling
 
-  const [viewMode, setViewMode] = useState<KanbanViewMode>('board')
+  const [viewMode, setViewMode] = useState<KanbanViewMode>(() =>
+    parseKanbanViewParam(searchParams.get('view')),
+  )
   const [viewVisible, setViewVisible] = useState(true)
   const [executionPins, setExecutionPins] = useState(() => loadExecutionPins())
+
+  useEffect(() =>
+  {
+    const fromUrl = parseKanbanViewParam(searchParams.get('view'))
+    setViewMode((prev) => (prev === fromUrl ? prev : fromUrl))
+  }, [searchParams])
+
+  useEffect(() =>
+  {
+    const param = kanbanViewParam(viewMode)
+    if (searchParams.get('view') === param) return
+    const next = new URLSearchParams(searchParams)
+    next.set('view', param)
+    setSearchParams(next, { replace: true })
+  }, [viewMode, searchParams, setSearchParams])
 
   useEffect(() =>
   {
@@ -658,9 +678,9 @@ export function KanbanView()
       <div className={AXEL_KANBAN_GLOW} aria-hidden />
 
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
-        <div className={`shrink-0 ${AXEL_PAGE_SHELL_FLUID} px-3 sm:px-5 lg:px-7 pt-3 sm:pt-4 pb-2 flex items-center gap-2 border-b border-line`}>
+        <div className={`shrink-0 ${AXEL_PAGE_SHELL_FLUID} px-3 sm:px-5 lg:px-7 pt-2 sm:pt-3 pb-1.5 flex items-center gap-2 border-b border-line`}>
           <div className="min-w-0 flex-1">
-            <h1 className="text-[20px] sm:text-[22px] font-sans font-semibold tracking-tight text-ink leading-tight">
+            <h1 className="sl-page-title leading-tight">
               Tarefas
             </h1>
             {viewMode === 'board' && (
@@ -697,17 +717,26 @@ export function KanbanView()
           <button
             type="button"
             onClick={() => openCreateDrawer('hoje')}
-            className={`hidden lg:inline-flex items-center min-h-11 px-3.5 text-[14px] ${AXEL_BTN_PRIMARY}`}
+            className={`hidden lg:inline-flex items-center justify-center min-h-11 px-4 text-[14px] ${AXEL_BTN_PRIMARY}`}
           >
             Nova tarefa
           </button>
         </div>
 
         <div
-          className={`flex-1 min-h-0 flex flex-col px-3 sm:px-5 lg:px-7 pb-4 ${AXEL_PAGE_SHELL_FLUID} transition-opacity duration-200 ${
+          className={`flex-1 min-h-0 ${AXEL_DESKTOP_WORKSPACE}`}
+        >
+        <div
+          className={`flex-1 min-h-0 flex flex-col px-3 sm:px-5 lg:px-7 pb-4 min-w-0 transition-opacity duration-200 ${
             viewVisible ? 'opacity-100' : 'opacity-0'
           }`}
         >
+        {queueBootstrapping ? (
+          <div className="pt-4">
+            <BentoGridSkeleton variant="kanban" />
+          </div>
+        ) : (
+        <>
         <KanbanBillDuplicatesBar />
         {viewMode === 'list' && (
           <AxelKanbanListView
@@ -715,6 +744,10 @@ export function KanbanView()
             horizonOverrides={horizonOverrides}
             onOpen={handleOpen}
           />
+        )}
+
+        {viewMode === 'timeline' && (
+          <KanbanDayTimelineView tarefas={tarefas} onOpen={handleOpen} />
         )}
 
         {viewMode === 'calendar' && (
@@ -775,11 +808,12 @@ export function KanbanView()
             />
 
             <KanbanHorizonDesktop
-              columns={columns}
-              allTasks={tarefas}
+              tarefas={tarefas}
+              executionQueueIds={executionQueueIds}
+              executingId={execution?.taskId ?? null}
               activeId={activeId}
               onOpen={handleOpen}
-              onAddTask={openCreateDrawer}
+              onStartExecute={(task) => void handleExecuteFromDue(task)}
             />
 
             <DragOverlay dropAnimation={null}>
@@ -845,6 +879,11 @@ export function KanbanView()
             </KanbanInsightsPanel>
           </div>
         )}
+        </>
+        )}
+        </div>
+
+        <KanbanDesktopRail tarefas={tarefas} onOpen={handleOpen} />
         </div>
 
         <AxelAchievementTrail />

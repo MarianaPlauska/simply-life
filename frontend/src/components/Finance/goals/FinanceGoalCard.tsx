@@ -1,11 +1,11 @@
-import { Check, CheckCircle2, Edit3, Target } from 'lucide-react'
+import { Check, CheckCircle2, Edit3 } from 'lucide-react'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_PROGRESS_THICK,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../../constants/axelSurfaces'
-import { FINANCE_CATEGORY_ICONS } from '../financeCategoryIcons'
+import { CategoryIconCircle } from '../categories/CategoryIconCircle'
 import type { GoalProjection } from '../../../lib/financeGoalProjection'
 import type { FinancialGoal } from '../../../store/storeTypes'
 
@@ -37,7 +37,6 @@ export function FinanceGoalCard({
 {
   const current = meta.valor_atual
   const pct = Math.min((current / meta.valor_alvo) * 100, 100)
-  const Icon = FINANCE_CATEGORY_ICONS[meta.icone] ?? Target
 
   const paceClass = projection.onTrack
     ? 'text-concluido'
@@ -49,12 +48,7 @@ export function FinanceGoalCard({
     <article className={`${AXEL_BORDERLESS_PANEL} h-full flex flex-col`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div
-            className="w-9 h-9 rounded-sl flex items-center justify-center border border-line bg-chrome shrink-0"
-            style={{ color: meta.cor }}
-          >
-            <Icon className="w-4 h-4" />
-          </div>
+          <CategoryIconCircle icone={meta.icone} cor={meta.cor} size="lg" />
           <div className="min-w-0">
             <h3 className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
               {meta.titulo}
@@ -81,7 +75,7 @@ export function FinanceGoalCard({
         </div>
         <div className={AXEL_PROGRESS_THICK}>
           <div
-            className="h-full rounded-sl transition-all duration-700 bg-accent"
+            className="h-full rounded-sl transition-all duration-700 bg-finance"
             style={{ width: `${pct}%`, backgroundColor: meta.cor }}
           />
         </div>

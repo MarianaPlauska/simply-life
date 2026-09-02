@@ -155,8 +155,8 @@ function useFocusTimer() {
   const circumference = 2 * Math.PI * 140;
   const strokeOffset = circumference * (1 - progress);
   const phaseLabel = phase === 'focus' ? 'Foco Profundo' : phase === 'break' ? 'Pausa' : phase === 'completed' ? 'Completo!' : 'Pronto para Focar';
-  const phaseColor = phase === 'focus' ? 'text-ia' : phase === 'break' ? 'text-amber-400' : phase === 'completed' ? 'text-emerald-400' : 'text-zinc-400';
-  const ringColor = phase === 'focus' ? 'text-ia' : phase === 'break' ? 'text-amber-400' : 'text-emerald-400';
+  const phaseColor = phase === 'focus' ? 'text-accent' : phase === 'break' ? 'text-amber-400' : phase === 'completed' ? 'text-emerald-400' : 'text-ink-muted';
+  const ringColor = phase === 'focus' ? 'text-accent' : phase === 'break' ? 'text-amber-400' : 'text-emerald-400';
 
   const handleTogglePause = () => {
     if (isFocusModeActive) useTaskStore.setState({ isFocusModeActive: false });
@@ -195,28 +195,28 @@ export function FocusImmersiveOverlay() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="fixed inset-0 z-[200] flex items-center justify-center bg-zinc-950/95 backdrop-blur-2xl"
+        className="fixed inset-0 z-[200] flex items-center justify-center bg-fundo/95"
       >
         <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
 
         <button
           onClick={() => setActiveView('foco')}
-          className="absolute top-6 right-6 flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-[13px]"
+          className="absolute top-6 right-6 flex items-center gap-2 text-ink-muted hover:text-white transition-colors text-[13px]"
         >
           <Minimize2 className="w-4 h-4" />
           Ir para Modo Foco
         </button>
 
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-ia/20 to-transparent blur-[140px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-tr from-accent/20 to-transparent blur-[140px] pointer-events-none" />
 
         {/* Glass card */}
-        <div className="relative bg-zinc-900/60 border border-zinc-800/50 rounded-3xl px-12 py-10 backdrop-blur-sm flex flex-col items-center gap-6 shadow-2xl w-full max-w-sm mx-4">
+        <div className="relative sl-panel px-8 py-8 flex flex-col items-center gap-6 w-full max-w-sm mx-4">
           {/* XP strip */}
           <div className="flex items-center gap-4 text-sm">
             <span className="flex items-center gap-1.5 text-amber-400">
               <Zap className="w-4 h-4" /> {gamificacao.xp} XP
             </span>
-            <span className="text-zinc-600">·</span>
+            <span className="text-ink-faint">·</span>
             <span className="flex items-center gap-1.5 text-orange-400">
               <Flame className="w-4 h-4" /> {gamificacao.streak_days}d
             </span>
@@ -225,7 +225,7 @@ export function FocusImmersiveOverlay() {
         
           <div className="relative flex items-center justify-center">
             <svg width="200" height="200" className="-rotate-90">
-              <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" className="text-zinc-800/40" strokeWidth="4" />
+              <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" className="text-line" strokeWidth="4" />
               <motion.circle
                 cx="100" cy="100" r="88" fill="none" stroke="currentColor"
                 className={`${ringColor} transition-colors duration-500`}
@@ -247,18 +247,18 @@ export function FocusImmersiveOverlay() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleTogglePause}
-              className="px-6 py-2.5 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2"
+              className="px-6 py-2.5 rounded-full bg-white text-fundo text-sm font-semibold hover:bg-chrome transition-colors flex items-center gap-2"
             >
               {isFocusModeActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {isFocusModeActive ? 'Pausar' : 'Continuar'}
             </button>
-            <button onClick={resetFocus} className="p-2.5 rounded-full border border-zinc-800/50 text-zinc-500 hover:text-white hover:border-zinc-700 transition-colors">
+            <button onClick={resetFocus} className="p-2.5 rounded-full border border-line text-ink-muted hover:text-white hover:border-line transition-colors">
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
               onClick={sound.toggle}
               className={`p-2.5 rounded-full border transition-colors ${
-                sound.playing ? 'border-ia/30 text-ia bg-ia/5' : 'border-zinc-800/50 text-zinc-500 hover:text-white hover:border-zinc-700'
+                sound.playing ? 'border-accent/30 text-accent bg-accent/5' : 'border-line text-ink-muted hover:text-white hover:border-line'
               }`}
             >
               {sound.playing ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
@@ -315,32 +315,32 @@ export function FocusModeView() {
 
       {/* Ambient glow */}
       <motion.div className="absolute inset-0 pointer-events-none" animate={{ opacity: phase === 'focus' ? 0.6 : 0.2 }} transition={{ duration: 2 }}>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-ia/20 to-transparent blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-accent/20 to-transparent blur-[120px]" />
       </motion.div>
 
       {/* XP & Streak Bar */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-6 bg-zinc-900/60 border border-zinc-800/50 rounded-2xl px-6 py-3 backdrop-blur-sm">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-6 sl-panel px-6 py-3">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-semibold text-white">{gamificacao.xp} XP</span>
-          <span className="text-xs text-zinc-500">Nível {gamificacao.nivel}</span>
+          <span className="text-xs text-ink-muted">Nível {gamificacao.nivel}</span>
         </div>
-        <div className="w-px h-5 bg-zinc-700" />
+        <div className="w-px h-5 bg-line" />
         <div className="flex items-center gap-2">
-          <Flame className={`w-4 h-4 ${gamificacao.streak_days > 0 ? 'text-orange-400' : 'text-zinc-600'}`} />
+          <Flame className={`w-4 h-4 ${gamificacao.streak_days > 0 ? 'text-orange-400' : 'text-ink-faint'}`} />
           <span className="text-sm font-medium text-white">{gamificacao.streak_days}d streak</span>
         </div>
-        <div className="w-px h-5 bg-zinc-700" />
+        <div className="w-px h-5 bg-line" />
         <div className="flex items-center gap-2">
           <Trophy className="w-4 h-4 text-emerald-400" />
-          <span className="text-sm text-zinc-400">{sessionsCompleted} sessões</span>
+          <span className="text-sm text-ink-muted">{sessionsCompleted} sessões</span>
         </div>
       </motion.div>
 
       {/* Timer Ring */}
       <div className="relative flex items-center justify-center">
         <svg width="320" height="320" className="relative -rotate-90">
-          <circle cx="160" cy="160" r="140" fill="none" stroke="currentColor" className="text-zinc-800/40" strokeWidth="4" />
+          <circle cx="160" cy="160" r="140" fill="none" stroke="currentColor" className="text-line" strokeWidth="4" />
           <motion.circle
             cx="160" cy="160" r="140" fill="none" stroke="currentColor"
             className={`${ringColor} transition-colors duration-500`}
@@ -366,9 +366,9 @@ export function FocusModeView() {
           {presets.map((preset) => {
             const Icon = preset.icon;
             return (
-              <div key={preset.label} className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium text-zinc-500 border border-zinc-800/50">
+              <div key={preset.label} className="flex items-center gap-2 px-5 py-2.5 rounded-full text-[13px] font-medium text-ink-muted border border-line">
                 <Icon className="w-4 h-4" /> {preset.label}
-                <span className="text-zinc-600 text-[11px]">{preset.minutes}m</span>
+                <span className="text-ink-faint text-[11px]">{preset.minutes}m</span>
               </div>
             );
           })}
@@ -378,7 +378,7 @@ export function FocusModeView() {
       {/* Task Selector (idle) */}
       {phase === 'idle' && tarefas.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md space-y-2">
-          <p className="text-[11px] uppercase tracking-widest text-zinc-500 text-center">Selecione uma tarefa para focar</p>
+          <p className="text-[11px] uppercase tracking-widest text-ink-muted text-center">Selecione uma tarefa para focar</p>
           <div className="space-y-1.5 max-h-48 overflow-y-auto">
             {[...tarefas]
               .filter((t) => t.status !== 'concluida')
@@ -387,15 +387,15 @@ export function FocusModeView() {
               .map((t) => (
                 <button key={t.id} onClick={() => setSelectedTaskId(selectedTaskId === t.id ? null : t.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${
-                    selectedTaskId === t.id ? 'border-ia/50 bg-ia/5 text-white' : 'border-zinc-800/50 bg-zinc-900/30 text-zinc-300 hover:border-zinc-700/50'
+                    selectedTaskId === t.id ? 'border-accent/50 bg-accent/5 text-ink' : 'border-line bg-card text-ink-muted hover:border-line'
                   }`}
                 >
-                  <Target className={`w-4 h-4 shrink-0 ${selectedTaskId === t.id ? 'text-ia' : 'text-zinc-600'}`} />
+                  <Target className={`w-4 h-4 shrink-0 ${selectedTaskId === t.id ? 'text-accent' : 'text-ink-faint'}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-medium truncate">{t.titulo}</p>
-                    <p className="text-[11px] text-zinc-500">Score: {t.score_urgencia} · {t.prioridade}</p>
+                    <p className="text-[11px] text-ink-muted">Score: {t.score_urgencia} · {t.prioridade}</p>
                   </div>
-                  {selectedTaskId === t.id && <ChevronRight className="w-4 h-4 text-ia" />}
+                  {selectedTaskId === t.id && <ChevronRight className="w-4 h-4 text-accent" />}
                 </button>
               ))}
           </div>
@@ -406,7 +406,7 @@ export function FocusModeView() {
       <div className="flex items-center gap-4">
         {phase === 'idle' || phase === 'completed' ? (
           <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleStart}
-            className="px-8 py-3 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2 shadow-[0_0_30px_-5px_rgba(255,255,255,0.15)]"
+            className="px-8 py-3 rounded-full bg-white text-fundo text-sm font-semibold hover:bg-chrome transition-colors flex items-center gap-2 shadow-[0_0_30px_-5px_rgba(255,255,255,0.15)]"
           >
             <Play className="w-4 h-4" />
             {phase === 'completed' ? 'Nova Sessão' : 'Iniciar Foco'}
@@ -414,19 +414,19 @@ export function FocusModeView() {
         ) : (
           <>
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleTogglePause}
-              className="px-8 py-3 rounded-full bg-white text-zinc-900 text-sm font-semibold hover:bg-zinc-200 transition-colors flex items-center gap-2 shadow-[0_0_30px_-5px_rgba(255,255,255,0.15)]"
+              className="px-8 py-3 rounded-full bg-white text-fundo text-sm font-semibold hover:bg-chrome transition-colors flex items-center gap-2 shadow-[0_0_30px_-5px_rgba(255,255,255,0.15)]"
             >
               {isFocusModeActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {isFocusModeActive ? 'Pausar' : 'Continuar'}
             </motion.button>
-            <button onClick={resetFocus} className="p-3 rounded-full border border-zinc-800/50 text-zinc-500 hover:text-white hover:border-zinc-700 transition-colors" title="Reiniciar">
+            <button onClick={resetFocus} className="p-3 rounded-full border border-line text-ink-muted hover:text-white hover:border-line transition-colors" title="Reiniciar">
               <RotateCcw className="w-4 h-4" />
             </button>
           </>
         )}
         <button onClick={sound.toggle}
           className={`p-3 rounded-full border transition-colors ${
-            sound.playing ? 'border-ia/30 text-ia bg-ia/5' : 'border-zinc-800/50 text-zinc-500 hover:text-white hover:border-zinc-700'
+            sound.playing ? 'border-accent/30 text-accent bg-accent/5' : 'border-line text-ink-muted hover:text-white hover:border-line'
           }`}
           title={sound.playing ? 'Desligar som ambiente' : 'Ligar som ambiente'}
         >
@@ -437,11 +437,11 @@ export function FocusModeView() {
       {/* Active Task Card */}
       {targetTask && (phase === 'focus' || phase === 'break') && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl px-6 py-4 max-w-md w-full text-center"
+          className="sl-panel px-6 py-4 max-w-md w-full text-center"
         >
-          <p className="text-[11px] uppercase tracking-widest text-zinc-500 mb-1.5">Tarefa em foco</p>
+          <p className="text-[11px] uppercase tracking-widest text-ink-muted mb-1.5">Tarefa em foco</p>
           <p className="text-sm font-medium text-white">{targetTask.titulo}</p>
-          <p className="text-xs text-zinc-500 mt-1">Score: {targetTask.score_urgencia} · {targetTask.prioridade}</p>
+          <p className="text-xs text-ink-muted mt-1">Score: {targetTask.score_urgencia} · {targetTask.prioridade}</p>
         </motion.div>
       )}
 
@@ -453,7 +453,7 @@ export function FocusModeView() {
           >
             <Trophy className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-white mb-1">Sessão Completa!</h3>
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-ink-muted">
               {sessionsCompleted} sessões hoje · {gamificacao.xp} XP total · Nível {gamificacao.nivel}
             </p>
           </motion.div>

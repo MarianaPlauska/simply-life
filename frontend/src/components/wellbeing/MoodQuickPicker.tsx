@@ -13,8 +13,12 @@ interface MoodQuickPickerProps
 
 export function MoodQuickPicker({ disabled, selected, compact, onSelect }: MoodQuickPickerProps)
 {
+  const btnMinH = compact ? 'min-h-[44px] md:min-h-[40px]' : 'min-h-[52px]'
+  const iconSize = compact ? 22 : 26
+  const labelSize = compact ? 'text-[11px] md:text-[10px]' : 'text-[12px]'
+
   return (
-    <div className={`grid grid-cols-5 ${compact ? 'gap-1.5' : 'gap-2'}`}>
+    <div className={`grid grid-cols-5 ${compact ? 'gap-1.5 max-w-md' : 'gap-2'}`}>
       {MOODS.map((m) =>
       {
         const active = selected === m.value
@@ -26,7 +30,7 @@ export function MoodQuickPicker({ disabled, selected, compact, onSelect }: MoodQ
             disabled={disabled}
             onClick={() => onSelect(m.value, m.label)}
             className={`
-              sl-touch flex flex-col items-center justify-center gap-1 rounded-sl min-h-[52px]
+              sl-touch flex flex-col items-center justify-center gap-1 rounded-sl ${btnMinH}
               disabled:opacity-50
               ${compact ? 'p-1.5' : 'p-2'}
               ${AXEL_TOUCH_PRESS}
@@ -38,10 +42,11 @@ export function MoodQuickPicker({ disabled, selected, compact, onSelect }: MoodQ
           >
             <AxelMoodFace
               level={m.value}
-              size={compact ? 22 : 26}
+              size={iconSize}
               title={stateLabel}
+              quiet={!active}
             />
-            <span className={`font-sans leading-tight text-center w-full px-0.5 ${compact ? 'text-[11px]' : 'text-[12px]'} ${active ? 'text-ink' : 'text-ink-muted'}`}>
+            <span className={`font-sans leading-tight text-center w-full px-0.5 ${labelSize} ${active ? 'text-ink' : 'text-ink-muted'}`}>
               {m.label}
             </span>
           </button>

@@ -14,6 +14,7 @@ import generateGreeting from '../_lib/handlers/axel/generate-greeting.js';
 import adminUsers from '../_lib/handlers/axel/admin-users.js';
 import todayVerdict from '../_lib/handlers/axel/today-verdict.js';
 import weeklyDigestTest from '../_lib/handlers/axel/weekly-digest-test.js';
+import accountDelete from '../_lib/handlers/axel/account-delete.js';
 
 const ROUTES = {
   'morning-brief': morningBrief,
@@ -30,6 +31,7 @@ const ROUTES = {
   'admin-users': adminUsers,
   'today-verdict': todayVerdict,
   'weekly-digest-test': weeklyDigestTest,
+  'account-delete': accountDelete,
 };
 
 function pickQuery(value)

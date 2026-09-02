@@ -1,69 +1,35 @@
-import { AxelKanbanCard } from './AxelKanbanCard'
-import { AxelKanbanColumn } from './AxelKanbanColumn'
-import { AXEL_KANBAN_COL_WIDTH } from '../../constants/axelKanbanTheme'
-import { HORIZON_LABELS, type TemporalHorizon } from '../../lib/temporalHorizon'
+import { DueBucketBoard } from './DueBucketBoard'
 import type { TarefaUnificada } from '../../types'
-
-const HORIZONS: TemporalHorizon[] = ['hoje', 'semana', 'backlog']
 
 interface KanbanHorizonDesktopProps
 {
-  columns: Record<TemporalHorizon, TarefaUnificada[]>
-  allTasks: TarefaUnificada[]
+  tarefas: TarefaUnificada[]
+  executionQueueIds: Set<number>
+  executingId: number | null
   activeId: number | null
   onOpen: (task: TarefaUnificada) => void
-  onAddTask: (horizon: TemporalHorizon) => void
+  onStartExecute?: (task: TarefaUnificada) => void
 }
 
+/** Board desktop — colunas de prazo em largura fixa, overflow-x se sobrar espaço */
 export function KanbanHorizonDesktop({
-  columns,
-  allTasks,
+  tarefas,
+  executionQueueIds,
+  executingId,
   activeId,
   onOpen,
-  onAddTask,
+  onStartExecute,
 }: KanbanHorizonDesktopProps)
 {
   return (
-    <div
-      className="hidden lg:flex flex-1 min-h-0 flex-row gap-3 w-full items-start overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x"
-      role="region"
-      aria-label="Quadro por horizonte"
-    >
-      {HORIZONS.map((horizon) =>
-      {
-        const items = columns[horizon].filter((t) => t.status !== 'concluida')
-        const scoreSum = items.reduce((acc, t) => acc + (t.score_urgencia ?? 0), 0)
-
-        return (
-          <div
-            key={horizon}
-            className={`${AXEL_KANBAN_COL_WIDTH} flex flex-col min-h-0`}
-          >
-            <AxelKanbanColumn
-              id={horizon}
-              title={HORIZON_LABELS[horizon]}
-              count={items.length}
-              scoreSum={scoreSum}
-              embedded
-              emphasized={horizon === 'hoje'}
-              isEmpty={items.length === 0}
-              onAddTask={() => onAddTask(horizon)}
-            >
-              {items.map((tarefa) => (
-                <AxelKanbanCard
-                  key={tarefa.id}
-                  tarefa={tarefa}
-                  allTasks={allTasks}
-                  columnHorizon={horizon}
-                  isDragging={activeId === tarefa.id}
-                  layout="checklist"
-                  onOpen={() => onOpen(tarefa)}
-                />
-              ))}
-            </AxelKanbanColumn>
-          </div>
-        )
-      })}
-    </div>
+    <DueBucketBoard
+      layout="columns"
+      tarefas={tarefas}
+      executionQueueIds={executionQueueIds}
+      executingId={executingId}
+      activeId={activeId}
+      onOpen={onOpen}
+      onStartExecute={onStartExecute}
+    />
   )
 }

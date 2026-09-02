@@ -6,10 +6,9 @@ import { ritualHeadline, isAguaRitualComplete, aguaDisplaySnapshot } from '../..
 import { useHealthRitualSnapshot } from '../../hooks/useHealthRitualSnapshot'
 import { countDoseProgress } from '../../lib/medicamentosSchedule'
 import { snapshotNutricaoHoje } from '../../lib/healthNutrition'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { HealthQuickTile } from './HealthQuickTile'
-
-// Hub "Hoje" — visão leve no celular: ritual + atalhos de 1 toque (padrão Finch/Rise)
+import { HabitRepeatStrip } from './HabitRepeatStrip'
 
 interface HealthTodayPanelProps
 {
@@ -35,110 +34,70 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
   const headline = ritualHeadline(snapshot)
   const aguaOk = isAguaRitualComplete(aguaCopos, aguaMeta)
   const aguaSnap = aguaDisplaySnapshot(aguaCopos, aguaMeta)
-  const proteinaPct = proteina && proteina.meta_diaria > 0
-    ? Math.min(100, Math.round((proteina.progresso_atual / proteina.meta_diaria) * 100))
-    : 0
   const nut = snapshotNutricaoHoje(habitos)
 
   return (
-    <div className="space-y-1">
-      <section className={AXEL_METRIC_HAIRLINE}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-accent mb-1">
-              Ritual de hoje
-            </p>
-            <p className={`text-[14px] sm:text-[15px] leading-snug ${AXEL_TEXT_PRIMARY}`}>
-              {headline}
-            </p>
-            <p className={`text-[11px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
-              {snapshot.doneCount}/{snapshot.totalApplicable} cuidados · progresso parcial conta
-            </p>
-            {habitosStreaks.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {habitosStreaks.slice(0, 4).map((s) => (
-                  <span
-                    key={s.habito_id}
-                    className="font-mono text-[8px] uppercase px-1.5 py-0.5 rounded-sl bg-chrome/50 text-accent"
-                  >
-                    {s.nome_exibicao} · {s.streak_dias}d
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+    <div className="space-y-5">
+      <section>
+        <p className="sl-section-label">Cuidado de hoje</p>
+        <p className={`mt-1 text-[1.125rem] font-display font-medium leading-snug ${AXEL_TEXT_PRIMARY}`}>
+          {headline}
+        </p>
+        <p className={`text-[13px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
+          {snapshot.doneCount} de {snapshot.totalApplicable} — o que falta cabe hoje
+        </p>
+        <div
+          className="mt-3 h-2 overflow-hidden rounded-full bg-chrome"
+          aria-label={`${snapshot.percent}% do cuidado de hoje`}
+        >
           <div
-            className="shrink-0 w-14 h-14 rounded-full border-2 border-line flex items-center justify-center relative"
-            aria-hidden
-          >
-            <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15.5" fill="none" className="stroke-chrome" strokeWidth="3" />
-              <circle
-                cx="18"
-                cy="18"
-                r="15.5"
-                fill="none"
-                className="stroke-accent transition-all duration-500"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeDasharray={`${snapshot.percent} 100`}
-                pathLength={100}
-              />
-            </svg>
-            <span className="font-mono text-[11px] tabular-nums text-ink">{snapshot.percent}%</span>
-          </div>
-        </div>
-
-        <div className="h-1.5 rounded-sl bg-chrome overflow-hidden">
-          <div
-            className="h-full bg-accent transition-all duration-500"
+            className="h-full bg-health transition-all duration-500"
             style={{ width: `${snapshot.percent}%` }}
           />
         </div>
+        {habitosStreaks.length > 0 && (
+          <p className={`mt-2 text-[13px] ${AXEL_TEXT_SECONDARY}`}>
+            {habitosStreaks.slice(0, 3).map((s) => `${s.nome_exibicao} ${s.streak_dias}d`).join(' · ')}
+          </p>
+        )}
       </section>
 
-      <div className={`${AXEL_METRIC_HAIRLINE} mt-3 flex flex-col`}>
-        <HealthQuickTile
-          icon={Droplets}
-          label="Água"
-          value={`${aguaSnap.copos}/${aguaSnap.ritualCopos}`}
-          sub={aguaOk ? 'Ritual ok' : `${aguaSnap.ritualPct}% do ritual`}
-          tone="sky"
-          done={aguaOk}
-          onClick={() => onSelectTab('hidratacao')}
-        />
+      <div>
         <HealthQuickTile
           icon={HeartPulse}
-          label="Diário"
-          value={humorHojeLista.length > 0 ? `${humorHojeLista.length} registro${humorHojeLista.length !== 1 ? 's' : ''}` : 'Como está?'}
-          sub={humorHojeLista.length > 0 ? 'Hoje' : '1 toque'}
-          tone="accent"
+          label="Humor"
+          value={humorHojeLista.length > 0 ? 'Registrado hoje' : 'Como você está?'}
+          sub={humorHojeLista.length > 0 ? 'Ver o diário' : 'Um toque'}
           done={humorHojeLista.length > 0}
           onClick={() => onSelectTab('diario')}
         />
         <HealthQuickTile
+          icon={Droplets}
+          label="Água"
+          value={`${aguaSnap.copos} de ${aguaSnap.ritualCopos} copos`}
+          sub={aguaOk ? 'Ritual ok' : 'Toque para beber'}
+          done={aguaOk}
+          onClick={() => onSelectTab('hidratacao')}
+        />
+        <HealthQuickTile
           icon={Pill}
           label="Medicamentos"
-          value={medicamentos.length > 0 ? `${medsTomados}/${medicamentos.length}` : 'Nenhum'}
-          sub={medicamentos.length > 0 ? 'Prioridade no Kanban' : 'Cadastre se precisar'}
-          tone="teal"
+          value={medicamentos.length > 0 ? `${medsTomados} de ${medicamentos.length} doses` : 'Nada cadastrado'}
+          sub={medicamentos.length > 0 ? 'Agenda de hoje' : 'Cadastre se precisar'}
           done={medicamentos.length > 0 && medsTomados >= medicamentos.length}
           onClick={() => onSelectTab('medicamentos')}
         />
         <HealthQuickTile
           icon={Beef}
-          label="Proteína"
-          value={proteina ? `${proteina.progresso_atual}g` : 'Ativar'}
-          sub={proteina ? `${nut.kcal} kcal · ${proteinaPct}% prot.` : 'Meta diária'}
-          tone="amber"
+          label="Comida"
+          value={proteina ? `${proteina.progresso_atual}g proteína` : 'Sem meta ainda'}
+          sub={proteina ? `${nut.kcal} kcal` : 'Ativar alimentação'}
           done={proteina ? proteina.progresso_atual >= proteina.meta_diaria : false}
           onClick={() => onSelectTab('alimentacao')}
         />
       </div>
 
-      <p className="text-[11px] text-ink-muted text-center leading-relaxed px-2">
-        Vitalidade conecta com Kanban e Dashboard. Medicamentos atrasados sobem na fila do AXEL.
-      </p>
+      <HabitRepeatStrip />
     </div>
   )
 }

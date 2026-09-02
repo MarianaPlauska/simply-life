@@ -42,7 +42,7 @@ import { clampFinanceMonthOffset, getFinanceMonthNavBounds } from '../../lib/fin
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
 import { FinanceCashTab } from './FinanceCashTab';
 import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup';
-import { NewGoalModal } from './NewGoalModal';
+import { FinanceGoalWizard } from './goals/FinanceGoalWizard';
 import { BentoGridSkeleton } from '../ui/Skeleton';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -301,7 +301,6 @@ export function FinancePlannerView() {
 
   return (
     <FinancePlannerShell
-      monthLabel={monthLabel}
       monthOffset={monthOffset}
       tabs={FINANCE_MAIN_TABS}
       activeTab={navGroup}
@@ -506,7 +505,7 @@ export function FinancePlannerView() {
       </>
       )}
 
-      <NewGoalModal isOpen={showGoalModal} onClose={() => setShowGoalModal(false)} />
+      <FinanceGoalWizard isOpen={showGoalModal} onClose={() => setShowGoalModal(false)} />
 
       {showCatModal && <FinanceCategories onClose={() => setShowCatModal(false)} />}
     </FinancePlannerShell>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { View, Modal, Pressable } from 'react-native'
+import { View, Modal, Pressable, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
   buildDashboardGlances,
@@ -7,6 +7,7 @@ import {
   minutesToLabel,
   formatBRL,
   monthExpenseTotal,
+  computeSaldoDisponivel,
 } from '@simply-life/shared'
 import {
   Screen,
@@ -23,8 +24,13 @@ import { useAuthStore } from '../../src/store/authStore'
 import { useCaptureStore } from '../../src/store/captureStore'
 import { useDataStore } from '../../src/store/dataStore'
 import { HomeWelcomeHero } from '../../src/components/dashboard/HomeWelcomeHero'
+import { HomeQuickActions } from '../../src/components/dashboard/HomeQuickActions'
 import { GlanceGrid } from '../../src/components/dashboard/GlanceGrid'
+import { DashboardQuickWidgets } from '../../src/components/dashboard/DashboardQuickWidgets'
+import { HomeDriveAside } from '../../src/components/dashboard/HomeDriveAside'
 import { TabShell } from '../../src/components/dashboard/TabShell'
+import { useWorkspace } from '../../src/layout/useWorkspace'
+import { usePrefsStore } from '../../src/store/prefsStore'
 
 type ModuleFilter = 'tudo' | 'tarefas' | 'saude' | 'financas'
 
@@ -38,6 +44,7 @@ function greetingForHour(h: number): string
 export default function DashboardScreen()
 {
   const { colors, space, mode, setMode } = useTheme()
+  const { showRail } = useWorkspace()
   const router = useRouter()
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -47,6 +54,8 @@ export default function DashboardScreen()
   const humor = useDataStore((s) => s.humor)
   const finance = useDataStore((s) => s.finance)
   const habits = useDataStore((s) => s.habits)
+  const cash = useDataStore((s) => s.cashAccount)
+  const fixas = useDataStore((s) => s.contasFixas)
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
@@ -62,6 +71,10 @@ export default function DashboardScreen()
   )
   const hero = today.find((t) => t.status !== 'done') ?? openTasks[0]
   const gastosMes = monthExpenseTotal(finance)
+  const saldoDisp = useMemo(
+    () => computeSaldoDisponivel(cash, finance, fixas).disponivel,
+    [cash, finance, fixas],
+  )
   const [filter, setFilter] = useState<ModuleFilter>('tudo')
   const [menuOpen, setMenuOpen] = useState(false)
   const name = email?.split('@')[0] ?? 'Você'
@@ -104,122 +117,214 @@ export default function DashboardScreen()
         <HomeWelcomeHero
           greet={greet}
           name={name}
+          saldoLabel={formatBRL(saldoDisp)}
           openTasks={openTasks.length}
           doneToday={doneToday}
           onMenu={() => setMenuOpen(true)}
         />
 
-        <PillTabs
-          tabs={[
-            { id: 'tudo', label: 'Tudo', count: glances.length },
-            { id: 'tarefas', label: 'Tarefas', count: openTasks.length },
-            { id: 'saude', label: 'Saúde' },
-            { id: 'financas', label: 'Finanças' },
-          ]}
-          value={filter}
-          onChange={setFilter}
-        />
-
-        {(filter === 'tudo' || filter === 'financas') && (
-          <Card tone="elevated" style={{ gap: space.sm }}>
-            <Text variant="caption" color={colors.finance}>
-              Gastos do mês
-            </Text>
-            <Text variant="hero" color={colors.finance} style={{ letterSpacing: -0.5, fontSize: 34 }}>
-              {formatBRL(gastosMes)}
-            </Text>
-            <Text variant="caption" muted>
-              Finanças em um olhar
-            </Text>
-          </Card>
-        )}
-
-        {(filter === 'tudo' || filter === 'tarefas') && (
-          hero ? (
-            <Card tone="hero" style={{ gap: space.md }}>
-              <Text variant="caption" color={colors.tasks}>
-                Prioridade de hoje
-              </Text>
-              <Text variant="title">{hero.titulo}</Text>
-              <Text variant="caption" muted>
-                {hero.horaMinutos != null
-                  ? `Às ${minutesToLabel(hero.horaMinutos)} · ${hero.estimativaMinutos} min`
-                  : `${hero.estimativaMinutos} min`}
-              </Text>
-              <PrimaryButton
-                label="Abrir tarefa"
-                onPress={() => router.push(`/task/${hero.id}`)}
-                style={{ borderRadius: 999, alignSelf: 'flex-start', paddingHorizontal: 24 }}
+        {/* Drive desktop: coluna principal + aside; mobile empilha tudo */}
+        <View
+          style={{
+            flexDirection: showRail ? 'row' : 'column',
+            alignItems: showRail ? 'flex-start' : undefined,
+            gap: showRail ? space.xl : space.md + 4,
+          }}
+        >
+          <View style={{ flex: 1, minWidth: 0, gap: showRail ? space.xl : space.md + 4 }}>
+            {!showRail ? (
+              <HomeQuickActions
+                actions={[
+                  {
+                    id: 'expense',
+                    label: 'Gasto',
+                    icon: 'arrow-up-outline',
+                    onPress: () => openCapture('expense'),
+                  },
+                  {
+                    id: 'task',
+                    label: 'Tarefa',
+                    icon: 'checkbox-outline',
+                    onPress: () => openCapture('dump'),
+                  },
+                  {
+                    id: 'water',
+                    label: 'Água',
+                    icon: 'water-outline',
+                    onPress: () => router.push('/(tabs)/saude'),
+                  },
+                  {
+                    id: 'finance',
+                    label: 'Contas',
+                    icon: 'wallet-outline',
+                    onPress: () => router.push('/(tabs)/financeiro'),
+                  },
+                ]}
               />
-            </Card>
-          ) : (
-            <Card tone="hero">
-              <EmptyState title="Nada na fila" body="Capture uma tarefa para começar." />
-              <PrimaryButton
-                label="Capturar"
-                onPress={() => openCapture('dump')}
-                style={{ borderRadius: 999 }}
-              />
-            </Card>
-          )
-        )}
+            ) : null}
 
-        <View>
-          <SectionHeader
-            title="Agora"
-            subtitle="Áreas da vida"
-            action={
-              filter !== 'tudo' ? (
-                <PrimaryButton
-                  label="Ver tudo"
-                  variant="link"
-                  size="sm"
-                  onPress={() => setFilter('tudo')}
-                />
-              ) : null
-            }
-          />
-          <GlanceGrid
-            glances={filteredGlances}
-            toneColor={toneColor}
-            onPressGlance={onGlancePress}
-          />
-        </View>
+            {filter === 'tudo' && !showRail ? <DashboardQuickWidgets /> : null}
 
-        {(filter === 'tudo' || filter === 'tarefas') && (
-          <View>
-            <SectionHeader
-              title="Planos de hoje"
-              action={
-                <PrimaryButton
-                  label="Ver tudo"
-                  variant="link"
-                  size="sm"
-                  onPress={() => router.push('/(tabs)/kanban')}
-                />
-              }
+            <PillTabs
+              tabs={[
+                { id: 'tudo', label: 'Tudo', count: glances.length },
+                { id: 'tarefas', label: 'Tarefas', count: openTasks.length },
+                { id: 'saude', label: 'Saúde' },
+                { id: 'financas', label: 'Finanças' },
+              ]}
+              value={filter}
+              onChange={setFilter}
             />
-            <Card tone="elevated" style={{ paddingVertical: space.sm, gap: 0 }}>
-              {today.slice(0, 5).length === 0 ? (
-                <EmptyState title="Sem prazos hoje" body="Itens aparecem na lista de tarefas." />
-              ) : (
-                today.slice(0, 5).map((t, i, arr) => (
-                  <CheckRow
-                    key={t.id}
-                    title={t.titulo}
-                    subtitle={
-                      t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : 'Sem horário'
-                    }
-                    done={t.status === 'done'}
-                    onPress={() => router.push(`/task/${t.id}`)}
-                    onToggle={() => void toggleTaskDone(t.id, isGuest)}
-                    showSeparator={i < arr.length - 1}
-                  />
-                ))
-              )}
-            </Card>
+
+            {(filter === 'tudo' || filter === 'financas' || filter === 'tarefas') && (
+              <View
+                style={{
+                  flexDirection: showRail ? 'row' : 'column',
+                  flexWrap: 'wrap',
+                  gap: space.md,
+                }}
+              >
+                {(filter === 'tudo' || filter === 'financas') && (
+                  <Card
+                    tone="elevated"
+                    style={{
+                      gap: space.sm,
+                      minHeight: showRail ? 120 : 88,
+                      justifyContent: 'center',
+                      flexGrow: 1,
+                      flexBasis: showRail ? 200 : undefined,
+                      borderRadius: 18,
+                    }}
+                  >
+                    <Text variant="caption" color={colors.finance}>
+                      Gastos do mês
+                    </Text>
+                    <Text
+                      variant="title"
+                      color={colors.finance}
+                      style={{ letterSpacing: -0.3, fontSize: showRail ? 26 : 22 }}
+                    >
+                      {formatBRL(gastosMes)}
+                    </Text>
+                  </Card>
+                )}
+
+                {(filter === 'tudo' || filter === 'tarefas') && (
+                  hero ? (
+                    <Card
+                      tone="elevated"
+                      style={{
+                        gap: space.sm,
+                        minHeight: showRail ? 120 : 100,
+                        backgroundColor: colors.widget,
+                        flexGrow: 2,
+                        flexBasis: showRail ? 280 : undefined,
+                        borderRadius: 18,
+                      }}
+                    >
+                      <Text variant="caption" style={{ color: colors.widgetMuted }}>
+                        Prioridade de hoje
+                      </Text>
+                      <Text
+                        variant="title"
+                        style={{ fontSize: showRail ? 20 : 20, color: colors.widgetInk }}
+                      >
+                        {hero.titulo}
+                      </Text>
+                      <Text variant="caption" style={{ color: colors.widgetMuted }}>
+                        {hero.horaMinutos != null
+                          ? `Às ${minutesToLabel(hero.horaMinutos)} · ${hero.estimativaMinutos} min`
+                          : `${hero.estimativaMinutos} min`}
+                      </Text>
+                      <PrimaryButton
+                        label="Abrir tarefa"
+                        onPress={() => router.push(`/task/${hero.id}`)}
+                        style={{ borderRadius: 999, alignSelf: 'flex-start', paddingHorizontal: 24 }}
+                      />
+                    </Card>
+                  ) : (
+                    <Card
+                      tone="elevated"
+                      style={{
+                        flexGrow: 2,
+                        flexBasis: showRail ? 280 : undefined,
+                        borderRadius: 18,
+                      }}
+                    >
+                      <EmptyState title="Nada na fila" body="Capture uma tarefa para começar." />
+                      <PrimaryButton
+                        label="Capturar"
+                        onPress={() => openCapture('dump')}
+                        style={{ borderRadius: 999 }}
+                      />
+                    </Card>
+                  )
+                )}
+              </View>
+            )}
+
+            <View>
+              <SectionHeader
+                title={showRail ? 'Áreas' : 'Áreas da vida'}
+                subtitle={showRail ? 'Atalhos do dia' : 'Atalhos do dia'}
+                action={
+                  filter !== 'tudo' ? (
+                    <PrimaryButton
+                      label="Ver tudo"
+                      variant="link"
+                      size="sm"
+                      onPress={() => setFilter('tudo')}
+                    />
+                  ) : null
+                }
+              />
+              <GlanceGrid
+                glances={filteredGlances}
+                toneColor={toneColor}
+                onPressGlance={onGlancePress}
+              />
+            </View>
+
+            {filter === 'tudo' && showRail ? <DashboardQuickWidgets /> : null}
+
+            {(filter === 'tudo' || filter === 'tarefas') && (
+              <View>
+                <SectionHeader
+                  title={showRail ? 'Recentes' : 'Planos de hoje'}
+                  action={
+                    <PrimaryButton
+                      label="Ver tudo"
+                      variant="link"
+                      size="sm"
+                      onPress={() => router.push('/(tabs)/kanban')}
+                    />
+                  }
+                />
+                <Card tone="elevated" style={{ paddingVertical: space.sm, gap: 0, borderRadius: 18 }}>
+                  {today.slice(0, 5).length === 0 ? (
+                    <EmptyState title="Sem prazos hoje" body="Itens aparecem na lista de tarefas." />
+                  ) : (
+                    today.slice(0, 5).map((t, i, arr) => (
+                      <CheckRow
+                        key={t.id}
+                        title={t.titulo}
+                        subtitle={
+                          t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : 'Sem horário'
+                        }
+                        done={t.status === 'done'}
+                        onPress={() => router.push(`/task/${t.id}`)}
+                        onToggle={() => void toggleTaskDone(t.id, isGuest)}
+                        showSeparator={i < arr.length - 1}
+                      />
+                    ))
+                  )}
+                </Card>
+              </View>
+            )}
           </View>
-        )}
+
+          {showRail ? <HomeDriveAside todayTasks={today} /> : null}
+        </View>
       </TabShell>
 
       <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
@@ -229,23 +334,49 @@ export default function DashboardScreen()
             onPress={() => setMenuOpen(false)}
             style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
           />
-          <View
+          <ScrollView
             style={{
               backgroundColor: colors.surface,
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
-              padding: space.lg,
-              gap: space.sm,
               maxWidth: 480,
+              maxHeight: '80%',
               alignSelf: 'center',
               width: '100%',
             }}
+            contentContainerStyle={{ padding: space.lg, gap: space.sm }}
           >
-            <Text variant="section">Preferências</Text>
+            <Text variant="section">Mais</Text>
+            {(
+              [
+                { label: 'Preferências', href: '/preferencias' },
+                { label: 'Inteligência', href: '/inteligencia' },
+                { label: 'Relatórios', href: '/relatorios' },
+                { label: 'Calendário', href: '/calendario' },
+                { label: 'Anotações', href: '/anotacoes' },
+                { label: 'Modo foco', href: '/foco' },
+              ] as const
+            ).map((item) => (
+              <PrimaryButton
+                key={item.href}
+                label={item.label}
+                variant="secondary"
+                onPress={() =>
+                {
+                  setMenuOpen(false)
+                  router.push(item.href as never)
+                }}
+              />
+            ))}
             <PrimaryButton
               label={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-              variant="secondary"
-              onPress={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+              variant="ghost"
+              onPress={() =>
+              {
+                const next = mode === 'dark' ? 'light' : 'dark'
+                setMode(next)
+                void usePrefsStore.getState().patch({ color_scheme: next })
+              }}
             />
             <PrimaryButton
               label="Sair"
@@ -257,7 +388,7 @@ export default function DashboardScreen()
               }}
             />
             <PrimaryButton label="Fechar" variant="link" onPress={() => setMenuOpen(false)} />
-          </View>
+          </ScrollView>
         </View>
       </Modal>
     </Screen>

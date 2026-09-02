@@ -27,7 +27,7 @@ function MlChipRow({ presets, selected, onSelect, disabled, size = 'sm' }: MlChi
           onClick={() => onSelect(ml)}
           className={`rounded-sl font-mono border transition-colors ${pad} ${
             selected === ml
-              ? 'border-accent/40 bg-accent-muted text-ink'
+              ? 'border-health/40 bg-health-muted text-ink'
               : 'border-line text-ink-muted hover:text-ink hover:bg-chrome/40'
           }`}
         >
@@ -81,7 +81,7 @@ function MlCustomField({ value, onChange, onApply, label = 'Outro valor', disabl
         type="button"
         disabled={disabled}
         onClick={onApply}
-        className="shrink-0 px-3 py-1.5 sm:px-2 sm:py-1 rounded-sl border border-accent/30 bg-accent-muted font-mono text-[10px] sm:text-[9px] uppercase text-ink hover:bg-accent-muted/80 transition-colors"
+        className="shrink-0 px-3 py-1.5 sm:px-2 sm:py-1 rounded-sl border border-health/30 bg-health-muted font-mono text-[10px] sm:text-[9px] uppercase text-ink hover:bg-health-muted/80 transition-colors"
       >
         Aplicar
       </button>
@@ -163,7 +163,7 @@ export function WaterDefaultMlControls({
           onClick={() => setManageOpen((o) => !o)}
           className={`inline-flex items-center gap-1 px-2 py-0.5 sm:px-1.5 sm:py-px rounded-sl font-mono text-[9px] sm:text-[8px] border transition-colors ${
             manageOpen
-              ? 'border-accent/40 bg-accent-muted text-ink'
+              ? 'border-health/40 bg-health-muted text-ink'
               : 'border-line text-ink-muted hover:text-ink'
           }`}
           aria-expanded={manageOpen}

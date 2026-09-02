@@ -30,6 +30,7 @@
     { "source": "/api/webhook-ingest", "destination": "/api/webhooks/m2m" },
     { "source": "/api/push-subscribe", "destination": "/api/webhooks/push-subscribe" },
     { "source": "/api/push-test", "destination": "/api/webhooks/push-test" },
+    { "source": "/api/push-action", "destination": "/api/webhooks/push-action" },
     { "source": "/api/demo-login-reset", "destination": "/api/demo/login-reset" },
     { "source": "/api/morning-brief", "destination": "/api/axel/morning-brief" },
     { "source": "/api/orchestrate-tasks", "destination": "/api/axel/orchestrate-tasks" },
@@ -44,6 +45,7 @@
     { "source": "/api/generate-greeting", "destination": "/api/axel/generate-greeting" },
     { "source": "/api/today-verdict", "destination": "/api/axel/today-verdict" },
     { "source": "/api/weekly-digest-test", "destination": "/api/axel/weekly-digest-test" },
+    { "source": "/api/account-delete", "destination": "/api/axel/account-delete" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [

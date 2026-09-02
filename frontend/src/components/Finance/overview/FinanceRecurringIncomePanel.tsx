@@ -218,7 +218,7 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
           <div className="flex gap-2">
             <button
               type="submit"
-              className="flex-1 py-2 rounded-sl bg-accent hover:bg-accent-hover text-white text-[11px] font-mono uppercase"
+              className="flex-1 py-2 min-h-11 rounded-sl bg-ink text-fundo text-[11px] font-mono uppercase"
             >
               Salvar
             </button>

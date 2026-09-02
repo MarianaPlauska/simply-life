@@ -50,6 +50,12 @@ function RootNavigator()
         <Stack.Screen name="login" />
         <Stack.Screen name="tokens-preview" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="preferencias" />
+        <Stack.Screen name="inteligencia" />
+        <Stack.Screen name="relatorios" />
+        <Stack.Screen name="calendario" />
+        <Stack.Screen name="anotacoes" />
+        <Stack.Screen name="foco" />
         <Stack.Screen
           name="task/[id]"
           options={{ presentation: 'modal', headerShown: false }}

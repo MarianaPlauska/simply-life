@@ -62,7 +62,7 @@ export const ELEVATION: { light: ElevationSet; dark: ElevationSet } = {
       elevation: 8,
     },
     fab: {
-      shadowColor: '#CA2851',
+      shadowColor: '#A05C3D',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.35,
       shadowRadius: 16,
@@ -92,7 +92,7 @@ export const ELEVATION: { light: ElevationSet; dark: ElevationSet } = {
       elevation: 10,
     },
     fab: {
-      shadowColor: '#FF6766',
+      shadowColor: '#FF6A2B',
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.45,
       shadowRadius: 14,

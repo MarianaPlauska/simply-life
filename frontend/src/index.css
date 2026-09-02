@@ -5,8 +5,9 @@
 @tailwind utilities;
 
 /* ── Simply-Life — identidade AXEL (ver src/design/identityTokens.ts)
-   · Grafite quente, não preto-azulado
-   · Laranja só na voz do AXEL (--sl-axel)
+   · Claro = Tortilla / Gold Leaf / Terracotta
+   · Escuro = Chinese Black → Antique Brass
+   · Acento só na voz do AXEL (--sl-axel)
    · Fraunces = fala · Manrope = dados/ações
 */
 
@@ -20,87 +21,90 @@ body {
 }
 
 :root {
-  --sl-canvas: #F7F5F2;
-  --sl-chrome: #EFECE8;
-  --sl-surface: #FBFAF8;
-  --sl-voice: #F3EBE4;
-  --sl-elevated: #FDFCFA;
-  --sl-text: #2A2622;
-  --sl-text-muted: #6A645C;
-  --sl-text-faint: #7A746C;
-  --sl-border: rgba(42, 38, 34, 0.09);
-  --sl-border-subtle: rgba(42, 38, 34, 0.09);
-  /* CTA = laranja AXEL (AA no canvas: #B8502C, não #C45A32) */
-  --sl-accent: #B8502C;
-  --sl-accent-hover: #C45A32;
-  --sl-accent-muted: rgba(184, 80, 44, 0.12);
-  --sl-axel: #B8502C;
-  --sl-axel-hover: #C45A32;
-  --sl-axel-muted: rgba(184, 80, 44, 0.12);
-  --sl-axel-on-fill: #F7F5F2;
-  --sl-health: #4F6F4C;
-  --sl-health-muted: rgba(79, 111, 76, 0.12);
-  --sl-finance: #8A6A2E;
-  --sl-finance-muted: rgba(138, 106, 46, 0.12);
-  --sl-tasks: #4A5C68;
-  --sl-tasks-muted: rgba(74, 92, 104, 0.12);
-  --sl-urgent: #A33D3D;
-  --sl-attention: #8A6A2E;
-  --sl-success: #6A645C;
+  /* Pantone: Tortilla lavado / Gold Leaf / Terracotta */
+  --sl-canvas: #F5F1EC;
+  --sl-chrome: #FFFCFA;
+  --sl-surface: #FFFCFA;
+  --sl-voice: #EDE4D8;
+  --sl-elevated: #EDE4D8;
+  --sl-text: #0C1519;
+  --sl-text-muted: #5C534C;
+  --sl-text-faint: #8A7E74;
+  --sl-border: rgba(12, 21, 25, 0.10);
+  --sl-border-subtle: rgba(198, 161, 126, 0.40);
+  /* CTA = terracotta AXEL (AA no cream; 1–2× por tela) */
+  --sl-accent: #A05C3D;
+  --sl-accent-hover: #8B4E34;
+  --sl-accent-muted: rgba(184, 114, 82, 0.16);
+  --sl-axel: #A05C3D;
+  --sl-axel-hover: #8B4E34;
+  --sl-axel-muted: rgba(184, 114, 82, 0.16);
+  --sl-axel-on-fill: #F5F1EC;
+  --sl-health: #3F6B5A;
+  --sl-health-muted: rgba(184, 212, 200, 0.45);
+  --sl-finance: #7A6540;
+  --sl-finance-muted: rgba(198, 161, 126, 0.35);
+  --sl-tasks: #4A5560;
+  --sl-tasks-muted: rgba(184, 200, 212, 0.45);
+  --sl-urgent: #9A4545;
+  --sl-attention: #9A7A3A;
+  --sl-success: #4A6B58;
+  --sl-sand: #C6A17E;
   --sl-radius-sm: 12px;
   --sl-radius: 16px;
+  --sl-radius-control: 7px;
   --sl-radius-lg: 24px;
   --sl-radius-pill: 9999px;
   --sl-shadow: none;
-  --sl-shadow-lg: 0 16px 48px rgba(42, 38, 34, 0.08);
-  --sl-shadow-voice: 0 0 0 1px rgba(184, 80, 44, 0.22), 0 12px 40px rgba(184, 80, 44, 0.08);
-  --sl-chart-meta: #FBFAF8;
-  --sl-chart-meta-border: rgba(42, 38, 34, 0.09);
-  --sl-chart-real-a: #B8502C;
-  --sl-chart-real-b: #8A6A2E;
-  --sl-chart-real-c: #4F6F4C;
-  --sl-water-fill: #4F6F4C;
-  --sl-water-fill-end: #7FA37A;
+  --sl-shadow-lg: 0 16px 48px rgba(12, 21, 25, 0.08);
+  --sl-shadow-voice: 0 0 0 1px rgba(160, 92, 61, 0.22), 0 12px 40px rgba(160, 92, 61, 0.08);
+  --sl-chart-meta: #FFFCFA;
+  --sl-chart-meta-border: rgba(12, 21, 25, 0.10);
+  --sl-chart-real-a: #7A6540;
+  --sl-chart-real-b: #A05C3D;
+  --sl-chart-real-c: #3F6B5A;
+  --sl-water-fill: #3F6B5A;
+  --sl-water-fill-end: #B8D4C8;
 }
 
 .dark {
-  --sl-canvas: #1E1C18;
-  --sl-chrome: #25221D;
-  --sl-surface: #2C2923;
-  --sl-voice: #342F28;
-  --sl-elevated: #3E3931;
-  --sl-text: #EDE7DD;
-  --sl-text-muted: #A39B90;
-  --sl-text-faint: #8F877C;
-  --sl-border: rgba(237, 231, 221, 0.12);
-  --sl-border-subtle: rgba(237, 231, 221, 0.10);
-  /* Ação genérica = cream invertido — não é o laranja do AXEL */
-  --sl-accent: #EDE7DD;
-  --sl-accent-hover: #F5F0E8;
-  --sl-accent-muted: rgba(237, 231, 221, 0.10);
-  --sl-axel: #E8734A;
-  --sl-axel-hover: #F0845C;
-  --sl-axel-muted: rgba(232, 115, 74, 0.14);
-  --sl-axel-on-fill: #1E1C18;
-  --sl-health: #7FA37A;
-  --sl-health-muted: rgba(127, 163, 122, 0.14);
-  --sl-finance: #C9A15C;
-  --sl-finance-muted: rgba(201, 161, 92, 0.14);
-  --sl-tasks: #8B9BA8;
-  --sl-tasks-muted: rgba(139, 155, 168, 0.14);
-  --sl-urgent: #D47878;
-  --sl-attention: #C9A15C;
-  --sl-success: #B8A99A;
+  /* P2P — preto profundo + laranja vivo */
+  --sl-canvas: #0A0A0C;
+  --sl-chrome: #141418;
+  --sl-surface: #141418;
+  --sl-voice: #0D1020;
+  --sl-elevated: #1C1C24;
+  --sl-text: #F5F5F7;
+  --sl-text-muted: #9A9AA6;
+  --sl-text-faint: #6E6E78;
+  --sl-border: rgba(245, 245, 247, 0.10);
+  --sl-border-subtle: rgba(255, 106, 43, 0.28);
+  --sl-accent: #FF6A2B;
+  --sl-accent-hover: #FF8A4C;
+  --sl-accent-muted: rgba(255, 106, 43, 0.18);
+  --sl-axel: #FF6A2B;
+  --sl-axel-hover: #FF8A4C;
+  --sl-axel-muted: rgba(255, 106, 43, 0.18);
+  --sl-axel-on-fill: #0A0A0C;
+  --sl-health: #5FD39A;
+  --sl-health-muted: rgba(95, 211, 154, 0.16);
+  --sl-finance: #F0B45A;
+  --sl-finance-muted: rgba(240, 180, 90, 0.16);
+  --sl-tasks: #8BA4C7;
+  --sl-tasks-muted: rgba(139, 164, 199, 0.16);
+  --sl-urgent: #FF6B7A;
+  --sl-attention: #F0B45A;
+  --sl-success: #5FD39A;
   --sl-shadow: none;
-  --sl-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
-  --sl-shadow-voice: 0 0 0 1px rgba(232, 115, 74, 0.22), 0 12px 40px rgba(232, 115, 74, 0.08);
-  --sl-chart-meta: #2C2923;
-  --sl-chart-meta-border: rgba(237, 231, 221, 0.10);
-  --sl-chart-real-a: #E8734A;
-  --sl-chart-real-b: #C9A15C;
-  --sl-chart-real-c: #7FA37A;
-  --sl-water-fill: #7FA37A;
-  --sl-water-fill-end: #5E8A5A;
+  --sl-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --sl-shadow-voice: 0 0 0 1px rgba(255, 106, 43, 0.28), 0 12px 40px rgba(255, 106, 43, 0.12);
+  --sl-chart-meta: #141418;
+  --sl-chart-meta-border: rgba(245, 245, 247, 0.10);
+  --sl-chart-real-a: #FF6A2B;
+  --sl-chart-real-b: #F0B45A;
+  --sl-chart-real-c: #5FD39A;
+  --sl-water-fill: #5FD39A;
+  --sl-water-fill-end: #3DB87A;
 }
 
 @keyframes sl-shimmer {
@@ -247,16 +251,219 @@ body {
 }
 
 @layer components {
+  /* Título global — Fraunces (telas ainda não migradas) */
+  .sl-page-title {
+    font-family: "Fraunces", Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--sl-text);
+  }
+
+  @media (min-width: 640px) {
+    .sl-page-title {
+      font-size: 1.75rem;
+    }
+  }
+
+  /* Escopo Dashboard — spec premium SaaS */
+  .sl-dashboard-scope .sl-page-title {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  @media (min-width: 768px) {
+    .sl-dashboard-scope .sl-page-title {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* Tier 1 — um por tela (28px desktop / 24px mobile) */
+  .sl-screen-hero {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 768px) {
+    .sl-screen-hero {
+      font-size: 1.75rem;
+      font-weight: 500;
+    }
+  }
+
+  /* Tier 2 — KPI com contexto (22–24px) */
+  .sl-module-highlight {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 768px) {
+    .sl-module-highlight {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+  }
+
+  /** @deprecated prefer sl-screen-hero ou sl-module-highlight */
+  .sl-hero-metric {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 768px) {
+    .sl-hero-metric {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+  }
+
+  .sl-module-metric {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sl-body {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--sl-text);
+  }
+
+  .sl-body-muted {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--sl-text-muted);
+  }
+
+  .sl-section-pad {
+    padding: 1.25rem;
+  }
+
+  @media (min-width: 768px) {
+    .sl-section-pad {
+      padding: 1.5rem;
+    }
+  }
+
+  .sl-stack-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .sl-stack-gap {
+      gap: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .sl-stack-gap {
+      gap: 2rem;
+    }
+  }
+
+  .sl-dashboard-scope .sl-stack-gap {
+    gap: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .sl-dashboard-scope .sl-stack-gap {
+      gap: 1.5rem;
+    }
+  }
+
+  .sl-hairline {
+    border-width: 0.5px;
+    border-style: solid;
+    border-color: var(--sl-border-subtle);
+  }
+
+  .sl-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding-inline: 1rem;
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: var(--sl-radius-control);
+    border: 0.5px solid var(--sl-border);
+    transition: background-color 150ms ease, opacity 150ms ease;
+  }
+
+  @media (min-width: 768px) {
+    .sl-btn {
+      min-height: 2.5rem;
+    }
+  }
+
+  .sl-btn-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  .sl-btn-icon svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .sl-page-lede {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--sl-text-muted);
+  }
+
+  .sl-section-label {
+    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--sl-text-muted);
+  }
+
   /* Kicker de módulo — sans, nunca laranja, nunca mono */
   .sl-eyebrow {
-    @apply font-sans text-[11px] font-semibold uppercase tracking-wide;
+    @apply font-sans text-[13px] font-medium;
     color: var(--sl-text-muted);
+    letter-spacing: 0;
+    text-transform: none;
   }
 
   .sl-panel {
     background-color: var(--sl-surface);
-    border: 1px solid var(--sl-border-subtle);
-    border-radius: var(--sl-radius);
+    border: 0.5px solid var(--sl-border-subtle);
+    border-radius: var(--sl-radius-control);
     box-shadow: none;
     color: var(--sl-text);
   }
@@ -278,14 +485,7 @@ body {
   }
 
   .sl-metric {
-    @apply font-sans font-medium tabular-nums tracking-tight leading-none;
-    font-size: 1.5rem;
-  }
-
-  @media (min-width: 640px) {
-    .sl-metric {
-      font-size: 1.75rem;
-    }
+    @apply sl-hero-metric;
   }
 
   /* CTA cream no escuro: texto grafite (AA). No claro o fill já é tinta. */
@@ -555,6 +755,39 @@ body {
 .water-bubble-a { width: 8px; height: 8px; left: 18%; bottom: 22%; animation-delay: 0s; }
 .water-bubble-b { width: 5px; height: 5px; left: 62%; bottom: 18%; animation-delay: 1.2s; }
 .water-bubble-c { width: 6px; height: 6px; left: 44%; bottom: 30%; animation-delay: 2.4s; }
+
+@keyframes sl-progress-bump {
+  from {
+    opacity: 0.72;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduce-motion) .sl-action-feedback {
+    animation: sl-progress-bump 180ms ease-out;
+  }
+
+  html:not(.reduce-motion) .sl-vitality-pulse {
+    animation: sl-vitality-glow 450ms ease-out;
+  }
+}
+
+@keyframes sl-vitality-glow {
+  0% {
+    filter: brightness(1);
+  }
+  40% {
+    filter: brightness(1.15);
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

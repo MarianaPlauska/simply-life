@@ -1,18 +1,21 @@
 import { useMemo, useState } from 'react'
-import { Check, ChevronDown, Edit3, Plus, Wallet } from 'lucide-react'
+import { Check, ChevronDown, Edit3, Plus } from 'lucide-react'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_PROGRESS_THICK,
   AXEL_SECTION_TITLE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
+  MODULE_HERO,
 } from '../../../constants/axelSurfaces'
 import {
   budgetAlertLabel,
+  budgetRemainingDisplay,
   filterActiveBudgetRows,
+  totalBudgetRemaining,
   type CategoryBudgetRow,
 } from '../../../lib/financeCategoryBudget'
-import { FINANCE_CATEGORY_ICONS } from '../financeCategoryIcons'
+import { CategoryIconCircle } from '../categories/CategoryIconCircle'
 
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -32,7 +35,7 @@ function barTone(row: CategoryBudgetRow): string
 {
   if (row.alert === 'over') return 'bg-urgente'
   if (row.alert === 'caution') return 'bg-atencao'
-  return 'bg-accent'
+  return 'bg-finance'
 }
 
 export function FinanceBudgetPanel({
@@ -52,6 +55,11 @@ export function FinanceBudgetPanel({
     () => rows.filter((r) => r.limite <= 0 && r.gasto <= 0),
     [rows],
   )
+  const totalRemaining = useMemo(() => totalBudgetRemaining(rows), [rows])
+  const trackedCount = useMemo(
+    () => rows.filter((r) => r.limite > 0).length,
+    [rows],
+  )
 
   const usedTone = budgetUsedPct > 90
     ? 'text-urgente'
@@ -68,9 +76,18 @@ export function FinanceBudgetPanel({
             Só categorias com limite ou gasto no mês
           </p>
         </div>
-        <span className={`font-mono text-[10px] tabular-nums ${usedTone}`}>
-          {budgetUsedPct.toFixed(0)}% usado
-        </span>
+        <div className="text-right shrink-0">
+          {trackedCount > 0 && (
+            <p className={`text-[15px] font-display tabular-nums ${MODULE_HERO.finance}`}>
+              {fmt(totalRemaining)}
+            </p>
+          )}
+          <span className={`font-mono text-[10px] tabular-nums ${usedTone}`}>
+            {trackedCount > 0
+              ? `livres · ${budgetUsedPct.toFixed(0)}% usado`
+              : `${budgetUsedPct.toFixed(0)}% usado`}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-3 mt-4">
@@ -82,19 +99,14 @@ export function FinanceBudgetPanel({
 
         {displayRows.map((cat) =>
         {
-          const CatIcon = FINANCE_CATEGORY_ICONS[cat.icone] ?? Wallet
+          const display = budgetRemainingDisplay(cat, fmt)
           const isEditing = editingBudget === cat.id
 
           return (
             <div key={cat.id} className="space-y-1.5">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className="w-7 h-7 rounded-sl flex items-center justify-center border border-line bg-chrome shrink-0"
-                    style={{ color: cat.cor }}
-                  >
-                    <CatIcon className="w-3.5 h-3.5" />
-                  </div>
+                  <CategoryIconCircle icone={cat.icone} cor={cat.cor} size="sm" />
                   <div className="min-w-0">
                     <p className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
                       {cat.nome}
@@ -141,10 +153,15 @@ export function FinanceBudgetPanel({
                       setEditingBudget(cat.id)
                       setEditVal(String(cat.limite))
                     }}
-                    className={`flex items-center gap-1 text-[11px] font-mono tabular-nums shrink-0 ${AXEL_TEXT_SECONDARY} hover:text-accent transition-colors`}
+                    className="text-right shrink-0 min-w-0 hover:opacity-90 transition-opacity"
                   >
-                    <Edit3 className="w-3 h-3 opacity-60" />
-                    {fmt(cat.gasto)} / {fmt(cat.limite)}
+                    <p className={`text-[14px] font-display tabular-nums leading-tight ${display.tone}`}>
+                      {display.primary}
+                    </p>
+                    <p className={`text-[10px] font-mono tabular-nums flex items-center justify-end gap-1 ${AXEL_TEXT_SECONDARY}`}>
+                      <Edit3 className="w-3 h-3 opacity-60" />
+                      {display.secondary}
+                    </p>
                   </button>
                 )}
               </div>

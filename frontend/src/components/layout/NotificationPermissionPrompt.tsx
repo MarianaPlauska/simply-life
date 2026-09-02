@@ -70,7 +70,7 @@ export function NotificationPermissionPrompt()
             type="button"
             disabled={loading}
             onClick={() => void enable()}
-            className="px-3 py-1.5 rounded-sl bg-accent text-white text-[11px] font-mono uppercase disabled:opacity-50"
+            className="px-3 py-1.5 rounded-sl bg-ink text-fundo text-[11px] font-mono uppercase disabled:opacity-50"
           >
             Permitir notificações
           </button>

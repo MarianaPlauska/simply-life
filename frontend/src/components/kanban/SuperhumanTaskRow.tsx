@@ -26,8 +26,8 @@ const PRIO_CYCLE = ['baixa', 'media', 'alta', 'critica'] as const
 const PRIO_CHIP: Record<string, string> = {
   critica: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
   alta: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-  media: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
-  baixa: 'text-zinc-500 bg-zinc-900/40 border-zinc-800/60',
+  media: 'text-task bg-task/10 border-task/20',
+  baixa: 'text-ink-muted bg-chrome/40 border-line',
 }
 
 export function SuperhumanTaskRow({ tarefa, onComplete, onUpdate, onArchive }: SuperhumanTaskRowProps)
@@ -63,7 +63,7 @@ export function SuperhumanTaskRow({ tarefa, onComplete, onUpdate, onArchive }: S
             if (e.key === 'Escape') setEditingNotes(false)
           }}
           onClick={(e) => e.stopPropagation()}
-          className="hidden md:block w-40 bg-zinc-950 border border-violet-500/30 rounded-md px-2 py-0.5 text-[10px] text-zinc-300 outline-none"
+          className="hidden md:block w-40 bg-chrome border border-line rounded-md px-2 py-0.5 text-[10px] text-ink outline-none"
           autoFocus
         />
       ) : (
@@ -74,7 +74,7 @@ export function SuperhumanTaskRow({ tarefa, onComplete, onUpdate, onArchive }: S
             e.stopPropagation()
             setEditingNotes(true)
           }}
-          className="hidden md:block max-w-[140px] truncate text-[10px] text-zinc-600 hover:text-zinc-400"
+          className="hidden md:block max-w-[140px] truncate text-[10px] text-ink-muted hover:text-ink"
         >
           {tarefa.notas_locais || 'Nota…'}
         </button>
@@ -97,7 +97,7 @@ export function SuperhumanTaskRow({ tarefa, onComplete, onUpdate, onArchive }: S
           e.stopPropagation()
           void onComplete(tarefa)
         }}
-        className="p-1 text-zinc-600 hover:text-emerald-400"
+        className="p-1 text-ink-muted hover:text-health"
         title="Concluir"
       >
         <Circle className="w-3.5 h-3.5" />
@@ -109,7 +109,7 @@ export function SuperhumanTaskRow({ tarefa, onComplete, onUpdate, onArchive }: S
           e.stopPropagation()
           void onArchive(tarefa.id)
         }}
-        className="text-[10px] text-zinc-600 hover:text-red-400 opacity-0 group-hover:opacity-100"
+        className="text-[10px] text-ink-muted hover:text-danger opacity-0 group-hover:opacity-100"
       >
         Arquivar
       </button>

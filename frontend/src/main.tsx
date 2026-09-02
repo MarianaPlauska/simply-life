@@ -8,8 +8,10 @@ import App from './App.tsx'
 import { reportWebVitals } from './utils/webVitals'
 import { registerSW } from 'virtual:pwa-register'
 import { toast } from 'sonner'
+import { initSentry } from './lib/sentryInit'
 
 bootstrapColorSchemeFromStorage()
+initSentry()
 
 // Service worker só em produção — evita workbox no dev (cache Vite instável)
 if (import.meta.env.PROD)

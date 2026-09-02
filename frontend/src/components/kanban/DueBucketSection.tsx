@@ -16,7 +16,10 @@ import {
   isDueBucketDropTarget,
   type DueBucket,
 } from '../../lib/dueBucket'
-import { AXEL_KANBAN_DROPZONE } from '../../constants/axelKanbanTheme'
+import {
+  AXEL_KANBAN_COL_WIDTH,
+  AXEL_KANBAN_DROPZONE,
+} from '../../constants/axelKanbanTheme'
 import { AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
 
 interface DueBucketSectionProps
@@ -26,6 +29,8 @@ interface DueBucketSectionProps
   children: ReactNode
   collapsible?: boolean
   defaultCollapsed?: boolean
+  /** stack = mobile; column = board desktop Trello */
+  layout?: 'stack' | 'column'
 }
 
 const TONE_CLASS: Record<string, string> = {
@@ -57,6 +62,7 @@ export function DueBucketSection({
   children,
   collapsible = false,
   defaultCollapsed = false,
+  layout = 'stack',
 }: DueBucketSectionProps)
 {
   const [collapsed, setCollapsed] = useState(defaultCollapsed)
@@ -71,6 +77,7 @@ export function DueBucketSection({
   const shell = SECTION_SHELL[meta.tone] ?? SECTION_SHELL.muted
   const BucketIcon = BUCKET_ICON[bucket]
   const hidden = collapsible && collapsed
+  const asColumn = layout === 'column'
 
   return (
     <section
@@ -78,8 +85,10 @@ export function DueBucketSection({
       ref={droppable ? setNodeRef : undefined}
       aria-labelledby={`due-bucket-${bucket}`}
       className={[
-        'border-b border-white/[0.04] last:border-b-0 scroll-mt-12',
-        shell,
+        asColumn
+          ? `${AXEL_KANBAN_COL_WIDTH} flex flex-col min-h-0 self-stretch border-r border-line last:border-r-0`
+          : 'border-b border-white/[0.04] last:border-b-0 scroll-mt-12',
+        asColumn ? '' : shell,
         droppable && isOver ? 'ring-2 ring-inset ring-accent/30' : '',
       ].join(' ')}
     >
@@ -112,7 +121,9 @@ export function DueBucketSection({
       {!hidden && (
         <div
           className={[
-            'px-3 py-2 space-y-1.5 min-h-[48px]',
+            asColumn
+              ? 'flex-1 min-h-0 overflow-y-auto custom-scrollbar px-3 py-2 space-y-1.5'
+              : 'px-3 py-2 space-y-1.5 min-h-[48px]',
             count === 0 ? AXEL_KANBAN_DROPZONE : '',
           ].join(' ')}
         >

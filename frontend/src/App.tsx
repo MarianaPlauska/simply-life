@@ -13,12 +13,12 @@ import { AuthCallbackView } from './components/Auth/AuthCallbackView'
 import { ResetPasswordView } from './components/Auth/ResetPasswordView'
 import { AxelSetupWizard } from './components/Onboarding/AxelSetupWizard'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
-import { AxelLoader } from './components/ui/AxelLoader'
+import { BentoGridSkeleton } from './components/ui/Skeleton'
 import { useTaskStore, type ActiveView } from './store/useTaskStore'
 import { applyColorScheme, readDedicatedColorScheme } from './utils/applyColorScheme'
 import { AppLayout } from './components/layout/AppLayout'
-import { Briefcase, Rocket } from 'lucide-react'
 import { useUserSessionIsolation } from './hooks/useUserSessionIsolation'
+import { usePushActionBridge } from './hooks/usePushActionBridge'
 
 const DashboardView = lazy(() => import('./components/layout/DashboardView').then((m) => ({ default: m.DashboardView })))
 const KanbanView = lazy(() => import('./components/kanban/KanbanView').then((m) => ({ default: m.KanbanView })))
@@ -29,12 +29,14 @@ const HealthView = lazy(() => import('./components/Health/HealthView').then((m) 
 const PreferencesView = lazy(() => import('./components/Settings/PreferencesView').then((m) => ({ default: m.PreferencesView })))
 const FinancePlannerView = lazy(() => import('./components/Finance/FinancePlannerView').then((m) => ({ default: m.FinancePlannerView })))
 const CalendarView = lazy(() => import('./components/Calendar/CalendarView').then((m) => ({ default: m.CalendarView })))
-const DriveVaultView = lazy(() => import('./components/Drive/DriveVaultView').then((m) => ({ default: m.DriveVaultView })))
 const ProfileView = lazy(() => import('./components/Auth/ProfileView').then((m) => ({ default: m.ProfileView })))
 const PreferenciasIA = lazy(() => import('./components/Settings/PreferenciasIA').then((m) => ({ default: m.PreferenciasIA })))
 const RelatoriosView = lazy(() => import('./components/Relatorios/RelatoriosView').then((m) => ({ default: m.RelatoriosView })))
 const AxelHistoryView = lazy(() => import('./components/axel/AxelHistoryView').then((m) => ({ default: m.AxelHistoryView })))
 const SuperhumanView = lazy(() => import('./components/kanban/SuperhumanView').then((m) => ({ default: m.SuperhumanView })))
+const HealthDiaryChartsPreview = import.meta.env.DEV
+  ? lazy(() => import('./dev/HealthDiaryChartsPreview').then((m) => ({ default: m.HealthDiaryChartsPreview })))
+  : null
 
 function useAccessibilityInit()
 {
@@ -58,22 +60,6 @@ function useAccessibilityInit()
   }, [a.fontSize, a.highContrast, a.reducedMotion, a.colorScheme, a.focusVisible, applyWorkspaceTheme])
 }
 
-function PlaceholderView({ title, subtitle, icon: Icon }: { title: string; subtitle: string; icon?: React.ElementType })
-{
-  const ViewIcon = Icon || Rocket
-  return (
-    <div className="flex flex-col items-center justify-center flex-1 min-h-[50vh] gap-4 px-6">
-      <div className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-800/60 border border-zinc-200 dark:border-zinc-700/40 flex items-center justify-center">
-        <ViewIcon className="w-6 h-6 text-zinc-500" />
-      </div>
-      <div className="text-center">
-        <p className="text-zinc-900 dark:text-zinc-200 text-lg font-semibold">{title}</p>
-        <p className="text-zinc-500 text-sm mt-1 max-w-md">{subtitle}</p>
-      </div>
-    </div>
-  )
-}
-
 const ROUTE_MAP: Record<string, ActiveView> = {
   '/':              'dashboard',
   '/kanban':        'kanban',
@@ -86,10 +72,8 @@ const ROUTE_MAP: Record<string, ActiveView> = {
   '/perfil':        'perfil',
   '/planner':       'planner',
   '/calendario':    'calendario',
-  '/drive':         'drive',
   '/superhuman':    'superhuman',
   '/inteligencia':  'inteligencia',
-  '/carreira':      'carreira',
   '/relatorios':    'relatorios',
   '/axel/historico': 'axel-historico',
 }
@@ -169,14 +153,12 @@ function AppShell()
           <Route path="perfil" element={<ErrorBoundary fallbackTitle="Erro no Perfil"><ProfileView /></ErrorBoundary>} />
           <Route path="planner" element={<Navigate to="/financeiro" replace />} />
           <Route path="calendario" element={<ErrorBoundary fallbackTitle="Erro no Calendário"><CalendarView /></ErrorBoundary>} />
-          <Route path="drive" element={<ErrorBoundary fallbackTitle="Erro no Drive"><DriveVaultView /></ErrorBoundary>} />
+          <Route path="drive" element={<Navigate to="/configuracoes" replace />} />
           <Route path="superhuman" element={<ErrorBoundary fallbackTitle="Erro no Superhuman"><SuperhumanView /></ErrorBoundary>} />
           <Route path="inteligencia" element={<PreferenciasIA />} />
           <Route path="relatorios" element={<ErrorBoundary fallbackTitle="Erro nos Relatórios"><RelatoriosView /></ErrorBoundary>} />
           <Route path="axel/historico" element={<ErrorBoundary fallbackTitle="Erro no histórico AXEL"><AxelHistoryView /></ErrorBoundary>} />
-          <Route path="carreira" element={
-            <PlaceholderView title="Radar de Carreira" subtitle="Monitoramento de vagas e oportunidades profissionais será ativado em breve." icon={Briefcase} />
-          } />
+          <Route path="carreira" element={<Navigate to="/configuracoes" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
         </Routes>
@@ -189,6 +171,7 @@ function App()
 {
   useAccessibilityInit()
   useUserSessionIsolation()
+  usePushActionBridge()
   const fetchWorkspacePrefs = useTaskStore((s) => s.fetchWorkspacePrefs)
   const colorScheme = useTaskStore((s) => s.accessibility.colorScheme)
 
@@ -215,6 +198,18 @@ function App()
         <Route path="/auth/callback" element={<AuthCallbackView />} />
         <Route path="/google-callback" element={<GoogleCallbackView />} />
         <Route path="/join/:code" element={<JoinFriendView />} />
+        {import.meta.env.DEV && HealthDiaryChartsPreview && (
+          <Route
+            path="/__dev/health-diary-charts"
+            element={(
+              <ErrorBoundary fallbackTitle="Erro no preview">
+                <Suspense fallback={<BentoGridSkeleton variant="health" />}>
+                  <HealthDiaryChartsPreview />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+          />
+        )}
         <Route
           path="/setup"
           element={
@@ -231,11 +226,8 @@ function App()
               <FocusImmersiveOverlay />
             </Suspense>
             <Suspense fallback={
-              <div className="flex flex-col items-center justify-center min-h-[100dvh] bg-fundo gap-3">
-                <AxelLoader />
-                <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted">
-                  Carregando…
-                </p>
+              <div className="min-h-[100dvh] bg-canvas px-4 py-6">
+                <BentoGridSkeleton variant="default" />
               </div>
             }>
               <AppShell />

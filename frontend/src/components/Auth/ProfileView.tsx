@@ -15,6 +15,7 @@ import { AxelCosmeticsLibrary } from '../gamification/AxelCosmeticsLibrary'
 import { InviteFriendPanel } from '../social/InviteFriendPanel'
 import { FriendCircleCard } from '../social/FriendCircleCard'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
+import { AccountDataPanel } from './AccountDataPanel'
 import { ProfileAdminUsersPanel } from './ProfileAdminUsersPanel'
 import { ProfileWorkspacePrefsPanel } from './ProfileWorkspacePrefsPanel'
 import { MfaEnrollPanel } from './MfaEnrollPanel'
@@ -252,6 +253,10 @@ export function ProfileView()
           <PreferenceRow icon={Keyboard} label="Atalhos" description="⌘K abre criar ou buscar" defaultOn />
           <PreferenceRow icon={Monitor} label="Movimento reduzido" description="Acessibilidade" />
         </div>
+      </DashboardCollapsible>
+
+      <DashboardCollapsible title="Os seus dados" subtitle="Exportar JSON ou apagar a conta (LGPD)">
+        <AccountDataPanel />
       </DashboardCollapsible>
 
       <section className="rounded-sl border border-urgente/30 bg-urgente/5 p-4">

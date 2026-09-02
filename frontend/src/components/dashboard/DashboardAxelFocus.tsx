@@ -7,7 +7,9 @@ import { useStartTaskExecution } from '../../hooks/useStartTaskExecution'
 import { syncMainQuest } from '../../lib/mainQuest'
 import { cleanTitleForDisplay } from '../kanban/axelKanbanUtils'
 import {
-  AXEL_BTN_PRIMARY_COMPACT,
+  AXEL_BTN_MD,
+  AXEL_BTN_PRIMARY,
+  AXEL_BTN_EXECUTE,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
@@ -15,14 +17,17 @@ import {
 interface DashboardAxelFocusProps
 {
   onOpenTask?: (taskId: number) => void
+  embedded?: boolean
 }
 
-export function DashboardAxelFocus({ onOpenTask }: DashboardAxelFocusProps)
+export function DashboardAxelFocus({ onOpenTask, embedded = false }: DashboardAxelFocusProps)
 {
   const navigate = useNavigate()
   const { startTask } = useStartTaskExecution()
   const storeTarefas = useTaskStore((s) => s.tarefas)
   const mood = useMoodOrchestration()
+  const getAdjustedEstimateMinutes = useTaskStore((s) => s.getAdjustedEstimateMinutes)
+  const pomodoroTime = useTaskStore((s) => s.timerConfig.pomodoroTime)
 
   const { topTask } = useMemo(() =>
   {
@@ -32,6 +37,12 @@ export function DashboardAxelFocus({ onOpenTask }: DashboardAxelFocusProps)
   }, [storeTarefas, mood])
 
   const title = topTask ? cleanTitleForDisplay(topTask.titulo) : null
+  const estimateMin = topTask
+    ? getAdjustedEstimateMinutes(topTask.id, topTask.titulo)
+    : 0
+  const pomodoroBlocks = topTask
+    ? Math.max(1, Math.ceil(estimateMin / Math.max(1, pomodoroTime)))
+    : 0
 
   const execute = useCallback(async () =>
   {
@@ -45,9 +56,9 @@ export function DashboardAxelFocus({ onOpenTask }: DashboardAxelFocusProps)
   }, [navigate, startTask, topTask])
 
   return (
-    <div className="flex items-center gap-2 pt-2.5 mt-2.5 border-t border-line">
+    <div className={`flex items-center gap-3 ${embedded ? 'pt-0 mt-0' : 'pt-3 mt-3 border-t border-line/80'}`}>
       <div className="min-w-0 flex-1">
-        <p className="text-[12px] font-medium text-ink-muted">
+        <p className="sl-section-label">
           Agora
         </p>
         {topTask ? (
@@ -56,8 +67,12 @@ export function DashboardAxelFocus({ onOpenTask }: DashboardAxelFocusProps)
             onClick={() => onOpenTask?.(topTask.id)}
             className={`text-left w-full min-w-0 mt-0.5 min-h-[44px] ${AXEL_TEXT_PRIMARY}`}
           >
-            <span className="font-display text-[15px] leading-snug line-clamp-2">
+            <span className="sl-body font-medium leading-snug line-clamp-2">
               {title}
+            </span>
+            <span className={`block mt-0.5 text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+              {pomodoroBlocks} bloco{pomodoroBlocks === 1 ? '' : 's'} de {pomodoroTime} min
+              {' · '}~{estimateMin} min
             </span>
           </button>
         ) : (
@@ -69,7 +84,7 @@ export function DashboardAxelFocus({ onOpenTask }: DashboardAxelFocusProps)
       <button
         type="button"
         onClick={() => void execute()}
-        className={`shrink-0 inline-flex items-center justify-center gap-1.5 min-h-11 px-3 ${AXEL_BTN_PRIMARY_COMPACT}`}
+        className={`shrink-0 gap-1.5 ${AXEL_BTN_MD} ${topTask ? AXEL_BTN_EXECUTE : AXEL_BTN_PRIMARY}`}
       >
         <Play size={11} strokeWidth={1.75} fill="currentColor" />
         {topTask ? 'Executar' : 'Kanban'}

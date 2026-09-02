@@ -12,7 +12,9 @@ import { fetchProteinEstimate } from '../../lib/estimateProteinApi'
 import { kcalFromProteinGrams } from '../../lib/healthNutrition'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { AXEL_ICON_STROKE, resolveAxelIcon } from '../../lib/axelIconMap'
+import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import { ProteinFoodQuickAdd } from './ProteinFoodQuickAdd'
+import { ProteinQuickTapGrid } from './ProteinQuickTapGrid'
 
 export function ProteinMealLog()
 {
@@ -24,6 +26,7 @@ export function ProteinMealLog()
   const [refeicao, setRefeicao] = useState<RefeicaoId>('almoco')
   const [journalText, setJournalText] = useState('')
   const [savingJournal, setSavingJournal] = useState(false)
+  const [quickBusy, setQuickBusy] = useState(false)
 
   const proteina = useMemo(() => habitos.find((h) => h.tipo === 'proteina'), [habitos])
   const porRefeicao = (proteina?.config?.proteina_por_refeicao ?? {}) as Record<string, number>
@@ -60,7 +63,7 @@ export function ProteinMealLog()
     await setHabitoProgress(h.id, total)
   }
 
-  const adicionarGramas = async (gramas: number, _label: string, kcal?: number) =>
+  const adicionarGramas = async (gramas: number, label: string, kcal?: number) =>
   {
     if (gramas <= 0) return
     const h = await ensureProteina()
@@ -70,6 +73,9 @@ export function ProteinMealLog()
     const total = Math.min(h.meta_diaria + 200, current + gramas)
     const kcalAdd = kcal ?? kcalFromProteinGrams(gramas)
     await salvarRefeicoes(nextMap, total, { kcalAdd })
+    const { emitCareRegistered } = await import('../../lib/healthVitality')
+    emitCareRegistered()
+    toast.success(`+${gramas}g · ${label}`, { duration: 1500 })
   }
 
   const removerGramas = async (gramas: number, kcal?: number) =>
@@ -93,6 +99,19 @@ export function ProteinMealLog()
     await patchHabitoConfig(h.id, {
       alimentos_custom: { ...customByMeal, [refeicao]: foods },
     })
+  }
+
+  const handleQuickAdd = async (gramas: number, label: string, kcal: number) =>
+  {
+    setQuickBusy(true)
+    try
+    {
+      await adicionarGramas(gramas, label, kcal)
+    }
+    finally
+    {
+      setQuickBusy(false)
+    }
   }
 
   const handleJournal = async () =>
@@ -124,6 +143,8 @@ export function ProteinMealLog()
       const nextLog = [entry, ...textoLog].slice(0, 24)
 
       await salvarRefeicoes(nextMap, total, { logPatch: nextLog, kcalAdd: parsed.kcal })
+      const { emitCareRegistered } = await import('../../lib/healthVitality')
+      emitCareRegistered()
       setJournalText('')
       const via = parsed.source === 'ai' ? 'IA' : 'estimativa local'
       toast.success(
@@ -142,9 +163,9 @@ export function ProteinMealLog()
   return (
     <section className="rounded-sl border border-line bg-card p-4 space-y-4">
       <div>
-        <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>O que você comeu</p>
+        <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Registrar refeição</p>
         <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-          Descreva o prato ou use os atalhos abaixo com porção ajustável.
+          Um toque nos favoritos — sem precisar contar tudo.
         </p>
       </div>
 
@@ -175,10 +196,35 @@ export function ProteinMealLog()
         })}
       </div>
 
-      <div className="space-y-2">
-        <label className={`text-[10px] font-mono uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-          {refeicaoLabel}: descreva o prato
-        </label>
+      <ProteinQuickTapGrid
+        refeicao={refeicao}
+        onAdd={handleQuickAdd}
+        busy={quickBusy}
+      />
+
+      <DashboardCollapsible
+        title="Mais alimentos"
+        subtitle={`Porções ajustáveis · ${refeicaoLabel}`}
+        borderless
+        defaultOpen={false}
+        bodyClassName="pt-1"
+      >
+        <ProteinFoodQuickAdd
+          refeicao={refeicao}
+          customFoods={customFoods}
+          onAdd={adicionarGramas}
+          onRemove={removerGramas}
+          onSaveCustom={salvarCustomFoods}
+        />
+      </DashboardCollapsible>
+
+      <DashboardCollapsible
+        title="Descrever refeição"
+        subtitle="Texto livre com estimativa automática"
+        borderless
+        defaultOpen={false}
+        bodyClassName="space-y-2 pt-1"
+      >
         <textarea
           value={journalText}
           onChange={(e) => setJournalText(e.target.value)}
@@ -195,34 +241,26 @@ export function ProteinMealLog()
           {savingJournal ? <Loader2 className="w-4 h-4 animate-spin" /> : <PenLine className="w-4 h-4" />}
           Registrar refeição
         </button>
-      </div>
 
-      {textoLog.length > 0 && (
-        <div className="space-y-2 pt-2 border-t border-line">
-          <p className={`text-[10px] font-mono uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>Hoje</p>
-          <ul className="space-y-2 max-h-36 overflow-y-auto custom-scrollbar">
-            {textoLog.map((entry, i) => (
-              <li key={`${entry.hora}-${i}`} className="text-[12px] leading-snug">
-                <span className="font-mono text-[10px] text-ink-muted">{entry.hora}</span>
-                <span className="text-ink-muted"> · </span>
-                <span className="text-ink">{entry.texto}</span>
-                <span className="font-mono text-amber-600 dark:text-amber-300/90 ml-1 tabular-nums">
-                  +{entry.gramas}g
-                  {entry.kcal ? ` · ${entry.kcal} kcal` : ''}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      <ProteinFoodQuickAdd
-        refeicao={refeicao}
-        customFoods={customFoods}
-        onAdd={adicionarGramas}
-        onRemove={removerGramas}
-        onSaveCustom={salvarCustomFoods}
-      />
+        {textoLog.length > 0 && (
+          <div className="space-y-2 pt-2 border-t border-line">
+            <p className={`text-[10px] font-mono uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>Hoje</p>
+            <ul className="space-y-2 max-h-36 overflow-y-auto custom-scrollbar">
+              {textoLog.map((entry, i) => (
+                <li key={`${entry.hora}-${i}`} className="text-[12px] leading-snug">
+                  <span className="font-mono text-[10px] text-ink-muted">{entry.hora}</span>
+                  <span className="text-ink-muted"> · </span>
+                  <span className="text-ink">{entry.texto}</span>
+                  <span className="font-mono text-amber-600 dark:text-amber-300/90 ml-1 tabular-nums">
+                    +{entry.gramas}g
+                    {entry.kcal ? ` · ${entry.kcal} kcal` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </DashboardCollapsible>
     </section>
   )
 }

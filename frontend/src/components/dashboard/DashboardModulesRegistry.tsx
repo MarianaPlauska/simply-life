@@ -84,8 +84,8 @@ export function DashboardModulesRegistry({ excludeIds = [] }: DashboardModulesRe
     {
       id: 'integ',
       label: 'Integrações',
-      desc: 'Google · webhooks · vault',
-      path: '/carreira',
+      desc: 'Google e webhooks',
+      path: '/configuracoes',
       Icon: PlugZap,
       metric: googleConnected ? 'Google ativo' : 'configurar',
       status: googleConnected ? 'ok' : 'idle',

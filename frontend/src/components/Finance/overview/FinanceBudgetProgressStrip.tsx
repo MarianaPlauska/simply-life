@@ -2,10 +2,17 @@ import { useMemo } from 'react'
 import { AlertTriangle } from 'lucide-react'
 import {
   buildCategoryBudgetRows,
-  filterActiveBudgetRows,
   budgetAlertLabel,
+  budgetRemainingDisplay,
+  filterActiveBudgetRows,
 } from '../../../lib/financeCategoryBudget'
-import { AXEL_PROGRESS_THICK, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_METRIC_HAIRLINE } from '../../../constants/axelSurfaces'
+import {
+  AXEL_PROGRESS_THICK,
+  AXEL_TEXT_PRIMARY,
+  AXEL_TEXT_SECONDARY,
+  AXEL_METRIC_HAIRLINE,
+} from '../../../constants/axelSurfaces'
+import { CategoryIconCircle } from '../categories/CategoryIconCircle'
 import type { BudgetLimit, Category, Transaction } from '../../../store/storeTypes'
 
 const fmt = (v: number) =>
@@ -19,7 +26,7 @@ interface FinanceBudgetProgressStripProps
   onConfigure?: () => void
 }
 
-// Barras de orçamento por categoria — padrão Mobills/YNAB (top categorias do mês)
+// Barras de orçamento por categoria — restante em destaque
 
 export function FinanceBudgetProgressStrip({
   categories,
@@ -46,30 +53,35 @@ export function FinanceBudgetProgressStrip({
           <button
             type="button"
             onClick={onConfigure}
-            className="font-mono text-[8px] uppercase text-accent hover:underline"
+            className="font-mono text-[8px] uppercase text-finance hover:underline"
           >
             Ajustar limites
           </button>
         )}
       </div>
-      <ul className="space-y-2">
+      <ul className="space-y-2.5">
         {rows.map((row) =>
         {
+          const display = budgetRemainingDisplay(row, fmt)
           const tone = row.alert === 'over'
             ? 'bg-urgente'
             : row.alert === 'caution'
               ? 'bg-atencao'
-              : 'bg-accent'
+              : 'bg-finance'
           return (
             <li key={row.id}>
-              <div className="flex justify-between items-baseline gap-2 mb-0.5">
-                <span className={`text-[11px] truncate ${AXEL_TEXT_PRIMARY}`}>{row.nome}</span>
-                <span className={`font-mono text-[9px] tabular-nums shrink-0 ${
-                  row.alert === 'over' ? 'text-urgente' : AXEL_TEXT_SECONDARY
-                }`}>
-                  {fmt(row.gasto)} / {fmt(row.limite)}
-                </span>
+              <div className="flex items-center gap-2 mb-1">
+                <CategoryIconCircle icone={row.icone} cor={row.cor} size="sm" />
+                <div className="flex-1 min-w-0 flex items-baseline justify-between gap-2">
+                  <span className={`text-[11px] truncate ${AXEL_TEXT_PRIMARY}`}>{row.nome}</span>
+                  <span className={`text-[12px] font-display tabular-nums shrink-0 ${display.tone}`}>
+                    {display.primary}
+                  </span>
+                </div>
               </div>
+              <p className={`text-[9px] font-mono tabular-nums mb-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                {display.secondary}
+              </p>
               <div className={AXEL_PROGRESS_THICK}>
                 <div
                   className={`h-full rounded-sl transition-all ${tone}`}

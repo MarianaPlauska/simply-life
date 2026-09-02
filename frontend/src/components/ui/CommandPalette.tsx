@@ -253,13 +253,13 @@ export function CommandPalette ()
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -12 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="w-full max-w-xl mx-4 bg-zinc-900/95 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            className="w-full max-w-xl mx-4 bg-card border border-line rounded-sl-lg shadow-sl-lg overflow-hidden"
           >
             {/* input de busca — mostra spinner quando está carregando */}
-            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/8">
+            <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line">
               {searchLoading
-                ? <Loader2 className="w-4 h-4 text-violet-400 shrink-0 animate-spin" />
-                : <Search className="w-4 h-4 text-zinc-500 shrink-0" />
+                ? <Loader2 className="w-4 h-4 text-ink shrink-0 animate-spin" />
+                : <Search className="w-4 h-4 text-ink-muted shrink-0" />
               }
               <input
                 ref={inputRef}
@@ -267,9 +267,9 @@ export function CommandPalette ()
                 placeholder="Buscar… ou gastei 45 almoço"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="flex-1 bg-transparent text-zinc-100 placeholder-zinc-600 text-sm outline-none"
+                className="flex-1 bg-transparent text-ink placeholder:text-ink-faint text-sm outline-none"
               />
-              <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 text-xs font-mono">
+              <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-chrome border border-line text-ink-muted text-xs font-mono">
                 ESC
               </kbd>
             </div>
@@ -277,7 +277,7 @@ export function CommandPalette ()
             {/* resultados */}
             <div ref={listRef} className="max-h-[60vh] overflow-y-auto py-2">
               {flatList.length === 0 ? (
-                <p className="text-center text-zinc-600 text-sm py-8">Nenhum resultado para &quot;{query}&quot;</p>
+                <p className="text-center text-ink-muted text-sm py-8">Nenhum resultado para &quot;{query}&quot;</p>
               ) : (
                 groups.map((group) =>
                 {
@@ -285,7 +285,7 @@ export function CommandPalette ()
                   if ( !items.length ) return null;
                   return (
                     <div key={group}>
-                      <p className="px-4 py-1.5 text-[10px] font-semibold tracking-widest uppercase text-zinc-600">
+                      <p className="px-4 py-1.5 text-[10px] font-semibold tracking-widest uppercase text-ink-muted">
                         {group === 'Resultados' && searchResults
                           ? `Resultados (${searchResults.total})`
                           : group
@@ -303,23 +303,23 @@ export function CommandPalette ()
                             onClick={cmd.action}
                             className={[
                               'w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors',
-                              isSelected ? 'bg-violet-500/20 text-zinc-50' : 'text-zinc-300 hover:bg-zinc-800/60',
+                              isSelected ? 'bg-chrome text-ink' : 'text-ink-muted hover:bg-chrome/60',
                             ].join(' ')}
                           >
                             <div className={[
                               'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-                              isSelected ? 'bg-violet-500/30' : 'bg-zinc-800',
+                              isSelected ? 'bg-elevated' : 'bg-chrome',
                             ].join(' ')}>
-                              <cmd.icon className={['w-4 h-4', isSelected ? 'text-violet-300' : 'text-zinc-500'].join(' ')} />
+                              <cmd.icon className={['w-4 h-4', isSelected ? 'text-ink' : 'text-ink-muted'].join(' ')} />
                             </div>
                             <div className="flex-1 min-w-0">
                               <span className="text-sm font-medium block truncate">{cmd.label}</span>
                               {cmd.subtitle && (
-                                <span className="text-[11px] text-zinc-500 block truncate">{cmd.subtitle}</span>
+                                <span className="text-[11px] text-ink-muted block truncate">{cmd.subtitle}</span>
                               )}
                             </div>
                             {cmd.shortcut && (
-                              <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-500 text-xs font-mono">
+                              <kbd className="px-1.5 py-0.5 rounded bg-chrome border border-line text-ink-muted text-xs font-mono">
                                 {cmd.shortcut}
                               </kbd>
                             )}
@@ -332,13 +332,13 @@ export function CommandPalette ()
               )}
             </div>
 
-            <div className="flex items-center gap-4 px-4 py-2.5 border-t border-white/8 text-[11px] text-zinc-600">
+            <div className="flex items-center gap-4 px-4 py-2.5 border-t border-line text-[11px] text-ink-muted">
               <span className="flex items-center gap-1.5">
-                <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[10px]">↑↓</kbd>
+                <kbd className="px-1 py-0.5 rounded bg-chrome border border-line font-mono text-[10px]">↑↓</kbd>
                 navegar
               </span>
               <span className="flex items-center gap-1.5">
-                <kbd className="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 font-mono text-[10px]">⏎</kbd>
+                <kbd className="px-1 py-0.5 rounded bg-chrome border border-line font-mono text-[10px]">⏎</kbd>
                 abrir
               </span>
               <span className="ml-auto">Ctrl+K para fechar</span>

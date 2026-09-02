@@ -86,11 +86,11 @@ export function FinanceSpendingCharts({
   const weekTotal = weekData.reduce((s, d) => s + d.value, 0)
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
+    <div className={`grid grid-cols-1 ${compact ? '' : 'lg:grid-cols-2'} gap-3 md:gap-4`}>
       <section className={`${AXEL_BORDERLESS_PANEL}`}>
         <header className="flex items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <BarChart3 size={14} className="text-accent" />
+            <BarChart3 size={14} className="text-finance" />
             <div>
               <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
                 Maiores gastos da semana
@@ -131,10 +131,11 @@ export function FinanceSpendingCharts({
         )}
       </section>
 
+      {!compact && (
       <section className={`${AXEL_BORDERLESS_PANEL}`}>
         <header className="mb-3 space-y-2">
           <div className="flex items-center gap-2">
-            <CreditCard size={14} className="text-accent" />
+            <CreditCard size={14} className="text-finance" />
             <p className={`font-mono text-[10px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
               Gastos por cartão · semana
             </p>
@@ -190,6 +191,7 @@ export function FinanceSpendingCharts({
           </div>
         )}
       </section>
+      )}
     </div>
   )
 }

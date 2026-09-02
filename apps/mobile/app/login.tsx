@@ -18,7 +18,7 @@ import { useAuthStore } from '../src/store/authStore'
 const SHELL_MAX = 440
 const PAD_X = 24
 
-/** Login único em /login — mobile com AuthHeader; desktop (≥1024) split-screen */
+/** Login — mobile: onda + form (ref Sign in); desktop: split-screen */
 export default function LoginScreen()
 {
   const { colors, space } = useTheme()
@@ -33,10 +33,6 @@ export default function LoginScreen()
   const shellMax = Math.min(isDesktop ? 480 : vw, SHELL_MAX)
   const contentPad = !isDesktop && vw > SHELL_MAX ? Math.max((vw - SHELL_MAX) / 2, 0) : 0
   const minH = Math.max(winH - insets.top, 640)
-
-  const headerTitle = mode === 'login' ? 'Entrar' : 'Criar conta'
-  const headerSubtitle =
-    mode === 'login' ? 'Use seu email e senha.' : 'Crie sua conta para sincronizar.'
 
   if (isDesktop)
   {
@@ -72,11 +68,11 @@ export default function LoginScreen()
           alignSelf: 'center',
           overflow: 'hidden',
           marginHorizontal: contentPad > 0 ? 0 : undefined,
+          backgroundColor: colors.elevated,
         }}
       >
         <AuthHeader
-          title={headerTitle}
-          subtitle={headerSubtitle}
+          welcomeLabel={mode === 'login' ? 'Bem-vindo' : 'Olá'}
           compact={mode === 'register'}
           width={shellMax}
         />
@@ -86,10 +82,14 @@ export default function LoginScreen()
           style={{
             flexGrow: 1,
             paddingHorizontal: PAD_X,
+            paddingTop: space.md,
             paddingBottom: Math.max(insets.bottom, space.lg),
+            backgroundColor: colors.elevated,
+            borderTopLeftRadius: 0,
           }}
         >
-          <LoginForm mode={mode} onModeChange={setMode} showHeading={false} />
+          {/* Título no bloco branco — layout Sign in da ref */}
+          <LoginForm mode={mode} onModeChange={setMode} showHeading variant="wave" />
         </KeyboardAvoidingView>
       </View>
     </Screen>

@@ -1,7 +1,6 @@
 import { View, Pressable } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { MARBLE } from '@simply-life/ui-tokens'
 import { Text } from '../../ui'
 import { BrandMark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -15,9 +14,15 @@ const NAV = [
   { href: '/(tabs)/financeiro', match: 'financeiro', label: 'Finanças', icon: 'wallet-outline' as const },
 ]
 
+/** Largura rail desktop — labels + ícone */
+export const DESKTOP_SIDEBAR_WIDTH = 220
+
+/** Raio das curvas que “mordem” a borda da sidebar (efeito SoftTech / CodePen) */
+const NOTCH = 22
+
 /**
- * Sidebar desktop (≥1024) — ref dashboard com rail lateral.
- * Mobile continua com TabBarWithFab (não alterar).
+ * Sidebar desktop com item ativo em entalhe:
+ * pill do canvas + curvas côncavas em cima/baixo, fundindo com o conteúdo.
  */
 export function DesktopSidebar()
 {
@@ -28,10 +33,17 @@ export function DesktopSidebar()
   const email = useAuthStore((s) => s.sessionEmail)
   const name = email?.split('@')[0] ?? 'Você'
 
-  const bg = mode === 'dark' ? '#24181A' : MARBLE.rose
-  const ink = '#FFF8F0'
-  const inkMuted = 'rgba(255,248,240,0.72)'
-  const activeBg = mode === 'dark' ? 'rgba(255,103,102,0.22)' : 'rgba(255,255,255,0.18)'
+  // Rail Drive: navy black no escuro; Chinese Black no claro
+  const sidebarBg = mode === 'dark' ? '#0D1020' : '#0C1519'
+  const contentBg = colors.canvas
+  const inkOnBrand = 'rgba(245, 241, 236, 0.92)'
+  const inkMutedOnBrand = 'rgba(245, 241, 236, 0.62)'
+  const activeFg = colors.ink
+  const pressedBg = 'rgba(245, 241, 236, 0.12)'
+  const divider = 'rgba(245, 241, 236, 0.18)'
+  const avatarBg = 'rgba(245, 241, 236, 0.14)'
+  const ctaBg = 'rgba(245, 241, 236, 0.14)'
+  const ctaFg = '#F5F1EC'
 
   const isActive = (item: (typeof NAV)[0]) =>
   {
@@ -45,113 +57,214 @@ export function DesktopSidebar()
   return (
     <View
       style={{
-        width: 248,
-        backgroundColor: bg,
-        paddingTop: space.xl,
+        width: DESKTOP_SIDEBAR_WIDTH,
+        alignSelf: 'stretch',
+        backgroundColor: sidebarBg,
+        paddingTop: space.lg,
         paddingBottom: space.lg,
-        paddingHorizontal: space.md,
+        // Sem padding à direita: o entalhe encosta no canvas
+        paddingLeft: space.md,
         justifyContent: 'space-between',
       }}
     >
-      <View style={{ gap: space.lg }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 8 }}>
-          <BrandMark size={40} onFill />
-          <Text variant="section" style={{ color: ink, letterSpacing: -0.3 }}>
+      <View style={{ gap: space.md }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 10,
+            paddingHorizontal: space.sm,
+            paddingBottom: space.sm,
+          }}
+        >
+          <BrandMark size={32} onFill />
+          <Text
+            variant="bodyStrong"
+            style={{ color: '#F5F1EC', letterSpacing: -0.2, fontSize: 15 }}
+            numberOfLines={1}
+          >
             Simply Life
           </Text>
         </View>
 
-        <View style={{ gap: 4 }}>
+        <Text
+          variant="micro"
+          style={{
+            color: inkMutedOnBrand,
+            paddingHorizontal: space.md,
+            textTransform: 'uppercase',
+            letterSpacing: 0.8,
+            fontSize: 10,
+          }}
+        >
+          Menu
+        </Text>
+
+        <View style={{ gap: 0 }}>
           {NAV.map((item) =>
           {
             const active = isActive(item)
             return (
-              <Pressable
+              <View
                 key={item.href}
-                onPress={() => router.push(item.href as never)}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-                style={({ pressed }) => ({
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 12,
-                  minHeight: 48,
-                  paddingHorizontal: 14,
-                  borderRadius: 14,
-                  backgroundColor: active ? activeBg : pressed ? 'rgba(255,255,255,0.08)' : 'transparent',
-                })}
+                style={{
+                  position: 'relative',
+                  zIndex: active ? 2 : 1,
+                }}
               >
-                <Ionicons
-                  name={active ? (item.icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : item.icon}
-                  size={20}
-                  color={active ? MARBLE.cream : inkMuted}
-                />
-                <Text
-                  variant="bodyStrong"
-                  style={{ color: active ? ink : inkMuted }}
+                {active ? (
+                  <>
+                    {/* Curva superior — “mordida” no rail */}
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: 'absolute',
+                        top: -NOTCH,
+                        right: 0,
+                        width: NOTCH,
+                        height: NOTCH,
+                        backgroundColor: contentBg,
+                        zIndex: 3,
+                      }}
+                    >
+                      <View
+                        style={{
+                          flex: 1,
+                          backgroundColor: sidebarBg,
+                          borderBottomRightRadius: NOTCH,
+                        }}
+                      />
+                    </View>
+                    {/* Curva inferior */}
+                    <View
+                      pointerEvents="none"
+                      style={{
+                        position: 'absolute',
+                        bottom: -NOTCH,
+                        right: 0,
+                        width: NOTCH,
+                        height: NOTCH,
+                        backgroundColor: contentBg,
+                        zIndex: 3,
+                      }}
+                    >
+                      <View
+                        style={{
+                          flex: 1,
+                          backgroundColor: sidebarBg,
+                          borderTopRightRadius: NOTCH,
+                        }}
+                      />
+                    </View>
+                  </>
+                ) : null}
+
+                <Pressable
+                  onPress={() => router.push(item.href as never)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  style={({ pressed }) => ({
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                    minHeight: 48,
+                    paddingLeft: 16,
+                    paddingRight: 18,
+                    borderTopLeftRadius: active ? NOTCH + 6 : 0,
+                    borderBottomLeftRadius: active ? NOTCH + 6 : 0,
+                    backgroundColor: active
+                      ? contentBg
+                      : pressed
+                        ? pressedBg
+                        : 'transparent',
+                  })}
                 >
-                  {item.label}
-                </Text>
-              </Pressable>
+                  <Ionicons
+                    name={
+                      active
+                        ? (item.icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap)
+                        : item.icon
+                    }
+                    size={18}
+                    color={active ? activeFg : inkOnBrand}
+                  />
+                  <Text
+                    variant="label"
+                    style={{
+                      color: active ? activeFg : inkOnBrand,
+                      fontSize: 14,
+                      fontWeight: active ? '700' : '500',
+                    }}
+                  >
+                    {item.label}
+                  </Text>
+                </Pressable>
+              </View>
             )
           })}
         </View>
 
         <Pressable
           onPress={() => openCapture('dump')}
+          accessibilityRole="button"
+          accessibilityLabel="Capturar"
           style={({ pressed }) => ({
             marginTop: space.sm,
-            minHeight: 48,
-            borderRadius: 14,
+            marginRight: space.md,
+            minHeight: 44,
+            borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: mode === 'dark' ? MARBLE.coral : 'rgba(255,255,255,0.95)',
+            backgroundColor: ctaBg,
+            borderWidth: 1,
+            borderColor: divider,
             opacity: pressed ? 0.9 : 1,
           })}
         >
-          <Text
-            variant="bodyStrong"
-            color={mode === 'dark' ? '#1A1214' : MARBLE.rose}
-          >
+          <Text variant="label" style={{ color: ctaFg, fontSize: 13, fontWeight: '700' }}>
             + Capturar
           </Text>
         </Pressable>
       </View>
 
-      <View
+      <Pressable
+        onPress={() => router.push('/preferencias')}
+        accessibilityRole="button"
+        accessibilityLabel="Abrir preferências"
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 12,
-          paddingHorizontal: 10,
+          gap: 10,
+          paddingHorizontal: space.sm,
           paddingTop: space.md,
+          marginRight: space.md,
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255,255,255,0.15)',
+          borderTopColor: divider,
         }}
       >
         <View
           style={{
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             borderRadius: 999,
-            backgroundColor: 'rgba(255,255,255,0.18)',
+            backgroundColor: avatarBg,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Text variant="bodyStrong" style={{ color: ink }}>
+          <Text variant="label" style={{ color: '#F5F1EC', fontSize: 13 }}>
             {name.slice(0, 1).toUpperCase()}
           </Text>
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ color: ink }}>
+          <Text variant="label" numberOfLines={1} style={{ color: '#F5F1EC', fontSize: 13 }}>
             {name}
           </Text>
-          <Text variant="caption" numberOfLines={1} style={{ color: inkMuted }}>
-            Conta
+          <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 11 }}>
+            Preferências
           </Text>
         </View>
-      </View>
+      </Pressable>
     </View>
   )
 }

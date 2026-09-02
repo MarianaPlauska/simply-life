@@ -1,9 +1,11 @@
-// POST /api/push-test — dispara uma notificação de teste para as subscriptions do usuário
+// POST /api/push-test — Web + Expo
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js'
-import { sendWebPush, isExpiredSubscriptionError, isWebPushConfigured } from '../../webPush.js'
+import { isWebPushConfigured } from '../../webPush.js'
+import { enrichPushPayload } from '../../pushActionPayload.js'
 import { enforceRateLimit, sendRateLimited } from '../../rateLimit.js'
+import { sendPushToSubscriptions } from '../../sendPushFanout.js'
 
 export default async function handler(req, res)
 {
@@ -22,46 +24,45 @@ export default async function handler(req, res)
   })
   if (!limited.ok) return sendRateLimited(res, limited.retryAfter)
 
-  if (!isWebPushConfigured())
-  {
-    return res.status(503).json({ error: 'Web Push não configurado (VAPID)' })
-  }
-
   const supabase = getSupabaseAdmin()
   if (!supabase) return res.status(500).json({ error: 'Supabase não configurado' })
 
   const { data: rows, error } = await supabase
     .from('push_subscriptions')
-    .select('endpoint, p256dh, auth_key')
+    .select('id, endpoint, p256dh, auth_key, provider')
     .eq('user_id', user.id)
 
   if (error) return res.status(500).json({ error: error.message })
   if (!rows?.length)
   {
-    return res.status(400).json({ error: 'Nenhuma inscrição push neste dispositivo. Permita notificações no app.' })
+    return res.status(400).json({
+      error: 'Nenhuma inscrição push. Permita notificações no app (web ou Expo).',
+    })
   }
 
-  let sent = 0
-  for (const row of rows)
+  const hasWeb = rows.some((r) => r.provider !== 'expo')
+  if (hasWeb && !isWebPushConfigured())
   {
-    try
+    // ainda pode enviar só Expo
+    const onlyExpo = rows.filter((r) => r.provider === 'expo')
+    if (!onlyExpo.length)
     {
-      await sendWebPush(row, {
-        title: 'Simply-Life · teste',
-        body: 'Push ponta a ponta ok. A Rotina Guiada e o resumo semanal usam este canal.',
-        url: '/kanban?foco=1',
-        tag: 'simply-life-test',
-      })
-      sent += 1
-    }
-    catch (err)
-    {
-      if (isExpiredSubscriptionError(err))
-      {
-        await supabase.from('push_subscriptions').delete().eq('endpoint', row.endpoint)
-      }
+      return res.status(503).json({ error: 'Web Push não configurado (VAPID)' })
     }
   }
 
+  const payload = enrichPushPayload({
+    title: 'Simply-Life · teste',
+    body: 'Push OK — web ou Expo. Toque para abrir o app.',
+    url: '/kanban?foco=1',
+    tag: 'simply-life-test',
+  }, {
+    userId: user.id,
+    kind: 'mood',
+    snoozeKey: `test:${user.id}`,
+    nudgeKey: `test:${new Date().toISOString().slice(0, 10)}`,
+  })
+
+  const { sent } = await sendPushToSubscriptions(supabase, rows, payload)
   return res.status(200).json({ ok: true, sent })
 }

@@ -1,11 +1,22 @@
 // Notificações de saúde via Service Worker (PWA + permissão)
 
+import {
+  buildInteractiveNotificationData,
+  PUSH_INLINE_ACTIONS,
+  type PushNotificationData,
+} from './pushNotificationActions'
+
 export interface HealthNotificationPayload
 {
   title: string
   body: string
   url: string
   tag: string
+  kind?: PushNotificationData['kind']
+  taskId?: number
+  medicamentoId?: number
+  horario?: string
+  interactive?: boolean
 }
 
 export async function showHealthNotification(payload: HealthNotificationPayload): Promise<boolean>
@@ -19,6 +30,18 @@ export async function showHealthNotification(payload: HealthNotificationPayload)
     return false
   }
 
+  const data = payload.interactive !== false
+    ? buildInteractiveNotificationData({
+        url: payload.url,
+        tag: payload.tag,
+        kind: payload.kind ?? (payload.taskId ? 'task' : undefined),
+        taskId: payload.taskId ?? null,
+        medicamentoId: payload.medicamentoId ?? null,
+        horario: payload.horario ?? null,
+        snoozeKey: payload.tag,
+      })
+    : { url: payload.url, tag: payload.tag }
+
   try
   {
     const reg = await navigator.serviceWorker?.ready
@@ -29,7 +52,9 @@ export async function showHealthNotification(payload: HealthNotificationPayload)
         icon: '/pwa-192x192.png',
         badge: '/pwa-192x192.png',
         tag: payload.tag,
-        data: { url: payload.url },
+        data,
+        actions: payload.interactive !== false ? [...PUSH_INLINE_ACTIONS] : undefined,
+        requireInteraction: payload.interactive !== false,
       })
       return true
     }

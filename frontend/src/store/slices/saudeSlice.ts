@@ -2,7 +2,9 @@
 import type { StateCreator } from 'zustand'
 import type { Medicamento, MedicamentoTomada, HabitoDiario, HabitoDiarioConfig, SessaoTreino } from '../storeTypes'
 import type { HabitoStreak } from '../../types'
+import { computeStreakStats } from '../../lib/habitStreakCalc'
 import { supabase } from '../../lib/supabase'
+import { GOLD_PER_HABIT } from '../../lib/goldEconomy'
 import { isWorkoutComplete, minutesBetween } from '../../utils/workoutCompletion'
 import {
   configAposResetDiario,
@@ -166,7 +168,8 @@ export interface SaudeSlice
 async function grantHabitoXp(get: () => SaudeSlice & Record<string, unknown>, tituloQuest?: string)
 {
   const anyGet = get() as Record<string, unknown>
-  if (anyGet.addXP) await (anyGet.addXP as (m: string, n: number) => Promise<void>)('saude', 10)
+  if (anyGet.addXP) await (anyGet.addXP as (m: string, n: number) => Promise<number>)('saude', 10)
+  if (anyGet.addGold) await (anyGet.addGold as (n: number) => Promise<number>)(GOLD_PER_HABIT)
   if (tituloQuest && anyGet.incrementQuestProgress)
   {
     await (anyGet.incrementQuestProgress as (t: string, v: number) => Promise<void>)(tituloQuest, 1)
@@ -1309,30 +1312,35 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       const { data, error } = await supabase
         .from('historico_habitos')
         .select('habito_id, data, concluido')
-        .order('data', { ascending: false })
+        .order('data', { ascending: true })
       if (error) throw error
-      // agrupa por habito e calcula streak
-      const streakMap = new Map<number, number>()
+
+      const byHabit = new Map<number, string[]>()
       if (data)
       {
         for (const row of data)
         {
-          if (row.concluido === 1)
-          {
-            streakMap.set(row.habito_id, (streakMap.get(row.habito_id) || 0) + 1)
-          }
+          if (row.concluido !== 1) continue
+          const list = byHabit.get(row.habito_id) ?? []
+          list.push(row.data)
+          byHabit.set(row.habito_id, list)
         }
       }
-      const habitos = get().habitos;
-      const streaks: HabitoStreak[] = Array.from(streakMap.entries()).map(([habito_id, streak_dias]) => {
-        const habito = habitos.find(h => h.id === habito_id);
+
+      const habitos = get().habitos
+      const streaks: HabitoStreak[] = Array.from(byHabit.entries()).map(([habito_id, dates]) =>
+      {
+        const stats = computeStreakStats(dates)
+        const habito = habitos.find((h) => h.id === habito_id)
         return {
           habito_id,
           nome_exibicao: habito ? habito.nome_exibicao : `Hábito ${habito_id}`,
-          streak_dias,
-          ultima_data: null, // Pode ser aprimorado com a última data real do histórico
-        };
-      })
+          streak_dias: stats.streak_dias,
+          recorde_dias: stats.recorde_dias,
+          ultima_data: stats.ultima_data,
+        }
+      }).sort((a, b) => b.streak_dias - a.streak_dias)
+
       set({ habitosStreaks: streaks })
     }
     catch (e) { console.error('fetchHabitosStreaks:', e) }

@@ -32,7 +32,7 @@ export function CardSkeleton()
 
 interface BentoGridSkeletonProps
 {
-  variant?: 'health' | 'finance' | 'default'
+  variant?: 'health' | 'finance' | 'kanban' | 'default'
 }
 
 /** Placeholders no formato Bento — evita tela vazia durante fetch */
@@ -71,6 +71,20 @@ export function BentoGridSkeleton({ variant = 'default' }: BentoGridSkeletonProp
         </div>
         <Shimmer className="h-36 w-full" />
         <Shimmer className="h-32 w-full" />
+      </div>
+    );
+  }
+
+  if (variant === 'kanban')
+  {
+    return (
+      <div className="space-y-3" aria-busy="true" aria-label="Carregando tarefas">
+        <Shimmer className="h-10 w-full max-w-md" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Shimmer className="h-56" />
+          <Shimmer className="h-56" />
+          <Shimmer className="h-56" />
+        </div>
       </div>
     );
   }

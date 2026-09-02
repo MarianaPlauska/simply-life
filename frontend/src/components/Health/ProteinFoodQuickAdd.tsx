@@ -68,7 +68,6 @@ export function ProteinFoodQuickAdd({
     const g = gramsFor(food)
     const kcal = scaleKcal(food, g)
     await onAdd(g, food.nome, kcal)
-    toast.success(`+${g}g · ${food.nome}`, { duration: 1500 })
   }
 
   const handleRemove = async (food: ProteinFood) =>
@@ -134,7 +133,7 @@ export function ProteinFoodQuickAdd({
   }
 
   return (
-    <div className="pt-2 border-t border-line space-y-3">
+    <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
         <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>Atalhos e porções</p>
         <button

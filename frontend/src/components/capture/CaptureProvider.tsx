@@ -1,8 +1,10 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
 import { addOneWaterCup } from '../../lib/waterHydrationActions'
-import { CaptureActionSheet } from './CaptureActionSheet'
+import { captureIntentFromPath } from '../../lib/captureIntent'
+import { DumpSheet } from './DumpSheet'
 import { CaptureTaskSheet } from './CaptureTaskSheet'
 
 interface CaptureContextValue
@@ -10,7 +12,7 @@ interface CaptureContextValue
   sheetOpen: boolean
   toggleSheet: () => void
   closeSheet: () => void
-  openTask: () => void
+  openDump: (seed?: string) => void
   openFinance: () => void
   addWater: () => Promise<void>
   savingWater: boolean
@@ -22,7 +24,7 @@ const CAPTURE_HMR_FALLBACK: CaptureContextValue = {
   sheetOpen: false,
   toggleSheet: () => undefined,
   closeSheet: () => undefined,
-  openTask: () => undefined,
+  openDump: () => undefined,
   openFinance: () => undefined,
   addWater: async () => undefined,
   savingWater: false,
@@ -33,7 +35,6 @@ export function useCapture()
   const ctx = useContext(CaptureContext)
   if (!ctx)
   {
-    // Fast Refresh pode remontar o botão antes do provider após um HMR quebrado
     return CAPTURE_HMR_FALLBACK
   }
   return ctx
@@ -41,25 +42,77 @@ export function useCapture()
 
 export function CaptureProvider({ children }: { children: ReactNode })
 {
+  const location = useLocation()
+  const intent = captureIntentFromPath(location.pathname)
   const setFinanceOpen = useTaskStore((s) => s.setFinanceQuickCaptureOpen)
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const financeOpen = useTaskStore((s) => s.isFinanceQuickCaptureOpen)
+  const setNoteOpen = useTaskStore((s) => s.setQuickCaptureOpen)
+  const noteOpen = useTaskStore((s) => s.isQuickCaptureOpen)
+  const [dumpOpen, setDumpOpen] = useState(false)
   const [taskOpen, setTaskOpen] = useState(false)
+  const [seed, setSeed] = useState('')
   const [savingWater, setSavingWater] = useState(false)
 
-  const closeSheet = useCallback(() => setSheetOpen(false), [])
-  const toggleSheet = useCallback(() => setSheetOpen((v) => !v), [])
-
-  const openTask = useCallback(() =>
+  const closeSheet = useCallback(() =>
   {
-    setSheetOpen(false)
-    setTaskOpen(true)
-  }, [])
+    setDumpOpen(false)
+    setTaskOpen(false)
+    setFinanceOpen(false)
+    setNoteOpen(false)
+    setSeed('')
+  }, [setFinanceOpen, setNoteOpen])
+
+  const toggleSheet = useCallback(() =>
+  {
+    if (intent === 'finance')
+    {
+      const next = !financeOpen
+      setDumpOpen(false)
+      setTaskOpen(false)
+      setNoteOpen(false)
+      setFinanceOpen(next)
+      return
+    }
+    if (intent === 'task')
+    {
+      const next = !taskOpen
+      setDumpOpen(false)
+      setFinanceOpen(false)
+      setNoteOpen(false)
+      setTaskOpen(next)
+      return
+    }
+    if (intent === 'note')
+    {
+      const next = !noteOpen
+      setDumpOpen(false)
+      setTaskOpen(false)
+      setFinanceOpen(false)
+      setNoteOpen(next)
+      return
+    }
+    setTaskOpen(false)
+    setFinanceOpen(false)
+    setNoteOpen(false)
+    setDumpOpen((v) => !v)
+  }, [intent, financeOpen, taskOpen, noteOpen, setFinanceOpen, setNoteOpen])
+
+  const openDump = useCallback((nextSeed?: string) =>
+  {
+    setSeed(nextSeed ?? '')
+    setTaskOpen(false)
+    setFinanceOpen(false)
+    setNoteOpen(false)
+    setDumpOpen(true)
+  }, [setFinanceOpen, setNoteOpen])
 
   const openFinance = useCallback(() =>
   {
-    setSheetOpen(false)
+    setDumpOpen(false)
+    setTaskOpen(false)
+    setNoteOpen(false)
     setFinanceOpen(true)
-  }, [setFinanceOpen])
+  }, [setFinanceOpen, setNoteOpen])
 
   const addWater = useCallback(async () =>
   {
@@ -73,7 +126,6 @@ export function CaptureProvider({ children }: { children: ReactNode })
         return
       }
       toast.success(`+1 copo · ${copos} hoje`)
-      setSheetOpen(false)
     }
     catch
     {
@@ -85,31 +137,40 @@ export function CaptureProvider({ children }: { children: ReactNode })
     }
   }, [])
 
+  const sheetOpen = dumpOpen || taskOpen || financeOpen || noteOpen
+
   const value = useMemo(
     () => ({
       sheetOpen,
       toggleSheet,
       closeSheet,
-      openTask,
+      openDump,
       openFinance,
       addWater,
       savingWater,
     }),
-    [sheetOpen, toggleSheet, closeSheet, openTask, openFinance, addWater, savingWater],
+    [sheetOpen, toggleSheet, closeSheet, openDump, openFinance, addWater, savingWater],
   )
 
   return (
     <CaptureContext.Provider value={value}>
       {children}
-      <CaptureActionSheet
-        open={sheetOpen}
-        savingWater={savingWater}
-        onClose={closeSheet}
-        onTask={openTask}
+      <DumpSheet
+        open={dumpOpen}
+        seed={seed}
+        onClose={() =>
+        {
+          setDumpOpen(false)
+          setSeed('')
+        }}
         onFinance={openFinance}
-        onWater={() => void addWater()}
+        onWater={addWater}
+        savingWater={savingWater}
       />
-      <CaptureTaskSheet open={taskOpen} onClose={() => setTaskOpen(false)} />
+      <CaptureTaskSheet
+        open={taskOpen}
+        onClose={() => setTaskOpen(false)}
+      />
     </CaptureContext.Provider>
   )
 }

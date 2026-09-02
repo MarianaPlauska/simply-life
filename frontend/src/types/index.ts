@@ -80,6 +80,7 @@ export interface HabitoStreak {
   habito_id: number;
   nome_exibicao: string;
   streak_dias: number;
+  recorde_dias: number;
   ultima_data: string | null;
 }
 

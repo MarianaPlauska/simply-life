@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import {
   LayoutDashboard, KanbanSquare, CalendarDays, StickyNote,
   Wallet, PanelLeftClose, PanelLeft, Settings,
@@ -7,8 +6,7 @@ import {
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTaskStore, type ActiveView } from '../../store/useTaskStore'
 import {
-  AXEL_NAV_PLANE, AXEL_TEXT_PRIMARY, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE,
-  AXEL_AVATAR, AXEL_AVATAR_INITIALS, AXEL_BTN_PRIMARY,
+  AXEL_NAV_PLANE, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE, AXEL_BTN_GHOST,
 } from '../../constants/axelSurfaces'
 import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
@@ -62,20 +60,6 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 ]
 
-function iniciaisDe(nome: string): string
-{
-  const partes = nome.trim().split(/\s+/).filter(Boolean)
-  if (partes.length >= 2)
-  {
-    return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase()
-  }
-  if (partes.length === 1 && partes[0].length >= 2)
-  {
-    return partes[0].slice(0, 2).toUpperCase()
-  }
-  return 'MC'
-}
-
 function navItemClasses(isActive: boolean): string
 {
   return isActive ? AXEL_NAV_ACTIVE : AXEL_NAV_IDLE
@@ -90,13 +74,6 @@ export function Sidebar()
   const toggleSidebar = useTaskStore((s) => s.toggleSidebar)
   const registerInteraction = useTaskStore((s) => s.registerInteraction)
   const setCommandPaletteOpen = useTaskStore((s) => s.setCommandPaletteOpen)
-  const userProfile = useTaskStore((s) => s.userProfile)
-  const userStats = useTaskStore((s) => s.userStats)
-
-  const iniciais = useMemo(
-    () => iniciaisDe(userProfile?.nome || 'Convidado'),
-    [userProfile?.nome],
-  )
 
   const handleNav = (item: NavItem) =>
   {
@@ -107,7 +84,7 @@ export function Sidebar()
   if (sidebarCollapsed)
   {
     return (
-      <aside className={`hidden md:flex w-14 shrink-0 min-h-screen sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col items-center py-4 gap-1`}>
+      <aside className={`hidden md:flex w-14 shrink-0 min-h-dvh sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col items-center py-4 gap-1`}>
         <button onClick={toggleSidebar} className="p-2 text-ink-muted hover:text-ink hover:bg-chrome transition-colors mb-4">
           <PanelLeft className="w-4 h-4" />
         </button>
@@ -119,7 +96,7 @@ export function Sidebar()
               key={id}
               onClick={() => { navigate(path); if (moduleKey) registerInteraction(moduleKey) }}
               title={String(id)}
-              className={`p-2 transition-colors rounded-r-md ${navItemClasses(isActive)}`}
+              className={`p-2 min-h-11 min-w-11 flex items-center justify-center transition-colors rounded-r-md ${navItemClasses(isActive)}`}
             >
               <Icon className="w-4 h-4" />
             </button>
@@ -130,7 +107,7 @@ export function Sidebar()
   }
 
   return (
-    <aside className={`hidden md:flex w-60 shrink-0 min-h-screen sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col overflow-hidden`}>
+    <aside className={`hidden md:flex w-60 shrink-0 min-h-dvh sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col overflow-hidden`}>
       <div className="px-5 h-16 flex items-center justify-between shrink-0">
         <SimplyLifeMark variant="lockup" />
         <button onClick={toggleSidebar} className="p-1.5 text-ink-muted hover:text-ink hover:bg-chrome transition-colors">
@@ -142,7 +119,7 @@ export function Sidebar()
         <button
           type="button"
           onClick={() => setCommandPaletteOpen(true)}
-          className={`w-full flex items-center justify-center gap-2 px-3 py-2.5 text-[12px] font-medium ${AXEL_BTN_PRIMARY}`}
+          className={`w-full ${AXEL_BTN_GHOST}`}
           title="Tarefa, nota, gasto ou ir a qualquer módulo"
         >
           <Search className="w-3.5 h-3.5 opacity-90" aria-hidden />
@@ -167,9 +144,9 @@ export function Sidebar()
                   <div key={String(item.id)} className="group relative">
                     <button
                       onClick={() => handleNav(item)}
-                      className={`w-full flex items-center gap-2.5 px-2 py-2 text-[13px] transition-colors rounded-r-md ${navItemClasses(isActive)}`}
+                      className={`w-full flex items-center gap-2.5 px-2 py-2 min-h-11 text-[13px] transition-colors rounded-r-md ${navItemClasses(isActive)}`}
                     >
-                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-accent' : ''}`} />
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-ink' : ''}`} />
                       <span className="truncate flex-1 text-left">{item.label}</span>
                     </button>
                   </div>
@@ -179,27 +156,6 @@ export function Sidebar()
           </div>
         ))}
       </nav>
-
-      <div className="px-4 pb-4 pt-2 shrink-0 space-y-3">
-        <button
-          onClick={() => navigate('/perfil')}
-          className="w-full flex items-center gap-3 px-1 py-2 hover:bg-chrome transition-colors text-left rounded-sl"
-        >
-          <div className={`w-8 h-8 shrink-0 ${AXEL_AVATAR}`}>
-            <span className={`text-[10px] ${AXEL_AVATAR_INITIALS}`}>
-              {iniciais}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className={`text-[12px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>
-              {userProfile?.nome?.split(' ')[0] || 'Convidado'}
-            </div>
-            <div className="text-[10.5px] font-mono text-ink-muted">
-              Nível {userStats?.level || 1}
-            </div>
-          </div>
-        </button>
-      </div>
     </aside>
   )
 }

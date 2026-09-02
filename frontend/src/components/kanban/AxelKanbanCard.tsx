@@ -10,7 +10,13 @@ import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
 import { isThermalDecay, resolveDaysStagnant } from '../../lib/taskDecay'
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { ICON } from '../../design/identityTokens'
-import { checklistRingClass, urgencyHairlineClass } from '../../lib/kanbanVisual'
+import { checklistRingClass } from '../../lib/kanbanVisual'
+import {
+  kanbanOriginTone,
+  KANBAN_ORIGIN_BAR,
+  kanbanDueTextClass,
+} from '../../lib/kanbanCardGrammar'
+import { KanbanOriginMark } from './KanbanOriginMark'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -66,6 +72,7 @@ export function AxelKanbanCard({
     tarefa.id !== 0
   const score = tarefa.score_urgencia ?? 0
   const checklist = layout === 'checklist'
+  const tone = kanbanOriginTone(tarefa.origem)
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: tarefa.id,
@@ -99,8 +106,9 @@ export function AxelKanbanCard({
       tabIndex={dependencyBlocked ? -1 : 0}
       aria-disabled={dependencyBlocked}
       className={[
-        'group relative flex items-center gap-2.5 w-full text-left min-h-12 py-1.5 px-2 rounded-sl',
+        'group relative flex items-center gap-2.5 w-full text-left min-h-12 py-1.5 pl-2.5 pr-2 rounded-sl',
         'border-[0.5px] border-line hover:border-ink-muted/40',
+        KANBAN_ORIGIN_BAR[tone],
         featured || isTimerHere ? 'bg-chrome/50' : '',
         dependencyBlocked ? 'opacity-45 pointer-events-none cursor-not-allowed' : 'cursor-grab active:cursor-grabbing',
         snoozed ? 'opacity-55' : '',
@@ -115,12 +123,6 @@ export function AxelKanbanCard({
         </span>
       )}
 
-      {score > 70 && (
-        <span
-          aria-hidden
-          className={`absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full ${urgencyHairlineClass(score)}`}
-        />
-      )}
 
       {checklist && (
         <button
@@ -145,11 +147,14 @@ export function AxelKanbanCard({
         <span className="block font-sans font-medium leading-snug line-clamp-2 text-ink text-[14px]">
           {cleanTitleForDisplay(tarefa.titulo)}
         </span>
-        {meta && (
-          <span className={`block text-[12px] mt-0.5 tabular-nums ${AXEL_TEXT_SECONDARY}`}>
-            {meta}
-          </span>
-        )}
+        <span className="mt-0.5 flex items-center gap-2 min-w-0">
+          <KanbanOriginMark origem={tarefa.origem} />
+          {meta && (
+            <span className={`text-[12px] tabular-nums truncate ${due ? kanbanDueTextClass(tarefa.data_vencimento) : AXEL_TEXT_SECONDARY}`}>
+              {meta}
+            </span>
+          )}
+        </span>
       </span>
 
       {canStart && !isTimerHere && (

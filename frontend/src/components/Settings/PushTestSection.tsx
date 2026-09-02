@@ -38,8 +38,10 @@ export function PushTestSection()
         <div className="min-w-0 flex-1">
           <h3 className="text-[13px] font-semibold text-ink">Notificações no dispositivo</h3>
           <p className="text-[12px] text-ink-muted mt-1 leading-relaxed">
-            No Android/Chrome, instale o PWA e permita alertas. No iPhone, use Safari 16.4+
-            depois de Adicionar à Tela de Início — o iOS não mostra o prompt no Safari comum.
+            No Android/Chrome, instale o PWA e permita alertas. As notificações trazem
+            botões <strong className="font-medium text-ink">Feito</strong> e{' '}
+            <strong className="font-medium text-ink">Adiar</strong> sem abrir o app.
+            No iPhone, use Safari 16.4+ após Adicionar à Tela de Início.
           </p>
         </div>
       </div>

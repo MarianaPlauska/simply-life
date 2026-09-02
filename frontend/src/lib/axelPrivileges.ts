@@ -50,13 +50,10 @@ export function listPrivileges(ctx: PrivilegeContext): PrivilegeStatus[]
   })
 }
 
-export function canUseAccent(accent: string, ctx: PrivilegeContext): boolean
+export function canUseAccent(accent: string, _ctx: PrivilegeContext): boolean
 {
-  if (accent === 'meridian') return true
-  if (accent === 'copper') return true
-  if (ctx.level >= 3 && ['sky', 'forest'].includes(accent)) return true
-  if (ctx.level >= 6 && accent === 'violet') return true
-  return false
+  // Cores do sistema liberadas no onboarding/preferências (não gatear escolha)
+  return ['meridian', 'copper', 'sky', 'forest', 'violet'].includes(accent)
 }
 
 export function canInviteFriends(ctx: PrivilegeContext): boolean

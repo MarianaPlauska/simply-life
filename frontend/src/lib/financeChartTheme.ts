@@ -15,11 +15,11 @@ export interface FinanceChartTheme
 const FALLBACK_DARK: FinanceChartTheme = {
   receita: '#48BB78',
   despesa: '#F56565',
-  accent: '#38B2AC',
-  grid: '#2A3340',
-  tick: '#94A3B8',
-  card: '#222A35',
-  line: '#3D4A5C',
+  accent: '#C9A15C',
+  grid: '#2D2D2D',
+  tick: '#9D9D9D',
+  card: '#2D2D2D',
+  line: 'rgba(255, 255, 255, 0.09)',
 }
 
 function readCssVar(name: string, fallback: string): string
@@ -38,7 +38,7 @@ export function getFinanceChartTheme(): FinanceChartTheme
   return {
     receita: readCssVar('--sl-success', FALLBACK_DARK.receita),
     despesa: readCssVar('--sl-urgent', FALLBACK_DARK.despesa),
-    accent: readCssVar('--sl-accent', FALLBACK_DARK.accent),
+    accent: readCssVar('--sl-finance', FALLBACK_DARK.accent),
     grid: readCssVar('--sl-border', FALLBACK_DARK.grid),
     tick: readCssVar('--sl-text-muted', FALLBACK_DARK.tick),
     card: readCssVar('--sl-surface', FALLBACK_DARK.card),

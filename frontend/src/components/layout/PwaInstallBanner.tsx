@@ -109,7 +109,7 @@ export function PwaInstallBanner()
             <button
               type="button"
               onClick={() => void install()}
-              className="px-3 py-2 rounded-sl bg-accent text-white font-mono text-[10px] uppercase"
+              className="px-3 py-2 rounded-sl bg-ink text-fundo font-mono text-[10px] uppercase"
             >
               Instalar
             </button>

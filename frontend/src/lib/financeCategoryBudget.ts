@@ -31,6 +31,52 @@ export function budgetAlertLabel(level: BudgetAlertLevel): string
   return 'No limite'
 }
 
+export interface BudgetRemainingDisplay
+{
+  primary: string
+  secondary: string
+  tone: string
+}
+
+/** Hero + legenda — valor restante em destaque */
+export function budgetRemainingDisplay(
+  row: CategoryBudgetRow,
+  fmt: (v: number) => string,
+): BudgetRemainingDisplay
+{
+  if (row.limite <= 0)
+  {
+    return {
+      primary: fmt(row.gasto),
+      secondary: 'sem limite definido',
+      tone: 'text-ink-muted',
+    }
+  }
+
+  if (row.alert === 'over')
+  {
+    return {
+      primary: `Estourou ${fmt(row.gasto - row.limite)}`,
+      secondary: `${fmt(row.gasto)} de ${fmt(row.limite)}`,
+      tone: 'text-urgente',
+    }
+  }
+
+  return {
+    primary: `${fmt(row.restante)} restantes`,
+    secondary: `${fmt(row.gasto)} de ${fmt(row.limite)}`,
+    tone: row.alert === 'caution' ? 'text-atencao' : 'text-finance',
+  }
+}
+
+/** Soma do que ainda cabe nas categorias com teto */
+export function totalBudgetRemaining(rows: CategoryBudgetRow[]): number
+{
+  return rows
+    .filter((r) => r.limite > 0)
+    .reduce((sum, r) => sum + r.restante, 0)
+}
+
 /** Gasto do mês na categoria (inclui subcategorias no pai) */
 export function sumCategorySpend(
   monthTx: Transaction[],
@@ -83,6 +129,17 @@ export function filterActiveBudgetRows(rows: CategoryBudgetRow[]): CategoryBudge
   return rows
     .filter((r) => r.limite > 0 || r.gasto > 0)
     .sort((a, b) => b.pct - a.pct)
+}
+
+/** Categoria com teto e maior % usada — o envelope que mais aperta */
+export function worstBudgetEnvelope(rows: CategoryBudgetRow[]): CategoryBudgetRow | null
+{
+  const withLimit = rows.filter((r) => r.limite > 0)
+  if (withLimit.length === 0)
+  {
+    return null
+  }
+  return [...withLimit].sort((a, b) => b.pct - a.pct)[0]
 }
 
 export interface BudgetSpendCheck

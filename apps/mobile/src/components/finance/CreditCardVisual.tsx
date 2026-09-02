@@ -1,4 +1,4 @@
-import { View, StyleSheet } from 'react-native'
+import { View, StyleSheet, Pressable } from 'react-native'
 import Svg, { Defs, LinearGradient as SvgGradient, Rect, Stop } from 'react-native-svg'
 import { formatBRL, type FinanceCard, type FinanceCardGradient } from '@simply-life/shared'
 import { Text } from '../../ui'
@@ -7,23 +7,25 @@ import { useTheme } from '../../theme/ThemeProvider'
 /** Proporção ISO/IEC 7810 ID-1 (~85.6×53.98mm) */
 export const CARD_ASPECT = 1.586
 
+/** Skins metálicos — saturação baixa/média (cartão real, não alerta) */
 const SKINS: Record<FinanceCardGradient, [string, string, string]> = {
-  purple: ['#4C1D95', '#312E81', '#1E1B4B'],
+  purple: ['#3D3560', '#2A2640', '#1C1A2A'],
   obsidian: ['#3F3F46', '#27272A', '#18181B'],
-  sunset: ['#CA2851', '#FF6766', '#FF8173'],
-  ocean: ['#0C4A6E', '#164E63', '#042F2E'],
-  mint: ['#065F46', '#134E4A', '#064E3B'],
-  copper: ['#CA2851', '#A81F42', '#2A1218'],
+  sunset: ['#6B3A32', '#4A2C28', '#2A1E1C'],
+  ocean: ['#2A4A5C', '#1E3644', '#152830'],
+  mint: ['#2F4A42', '#243832', '#1A2824'],
+  copper: ['#5C4034', '#3D2C24', '#2A221C'],
 }
 
 type Props = {
   card: FinanceCard
   width: number
   selected?: boolean
+  onPress?: () => void
 }
 
 /** Representação visual de cartão — referência Mercury/Copilot + web CreditCardVisual */
-export function CreditCardVisual({ card, width, selected }: Props)
+export function CreditCardVisual({ card, width, selected, onPress }: Props)
 {
   const { colors, radius } = useTheme()
   const skin = SKINS[card.tipoGradiente ?? 'copper']
@@ -33,7 +35,7 @@ export function CreditCardVisual({ card, width, selected }: Props)
   const usage = card.limite > 0 ? Math.min(100, (fatura / card.limite) * 100) : 0
   const blocked = card.status === 'bloqueado'
 
-  return (
+  const shell = (
     <View
       style={{
         width,
@@ -165,5 +167,17 @@ export function CreditCardVisual({ card, width, selected }: Props)
         </View>
       </View>
     </View>
+  )
+
+  if (!onPress) return shell
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir cartão ${card.nome}`}
+    >
+      {shell}
+    </Pressable>
   )
 }

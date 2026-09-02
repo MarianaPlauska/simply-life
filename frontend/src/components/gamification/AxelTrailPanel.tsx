@@ -206,7 +206,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
               >
                 <div
                   className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${
-                    reached ? 'bg-accent text-white' : 'bg-chrome border border-line text-ink-muted'
+                    reached ? 'bg-ink text-fundo' : 'bg-chrome border border-line text-ink-muted'
                   }`}
                 >
                   {reached ? <Check size={14} /> : m.level}

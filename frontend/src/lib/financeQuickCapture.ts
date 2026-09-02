@@ -2,13 +2,14 @@ import type { Category } from '../store/storeTypes'
 
 export interface ParsedFinanceCapture
 {
-  tipo: 'despesa' | 'receita'
+  tipo: 'despesa' | 'receita' | 'investimento'
   valor: number
   descricao: string
 }
 
 const EXPENSE_RE = /^(?:gastei|gasto|paguei|comprei|-\s*)\s*(?:r\$\s*)?(\d+(?:[.,]\d{1,2})?)\s*(?:reais?)?\s*(?:no|na|em|de)?\s*(.+)?$/i
 const INCOME_RE = /^(?:recebi|ganhei|entrou|sal[aá]rio|\+)\s*(?:r\$\s*)?(\d+(?:[.,]\d{1,2})?)\s*(?:reais?)?\s*(.+)?$/i
+const INVEST_RE = /^(?:guardei|poupei|investi|investimento)\s*(?:r\$\s*)?(\d+(?:[.,]\d{1,2})?)\s*(?:reais?)?\s*(.+)?$/i
 const SHORT_RE = /^([+-])\s*(?:r\$\s*)?(\d+(?:[.,]\d{1,2})?)\s+(.+)$/i
 
 export function parseFinanceQuickCapture(raw: string): ParsedFinanceCapture | null
@@ -25,6 +26,18 @@ export function parseFinanceQuickCapture(raw: string): ParsedFinanceCapture | nu
       tipo: short[1] === '+' ? 'receita' : 'despesa',
       valor,
       descricao: short[3].trim() || (short[1] === '+' ? 'Receita' : 'Gasto'),
+    }
+  }
+
+  const invest = text.match(INVEST_RE)
+  if (invest)
+  {
+    const valor = parseValor(invest[1])
+    if (valor == null) return null
+    return {
+      tipo: 'investimento',
+      valor,
+      descricao: (invest[2] || 'Reserva').trim(),
     }
   }
 
@@ -66,7 +79,7 @@ function parseValor(raw: string): number | null
 export function guessCategoryId(
   descricao: string,
   categories: Category[],
-  tipo: 'despesa' | 'receita',
+  tipo: 'despesa' | 'receita' | 'investimento',
 ): number | undefined
 {
   const q = descricao.toLowerCase()
@@ -80,6 +93,7 @@ export function guessCategoryId(
     { keys: ['netflix', 'spotify', 'assinatura'], match: (c) => /assin|lazer|stream/i.test(c.nome) },
     { keys: ['aluguel', 'condomínio', 'condominio'], match: (c) => /moradia|aluguel|habita/i.test(c.nome) },
     { keys: ['salário', 'salario', 'freelance', 'pix'], match: (c) => /sal[aá]rio|receita|renda/i.test(c.nome) },
+    { keys: ['reserva', 'cdb', 'poupan', 'invest'], match: (c) => /invest/i.test(c.nome) },
   ]
 
   for (const rule of rules)

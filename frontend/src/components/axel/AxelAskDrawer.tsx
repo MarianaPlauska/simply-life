@@ -6,6 +6,7 @@ import { AxelCompanionAvatar } from '../Onboarding/AxelCompanionAvatar'
 import { iniciaisDe } from '../../lib/axelAvatarPresets'
 import { useAxelAsk } from '../../hooks/useAxelAsk'
 import { useTaskStore } from '../../store/useTaskStore'
+import { AxelDumpProposals } from './AxelDumpProposals'
 import {
   AXEL_ASK_EXAMPLES,
   AXEL_ASK_UNLOCK_LEVEL,
@@ -44,6 +45,7 @@ export function AxelAskDrawer({ open, onClose }: AxelAskDrawerProps)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const [input, setInput] = useState('')
   const [lines, setLines] = useState<ChatLine[]>([])
+  const lastUserQuestion = [...lines].reverse().find((l) => l.role === 'user')?.text ?? ''
 
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)
   const userProfile = useTaskStore((s) => s.userProfile)
@@ -204,6 +206,10 @@ export function AxelAskDrawer({ open, onClose }: AxelAskDrawerProps)
               </p>
             </div>
           )}
+
+          {lastUserQuestion && (
+            <AxelDumpProposals question={lastUserQuestion} />
+          )}
         </div>
 
         <footer className="shrink-0 border-t border-line p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] space-y-2">
@@ -229,7 +235,7 @@ export function AxelAskDrawer({ open, onClose }: AxelAskDrawerProps)
               type="button"
               disabled={!unlocked || loading || !input.trim()}
               onClick={() => void handleAsk()}
-              className={`shrink-0 self-end p-2.5 rounded-sl bg-accent text-white disabled:opacity-40 ${AXEL_TOUCH_PRESS}`}
+              className={`shrink-0 self-end p-2.5 rounded-sl bg-ink text-fundo disabled:opacity-40 ${AXEL_TOUCH_PRESS}`}
               aria-label="Enviar pergunta"
             >
               <Send size={18} />

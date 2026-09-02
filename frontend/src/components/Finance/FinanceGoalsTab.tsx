@@ -88,7 +88,7 @@ export function FinanceGoalsTab({
         <button
           type="button"
           onClick={() => setShowGoalModal(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-sl bg-accent hover:bg-accent-hover text-white font-mono text-[10px] uppercase"
+          className="inline-flex items-center gap-1.5 px-3 py-2 min-h-11 rounded-sl bg-ink text-fundo font-mono text-[10px] uppercase"
         >
           <Plus className="w-3.5 h-3.5" />
           Nova meta

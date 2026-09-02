@@ -19,6 +19,8 @@ interface DueBucketBoardProps
   activeId: number | null
   onOpen: (task: TarefaUnificada) => void
   onStartExecute?: (task: TarefaUnificada) => void
+  /** stack = mobile; columns = board desktop de largura fixa */
+  layout?: 'stack' | 'columns'
 }
 
 export function DueBucketBoard({
@@ -28,12 +30,19 @@ export function DueBucketBoard({
   activeId,
   onOpen,
   onStartExecute,
+  layout = 'stack',
 }: DueBucketBoardProps)
 {
   const buckets = useMemo(() => bucketByDueDate(tarefas), [tarefas])
+  const asColumns = layout === 'columns'
 
   const visibleBuckets = useMemo(() =>
   {
+    if (asColumns)
+    {
+      return ACTIVE_DUE_BUCKETS
+    }
+
     const set = new Set<DueBucket>()
 
     for (const b of DUE_BUCKET_ALWAYS_VISIBLE)
@@ -50,20 +59,20 @@ export function DueBucketBoard({
     }
 
     return ACTIVE_DUE_BUCKETS.filter((b) => set.has(b))
-  }, [buckets])
+  }, [asColumns, buckets])
 
   const renderSection = (bucket: DueBucket) =>
   {
     const items = buckets[bucket]
     const count = items.length
-
-    const collapseDefault = bucket === 'sem_prazo' && count > 4
+    const collapseDefault = !asColumns && bucket === 'sem_prazo' && count > 4
 
     return (
       <DueBucketSection
         key={bucket}
         bucket={bucket}
         count={count}
+        layout={asColumns ? 'column' : 'stack'}
         collapsible={collapseDefault}
         defaultCollapsed={collapseDefault}
       >
@@ -74,7 +83,7 @@ export function DueBucketBoard({
         ) : (
           <DueBucketTaskList
             items={items}
-            maxVisible={bucket === 'sem_prazo' ? 5 : 6}
+            maxVisible={asColumns ? 24 : bucket === 'sem_prazo' ? 5 : 6}
             renderItem={(t) => (
               <DueBucketTaskRow
                 key={t.id}
@@ -103,6 +112,19 @@ export function DueBucketBoard({
     out.concluido = buckets.concluido.length
     return out
   }, [buckets])
+
+  if (asColumns)
+  {
+    return (
+      <div
+        className="hidden lg:flex flex-1 min-h-[min(68vh,720px)] flex-row w-full items-stretch overflow-x-auto pb-2 custom-scrollbar custom-scrollbar-x"
+        role="region"
+        aria-label="Quadro por prazo"
+      >
+        {visibleBuckets.map((bucket) => renderSection(bucket))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">

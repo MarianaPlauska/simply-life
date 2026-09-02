@@ -2,6 +2,7 @@
 import type { StateCreator } from 'zustand'
 import { supabase } from '../../lib/supabase'
 import type { AxelStreakSlice } from './axelStreakSlice'
+import { readLocalOuro } from '../../lib/goldEconomy'
 
 type GamificacaoStore = GamificacaoSlice & Pick<AxelStreakSlice, 'hydrateOfensivaFromServer'>
 
@@ -22,6 +23,7 @@ export interface UserStats
   ofensiva_focus_minutes?: Record<string, number>;
   ofensiva_task_today?: boolean;
   ofensiva_wellbeing_today?: boolean;
+  ouro?: number;
 }
 
 export interface Achievement
@@ -56,9 +58,11 @@ export interface GamificacaoSlice
   fetchGamificacaoStats: () => Promise<void>;
   fetchAchievements: () => Promise<void>;
   fetchQuests: () => Promise<void>;
-  addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number, options?: { silent?: boolean }) => Promise<void>;
+  addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number, options?: { silent?: boolean }) => Promise<number>;
   /** Debita XP total (prioriza módulo foco) — compras na loja AXEL */
   spendXp: (amount: number) => Promise<boolean>;
+  /** Desfaz crédito de XP (reabrir tarefa) */
+  undoXp: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number) => Promise<void>;
   /** Conclui tarefa e converte score de urgência em XP (1:1) */
   completeTask: (taskId: number, urgencyScore: number) => Promise<void>;
   checkAndUnlockAchievements: () => Promise<void>;
@@ -88,7 +92,10 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
 
       if (data)
       {
-        set({ userStats: data })
+        const ouro = typeof (data as { ouro?: number }).ouro === 'number'
+          ? (data as { ouro: number }).ouro
+          : readLocalOuro(uid)
+        set({ userStats: { ...data, ouro } })
         get().hydrateOfensivaFromServer(data)
       }
       else
@@ -102,6 +109,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
           xp_estabilidade: 0,
           streak_saude: 0,
           streak_foco: 0,
+          ouro: 0,
         }
         set({ userStats: fallback })
       }
@@ -156,7 +164,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
     try
     {
       const uid = (await supabase.auth.getUser()).data.user?.id
-      if (!uid) return
+      if (!uid) return 0
 
       let stats = get().userStats
       if (!stats)
@@ -165,7 +173,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
         stats = get().userStats
       }
 
-      if (!stats) return
+      if (!stats) return 0
 
       let xp_f = stats.xp_foco
       let xp_v = stats.xp_vitalidade
@@ -184,7 +192,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
             duration: 5000,
           })
         }
-        return
+        return 0
       }
 
       if (capped && !silent)
@@ -255,8 +263,9 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
 
       // Verifica conquistas após ganhar XP
       await get().checkAndUnlockAchievements()
+      return granted
     }
-    catch (e) { console.error('addXP:', e) }
+    catch (e) { console.error('addXP:', e); return 0 }
   },
 
   spendXp: async (amount) =>
@@ -326,6 +335,45 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
     {
       console.error('spendXp:', e)
       return false
+    }
+  },
+
+  undoXp: async (modulo, quantidade) =>
+  {
+    if (quantidade <= 0) return
+    try
+    {
+      const uid = (await supabase.auth.getUser()).data.user?.id
+      if (!uid) return
+      const stats = get().userStats
+      if (!stats) return
+
+      const { refundDailyXp, levelFromTotalXp } = await import('../../lib/xpEconomy')
+      refundDailyXp(quantidade)
+
+      let xp_f = stats.xp_foco
+      let xp_v = stats.xp_vitalidade
+      let xp_e = stats.xp_estabilidade
+      if (modulo === 'foco') xp_f = Math.max(0, xp_f - quantidade)
+      else if (modulo === 'saude') xp_v = Math.max(0, xp_v - quantidade)
+      else xp_e = Math.max(0, xp_e - quantidade)
+
+      const total_xp = xp_f + xp_v + xp_e
+      const newLevel = Math.max(1, levelFromTotalXp(total_xp))
+      const updatedStats = { ...stats, xp_foco: xp_f, xp_vitalidade: xp_v, xp_estabilidade: xp_e, level: newLevel }
+      set({ userStats: updatedStats })
+      await supabase.from('user_stats').upsert({
+        id: uid,
+        level: newLevel,
+        xp_foco: xp_f,
+        xp_vitalidade: xp_v,
+        xp_estabilidade: xp_e,
+        updated_at: new Date().toISOString(),
+      })
+    }
+    catch (e)
+    {
+      console.error('undoXp:', e)
     }
   },
 

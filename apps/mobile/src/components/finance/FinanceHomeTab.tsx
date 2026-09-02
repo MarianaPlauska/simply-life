@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { View, ScrollView, Pressable, useWindowDimensions } from 'react-native'
+import { View, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import {
   rankCategoriesBySpend,
@@ -25,12 +25,15 @@ import { useCaptureStore } from '../../store/captureStore'
 import { useDataStore } from '../../store/dataStore'
 import { tabBarScreenPadding } from '../../ui/chrome'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { CreditCardVisual } from './CreditCardVisual'
+import { CardCarousel } from './CardCarousel'
+import { FinanceCardDetailSheet } from './FinanceCardDetailSheet'
 import { FinanceHealthMetrics } from './FinanceHealthMetrics'
 
 type Props = {
   onGoMovimentos: () => void
   onGoCartoes?: () => void
+  cardsFocus: boolean
+  onCardsFocusChange: (focus: boolean) => void
 }
 
 const QUICK = [
@@ -40,14 +43,26 @@ const QUICK = [
   { id: 'more', label: 'Mais', icon: 'grid-outline' as const },
 ]
 
-/** Início Finanças — cartão + métricas (refs fintech mobile) */
-export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
+/**
+ * Finanças Início — hierarquia:
+ * N1: Saldo disponível (1 hero, número 32px cobre)
+ * N2: atalhos / cartões / saúde financeira / donut
+ * N3: movimentos recentes (lista)
+ * Acento cobre: número do saldo + botão + Gasto (máx. 2).
+ */
+export function FinanceHomeTab({
+  onGoMovimentos,
+  onGoCartoes,
+  cardsFocus,
+  onCardsFocusChange,
+}: Props)
 {
   const { colors, space, radius } = useTheme()
   const { isDesktop, showRail } = useWorkspace()
-  const { width } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const [catFilter, setCatFilter] = useState<string | null>(null)
+  const [detailId, setDetailId] = useState<string | null>(null)
+  const [visibleCardId, setVisibleCardId] = useState<string | null>(null)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const txs = useDataStore((s) => s.finance)
   const cash = useDataStore((s) => s.cashAccount)
@@ -60,20 +75,16 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
   const pos = computeSaldoDisponivel(cash, txs, fixas)
   const max = ranking[0]?.total ?? 1
   const pctReceita = receitas > 0 ? Math.round((despesas / receitas) * 100) : 0
-  const pillBtn = { borderRadius: 999 as const }
   const fabClearance = showRail ? space.md : tabBarScreenPadding(insets.bottom) + space.md
-  const cardW = Math.min(isDesktop ? 320 : width - 56, 340)
-  const primaryCard = cards[0]
+  const primaryCard = cards.find((c) => c.id === visibleCardId) ?? cards[0]
+  const detailCard = cards.find((c) => c.id === detailId) ?? null
   const cardUsage =
     primaryCard && primaryCard.limite > 0
       ? ((primaryCard.faturaAberta ?? 0) / primaryCard.limite) * 100
       : 0
 
   const recent = useMemo(
-    () =>
-      [...txs]
-        .sort((a, b) => b.data.localeCompare(a.data))
-        .slice(0, 5),
+    () => [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 5),
     [txs],
   )
 
@@ -95,52 +106,48 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
   {
     if (id === 'expense') openCapture('expense')
     else if (id === 'mov') onGoMovimentos()
-    else if (id === 'cards') onGoCartoes?.()
+    else if (id === 'cards') onCardsFocusChange(true)
     else openCapture('dump')
   }
 
+  // ── Nível 1 (único hero) ─────────────────────────────────
   const balanceHero = (
     <Card
       tone="elevated"
       style={{
         gap: space.md,
-        backgroundColor: colors.axel,
-        borderWidth: 0,
         paddingVertical: space.lg,
+        minHeight: 128,
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View style={{ gap: 4 }}>
-          <Text variant="caption" style={{ color: 'rgba(255,248,240,0.78)' }}>
+        <View style={{ gap: 4, flex: 1 }}>
+          <Text variant="caption" muted>
             Saldo disponível · {currentMonthLabel()}
           </Text>
-          <Text variant="hero" style={{ color: '#FFF8F0', fontSize: 34, letterSpacing: -0.6 }}>
+          <Text
+            variant="hero"
+            color={colors.axel}
+            style={{ fontSize: 32, letterSpacing: -0.6 }}
+          >
             {formatBRL(pos.disponivel)}
           </Text>
-          <Text variant="caption" style={{ color: 'rgba(255,248,240,0.72)' }}>
+          <Text variant="caption" muted>
             {saldo >= 0 ? '+' : ''}
             {formatBRL(saldo)} no mês
           </Text>
         </View>
-        <Pressable
+        <PrimaryButton
+          label="+ Gasto"
+          size="sm"
           onPress={() => openCapture('expense')}
-          style={{
-            backgroundColor: '#1A1214',
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            borderRadius: 999,
-            minHeight: 44,
-            justifyContent: 'center',
-          }}
-        >
-          <Text variant="label" style={{ color: '#FFF8F0' }}>
-            + Gasto
-          </Text>
-        </Pressable>
+          style={{ borderRadius: 999, paddingHorizontal: 16 }}
+        />
       </View>
     </Card>
   )
 
+  // ── Nível 2 ──────────────────────────────────────────────
   const quickRow = (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: space.sm }}>
       {QUICK.map((q) => (
@@ -168,7 +175,7 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
               borderColor: colors.hairline,
             }}
           >
-            <Ionicons name={q.icon} size={20} color={colors.axel} />
+            <Ionicons name={q.icon} size={20} color={colors.inkMuted} />
           </View>
           <Text variant="caption" muted>
             {q.label}
@@ -178,39 +185,48 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
     </View>
   )
 
-  const cardsBlock = (
-    <View style={{ gap: space.sm }}>
+  const cardsFocusView = (
+    <View style={{ gap: space.lg }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm }}>
+        <PrimaryButton
+          label="Voltar"
+          variant="ghost"
+          size="sm"
+          onPress={() => onCardsFocusChange(false)}
+        />
+        {onGoCartoes ? (
+          <PrimaryButton
+            label="Gerenciar"
+            variant="link"
+            size="sm"
+            onPress={() =>
+            {
+              onCardsFocusChange(false)
+              onGoCartoes()
+            }}
+          />
+        ) : null}
+      </View>
       <SectionHeader
         title="Seus cartões"
-        action={
-          onGoCartoes ? (
-            <PrimaryButton label="Ver tudo" variant="link" size="sm" onPress={onGoCartoes} />
-          ) : undefined
-        }
+        subtitle={cards.length > 1 ? 'Deslize para ver o próximo' : undefined}
       />
       {cards.length === 0 ? (
         <Card tone="elevated">
           <EmptyState title="Nenhum cartão" body="Cadastre cartões para acompanhar faturas." />
         </Card>
       ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: space.md, paddingVertical: 4 }}
-        >
-          {cards.map((card, i) => (
-            <CreditCardVisual
-              key={card.id}
-              card={card}
-              width={cardW}
-              selected={i === 0}
-            />
-          ))}
-        </ScrollView>
+        <CardCarousel
+          cards={cards}
+          selectedId={detailId ?? visibleCardId}
+          onSelect={(id) => setDetailId(id)}
+          onVisibleChange={setVisibleCardId}
+        />
       )}
     </View>
   )
 
+  // ── Nível 3 ──────────────────────────────────────────────
   const recentBlock = (
     <View style={{ gap: space.sm }}>
       <SectionHeader
@@ -238,7 +254,7 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
   )
 
   const donutCard = (
-    <Card tone="hero" style={{ alignItems: 'center', gap: space.md }}>
+    <Card tone="elevated" style={{ alignItems: 'center', gap: space.md, minHeight: 280 }}>
       <Text variant="caption" muted style={{ textTransform: 'capitalize' }}>
         Gastos por categoria
       </Text>
@@ -300,7 +316,7 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
               </View>
               <View
                 style={{
-                  height: 8,
+                  height: 6,
                   borderRadius: radius.pill,
                   backgroundColor: colors.hairline,
                   overflow: 'hidden',
@@ -321,11 +337,56 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
     </View>
   ) : null
 
+  // Nível 2 — KPIs de suporte (abaixo do hero, números 22px)
+  const kpiRow = (
+    <View style={{ flexDirection: 'row', gap: space.md }}>
+      <Card tone="elevated" style={{ flex: 1, gap: 4, minHeight: 88, justifyContent: 'center' }}>
+        <Text variant="caption" muted>
+          Gastos do mês
+        </Text>
+        <Text
+          variant="title"
+          color={colors.finance}
+          style={{ fontSize: 22, letterSpacing: -0.3 }}
+        >
+          {formatBRL(despesas)}
+        </Text>
+      </Card>
+      <Card tone="elevated" style={{ flex: 1, gap: 4, minHeight: 88, justifyContent: 'center' }}>
+        <Text variant="caption" muted>
+          Saldo do mês
+        </Text>
+        <Text
+          variant="title"
+          color={saldo >= 0 ? colors.health : colors.finance}
+          style={{ fontSize: 22, letterSpacing: -0.3 }}
+        >
+          {formatBRL(saldo)}
+        </Text>
+      </Card>
+    </View>
+  )
+
+  if (cardsFocus)
+  {
+    return (
+      <View style={{ gap: space.lg }}>
+        {cardsFocusView}
+        <FinanceCardDetailSheet
+          card={detailCard}
+          visible={detailId != null}
+          onClose={() => setDetailId(null)}
+        />
+        <View style={{ marginBottom: fabClearance }} />
+      </View>
+    )
+  }
+
   return (
     <View style={{ gap: space.lg }}>
       {balanceHero}
+      {kpiRow}
       {quickRow}
-      {cardsBlock}
 
       <FinanceHealthMetrics
         receitas={receitas}
@@ -350,11 +411,13 @@ export function FinanceHomeTab({ onGoMovimentos, onGoCartoes }: Props)
 
       {recentBlock}
 
-      <PrimaryButton
-        label="Registrar gasto"
-        onPress={() => openCapture('expense')}
-        style={[pillBtn, { marginBottom: fabClearance }]}
+      <FinanceCardDetailSheet
+        card={detailCard}
+        visible={detailId != null}
+        onClose={() => setDetailId(null)}
       />
+
+      <View style={{ marginBottom: fabClearance }} />
     </View>
   )
 }

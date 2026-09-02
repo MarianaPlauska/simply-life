@@ -4,7 +4,14 @@ import { Lock, Play } from 'lucide-react'
 import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { isTaskDependencyBlocked } from '../../lib/taskDependencies'
 import { ICON } from '../../design/identityTokens'
-import { checklistRingClass, urgencyHairlineClass } from '../../lib/kanbanVisual'
+import { checklistRingClass } from '../../lib/kanbanVisual'
+import {
+  kanbanOriginTone,
+  KANBAN_ORIGIN_BAR,
+  kanbanDueTextClass,
+  kanbanDueLabel,
+} from '../../lib/kanbanCardGrammar'
+import { KanbanOriginMark } from './KanbanOriginMark'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
@@ -32,6 +39,8 @@ export function DueBucketTaskRow({
   const blocked = isTaskDependencyBlocked(tarefa, allTasks)
   const canExecute = !blocked && tarefa.status !== 'concluida' && tarefa.id !== 0
   const score = tarefa.score_urgencia ?? 0
+  const tone = kanbanOriginTone(tarefa.origem)
+  const dueLabel = kanbanDueLabel(tarefa.data_vencimento)
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: tarefa.id,
@@ -51,19 +60,14 @@ export function DueBucketTaskRow({
       {...(blocked ? {} : listeners)}
       {...(blocked ? {} : attributes)}
       className={[
-        'group relative flex items-center gap-2.5 px-1 py-1.5 min-h-12 rounded-sl text-left w-full',
+        'group relative flex items-center gap-2.5 pl-2.5 pr-1 py-1.5 min-h-12 rounded-sl text-left w-full',
         'hover:bg-chrome/70',
+        KANBAN_ORIGIN_BAR[tone],
         isExecuting ? 'bg-chrome/50' : '',
         blocked ? 'opacity-45' : 'cursor-grab active:cursor-grabbing',
         isDragging ? 'opacity-50' : '',
       ].join(' ')}
     >
-      {score > 70 && (
-        <span
-          aria-hidden
-          className={`absolute left-0 top-2.5 bottom-2.5 w-0.5 rounded-full ${urgencyHairlineClass(score)}`}
-        />
-      )}
 
       {canExecute ? (
         <button
@@ -91,9 +95,17 @@ export function DueBucketTaskRow({
         <p className="text-[14px] font-medium leading-snug line-clamp-1 text-ink">
           {cleanTitleForDisplay(tarefa.titulo)}
         </p>
-        {meta && (
-          <p className="text-[12px] text-ink-muted mt-0.5">{meta}</p>
-        )}
+        <div className="flex items-center gap-2 mt-0.5 min-w-0">
+          <KanbanOriginMark origem={tarefa.origem} />
+          {dueLabel && (
+            <span className={`text-[12px] tabular-nums shrink-0 ${kanbanDueTextClass(tarefa.data_vencimento)}`}>
+              {dueLabel}
+            </span>
+          )}
+          {meta && (
+            <span className="text-[12px] text-ink-muted truncate">{meta}</span>
+          )}
+        </div>
       </button>
 
       {canExecute && onStartExecute && !isExecuting && (

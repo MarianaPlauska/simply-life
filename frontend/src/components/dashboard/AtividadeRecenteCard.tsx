@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, Pill, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
+import { EMPTY_COPY } from '../../lib/emptyCopy'
 import {
   AXEL_BORDERLESS_PANEL,
   AXEL_LINK,
@@ -75,7 +76,7 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
         list.push({
           id: `m-${m.id}`,
           Icon: Pill,
-          iconClass: 'text-accent',
+          iconClass: 'text-health',
           primary: 'Medicamento',
           secondary: `${m.nome} · ${m.horario}`,
           xpGain: '+20 vit.',
@@ -115,7 +116,7 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
       <ul role="list" className="flex-1">
         {items.length === 0 && (
           <li className={`py-3 text-[13px] ${AXEL_TEXT_SECONDARY}`}>
-            Nenhum evento registrado hoje
+            {EMPTY_COPY.activityToday}
           </li>
         )}
         {items.map((a) => (
@@ -125,7 +126,7 @@ export function AtividadeRecenteCard({ embedded = false }: { embedded?: boolean 
               <div className={`text-[13px] font-medium truncate ${AXEL_TEXT_PRIMARY}`}>{a.primary}</div>
               <div className={`font-mono text-[11px] truncate ${AXEL_TEXT_SECONDARY}`}>{a.secondary}</div>
             </div>
-            <span className={`font-mono text-[10px] text-accent shrink-0`}>{a.xpGain}</span>
+            <span className={`font-sans text-[11px] text-ink-muted shrink-0`}>{a.xpGain}</span>
             <span className={`font-mono text-[10px] w-6 text-right shrink-0 ${AXEL_TEXT_SECONDARY}`}>{a.when}</span>
           </li>
         ))}

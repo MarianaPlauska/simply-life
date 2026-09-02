@@ -354,7 +354,7 @@ export function CardQuickSpendStrip({
                 <div className={`flex-1 ${AXEL_PROGRESS_THICK}`}>
                   <div
                     className={`h-full rounded-sl transition-all ${
-                      usagePct >= 90 ? 'bg-urgente' : usagePct >= 70 ? 'bg-atencao' : 'bg-accent'
+                      usagePct >= 90 ? 'bg-urgente' : usagePct >= 70 ? 'bg-atencao' : 'bg-finance'
                     }`}
                     style={{ width: `${usagePct}%` }}
                   />
@@ -395,7 +395,7 @@ export function CardQuickSpendStrip({
             <div className={`flex-1 ${AXEL_PROGRESS_THICK}`}>
               <div
                 className={`h-full rounded-sl transition-all ${
-                  usagePct >= 90 ? 'bg-urgente' : usagePct >= 70 ? 'bg-atencao' : 'bg-accent'
+                  usagePct >= 90 ? 'bg-urgente' : usagePct >= 70 ? 'bg-atencao' : 'bg-finance'
                 }`}
                 style={{ width: `${usagePct}%` }}
               />

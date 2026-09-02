@@ -33,7 +33,7 @@ export const DUE_BUCKET_LABELS: Record<DueBucket, string> = {
   hoje: 'Prazo: hoje',
   esta_semana: 'Esta semana',
   proxima_semana: 'Próximas semanas',
-  sem_prazo: 'Sem data definida',
+  sem_prazo: 'Intenções',
   concluido: 'Já concluídas',
 }
 
@@ -43,7 +43,7 @@ export const DUE_BUCKET_HINTS: Record<DueBucket, string> = {
   hoje: 'A data de vencimento é hoje.',
   esta_semana: 'Vence entre amanhã e os próximos 7 dias.',
   proxima_semana: 'Vence daqui a mais de uma semana.',
-  sem_prazo: 'Nenhuma data marcada — fica no backlog até você definir prazo.',
+  sem_prazo: 'Ainda sem hora — não é atraso. Agende quando fizer sentido.',
   concluido: 'Tarefas finalizadas — não entram na fila de execução.',
 }
 

@@ -26,6 +26,7 @@ import { createInboxSlice, type InboxSlice } from './slices/inboxSlice';
 import { createNewsSlice, type NewsSlice } from './slices/newsSlice';
 import { createContasFixasSlice, type ContasFixasSlice } from './slices/contasFixasSlice';
 import { createGamificacaoSlice, type GamificacaoSlice } from './slices/gamificacaoSlice';
+import { createGoldSlice, type GoldSlice } from './slices/goldSlice';
 import { createAxelExecutionSlice, type AxelExecutionSlice } from './slices/axelExecutionSlice';
 import { createAxelStreakSlice, type AxelStreakSlice } from './slices/axelStreakSlice';
 import { createAxelTaskMetaSlice, type AxelTaskMetaSlice } from './slices/axelTaskMetaSlice';
@@ -58,6 +59,7 @@ export type TaskStore =
   NewsSlice &
   ContasFixasSlice &
   GamificacaoSlice &
+  GoldSlice &
   AxelExecutionSlice &
   AxelStreakSlice &
   AxelTaskMetaSlice &
@@ -88,6 +90,7 @@ export const useTaskStore = create<TaskStore>()(
       ...createNewsSlice(...a),
       ...createContasFixasSlice(...a),
       ...createGamificacaoSlice(...a),
+      ...createGoldSlice(...a),
       ...createAxelExecutionSlice(...a),
       ...createAxelStreakSlice(...a),
       ...createAxelTaskMetaSlice(...a),

@@ -22,7 +22,6 @@ export function OnboardingChecklist ()
   const steps       = useTaskStore((s) => s.onboardingSteps);
   const dismissed   = useTaskStore((s) => s.onboardingDismissed);
   const dismiss     = useTaskStore((s) => s.dismissOnboarding);
-  const userId      = useTaskStore((s) => s.userId);
   const completeStep = useTaskStore((s) => s.completeOnboardingStep);
   const navigate    = useNavigate();
 
@@ -32,16 +31,8 @@ export function OnboardingChecklist ()
   const totalSteps     = ONBOARDING_STEPS.length;
   const progressPct    = (completedCount / totalSteps) * 100;
 
-  const tarefas        = useTaskStore((s) => s.tarefas);
-  const transactions   = useTaskStore((s) => s.transactions);
-  const habitos        = useTaskStore((s) => s.habitos);
-
-  const isReturningUser = (tarefas && tarefas.length > 0) ||
-                          (transactions && transactions.length > 0) ||
-                          (habitos && habitos.length > 0);
-
-  // esconde se dispensado, completo, se já tem sessão ativa ou se já possui dados existentes (não é novo usuário)
-  if ( dismissed || completedCount >= totalSteps || (userId && userId.length > 0) || isReturningUser )
+  // Restaurado: aparece para logados até dispensar ou completar todos os passos
+  if (dismissed || completedCount >= totalSteps)
   {
     return null;
   }
@@ -135,6 +126,8 @@ function OnboardingHeader ({ completedCount, totalSteps, collapsed, onToggle, on
 
 /* ── item individual de step ─────────────────────────────── */
 const STEP_ICONS: Record<string, LucideIcon> = {
+  dump_vida: Sparkles,
+  recompensa_irl: Sparkles,
   create_task: CheckCircle,
   add_expense: Wallet,
   add_habit: Pill,

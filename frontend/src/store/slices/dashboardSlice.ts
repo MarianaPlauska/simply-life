@@ -8,7 +8,7 @@ import {
   reconcileStaleNotifications,
 } from '../../lib/notificationResolution'
 import { supabase } from '../../lib/supabase'
-import type { UISlice } from './uiSlice'
+import { normalizePinnedModules, type UISlice } from './uiSlice'
 
 export interface DashboardSlice
 {
@@ -126,6 +126,11 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
       {
         const kw = (data.palavras_chave_email || '').split(',').map((s: string) => s.trim()).filter(Boolean)
         get().setKeywords(kw)
+        if (data.modulos_fixados)
+        {
+          const pins = String(data.modulos_fixados).split(',').map((s) => s.trim()).filter(Boolean)
+          set({ pinnedModules: normalizePinnedModules(pins) })
+        }
       }
     }
     catch { /* sem preferências ainda */ }

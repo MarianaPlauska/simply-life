@@ -6,10 +6,14 @@ import {
   mediaHumor,
   tendenciaLabel,
   tendenciaSemana,
+  aggregateHumorByDay,
 } from '../../lib/moodInsights'
+import { buildMoodDistribution } from '../../lib/moodDistribution'
 import { moodLabel, MOOD_HEX } from '../../lib/moodConstants'
 import { MoodWeekSparkline } from './MoodWeekSparkline'
 import { MoodMonthHeatmap } from './MoodMonthHeatmap'
+import { MoodDistributionDonut } from './MoodDistributionDonut'
+import { MoodMonthCalendarHeatmap } from './MoodMonthCalendarHeatmap'
 import {
   AXEL_LIST_FILTER_ACTIVE,
   AXEL_LIST_FILTER_IDLE,
@@ -192,6 +196,16 @@ export function MoodDiarySection({ defaultView = 'resumo' }: MoodDiarySectionPro
     [humorMes, range],
   )
 
+  const humorMesAgregado = useMemo(
+    () => aggregateHumorByDay(humorMes),
+    [humorMes],
+  )
+
+  const moodDistribution = useMemo(
+    () => buildMoodDistribution(humorFiltrado),
+    [humorFiltrado],
+  )
+
   const humorAgregadoFiltrado = useMemo(() =>
   {
     const map = new Map<string, { data: string; humor: number; registros: number }>()
@@ -315,6 +329,19 @@ export function MoodDiarySection({ defaultView = 'resumo' }: MoodDiarySectionPro
             </label>
           </div>
         )}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] gap-4 pt-2 border-t border-line/60">
+        <div className="min-w-0">
+          <p className="sl-section-label mb-3">Distribuição no período</p>
+          <MoodDistributionDonut
+            slices={moodDistribution}
+            total={humorFiltrado.length}
+          />
+        </div>
+        <div className="min-w-0">
+          <MoodMonthCalendarHeatmap agregados={humorMesAgregado} />
+        </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-0.5 border-b border-line/60 pb-px">

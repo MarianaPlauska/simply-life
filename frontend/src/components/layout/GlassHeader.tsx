@@ -8,9 +8,9 @@ import { useTaskStore } from '../../store/useTaskStore';
 const VIEW_TO_PATH: Record<string, string> = {
   dashboard: '/', kanban: '/kanban', anotacoes: '/anotacoes',
   configuracoes: '/configuracoes', superhuman: '/superhuman', financeiro: '/financeiro',
-  saude: '/saude', inteligencia: '/inteligencia', carreira: '/carreira',
+  saude: '/saude', inteligencia: '/inteligencia', carreira: '/configuracoes',
   preferencias: '/preferencias', planner: '/planner', calendario: '/calendario',
-  drive: '/drive', perfil: '/perfil', relatorios: '/relatorios',
+  drive: '/configuracoes', perfil: '/perfil', relatorios: '/relatorios',
 };
 
 const VIEW_LABELS: Record<string, string> = {
@@ -22,11 +22,11 @@ const VIEW_LABELS: Record<string, string> = {
   financeiro: 'Financeiro',
   saude: 'Saude',
   inteligencia: 'Inteligencia',
-  carreira: 'Carreira',
+  carreira: 'Configuracoes',
   preferencias: 'Preferencias',
   planner: 'Planejador',
   calendario: 'Calendario',
-  drive: 'Vault / Drive',
+  drive: 'Configuracoes',
   perfil: 'Meu Perfil',
   login: 'Login',
 };

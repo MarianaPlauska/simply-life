@@ -9,12 +9,12 @@ type Props = {
   saldo: number
   disponivel: number
   fixasMes: number
-  /** % do limite do cartão principal usado (0–100) */
   cardUsagePct: number
 }
 
 /**
- * Métricas de saúde financeira — ref apps com KPIs + barras (imagem 3).
+ * Nível 2 — métricas de saúde financeira.
+ * Barras em tom do módulo Finanças (ouro), não no acento cobre.
  */
 export function FinanceHealthMetrics({
   receitas,
@@ -36,78 +36,62 @@ export function FinanceHealthMetrics({
       label: 'Gastos / receita',
       value: `${burnPct}%`,
       pct: burnPct,
-      color: burnPct > 80 ? colors.danger : colors.axel,
+      color: colors.finance,
     },
     {
       label: 'Uso do cartão',
       value: `${Math.round(cardUsagePct)}%`,
       pct: Math.min(100, cardUsagePct),
-      color: cardUsagePct > 80 ? colors.danger : colors.finance,
+      color: colors.finance,
     },
     {
       label: 'Fixas do mês',
       value: formatBRL(fixasMes),
       pct: receitas > 0 ? Math.min(100, Math.round((fixasMes / receitas) * 100)) : 0,
-      color: colors.tasks,
+      color: colors.inkMuted,
     },
   ]
+
+  const kpiStyle = {
+    flexGrow: 1,
+    flexBasis: '30%' as const,
+    minWidth: 140,
+    minHeight: 108,
+    gap: 4,
+    justifyContent: 'center' as const,
+  }
 
   return (
     <View style={{ gap: space.md }}>
       <SectionHeader title="Saúde financeira" subtitle="Desempenho do mês" />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-        <Card
-          tone="elevated"
-          style={{
-            flexGrow: 1,
-            flexBasis: '30%',
-            minWidth: 140,
-            gap: 6,
-            alignItems: 'flex-start',
-          }}
-        >
+        <Card tone="elevated" style={kpiStyle}>
           <Text variant="caption" muted>
             Score
           </Text>
-          <Text variant="hero" color={scoreColor} style={{ fontSize: 28 }}>
+          <Text variant="title" color={scoreColor} style={{ fontSize: 22 }}>
             {scoreLabel}
           </Text>
           <Text variant="caption" muted>
             Saldo {formatBRL(saldo)}
           </Text>
         </Card>
-        <Card
-          tone="elevated"
-          style={{
-            flexGrow: 1,
-            flexBasis: '30%',
-            minWidth: 140,
-            gap: 6,
-          }}
-        >
+        <Card tone="elevated" style={kpiStyle}>
           <Text variant="caption" muted>
             Disponível
           </Text>
-          <Text variant="hero" color={colors.ink} style={{ fontSize: 26 }}>
+          <Text variant="title" color={colors.ink} style={{ fontSize: 22 }}>
             {formatBRL(disponivel)}
           </Text>
           <Text variant="caption" muted>
             Após receitas − despesas
           </Text>
         </Card>
-        <Card
-          tone="elevated"
-          style={{
-            flexGrow: 1,
-            flexBasis: '30%',
-            minWidth: 140,
-            gap: 6,
-          }}
-        >
+        <Card tone="elevated" style={kpiStyle}>
           <Text variant="caption" muted>
             Receitas
           </Text>
-          <Text variant="hero" color={colors.health} style={{ fontSize: 26 }}>
+          <Text variant="title" color={colors.health} style={{ fontSize: 22 }}>
             {formatBRL(receitas)}
           </Text>
           <Text variant="caption" muted>
@@ -127,7 +111,7 @@ export function FinanceHealthMetrics({
             </View>
             <View
               style={{
-                height: 8,
+                height: 6,
                 borderRadius: radius.pill,
                 backgroundColor: colors.hairline,
                 overflow: 'hidden',

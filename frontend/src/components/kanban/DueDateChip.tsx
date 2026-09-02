@@ -1,8 +1,6 @@
 import { Calendar } from 'lucide-react'
-import {
-  DAYS_REMAINING_TONE_CLASS,
-  formatDaysRemaining,
-} from '../../lib/daysRemaining'
+import { formatDaysRemaining } from '../../lib/daysRemaining'
+import { kanbanDueTextClass } from '../../lib/kanbanCardGrammar'
 
 interface DueDateChipProps
 {
@@ -19,7 +17,7 @@ export function DueDateChip({ date, compact = false }: DueDateChipProps)
     return null
   }
 
-  const toneClass = DAYS_REMAINING_TONE_CLASS[meta.tone]
+  const toneClass = kanbanDueTextClass(date)
 
   if (compact)
   {

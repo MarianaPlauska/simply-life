@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { CalendarOff } from 'lucide-react'
+import { CalendarOff, Landmark, PiggyBank, Receipt, Wallet } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { useCashPosition } from '../../hooks/useCashPosition'
 import { resolveCashTone, outlookToneToBalance } from '../../lib/financeBalanceTone'
@@ -12,11 +12,17 @@ import {
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
   AXEL_PAGE_SHELL_READING,
+  AXEL_DESKTOP_WORKSPACE,
 } from '../../constants/axelSurfaces'
+import { FinanceHomeRail } from './FinanceHomeRail'
 import type { FinanceAlertTab } from '../../lib/financeAlerts'
 import { useFinanceAlerts } from '../../hooks/useFinanceAlerts'
 import { FinanceAlertsPanel } from './goals/FinanceAlertsPanel'
 import { FinanceMonthGoalWidget } from './overview/FinanceMonthGoalWidget'
+import { FinanceWorstEnvelope } from './overview/FinanceWorstEnvelope'
+import { FinanceBudgetProgressStrip } from './overview/FinanceBudgetProgressStrip'
+import { FinanceSpendHeatmap } from './FinanceSpendHeatmap'
+import { FinanceRecentTransactions } from './FinanceRecentTransactions'
 import { DashboardCollapsible } from '../dashboard/DashboardCollapsible'
 import type { Transaction } from '../../store/storeTypes'
 import type { PlannerLeafTab } from '../../lib/financePlannerNav'
@@ -52,6 +58,8 @@ export function FinanceHomeTab({
   const isFutureMonth = monthOffset > 0
   const isPastMonth = monthOffset < 0
   const cashAccount = useTaskStore((s) => s.cashAccount)
+  const setFinanceCaptureOpen = useTaskStore((s) => s.setFinanceQuickCaptureOpen)
+  const setNewTransactionOpen = useTaskStore((s) => s.setNewTransactionModalOpen)
   const cards = useTaskStore((s) => s.cards)
   const reservedBills = useTaskStore((s) => s.reservedBills)
   const recurringIncomes = useTaskStore((s) => s.recurringIncomes)
@@ -116,7 +124,8 @@ export function FinanceHomeTab({
   const kpiSaldoMes = isFutureMonth ? outlook.sobraParaGastar : saldo
 
   return (
-    <div className={`${AXEL_PAGE_SHELL_READING} space-y-3 pt-2 sm:pt-3`}>
+    <div className={`${AXEL_PAGE_SHELL_READING} ${AXEL_DESKTOP_WORKSPACE} pt-2 sm:pt-3`}>
+      <div className="space-y-3 min-w-0">
       {pastMonthEmpty ? (
         <div className="border-t-[0.5px] border-line py-4 text-center space-y-1.5">
           <CalendarOff className="w-8 h-8 mx-auto text-ink-muted opacity-60" aria-hidden />
@@ -146,6 +155,57 @@ export function FinanceHomeTab({
             }
           />
 
+          {!isFutureMonth && (
+            <div className="xl:hidden space-y-3">
+              <FinanceWorstEnvelope
+                categories={categories}
+                budgetLimits={budgetLimits}
+                monthTransactions={monthTransactions}
+                onConfigure={() => onNavigate('visao-geral')}
+              />
+              <FinanceBudgetProgressStrip
+                categories={categories}
+                budgetLimits={budgetLimits}
+                monthTransactions={monthTransactions}
+                onConfigure={() => onNavigate('visao-geral')}
+              />
+            </div>
+          )}
+
+          {!isFutureMonth && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <HomeMoneyAction
+                icon={Receipt}
+                label="Gasto"
+                onClick={() => setFinanceCaptureOpen(true)}
+              />
+              <HomeMoneyAction
+                icon={PiggyBank}
+                label="Ganho"
+                onClick={() => setNewTransactionOpen(true, 'receita')}
+              />
+              <HomeMoneyAction
+                icon={Wallet}
+                label="Saldo"
+                onClick={() => onNavigate('conta')}
+              />
+              <HomeMoneyAction
+                icon={Landmark}
+                label="A pagar"
+                onClick={() => onNavigate('faturas')}
+              />
+            </div>
+          )}
+
+          {!isFutureMonth && !pastMonthEmpty && (
+            <FinanceRecentTransactions
+              transactions={monthTransactions}
+              categories={categories}
+              hideValues={hideValues}
+              onOpenLedger={() => onNavigate('diario')}
+            />
+          )}
+
           {monthOffset === 0 && (
             <FinanceGlobalMoodBanner
               monthLabel={monthLabel}
@@ -163,6 +223,12 @@ export function FinanceHomeTab({
           </p>
 
           {!isFutureMonth && (
+            <div className="xl:hidden">
+              <FinanceSpendHeatmap transactions={monthTransactions} compact />
+            </div>
+          )}
+
+          {!isFutureMonth && (
             <DashboardCollapsible
               title="Mais"
               subtitle="Meta do mês e avisos"
@@ -177,6 +243,35 @@ export function FinanceHomeTab({
           )}
         </>
       )}
+      </div>
+      <FinanceHomeRail
+        transactions={monthTransactions}
+        categories={categories}
+        budgetLimits={budgetLimits}
+        onNavigate={onNavigate}
+      />
     </div>
+  )
+}
+
+function HomeMoneyAction({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Receipt
+  label: string
+  onClick: () => void
+})
+{
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center justify-center gap-1.5 min-h-11 px-2 rounded-sl border border-line text-[13px] text-ink hover:bg-chrome"
+    >
+      <Icon className="w-3.5 h-3.5 shrink-0 text-finance" strokeWidth={1.75} />
+      {label}
+    </button>
   )
 }

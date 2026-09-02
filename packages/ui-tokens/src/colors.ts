@@ -1,16 +1,56 @@
 /**
- * Simply-Life — paleta Marble (mobile + tokens compartilhados).
- * CA2851 · FF6766 · FF8173 · FFE3B3
+ * AXEL Premium — tons quentes de referência:
+ * Claro: Pantone Gold Leaf / 2429 terracotta / Tortilla
+ * Escuro: P2P / Task — preto profundo + laranja vivo
+ *
+ * O acento é a voz do AXEL: no máx. 1–2 usos por tela.
  */
 
-export const AXEL_PREMIUM_VERSION = '2026.09-marble-v1'
+export const AXEL_PREMIUM_VERSION = '2026.09-drive-p2p-v1'
 
-/** Swatches Marble — referência visual */
-export const MARBLE = {
-  rose: '#CA2851',
-  coral: '#FF6766',
-  salmon: '#FF8173',
-  cream: '#FFE3B3',
+/**
+ * Escuro — preto-azulado / charcoal / laranja (refs P2P + Task)
+ */
+export const GUIDE_DARK = {
+  /** Canvas quase preto */
+  inkBlack: '#0A0A0C',
+  /** Sidebar Drive — navy black */
+  navyBlack: '#0D1020',
+  charcoal: '#141418',
+  elevated: '#1C1C24',
+  /** Laranja vivo (CTAs das refs) */
+  ember: '#FF6A2B',
+  emberSoft: '#FF8A4C',
+  ash: '#9A9AA6',
+  /** aliases legados */
+  chineseBlack: '#0A0A0C',
+  jungle: '#141418',
+  jet: '#1C1C24',
+  coffee: '#0D1020',
+  antiqueBrass: '#FF6A2B',
+  canvas: '#0A0A0C',
+  umber: '#0D1020',
+  rust: '#E85A24',
+  copper: '#FF6A2B',
+} as const
+
+/**
+ * Claro — amostrado das fichas Pantone:
+ * Gold Leaf #C6A17E · Terracotta #B87252 · Tortilla #CABAAA
+ */
+export const GUIDE_LIGHT = {
+  goldLeaf: '#C6A17E',
+  terracotta: '#B87252',
+  tortilla: '#CABAAA',
+  cream: '#F5F1EC',
+  sand: '#C6A17E',
+  slate: '#5C534C',
+  ink: '#0C1519',
+  semanticWarm: '#E8D5C8',
+  semanticRose: '#E5B8B8',
+  semanticMint: '#B8D4C8',
+  semanticSky: '#B8C8D4',
+  semanticButter: '#F0E4D0',
 } as const
 
 export type ColorTokens = {
@@ -42,64 +82,67 @@ export type ColorTokens = {
   widgetMuted: string
 }
 
-/** Dark — base quente + coral Marble */
+/** Dark — P2P: preto profundo, cards charcoal, acento laranja */
 export const COLOR_DARK: ColorTokens = {
-  canvas: '#1A1214',
-  chrome: '#24181A',
-  surface: '#2E1F22',
-  elevated: '#3A282C',
-  ink: '#FFF6EB',
-  inkMuted: '#C9A89A',
-  inkFaint: '#8F7368',
-  hairline: 'rgba(255, 246, 235, 0.10)',
-  hairlineStrong: 'rgba(255, 246, 235, 0.18)',
-  axel: MARBLE.coral,
-  axelHover: MARBLE.salmon,
-  axelMuted: 'rgba(255, 103, 102, 0.18)',
-  axelOnFill: '#1A1214',
-  health: '#7FA37A',
-  healthMuted: 'rgba(127, 163, 122, 0.16)',
-  finance: MARBLE.cream,
-  financeMuted: 'rgba(255, 227, 179, 0.16)',
-  tasks: '#E8A0A0',
-  tasksMuted: 'rgba(232, 160, 160, 0.16)',
-  danger: MARBLE.rose,
-  attention: MARBLE.salmon,
-  done: '#9AAA95',
-  overlay: 'rgba(0, 0, 0, 0.55)',
-  widget: '#322024',
-  widgetInk: '#FFF6EB',
-  widgetMuted: '#C9A89A',
+  canvas: GUIDE_DARK.inkBlack,
+  chrome: GUIDE_DARK.charcoal,
+  surface: GUIDE_DARK.charcoal,
+  elevated: GUIDE_DARK.elevated,
+  ink: '#F5F5F7',
+  inkMuted: GUIDE_DARK.ash,
+  inkFaint: '#6E6E78',
+  hairline: 'rgba(245, 245, 247, 0.10)',
+  hairlineStrong: 'rgba(255, 106, 43, 0.35)',
+  axel: GUIDE_DARK.ember,
+  axelHover: GUIDE_DARK.emberSoft,
+  axelMuted: 'rgba(255, 106, 43, 0.18)',
+  axelOnFill: '#0A0A0C',
+  health: '#5FD39A',
+  healthMuted: 'rgba(95, 211, 154, 0.16)',
+  finance: '#F0B45A',
+  financeMuted: 'rgba(240, 180, 90, 0.16)',
+  tasks: '#8BA4C7',
+  tasksMuted: 'rgba(139, 164, 199, 0.16)',
+  danger: '#FF6B7A',
+  attention: '#F0B45A',
+  done: '#5FD39A',
+  overlay: 'rgba(0, 0, 0, 0.72)',
+  widget: GUIDE_DARK.elevated,
+  widgetInk: '#F5F5F7',
+  widgetMuted: GUIDE_DARK.ash,
 }
 
-/** Light — cream + rose/coral Marble */
+/**
+ * Light — Tortilla / Gold Leaf / Terracotta.
+ * Acento AXEL: terracotta escurecido para AA no cream.
+ */
 export const COLOR_LIGHT: ColorTokens = {
-  canvas: '#FFF6EB',
-  chrome: '#FFFFFF',
-  surface: '#FFEFD9',
-  elevated: '#FFFFFF',
-  ink: '#2A1218',
-  inkMuted: '#6B4550',
-  inkFaint: '#A07880',
-  hairline: 'rgba(42, 18, 24, 0.10)',
-  hairlineStrong: 'rgba(42, 18, 24, 0.16)',
-  axel: MARBLE.rose,
-  axelHover: '#A81F42',
-  axelMuted: 'rgba(255, 103, 102, 0.14)',
-  axelOnFill: '#FFF8F0',
-  health: '#4F6F4C',
-  healthMuted: 'rgba(79, 111, 76, 0.12)',
-  finance: '#B8862E',
-  financeMuted: 'rgba(184, 134, 46, 0.12)',
-  tasks: '#8A4A55',
-  tasksMuted: 'rgba(138, 74, 85, 0.12)',
-  danger: MARBLE.rose,
-  attention: MARBLE.coral,
-  done: '#5A6B52',
-  overlay: 'rgba(42, 18, 24, 0.40)',
-  widget: '#2A1218',
-  widgetInk: '#FFF6EB',
-  widgetMuted: '#C9A89A',
+  canvas: GUIDE_LIGHT.cream,
+  chrome: '#FFFCFA',
+  surface: '#FFFCFA',
+  elevated: '#EDE4D8',
+  ink: GUIDE_LIGHT.ink,
+  inkMuted: GUIDE_LIGHT.slate,
+  inkFaint: '#8A7E74',
+  hairline: 'rgba(12, 21, 25, 0.10)',
+  hairlineStrong: 'rgba(198, 161, 126, 0.55)',
+  axel: '#A05C3D',
+  axelHover: '#8B4E34',
+  axelMuted: 'rgba(184, 114, 82, 0.16)',
+  axelOnFill: GUIDE_LIGHT.cream,
+  health: '#3F6B5A',
+  healthMuted: 'rgba(184, 212, 200, 0.45)',
+  finance: '#7A6540',
+  financeMuted: 'rgba(198, 161, 126, 0.35)',
+  tasks: '#4A5560',
+  tasksMuted: 'rgba(184, 200, 212, 0.45)',
+  danger: '#9A4545',
+  attention: '#9A7A3A',
+  done: '#4A6B58',
+  overlay: 'rgba(12, 21, 25, 0.40)',
+  widget: GUIDE_LIGHT.ink,
+  widgetInk: GUIDE_LIGHT.cream,
+  widgetMuted: GUIDE_LIGHT.goldLeaf,
 }
 
 export type ThemeMode = 'light' | 'dark'
@@ -110,11 +153,11 @@ export function colorsFor(mode: ThemeMode): ColorTokens
 }
 
 export const MOOD_COLORS: Record<number, string> = {
-  1: MARBLE.rose,
-  2: MARBLE.coral,
-  3: '#C9A89A',
-  4: MARBLE.salmon,
-  5: '#7FA37A',
+  1: '#FF6B7A',
+  2: '#F0B45A',
+  3: '#9A9AA6',
+  4: '#5FD39A',
+  5: '#3DB87A',
 }
 
 export const MOOD_LABELS: Record<number, string> = {

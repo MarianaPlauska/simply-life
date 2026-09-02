@@ -7,14 +7,9 @@ export function healthHeaderSubtitle(
   nut?: { gramas: number; kcal: number },
 ): string
 {
-  if (section === 'hoje')
+  if (section === 'hoje' || section === 'cuidados')
   {
-    const ritual = `${stats.ritualDone} de ${stats.ritualTotal} cuidados hoje`
-    if (nut && (nut.gramas > 0 || nut.kcal > 0))
-    {
-      return `${ritual} · ${nut.gramas}g proteína · ${nut.kcal} kcal`
-    }
-    return ritual
+    return 'Um passo de cada vez — o AXEL cuida com você.'
   }
   if (section === 'diario')
   {
@@ -22,12 +17,12 @@ export function healthHeaderSubtitle(
   }
 
   const labels: Record<CuidadosTab, string> = {
-    hidratacao: 'Hidratação · meta alinhada ao ritual do dashboard',
+    hidratacao: 'Água quando fizer sentido',
     alimentacao: nut && (nut.gramas > 0 || nut.kcal > 0)
-      ? `Alimentação · ${nut.gramas}g proteína · ${nut.kcal} kcal`
-      : 'Alimentação · proteína e refeições do dia',
-    academia: 'Academia · treino de hoje ou configurar plano',
-    medicamentos: 'Medicamentos · doses e lembretes no horário',
+      ? `Comida · ${nut.gramas}g proteína hoje`
+      : 'Comida no seu ritmo',
+    academia: 'Movimento leve também conta',
+    medicamentos: 'Lembretes gentis, sem cobrança',
   }
   return labels[cuidados]
 }

@@ -1,7 +1,9 @@
 // Push — medicamentos na janela + lembrete de bem-estar (humor do dia)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
-import { sendWebPush, isWebPushConfigured, isExpiredSubscriptionError } from '../../webPush.js';
+import { enrichPushPayload } from '../../pushActionPayload.js';
+import { isPushSnoozed } from '../../pushSnooze.js';
+import { sendPushToSubscriptions } from '../../sendPushFanout.js';
 import {
   buildDosesHoje,
   proximaDosePendente,
@@ -47,11 +49,6 @@ export default async function handler(req, res)
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (!isWebPushConfigured())
-  {
-    return res.status(200).json({ status: 'skipped', reason: 'VAPID não configurado' });
-  }
-
   const supabase = getSupabaseAdmin();
   if (!supabase)
   {
@@ -60,7 +57,7 @@ export default async function handler(req, res)
 
   const { data: subs, error: subsErr } = await supabase
     .from('push_subscriptions')
-    .select('id, user_id, endpoint, p256dh, auth_key');
+    .select('id, user_id, endpoint, p256dh, auth_key, provider');
 
   if (subsErr)
   {
@@ -102,30 +99,22 @@ export default async function handler(req, res)
       if (pendente)
       {
         const doseKey = doseDeliveryKey(pendente.medicamentoId, pendente.horario, today);
-        if (!medDeliveredSet.has(doseKey))
+        if (!medDeliveredSet.has(doseKey) && !(await isPushSnoozed(supabase, userId, doseKey, now)))
         {
-          const payload = {
+          const payload = enrichPushPayload({
             title: 'AXEL · Medicamento',
             body: mensagemGentilDose(pendente),
             url: '/saude#medicamentos',
             tag: `med-${doseKey}`,
-          };
-          let anyOk = false;
-          for (const subRow of userSubs)
-          {
-            try
-            {
-              await sendWebPush(subRow, payload);
-              anyOk = true;
-            }
-            catch (err)
-            {
-              if (isExpiredSubscriptionError(err))
-              {
-                await supabase.from('push_subscriptions').delete().eq('id', subRow.id);
-              }
-            }
-          }
+          }, {
+            userId,
+            kind: 'med',
+            snoozeKey: doseKey,
+            medicamentoId: pendente.medicamentoId,
+            horario: pendente.horario,
+          });
+          const fanout = await sendPushToSubscriptions(supabase, userSubs, payload);
+          const anyOk = fanout.sent > 0;
           if (anyOk)
           {
             await supabase.from('push_medication_deliveries').upsert({
@@ -157,24 +146,9 @@ export default async function handler(req, res)
           tag: consultaKey,
         };
 
-        let anyOk = false;
-        for (const subRow of userSubs)
-        {
-          try
-          {
-            await sendWebPush(subRow, payload);
-            anyOk = true;
-          }
-          catch (err)
-          {
-            if (isExpiredSubscriptionError(err))
-            {
-              await supabase.from('push_subscriptions').delete().eq('id', subRow.id);
-            }
-          }
-        }
-
-        if (anyOk)
+        const fanout = await sendPushToSubscriptions(supabase, userSubs, payload);
+          const anyOk = fanout.sent > 0;
+          if (anyOk)
         {
           await supabase.from('push_medication_deliveries').upsert({
             user_id: userId,
@@ -200,30 +174,22 @@ export default async function handler(req, res)
         const nudgeKey = `mood-checkin:${today}`;
         const wbSet = new Set((wbDelivered || []).map((d) => d.nudge_key));
 
-        if (!humorHoje?.length && !snoozed && !wbSet.has(nudgeKey))
+        if (!humorHoje?.length && !snoozed && !wbSet.has(nudgeKey)
+          && !(await isPushSnoozed(supabase, userId, nudgeKey, now)))
         {
-          const payload = {
+          const payload = enrichPushPayload({
             title: 'AXEL · Bem-estar',
             body: 'Como você está hoje? Um toque no humor já ajuda.',
-            url: '/#dashboard-wellbeing',
+            url: '/saude#diario',
             tag: nudgeKey,
-          };
-          let anyOk = false;
-          for (const subRow of userSubs)
-          {
-            try
-            {
-              await sendWebPush(subRow, payload);
-              anyOk = true;
-            }
-            catch (err)
-            {
-              if (isExpiredSubscriptionError(err))
-              {
-                await supabase.from('push_subscriptions').delete().eq('id', subRow.id);
-              }
-            }
-          }
+          }, {
+            userId,
+            kind: 'mood',
+            snoozeKey: nudgeKey,
+            nudgeKey,
+          });
+          const fanout = await sendPushToSubscriptions(supabase, userSubs, payload);
+          const anyOk = fanout.sent > 0;
           if (anyOk)
           {
             await supabase.from('push_wellbeing_deliveries').upsert({

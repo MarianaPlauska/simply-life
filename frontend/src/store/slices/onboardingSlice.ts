@@ -11,6 +11,8 @@ export interface OnboardingSlice
 }
 
 export const ONBOARDING_STEPS = [
+  { id: 'dump_vida',         label: 'Despejar a cabeça',         path: '/' },
+  { id: 'recompensa_irl',    label: 'Criar recompensa da vida real', path: '/' },
   { id: 'create_task',       label: 'Criar primeira tarefa',   path: '/kanban' },
   { id: 'add_expense',       label: 'Registrar uma despesa',   path: '/financeiro' },
   { id: 'register_mood',     label: 'Registrar como está hoje', path: '/saude#diario' },

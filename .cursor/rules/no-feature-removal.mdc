@@ -1,0 +1,28 @@
+---
+description: Redesign visual não pode remover funcionalidade existente
+alwaysApply: true
+---
+
+# Redesign — preservar funcionalidade
+
+## Regra permanente
+
+Nenhuma frente de **redesign visual** pode remover uma funcionalidade existente.
+
+- Se simplificar navegação for necessário, a funcionalidade precisa continuar **acessível** (mesmo que reorganizada).
+- **Nunca** desaparecer silenciosamente.
+- Se não for possível manter algo, **parar e perguntar** ao usuário antes de remover — não remover e seguir em frente.
+
+## Ao refatorar telas
+
+1. Auditar abas/sub-abas e ações antes de editar (git ou referência web em `frontend/`).
+2. Listar o que existia vs. o que ficará — confirmar paridade.
+3. Aplicar tokens visuais novos **sobre** a estrutura restaurada, não no lugar dela.
+4. Critério de aceite: cada aba/sub-aba anterior continua presente e funcional.
+
+## Referências de paridade mobile
+
+- Saúde: `Hoje` / `Cuidados` / `Diário`; em Cuidados: `Hidratação` / `Alimentação` / `Academia` / `Medicamentos`.
+- Finanças: `Início` / `Movimentos` / `Contas` / `Análise`; em Contas: `Conta` / `Cartões` / `A pagar` / `Fixas`.
+
+Ver também `docs/MOBILE_PARITY.md`.

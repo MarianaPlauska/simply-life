@@ -297,7 +297,7 @@ function ComparisonBlock({
             <button
               type="button"
               onClick={saveGoal}
-              className="px-2.5 py-1.5 rounded-sl bg-accent text-white font-mono text-[9px] uppercase min-h-[36px]"
+              className="px-2.5 py-1.5 rounded-sl bg-ink text-fundo font-mono text-[9px] uppercase min-h-[44px]"
             >
               Salvar
             </button>

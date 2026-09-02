@@ -24,6 +24,7 @@ export default function FinanceiroScreen()
 {
   const { colors } = useTheme()
   const [tab, setTab] = useState<FinanceMainTab>('inicio')
+  const [cardsFocus, setCardsFocus] = useState(false)
   const [movSub, setMovSub] = useState<MovimentosSubTab>('diario')
   const [contasSub, setContasSub] = useState<ContasSubTab>('conta')
   const [analiseSub, setAnaliseSub] = useState<AnaliseSubTab>('visao-geral')
@@ -44,39 +45,58 @@ export default function FinanceiroScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title="Finanças" subtitle="Início, movimentos, contas e análise." />
+        {!(tab === 'inicio' && cardsFocus) && (
+          <ScreenIntro title="Finanças" subtitle="Início, movimentos, contas e análise." />
+        )}
 
-        <MetricCards
-          items={[
-            {
-              label: 'Gastos do mês',
-              value: formatBRL(despesas),
-              color: colors.finance,
-            },
-            {
-              label: 'Saldo',
-              value: formatBRL(saldo),
-              color: saldo >= 0 ? colors.health : colors.finance,
-              hint: `Receitas ${formatBRL(receitas)}`,
-            },
-          ]}
-        />
+        {/* Na Início o Nível 1 (Saldo) vem primeiro dentro de FinanceHomeTab.
+            KPIs L2 só nas outras abas para não competir com o hero. */}
+        {tab !== 'inicio' && (
+          <MetricCards
+            items={[
+              {
+                label: 'Gastos do mês',
+                value: formatBRL(despesas),
+                color: colors.finance,
+              },
+              {
+                label: 'Saldo',
+                value: formatBRL(saldo),
+                color: saldo >= 0 ? colors.health : colors.finance,
+                hint: `Receitas ${formatBRL(receitas)}`,
+              },
+            ]}
+          />
+        )}
 
-        <PillTabs
-          tabs={FINANCE_MAIN_TABS.map((t) => ({
-            ...t,
-            count: t.id === 'movimentos' ? movCount : undefined,
-          }))}
-          value={tab}
-          onChange={setTab}
-        />
+        {!(tab === 'inicio' && cardsFocus) && (
+          <PillTabs
+            tabs={FINANCE_MAIN_TABS.map((t) => ({
+              ...t,
+              count: t.id === 'movimentos' ? movCount : undefined,
+            }))}
+            value={tab}
+            onChange={(next) =>
+            {
+              setCardsFocus(false)
+              setTab(next)
+            }}
+          />
+        )}
 
         <View>
           {tab === 'inicio' && (
             <FinanceHomeTab
-              onGoMovimentos={() => setTab('movimentos')}
+              cardsFocus={cardsFocus}
+              onCardsFocusChange={setCardsFocus}
+              onGoMovimentos={() =>
+              {
+                setCardsFocus(false)
+                setTab('movimentos')
+              }}
               onGoCartoes={() =>
               {
+                setCardsFocus(false)
                 setTab('contas')
                 setContasSub('cartoes')
               }}
@@ -86,7 +106,11 @@ export default function FinanceiroScreen()
             <FinanceMovimentosTab subTab={movSub} onSubTabChange={setMovSub} />
           )}
           {tab === 'contas' && (
-            <FinanceContasTab subTab={contasSub} onSubTabChange={setContasSub} />
+            <FinanceContasTab
+              subTab={contasSub}
+              onSubTabChange={setContasSub}
+              onGoMovimentos={() => setTab('movimentos')}
+            />
           )}
           {tab === 'analise' && (
             <FinanceAnaliseTab subTab={analiseSub} onSubTabChange={setAnaliseSub} />

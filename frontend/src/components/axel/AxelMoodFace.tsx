@@ -10,6 +10,8 @@ interface AxelMoodFaceProps
   size?: number
   className?: string
   title?: string
+  /** Sem a brasa — seletor de humor, não a voz do AXEL */
+  quiet?: boolean
 }
 
 const MOUTH: Record<MoodValue, string> = {
@@ -40,6 +42,7 @@ export function AxelMoodFace({
   size = AXEL_MOOD.sizeInVoice,
   className = '',
   title,
+  quiet = false,
 }: AxelMoodFaceProps)
 {
   const mood = presence
@@ -57,7 +60,7 @@ export function AxelMoodFace({
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      className={`shrink-0 text-axel ${className}`}
+      className={`shrink-0 ${quiet ? 'text-ink-muted' : 'text-axel'} ${className}`}
       role="img"
       aria-label={title ?? `AXEL: ${label}`}
     >
@@ -78,7 +81,9 @@ export function AxelMoodFace({
         strokeWidth={AXEL_MOOD.stroke}
         strokeLinecap="round"
       />
-      <circle cx="18.2" cy="18.2" r="2.1" fill="var(--sl-axel)" />
+      {!quiet && (
+        <circle cx="18.2" cy="18.2" r="2.1" fill="var(--sl-axel)" />
+      )}
     </svg>
   )
 }

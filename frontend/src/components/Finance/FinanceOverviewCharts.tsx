@@ -17,6 +17,8 @@ import {
   Cell,
 } from 'recharts'
 import {
+  AXEL_BTN_MD,
+  AXEL_BTN_PRIMARY,
   AXEL_METRIC_HAIRLINE,
   AXEL_SECTION_TITLE,
   AXEL_TEXT_PRIMARY,
@@ -196,12 +198,12 @@ export function FinanceOverviewCharts({
 
         <aside className={`${AXEL_METRIC_HAIRLINE} relative overflow-hidden flex flex-col justify-between`}>
           <div
-            className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-chrome/30 pointer-events-none"
+            className="absolute inset-0 bg-gradient-to-br from-axel/10 via-transparent to-chrome/30 pointer-events-none"
             aria-hidden
           />
           <div className="relative space-y-4">
-            <div className="w-8 h-8 rounded-sl bg-accent-muted border border-accent/30 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-accent" />
+            <div className="w-8 h-8 rounded-sl bg-axel-muted border border-axel/30 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-axel" />
             </div>
             <div>
               <h3 className={`text-[12px] font-mono uppercase tracking-wide ${AXEL_TEXT_PRIMARY}`}>
@@ -217,7 +219,7 @@ export function FinanceOverviewCharts({
           <button
             type="button"
             onClick={onViewGoals}
-            className="relative mt-5 flex items-center justify-center gap-1.5 w-full py-2.5 bg-accent hover:bg-accent-hover text-white rounded-sl text-[11px] font-mono uppercase transition-colors"
+            className={`relative mt-5 self-start ${AXEL_BTN_MD} ${AXEL_BTN_PRIMARY} gap-1.5`}
           >
             Ver metas
             <ArrowRight className="w-3.5 h-3.5" />

@@ -20,7 +20,13 @@ import {
   resolveDueBucket,
   type DueBucket,
 } from '../../lib/dueBucket'
-import { urgencyScoreClass, urgencyStripeClass } from '../../lib/kanbanVisual'
+import { urgencyScoreClass } from '../../lib/kanbanVisual'
+import {
+  kanbanOriginTone,
+  KANBAN_ORIGIN_BAR,
+  kanbanDueTextClass,
+} from '../../lib/kanbanCardGrammar'
+import { KanbanOriginMark } from './KanbanOriginMark'
 import { DueDateChip } from './DueDateChip'
 import { AXEL_KANBAN_TABLE } from '../../constants/axelKanbanTheme'
 import type { TarefaUnificada } from '../../types'
@@ -95,7 +101,7 @@ function ListMobileCard({
 
   return (
     <article
-      className={`rounded-lg border border-line bg-card shadow-sl p-2.5 space-y-1.5 ${urgencyStripeClass(score)}`}
+      className={`rounded-lg border border-line bg-card shadow-sl p-2.5 pl-3 space-y-1.5 ${KANBAN_ORIGIN_BAR[kanbanOriginTone(tarefa.origem)]}`}
     >
       <button
         type="button"
@@ -109,7 +115,7 @@ function ListMobileCard({
         <div className={AXEL_CARD_META}>
           <div className="flex items-center justify-between gap-2 text-[11px]">
             <span className="text-zinc-500">Prazo</span>
-            <span className="text-zinc-800 dark:text-ink font-medium tabular-nums">{prazoLabel}</span>
+            <span className={`font-medium tabular-nums ${kanbanDueTextClass(tarefa.data_vencimento)}`}>{prazoLabel}</span>
           </div>
           <div className="flex items-center justify-between gap-2 text-[11px]">
             <span className="text-zinc-500">Prioridade</span>
@@ -132,9 +138,12 @@ function ListMobileCard({
           )}
         </div>
 
-        <p className="text-[11px] mt-1.5 text-zinc-500 capitalize">
-          {tag} · {tarefa.status.replace('_', ' ')}
-        </p>
+        <div className="mt-1.5 flex items-center gap-2 min-w-0">
+          <KanbanOriginMark origem={tarefa.origem} />
+          <span className="text-[11px] text-zinc-500 capitalize truncate">
+            {tag} · {tarefa.status.replace('_', ' ')}
+          </span>
+        </div>
       </button>
       {tarefa.status !== 'concluida' && tarefa.id !== 0 && (
         <button
@@ -406,7 +415,7 @@ export function AxelKanbanListView({
                 <tr
                   key={t.id}
                   onClick={() => onOpen(t)}
-                  className={`border-b border-line cursor-pointer ${AXEL_ROW_HOVER} ${urgencyStripeClass(score)}`}
+                  className={`border-b border-line cursor-pointer ${AXEL_ROW_HOVER} ${KANBAN_ORIGIN_BAR[kanbanOriginTone(t.origem)]}`}
                 >
                   <td className={`px-4 py-2 text-sm max-w-[280px] truncate ${AXEL_TEXT_PRIMARY}`}>
                     {cleanTitle(t.titulo)}

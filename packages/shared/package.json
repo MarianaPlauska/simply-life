@@ -1,0 +1,22 @@
+{
+  "name": "@simply-life/shared",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./mood": "./src/mood.ts",
+    "./tasks": "./src/tasks.ts",
+    "./finance": "./src/finance.ts",
+    "./dates": "./src/dates.ts",
+    "./demo": "./src/demoData.ts"
+  },
+  "dependencies": {
+    "@simply-life/ui-tokens": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0"
+  }
+}

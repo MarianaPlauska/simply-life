@@ -122,7 +122,7 @@ export function FinanceMonthGoalWidget({
           <button
             type="button"
             onClick={save}
-            className="shrink-0 px-2.5 py-1.5 rounded-sl bg-accent text-white font-mono text-[9px] uppercase"
+            className="shrink-0 px-2.5 py-1.5 min-h-11 rounded-sl bg-ink text-fundo font-mono text-[9px] uppercase"
           >
             Salvar
           </button>
@@ -146,7 +146,7 @@ export function FinanceMonthGoalWidget({
   const barTone = progress.poupado >= goal.valorAlvo
     ? 'bg-concluido'
     : progress.onTrack
-      ? 'bg-accent'
+      ? 'bg-finance'
       : 'bg-atencao'
 
   return (
@@ -154,7 +154,7 @@ export function FinanceMonthGoalWidget({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <Target size={13} className="text-accent shrink-0" />
+            <Target size={13} className="text-finance shrink-0" />
             <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
               Meta do mês
             </p>

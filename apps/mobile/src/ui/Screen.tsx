@@ -39,11 +39,14 @@ export function Screen({
   const bottom = useTabPad
     ? tabBarScreenPadding(insets.bottom)
     : Math.max(insets.bottom, 16)
+  // Desktop: padding vem do TabShell; Screen só reserva o fundo
+  const hPad = showRail ? 0 : COMPONENT_SPEC.Screen.paddingHorizontal
 
   const pad = padded
     ? {
-        paddingHorizontal: COMPONENT_SPEC.Screen.paddingHorizontal,
+        paddingHorizontal: hPad,
         paddingBottom: bottom,
+        ...(showRail ? { flexGrow: 1 } : null),
       }
     : { paddingBottom: bottom }
 

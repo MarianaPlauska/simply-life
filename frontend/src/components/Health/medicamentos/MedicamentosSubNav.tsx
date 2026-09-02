@@ -26,11 +26,11 @@ export function MedicamentosSubNav({ active, onSelect, tabs }: MedicamentosSubNa
               className={[
                 'flex items-center gap-1.5 px-3 py-2 rounded-sl text-[11px] font-mono whitespace-nowrap shrink-0 transition-colors min-h-[40px]',
                 ativo
-                  ? 'bg-accent-muted text-ink border border-accent/30'
+                  ? 'bg-health-muted text-ink border border-health/30'
                   : 'text-ink-muted border border-transparent hover:bg-chrome hover:text-ink',
               ].join(' ')}
             >
-              <Icon className={`w-3.5 h-3.5 ${ativo ? 'text-accent' : ''}`} />
+              <Icon className={`w-3.5 h-3.5 ${ativo ? 'text-health' : ''}`} />
               <span className="sm:hidden">{short}</span>
               <span className="hidden sm:inline">{label}</span>
             </button>

@@ -7,14 +7,14 @@ export const AXEL_KANBAN_WORKSPACE =
   'flex-1 min-h-0 overflow-hidden flex flex-col lg:flex-row'
 
 export const AXEL_KANBAN_EXEC_COLUMN =
-  'lg:w-[280px] lg:shrink-0'
+  'lg:w-[320px] lg:shrink-0'
 
 export const AXEL_KANBAN_DUE_SHELL =
   'flex-1 min-h-0 flex flex-col'
 
 /** Coluna de quadro — largura fixa, não estica vazio */
 export const AXEL_KANBAN_COL_WIDTH =
-  'w-[280px] shrink-0'
+  'w-[320px] shrink-0'
 
 /** @deprecated Semana + Backlog — substituído por AXEL_KANBAN_DUE_SHELL */
 export const AXEL_KANBAN_PLAN_SHELL =
@@ -26,10 +26,10 @@ export const AXEL_KANBAN_BOARD_SHELL = AXEL_KANBAN_PLAN_SHELL
 export const AXEL_KANBAN_COLUMN_DIVIDER = 'border-r border-line last:border-r-0'
 
 export const AXEL_KANBAN_COLUMN =
-  'flex flex-col min-h-0 w-[280px] shrink-0'
+  'flex flex-col min-h-0 w-[320px] shrink-0'
 
 export const AXEL_KANBAN_COLUMN_EMBEDDED =
-  'flex flex-col min-w-0 w-[280px] shrink-0 min-h-0 bg-transparent'
+  'flex flex-col min-w-0 w-[320px] shrink-0 min-h-0 bg-transparent'
 
 export const AXEL_KANBAN_CARD =
   'bg-card border-[0.5px] border-line rounded-sl transition-[border-color] duration-150'

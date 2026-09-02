@@ -177,6 +177,8 @@ export function AcademyModeView()
       treinoTitulo: rotuloTreino,
       treinoCodigo,
     })
+    const { emitCareRegistered } = await import('../../lib/healthVitality')
+    emitCareRegistered()
     navigate('/saude#academia')
   }
 

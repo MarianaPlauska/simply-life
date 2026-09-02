@@ -1,7 +1,7 @@
 // Cron + disparo manual — resumo semanal (e-mail IMAP e/ou web push)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
-import { sendWebPush, isWebPushConfigured, isExpiredSubscriptionError } from '../../webPush.js'
+import { sendPushToSubscriptions } from '../../sendPushFanout.js'
 import { sendMailViaImapAccount } from '../../mailer.js'
 import { buildWeeklyDigest, shouldSendDigest } from '../../weeklyDigest.js'
 
@@ -10,33 +10,20 @@ async function deliverDigest(supabase, userId, pref, digest)
   const channel = pref.channel || 'both'
   const result = { push: 0, email: false, error: null }
 
-  if ((channel === 'push' || channel === 'both') && isWebPushConfigured())
+  if (channel === 'push' || channel === 'both')
   {
     const { data: subs } = await supabase
       .from('push_subscriptions')
-      .select('endpoint, p256dh, auth_key')
+      .select('id, endpoint, p256dh, auth_key, provider')
       .eq('user_id', userId)
 
-    for (const row of subs || [])
-    {
-      try
-      {
-        await sendWebPush(row, {
-          title: digest.title,
-          body: digest.body.slice(0, 180),
-          url: '/axel/historico',
-          tag: 'simply-life-weekly',
-        })
-        result.push += 1
-      }
-      catch (err)
-      {
-        if (isExpiredSubscriptionError(err))
-        {
-          await supabase.from('push_subscriptions').delete().eq('endpoint', row.endpoint)
-        }
-      }
-    }
+    const { sent } = await sendPushToSubscriptions(supabase, subs || [], {
+      title: digest.title,
+      body: digest.body.slice(0, 180),
+      url: '/axel/historico',
+      tag: 'simply-life-weekly',
+    })
+    result.push = sent
   }
 
   if (channel === 'email' || channel === 'both')

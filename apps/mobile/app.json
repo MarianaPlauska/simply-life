@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Simply-Life",
+    "slug": "simply-life",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "simplylife",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1A1816"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.simplylife.os"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1A1816"
+      },
+      "package": "app.simplylife.os"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-asset",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#C9A15C",
+          "defaultChannel": "default"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

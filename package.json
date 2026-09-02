@@ -1,8 +1,18 @@
 {
+  "name": "simply-life",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "cd frontend && npm run build",
     "dev": "npx vercel dev",
     "dev:frontend": "cd frontend && npm run dev",
+    "dev:mobile": "npm run start --workspace=@simply-life/mobile",
+    "mobile": "npm run start --workspace=@simply-life/mobile",
+    "mobile:web": "npm run web --workspace=@simply-life/mobile",
+    "typecheck:mobile": "npm run typecheck --workspace=@simply-life/mobile",
     "test:groq": "node scripts/test-groq-orchestrate.mjs",
     "test:e2e": "npx playwright test",
     "test:e2e:ui": "npx playwright test --ui"
@@ -20,5 +30,11 @@
   },
   "optionalDependencies": {
     "fsevents": "2.3.2"
+  },
+  "overrides": {
+    "expo-font": "~13.0.4",
+    "@expo/vector-icons": "14.0.4",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   }
 }

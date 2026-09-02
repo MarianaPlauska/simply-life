@@ -1,7 +1,7 @@
 import { View, StyleSheet, Platform } from 'react-native'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
-import Svg, { Path } from 'react-native-svg'
+import Svg, { Path, Defs, LinearGradient, Stop, Ellipse } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TOUCH } from '@simply-life/ui-tokens'
 import { Text, PressableScale } from '../ui'
@@ -27,7 +27,7 @@ const BAR_H = 64
 const FAB = TOUCH.fab
 const NOTCH_R = FAB / 2 + 10
 
-/** Tab bar com entalhe sob o FAB (estilo notch) */
+/** Tab bar com entalhe sob o FAB + holofote no item ativo */
 export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
 {
   const { colors, elevation, mode } = useTheme()
@@ -39,9 +39,9 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
   const barBg =
     mode === 'light'
       ? Platform.OS === 'web'
-        ? 'rgba(255,255,255,0.96)'
+        ? 'rgba(248,246,243,0.96)'
         : colors.chrome
-      : 'rgba(36,24,26,0.96)'
+      : 'rgba(32,16,14,0.96)'
 
   const renderTab = (route: (typeof state.routes)[0]) =>
   {
@@ -55,30 +55,70 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
         onPress={() => navigation.navigate(route.name)}
         style={styles.tab}
       >
-        <View
-          style={{
-            width: 44,
-            height: 30,
-            borderRadius: 999,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: focused ? colors.axelMuted : 'transparent',
-          }}
-        >
-          <Ionicons
-            name={focused ? (icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : icon}
-            size={22}
-            color={focused ? colors.axel : colors.inkMuted}
-          />
+        <View style={styles.tabInner}>
+          {focused ? (
+            <View pointerEvents="none" style={styles.spotlightWrap}>
+              <Svg width={56} height={48} viewBox="0 0 56 48">
+                <Defs>
+                  <LinearGradient id={`spot-${route.key}`} x1="0.5" y1="0" x2="0.5" y2="1">
+                    <Stop offset="0" stopColor={colors.axel} stopOpacity={0.55} />
+                    <Stop offset="0.45" stopColor={colors.axel} stopOpacity={0.18} />
+                    <Stop offset="1" stopColor={colors.axel} stopOpacity={0} />
+                  </LinearGradient>
+                </Defs>
+                {/* Cone de luz vindo de cima (ref holofote) */}
+                <Path
+                  d="M 20 0 L 36 0 L 33 40 L 23 40 Z"
+                  fill={`url(#spot-${route.key})`}
+                />
+                <Ellipse
+                  cx={28}
+                  cy={36}
+                  rx={16}
+                  ry={7}
+                  fill={colors.axel}
+                  opacity={0.28}
+                />
+                <Ellipse
+                  cx={28}
+                  cy={2}
+                  rx={10}
+                  ry={3}
+                  fill={colors.axel}
+                  opacity={0.7}
+                />
+              </Svg>
+            </View>
+          ) : null}
+          <View
+            style={{
+              width: 44,
+              height: 30,
+              borderRadius: 999,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'transparent',
+              zIndex: 1,
+            }}
+          >
+            <Ionicons
+              name={focused ? (icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : icon}
+              size={22}
+              color={focused ? colors.axel : colors.inkMuted}
+            />
+          </View>
         </View>
-        <Text variant="micro" color={focused ? colors.axel : colors.inkMuted} style={{ fontSize: 11 }}>
+        <Text
+          variant="micro"
+          color={focused ? colors.axel : colors.inkMuted}
+          style={{ fontSize: 11, zIndex: 1 }}
+        >
           {label}
         </Text>
       </PressableScale>
     )
   }
 
-  // Path: barra com semicírculo côncavo no centro
   const w = 360
   const mid = w / 2
   const notchPath = `
@@ -160,6 +200,7 @@ const styles = StyleSheet.create({
   barOuter: {
     height: BAR_H,
     justifyContent: 'flex-end',
+    overflow: 'visible',
   },
   barInner: {
     flexDirection: 'row',
@@ -168,7 +209,8 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
-    overflow: 'hidden',
+    // visible para o holofote do tab ativo não ser cortado
+    overflow: 'visible',
   },
   side: {
     flex: 1,
@@ -181,6 +223,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 1,
+  },
+  tabInner: {
+    width: 56,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    overflow: 'visible',
+  },
+  spotlightWrap: {
+    position: 'absolute',
+    top: -14,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    height: 52,
+    zIndex: 0,
   },
   fab: {
     position: 'absolute',

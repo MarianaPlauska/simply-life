@@ -109,7 +109,7 @@ export function Rule503020Section({
               />
               <div
                 className={`h-full rounded-sl transition-all duration-500 ${
-                  block.warn ? 'bg-atencao' : 'bg-accent'
+                  block.warn ? 'bg-atencao' : 'bg-finance'
                 }`}
                 style={{ width: `${Math.min(block.pct, 100)}%` }}
               />

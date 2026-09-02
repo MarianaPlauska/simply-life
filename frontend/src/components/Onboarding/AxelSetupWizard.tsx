@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { useNavigate, Navigate } from 'react-router-dom'
+import { useNavigate, Navigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTaskStore } from '../../store/useTaskStore'
@@ -65,6 +65,8 @@ const WIZARD_SHELL =
 export function AxelSetupWizard()
 {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const isEdit = searchParams.get('edit') === '1'
   const userStats = useTaskStore((s) => s.userStats)
   const accessibility = useTaskStore((s) => s.accessibility)
   const patchWorkspacePrefs = useTaskStore((s) => s.patchWorkspacePrefs)
@@ -102,7 +104,8 @@ export function AxelSetupWizard()
     }
   }, [workspacePrefsLoaded, fetchWorkspacePrefs])
 
-  if (workspacePrefsLoaded && isSetupComplete(workspacePrefs))
+  // /setup?edit=1 permite remontar o AXEL depois do primeiro setup
+  if (workspacePrefsLoaded && isSetupComplete(workspacePrefs) && !isEdit)
   {
     return <Navigate to="/" replace />
   }

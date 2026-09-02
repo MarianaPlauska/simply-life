@@ -83,7 +83,7 @@ export function NotesMoodStrip()
             type="button"
             disabled={saving || !pendingMood}
             onClick={() => void confirmMood()}
-            className="mt-2 w-full sm:w-auto px-4 py-2 rounded-sl bg-accent text-white font-mono text-[10px] uppercase disabled:opacity-40"
+            className="mt-2 w-full sm:w-auto px-4 py-2 min-h-11 rounded-sl bg-ink text-fundo font-mono text-[10px] uppercase disabled:opacity-40"
           >
             {saving ? 'Salvando…' : pendingMood ? `Registrar · ${pendingMood.label}` : 'Escolha o humor'}
           </button>

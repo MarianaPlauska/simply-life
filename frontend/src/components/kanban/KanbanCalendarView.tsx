@@ -156,7 +156,7 @@ export function KanbanCalendarView({ tarefas, onOpen }: KanbanCalendarViewProps)
                     <span
                       className={[
                         'font-mono text-[11px] w-6 h-6 flex items-center justify-center rounded-sl tabular-nums shrink-0',
-                        isToday ? 'bg-accent text-white font-semibold' : 'text-ink',
+                        isToday ? 'bg-ink text-fundo font-semibold' : 'text-ink',
                         overdue && !isToday ? 'text-urgente' : '',
                       ].join(' ')}
                     >

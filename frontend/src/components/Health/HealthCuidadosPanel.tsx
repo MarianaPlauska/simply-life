@@ -7,7 +7,6 @@ import { AcademyView } from './AcademyView'
 import { AcademyModeView } from './AcademyModeView'
 import { MedicamentosView } from './MedicamentosView'
 import { useTaskStore } from '../../store/useTaskStore'
-import { AXEL_NAV_SUB_ACTIVE, AXEL_NAV_SUB_IDLE } from '../../constants/axelSurfaces'
 
 const CUIDADOS_TABS: {
   id: CuidadosTab
@@ -21,28 +20,28 @@ const CUIDADOS_TABS: {
     label: 'Hidratação',
     short: 'Água',
     Icon: Droplets,
-    color: 'text-sky-400',
+    color: 'text-health',
   },
   {
     id: 'alimentacao',
     label: 'Alimentação',
     short: 'Comida',
     Icon: Beef,
-    color: 'text-amber-400',
+    color: 'text-health',
   },
   {
     id: 'academia',
     label: 'Academia',
     short: 'Treino',
     Icon: Dumbbell,
-    color: 'text-ink',
+    color: 'text-health',
   },
   {
     id: 'medicamentos',
     label: 'Medicamentos',
     short: 'Meds',
     Icon: Pill,
-    color: 'text-accent',
+    color: 'text-health',
   },
 ]
 
@@ -57,9 +56,9 @@ export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelPro
   const sessaoTreinoAtiva = useTaskStore((s) => s.sessaoTreinoAtiva)
 
   return (
-    <div className="space-y-4">
-      <nav aria-label="Cuidados diários">
-        <div className="flex gap-0.5 overflow-x-auto scrollbar-none -mx-0.5">
+    <div className="space-y-4 min-w-0">
+      <nav aria-label="Cuidados diários" className="relative z-10">
+        <div className="grid grid-cols-4 gap-0.5">
           {CUIDADOS_TABS.map(({ id, label, short, Icon, color }) =>
           {
             const ativo = active === id
@@ -68,11 +67,15 @@ export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelPro
                 key={id}
                 type="button"
                 onClick={() => onSelect(id)}
-                className={`${ativo ? AXEL_NAV_SUB_ACTIVE : AXEL_NAV_SUB_IDLE} min-h-[44px]`}
+                className={`inline-flex items-center justify-center gap-1 px-1 py-1.5 text-[12px] sm:text-[13px] font-sans transition-colors border-b-2 min-h-[44px] min-w-0 ${
+                  ativo
+                    ? 'border-ink text-ink font-semibold'
+                    : 'border-transparent text-ink-muted hover:text-ink hover:border-line'
+                }`}
               >
                 <Icon className={`w-3.5 h-3.5 shrink-0 ${ativo ? color : ''}`} />
-                <span className="sm:hidden">{short}</span>
-                <span className="hidden sm:inline">{label}</span>
+                <span className="sm:hidden truncate">{short}</span>
+                <span className="hidden sm:inline truncate">{label}</span>
               </button>
             )
           })}
@@ -80,20 +83,20 @@ export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelPro
       </nav>
 
       {active === 'hidratacao' && (
-        <section className="w-full">
+        <section className="w-full min-w-0 overflow-x-hidden">
           <WaterTrackerCard />
         </section>
       )}
 
       {active === 'alimentacao' && (
-        <section className="grid grid-cols-1 gap-4 w-full">
+        <section className="grid grid-cols-1 gap-4 w-full min-w-0 overflow-x-hidden">
           <ProteinGoalCard />
           <ProteinMealLog />
         </section>
       )}
 
       {active === 'academia' && (
-        <section>
+        <section className="min-w-0 overflow-x-hidden">
           {sessaoTreinoAtiva ? (
             <AcademyModeView />
           ) : (
@@ -103,7 +106,7 @@ export function HealthCuidadosPanel({ active, onSelect }: HealthCuidadosPanelPro
       )}
 
       {active === 'medicamentos' && (
-        <section>
+        <section className="min-w-0 overflow-x-hidden">
           <MedicamentosView />
         </section>
       )}

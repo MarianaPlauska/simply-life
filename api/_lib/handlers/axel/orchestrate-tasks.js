@@ -39,6 +39,10 @@ export default async function handler(req, res)
         groq: Boolean(process.env.GROQ_API_KEY),
         gemini: Boolean(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY),
       },
+      quota: {
+        orchestrate_per_minute: 30,
+        orchestrate_per_day: 40,
+      },
     });
   }
 
@@ -62,6 +66,22 @@ export default async function handler(req, res)
   if (!limited.ok)
   {
     return sendRateLimited(res, limited.retryAfter);
+  }
+
+  const dayLimited = await enforceRateLimit(req, {
+    route: 'orchestrate-tasks-day',
+    limit: 40,
+    windowSec: 86400,
+    key: user.id,
+  });
+  if (!dayLimited.ok)
+  {
+    res.setHeader('Retry-After', String(dayLimited.retryAfter));
+    return res.status(429).json({
+      error: 'Cota diária de IA no Hobby (40). O quadro segue com regras locais.',
+      retry_after: dayLimited.retryAfter,
+      source: 'local',
+    });
   }
 
   try

@@ -24,7 +24,6 @@ type ContextoMeta =
   id: DiarioContexto
   label: string
   Icon: typeof PenLine
-  grupo: 'reflexao' | 'prazo' | 'gasto'
   ativo: string
   inativo: string
 }
@@ -34,40 +33,35 @@ const CONTEXTOS: ContextoMeta[] = [
     id: 'geral',
     label: 'Geral',
     Icon: PenLine,
-    grupo: 'reflexao',
-    ativo: 'border-accent/40 bg-accent-muted/60 text-accent ring-1 ring-accent/25',
+    ativo: 'border-accent/40 bg-accent-muted/60 text-accent',
     inativo: 'border-line/80 bg-card/40 text-ink-muted hover:border-accent/25 hover:text-ink',
   },
   {
     id: 'saude',
     label: 'Saúde',
     Icon: HeartPulse,
-    grupo: 'reflexao',
-    ativo: 'border-rose-400/40 bg-rose-500/10 text-rose-300 ring-1 ring-rose-400/20',
+    ativo: 'border-rose-400/40 bg-rose-500/10 text-rose-300',
     inativo: 'border-line/80 bg-card/40 text-ink-muted hover:border-rose-400/30 hover:text-ink',
   },
   {
     id: 'tarefa',
     label: 'Tarefa',
     Icon: ListTodo,
-    grupo: 'prazo',
-    ativo: 'border-accent/40 bg-accent-muted/60 text-accent ring-1 ring-accent/25',
+    ativo: 'border-accent/40 bg-accent-muted/60 text-accent',
     inativo: 'border-line/80 bg-card/40 text-ink-muted hover:border-accent/25 hover:text-ink',
   },
   {
     id: 'lembrete',
     label: 'Lembrete',
     Icon: Bell,
-    grupo: 'prazo',
-    ativo: 'border-amber-400/40 bg-amber-500/10 text-amber-200 ring-1 ring-amber-400/20',
+    ativo: 'border-amber-400/40 bg-amber-500/10 text-amber-200',
     inativo: 'border-line/80 bg-card/40 text-ink-muted hover:border-amber-400/30 hover:text-ink',
   },
   {
     id: 'gasto',
     label: 'Gasto',
     Icon: Wallet,
-    grupo: 'gasto',
-    ativo: 'border-atencao/40 bg-atencao/10 text-atencao ring-1 ring-atencao/20',
+    ativo: 'border-atencao/40 bg-atencao/10 text-atencao',
     inativo: 'border-line/80 bg-card/40 text-ink-muted hover:border-atencao/30 hover:text-ink',
   },
 ]
@@ -79,14 +73,16 @@ const PLACEHOLDERS: Partial<Record<DiarioContexto, string>> = {
   saude: 'Sintoma, energia ou cuidado',
 }
 
-function ContextoCard({
+function ContextoChip({
   meta,
   selected,
   onSelect,
+  dense,
 }: {
   meta: ContextoMeta
   selected: boolean
   onSelect: () => void
+  dense?: boolean
 })
 {
   const { Icon, label, ativo, inativo } = meta
@@ -96,27 +92,29 @@ function ContextoCard({
       onClick={onSelect}
       aria-pressed={selected}
       className={[
-        'flex flex-col items-center justify-center gap-1.5 min-h-[52px] px-2 py-2.5 rounded-sl border transition-all',
+        'shrink-0 inline-flex items-center gap-1.5 rounded-pill border font-medium transition-colors',
+        dense ? 'min-h-[32px] px-2.5 text-[11px]' : 'min-h-[40px] px-3 text-[12px]',
         selected ? ativo : inativo,
       ].join(' ')}
     >
-      <Icon className="w-4 h-4 shrink-0" strokeWidth={1.75} aria-hidden />
-      <span className="text-[12px] font-medium leading-none">{label}</span>
+      <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+      {label}
     </button>
   )
 }
 
-export function HealthNoteComposer()
+interface HealthNoteComposerProps
+{
+  dense?: boolean
+}
+
+export function HealthNoteComposer({ dense = false }: HealthNoteComposerProps)
 {
   const criarEntradaDiario = useTaskStore((s) => s.criarEntradaDiario)
   const [conteudo, setConteudo] = useState('')
   const [contexto, setContexto] = useState<DiarioContexto>('geral')
   const [dataPrazo, setDataPrazo] = useState('')
   const [salvando, setSalvando] = useState(false)
-
-  const reflexao = CONTEXTOS.filter((c) => c.grupo === 'reflexao')
-  const prazo = CONTEXTOS.filter((c) => c.grupo === 'prazo')
-  const gasto = CONTEXTOS.find((c) => c.grupo === 'gasto')!
 
   const previewDatas = extractDatesFromText(
     dataPrazo ? `${conteudo}\n${dataPrazo.split('-').reverse().join('/')}` : conteudo,
@@ -139,55 +137,29 @@ export function HealthNoteComposer()
   const mostraPrazo = contexto === 'lembrete' || contexto === 'tarefa'
 
   return (
-    <section className="sl-panel p-4 sm:p-5 space-y-4 border border-accent/10">
-      <h2 className={`font-display text-base ${AXEL_TEXT_PRIMARY}`}>Nova anotação</h2>
+    <section className={`sl-panel border border-line/80 space-y-3 ${dense ? 'p-3 sm:p-4' : 'p-4 sm:p-5 space-y-4 border-accent/10'}`}>
+      <h2 className={`font-sans font-semibold ${dense ? 'text-[15px]' : 'font-display text-base'} ${AXEL_TEXT_PRIMARY}`}>
+        Nova anotação
+      </h2>
 
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <p className={`font-mono text-[9px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-            Reflexão
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {reflexao.map((meta) => (
-              <ContextoCard
-                key={meta.id}
-                meta={meta}
-                selected={contexto === meta.id}
-                onSelect={() => setContexto(meta.id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <p className={`font-mono text-[9px] uppercase tracking-wide ${AXEL_TEXT_SECONDARY}`}>
-            Com prazo
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {prazo.map((meta) => (
-              <ContextoCard
-                key={meta.id}
-                meta={meta}
-                selected={contexto === meta.id}
-                onSelect={() => setContexto(meta.id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <ContextoCard
-          meta={gasto}
-          selected={contexto === 'gasto'}
-          onSelect={() => setContexto('gasto')}
-        />
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5 -mx-0.5 px-0.5">
+        {CONTEXTOS.map((meta) => (
+          <ContextoChip
+            key={meta.id}
+            meta={meta}
+            selected={contexto === meta.id}
+            onSelect={() => setContexto(meta.id)}
+            dense={dense}
+          />
+        ))}
       </div>
 
       <textarea
         placeholder={PLACEHOLDERS[contexto] ?? 'Como foi o dia?'}
         value={conteudo}
         onChange={(e) => setConteudo(e.target.value)}
-        rows={4}
-        className={`w-full resize-none min-h-[88px] ${AXEL_FIELD_INPUT}`}
+        rows={dense ? 3 : 4}
+        className={`w-full resize-none ${dense ? 'min-h-[72px]' : 'min-h-[88px]'} ${AXEL_FIELD_INPUT}`}
       />
 
       {mostraPrazo && (
@@ -201,7 +173,7 @@ export function HealthNoteComposer()
               type="date"
               value={dataPrazo}
               onChange={(e) => setDataPrazo(e.target.value)}
-              className={`flex-1 min-h-[44px] bg-transparent border-0 outline-none text-sm text-ink`}
+              className="flex-1 min-h-[40px] bg-transparent border-0 outline-none text-sm text-ink"
             />
           </div>
         </label>
@@ -213,12 +185,12 @@ export function HealthNoteComposer()
         </p>
       )}
 
-      <div className="flex justify-end pt-1">
+      <div className="flex justify-end pt-0.5">
         <button
           type="button"
           onClick={() => void handleSubmit()}
           disabled={salvando || !conteudo.trim()}
-          className={`inline-flex items-center gap-1.5 px-4 py-2.5 min-h-[44px] disabled:opacity-40 ${AXEL_BTN_PRIMARY_COMPACT}`}
+          className={`inline-flex items-center gap-1.5 px-4 py-2 disabled:opacity-40 ${dense ? 'min-h-[40px] text-[12px]' : 'min-h-[44px]'} ${AXEL_BTN_PRIMARY_COMPACT}`}
         >
           <Send className="w-3.5 h-3.5" />
           {salvando ? 'Salvando…' : 'Salvar'}

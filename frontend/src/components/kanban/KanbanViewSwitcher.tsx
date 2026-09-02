@@ -1,7 +1,7 @@
-import { CalendarDays, ChartGantt, LayoutGrid, List } from 'lucide-react'
+import { CalendarClock, CalendarDays, ChartGantt, LayoutGrid, List } from 'lucide-react'
 import { ICON } from '../../design/identityTokens'
 
-export type KanbanViewMode = 'board' | 'list' | 'calendar' | 'gantt'
+export type KanbanViewMode = 'board' | 'list' | 'timeline' | 'calendar' | 'gantt'
 
 interface KanbanViewSwitcherProps
 {
@@ -12,15 +12,33 @@ interface KanbanViewSwitcherProps
 const MODES: { id: KanbanViewMode; label: string; Icon: typeof LayoutGrid }[] = [
   { id: 'board', label: 'Quadro', Icon: LayoutGrid },
   { id: 'list', label: 'Lista', Icon: List },
+  { id: 'timeline', label: 'Linha do tempo', Icon: CalendarClock },
   { id: 'calendar', label: 'Calendário', Icon: CalendarDays },
-  { id: 'gantt', label: 'Gantt', Icon: ChartGantt },
+  { id: 'gantt', label: 'Período', Icon: ChartGantt },
 ]
+
+export function parseKanbanViewParam(raw: string | null): KanbanViewMode
+{
+  if (raw === 'timeline' || raw === 'linha-do-tempo') return 'timeline'
+  if (raw === 'gantt' || raw === 'periodo') return 'gantt'
+  if (raw === 'list' || raw === 'lista') return 'list'
+  if (raw === 'calendar' || raw === 'calendario') return 'calendar'
+  if (raw === 'board' || raw === 'quadro') return 'board'
+  return 'board'
+}
+
+export function kanbanViewParam(mode: KanbanViewMode): string
+{
+  if (mode === 'gantt') return 'periodo'
+  if (mode === 'timeline') return 'timeline'
+  return mode
+}
 
 export function KanbanViewSwitcher({ mode, onChange }: KanbanViewSwitcherProps)
 {
   return (
     <div
-      className="inline-flex items-center gap-0.5 shrink-0"
+      className="inline-flex items-center gap-0.5 shrink-0 overflow-x-auto scrollbar-none max-w-[min(100%,14rem)] sm:max-w-none"
       role="tablist"
       aria-label="Modo de visualização"
     >

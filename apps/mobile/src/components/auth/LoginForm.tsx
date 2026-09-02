@@ -14,8 +14,10 @@ export type AuthMode = 'login' | 'register'
 type Props = {
   mode: AuthMode
   onModeChange: (mode: AuthMode) => void
-  /** Exibe título/subtítulo dentro do formulário (desktop). No mobile o AuthHeader já cobre. */
+  /** Exibe título/subtítulo dentro do formulário */
   showHeading?: boolean
+  /** wave = form flat no sheet branco (login mobile ref) */
+  variant?: 'card' | 'wave'
 }
 
 type FieldErrors = {
@@ -26,9 +28,10 @@ type FieldErrors = {
 }
 
 /** Formulário de login/cadastro — estrutura rotulada (referência split-screen) */
-export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
+export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'card' }: Props)
 {
   const { colors, space, elevation } = useTheme()
+  const isWave = variant === 'wave'
   const signIn = useAuthStore((s) => s.signIn)
   const signUp = useAuthStore((s) => s.signUp)
   const enterGuest = useAuthStore((s) => s.enterGuest)
@@ -128,7 +131,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
         justifyContent: 'center',
       }}
     >
-      <Text variant="label" color={colors.axel}>
+      <Text variant="label" color={colors.inkMuted}>
         {show ? 'Ocultar' : 'Mostrar'}
       </Text>
     </Pressable>
@@ -138,23 +141,8 @@ export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
   const subtitle =
     mode === 'login' ? 'Use seu email e senha.' : 'Crie sua conta para sincronizar.'
 
-  return (
-    <View style={{ gap: space.lg, width: '100%', maxWidth: 480 }}>
-      {showHeading ? (
-        <View style={{ gap: space.xs }}>
-          <Text variant="hero" style={{ letterSpacing: -0.5 }}>
-            {title}
-          </Text>
-          <Text variant="body" muted>
-            {subtitle}
-          </Text>
-        </View>
-      ) : null}
-
-      <Card
-        tone="elevated"
-        style={{ gap: space.md, paddingVertical: space.lg, ...elevation.card }}
-      >
+  const fields = (
+    <View style={{ gap: space.md }}>
         {!supabaseConfigured ? (
           <Text variant="caption" muted>
             Modo offline — use convidado ou qualquer email.
@@ -256,14 +244,14 @@ export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
                   height: 20,
                   borderRadius: 4,
                   borderWidth: remember ? 0 : 1.5,
-                  borderColor: colors.axel,
-                  backgroundColor: remember ? colors.axel : 'transparent',
+                  borderColor: colors.ink,
+                  backgroundColor: remember ? colors.ink : 'transparent',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
                 {remember ? (
-                  <Ionicons name="checkmark" size={14} color={colors.axelOnFill} />
+                  <Ionicons name="checkmark" size={14} color={colors.canvas} />
                 ) : null}
               </View>
               <Text variant="caption" color={colors.ink}>
@@ -276,7 +264,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
               accessibilityRole="link"
               style={{ minHeight: 44, justifyContent: 'center' }}
             >
-              <Text variant="label" color={colors.axel}>
+              <Text variant="label" color={colors.inkMuted}>
                 Esqueceu a senha?
               </Text>
             </Pressable>
@@ -298,16 +286,44 @@ export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
           label={mode === 'login' ? 'Entrar' : 'Criar conta'}
           loading={loading}
           onPress={() => void onSubmit()}
-          style={{ width: '100%', borderRadius: 999 }}
+          style={{ width: '100%', borderRadius: isWave ? 14 : 999, marginTop: space.sm }}
         />
 
         <PrimaryButton
           label="Continuar como convidado"
           variant="ghost"
           onPress={enterGuest}
-          style={{ width: '100%', borderRadius: 999 }}
+          style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
         />
-      </Card>
+    </View>
+  )
+
+  return (
+    <View style={{ gap: space.lg, width: '100%', maxWidth: 480 }}>
+      {showHeading ? (
+        <View style={{ gap: space.xs, marginBottom: space.xs }}>
+          <Text
+            variant="hero"
+            style={{ letterSpacing: -0.5, fontSize: isWave ? 28 : undefined }}
+          >
+            {title}
+          </Text>
+          <Text variant="body" muted>
+            {subtitle}
+          </Text>
+        </View>
+      ) : null}
+
+      {isWave ? (
+        fields
+      ) : (
+        <Card
+          tone="elevated"
+          style={{ gap: space.md, paddingVertical: space.lg, ...elevation.card }}
+        >
+          {fields}
+        </Card>
+      )}
 
       <View
         style={{
@@ -333,7 +349,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true }: Props)
           accessibilityRole="link"
           style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}
         >
-          <Text variant="bodyStrong" color={colors.axel}>
+          <Text variant="bodyStrong" color={isWave ? colors.axel : colors.ink}>
             {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
           </Text>
         </Pressable>

@@ -175,7 +175,7 @@ export function FinanceQuickPresets({ onLaunched }: FinanceQuickPresetsProps)
             <button
               type="button"
               onClick={confirmPending}
-              className={`mt-3 w-full py-2 font-mono text-[10px] uppercase bg-accent hover:bg-accent-hover text-white font-bold rounded-sl`}
+              className={`mt-3 w-full min-h-11 py-2 font-mono text-[10px] uppercase bg-ink text-fundo font-bold rounded-sl`}
             >
               Lançar
             </button>

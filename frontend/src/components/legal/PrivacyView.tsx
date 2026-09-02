@@ -6,7 +6,7 @@ export function PrivacyView()
   return (
     <article className={`${AXEL_PAGE_SHELL} max-w-2xl mx-auto py-10 px-5`}>
       <h1 className={`text-2xl font-semibold mb-2 ${AXEL_TEXT_PRIMARY}`}>Política de Privacidade</h1>
-      <p className={`text-[13px] mb-8 ${AXEL_TEXT_SECONDARY}`}>Simply-Life OS · projeto pessoal / portfólio · atualizado em agosto de 2026</p>
+      <p className={`text-[13px] mb-8 ${AXEL_TEXT_SECONDARY}`}>Simply-Life OS · produto pessoal · atualizado em agosto de 2026</p>
 
       <div className={`space-y-5 text-[14px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
         <p>
@@ -38,8 +38,9 @@ export function PrivacyView()
         </ul>
         <h2 className={`text-[15px] font-semibold ${AXEL_TEXT_PRIMARY}`}>Seus direitos</h2>
         <p>
-          Você pode exportar ou apagar seus dados pela conta, ou pedir exclusão pelo e-mail
-          associado ao cadastro. Este é um projeto de portfólio, não um produto comercial.
+          Você pode exportar ou apagar os dados em Perfil → Os seus dados.
+          Também pode pedir exclusão pelo e-mail da conta. Humores e finanças
+          não saem do produto.
         </p>
         <p>
           <Link to="/termos" className="text-accent hover:underline">Termos de uso</Link>

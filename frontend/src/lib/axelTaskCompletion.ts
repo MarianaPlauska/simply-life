@@ -1,4 +1,5 @@
 import { toast } from 'sonner'
+import { hapticTap } from './haptic'
 import { celebrateTaskComplete } from './axelCelebration'
 import { dismissBillForTask } from './financeBillOrchestrator'
 import { isMainQuestTask, mainQuestBonusXp } from './mainQuest'
@@ -15,6 +16,8 @@ const FOCUS_XP_BONUS = XP_FOCUS_SESSION
 export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
 {
   if (tarefa.status === 'concluida') return
+
+  hapticTap()
 
   const store = useTaskStore.getState()
   const score = tarefa.score_urgencia ?? 0
@@ -78,12 +81,9 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
     store.patchTarefaLocal(tarefa.id, { status: 'concluida' })
   }
 
-  const xpAmount = xpFromTaskScore(score)
-  await store.addXP('foco', xpAmount)
-
   store.recordAchievement(tarefa.id, tarefa.titulo, focusMinutes, tarefa.created_at)
 
-  const baseXp = xpAmount
+  const baseXp = xpFromTaskScore(score)
   if (isMainQuestTask(tarefa.id))
   {
     const bonus = mainQuestBonusXp(baseXp)

@@ -11,6 +11,21 @@ import {
   patchMlPresetChange,
   registrosMl,
 } from './waterHydration'
+import { isAguaRitualComplete } from './healthRitual'
+import { hapticTap } from './haptic'
+
+/** Vibra só quando o copo extra fecha o ritual de hidratação */
+export function hapticWaterGoalIfReached(
+  prevCount: number,
+  nextCount: number,
+  meta: number,
+): void
+{
+  if (!isAguaRitualComplete(prevCount, meta) && isAguaRitualComplete(nextCount, meta))
+  {
+    hapticTap()
+  }
+}
 
 /** Estado fresco do hábito água — evita patch com config desatualizada. */
 export function freshAguaHabit(fallback?: HabitoDiario): HabitoDiario | undefined
@@ -78,6 +93,8 @@ export async function addOneWaterCup(): Promise<number | null>
   const fresh = freshAguaHabit(ensured)
   const ml = mlPorCopo(fresh)
   const next = [...registrosMl(fresh), ml]
+  const meta = fresh?.meta_diaria ?? DEFAULT_AGUA_COPOS
   await useTaskStore.getState().setAguaRegistros(ensured.id, next)
+  hapticWaterGoalIfReached(registrosMl(fresh).length, next.length, meta)
   return next.length
 }

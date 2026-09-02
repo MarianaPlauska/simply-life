@@ -81,6 +81,8 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
       return
     }
     await iniciarTreino(h.id, titulo, Math.max(minutos, 1))
+    const { emitCareRegistered } = await import('../../../lib/healthVitality')
+    emitCareRegistered()
     navigate('/saude#academia')
   }
 
@@ -93,9 +95,9 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
           className="w-full flex items-center justify-between gap-3 rounded-sl border border-dashed border-accent/35 bg-accent-muted/10 px-4 py-3 text-left hover:bg-accent-muted/20 transition-colors"
         >
           <div>
-            <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Nenhum treino para hoje</p>
+            <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Ainda sem treino para hoje</p>
             <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              Em Configurar, escolha semana ou mês e monte o dia como uma lista.
+              Monte o dia em Configurar — leva poucos minutos.
             </p>
           </div>
           <Settings2 className="w-4 h-4 text-accent shrink-0" />
@@ -117,7 +119,7 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
             <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               {temTreinoMontado
                 ? `Meta: ${planoHoje?.meta_minutos ?? DEFAULT_TREINO_MINUTOS} min · ${concluidasHoje} sessão(ões) hoje`
-                : 'Configure em Configurar para ver o plano de hoje'}
+                : 'Configure o plano quando quiser — sem pressa'}
             </p>
           </div>
           <span className="font-mono text-[10px] text-ink-muted tabular-nums">
@@ -129,10 +131,10 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
           type="button"
           onClick={() => void handleStart()}
           disabled={!temTreinoMontado && !sessaoTreinoAtiva}
-          className="w-full min-h-[48px] flex items-center justify-center gap-2 py-3 rounded-sl bg-accent/15 border border-accent/30 text-ink font-mono text-[11px] uppercase hover:bg-accent/20 disabled:opacity-40 transition-colors"
+          className="w-full min-h-[48px] flex items-center justify-center gap-2 py-3 rounded-sl bg-health-muted border border-health/30 text-ink font-mono text-[11px] uppercase hover:bg-health-muted/80 disabled:opacity-40 transition-colors"
         >
           <Play className="w-4 h-4" />
-          {sessaoTreinoAtiva ? 'Continuar cronômetro' : 'Iniciar com cronômetro'}
+          {sessaoTreinoAtiva ? 'Continuar cronômetro' : 'Iniciar treino'}
         </button>
       </section>
 

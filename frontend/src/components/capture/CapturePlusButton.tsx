@@ -1,5 +1,7 @@
 import { Plus, X } from 'lucide-react'
-import { AXEL_BTN_PRIMARY, AXEL_HEADER_ACTION, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
+import { useLocation } from 'react-router-dom'
+import { AXEL_HEADER_ACTION } from '../../constants/axelSurfaces'
+import { captureIntentFromPath, captureIntentLabel } from '../../lib/captureIntent'
 import { useCapture } from './CaptureProvider'
 
 interface CapturePlusButtonProps
@@ -10,7 +12,9 @@ interface CapturePlusButtonProps
 export function CapturePlusButton({ placement }: CapturePlusButtonProps)
 {
   const { sheetOpen, toggleSheet } = useCapture()
-  const label = sheetOpen ? 'Fechar captura' : 'Capturar tarefa, gasto ou água'
+  const pathname = useLocation().pathname
+  const intent = captureIntentFromPath(pathname)
+  const label = captureIntentLabel(intent, sheetOpen)
 
   if (placement === 'header')
   {
@@ -20,7 +24,7 @@ export function CapturePlusButton({ placement }: CapturePlusButtonProps)
         onClick={toggleSheet}
         aria-expanded={sheetOpen}
         aria-label={label}
-        title="Capturar"
+        title={label}
         className={`hidden md:inline-flex ${AXEL_HEADER_ACTION}`}
       >
         {sheetOpen ? <X size={20} strokeWidth={1.75} /> : <Plus size={20} strokeWidth={1.75} />}
@@ -34,7 +38,8 @@ export function CapturePlusButton({ placement }: CapturePlusButtonProps)
       onClick={toggleSheet}
       aria-expanded={sheetOpen}
       aria-label={label}
-      className={`relative z-10 -mt-4 w-11 h-11 rounded-full shadow-sl-lg flex items-center justify-center shrink-0 ${AXEL_BTN_PRIMARY} ${AXEL_TOUCH_PRESS}`}
+      title={label}
+      className="relative z-10 w-10 h-10 rounded-full border border-line bg-elevated text-ink flex items-center justify-center shrink-0 active:scale-95 transition-transform"
     >
       {sheetOpen ? <X size={18} strokeWidth={2} /> : <Plus size={20} strokeWidth={2} />}
     </button>

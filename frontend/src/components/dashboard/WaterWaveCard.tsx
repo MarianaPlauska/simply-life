@@ -1,11 +1,12 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Droplets, ChevronRight, Plus, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AGUA_PRESET } from '../../constants/healthPresets'
 import { isAguaRitualComplete } from '../../lib/healthRitual'
 import { WaterCupGrid } from '../Health/WaterCupGrid'
-import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, MODULE_WASH, MODULE_HERO } from '../../constants/axelSurfaces'
+import { ActionFeedbackNumber } from '../ui/ActionFeedbackNumber'
 import {
   DEFAULT_AGUA_COPOS,
   DEFAULT_ML_POR_COPO,
@@ -18,7 +19,7 @@ import {
   resolveMlPresets,
   totalMlHoje,
 } from '../../lib/waterHydration'
-import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset } from '../../lib/waterHydrationActions'
+import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset, hapticWaterGoalIfReached } from '../../lib/waterHydrationActions'
 
 interface WaterWaveCardProps
 {
@@ -47,6 +48,7 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
   const extra = Math.max(0, current - goal)
   const done = current >= goal && goal > 0
   const ritualOk = isAguaRitualComplete(current, goal)
+  const [waterPulse, setWaterPulse] = useState(0)
 
   useEffect(() =>
   {
@@ -73,9 +75,15 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
 
   const persistEntries = async (next: number[]) =>
   {
+    const prevLen = entries.length
     const ensured = agua ?? await ensureHealthHabit(AGUA_PRESET)
     if (!ensured) return
     await setAguaRegistros(ensured.id, next)
+    hapticWaterGoalIfReached(current, next.length, goal)
+    if (next.length !== prevLen)
+    {
+      setWaterPulse((k) => k + 1)
+    }
   }
 
   const handleDefaultMl = async (ml: number) =>
@@ -112,20 +120,31 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
   {
     return (
       <div className={className} aria-label="Hidratação hoje">
-        <div className="flex items-center justify-between gap-2">
-          <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
-            {litrosLine} · {current}/{goal} copos
-          </p>
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[15px] font-medium text-ink">Água</p>
+            <div className={`${MODULE_WASH.health} mt-1.5 inline-block`}>
+              <p className={MODULE_HERO.health}>
+                <ActionFeedbackNumber pulseToken={waterPulse}>
+                  {current}
+                </ActionFeedbackNumber>
+                <span className="text-[14px] font-sans font-normal ml-1 text-ink-muted">/{goal}</span>
+              </p>
+            </div>
+            <p className={`text-[13px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
+              {litrosLine}
+            </p>
+          </div>
           <button
             type="button"
             onClick={() => void handleQuickAdd()}
-            className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1 text-[14px] font-semibold text-health hover:text-ink active:scale-95 transition-colors"
+            className="shrink-0 inline-flex min-h-11 items-center justify-center gap-1.5 rounded-sl border border-health/30 bg-health-muted px-3 text-[14px] font-semibold text-ink hover:bg-health-muted/80 active:scale-95 transition-colors"
           >
             <Plus size={17} strokeWidth={2} aria-hidden="true" />
             {defaultMl} ml
           </button>
         </div>
-        <div className="mt-2">
+        <div className="mt-2.5">
           <WaterCupGrid
             entries={entries}
             goal={displayGoal}
@@ -134,6 +153,15 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
             mlPresets={mlPresets}
             onEntriesChange={(next) => void persistEntries(next)}
             compact
+          />
+        </div>
+        <div
+          className="mt-2.5 h-2 overflow-hidden rounded-full bg-chrome"
+          aria-label={`${current} de ${goal} copos`}
+        >
+          <div
+            className="h-full bg-health transition-all duration-500"
+            style={{ width: `${goal > 0 ? Math.min(100, Math.round((current / goal) * 100)) : 0}%` }}
           />
         </div>
       </div>
@@ -220,7 +248,7 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
             <button
               type="button"
               onClick={() => void handleClear()}
-              className="inline-flex items-center justify-center w-8 h-8 sm:w-7 sm:h-7 rounded-sl border border-line text-ink-muted hover:text-atencao hover:border-atencao/40 hover:bg-atencao/5 transition-colors"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-sl border border-line text-ink-muted hover:text-atencao hover:border-atencao/40 hover:bg-atencao/5 transition-colors"
               title="Zerar água de hoje"
               aria-label="Zerar água de hoje"
             >
@@ -255,7 +283,7 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
           <button
             type="button"
             onClick={() => void handleQuickAdd()}
-            className={`mt-3 w-full sm:w-auto sm:max-w-[9.5rem] inline-flex items-center justify-center gap-1.5 sm:gap-1 py-2 sm:py-1.5 px-3 sm:px-2.5 rounded-sl text-[13px] font-medium border border-health/30 bg-health-muted text-ink hover:bg-health-muted/80 transition-colors ${
+            className={`mt-3 w-full sm:w-auto sm:max-w-[9.5rem] inline-flex items-center justify-center gap-1.5 sm:gap-1 min-h-[44px] py-2 sm:py-1.5 px-3 sm:px-2.5 rounded-sl text-[13px] font-medium border border-health/30 bg-health-muted text-ink hover:bg-health-muted/80 transition-colors ${
               done ? 'border-dashed' : ''
             }`}
           >

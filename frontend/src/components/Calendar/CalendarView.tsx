@@ -1,7 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Clock, MapPin, CalendarDays, Loader2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { ChevronLeft, ChevronRight, Clock, MapPin, CalendarDays } from 'lucide-react';
 import { useTaskStore, type CalendarEvent } from '../../store/useTaskStore';
-import { AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
+import { AXEL_PAGE_GUTTER, AXEL_PAGE_SHELL } from '../../constants/axelSurfaces';
+import { tarefasToCalendarEvents } from '../../lib/tarefasToCalendarEvents';
+import { PageIntro } from '../layout/PageIntro';
 
 /* ── Adapt store events to local display model ── */
 interface DisplayEvent {
@@ -14,14 +16,12 @@ interface DisplayEvent {
 }
 
 const EVENT_COLORS: Record<string, { pill: string; dot: string; text: string }> = {
-  blue: { pill: 'bg-blue-500/15 text-blue-400 border-blue-500/20', dot: 'bg-blue-500', text: 'text-blue-400' },
-  red: { pill: 'bg-red-500/15 text-red-400 border-red-500/20', dot: 'bg-red-500', text: 'text-red-400' },
-  amber: { pill: 'bg-amber-500/15 text-amber-400 border-amber-500/20', dot: 'bg-amber-500', text: 'text-amber-400' },
-  emerald: { pill: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20', dot: 'bg-emerald-500', text: 'text-emerald-400' },
-  violet: { pill: 'bg-violet-500/15 text-violet-400 border-violet-500/20', dot: 'bg-violet-500', text: 'text-violet-400' },
-};
+  tasks: { pill: 'bg-tasks-muted text-tasks border-tasks/25', dot: 'bg-tasks', text: 'text-tasks' },
+  health: { pill: 'bg-health-muted text-health border-health/25', dot: 'bg-health', text: 'text-health' },
+  finance: { pill: 'bg-finance-muted text-finance border-finance/25', dot: 'bg-finance', text: 'text-finance' },
+}
 
-const COLOR_CYCLE = ['blue', 'emerald', 'amber', 'violet', 'red'];
+const COLOR_CYCLE = ['tasks', 'health', 'finance']
 
 function storeToDisplay(events: CalendarEvent[]): DisplayEvent[] {
   return events.map((ev, i) => {
@@ -53,19 +53,13 @@ export function CalendarView() {
   const [month, setMonth] = useState(today.getMonth());
   const [selectedDay, setSelectedDay] = useState<number | null>(today.getDate());
 
+  const tarefas = useTaskStore((s) => s.tarefas);
   const storeEvents = useTaskStore((s) => s.calendarEvents);
-  const loading = useTaskStore((s) => s.calendarLoading);
-  const error = useTaskStore((s) => s.calendarError);
-  const googleConnected = useTaskStore((s) => s.googleCalendarConnected);
-  const fetchCalendarEvents = useTaskStore((s) => s.fetchCalendarEvents);
-  const checkGoogleStatus = useTaskStore((s) => s.checkGoogleStatus);
 
-  useEffect(() => {
-    checkGoogleStatus().then(() => fetchCalendarEvents());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const displayEvents = useMemo(() => storeToDisplay(storeEvents), [storeEvents]);
+  const displayEvents = useMemo(() => {
+    const fromTasks = tarefasToCalendarEvents(tarefas);
+    return storeToDisplay([...fromTasks, ...storeEvents]);
+  }, [tarefas, storeEvents]);
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfWeek(year, month);
@@ -103,50 +97,40 @@ export function CalendarView() {
     day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
   return (
-    <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16`}>
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Calendário</h1>
-          <p className="text-sm text-zinc-500 mt-1">
-            {googleConnected ? 'Sincronizado com Google Calendar' : 'Conecte o Google Calendar nas configurações'}
-          </p>
-        </div>
-        {loading && <Loader2 className="w-5 h-5 text-zinc-500 animate-spin" />}
+    <div className={`${AXEL_PAGE_SHELL} ${AXEL_PAGE_GUTTER} pb-16`}>
+      <div className="mb-6">
+        <PageIntro
+          title="Calendário"
+          lede="Compromissos e prazos do dia."
+        />
       </div>
 
-      {error && (
-        <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
-          {error}
-        </div>
-      )}
-
-      {!googleConnected && !loading && storeEvents.length === 0 && (
-        <div className="mb-6 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-10 flex flex-col items-center gap-3 text-center">
-          <CalendarDays className="w-10 h-10 text-zinc-600" />
-          <p className="text-sm text-zinc-400">Nenhum evento disponível.</p>
-          <p className="text-xs text-zinc-600">Conecte sua conta Google em Configurações para sincronizar seus compromissos.</p>
+      {displayEvents.length === 0 && (
+        <div className="mb-6 rounded-sl border border-line bg-card p-10 flex flex-col items-center gap-3 text-center">
+          <CalendarDays className="w-10 h-10 text-ink-muted" />
+          <p className="text-sm text-ink-muted">Nenhum compromisso com data.</p>
+          <p className="text-xs text-ink-faint">Despeje a cabeça no + — o lote com horário aparece aqui.</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* ── Calendar Grid ── */}
-        <div className="lg:col-span-3 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-sm p-6">
+        <div className="lg:col-span-3 rounded-sl border border-line bg-card p-6">
          
           <div className="flex items-center justify-between mb-6">
-            <button onClick={prevMonth} className="p-2 rounded-xl hover:bg-zinc-800/60 transition-colors">
-              <ChevronLeft className="w-5 h-5 text-zinc-400" />
+            <button type="button" onClick={prevMonth} className="p-2 rounded-sl hover:bg-chrome min-h-11 min-w-11 inline-flex items-center justify-center">
+              <ChevronLeft className="w-5 h-5 text-ink-muted" />
             </button>
-            <span className="text-[15px] font-semibold text-white capitalize">{monthLabel}</span>
-            <button onClick={nextMonth} className="p-2 rounded-xl hover:bg-zinc-800/60 transition-colors">
-              <ChevronRight className="w-5 h-5 text-zinc-400" />
+            <span className="text-[15px] font-semibold text-ink capitalize">{monthLabel}</span>
+            <button type="button" onClick={nextMonth} className="p-2 rounded-sl hover:bg-chrome min-h-11 min-w-11 inline-flex items-center justify-center">
+              <ChevronRight className="w-5 h-5 text-ink-muted" />
             </button>
           </div>
 
          
           <div className="grid grid-cols-7 mb-2">
             {WEEKDAYS.map((d) => (
-              <div key={d} className="text-center text-[11px] font-semibold text-zinc-500 uppercase tracking-wider py-2">
+              <div key={d} className="text-center text-[11px] font-semibold text-ink-muted uppercase tracking-wider py-2">
                 {d}
               </div>
             ))}
@@ -168,15 +152,15 @@ export function CalendarView() {
                   onClick={() => setSelectedDay(day)}
                   className={`aspect-square flex flex-col items-center justify-start pt-2 rounded-xl transition-all relative ${
                     selected
-                      ? 'bg-ia/10 ring-1 ring-ia/30'
-                      : 'hover:bg-zinc-800/30'
+                      ? 'bg-chrome ring-1 ring-line'
+                      : 'hover:bg-chrome/60'
                   }`}
                 >
                   <span
                     className={`text-[13px] font-semibold w-7 h-7 flex items-center justify-center rounded-full ${
                       isToday(day)
-                        ? 'bg-ia text-white'
-                        : selected ? 'text-ia' : 'text-zinc-300'
+                        ? 'bg-ink text-fundo'
+                        : selected ? 'text-ink' : 'text-ink-muted'
                     }`}
                   >
                     {day}
@@ -184,7 +168,7 @@ export function CalendarView() {
                   {dayEvents.length > 0 && (
                     <div className="flex gap-0.5 mt-1">
                       {dayEvents.slice(0, 3).map((ev) => (
-                        <div key={ev.id} className={`w-1.5 h-1.5 rounded-full ${(EVENT_COLORS[ev.cor] || EVENT_COLORS.blue).dot}`} />
+                        <div key={ev.id} className={`w-1.5 h-1.5 rounded-full ${(EVENT_COLORS[ev.cor] || EVENT_COLORS.tasks).dot}`} />
                       ))}
                     </div>
                   )}
@@ -195,21 +179,21 @@ export function CalendarView() {
         </div>
 
       
-        <div className="lg:col-span-1 rounded-2xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-sm p-5">
-          <h3 className="text-[14px] font-semibold text-white mb-4">
+        <div className="lg:col-span-1 rounded-sl border border-line bg-card p-5">
+          <h3 className="text-[14px] font-semibold text-ink mb-4">
             {selectedDay
               ? new Date(year, month, selectedDay).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', weekday: 'long' })
               : 'Selecione um dia'}
           </h3>
 
           {selectedEvents.length === 0 ? (
-            <p className="text-[12px] text-zinc-500">Nenhum evento neste dia.</p>
+            <p className="text-[12px] text-ink-muted">Nenhum evento neste dia.</p>
           ) : (
             <div className="space-y-3">
               {selectedEvents
                 .sort((a, b) => a.hora.localeCompare(b.hora))
                 .map((ev) => {
-                  const colors = EVENT_COLORS[ev.cor] || EVENT_COLORS.blue;
+                  const colors = EVENT_COLORS[ev.cor] || EVENT_COLORS.tasks;
                   return (
                     <div
                       key={ev.id}

@@ -1,105 +1,96 @@
 /**
- * Identidade visual Simply-Life / AXEL — fonte da verdade.
+ * Identidade visual Simply-Life / AXEL — legado web (PWA).
+ *
+ * Fonte da verdade do redesign mobile: packages/ui-tokens (AXEL Premium).
+ * Ver docs/AXEL_PREMIUM.md e docs/PWA_DESTINO.md.
  *
  * Tokens ligados em index.css, tailwind.config.js e fontes.
- * Home (Centro de Comando) é a primeira tela com hierarquia voz vs dado.
- *
- * Princípio: o laranja é a voz do AXEL. Módulos de dados têm cor
- * própria. Números pesam mais que molduras. Emoji não é ícone.
+ * Princípio: o laranja é a voz do AXEL. Módulos de dados têm cor própria.
  */
 
-export const IDENTITY_VERSION = '2026.08-voice-v1'
+export const IDENTITY_VERSION = '2026.09-drive-p2p-v1'
+export const PREMIUM_TOKENS_PATH = '@simply-life/ui-tokens'
 
-/* ── Superfícies (tema escuro = identidade principal) ─────── */
+/* ── Superfícies (tema escuro = P2P preto + laranja) ─────────── */
 
 export const COLOR = {
-  /** Grafite quente — noite em papel, não OLED #000 */
-  canvas: '#1E1C18',
-  /** Entre o fundo e o card — nav, chrome, bottom bar */
-  chrome: '#25221D',
-  /** Card de dado — um tom acima do fundo, sem “placa flutuante” */
-  surface: '#2C2923',
-  /** Só o momento em que o AXEL fala — mais aberto, sem a mesma borda */
-  voice: '#342F28',
-  /** Hover / drawer / popover */
-  elevated: '#3E3931',
+  canvas: '#0A0A0C',
+  chrome: '#141418',
+  surface: '#141418',
+  /** Sidebar navy black */
+  voice: '#0D1020',
+  elevated: '#1C1C24',
 
-  /** Branco quebrado — texto e números */
-  ink: '#EDE7DD',
-  /**
-   * Secundário ainda AA (≥4.5:1 em surface).
-   * Mais escuro que isso vira “cinza morto no preto”.
-   */
-  inkMuted: '#A39B90',
-  /** Labels 11px+ — piso AA (~5:1 em canvas) */
-  inkFaint: '#8F877C',
+  ink: '#F5F5F7',
+  inkMuted: '#9A9AA6',
+  inkFaint: '#6E6E78',
 
-  hairline: 'rgba(237, 231, 221, 0.10)',
-  hairlineStrong: 'rgba(237, 231, 221, 0.16)',
+  hairline: 'rgba(245, 245, 247, 0.10)',
+  hairlineStrong: 'rgba(255, 106, 43, 0.35)',
 
   /**
-   * Voz do AXEL. Proibido em botão genérico, tab ativa, badge de
-   * módulo, progresso de água, ícone de nav.
+   * Voz do AXEL — laranja vivo (refs P2P / Task).
    */
-  axel: '#E8734A',
-  axelHover: '#F0845C',
-  axelMuted: 'rgba(232, 115, 74, 0.14)',
-  /** Texto em preenchimento laranja — cream no laranja falha AA (~2.4:1) */
-  axelOnFill: '#1E1C18',
+  axel: '#FF6A2B',
+  axelHover: '#FF8A4C',
+  axelMuted: 'rgba(255, 106, 43, 0.18)',
+  axelOnFill: '#0A0A0C',
 
-  /** Saúde / hidratação / proteína / treino */
-  health: '#7FA37A',
-  healthMuted: 'rgba(127, 163, 122, 0.14)',
-  healthOnFill: '#1E1C18',
+  health: '#5FD39A',
+  healthMuted: 'rgba(95, 211, 154, 0.16)',
+  healthOnFill: '#0A0A0C',
 
-  /** Finanças */
-  finance: '#C9A15C',
-  financeMuted: 'rgba(201, 161, 92, 0.14)',
-  financeOnFill: '#1E1C18',
+  finance: '#F0B45A',
+  financeMuted: 'rgba(240, 180, 90, 0.16)',
+  financeOnFill: '#0A0A0C',
 
-  /**
-   * Tarefas / Kanban / execução.
-   * Sem este quarto tom, o Kanban volta a roubar o laranja do AXEL.
-   * Ardósia fria: contrasta com laranja, sálvia e ouro (todos quentes).
-   */
-  tasks: '#8B9BA8',
-  tasksMuted: 'rgba(139, 155, 168, 0.14)',
-  tasksOnFill: '#1E1C18',
+  tasks: '#8BA4C7',
+  tasksMuted: 'rgba(139, 164, 199, 0.16)',
+  tasksOnFill: '#0A0A0C',
 
-  /** Semântica de sistema — não competem com os módulos */
-  danger: '#D47878',
-  dangerMuted: 'rgba(212, 120, 120, 0.14)',
-  /** Conclusão genérica (não é o verde de saúde) */
-  done: '#B8A99A',
+  danger: '#FF6B7A',
+  dangerMuted: 'rgba(255, 107, 122, 0.14)',
+  done: '#5FD39A',
+  attention: '#F0B45A',
 } as const
 
-/* ── Claro (off-white neutro — Instagram/X, não sépia) ──── */
+/* ── Claro (Pantone Tortilla / Gold Leaf / Terracotta) ──────── */
 
 export const COLOR_LIGHT = {
-  canvas: '#F7F5F2',
-  chrome: '#EFECE8',
-  surface: '#FBFAF8',
-  voice: '#F3EBE4',
-  elevated: '#FDFCFA',
-  ink: '#2A2622',
-  inkMuted: '#6A645C',
-  inkFaint: '#7A746C',
-  hairline: 'rgba(42, 38, 34, 0.09)',
-  hairlineStrong: 'rgba(42, 38, 34, 0.14)',
+  /** Tortilla lavado */
+  canvas: '#F5F1EC',
+  chrome: '#FFFCFA',
+  surface: '#FFFCFA',
+  voice: '#EDE4D8',
+  elevated: '#EDE4D8',
+  ink: '#0C1519',
+  inkMuted: '#5C534C',
+  inkFaint: '#8A7E74',
+  hairline: 'rgba(12, 21, 25, 0.10)',
+  hairlineStrong: 'rgba(198, 161, 126, 0.55)',
   /**
-   * #C45A32 no canvas novo fica 3,97:1 (falha AA texto).
-   * #B8502C é o mesmo matiz, um degrau mais fechado: 4,57:1.
+   * Terracotta Pantone 2429 — escurecido para AA no cream.
    */
-  axel: '#B8502C',
-  health: '#4F6F4C',
-  finance: '#8A6A2E',
-  tasks: '#4A5C68',
-  danger: '#A33D3D',
-  done: '#6A645C',
-  axelOnFill: '#F7F5F2',
-  healthOnFill: '#F7F5F2',
-  financeOnFill: '#F7F5F2',
-  tasksOnFill: '#F7F5F2',
+  axel: '#A05C3D',
+  health: '#3F6B5A',
+  finance: '#7A6540',
+  tasks: '#4A5560',
+  danger: '#9A4545',
+  attention: '#9A7A3A',
+  done: '#4A6B58',
+  axelOnFill: '#F5F1EC',
+  healthOnFill: '#F5F1EC',
+  financeOnFill: '#F5F1EC',
+  tasksOnFill: '#F5F1EC',
+  /** Gold Leaf / Tortilla */
+  sand: '#C6A17E',
+  tortilla: '#CABAAA',
+  terracotta: '#B87252',
+  semanticWarm: '#E8D5C8',
+  semanticRose: '#E5B8B8',
+  semanticMint: '#B8D4C8',
+  semanticSky: '#B8C8D4',
+  semanticButter: '#F0E4D0',
 } as const
 
 /* ── WCAG 2.2 AA — pares que a UI pode usar ─────────────────
@@ -107,25 +98,24 @@ export const COLOR_LIGHT = {
  * Texto normal ≥ 4.5:1 · texto grande (≥18px ou 14px bold) ≥ 3:1
  * Controles / ícones ≥ 3:1
  *
- * Preenchimento de cor + cream (#EDE7DD) FALHA em axel/health/finance.
- * Por isso fills de módulo levam tinta grafite, não cream.
+ * Preenchimento de cor + cream falha AA. Fills de módulo levam o canvas escuro.
  */
 
 export const CONTRAST = {
-  inkOnCanvas: 15.0,
-  inkOnSurface: 13.8,
-  inkOnVoice: 12.8,
-  mutedOnSurface: 6.4,
-  faintOnCanvas: 5.4,
-  axelOnCanvas: 6.3,
-  axelOnSurface: 5.8,
-  healthOnCanvas: 6.8,
-  financeOnCanvas: 7.9,
-  tasksOnCanvas: 6.1,
-  dangerOnCanvas: 5.6,
+  inkOnCanvas: 12.2,
+  inkOnSurface: 9.6,
+  inkOnVoice: 8.5,
+  mutedOnSurface: 5.3,
+  faintOnCanvas: 5.2,
+  axelOnCanvas: 5.2,
+  axelOnSurface: 4.1,
+  healthOnCanvas: 5.5,
+  financeOnCanvas: 6.5,
+  tasksOnCanvas: 5.5,
+  dangerOnCanvas: 5.0,
   /** cream sobre #E8734A — não usar */
-  creamOnAxelFail: 2.4,
-  graphiteOnAxel: 6.3,
+  creamOnAxelFail: 2.3,
+  graphiteOnAxel: 5.2,
 } as const
 
 /* ── Tipografia ───────────────────────────────────────────── */
@@ -163,7 +153,7 @@ export const TYPE_ROLE = {
   body: { family: 'ui', sizePx: 16, weight: 400, lineHeight: 1.5 },
   /** Manrope 14 / 600 — botão, ação */
   action: { family: 'ui', sizePx: 14, weight: 600, lineHeight: 1.2 },
-  pageTitle: { family: 'ui', sizePx: 22, weight: 600, lineHeight: 1.25 },
+  pageTitle: { family: 'voice', sizePx: 24, weight: 500, lineHeight: 1.2 },
 } as const
 
 /* ── Espaço, raio, elevação ───────────────────────────────── */
@@ -224,7 +214,7 @@ export const SURFACE_ROLE = {
   },
 } as const
 
-/* ── Ícones e humor (assinatura) ──────────────────────────── */
+/* ─ Ícones e humor (assinatura) ──────────────────────────── */
 
 export const ICON = {
   library: 'lucide-react',
