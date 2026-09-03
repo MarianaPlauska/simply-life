@@ -1,4 +1,4 @@
-// slice do dashboard — resumo, notificações, preferências via supabase
+// slice do dashboard - resumo, notificações, preferências via supabase
 import type { StateCreator } from 'zustand'
 import type { DashboardResumo, Notificacao } from '../storeTypes'
 import { normalizeNotificacao } from '../../lib/notificacaoUtils'
@@ -144,7 +144,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
       const joined = palavras.join(',')
-      // upsert — cria ou atualiza
+      // upsert - cria ou atualiza
       const { error } = await supabase
         .from('preferencias_usuario')
         .upsert({ user_id: uid, palavras_chave_email: joined }, { onConflict: 'user_id' })
@@ -178,7 +178,7 @@ export const createDashboardSlice: StateCreator<DashboardSlice & UISlice, [], []
       const result = response.results?.[0]
       if (result?.success)
       {
-        toast.success(`Triagem concluída — Score: ${result.score_urgencia} (${result.prioridade})`)
+        toast.success(`Triagem concluída - Score: ${result.score_urgencia} (${result.prioridade})`)
       }
       else
       {

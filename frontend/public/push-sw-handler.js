@@ -1,4 +1,4 @@
-// Handler push — notificações com ações inline (Feito / Adiar)
+// Handler push - notificações com ações inline (Feito / Adiar)
 
 const DEFAULT_ACTIONS = [
   { action: 'done', title: 'Feito' },
@@ -145,7 +145,7 @@ self.addEventListener('notificationclick', (event) =>
         }
         else
         {
-          await showFeedback('Simply-Life', 'Não foi possível agir aqui — abra o app');
+          await showFeedback('Simply-Life', 'Não foi possível agir aqui - abra o app');
         }
 
         if (self.clients.openWindow)

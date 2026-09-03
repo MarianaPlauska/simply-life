@@ -140,7 +140,7 @@ export function buildAxelWeekForecast(input: {
   }
   else if (trend === 'subindo')
   {
-    headline = 'Humor subindo · boa janela para 1–2 prioridades extras.'
+    headline = 'Humor subindo · boa janela para 1-2 prioridades extras.'
   }
 
   return {

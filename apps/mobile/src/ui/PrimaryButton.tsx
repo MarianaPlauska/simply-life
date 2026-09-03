@@ -31,7 +31,7 @@ export function PrimaryButton({
   const isSecondary = variant === 'secondary'
   const isPrimary = variant === 'primary'
 
-  // Só a variante primary usa cobre — secondary/ghost/link ficam neutros
+  // Só a variante primary usa cobre - secondary/ghost/link ficam neutros
   const bg = isPrimary
     ? colors.axel
     : isSecondary

@@ -19,7 +19,7 @@ interface CardInvoiceDrawerProps
   onClose: () => void
 }
 
-// Fatura / extrato do cartão — bottom sheet com snap no mobile (como Grupos)
+// Fatura / extrato do cartão - bottom sheet com snap no mobile (como Grupos)
 
 export function CardInvoiceDrawer({
   open,

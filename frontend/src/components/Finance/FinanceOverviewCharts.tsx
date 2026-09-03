@@ -212,7 +212,7 @@ export function FinanceOverviewCharts({
               <p className={`text-[11px] mt-2 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
                 {saldo > 0
                   ? 'Saldo positivo no mês. Considere direcionar o excedente para metas ou reserva de emergência.'
-                  : 'Saldo negativo — revise despesas em categorias de desejo e ajuste o orçamento do próximo mês.'}
+                  : 'Saldo negativo - revise despesas em categorias de desejo e ajuste o orçamento do próximo mês.'}
               </p>
             </div>
           </div>
@@ -232,7 +232,7 @@ export function FinanceOverviewCharts({
           <div>
             <h2 className={AXEL_SECTION_TITLE}>Evolução financeira</h2>
             <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              Receita vs gastos — últimos 6 meses
+              Receita vs gastos - últimos 6 meses
             </p>
           </div>
           <div className="flex items-center gap-4">

@@ -105,6 +105,16 @@ export async function updateTarefaStatus(taskId: string, done: boolean): Promise
   if (error) throw new Error(error.message)
 }
 
+export async function updateTarefaDue(taskId: string, due: string | null): Promise<void>
+{
+  const { error } = await supabase
+    .from('tarefas_unificadas')
+    .update({ data_vencimento: due })
+    .eq('id', Number(taskId))
+
+  if (error) throw new Error(error.message)
+}
+
 export async function toggleSubtarefa(taskId: string, subId: string, feito: boolean): Promise<void>
 {
   const { error } = await supabase

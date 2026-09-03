@@ -22,7 +22,7 @@ export interface AxelStreakSlice
   hasWellbeingToday: boolean
   /** Abrir o resumo do dia já conta como check-in */
   hasDayCheckinToday: boolean
-  /** Ausência não zera — a sequência espera o próximo check-in */
+  /** Ausência não zera - a sequência espera o próximo check-in */
   streakPaused: boolean
   streakPulseNonce: number
   streakFreezes: number

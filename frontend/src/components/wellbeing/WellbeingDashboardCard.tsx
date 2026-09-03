@@ -108,7 +108,7 @@ export function WellbeingDashboardCard()
     }
   }
 
-  // Humor registrado some na hora — a mensagem do AXEL aparece no painel separado (AxelPostMoodCare)
+  // Humor registrado some na hora - a mensagem do AXEL aparece no painel separado (AxelPostMoodCare)
   if (snoozed)
   {
     return null

@@ -8,7 +8,7 @@ import {
 } from '../../lib/taskContextService'
 import { DRAWER_FLAG_COLORS } from './AxelDrawerOrganizationSection'
 
-// Select de pastas — expande para baixo com cores e criação inline
+// Select de pastas - expande para baixo com cores e criação inline
 
 interface ContextoComboboxProps
 {

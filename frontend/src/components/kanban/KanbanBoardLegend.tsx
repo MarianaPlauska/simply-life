@@ -1,6 +1,6 @@
 import { ArrowRight, CalendarClock, Zap } from 'lucide-react'
 
-// Legenda visual — modelo mental Executar agora vs Prazo
+// Legenda visual - modelo mental Executar agora vs Prazo
 
 interface KanbanBoardLegendProps
 {
@@ -45,7 +45,7 @@ export function KanbanBoardLegend({ execCount, dueCount }: KanbanBoardLegendProp
             Prazo
           </p>
           <p className="text-[12px] text-ink mt-1 leading-snug">
-            Quando a tarefa <strong className="font-medium">precisa estar pronta</strong> — por faixa de data.
+            Quando a tarefa <strong className="font-medium">precisa estar pronta</strong> - por faixa de data.
           </p>
           <p className="font-mono text-[11px] tabular-nums text-ink-muted mt-1.5">
             {dueCount} com data

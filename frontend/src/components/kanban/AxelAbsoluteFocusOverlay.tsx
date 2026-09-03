@@ -14,7 +14,7 @@ import { getProjectTag } from '../../lib/contextRationale'
 import { ZenFocusProgressRing } from './ZenFocusProgressRing'
 import type { TarefaUnificada } from '../../types'
 
-// Modo Foco Absoluto — ambiente calmo, timer silencioso, controle empático
+// Modo Foco Absoluto - ambiente calmo, timer silencioso, controle empático
 
 const ZEN_REASSURANCE =
   'Foque apenas nisso agora. O resto do sistema está cuidando de si mesmo.'

@@ -1,7 +1,7 @@
 import type { TarefaUnificada } from '../types'
 import type { MoodLoadThresholds, MoodOrchestrationContext } from './moodOrchestration'
 
-// Motor de Orquestração de Energia — carga mental e horário nobre
+// Motor de Orquestração de Energia - carga mental e horário nobre
 
 export type EnergyPeriod = 'manha' | 'tarde' | 'noite'
 export type MentalLoadLevel = 'ok' | 'warning' | 'overload'
@@ -73,7 +73,7 @@ export function computeMentalLoad(
   {
     level = 'warning'
     tooltip = mood?.profile === 'recuperacao'
-      ? 'Atenção: com humor baixo, vale proteger sua energia — priorize poucas tarefas.'
+      ? 'Atenção: com humor baixo, vale proteger sua energia - priorize poucas tarefas.'
       : 'Atenção: você está perto do limite de carga de hoje.'
   }
 
@@ -141,7 +141,7 @@ export function buildFlowSuggestion(
   let message: string
   if (mood?.profile === 'recuperacao' || mood?.profile === 'cuidado')
   {
-    message = `Seu humor pede leveza hoje. Sugiro mover ${listed} para Esta Semana — cap ajustado para ${cap} pts.`
+    message = `Seu humor pede leveza hoje. Sugiro mover ${listed} para Esta Semana - cap ajustado para ${cap} pts.`
   }
   else if (mood?.profile === 'sem_registro')
   {

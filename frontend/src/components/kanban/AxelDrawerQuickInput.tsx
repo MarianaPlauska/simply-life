@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Send } from 'lucide-react'
 
-// Input fluido no rodapé do drawer — nota rápida para o activity log
+// Input fluido no rodapé do drawer - nota rápida para o activity log
 
 interface AxelDrawerQuickInputProps
 {

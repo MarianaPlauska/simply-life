@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-// Log de decisões do AXEL — transparência na página do Kanban
+// Log de decisões do AXEL - transparência na página do Kanban
 
 function formatTime(iso: string): string
 {

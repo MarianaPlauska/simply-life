@@ -3,7 +3,7 @@ import { verifyWebhookSignature } from './webhookAuth.js';
 
 /**
  * Valida webhook M2M: Bearer (hash no banco) + HMAC do body.
- * O plaintext só existe na requisição — nunca é lido do Postgres.
+ * O plaintext só existe na requisição - nunca é lido do Postgres.
  */
 export async function resolveWebhookPlainSecret(supabase, userId, req, bodyRaw)
 {

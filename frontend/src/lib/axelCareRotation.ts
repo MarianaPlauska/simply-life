@@ -1,4 +1,4 @@
-// Rotação de frases AXEL — cache local + persistência em user_workspace_prefs (Supabase)
+// Rotação de frases AXEL - cache local + persistência em user_workspace_prefs (Supabase)
 
 import { saveWorkspacePrefs } from './userWorkspacePrefs'
 
@@ -63,7 +63,7 @@ async function persistRotation(): Promise<void>
   }
 }
 
-/** Primeiro humor do dia — oculta card no dashboard por 12h */
+/** Primeiro humor do dia - oculta card no dashboard por 12h */
 export function wellbeingHiddenUntilIso(): string
 {
   const until = new Date()
@@ -77,7 +77,7 @@ export function isWellbeingDashboardHidden(hiddenUntil: string | null | undefine
   return Date.now() < new Date(hiddenUntil).getTime()
 }
 
-/** Após 12h do 1º humor — pede reflexão do dia */
+/** Após 12h do 1º humor - pede reflexão do dia */
 export function isWellbeingCheckInDue(
   hiddenUntil: string | null | undefined,
   hasMoodToday: boolean,

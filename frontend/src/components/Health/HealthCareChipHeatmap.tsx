@@ -8,7 +8,7 @@ interface HealthCareChipHeatmapProps
   active: CuidadosTab
 }
 
-/** Constância do chip selecionado — rail Saúde */
+/** Constância do chip selecionado - rail Saúde */
 export function HealthCareChipHeatmap({ active }: HealthCareChipHeatmapProps)
 {
   const { cells, label, emptyHint, loading } = useCareChipHeatmap(active)

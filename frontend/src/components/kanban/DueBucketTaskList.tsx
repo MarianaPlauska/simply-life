@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import type { TarefaUnificada } from '../../types'
 
-// Lista de prazo com teto visual — evita seção gigante com muitas tarefas
+// Lista de prazo com teto visual - evita seção gigante com muitas tarefas
 
 interface DueBucketTaskListProps
 {

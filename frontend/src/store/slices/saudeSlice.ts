@@ -1,4 +1,4 @@
-// slice de saúde — medicamentos, hábitos, treinos, streaks via supabase
+// slice de saúde - medicamentos, hábitos, treinos, streaks via supabase
 import type { StateCreator } from 'zustand'
 import type { Medicamento, MedicamentoTomada, HabitoDiario, HabitoDiarioConfig, SessaoTreino } from '../storeTypes'
 import type { HabitoStreak } from '../../types'
@@ -224,7 +224,7 @@ async function syncHealthDayBoundary(): Promise<void>
 
     writeStoredHealthDay(today)
   }
-  catch { /* offline — reset local na leitura */ }
+  catch { /* offline - reset local na leitura */ }
 }
 
 async function cleanupMedPhantoms(uid: string, medId: number): Promise<void>
@@ -699,7 +699,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         const merged = habitos.find((m) => m.id === h.id)
         if (merged?.config?.ultima_data === today)
         {
-          // merge preservou progresso de hoje — não sobrescrever no Supabase
+          // merge preservou progresso de hoje - não sobrescrever no Supabase
           continue
         }
 
@@ -997,7 +997,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
       if (!uid)
       {
         const { toast } = await import('sonner')
-        toast.message('Água salva neste aparelho — entre na conta para sincronizar')
+        toast.message('Água salva neste aparelho - entre na conta para sincronizar')
         return
       }
       const query = supabase
@@ -1031,7 +1031,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
         ),
       }))
       const { toast } = await import('sonner')
-      toast.error('Não foi possível sincronizar a água — mantido neste aparelho')
+      toast.error('Não foi possível sincronizar a água - mantido neste aparelho')
     }
   },
 

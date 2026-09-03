@@ -121,7 +121,7 @@ export async function checkMedicamentosPendentes(
           .insert({
             user_id: userId,
             titulo: `Tomar ${med.nome} (era às ${horario})`,
-            descricao: `Medicamento ${med.nome} — dose das ${horario}. Registre em Saúde quando tomar.`,
+            descricao: `Medicamento ${med.nome} - dose das ${horario}. Registre em Saúde quando tomar.`,
             snippet_100_char: phantomKey,
             score_urgencia: score,
             status: 'pendente',

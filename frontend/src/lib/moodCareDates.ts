@@ -3,7 +3,7 @@ import { diffDaysUntilDue } from './daysRemaining'
 import type { MoodProfile } from './moodOrchestration'
 import type { TarefaUnificada } from '../types'
 
-// Cuidado de humor — adia prazos leves sem pressionar o que é urgente
+// Cuidado de humor - adia prazos leves sem pressionar o que é urgente
 
 export const MOOD_CARE_SCORE_MAX = 70
 const MOOD_CARE_STORAGE = 'axel-mood-care-due'
@@ -35,7 +35,7 @@ function dayKey(now: Date): string
   return now.toISOString().slice(0, 10)
 }
 
-/** Tarefas que o AXEL não mexe no prazo — urgente, VIP, override do usuário */
+/** Tarefas que o AXEL não mexe no prazo - urgente, VIP, override do usuário */
 export function isProtectedFromMoodCare(task: TarefaUnificada): boolean
 {
   if (task.horizon_override) return true
@@ -56,7 +56,7 @@ function loadStore(): Record<string, boolean>
   }
 }
 
-/** IDs já cuidados hoje — evita empurrar o mesmo prazo em loop */
+/** IDs já cuidados hoje - evita empurrar o mesmo prazo em loop */
 export function loadMoodCareShiftedIds(now: Date = new Date()): Set<number>
 {
   const prefix = `${dayKey(now)}:`
@@ -124,8 +124,8 @@ export function computeMoodCareDueShifts(
       currentDue: task.data_vencimento,
       nextDue,
       reason: profile === 'recuperacao'
-        ? 'Humor pede recuperação — prazo leve adiado dois dias úteis.'
-        : 'Humor pede cuidado — prazo leve adiado um dia útil.',
+        ? 'Humor pede recuperação - prazo leve adiado dois dias úteis.'
+        : 'Humor pede cuidado - prazo leve adiado um dia útil.',
     })
   }
 

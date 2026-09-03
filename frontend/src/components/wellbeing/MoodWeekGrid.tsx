@@ -26,7 +26,7 @@ function shortWeekday(iso: string): string
     .toUpperCase()
 }
 
-/** Últimos 7 dias — ícones de humor (melhor que barra única) */
+/** Últimos 7 dias - ícones de humor (melhor que barra única) */
 export function MoodWeekGrid({ dias }: MoodWeekGridProps)
 {
   const byDate = new Map(dias.map((d) => [d.data, d]))

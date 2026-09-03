@@ -1,4 +1,4 @@
-// POST /api/webhook-ingest — triagem M2M com keywords do usuário (+50)
+// POST /api/webhook-ingest - triagem M2M com keywords do usuário (+50)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { resolveWebhookPlainSecret } from '../../resolveWebhookAuth.js';

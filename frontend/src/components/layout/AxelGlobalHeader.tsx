@@ -24,7 +24,7 @@ import {
 import { normalizePinnedModules, PINNED_DASHBOARD_ID } from '../../store/slices/uiSlice'
 import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
-// Header global AXEL — navegação, notificações e acessibilidade em todas as páginas
+// Header global AXEL - navegação, notificações e acessibilidade em todas as páginas
 
 const VIEW_TO_PATH: Record<string, string> = {
   dashboard: '/',
@@ -44,7 +44,7 @@ const VIEW_TO_PATH: Record<string, string> = {
   relatorios: '/relatorios',
 }
 
-/** Telas com título local — não repetir no breadcrumb/pin central */
+/** Telas com título local - não repetir no breadcrumb/pin central */
 const MAIN_MODULE_VIEWS = new Set(['dashboard', 'kanban', 'financeiro', 'saude'])
 
 const VIEW_LABELS: Record<string, string> = {

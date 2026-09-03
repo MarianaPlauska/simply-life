@@ -1,4 +1,4 @@
-// Estimativa de esforço — fallback local (espelha backend/logic/task_estimate.py)
+// Estimativa de esforço - fallback local (espelha backend/logic/task_estimate.py)
 
 const MIN_ESTIMATE = 20
 const MAX_ESTIMATE = 480
@@ -145,7 +145,7 @@ export async function estimateTaskEffort(payload)
     return {
       estimate_minutes: localMinutes,
       extension_days: localExtension,
-      reasoning: 'Estimativa local — IA indisponível no servidor.',
+      reasoning: 'Estimativa local - IA indisponível no servidor.',
       confidence: 0.45,
       source: 'local',
       iaDisponivel: false,
@@ -211,7 +211,7 @@ Estimativa local de referência: ${localMinutes} min`
     return {
       estimate_minutes: localMinutes,
       extension_days: localExtension,
-      reasoning: 'Estimativa local — falha temporária na IA.',
+      reasoning: 'Estimativa local - falha temporária na IA.',
       confidence: 0.45,
       source: 'local',
       iaDisponivel: false,

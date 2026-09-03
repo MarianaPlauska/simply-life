@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
 
-/** Segundos acumulados na tarefa — atualiza a cada 1s enquanto o foco está ativo */
+/** Segundos acumulados na tarefa - atualiza a cada 1s enquanto o foco está ativo */
 export function useLiveTaskElapsed(taskId: number | null, isActive: boolean): number
 {
   const getTaskElapsedSeconds = useTaskStore((s) => s.getTaskElapsedSeconds)

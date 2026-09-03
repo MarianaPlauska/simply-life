@@ -22,7 +22,7 @@ export function TermsView()
         <h2 className={`text-[15px] font-semibold ${AXEL_TEXT_PRIMARY}`}>IA (AXEL)</h2>
         <p>
           A priorização tenta usar modelos via Groq no servidor (cota Hobby).
-          Sem chave, após a cota ou em falha, o quadro usa regras locais e avisa —
+          Sem chave, após a cota ou em falha, o quadro usa regras locais e avisa -
           não finge que a IA rodou. Textos de tarefas podem ir ao provedor quando
           a IA está ativa. Não coloque segredos no título.
         </p>

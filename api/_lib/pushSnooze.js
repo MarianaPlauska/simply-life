@@ -1,4 +1,4 @@
-/** Soneca de lembretes push — evita reenvio até o prazo */
+/** Soneca de lembretes push - evita reenvio até o prazo */
 
 export async function isPushSnoozed(supabase, userId, snoozeKey, now = new Date())
 {

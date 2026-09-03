@@ -3,7 +3,7 @@ import { Modal, Pressable, Switch, View, useWindowDimensions } from 'react-nativ
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import type { FinanceCard } from '@simply-life/shared'
-import { Text, PressableScale } from '../../ui'
+import { Text, PressableScale, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { CreditCardVisual } from './CreditCardVisual'
@@ -19,6 +19,9 @@ type Props = {
   card: FinanceCard | null
   visible: boolean
   onClose: () => void
+  onEdit?: () => void
+  onSpend?: () => void
+  onLedger?: () => void
 }
 
 type ToggleRow = {
@@ -56,9 +59,16 @@ const ROWS: ToggleRow[] = [
 ]
 
 /**
- * Sheet "My Cards" — cartão em destaque + toggles de controle.
+ * Sheet "My Cards" - cartão em destaque + toggles de controle.
  */
-export function FinanceCardDetailSheet({ card, visible, onClose }: Props)
+export function FinanceCardDetailSheet({
+  card,
+  visible,
+  onClose,
+  onEdit,
+  onSpend,
+  onLedger,
+}: Props)
 {
   const { colors, space, radius, elevation } = useTheme()
   const insets = useSafeAreaInsets()
@@ -161,6 +171,18 @@ export function FinanceCardDetailSheet({ card, visible, onClose }: Props)
 
           <View style={{ alignItems: 'center' }}>
             <CreditCardVisual card={card} width={cardW} selected />
+          </View>
+
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {onSpend ? (
+              <PrimaryButton label="Lançar gasto" size="sm" onPress={onSpend} style={{ flexGrow: 1 }} />
+            ) : null}
+            {onLedger ? (
+              <PrimaryButton label="Lançamentos" size="sm" variant="secondary" onPress={onLedger} style={{ flexGrow: 1 }} />
+            ) : null}
+            {onEdit ? (
+              <PrimaryButton label="Editar" size="sm" variant="ghost" onPress={onEdit} style={{ flexGrow: 1 }} />
+            ) : null}
           </View>
 
           <View

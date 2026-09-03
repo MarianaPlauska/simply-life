@@ -9,7 +9,7 @@ import { evaluateProofOfWork } from './proofOfWork'
 import { useTaskStore } from '../store/useTaskStore'
 import type { TarefaUnificada } from '../types'
 
-// Conclusão de tarefa — XP sempre; ofensiva só com prova de trabalho
+// Conclusão de tarefa - XP sempre; ofensiva só com prova de trabalho
 
 const FOCUS_XP_BONUS = XP_FOCUS_SESSION
 
@@ -115,7 +115,7 @@ export async function axelCompleteTask(tarefa: TarefaUnificada): Promise<void>
       duration: 5000,
       position: 'bottom-right',
       className: 'font-mono text-sm',
-      description: 'Ofensiva do dia mantida — bom trabalho.',
+      description: 'Ofensiva do dia mantida - bom trabalho.',
     })
     return
   }

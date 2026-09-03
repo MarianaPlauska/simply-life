@@ -14,7 +14,7 @@ export interface RitualItem
   applies: boolean
   detail: string
   path: string
-  /** 0–1 para barra de progresso parcial */
+  /** 0-1 para barra de progresso parcial */
   progress: number
 }
 

@@ -146,7 +146,7 @@ export function BurnoutAura()
                 </ul>
               ) : (
                 <p className="text-xs text-zinc-500 mb-5 italic">
-                  Nenhuma tarefa de e-mail/comunicação na fila crítica — revise manualmente as tarefas restantes.
+                  Nenhuma tarefa de e-mail/comunicação na fila crítica - revise manualmente as tarefas restantes.
                 </p>
               )}
 

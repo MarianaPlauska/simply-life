@@ -29,11 +29,11 @@ export function FinanceSpreadsheetTable({ rows, cards }: FinanceSpreadsheetTable
 {
   return (
     <div className="w-full">
-      {/* Lista em coluna única — mobile */}
+      {/* Lista em coluna única - mobile */}
       <ul className="md:hidden border border-line rounded-sl divide-y divide-line w-full">
         {rows.length === 0 && (
           <li className="px-3 py-12 text-center text-ink-muted bg-card text-[12px]">
-            Nenhum lançamento no período — use &quot;Novo lançamento&quot; para começar.
+            Nenhum lançamento no período - use &quot;Novo lançamento&quot; para começar.
           </li>
         )}
         {rows.map((row) =>
@@ -74,7 +74,7 @@ export function FinanceSpreadsheetTable({ rows, cards }: FinanceSpreadsheetTable
         })}
       </ul>
 
-      {/* Tabela — desktop */}
+      {/* Tabela - desktop */}
       <div className="hidden md:block border border-line rounded-sl overflow-x-auto shadow-sm w-full">
         <table className="w-full min-w-[980px] text-left border-collapse text-[11px]">
           <thead className="sticky top-0 z-10 bg-[#217346]">
@@ -94,7 +94,7 @@ export function FinanceSpreadsheetTable({ rows, cards }: FinanceSpreadsheetTable
             {rows.length === 0 && (
               <tr>
                 <td colSpan={9} className="px-3 py-12 text-center text-ink-muted bg-card">
-                  Nenhum lançamento no período — use &quot;Novo lançamento&quot; para começar.
+                  Nenhum lançamento no período - use &quot;Novo lançamento&quot; para começar.
                 </td>
               </tr>
             )}

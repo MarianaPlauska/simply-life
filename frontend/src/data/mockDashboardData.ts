@@ -15,7 +15,7 @@ export function getExecutionRowMeta(_taskId: number): ExecutionRowMeta
   return { context: 'database', iniciais: 'MC' }
 }
 
-/** Pass-through — mantido para compatibilidade; não injeta dados fictícios */
+/** Pass-through - mantido para compatibilidade; não injeta dados fictícios */
 export function mergeDashboardTasks(storeTasks: TarefaUnificada[]): TarefaUnificada[]
 {
   return storeTasks

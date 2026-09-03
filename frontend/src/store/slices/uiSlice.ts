@@ -43,7 +43,7 @@ export type RealtimeStatus = 'offline' | 'connecting' | 'live' | 'error';
 export interface UISlice {
   realtimeStatus: RealtimeStatus;
   setRealtimeStatus: (status: RealtimeStatus) => void;
-  /** IDs de tarefas recém-ingeridas — highlight no Kanban */
+  /** IDs de tarefas recém-ingeridas - highlight no Kanban */
   axelIngestionHighlightIds: number[];
   pushIngestionHighlights: (ids: number[]) => void;
   clearIngestionHighlights: () => void;

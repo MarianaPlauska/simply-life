@@ -1,4 +1,4 @@
-// Cálculos CLT — hora normal e hora extra (44h/semana → 220h/mês)
+// Cálculos CLT - hora normal e hora extra (44h/semana → 220h/mês)
 
 export const CLT_MONTHLY_HOURS = 220
 
@@ -41,7 +41,7 @@ export function computeHourlyNormal(grossSalary: number): number
   return Math.round((grossSalary / CLT_MONTHLY_HOURS) * 100) / 100
 }
 
-/** Taxas de hora extra — 50% dias úteis, 100% domingo/feriado */
+/** Taxas de hora extra - 50% dias úteis, 100% domingo/feriado */
 export function computeOvertimeRates(grossSalary: number): OvertimeRates
 {
   const hourlyNormal = computeHourlyNormal(grossSalary)

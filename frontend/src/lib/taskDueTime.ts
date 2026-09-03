@@ -1,4 +1,4 @@
-/** Data+hora local em ISO — `data_vencimento` não tem coluna `hora` à parte */
+/** Data+hora local em ISO - `data_vencimento` não tem coluna `hora` à parte */
 
 export function localDateTimeIso(dateIso: string, hora: string | null): string
 {

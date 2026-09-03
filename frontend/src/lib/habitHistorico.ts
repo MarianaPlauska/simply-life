@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 import { localTodayIso } from './healthDayBoundary'
 
-/** Registra conclusão diária do hábito — alimenta streaks e weekly review */
+/** Registra conclusão diária do hábito - alimenta streaks e weekly review */
 export async function upsertHabitHistorico(
   habitoId: number,
   concluido: boolean,

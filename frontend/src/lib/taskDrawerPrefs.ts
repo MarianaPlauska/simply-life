@@ -1,4 +1,4 @@
-// Preferências locais do drawer — bloqueio, lembrete e datas de início
+// Preferências locais do drawer - bloqueio, lembrete e datas de início
 
 export interface TaskDrawerPrefs
 {

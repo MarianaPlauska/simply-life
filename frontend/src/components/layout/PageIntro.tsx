@@ -5,14 +5,14 @@ interface PageIntroProps
   title: string
   /** Meta curta na mesma linha do título (ex.: ritual 2/3) */
   meta?: ReactNode
-  /** Subtítulo — evitar quando a mesma info já está em meta/actions */
+  /** Subtítulo - evitar quando a mesma info já está em meta/actions */
   lede?: string
   actions?: ReactNode
-  /** Abas ou sub-nav — segunda faixa compacta */
+  /** Abas ou sub-nav - segunda faixa compacta */
   subNav?: ReactNode
 }
 
-/** Cabeçalho de página — no máximo título + controles + abas */
+/** Cabeçalho de página - no máximo título + controles + abas */
 export function PageIntro({ title, meta, lede, actions, subNav }: PageIntroProps)
 {
   return (

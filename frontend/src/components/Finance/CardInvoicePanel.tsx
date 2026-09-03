@@ -350,7 +350,7 @@ export function CardInvoicePanel({
 
       {temFatura && (
         <p className={`px-3 sm:px-4 py-2 border-t border-line font-mono text-[9px] leading-relaxed break-words ${AXEL_TEXT_SECONDARY}`}>
-          Compras no cartão não debitam o caixa — use &quot;Pagar fatura&quot; para registrar a saída bancária.
+          Compras no cartão não debitam o caixa - use &quot;Pagar fatura&quot; para registrar a saída bancária.
         </p>
       )}
     </div>

@@ -1,4 +1,4 @@
-// Motor de score compartilhado — ingest-tasks e webhook-ingest
+// Motor de score compartilhado - ingest-tasks e webhook-ingest
 
 import { resolveInfluenceWeight, DEFAULT_INFLUENCE_MAP } from './influenceMap.js';
 
@@ -73,7 +73,7 @@ export function shouldForceHoje(aiFlags, rawText, sender)
   return resolveInfluenceWeight(sender || '', DEFAULT_INFLUENCE_MAP) >= KEY_SENDER_WEIGHT;
 }
 
-/** Piso de Hoje após a IA ler o e-mail — urgente/VIP não ficam na Semana */
+/** Piso de Hoje após a IA ler o e-mail - urgente/VIP não ficam na Semana */
 export function applyHojeFloor(score, aiFlags, rawText, sender)
 {
   if (shouldForceHoje(aiFlags, rawText, sender))

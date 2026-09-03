@@ -108,7 +108,7 @@ export function AcademyDayBuilder({ diaRef, subtitulo }: AcademyDayBuilderProps)
             className="w-20 px-3 py-2 rounded-sl border border-line bg-chrome text-[13px] text-ink font-mono uppercase outline-none focus:border-accent/40"
           />
           <p className="text-[10px] text-ink-muted">
-            Estável no mês — ex.: {formatTreinoLabel(codigo || 'A', titulo || '…')}
+            Estável no mês - ex.: {formatTreinoLabel(codigo || 'A', titulo || '…')}
           </p>
         </label>
 

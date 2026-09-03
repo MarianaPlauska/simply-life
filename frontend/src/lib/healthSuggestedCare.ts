@@ -28,7 +28,7 @@ export interface CareChipContext
   treinoHabit: boolean
 }
 
-/** Chips visíveis — sempre mostrar os quatro; cadastro acontece ao abrir */
+/** Chips visíveis - sempre mostrar os quatro; cadastro acontece ao abrir */
 export function visibleCareChips(_ctx: CareChipContext): CuidadosTab[]
 {
   return ['hidratacao', 'alimentacao', 'medicamentos', 'academia']
@@ -85,7 +85,7 @@ export function pickSuggestedCare(opts: {
       tab: 'hidratacao',
       title: 'Hidratação',
       detail: aguaMeta > 0
-        ? `${aguaCopos} de ${aguaMeta} copos — mais um copo já conta.`
+        ? `${aguaCopos} de ${aguaMeta} copos - mais um copo já conta.`
         : 'Um copo de água é um gesto simples de cuidado.',
       cta: '+1 copo',
     }
@@ -97,7 +97,7 @@ export function pickSuggestedCare(opts: {
       kind: 'medicamento',
       tab: 'medicamentos',
       title: proximaDose.nome,
-      detail: `Horário ${proximaDose.horario} — quando tomar, é só confirmar.`,
+      detail: `Horário ${proximaDose.horario} - quando tomar, é só confirmar.`,
       cta: 'Já tomei',
     }
   }
@@ -108,7 +108,7 @@ export function pickSuggestedCare(opts: {
       kind: 'alimentacao',
       tab: 'alimentacao',
       title: 'Alimentação',
-      detail: 'Registre uma refeição rápida — sem formulário longo.',
+      detail: 'Registre uma refeição rápida - sem formulário longo.',
       cta: 'Abrir comida',
     }
   }
@@ -119,7 +119,7 @@ export function pickSuggestedCare(opts: {
       kind: 'treino',
       tab: 'academia',
       title: 'Movimento de hoje',
-      detail: 'Um bloco curto já vale — comece quando puder.',
+      detail: 'Um bloco curto já vale - comece quando puder.',
       cta: 'Iniciar treino',
     }
   }

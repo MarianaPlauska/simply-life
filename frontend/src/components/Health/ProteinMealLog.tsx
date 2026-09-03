@@ -165,7 +165,7 @@ export function ProteinMealLog()
       <div>
         <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Registrar refeição</p>
         <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-          Um toque nos favoritos — sem precisar contar tudo.
+          Um toque nos favoritos - sem precisar contar tudo.
         </p>
       </div>
 

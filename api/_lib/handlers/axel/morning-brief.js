@@ -1,4 +1,4 @@
-// GET/POST /api/morning-brief — resumo matinal com IA (Groq/Gemini) + fallback
+// GET/POST /api/morning-brief - resumo matinal com IA (Groq/Gemini) + fallback
 
 function buildFallbackBrief(ctx)
 {
@@ -14,7 +14,7 @@ function buildFallbackBrief(ctx)
   let headline
   if (hojeCount === 0)
   {
-    headline = 'Como você está hoje? A fila de Hoje está quieta — dá para respirar.'
+    headline = 'Como você está hoje? A fila de Hoje está quieta - dá para respirar.'
   }
   else if (overdue > 0)
   {

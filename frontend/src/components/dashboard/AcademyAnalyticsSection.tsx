@@ -78,7 +78,7 @@ export function AcademyAnalyticsSection({ compact = false, className = '' }: Aca
           </h3>
           {!compact && (
             <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-              Minutos, volume, PRs e constância — dados das sessões finalizadas.
+              Minutos, volume, PRs e constância - dados das sessões finalizadas.
             </p>
           )}
         </div>
@@ -104,7 +104,7 @@ export function AcademyAnalyticsSection({ compact = false, className = '' }: Aca
 
       {!hasData ? (
         <p className={`text-sm py-6 text-center border border-dashed border-line rounded-sl ${AXEL_TEXT_SECONDARY}`}>
-          Finalize treinos no Modo Academia — gráficos aparecem aqui com minutos, volume e PRs reais.
+          Finalize treinos no Modo Academia - gráficos aparecem aqui com minutos, volume e PRs reais.
         </p>
       ) : (
         <>

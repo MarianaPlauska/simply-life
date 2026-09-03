@@ -15,13 +15,13 @@ interface AxelCareNudgeProps
   message?: string
   streak?: boolean
   durationMs?: number
-  /** Mensagem pós-humor — ignora o gate global e permanece o tempo inteiro */
+  /** Mensagem pós-humor - ignora o gate global e permanece o tempo inteiro */
   bypassGate?: boolean
   onDone?: () => void
   className?: string
 }
 
-/** Reação compacta — não ocupa a tela, só confirma presença do AXEL */
+/** Reação compacta - não ocupa a tela, só confirma presença do AXEL */
 export function AxelCareNudge({
   avatarStyle,
   displayName,
@@ -83,7 +83,7 @@ export function AxelCareNudge({
       window.clearTimeout(t)
       if (!doneRef.current && !bypassGate) releaseAxelCareNudge()
     }
-    // durationMs no ref — re-render do dashboard não reinicia os 25s
+    // durationMs no ref - re-render do dashboard não reinicia os 25s
   }, [visible, bypassGate])
 
   const initials = iniciaisDe(displayName ?? '')

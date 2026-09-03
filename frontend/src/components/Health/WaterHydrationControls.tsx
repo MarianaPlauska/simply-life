@@ -72,7 +72,7 @@ function MlCustomField({ value, onChange, onApply, label = 'Outro valor', disabl
               }
             }}
             className="w-full bg-chrome border border-line rounded-sl px-2 py-1.5 sm:py-1 sm:px-1.5 text-ink text-[12px] sm:text-[11px] font-mono tabular-nums"
-            placeholder={`${ML_MIN}–${ML_MAX}`}
+            placeholder={`${ML_MIN}-${ML_MAX}`}
           />
           <span className="font-mono text-[10px] sm:text-[9px] text-ink-muted shrink-0">ml</span>
         </div>

@@ -8,14 +8,14 @@ import {
   moodLabel,
   moodColor,
   currentMonthLabel,
+  weeklyMoodReview,
 } from '@simply-life/shared'
-import { Card, Text, SectionHeader, EmptyState } from '../../ui'
+import { Card, Text, SectionHeader, EmptyState, IconBadge, StatusPill, PrimaryButton } from '../../ui'
 import { MoodFaceRow } from '../MoodFace'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { useCaptureStore } from '../../store/captureStore'
-import { PrimaryButton } from '../../ui'
 
 export function HealthDiaryTab()
 {
@@ -34,15 +34,25 @@ export function HealthDiaryTab()
     () => [...humor].sort((a, b) => (b.created_at || b.data).localeCompare(a.created_at || a.data))[0],
     [humor],
   )
+  const week = useMemo(() => weeklyMoodReview(humor), [humor])
   const cellSize = Math.min(36, Math.floor((width - 64) / 7) - 4)
   const pillBtn = { borderRadius: 999 as const }
 
   return (
     <View style={{ gap: space.lg }}>
-      <Card tone="hero" style={{ gap: space.md }}>
-        <Text variant="caption" color={colors.axel}>
-          Humor de hoje
-        </Text>
+      <Card tone="hero" style={{ gap: space.md, borderRadius: 18 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <IconBadge name="happy" color={colors.axel} size={44} iconSize={22} />
+          <View style={{ flex: 1, gap: 6 }}>
+            <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
+              Humor de hoje
+            </Text>
+            <StatusPill
+              label={last ? moodLabel(last.humor) : 'Sem registro'}
+              color={last ? moodColor(last.humor) : colors.axel}
+            />
+          </View>
+        </View>
         <MoodFaceRow
           value={last?.humor}
           onChange={(m) => void addHumor(m, undefined, isGuest)}
@@ -81,7 +91,7 @@ export function HealthDiaryTab()
                       {moodLabel(m)}
                     </Text>
                     <Text variant="micro" muted>
-                      {count > 0 ? `${count} · ${pct}%` : '—'}
+                      {count > 0 ? `${count} · ${pct}%` : '-'}
                     </Text>
                   </View>
                   <View
@@ -104,6 +114,24 @@ export function HealthDiaryTab()
               )
             })}
           </View>
+        )}
+      </Card>
+
+      <Card tone="elevated" style={{ gap: space.sm }}>
+        <SectionHeader title="Revisão semanal" subtitle="Últimos 7 dias" />
+        {week.count === 0 ? (
+          <Text variant="caption" muted>
+            Sem check-ins nesta semana.
+          </Text>
+        ) : (
+          <>
+            <Text variant="bodyStrong">
+              Média {week.avg.toFixed(1)} · {week.daysLogged} dias
+            </Text>
+            <Text variant="caption" muted>
+              Melhor {moodLabel(week.best)} · mais baixo {moodLabel(week.worst)}
+            </Text>
+          </>
         )}
       </Card>
 

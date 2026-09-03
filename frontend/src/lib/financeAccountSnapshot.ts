@@ -24,7 +24,7 @@ export interface AccountPanelData
   reservaRestante: number
 }
 
-/** Painel de contas — caixa + cartões com saldo inicial e reservas */
+/** Painel de contas - caixa + cartões com saldo inicial e reservas */
 export function buildAccountPanelData(
   allTransactions: Transaction[],
   cards: VirtualCard[],

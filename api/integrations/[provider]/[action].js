@@ -1,4 +1,4 @@
-// Roteador único — integrações Google/Gmail (limite Hobby: 12 serverless functions)
+// Roteador único - integrações Google/Gmail (limite Hobby: 12 serverless functions)
 import googleStatus from '../../../_lib/handlers/integrations/google-status.js';
 import googleUrl from '../../../_lib/handlers/integrations/google-url.js';
 import googleCallback from '../../../_lib/handlers/integrations/google-callback.js';

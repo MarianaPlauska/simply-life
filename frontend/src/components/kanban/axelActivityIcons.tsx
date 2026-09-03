@@ -5,7 +5,7 @@ export const ACTIVITY_EVENT_META: Record<
   ActivityEventKind,
   { label: string; Icon: LucideIcon; color: string }
 > = {
-  // rascunho — eventos automáticos na criação da demanda
+  // rascunho - eventos automáticos na criação da demanda
   blocker: { label: 'Registrar bloqueio', Icon: AlertCircle, color: 'text-amber-400' },
   progress: { label: 'Atualizar andamento', Icon: CheckCircle, color: 'text-emerald-400' },
   dependency: { label: 'Vincular dependência', Icon: Link2, color: 'text-sky-400' },

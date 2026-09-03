@@ -1,4 +1,4 @@
-// i18n — setup do i18next com react-i18next
+// i18n - setup do i18next com react-i18next
 // detector de idioma do navegador, fallback pt-br
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';

@@ -9,7 +9,7 @@ interface AppErrorFallbackProps
   onRetry?: () => void
 }
 
-/** Erro genérico — tom calmo, sem detalhe técnico */
+/** Erro genérico - tom calmo, sem detalhe técnico */
 export function AppErrorFallback({
   title = 'Algo não carregou como esperado',
   onRetry,

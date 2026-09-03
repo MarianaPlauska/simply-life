@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 
-// Metadados locais de tarefa — lastMovedAt para decay
+// Metadados locais de tarefa - lastMovedAt para decay
 
 const LAST_MOVED_KEY = 'axel-task-last-moved-v1'
 

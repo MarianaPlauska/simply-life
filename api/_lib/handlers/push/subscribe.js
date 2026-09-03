@@ -1,4 +1,4 @@
-// Handler — VAPID (web) + Expo Push tokens
+// Handler - VAPID (web) + Expo Push tokens
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js';

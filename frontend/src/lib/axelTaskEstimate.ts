@@ -2,7 +2,7 @@ import type { Subtarefa, TarefaUnificada } from '../types'
 
 const MIN_ESTIMATE = 20
 const MAX_ESTIMATE = 480
-/** Janela útil de trabalho no dia — referência para estimativas */
+/** Janela útil de trabalho no dia - referência para estimativas */
 export const AXEL_WORKDAY_MINUTES = 14 * 60
 
 export interface TaskComplexityInput
@@ -14,7 +14,7 @@ export interface TaskComplexityInput
   prioridade?: TarefaUnificada['prioridade']
 }
 
-/** Fallback local — espelha backend/logic/task_estimate.py; preferir /api/task-estimate */
+/** Fallback local - espelha backend/logic/task_estimate.py; preferir /api/task-estimate */
 export function inferComplexityEstimateMinutes(input: TaskComplexityInput): number
 {
   const subs = input.subtarefas ?? []
@@ -61,7 +61,7 @@ export function inferComplexityFromTask(
 }
 
 /**
- * Progresso de foco — tempo sozinho não dispara a barra;
+ * Progresso de foco - tempo sozinho não dispara a barra;
  * checklist e complexidade modulam o ritmo.
  */
 export function computeAxelFocusProgress(

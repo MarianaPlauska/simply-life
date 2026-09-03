@@ -1,4 +1,4 @@
-/** Hábitos diários — água / proteína / treino (paridade web) */
+/** Hábitos diários - água / proteína / treino (paridade web) */
 
 export type HabitoTipo = 'agua' | 'proteina' | 'treino' | string
 

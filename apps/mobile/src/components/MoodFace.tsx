@@ -14,7 +14,7 @@ const ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   5: 'happy',
 }
 
-/** Face geométrica Ionicons — sem emoji Unicode */
+/** Face geométrica Ionicons - sem emoji Unicode */
 export function MoodFace({
   mood,
   selected,

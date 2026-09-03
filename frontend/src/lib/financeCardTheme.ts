@@ -1,6 +1,6 @@
 import type { VirtualCard } from '../store/storeTypes'
 
-/** Cores dos chips de pagamento — espelha o visual do cartão cadastrado */
+/** Cores dos chips de pagamento - espelha o visual do cartão cadastrado */
 export const CARD_CHIP_STYLES: Record<
   VirtualCard['tipo_gradiente'],
   { dot: string; activeBorder: string; activeBg: string }

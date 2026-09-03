@@ -3,7 +3,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { AxelCareNudge } from '../axel/AxelCareNudge'
 import { AXEL_MOOD_CARE_DURATION_MS, isAxelMoodCareActive } from '../../lib/axelMoodCare'
 
-// Mensagem do AXEL após humor — some sozinha em 25s
+// Mensagem do AXEL após humor - some sozinha em 25s
 
 export function AxelPostMoodCare()
 {

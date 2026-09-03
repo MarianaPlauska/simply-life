@@ -8,7 +8,7 @@ interface FormFieldLabelProps
   className?: string
 }
 
-/** Rótulo de campo — asterisco em obrigatórios */
+/** Rótulo de campo - asterisco em obrigatórios */
 export function FormFieldLabel({
   children,
   required = false,

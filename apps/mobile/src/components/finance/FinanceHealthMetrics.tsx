@@ -13,7 +13,7 @@ type Props = {
 }
 
 /**
- * Nível 2 — métricas de saúde financeira.
+ * Nível 2 - métricas de saúde financeira.
  * Barras em tom do módulo Finanças (ouro), não no acento cobre.
  */
 export function FinanceHealthMetrics({

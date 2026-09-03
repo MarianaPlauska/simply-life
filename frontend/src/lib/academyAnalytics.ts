@@ -1,4 +1,4 @@
-// Analytics de academia — séries, PRs, heatmap e consistência
+// Analytics de academia - séries, PRs, heatmap e consistência
 
 import type { AnalyticsChartRow, AnalyticsTimeframe } from '../data/analyticsMockData'
 import type { SessaoTreino } from '../store/storeTypes'

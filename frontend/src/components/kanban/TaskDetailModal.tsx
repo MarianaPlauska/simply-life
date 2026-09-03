@@ -388,7 +388,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
         {/* corpo: 2 colunas no desktop */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           
-          {/* coluna principal — conteúdo */}
+          {/* coluna principal - conteúdo */}
           <div className="flex-1 overflow-y-auto p-8 space-y-8 scrollbar-thin scrollbar-thumb-zinc-850 scrollbar-track-transparent">
             
             {/* titulo editável */}
@@ -552,7 +552,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                     </div>
                   )}
 
-                  {/* lista de subtarefas — C8: drag reorder */}
+                  {/* lista de subtarefas - C8: drag reorder */}
                   <DndContext sensors={subSensors} collisionDetection={closestCenter} onDragEnd={handleSubDragEnd}>
                     <SortableContext items={subs.map((s) => s.id)} strategy={verticalListSortingStrategy}>
                       <div className="space-y-1.5 max-h-[250px] overflow-y-auto pr-1 scrollbar-thin">
@@ -643,7 +643,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
             )}
           </div>
 
-          {/* sidebar direita — propriedades */}
+          {/* sidebar direita - propriedades */}
           <div className="w-full lg:w-[340px] shrink-0 border-t lg:border-t-0 lg:border-l border-zinc-800/30 bg-zinc-900/15 overflow-y-auto p-6 space-y-6 flex flex-col justify-between scrollbar-thin scrollbar-thumb-zinc-850 scrollbar-track-transparent">
             
             <div className="space-y-6">

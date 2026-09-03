@@ -313,7 +313,7 @@ export function AxelTaskDrawer({
     if (isCreatingNew && draftHasContent())
     {
       saveTaskCreateDraft(buildDraftPayload())
-      toast.message('Rascunho guardado — continue quando quiser')
+      toast.message('Rascunho guardado - continue quando quiser')
     }
     onClose()
   }
@@ -682,7 +682,7 @@ export function AxelTaskDrawer({
 
             {isCreatingNew && draftRestored && (
               <p className="text-[11px] text-ink-muted font-mono -mt-2">
-                Rascunho restaurado — continue ou descarte no rodapé.
+                Rascunho restaurado - continue ou descarte no rodapé.
               </p>
             )}
 
@@ -717,7 +717,7 @@ export function AxelTaskDrawer({
                     void updateTarefa(live.id, { data_vencimento: accepted.proposedDue })
                       .then(() =>
                       {
-                        addEntry(`Prazo aceito: ${accepted.proposedDue ? new Date(accepted.proposedDue).toLocaleString('pt-BR', { day: '2-digit', month: 'short' }) : '—'}`, 'progress')
+                        addEntry(`Prazo aceito: ${accepted.proposedDue ? new Date(accepted.proposedDue).toLocaleString('pt-BR', { day: '2-digit', month: 'short' }) : '-'}`, 'progress')
                         pushAiDecision(`Prazo aceito · ${live.titulo.slice(0, 40)}`)
                         toast.success('Novo prazo aplicado')
                       })

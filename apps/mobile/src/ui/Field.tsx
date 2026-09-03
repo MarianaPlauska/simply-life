@@ -8,7 +8,7 @@ type Props = TextInputProps & {
   error?: string
 }
 
-/** Campo com label — focus ring AXEL */
+/** Campo com label - focus ring AXEL */
 export function Field({ label, error, style, onFocus, onBlur, ...rest }: Props)
 {
   const { colors, radius } = useTheme()

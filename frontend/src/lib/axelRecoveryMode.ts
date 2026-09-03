@@ -1,4 +1,4 @@
-// Modo recuperação automático — Finch-like (nível 11+)
+// Modo recuperação automático - Finch-like (nível 11+)
 
 import type { HumorRegistro } from '../store/slices/bemEstarSlice'
 import type { DiaHumorAgregado } from './moodInsights'
@@ -110,8 +110,8 @@ export function applyAxelRecoveryBoost(
       flowSuggestMinPercent: 45,
       maxActiveForFlow: 2,
     },
-    axelNote: `AXEL ativou recuperação automática (${decision.reason}) — Hoje em ${effectiveDailyCap} pts.`,
-    loadTooltipSuffix: ' Recuperação automática ativa — priorize o essencial.',
-    snoozeReason: 'AXEL adiou — modo recuperação automático',
+    axelNote: `AXEL ativou recuperação automática (${decision.reason}) - Hoje em ${effectiveDailyCap} pts.`,
+    loadTooltipSuffix: ' Recuperação automática ativa - priorize o essencial.',
+    snoozeReason: 'AXEL adiou - modo recuperação automático',
   }
 }

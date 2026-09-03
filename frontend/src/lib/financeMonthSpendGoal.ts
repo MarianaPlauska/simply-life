@@ -72,7 +72,7 @@ export async function hydrateMonthSpendGoals(): Promise<SpendGoalMap>
   return readMap()
 }
 
-/** Mês corrente — atalho */
+/** Mês corrente - atalho */
 export function loadCurrentMonthSpendGoal(ref = new Date()): MonthSpendGoal | null
 {
   return loadMonthSpendGoal(getCurrentMonthKey(ref))

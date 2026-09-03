@@ -25,7 +25,7 @@ interface FinanceExtrasTabProps
   embedded?: boolean
 }
 
-/** Gastos avulsos e futuros — fora da fatura do cartão */
+/** Gastos avulsos e futuros - fora da fatura do cartão */
 export function FinanceExtrasTab({ onNewTransaction, embedded = false }: FinanceExtrasTabProps)
 {
   const transactions = useTaskStore((s) => s.transactions)

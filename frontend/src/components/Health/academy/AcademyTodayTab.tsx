@@ -97,7 +97,7 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
           <div>
             <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Ainda sem treino para hoje</p>
             <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-              Monte o dia em Configurar — leva poucos minutos.
+              Monte o dia em Configurar - leva poucos minutos.
             </p>
           </div>
           <Settings2 className="w-4 h-4 text-accent shrink-0" />
@@ -114,12 +114,12 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
               </h2>
             </div>
             <p className={`text-lg font-display ${AXEL_TEXT_PRIMARY}`}>
-              {temTreinoMontado ? rotuloHoje : '—'}
+              {temTreinoMontado ? rotuloHoje : '-'}
             </p>
             <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
               {temTreinoMontado
                 ? `Meta: ${planoHoje?.meta_minutos ?? DEFAULT_TREINO_MINUTOS} min · ${concluidasHoje} sessão(ões) hoje`
-                : 'Configure o plano quando quiser — sem pressa'}
+                : 'Configure o plano quando quiser - sem pressa'}
             </p>
           </div>
           <span className="font-mono text-[10px] text-ink-muted tabular-nums">
@@ -151,7 +151,7 @@ export function AcademyTodayTab({ onGoConfig }: AcademyTodayTabProps)
         </header>
         {exercicios.length === 0 ? (
           <p className={`px-4 py-3 text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-            Lista vazia — adicione exercícios em Configurar.
+            Lista vazia - adicione exercícios em Configurar.
           </p>
         ) : (
           <ul className="divide-y divide-line">

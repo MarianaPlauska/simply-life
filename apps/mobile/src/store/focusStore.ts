@@ -5,27 +5,42 @@ type FocusPhase = 'idle' | 'focus' | 'short' | 'long'
 type FocusState = {
   phase: FocusPhase
   remainingSec: number
+  /** Duração total da sessão atual (para o anel) */
+  durationSec: number
   running: boolean
   cycles: number
-  start: (minutes: number, phase: FocusPhase) => void
+  /** Tarefa vinculada ao timer (ref app rosa) */
+  targetTaskId: string | null
+  /** Dispara +1 a cada sessão de foco concluída - UI consome para XP */
+  completedFocusSessions: number
+  setTargetTask: (id: string | null) => void
+  start: (minutes: number, phase: FocusPhase, taskId?: string | null) => void
   pause: () => void
   resume: () => void
   tick: () => void
-  reset: () => void
+  reset: (defaultMinutes?: number) => void
 }
 
 export const useFocusStore = create<FocusState>((set, get) => ({
   phase: 'idle',
   remainingSec: 25 * 60,
+  durationSec: 25 * 60,
   running: false,
   cycles: 0,
+  targetTaskId: null,
+  completedFocusSessions: 0,
 
-  start: (minutes, phase) =>
+  setTargetTask: (id) => set({ targetTaskId: id }),
+
+  start: (minutes, phase, taskId) =>
   {
+    const durationSec = Math.max(1, minutes) * 60
     set({
       phase,
-      remainingSec: Math.max(1, minutes) * 60,
+      remainingSec: durationSec,
+      durationSec,
       running: true,
+      targetTaskId: taskId !== undefined ? taskId : get().targetTaskId,
     })
   },
 
@@ -34,20 +49,33 @@ export const useFocusStore = create<FocusState>((set, get) => ({
 
   tick: () =>
   {
-    const { remainingSec, running, phase, cycles } = get()
+    const { remainingSec, running, phase, cycles, completedFocusSessions } = get()
     if (!running) return
     if (remainingSec <= 1)
     {
+      const focusDone = phase === 'focus'
       set({
         remainingSec: 0,
         running: false,
         phase: 'idle',
-        cycles: phase === 'focus' ? cycles + 1 : cycles,
+        cycles: focusDone ? cycles + 1 : cycles,
+        completedFocusSessions: focusDone
+          ? completedFocusSessions + 1
+          : completedFocusSessions,
       })
       return
     }
     set({ remainingSec: remainingSec - 1 })
   },
 
-  reset: () => set({ phase: 'idle', remainingSec: 25 * 60, running: false }),
+  reset: (defaultMinutes = 25) =>
+  {
+    const durationSec = Math.max(1, defaultMinutes) * 60
+    set({
+      phase: 'idle',
+      remainingSec: durationSec,
+      durationSec,
+      running: false,
+    })
+  },
 }))

@@ -7,7 +7,7 @@ function categoryKey(c: Category): string
   return `${c.tipo}|${grupo}|${parent}|${c.nome.toLowerCase().trim()}`
 }
 
-/** Remove categorias duplicadas — mantém o id menor */
+/** Remove categorias duplicadas - mantém o id menor */
 export function dedupeCategories(categories: Category[]): Category[]
 {
   const seen = new Map<string, Category>()
@@ -25,7 +25,7 @@ export function dedupeCategories(categories: Category[]): Category[]
   return Array.from(seen.values())
 }
 
-/** Nomes que ainda não existem no banco — evita seed duplicado */
+/** Nomes que ainda não existem no banco - evita seed duplicado */
 export function missingSeedNames(
   existing: Category[],
   seeds: { nome: string; tipo: string; grupo: string }[],

@@ -27,7 +27,7 @@ interface FinanceMonthGoalWidgetProps
   compact?: boolean
 }
 
-// Meta de poupança do mês — ex.: poupar X até o dia 30
+// Meta de poupança do mês - ex.: poupar X até o dia 30
 
 export function FinanceMonthGoalWidget({
   monthTransactions,
@@ -177,7 +177,7 @@ export function FinanceMonthGoalWidget({
             onClick={remove}
             className="p-1 rounded-sl hover:bg-chrome/40"
             aria-label="Remover meta deste mês"
-            title="Remove só a meta atual — pode definir outra depois"
+            title="Remove só a meta atual - pode definir outra depois"
           >
             <X size={12} className="text-ink-muted" />
           </button>

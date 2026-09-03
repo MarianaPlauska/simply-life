@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import type { DashboardPriority } from './userWorkspacePrefs'
 
-/** Módulos disponíveis na barra inferior mobile — Home é sempre fixo */
+/** Módulos disponíveis na barra inferior mobile - Home é sempre fixo */
 export type MobileNavModuleId =
   | 'home'
   | 'kanban'
@@ -118,7 +118,7 @@ function isOptionalId(id: string): id is OptionalMobileNavId
   return OPTIONAL_IDS.has(id as OptionalMobileNavId)
 }
 
-/** Preferências antigas usavam academia como atalho separado — agora é aba em Saúde */
+/** Preferências antigas usavam academia como atalho separado - agora é aba em Saúde */
 function migrateNavModuleId(id: string): MobileNavModuleId | null
 {
   if (id === 'home')

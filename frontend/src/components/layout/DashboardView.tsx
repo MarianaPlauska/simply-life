@@ -7,7 +7,7 @@ import {
   scheduleHomeSecondary,
 } from '../../lib/hydrateHome'
 import { AxelTaskDrawer } from '../kanban/AxelTaskDrawer'
-import { BentoGridSkeleton } from '../dashboard/DashboardPrimitives'
+import { BentoGridSkeleton } from '../ui/Skeleton'
 import { DashboardCommandBar } from '../dashboard/DashboardCommandBar'
 import { useDashboardMobileLayout } from '../../lib/dashboardMobilePriority'
 import { DashboardMobilePriorityCard } from '../dashboard/DashboardMobilePriorityCard'
@@ -205,6 +205,3 @@ export function DashboardView()
     </div>
   )
 }
-
-/** @deprecated use DashboardView */
-export const DashboardHome = DashboardView

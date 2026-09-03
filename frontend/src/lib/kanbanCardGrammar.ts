@@ -1,6 +1,6 @@
 import { diffDaysUntilDue, formatDaysRemaining } from './daysRemaining'
 
-/** Tom de módulo a partir da origem da tarefa — não usa laranja AXEL */
+/** Tom de módulo a partir da origem da tarefa - não usa laranja AXEL */
 export type KanbanModuleTone = 'finance' | 'health' | 'tasks'
 
 export function kanbanOriginTone(origem: string | null | undefined): KanbanModuleTone

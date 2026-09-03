@@ -26,7 +26,7 @@ import { AxelListRow } from '../ui/AxelListRow'
 import type { Category, CategoryGrupo, Transaction } from '../../store/storeTypes'
 import type { LucideIcon } from 'lucide-react'
 
-// FinanceTransactionsTab — tabela densa estilo Excel/Bloomberg
+// FinanceTransactionsTab - tabela densa estilo Excel/Bloomberg
 // Sem caixas, sem rounded-lg pesado, sem hover que cresce
 // Zebra stripe sutil + sticky header + fonte mono para numeros
 

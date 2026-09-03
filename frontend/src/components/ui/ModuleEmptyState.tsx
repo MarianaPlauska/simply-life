@@ -15,7 +15,7 @@ const TONE_ICON: Record<ModuleTone, string> = {
   tasks: 'text-tasks',
 }
 
-/** Vazio calmo — ícone ~40px a 40% + uma linha */
+/** Vazio calmo - ícone ~40px a 40% + uma linha */
 export function ModuleEmptyState({ icon: Icon, tone, message }: ModuleEmptyStateProps)
 {
   return (

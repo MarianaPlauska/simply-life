@@ -1,4 +1,4 @@
-// Quitação de tarefa financeira — roteia caixa vs cartão
+// Quitação de tarefa financeira - roteia caixa vs cartão
 
 import type { Transaction, VirtualCard } from '../store/storeTypes'
 import type { TarefaUnificada } from '../types'
@@ -20,7 +20,7 @@ function todayIso(): string
 function tituloDescricao(titulo: string): string
 {
   const nome = parseBillNameFromTitle(titulo)
-  return (nome ?? titulo.replace(/^\[Boleto\]\s*/i, '').split(/\s*[—–-]\s*/)[0]).trim()
+  return (nome ?? titulo.replace(/^\[Boleto\]\s*/i, '').split(/\s*[---]\s*/)[0]).trim()
 }
 
 function findPendingCardTx(

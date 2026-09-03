@@ -1,6 +1,6 @@
-// core web vitals — mede LCP, CLS, TTFB, INP
+// core web vitals - mede LCP, CLS, TTFB, INP
 // por enquanto loga no console; no futuro pode enviar via sendBeacon
-// nota: onFID foi removido no web-vitals v4 — substituído por onINP
+// nota: onFID foi removido no web-vitals v4 - substituído por onINP
 import { onLCP, onCLS, onTTFB, onINP, type Metric } from 'web-vitals';
 
 function sendToAnalytics ( metric: Metric )

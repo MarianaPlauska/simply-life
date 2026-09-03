@@ -29,7 +29,7 @@ function shortWeekday(iso: string): string
     .replace('.', '')
 }
 
-/** Série semanal — humor e tarefas para gráficos do dashboard */
+/** Série semanal - humor e tarefas para gráficos do dashboard */
 export function buildWeekPerformanceSeries(
   humorDias: DiaHumorAgregado[],
   tarefas: TarefaUnificada[],

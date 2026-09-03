@@ -1,4 +1,4 @@
-// POST /api/push-action — ações inline de notificação (feito / soneca)
+// POST /api/push-action - ações inline de notificação (feito / soneca)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { corsJson } from '../../supabaseUser.js';

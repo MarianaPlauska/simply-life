@@ -13,7 +13,7 @@ import {
 } from '../lib/careChipHeatmap'
 import type { ConsistencyDay } from '../lib/consistencyHeatmap'
 
-/** Heatmap do chip ativo — alimenta a rail de Saúde no desktop */
+/** Heatmap do chip ativo - alimenta a rail de Saúde no desktop */
 export function useCareChipHeatmap(active: CuidadosTab): {
   cells: ConsistencyDay[]
   label: string

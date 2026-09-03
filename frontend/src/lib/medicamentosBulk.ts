@@ -1,4 +1,4 @@
-/** Parser de medicamentos em lote — uma linha por item: Nome | 08:00, 20:00 */
+/** Parser de medicamentos em lote - uma linha por item: Nome | 08:00, 20:00 */
 
 export interface MedicamentoBulkRow
 {

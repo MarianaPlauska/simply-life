@@ -1,4 +1,4 @@
-// Roteador único — webhooks (limite Hobby: 12 serverless functions)
+// Roteador único - webhooks (limite Hobby: 12 serverless functions)
 import ingest from '../_lib/handlers/webhooks/ingest.js';
 import m2mIngest from '../_lib/handlers/webhooks/m2m-ingest.js';
 import pushSubscribe from '../_lib/handlers/push/subscribe.js';

@@ -1,4 +1,4 @@
-// helper de sessão — evita 401 em queries sem auth
+// helper de sessão - evita 401 em queries sem auth
 import { supabase } from './supabase'
 
 // retorna o uid se logado, null se não

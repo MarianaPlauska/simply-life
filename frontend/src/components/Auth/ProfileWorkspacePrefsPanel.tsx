@@ -38,7 +38,7 @@ const MOOD_OPTIONS: { id: MascotMoodPref; label: string }[] = [
   { id: 'focused', label: 'Focado' },
 ]
 
-/** Avatar, mascote e dashboard — editável pelo próprio usuário no perfil */
+/** Avatar, mascote e dashboard - editável pelo próprio usuário no perfil */
 export function ProfileWorkspacePrefsPanel()
 {
   const workspacePrefs = useTaskStore((s) => s.workspacePrefs)

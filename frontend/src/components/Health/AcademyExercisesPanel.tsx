@@ -18,7 +18,7 @@ import { AcademyLoadChart } from './academy/AcademyLoadChart'
 
 interface AcademyExercisesPanelProps
 {
-  /** Dia da semana para editar (padrão: hoje) — legado */
+  /** Dia da semana para editar (padrão: hoje) - legado */
   diaKey?: string
   /** Referência semana ou data ISO */
   diaRef?: AcademyDiaRef

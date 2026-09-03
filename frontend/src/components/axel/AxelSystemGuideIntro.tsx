@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import { AxelSystemGuide } from './AxelSystemGuide'
 import { hasSeenSystemGuide, markSystemGuideSeen } from '../../lib/axelSystemGuideContent'
 
-/** Modal na primeira sessão — guia passo a passo (score, prazos, foco) */
+/** Modal na primeira sessão - guia passo a passo (score, prazos, foco) */
 export function AxelSystemGuideIntro()
 {
   const [open, setOpen] = useState(false)

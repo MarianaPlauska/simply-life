@@ -1,7 +1,7 @@
 import { bucketByTemporalHorizon, type TemporalHorizon } from './temporalHorizon'
 import type { TarefaUnificada } from '../types'
 
-// Fila WIP "Executar agora" — ortogonal ao DueBucket (prazo)
+// Fila WIP "Executar agora" - ortogonal ao DueBucket (prazo)
 
 /** IDs ordenados por score na fila de execução; pins fixos no topo. */
 export function deriveExecutionQueue(

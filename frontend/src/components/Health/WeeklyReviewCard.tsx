@@ -74,7 +74,7 @@ export function WeeklyReviewCard()
           <KPI
             icon={Brain}
             label="Humor Médio"
-            value={humor_medio > 0 ? `${humor_medio}/5` : '—'}
+            value={humor_medio > 0 ? `${humor_medio}/5` : '-'}
             sub={`${registros_humor} registros`}
             color="bg-accent-muted text-accent"
           />

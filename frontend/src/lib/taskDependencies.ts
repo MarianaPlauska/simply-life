@@ -1,6 +1,6 @@
 import type { TarefaUnificada } from '../types'
 
-// Soft lock — dependências até predecessor estar DONE (concluída)
+// Soft lock - dependências até predecessor estar DONE (concluída)
 
 export function isTaskDependencyBlocked(
   task: TarefaUnificada,

@@ -10,7 +10,7 @@ interface HabitHeatmapProps
   loading?: boolean
 }
 
-/** Constância mensal de um hábito — grade compacta */
+/** Constância mensal de um hábito - grade compacta */
 export function HabitHeatmap({ nome, cells, loading = false }: HabitHeatmapProps)
 {
   const hasAny = useMemo(() => cells.some((c) => c.count > 0), [cells])
@@ -26,7 +26,7 @@ export function HabitHeatmap({ nome, cells, loading = false }: HabitHeatmapProps
   {
     return (
       <p className={`text-[11px] py-0.5 ${AXEL_TEXT_SECONDARY}`}>
-        Sem histórico ainda — registre para ver o mapa.
+        Sem histórico ainda - registre para ver o mapa.
       </p>
     )
   }

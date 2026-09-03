@@ -1,5 +1,5 @@
-// POST /api/ingest-email — e-mail único ou lote com Groq estruturado
-// Exige JWT Supabase — user_id vem do token, nunca do body
+// POST /api/ingest-email - e-mail único ou lote com Groq estruturado
+// Exige JWT Supabase - user_id vem do token, nunca do body
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { getUserFromBearer } from '../../supabaseUser.js'
@@ -19,7 +19,7 @@ export default async function handler(req, res)
   const user = await getUserFromBearer(req)
   if (!user)
   {
-    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' })
+    return res.status(401).json({ error: 'Não autenticado - envie Authorization: Bearer <jwt>' })
   }
 
   const supabase = getSupabaseAdmin()

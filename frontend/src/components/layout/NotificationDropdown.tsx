@@ -162,7 +162,7 @@ export function NotificationDropdown({ onClose }: NotificationDropdownProps)
                     type="button"
                     onClick={() => openUrgentTask(task.id)}
                     className="flex-1 min-w-0 flex items-start text-left hover:bg-chrome/50 transition-colors"
-                    title="Abrir tarefa — some ao concluir"
+                    title="Abrir tarefa - some ao concluir"
                   >
                     <div className="w-[3px] self-stretch shrink-0 bg-atencao" />
                     <div className="flex items-start gap-2.5 px-3 py-2.5 flex-1 min-w-0">

@@ -1,4 +1,4 @@
-// Tokens Kanban — alta densidade, tokens globais light/dark
+// Tokens Kanban - alta densidade, tokens globais light/dark
 
 export const AXEL_KANBAN_PAGE = 'bg-fundo font-sans text-ink'
 export const AXEL_KANBAN_GLOW = 'pointer-events-none absolute inset-0'
@@ -12,11 +12,11 @@ export const AXEL_KANBAN_EXEC_COLUMN =
 export const AXEL_KANBAN_DUE_SHELL =
   'flex-1 min-h-0 flex flex-col'
 
-/** Coluna de quadro — largura fixa, não estica vazio */
+/** Coluna de quadro - largura fixa, não estica vazio */
 export const AXEL_KANBAN_COL_WIDTH =
   'w-[320px] shrink-0'
 
-/** @deprecated Semana + Backlog — substituído por AXEL_KANBAN_DUE_SHELL */
+/** @deprecated Semana + Backlog - substituído por AXEL_KANBAN_DUE_SHELL */
 export const AXEL_KANBAN_PLAN_SHELL =
   'flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]'
 

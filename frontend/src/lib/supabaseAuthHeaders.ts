@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 
-/** Headers com JWT da sessão — rotas /api que exigem usuário autenticado */
+/** Headers com JWT da sessão - rotas /api que exigem usuário autenticado */
 export async function supabaseAuthHeaders(): Promise<Record<string, string>>
 {
   const { data: { session } } = await supabase.auth.getSession()

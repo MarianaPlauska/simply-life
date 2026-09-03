@@ -1,4 +1,4 @@
-// Rate limit em Postgres — sem Redis pago, funciona entre instâncias serverless
+// Rate limit em Postgres - sem Redis pago, funciona entre instâncias serverless
 
 import { getSupabaseAdmin } from './supabaseAdmin.js'
 

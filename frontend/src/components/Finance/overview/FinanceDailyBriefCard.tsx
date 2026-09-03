@@ -16,7 +16,7 @@ interface FinanceDailyBriefCardProps
   compact?: boolean
 }
 
-// Resumo + lançamento + gasto no cartão — um único bloco no dashboard
+// Resumo + lançamento + gasto no cartão - um único bloco no dashboard
 
 export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCardProps)
 {

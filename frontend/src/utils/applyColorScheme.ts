@@ -5,7 +5,7 @@ const THEME_COLOR: Record<ColorScheme, string> = {
   light: '#F7F5F2',
 }
 
-/** Chave de dispositivo — escrita na hora, sem esperar o persist Zustand. */
+/** Chave de dispositivo - escrita na hora, sem esperar o persist Zustand. */
 export const COLOR_SCHEME_STORAGE_KEY = 'simply-life-color-scheme'
 
 export function persistColorScheme(scheme: ColorScheme): void
@@ -43,7 +43,7 @@ export function parseColorScheme(value: unknown): ColorScheme | null
   return null
 }
 
-// Aplica tema claro / escuro no documento (não grava — quem escolhe o tema chama persistColorScheme)
+// Aplica tema claro / escuro no documento (não grava - quem escolhe o tema chama persistColorScheme)
 
 export function applyColorScheme(scheme: ColorScheme): void
 {
@@ -68,5 +68,5 @@ export function rememberAndApplyColorScheme(scheme: ColorScheme): void
 
 export const COLOR_SCHEME_OPTIONS: { id: ColorScheme; label: string; hint: string }[] = [
   { id: 'light', label: 'Claro', hint: 'Off-white + voz do AXEL' },
-  { id: 'dark', label: 'Escuro', hint: 'Como o editor — VS Code Dark+' },
+  { id: 'dark', label: 'Escuro', hint: 'Como o editor - VS Code Dark+' },
 ]

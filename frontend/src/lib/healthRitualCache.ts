@@ -1,4 +1,4 @@
-// Cache local do ritual diário — evita flash “vazio” antes do Supabase responder
+// Cache local do ritual diário - evita flash “vazio” antes do Supabase responder
 
 import { countDoseProgress } from './medicamentosSchedule'
 import { localTodayIso, readCachedWaterEntries } from './healthDayBoundary'
@@ -49,7 +49,7 @@ export function readHealthRitualCacheToday(): HealthRitualInputs | null
   }
 }
 
-/** Mescla live + cache — nunca regride o que o usuário já viu hoje */
+/** Mescla live + cache - nunca regride o que o usuário já viu hoje */
 export function mergeHealthRitualInputs(
   live: HealthRitualInputs,
   cached: HealthRitualInputs | null,

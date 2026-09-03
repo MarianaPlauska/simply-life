@@ -1,4 +1,4 @@
-// slice de triagem — motor de palavras-chave via supabase
+// slice de triagem - motor de palavras-chave via supabase
 import type { StateCreator } from 'zustand'
 import type { PalavraChave, ProcessarMensagemResult } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
@@ -69,7 +69,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
     catch (e) { console.error('removePalavraChave:', e) }
   },
 
-  // processamento local — compara título com keywords
+  // processamento local - compara título com keywords
   processarMensagem: async (conteudo, origem, remetente) =>
   {
     try
@@ -123,7 +123,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
     catch (e) { console.error('simularEmailRecebido:', e) }
   },
 
-  // gmail sync — FastAPI se configurado; senão ingest demo via Groq
+  // gmail sync - FastAPI se configurado; senão ingest demo via Groq
   sincronizarGmail: async () =>
   {
     if (get().isSyncingGmail) return null
@@ -137,7 +137,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
         return null
       }
 
-      // Gmail gratuito (IMAP + senha de app) — prioridade
+      // Gmail gratuito (IMAP + senha de app) - prioridade
       try
       {
         const result = await syncGmailImap()
@@ -155,7 +155,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
         }
       }
 
-      // OAuth Google (opcional) — sync via API
+      // OAuth Google (opcional) - sync via API
       try
       {
         const result = await syncGmailNow()
@@ -167,7 +167,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
       catch (syncErr)
       {
         const msg = syncErr instanceof Error ? syncErr.message : ''
-        // Sem Google conectado — cai no demo abaixo
+        // Sem Google conectado - cai no demo abaixo
         if (!msg.includes('não conectado') && !msg.includes('Não autenticado'))
         {
           console.warn('syncGmailNow:', syncErr)
@@ -205,7 +205,7 @@ export const createTriagemSlice: StateCreator<TriagemSlice, [], [], TriagemSlice
       const demoEmails = [
         {
           sender: 'cliente@sst.com.br',
-          subject: '[URGENTE] Aprovação documento SST — prazo amanhã',
+          subject: '[URGENTE] Aprovação documento SST - prazo amanhã',
           body: 'Precisamos da aprovação até amanhã às 17h para liberar o deploy.',
         },
         {

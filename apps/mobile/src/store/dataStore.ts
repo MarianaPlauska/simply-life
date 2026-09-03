@@ -11,8 +11,13 @@ import {
   demoContasAPagar,
   demoFinanceGoals,
   pickMoodCareMessage,
+  dueDateForBucket,
+  type DueBucket,
+  type FinanceCategory,
+  type FinanceGoal,
   type FinanceTx,
   type HumorRegistro,
+  type ImportedTransactionRow,
   type MobileTask,
   type HabitoDiario,
   type Medicamento,
@@ -20,14 +25,18 @@ import {
   type FinanceCard,
   type ContaFixa,
   type ContaAPagar,
-  type FinanceGoal,
   findHabit,
 } from '@simply-life/shared'
 import { fetchHumorMes, registrarHumor } from '../lib/sync/humor'
-import { createTarefa, fetchTarefas, toggleSubtarefa, updateTarefaStatus } from '../lib/sync/tasks'
+import { createTarefa, fetchTarefas, toggleSubtarefa, updateTarefaDue, updateTarefaStatus } from '../lib/sync/tasks'
 import { addDespesa, fetchDespesas, parseExpenseQuick } from '../lib/sync/finance'
 import { bumpHabitoProgress, fetchHabitos } from '../lib/sync/habits'
-import { fetchMedicamentos, toggleMedicamentoTomado } from '../lib/sync/medicamentos'
+import {
+  deleteMedicamento,
+  fetchMedicamentos,
+  insertMedicamento,
+  toggleMedicamentoTomado,
+} from '../lib/sync/medicamentos'
 import {
   fetchCashAccount,
   fetchContasAPagar,
@@ -37,6 +46,7 @@ import {
 import { loadOfflineBundle, saveOfflineBundle } from '../lib/offlineCache'
 import { supabaseConfigured } from '../lib/supabase'
 import { hapticLight } from '../lib/haptics'
+import { useGamificationStore } from './gamificationStore'
 
 function useLocal(isGuest?: boolean): boolean
 {
@@ -70,8 +80,25 @@ type DataState = {
   addProteinGrams: (grams: number, isGuest?: boolean) => Promise<void>
   toggleTreinoDone: (isGuest?: boolean) => Promise<void>
   toggleMedicamento: (id: number, isGuest?: boolean) => Promise<void>
+  addMedicamento: (nome: string, horario: string, isGuest?: boolean) => Promise<{ error?: string }>
+  removeMedicamento: (id: number, isGuest?: boolean) => Promise<void>
+  moveTaskBucket: (taskId: string, bucket: DueBucket, isGuest?: boolean) => Promise<void>
+  importFinanceRows: (rows: ImportedTransactionRow[], isGuest?: boolean) => Promise<number>
+  addFinanceGoal: (titulo: string, meta: number) => void
+  addCardSpend: (cardId: string, valor: number, titulo: string, isGuest?: boolean) => Promise<{ ok: boolean; error?: string }>
+  patchTaskNotes: (taskId: string, notes: string) => void
   /** Bloqueia/desbloqueia cartão (estado local + demo) */
   setFinanceCardStatus: (cardId: string, status: FinanceCard['status']) => void
+  /** Atualiza perfil do cartão (local/demo) */
+  updateFinanceCard: (cardId: string, patch: Partial<FinanceCard>) => void
+  addFinanceCard: (input: {
+    nome: string
+    limite: number
+    diaVencimento: number
+    bandeira?: FinanceCard['bandeira']
+    tipoGradiente?: FinanceCard['tipoGradiente']
+  }) => FinanceCard
+  removeFinanceCard: (cardId: string) => void
 }
 
 export const useDataStore = create<DataState>((set, get) => ({
@@ -236,6 +263,8 @@ export const useDataStore = create<DataState>((set, get) => ({
         created_at: new Date().toISOString(),
       }
       set({ humor: [row, ...get().humor], lastAxelCare: care })
+      useGamificationStore.getState().grantXp(5, 'Check-in de humor')
+      useGamificationStore.getState().unlockIf('mood_check')
       return
     }
     const saved = await registrarHumor({ humor, nota })
@@ -243,6 +272,8 @@ export const useDataStore = create<DataState>((set, get) => ({
       humor: [saved, ...get().humor.filter((h) => h.id !== saved.id)],
       lastAxelCare: care,
     })
+    useGamificationStore.getState().grantXp(5, 'Check-in de humor')
+    useGamificationStore.getState().unlockIf('mood_check')
   },
 
   addTask: async (titulo, isGuest, notas) =>
@@ -284,6 +315,8 @@ export const useDataStore = create<DataState>((set, get) => ({
         tipo: 'despesa',
       }
       set({ finance: [tx, ...get().finance] })
+      useGamificationStore.getState().grantXp(8, 'Gasto lançado', parsed.titulo)
+      useGamificationStore.getState().unlockIf('finance_log')
       return { ok: true }
     }
 
@@ -291,6 +324,8 @@ export const useDataStore = create<DataState>((set, get) => ({
     {
       const saved = await addDespesa(parsed)
       set({ finance: [saved, ...get().finance] })
+      useGamificationStore.getState().grantXp(8, 'Gasto lançado', parsed.titulo)
+      useGamificationStore.getState().unlockIf('finance_log')
       return { ok: true }
     }
     catch (e)
@@ -361,6 +396,13 @@ export const useDataStore = create<DataState>((set, get) => ({
       ),
     })
 
+    if (done)
+    {
+      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
+      useGamificationStore.getState().unlockIf('first_task')
+      useGamificationStore.getState().bumpStreak()
+    }
+
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
     await updateTarefaStatus(taskId, done)
   },
@@ -376,6 +418,15 @@ export const useDataStore = create<DataState>((set, get) => ({
         h.id === agua.id ? { ...h, progressoAtual: next } : h,
       ),
     })
+    if (next >= agua.metaDiaria)
+    {
+      useGamificationStore.getState().grantXp(8, 'Meta de água')
+      useGamificationStore.getState().unlockIf('water_day')
+    }
+    else
+    {
+      useGamificationStore.getState().grantXp(3, 'Copo de água')
+    }
     if (useLocal(isGuest) || agua.id.startsWith('h-')) return
     await bumpHabitoProgress(agua.id, next)
   },
@@ -440,5 +491,199 @@ export const useDataStore = create<DataState>((set, get) => ({
         c.id === cardId ? { ...c, status } : c,
       ),
     })
+  },
+
+  updateFinanceCard: (cardId, patch) =>
+  {
+    hapticLight()
+    set({
+      financeCards: get().financeCards.map((c) =>
+        c.id === cardId ? { ...c, ...patch, id: c.id } : c,
+      ),
+    })
+  },
+
+  addFinanceCard: (input) =>
+  {
+    hapticLight()
+    const card: FinanceCard = {
+      id: `c-${Date.now()}`,
+      nome: input.nome.trim(),
+      limite: input.limite,
+      diaVencimento: input.diaVencimento,
+      status: 'ativo',
+      bandeira: input.bandeira ?? 'mastercard',
+      tipoGradiente: input.tipoGradiente ?? 'copper',
+      numeroMascarado: `•••• ${String(Math.floor(1000 + Math.random() * 9000))}`,
+      titular: 'Titular',
+      faturaAberta: 0,
+    }
+    set({ financeCards: [...get().financeCards, card] })
+    return card
+  },
+
+  removeFinanceCard: (cardId) =>
+  {
+    hapticLight()
+    set({
+      financeCards: get().financeCards.filter((c) => c.id !== cardId),
+    })
+  },
+
+  moveTaskBucket: async (taskId, bucket, isGuest) =>
+  {
+    const due = dueDateForBucket(bucket)
+    set({
+      tasks: get().tasks.map((t) =>
+        t.id === taskId ? { ...t, dataVencimento: due } : t,
+      ),
+    })
+    useGamificationStore.getState().logEvent(
+      'decision',
+      'Tarefa movida',
+      `${taskId} → ${bucket}`,
+    )
+    if (useLocal(isGuest) || taskId.startsWith('local-')) return
+    await updateTarefaDue(taskId, due)
+  },
+
+  importFinanceRows: async (rows, isGuest) =>
+  {
+    let n = 0
+    for (const row of rows)
+    {
+      const tx: FinanceTx = {
+        id: `imp-${Date.now()}-${n}`,
+        titulo: row.descricao,
+        valor: row.valor,
+        categoria: (row.categoria as FinanceCategory) || 'outros',
+        data: row.data,
+        tipo: row.tipo,
+      }
+      if (useLocal(isGuest))
+      {
+        set({ finance: [tx, ...get().finance] })
+      }
+      else
+      {
+        try
+        {
+          const saved = await addDespesa({
+            titulo: row.descricao,
+            valor: row.valor,
+            data: row.data,
+          })
+          set({ finance: [saved, ...get().finance] })
+        }
+        catch
+        {
+          set({ finance: [tx, ...get().finance] })
+        }
+      }
+      n += 1
+    }
+    return n
+  },
+
+  addFinanceGoal: (titulo, meta) =>
+  {
+    const goal: FinanceGoal = {
+      id: Date.now(),
+      titulo: titulo.trim(),
+      meta,
+      atual: 0,
+    }
+    set({ financeGoals: [goal, ...get().financeGoals] })
+  },
+
+  addCardSpend: async (cardId, valor, titulo, isGuest) =>
+  {
+    const card = get().financeCards.find((c) => c.id === cardId)
+    const label = titulo.trim() || 'Compra'
+    const tagged = card ? `[${card.nome}] ${label}` : label
+    set({
+      financeCards: get().financeCards.map((c) =>
+        c.id === cardId
+          ? { ...c, faturaAberta: (c.faturaAberta ?? 0) + valor }
+          : c,
+      ),
+    })
+    const today = new Date().toISOString().slice(0, 10)
+    if (useLocal(isGuest))
+    {
+      const tx: FinanceTx = {
+        id: `card-${Date.now()}`,
+        titulo: tagged,
+        valor,
+        categoria: 'compras',
+        data: today,
+        tipo: 'despesa',
+        cardId,
+      }
+      set({ finance: [tx, ...get().finance] })
+      useGamificationStore.getState().logEvent('xp', 'Gasto no cartão', tagged)
+      return { ok: true }
+    }
+    const res = await get().addExpenseFromText(`${tagged} ${valor}`, isGuest)
+    if (res.ok)
+    {
+      const first = get().finance[0]
+      if (first && !first.cardId)
+      {
+        set({
+          finance: get().finance.map((t, i) =>
+            i === 0 ? { ...t, cardId, titulo: tagged } : t,
+          ),
+        })
+      }
+    }
+    return res
+  },
+
+  patchTaskNotes: (taskId, notes) =>
+  {
+    set({
+      tasks: get().tasks.map((t) =>
+        t.id === taskId ? { ...t, anotacao: notes } : t,
+      ),
+    })
+  },
+
+  addMedicamento: async (nome, horario, isGuest) =>
+  {
+    if (useLocal(isGuest))
+    {
+      set({
+        medicamentos: [
+          ...get().medicamentos,
+          { id: Date.now(), nome, horario, tomado: false },
+        ],
+      })
+      return {}
+    }
+    try
+    {
+      const saved = await insertMedicamento(nome, horario)
+      set({ medicamentos: [...get().medicamentos, saved] })
+      return {}
+    }
+    catch (e)
+    {
+      return { error: e instanceof Error ? e.message : 'Falha ao salvar' }
+    }
+  },
+
+  removeMedicamento: async (id, isGuest) =>
+  {
+    set({ medicamentos: get().medicamentos.filter((m) => m.id !== id) })
+    if (useLocal(isGuest)) return
+    try
+    {
+      await deleteMedicamento(id)
+    }
+    catch
+    {
+      /* local já atualizado */
+    }
   },
 }))

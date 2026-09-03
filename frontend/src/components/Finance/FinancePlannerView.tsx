@@ -358,7 +358,7 @@ export function FinancePlannerView() {
             {monthOffset > 1 && ' · encadeado'}
           </p>
           <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            Estimativas com receitas recorrentes, contas fixas e faturas — meses distantes usam projeção encadeada.
+            Estimativas com receitas recorrentes, contas fixas e faturas - meses distantes usam projeção encadeada.
           </p>
         </div>
       )}
@@ -369,7 +369,7 @@ export function FinancePlannerView() {
             Histórico · {monthLabel}
           </p>
           <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            Lançamentos reais do período — compare com o que estava previsto nas fixas e recorrentes.
+            Lançamentos reais do período - compare com o que estava previsto nas fixas e recorrentes.
           </p>
         </div>
       )}

@@ -1,4 +1,4 @@
-// IntentAnalyzer — classificação de intenção (espelho do frontend)
+// IntentAnalyzer - classificação de intenção (espelho do frontend)
 
 import { formatSenderLabel, resolveInfluenceWeight, DEFAULT_INFLUENCE_MAP } from './influenceMap.js';
 
@@ -81,7 +81,7 @@ export function analyzeTaskIntent(task, senderOverride)
     return {
       category: 'alinhamento',
       categoryLabel: 'Alinhamento',
-      urgencyReason: `Classificado como Alinhamento: ${senderPart} compartilha informação — prazo secundário.`,
+      urgencyReason: `Classificado como Alinhamento: ${senderPart} compartilha informação - prazo secundário.`,
       forceMinScore: null,
       ignoreDeadline: false,
       flowAlert: null,
@@ -92,7 +92,7 @@ export function analyzeTaskIntent(task, senderOverride)
   return {
     category: 'execucao',
     categoryLabel: 'Execução',
-    urgencyReason: `Classificado como Execução: ${senderPart} — tarefa acionável.`,
+    urgencyReason: `Classificado como Execução: ${senderPart} - tarefa acionável.`,
     forceMinScore: null,
     ignoreDeadline: false,
     flowAlert: null,

@@ -1,4 +1,4 @@
-// Cliente Gmail REST — lista não lidos e marca como lido
+// Cliente Gmail REST - lista não lidos e marca como lido
 
 function parseFromHeader(headers)
 {

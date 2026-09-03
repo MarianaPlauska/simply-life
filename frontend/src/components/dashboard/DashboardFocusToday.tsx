@@ -4,11 +4,9 @@ import { AXEL_TEXT_SECONDARY, MODULE_WASH, MODULE_HERO, MODULE_METRIC } from '..
 
 interface DashboardFocusTodayProps
 {
-  /** Herói na rail; módulo no bloco “Mais” (mobile) */
   metricVariant?: 'hero' | 'module'
 }
 
-/** Minutos de Pomodoro já registrados hoje */
 export function DashboardFocusToday({ metricVariant = 'hero' }: DashboardFocusTodayProps)
 {
   const focusMinutesByDate = useTaskStore((s) => s.focusMinutesByDate)

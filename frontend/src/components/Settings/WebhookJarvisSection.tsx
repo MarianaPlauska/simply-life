@@ -67,7 +67,7 @@ export function WebhookJarvisSection()
 
       setHasSecret(true);
       setPlainSecret(secret);
-      toast.success('Secret gerado. Copie agora — não será exibido de novo.');
+      toast.success('Secret gerado. Copie agora - não será exibido de novo.');
     }
     catch (e)
     {
@@ -119,7 +119,7 @@ export function WebhookJarvisSection()
         <div className="flex items-center gap-3">
           <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
           <p className="text-xs text-zinc-400">
-            Status: {loading ? '…' : hasSecret ? 'Secret configurado' : 'Nenhum secret — gere abaixo'}
+            Status: {loading ? '…' : hasSecret ? 'Secret configurado' : 'Nenhum secret - gere abaixo'}
           </p>
           <button
             type="button"

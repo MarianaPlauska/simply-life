@@ -12,11 +12,11 @@ export type GlassCardProps = {
   className?: string;
   noPadding?: boolean;
   hover?: boolean;
-  /** @deprecated glow removido — mantido por compatibilidade */
+  /** @deprecated glow removido - mantido por compatibilidade */
   noGlow?: boolean;
 } & Omit<HTMLMotionProps<'div'>, 'children'>;
 
-/** Painel editorial — borda fina, sem glassmorphism nem glow */
+/** Painel editorial - borda fina, sem glassmorphism nem glow */
 export function GlassCard({
   children,
   className = '',

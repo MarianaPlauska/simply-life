@@ -161,7 +161,7 @@ export function AnotacoesView()
     <div className={`${AXEL_PAGE_SHELL} ${AXEL_PAGE_GUTTER} pb-16`}>
       <PageIntro
         title="Anotações"
-        lede="Diário, listas e lembretes — rápido como papel."
+        lede="Diário, listas e lembretes - rápido como papel."
       />
 
       <div className="mt-4">

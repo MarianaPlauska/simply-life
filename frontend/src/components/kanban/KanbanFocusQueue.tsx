@@ -2,7 +2,7 @@ import { urgencyScoreClass } from '../../lib/kanbanVisual'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
-// Fila lateral — ranking de Hoje (densidade Superhuman dentro do board)
+// Fila lateral - ranking de Hoje (densidade Superhuman dentro do board)
 
 interface KanbanFocusQueueProps
 {

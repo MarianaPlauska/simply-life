@@ -1,6 +1,6 @@
 import type { Transaction, VirtualCard } from '../store/storeTypes'
 
-/** Meio de pagamento explícito — persistido em despesas.forma_pagamento */
+/** Meio de pagamento explícito - persistido em despesas.forma_pagamento */
 export type FinancePaymentMethod =
   | 'pix'
   | 'debito'

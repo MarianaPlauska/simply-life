@@ -23,7 +23,7 @@ const TABS: { id: CaptureKind; label: string }[] = [
 ]
 
 const PLACEHOLDERS: Record<CaptureKind, string> = {
-  dump: 'Uma linha por item — tarefas ou “café 12,50”',
+  dump: 'Uma linha por item - tarefas ou “café 12,50”',
   task: 'O que precisa ser feito?',
   expense: 'Ex: café 12,50',
   note: 'Como foi o dia?',

@@ -2,7 +2,6 @@ import { Smile, Droplets, Wallet } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useCapture } from '../capture/CaptureProvider'
 
-/** Ícones compactos — só quando card + strip não preenchem a dobra */
 export function DashboardQuickActionsCompact()
 {
   const navigate = useNavigate()

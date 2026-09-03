@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { notifySubtasksChanged, readLocalSubtasks } from '../lib/subtaskProgress'
 import type { Subtarefa } from '../types'
 
-// Subtarefas locais para tarefas mock (id negativo) — checklist funcional sem Supabase
+// Subtarefas locais para tarefas mock (id negativo) - checklist funcional sem Supabase
 
 const STORAGE_KEY = 'axel-local-subtasks-v1'
 

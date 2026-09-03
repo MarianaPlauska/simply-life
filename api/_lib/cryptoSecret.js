@@ -41,7 +41,7 @@ export function encryptSecret(plain)
   const key = keyFromEnv()
   if (!key)
   {
-    throw new Error('ENCRYPTION_KEY ausente — não gravo senha em texto puro')
+    throw new Error('ENCRYPTION_KEY ausente - não gravo senha em texto puro')
   }
 
   const iv = randomBytes(12)
@@ -62,7 +62,7 @@ export function decryptSecret(stored)
   const key = keyFromEnv()
   if (!key)
   {
-    throw new Error('ENCRYPTION_KEY ausente — não consigo ler a senha IMAP')
+    throw new Error('ENCRYPTION_KEY ausente - não consigo ler a senha IMAP')
   }
 
   const buf = Buffer.from(stored.slice(PREFIX.length), 'base64')

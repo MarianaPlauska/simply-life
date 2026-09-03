@@ -1,4 +1,4 @@
-// Labels de projeto — vincula tag SST/FINALLY após ingestão
+// Labels de projeto - vincula tag SST/FINALLY após ingestão
 
 const TAG_COLORS = {
   SST: '#ef4444',

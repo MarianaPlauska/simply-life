@@ -1,4 +1,4 @@
-// Catálogo de cosméticos e tons de IA — desbloqueio por nível/ofensiva/XP
+// Catálogo de cosméticos e tons de IA - desbloqueio por nível/ofensiva/XP
 
 import type { PrivilegeContext } from './axelPrivileges'
 import type { AccentId } from './userWorkspacePrefs'
@@ -238,7 +238,7 @@ export function resolveProfileBadge(
 export const AI_TONE_PROMPTS: Record<string, string> = {
   ai_tone_friendly: 'Tom de melhor amigo: empático, caloroso, celebra pequenas vitórias.',
   ai_tone_direct: 'Tom direto: frases curtas, números primeiro, sem floreios.',
-  ai_tone_playful: 'Tom leve com humor sutil — nunca sarcástico com dinheiro sério.',
+  ai_tone_playful: 'Tom leve com humor sutil - nunca sarcástico com dinheiro sério.',
   ai_tone_zen: 'Tom zen: calmo, mindful, foco em equilíbrio e respiração financeira.',
   ai_tone_coach_plus: 'Tom de coach personalizado: mistura empatia com accountability gentil.',
 }

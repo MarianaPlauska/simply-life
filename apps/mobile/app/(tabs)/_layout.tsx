@@ -8,6 +8,7 @@ import { useWorkspace } from '../../src/layout/useWorkspace'
 import { useDataSync } from '../../src/hooks/useDataSync'
 import { useAuthStore } from '../../src/store/authStore'
 import { usePrefsStore } from '../../src/store/prefsStore'
+import { SetupGuard } from '../../src/components/auth/SetupGuard'
 import { useEffect } from 'react'
 
 export default function TabsLayout()
@@ -15,24 +16,28 @@ export default function TabsLayout()
   const { colors, mode, setMode } = useTheme()
   const { showRail } = useWorkspace()
   const userId = useAuthStore((s) => s.userId)
+  const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
   const scheme = usePrefsStore((s) => s.prefs.color_scheme)
   const prefsLoaded = usePrefsStore((s) => s.loaded)
   useDataSync()
 
   useEffect(() =>
   {
-    if (prefsLoaded && scheme && scheme !== mode)
+    // Sem preferência salva → claro (paleta Natural Tan)
+    const next = scheme ?? 'light'
+    if (prefsLoaded && next !== mode)
     {
-      setMode(scheme)
+      setMode(next)
     }
   }, [prefsLoaded, scheme, mode, setMode])
 
-  if (!userId)
+  if (!userId || mfaPending)
   {
     return <Redirect href="/login" />
   }
 
   return (
+    <SetupGuard>
     <View
       style={{
         flex: 1,
@@ -58,5 +63,6 @@ export default function TabsLayout()
       </View>
       <CaptureSheet />
     </View>
+    </SetupGuard>
   )
 }

@@ -22,9 +22,9 @@ export function formatReporterLabel(origem: string): string
 
 export function formatDrawerDate(iso: string | null | undefined): string
 {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   return d.toLocaleString('pt-BR', {
     day: '2-digit',
     month: 'short',

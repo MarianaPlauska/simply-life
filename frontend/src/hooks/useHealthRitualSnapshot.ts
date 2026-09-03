@@ -9,7 +9,7 @@ import {
 } from '../lib/healthRitualCache'
 
 /**
- * Ritual de saúde com cache local — pinta o estado de hoje antes do fetch remoto.
+ * Ritual de saúde com cache local - pinta o estado de hoje antes do fetch remoto.
  */
 export function useHealthRitualSnapshot(): HealthRitualSnapshot
 {

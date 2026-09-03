@@ -1,9 +1,5 @@
-/**
- * Layout AXEL Premium — radius, elevação, espaçamento 8-pt.
- */
-
 export const RADIUS = {
-  card: 24,
+  card: 18,
   control: 14,
   pill: 999,
   sheet: 28,
@@ -11,8 +7,7 @@ export const RADIUS = {
   bar: 28,
 } as const
 
-/** Altura do conteúdo da tab bar (sem safe-area) — Screen usa para padding inferior */
-export const TAB_BAR_CONTENT_HEIGHT = 72
+export const TAB_BAR_CONTENT_HEIGHT = 92
 
 export const SPACE = {
   xs: 4,
@@ -44,7 +39,7 @@ export type ElevationSet = {
   bar: ElevationStyle
 }
 
-/** Sombras — hero > card para hierarquia perceptível */
+/** Sombras - hero > card para hierarquia perceptível */
 export const ELEVATION: { light: ElevationSet; dark: ElevationSet } = {
   light: {
     card: {
@@ -92,16 +87,16 @@ export const ELEVATION: { light: ElevationSet; dark: ElevationSet } = {
       elevation: 10,
     },
     fab: {
-      shadowColor: '#FF6A2B',
+      shadowColor: '#B76021',
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.45,
       shadowRadius: 14,
       elevation: 8,
     },
     bar: {
-      shadowColor: '#000000',
+      shadowColor: '#1F1712',
       shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.45,
+      shadowOpacity: 0.55,
       shadowRadius: 20,
       elevation: 10,
     },
@@ -111,4 +106,6 @@ export const ELEVATION: { light: ElevationSet; dark: ElevationSet } = {
 export const BREAKPOINT = {
   tablet: 768,
   desktop: 1024,
+  mobileMax: 767,
+  tabletMax: 1023,
 } as const

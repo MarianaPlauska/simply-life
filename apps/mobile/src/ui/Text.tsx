@@ -2,7 +2,7 @@ import { Text as RNText, type TextProps, type TextStyle } from 'react-native'
 import { type TypeRole } from '@simply-life/ui-tokens'
 import { useTheme } from '../theme/ThemeProvider'
 
-/** Famílias nomeadas — sem fontWeight extra (quebra o face no RN/web) */
+/** Famílias nomeadas - sem fontWeight extra (quebra o face no RN/web) */
 const WEIGHT_TO_MANROPE: Record<string, string> = {
   '400': 'Manrope_400Regular',
   '500': 'Manrope_500Medium',

@@ -166,7 +166,7 @@ export function ListView ({ tarefas, selectedIds, onToggleSelect, onSelectAll, o
 
             {/* data */}
             <span className="text-[11px] text-zinc-500">
-              {t.created_at ? new Date(t.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '—'}
+              {t.created_at ? new Date(t.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '-'}
             </span>
 
             {/* ações */}

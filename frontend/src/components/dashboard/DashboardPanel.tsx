@@ -8,8 +8,6 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Cabeçalho padronizado — painéis do dashboard enterprise
-
 interface DashboardPanelProps
 {
   section?: string
@@ -19,7 +17,6 @@ interface DashboardPanelProps
   children: ReactNode
   className?: string
   noPadding?: boolean
-  /** Sem caixa — só hairline de métrica */
   hairline?: boolean
 }
 

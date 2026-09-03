@@ -33,10 +33,10 @@ import {
   Zap,
 } from 'lucide-react'
 
-/** Mesmo peso do menu — stroke 1.75 */
+/** Mesmo peso do menu - stroke 1.75 */
 export const AXEL_ICON_STROKE = 1.75
 
-/** id → Lucide. Atalho, refeição, preset e trilha — sem emoji nativo */
+/** id → Lucide. Atalho, refeição, preset e trilha - sem emoji nativo */
 export const AXEL_ICON_MAP: Record<string, LucideIcon> = {
   'qr-code': QrCode,
   car: Car,

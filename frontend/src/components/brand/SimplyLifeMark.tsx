@@ -1,4 +1,4 @@
-// Marca SL + sorriso AXEL — ícone e assinatura
+// Marca SL + sorriso AXEL - ícone e assinatura
 
 type MarkVariant = 'icon' | 'lockup'
 

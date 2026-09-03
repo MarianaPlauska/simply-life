@@ -36,7 +36,7 @@ function HabitRow({ habito, onIncrement }: HabitRowProps)
   )
 }
 
-/** Hábitos com meta N — toque até completar o dia + heatmap mensal */
+/** Hábitos com meta N - toque até completar o dia + heatmap mensal */
 export function HabitRepeatStrip()
 {
   const habitos = useTaskStore((s) => s.habitos)

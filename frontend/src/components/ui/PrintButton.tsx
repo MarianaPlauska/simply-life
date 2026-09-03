@@ -1,4 +1,4 @@
-// botão reutilizável de impressão — chama window.print() e se esconde no @media print
+// botão reutilizável de impressão - chama window.print() e se esconde no @media print
 import { Printer } from 'lucide-react';
 
 interface PrintButtonProps

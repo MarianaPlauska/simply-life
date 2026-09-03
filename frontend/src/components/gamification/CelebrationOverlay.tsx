@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Flame, X } from 'lucide-react'
 
-// Tela de marco — ofensiva 7 / 30 / 100 dias
+// Tela de marco - ofensiva 7 / 30 / 100 dias
 
 interface MilestoneDetail
 {
@@ -52,7 +52,7 @@ export function CelebrationOverlay()
           {days} dias de ofensiva
         </h2>
         <p className="text-sm text-ink-muted mt-2 leading-relaxed">
-          Marco alcançado. Você construiu um hábito real de execução — continue amanhã.
+          Marco alcançado. Você construiu um hábito real de execução - continue amanhã.
         </p>
         <button
           type="button"

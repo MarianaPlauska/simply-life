@@ -11,7 +11,7 @@ import {
   kanbanDueTextClass,
 } from '../../lib/kanbanCardGrammar'
 
-// Linha de tarefa — "tudo é linha" com micro-estética (metadados à direita, IA-aware)
+// Linha de tarefa - "tudo é linha" com micro-estética (metadados à direita, IA-aware)
 
 export interface TaskLineDragProps
 {
@@ -32,7 +32,7 @@ interface TaskLineRowProps
   dense?: boolean
   borderless?: boolean
   ultraCompact?: boolean
-  /** Metadados ricos à direita — dashboard executivo */
+  /** Metadados ricos à direita - dashboard executivo */
   rich?: boolean
 }
 

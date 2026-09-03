@@ -1,4 +1,4 @@
-// POST /api/integrations/google/callback — troca code por tokens e persiste
+// POST /api/integrations/google/callback - troca code por tokens e persiste
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import {

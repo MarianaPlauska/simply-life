@@ -29,7 +29,7 @@ interface FinanceRecentTransactionsProps
   onOpenLedger?: () => void
 }
 
-/** Últimos lançamentos reais — confirmação rápida sem ir ao Diário */
+/** Últimos lançamentos reais - confirmação rápida sem ir ao Diário */
 export function FinanceRecentTransactions({
   transactions,
   categories,

@@ -161,7 +161,7 @@ export function AxelDrawerOrganizationSection({
 
     if (taskLabels.length >= MAX_FLAGS)
     {
-      toast.message(`Máximo de ${MAX_FLAGS} flags — remova uma para usar a pasta como flag`)
+      toast.message(`Máximo de ${MAX_FLAGS} flags - remova uma para usar a pasta como flag`)
       return
     }
 

@@ -6,7 +6,7 @@ import { moodLabel } from '../../lib/moodConstants'
 import { MoodWeekSparkline } from '../wellbeing/MoodWeekSparkline'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-/** Humor do dia + resumo da semana — topo da aba Anotações */
+/** Humor do dia + resumo da semana - topo da aba Anotações */
 export function NotesMoodStrip()
 {
   const humorHojeLista = useTaskStore((s) => s.humorHojeLista)

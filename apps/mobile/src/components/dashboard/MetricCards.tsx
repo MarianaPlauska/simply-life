@@ -6,12 +6,12 @@ import { useWorkspace } from '../../layout/useWorkspace'
 export type MetricItem = {
   label: string
   value: string
-  /** Cor do número — módulo (não cobre AXEL) */
+  /** Cor do número - módulo (não cobre AXEL) */
   color?: string
   hint?: string
 }
 
-/** Nível 2 — par de métricas; no desktop ocupa a faixa como SoftTech */
+/** Nível 2 - par de métricas; no desktop ocupa a faixa como SoftTech */
 export function MetricCards({ items }: { items: MetricItem[] })
 {
   const { colors, space } = useTheme()

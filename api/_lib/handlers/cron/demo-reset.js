@@ -1,4 +1,4 @@
-// Safety net — reset da conta demo no cron diário (visitantes sujam o seed)
+// Safety net - reset da conta demo no cron diário (visitantes sujam o seed)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { resetConfiguredDemoAccount } from '../../demoWorkspace.js'

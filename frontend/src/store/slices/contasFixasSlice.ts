@@ -1,4 +1,4 @@
-// slice de contas fixas — aluguel, luz, internet, streaming, etc.
+// slice de contas fixas - aluguel, luz, internet, streaming, etc.
 import type { StateCreator } from 'zustand'
 import type { ContaFixa } from '../storeTypes'
 import { supabase } from '../../lib/supabase'

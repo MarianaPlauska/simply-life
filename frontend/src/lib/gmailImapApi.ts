@@ -100,7 +100,7 @@ export async function sendGmailImapTestMail(): Promise<void>
     if (data.oauth_required)
     {
       throw new Error(
-        'O Gmail recusou SMTP com senha de app. Não usamos OAuth pago — o resumo semanal cairá só em push.',
+        'O Gmail recusou SMTP com senha de app. Não usamos OAuth pago - o resumo semanal cairá só em push.',
       )
     }
     throw new Error(data.error || 'Falha ao enviar e-mail de teste')

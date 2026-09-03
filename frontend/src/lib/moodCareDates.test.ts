@@ -49,7 +49,7 @@ describe('moodCareDates', () =>
   {
     const urgent = task({
       id: 2,
-      titulo: 'URGENTE — contrato',
+      titulo: 'URGENTE - contrato',
       score_urgencia: 40,
       data_vencimento: '2026-08-19T17:00:00.000Z',
     })

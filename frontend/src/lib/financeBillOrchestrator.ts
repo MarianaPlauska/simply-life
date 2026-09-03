@@ -28,7 +28,7 @@ export interface GetUpcomingBillsInput
   reference?: Date
 }
 
-/** Fonte única — delega para buildUpcomingBills (fixas, reservas, cartões, pendentes) */
+/** Fonte única - delega para buildUpcomingBills (fixas, reservas, cartões, pendentes) */
 export function getUpcomingBills(input: GetUpcomingBillsInput): UpcomingBill[]
 {
   const windowDays = input.windowDays ?? 7
@@ -76,7 +76,7 @@ export function billPhantomKey(billId: string): string
 export function billTaskTitle(bill: UpcomingBill): string
 {
   const valor = bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-  return `[Boleto] ${bill.nome} — ${valor}`
+  return `[Boleto] ${bill.nome} - ${valor}`
 }
 
 export function billTaskNotes(bill: UpcomingBill): string
@@ -138,7 +138,7 @@ export function billIdFromTask(tarefa: TarefaUnificada): string | null
   return null
 }
 
-/** Marca o ciclo mensal como resolvido — impede recriar tarefa no refresh */
+/** Marca o ciclo mensal como resolvido - impede recriar tarefa no refresh */
 export function dismissBillForTask(tarefa: TarefaUnificada, ref = new Date()): void
 {
   const billId = billIdFromTask(tarefa)
@@ -184,7 +184,7 @@ function taskCoversBillPeriod(tarefa: TarefaUnificada, bill: UpcomingBill): bool
   return false
 }
 
-/** Boleto já pago/resolvido neste ciclo — não criar tarefa de novo */
+/** Boleto já pago/resolvido neste ciclo - não criar tarefa de novo */
 export function isBillResolvedForPeriod(
   bill: UpcomingBill,
   tarefas: TarefaUnificada[],

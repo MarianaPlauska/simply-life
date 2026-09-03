@@ -1,4 +1,4 @@
-// Resposta editável à carta do eu de ontem — loop emocional
+// Resposta editável à carta do eu de ontem - loop emocional
 
 import { readScopedJson, writeScopedJson } from './userScopedStorage'
 

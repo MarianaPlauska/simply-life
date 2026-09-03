@@ -1,5 +1,5 @@
 /**
- * Preview dev-only — donut, heatmap e altura de abas (sem auth).
+ * Preview dev-only - donut, heatmap e altura de abas (sem auth).
  * Rota: /__dev/health-diary-charts
  */
 import { useEffect, useMemo, useState } from 'react'
@@ -57,7 +57,7 @@ function HealthTabHeightDemo({ rows }: { rows: HumorRegistro[] })
     <div className="sl-panel border border-line/80 overflow-hidden">
       <div className="px-4 pt-3 border-b border-line/60">
         <p className="font-mono text-[10px] uppercase tracking-wider text-ink-muted mb-2">
-          Comparação de altura — container com min-height
+          Comparação de altura - container com min-height
         </p>
         <nav aria-label="Abas demo" className="flex gap-0.5 overflow-x-auto scrollbar-none -mx-0.5">
           {([
@@ -119,7 +119,7 @@ export function HealthDiaryChartsPreview()
     <div className="min-h-screen bg-canvas text-ink px-4 py-6 sm:px-6">
       <div className="max-w-5xl mx-auto space-y-10">
         <header className="space-y-1">
-          <h1 className="font-display text-xl">Saúde → Diário — preview dev</h1>
+          <h1 className="font-display text-xl">Saúde → Diário - preview dev</h1>
           <p className="text-[13px] text-ink-muted">
             Donut + heatmap mensal com dados de exemplo
           </p>

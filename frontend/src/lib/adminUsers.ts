@@ -1,4 +1,4 @@
-// Acesso administrativo — lista de usuários (cartões públicos) para contas admin
+// Acesso administrativo - lista de usuários (cartões públicos) para contas admin
 import { supabase } from './supabase'
 import { supabaseAuthHeaders } from './supabaseAuthHeaders'
 import {
@@ -60,7 +60,7 @@ export async function fetchIsAdmin(): Promise<boolean>
   }
 }
 
-/** Lista todos os usuários do sistema — só retorna dados se a RLS de admin permitir */
+/** Lista todos os usuários do sistema - só retorna dados se a RLS de admin permitir */
 export async function fetchAllUserCards(): Promise<AdminUserCard[]>
 {
   try
@@ -152,7 +152,7 @@ export async function adminSaveUserPrefs(
   if (cardError) throw cardError
 }
 
-/** Exclui conta de usuário — requer service role no servidor */
+/** Exclui conta de usuário - requer service role no servidor */
 export async function adminDeleteUser(userId: string): Promise<void>
 {
   const headers = await supabaseAuthHeaders()

@@ -13,7 +13,7 @@ import {
 } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
-// Faixa de comando Kanban — KPIs densos no padrão do dashboard
+// Faixa de comando Kanban - KPIs densos no padrão do dashboard
 
 interface KanbanCommandBarProps
 {
@@ -95,7 +95,7 @@ export function KanbanCommandBar({
       : load.level === 'warning'
         ? 'bg-atencao'
         : 'bg-accent'
-  const minutes = metrics.minutesSaved > 0 ? `${metrics.minutesSaved}m` : '—'
+  const minutes = metrics.minutesSaved > 0 ? `${metrics.minutesSaved}m` : '-'
 
   return (
     <section className={AXEL_KANBAN_COMMAND} aria-label="Comando do pipeline">
@@ -110,7 +110,7 @@ export function KanbanCommandBar({
         {mood && (
           <KpiCell
             label="Bem-estar"
-            value={mood.humorMedia != null ? `${mood.humorMedia}` : '—'}
+            value={mood.humorMedia != null ? `${mood.humorMedia}` : '-'}
             hint={mood.profileLabel}
             variant={
               mood.profile === 'recuperacao' ? 'urgent'

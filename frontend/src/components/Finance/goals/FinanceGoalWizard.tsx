@@ -186,7 +186,7 @@ export function FinanceGoalWizard({ isOpen, onClose }: FinanceGoalWizardProps)
           {step === 0 && (
             <>
               <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
-                Escolha um tipo para começar — você pode ajustar o nome depois.
+                Escolha um tipo para começar - você pode ajustar o nome depois.
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {GOAL_PRESETS.map((preset) => (
@@ -243,7 +243,7 @@ export function FinanceGoalWizard({ isOpen, onClose }: FinanceGoalWizardProps)
           {step === 2 && (
             <>
               <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
-                Prazo opcional — usamos sua sobra mensal para estimar se cabe.
+                Prazo opcional - usamos sua sobra mensal para estimar se cabe.
               </p>
               <div>
                 <label className={`block text-[11px] font-mono uppercase mb-1.5 ${AXEL_TEXT_SECONDARY}`}>

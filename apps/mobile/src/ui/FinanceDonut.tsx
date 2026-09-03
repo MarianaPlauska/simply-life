@@ -17,7 +17,7 @@ type Props = {
   strokeWidth?: number
 }
 
-/** Donut de gastos — visual de app financeiro nativo */
+/** Donut de gastos - visual de app financeiro nativo */
 export function FinanceDonut({
   segments,
   centerLabel,

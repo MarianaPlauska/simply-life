@@ -150,7 +150,7 @@ export function buildUpcomingBills(
     if (t.tipo !== 'despesa') continue
     if (status === 'pago') continue
 
-    // Gasto no cartão entra na fatura — não gera alerta de "conta vence"
+    // Gasto no cartão entra na fatura - não gera alerta de "conta vence"
     if (t.card_id) continue
 
     // Só contas futuras/agendadas ou pendentes com vencimento futuro

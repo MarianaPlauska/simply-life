@@ -2,7 +2,7 @@ import type { TarefaUnificada } from '../types'
 import type { MoodOrchestrationContext } from './moodOrchestration'
 import { pickMainQuestCandidate } from './wellbeingAnalytics'
 
-// Main Quest do dia — uma tarefa com bônus +50% XP (sensível ao humor)
+// Main Quest do dia - uma tarefa com bônus +50% XP (sensível ao humor)
 
 const STORAGE_KEY = 'axel-main-quest-v1'
 export const MAIN_QUEST_XP_BONUS_RATIO = 0.5
@@ -67,7 +67,7 @@ export function syncMainQuest(
     const existing = open.find((t) => t.id === stored.taskId)
     if (existing)
     {
-      // revalida se humor mudou muito — troca quest em modo recuperação
+      // revalida se humor mudou muito - troca quest em modo recuperação
       if (profile === 'recuperacao' || profile === 'cuidado')
       {
         const better = pickMainQuestCandidate(open, profile)

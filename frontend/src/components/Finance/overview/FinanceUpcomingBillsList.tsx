@@ -104,7 +104,7 @@ export function FinanceUpcomingBillsList({
 
       {upcoming.length === 0 ? (
         <p className={`text-[12px] py-4 text-center ${AXEL_TEXT_SECONDARY}`}>
-          Nenhuma conta prevista — cadastre fixas ou lance um pagamento agendado.
+          Nenhuma conta prevista - cadastre fixas ou lance um pagamento agendado.
         </p>
       ) : (
         <ul className="divide-y divide-line border border-line rounded-sl overflow-hidden">
@@ -155,7 +155,7 @@ export function FinanceUpcomingBillsList({
       )}
 
       <p className={`font-mono text-[9px] mt-2 ${AXEL_TEXT_SECONDARY}`}>
-        Caixa corrente: {fmt(saldoCorrente)} — alertas no sino ao entrar no app (≤3 dias).
+        Caixa corrente: {fmt(saldoCorrente)} - alertas no sino ao entrar no app (≤3 dias).
       </p>
     </div>
   )

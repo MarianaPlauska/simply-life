@@ -6,7 +6,7 @@ import { downloadAccountExport } from '../../lib/exportAccountData'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_BTN_GHOST, AXEL_BTN_PRIMARY, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-/** Exportar JSON e apagar a conta — direitos LGPD na UI */
+/** Exportar JSON e apagar a conta - direitos LGPD na UI */
 export function AccountDataPanel()
 {
   const logout = useTaskStore((s) => s.logout)
@@ -63,7 +63,7 @@ export function AccountDataPanel()
         </p>
         <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
           Exporta um JSON com tarefas, lançamentos, hábitos, medicamentos e notas.
-          Apagar a conta remove o cadastro e os dados no servidor — irreversível.
+          Apagar a conta remove o cadastro e os dados no servidor - irreversível.
         </p>
       </div>
       <button

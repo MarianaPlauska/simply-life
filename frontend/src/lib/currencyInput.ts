@@ -1,4 +1,4 @@
-// Entrada monetária BRL — dígitos da direita (centavos primeiro)
+// Entrada monetária BRL - dígitos da direita (centavos primeiro)
 
 export function centsFromDigits(digits: string): number
 {

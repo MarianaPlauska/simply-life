@@ -1,4 +1,4 @@
-// store/slices/relatoriosSlice.ts — relatórios via supabase
+// store/slices/relatoriosSlice.ts - relatórios via supabase
 import type { StateCreator } from 'zustand'
 import { supabase } from '../../lib/supabase'
 
@@ -124,7 +124,7 @@ async function fetchPeriodStats(inicio: string, fim: string): Promise<PeriodStat
     const despTotal = dList.reduce((s, x) => s + (x.valor || 0), 0)
 
     return {
-      periodo_label: `${inicio} — ${fim}`,
+      periodo_label: `${inicio} - ${fim}`,
       inicio,
       fim,
       tarefas_criadas: criadas,

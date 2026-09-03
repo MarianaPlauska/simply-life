@@ -51,7 +51,7 @@ export default function SaudeScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title="Saúde" subtitle="Hoje, cuidados e diário — no seu ritmo." />
+        <ScreenIntro title="Saúde" subtitle="Hoje, cuidados e diário - no seu ritmo." />
 
         <MetricCards
           items={[
@@ -63,7 +63,7 @@ export default function SaudeScreen()
             },
             {
               label: 'Água hoje',
-              value: agua ? `${agua.progressoAtual}` : '—',
+              value: agua ? `${agua.progressoAtual}` : '-',
               color: colors.health,
               hint: `de ${agua?.metaDiaria ?? 10} copos`,
             },

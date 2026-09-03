@@ -1,4 +1,4 @@
-// Tom de estabilidade do caixa — sage / âmbar / grafite (sem vermelho de alarme)
+// Tom de estabilidade do caixa - sage / âmbar / grafite (sem vermelho de alarme)
 
 export type BalanceTone = 'ok' | 'caution' | 'danger'
 
@@ -22,8 +22,8 @@ export const BALANCE_TONE_LABEL: Record<BalanceTone, string> = {
 
 export const STABILITY_HINT: Record<BalanceTone, string> = {
   ok: 'Folga confortável neste momento.',
-  caution: 'Folga estreita — gaste com calma.',
-  danger: 'Caixa apertado — priorize o essencial.',
+  caution: 'Folga estreita - gaste com calma.',
+  danger: 'Caixa apertado - priorize o essencial.',
 }
 
 export const STABILITY_BAR: Record<BalanceTone, string> = {
@@ -47,7 +47,7 @@ export function outlookToneToBalance(tone: 'ok' | 'caution' | 'urgent'): Balance
   return 'ok'
 }
 
-/** Caixa corrente — negativo ou folga estreita puxam para atenção/apertado */
+/** Caixa corrente - negativo ou folga estreita puxam para atenção/apertado */
 export function resolveCashTone(
   saldoCorrente: number,
   saldoProjetado?: number,
@@ -63,7 +63,7 @@ export function resolveCashTone(
   return 'ok'
 }
 
-/** Limite do cartão — uso da fatura vs limite total (legado → BalanceTone) */
+/** Limite do cartão - uso da fatura vs limite total (legado → BalanceTone) */
 export function resolveLimitTone(spent: number, limit: number): BalanceTone
 {
   const tone = resolveCardUsageToneFromSpend(spent, limit)

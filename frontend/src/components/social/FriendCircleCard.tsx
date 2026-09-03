@@ -85,7 +85,7 @@ export function FriendCircleCard()
         <span className="text-[10px] font-mono text-ink-muted">{friends.length} pessoa(s)</span>
       </div>
       <p className={`text-[12px] mb-3 ${AXEL_TEXT_SECONDARY}`}>
-        Cada um vê o &quot;quarto&quot; do outro — cor, mascote e ofensiva, nunca a planilha.
+        Cada um vê o &quot;quarto&quot; do outro - cor, mascote e ofensiva, nunca a planilha.
       </p>
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
         {friends.map((f) => (

@@ -1,5 +1,5 @@
 // editor de rich text wrapper do tiptap
-// suporta bold, italic, headings, listas — design escuro consistente com o sistema
+// suporta bold, italic, headings, listas - design escuro consistente com o sistema
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';

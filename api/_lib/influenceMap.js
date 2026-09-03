@@ -1,4 +1,4 @@
-// Mapa de influência — remetente → peso (0 a 1.0)
+// Mapa de influência - remetente → peso (0 a 1.0)
 
 /** @type {Record<string, number>} */
 export const DEFAULT_INFLUENCE_MAP = {
@@ -24,7 +24,7 @@ export function normalizeSenderKey(sender)
 }
 
 /**
- * Resolve peso 0–1 do remetente no mapa configurável.
+ * Resolve peso 0-1 do remetente no mapa configurável.
  * @param {string} sender
  * @param {Record<string, number>} [map]
  */

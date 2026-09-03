@@ -4,7 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Simply-Life — identidade AXEL (ver src/design/identityTokens.ts)
+/* ── Simply-Life - identidade AXEL (ver src/design/identityTokens.ts)
    · Claro = Tortilla / Gold Leaf / Terracotta
    · Escuro = Chinese Black → Antique Brass
    · Acento só na voz do AXEL (--sl-axel)
@@ -21,34 +21,42 @@ body {
 }
 
 :root {
-  /* Pantone: Tortilla lavado / Gold Leaf / Terracotta */
-  --sl-canvas: #F5F1EC;
-  --sl-chrome: #FFFCFA;
-  --sl-surface: #FFFCFA;
-  --sl-voice: #EDE4D8;
-  --sl-elevated: #EDE4D8;
-  --sl-text: #0C1519;
-  --sl-text-muted: #5C534C;
-  --sl-text-faint: #8A7E74;
-  --sl-border: rgba(12, 21, 25, 0.10);
-  --sl-border-subtle: rgba(198, 161, 126, 0.40);
-  /* CTA = terracotta AXEL (AA no cream; 1–2× por tela) */
-  --sl-accent: #A05C3D;
-  --sl-accent-hover: #8B4E34;
-  --sl-accent-muted: rgba(184, 114, 82, 0.16);
-  --sl-axel: #A05C3D;
-  --sl-axel-hover: #8B4E34;
-  --sl-axel-muted: rgba(184, 114, 82, 0.16);
-  --sl-axel-on-fill: #F5F1EC;
-  --sl-health: #3F6B5A;
-  --sl-health-muted: rgba(184, 212, 200, 0.45);
-  --sl-finance: #7A6540;
-  --sl-finance-muted: rgba(198, 161, 126, 0.35);
+  /* Bloco H - modo claro (creme quente) */
+  --bg-canvas: #F6EEE3;
+  --bg-surface: #FDF9F3;
+  --bg-elevated: #FFFFFF;
+  --border-hairline: #E8DDC9;
+  --text-primary: #2A2622;
+  --text-muted: #8C8275;
+  --accent: #E8734A;
+  --accent-pressed: #C45A32;
+
+  --sl-canvas: var(--bg-canvas);
+  --sl-chrome: var(--bg-surface);
+  --sl-surface: var(--bg-surface);
+  --sl-voice: #E8DDC9;
+  --sl-elevated: var(--bg-elevated);
+  --sl-text: var(--text-primary);
+  --sl-text-muted: var(--text-muted);
+  --sl-text-faint: rgba(140, 130, 117, 0.72);
+  --sl-border: var(--border-hairline);
+  --sl-border-subtle: rgba(232, 115, 74, 0.40);
+  --sl-accent: var(--accent);
+  --sl-accent-hover: var(--accent-pressed);
+  --sl-accent-muted: rgba(232, 115, 74, 0.14);
+  --sl-axel: var(--accent);
+  --sl-axel-hover: var(--accent-pressed);
+  --sl-axel-muted: rgba(232, 115, 74, 0.14);
+  --sl-axel-on-fill: #FFFFFF;
+  --sl-health: #3D8F6A;
+  --sl-health-muted: rgba(61, 143, 106, 0.12);
+  --sl-finance: #B8956B;
+  --sl-finance-muted: rgba(184, 149, 107, 0.14);
   --sl-tasks: #4A5560;
-  --sl-tasks-muted: rgba(184, 200, 212, 0.45);
-  --sl-urgent: #9A4545;
-  --sl-attention: #9A7A3A;
-  --sl-success: #4A6B58;
+  --sl-tasks-muted: rgba(74, 85, 96, 0.12);
+  --sl-urgent: #C44B4B;
+  --sl-attention: var(--accent);
+  --sl-success: #3D8F6A;
   --sl-sand: #C6A17E;
   --sl-radius-sm: 12px;
   --sl-radius: 16px;
@@ -68,43 +76,52 @@ body {
 }
 
 .dark {
-  /* P2P — preto profundo + laranja vivo */
-  --sl-canvas: #0A0A0C;
-  --sl-chrome: #141418;
-  --sl-surface: #141418;
-  --sl-voice: #0D1020;
-  --sl-elevated: #1C1C24;
-  --sl-text: #F5F5F7;
-  --sl-text-muted: #9A9AA6;
-  --sl-text-faint: #6E6E78;
-  --sl-border: rgba(245, 245, 247, 0.10);
-  --sl-border-subtle: rgba(255, 106, 43, 0.28);
-  --sl-accent: #FF6A2B;
-  --sl-accent-hover: #FF8A4C;
-  --sl-accent-muted: rgba(255, 106, 43, 0.18);
-  --sl-axel: #FF6A2B;
-  --sl-axel-hover: #FF8A4C;
-  --sl-axel-muted: rgba(255, 106, 43, 0.18);
-  --sl-axel-on-fill: #0A0A0C;
-  --sl-health: #5FD39A;
-  --sl-health-muted: rgba(95, 211, 154, 0.16);
-  --sl-finance: #F0B45A;
-  --sl-finance-muted: rgba(240, 180, 90, 0.16);
-  --sl-tasks: #8BA4C7;
-  --sl-tasks-muted: rgba(139, 164, 199, 0.16);
-  --sl-urgent: #FF6B7A;
-  --sl-attention: #F0B45A;
-  --sl-success: #5FD39A;
+  /* Dark Onyx - Bloco H (substitui preto puro) */
+  --bg-canvas: #373539;
+  --bg-surface: #403C40;
+  --bg-elevated: #4A454A;
+  --border-hairline: #504B4F;
+  --text-primary: #F5F1EC;
+  --text-muted: #B0A9A6;
+  --accent: #E8734A;
+  --accent-pressed: #C45A32;
+
+  --sl-canvas: var(--bg-canvas);
+  --sl-chrome: var(--bg-surface);
+  --sl-surface: var(--bg-surface);
+  --sl-voice: var(--bg-elevated);
+  --sl-elevated: var(--bg-elevated);
+  --sl-text: var(--text-primary);
+  --sl-text-muted: var(--text-muted);
+  --sl-text-faint: rgba(176, 169, 166, 0.72);
+  --sl-border: var(--border-hairline);
+  --sl-border-subtle: rgba(232, 115, 74, 0.55);
+  --sl-accent: var(--accent);
+  --sl-accent-hover: var(--accent-pressed);
+  --sl-accent-muted: rgba(232, 115, 74, 0.22);
+  --sl-axel: var(--accent);
+  --sl-axel-hover: var(--accent-pressed);
+  --sl-axel-muted: rgba(232, 115, 74, 0.22);
+  --sl-axel-on-fill: var(--bg-canvas);
+  --sl-health: #7BC9A0;
+  --sl-health-muted: rgba(123, 201, 160, 0.16);
+  --sl-finance: #D4B896;
+  --sl-finance-muted: rgba(212, 184, 150, 0.16);
+  --sl-tasks: #9AA8B5;
+  --sl-tasks-muted: rgba(154, 168, 181, 0.14);
+  --sl-urgent: #E07A6A;
+  --sl-attention: var(--accent);
+  --sl-success: #7BC9A0;
   --sl-shadow: none;
-  --sl-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.55);
-  --sl-shadow-voice: 0 0 0 1px rgba(255, 106, 43, 0.28), 0 12px 40px rgba(255, 106, 43, 0.12);
-  --sl-chart-meta: #141418;
-  --sl-chart-meta-border: rgba(245, 245, 247, 0.10);
-  --sl-chart-real-a: #FF6A2B;
-  --sl-chart-real-b: #F0B45A;
-  --sl-chart-real-c: #5FD39A;
-  --sl-water-fill: #5FD39A;
-  --sl-water-fill-end: #3DB87A;
+  --sl-shadow-lg: 0 16px 48px rgba(55, 53, 57, 0.72);
+  --sl-shadow-voice: 0 0 0 1px rgba(232, 115, 74, 0.36), 0 12px 40px rgba(232, 115, 74, 0.16);
+  --sl-chart-meta: var(--bg-surface);
+  --sl-chart-meta-border: rgba(245, 241, 236, 0.12);
+  --sl-chart-real-a: var(--accent);
+  --sl-chart-real-b: var(--text-primary);
+  --sl-chart-real-c: #7BC9A0;
+  --sl-water-fill: #7BC9A0;
+  --sl-water-fill-end: #3D8F6A;
 }
 
 @keyframes sl-shimmer {
@@ -251,7 +268,7 @@ body {
 }
 
 @layer components {
-  /* Título global — Fraunces (telas ainda não migradas) */
+  /* Título global - Fraunces (telas ainda não migradas) */
   .sl-page-title {
     font-family: "Fraunces", Georgia, serif;
     font-size: 1.5rem;
@@ -267,7 +284,7 @@ body {
     }
   }
 
-  /* Escopo Dashboard — spec premium SaaS */
+  /* Escopo Dashboard - spec premium SaaS */
   .sl-dashboard-scope .sl-page-title {
     font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.25rem;
@@ -282,7 +299,7 @@ body {
     }
   }
 
-  /* Tier 1 — um por tela (28px desktop / 24px mobile) */
+  /* Tier 1 - um por tela (28px desktop / 24px mobile) */
   .sl-screen-hero {
     font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.5rem;
@@ -299,7 +316,7 @@ body {
     }
   }
 
-  /* Tier 2 — KPI com contexto (22–24px) */
+  /* Tier 2 - KPI com contexto (22-24px) */
   .sl-module-highlight {
     font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.375rem;
@@ -452,7 +469,7 @@ body {
     color: var(--sl-text-muted);
   }
 
-  /* Kicker de módulo — sans, nunca laranja, nunca mono */
+  /* Kicker de módulo - sans, nunca laranja, nunca mono */
   .sl-eyebrow {
     @apply font-sans text-[13px] font-medium;
     color: var(--sl-text-muted);
@@ -468,7 +485,7 @@ body {
     color: var(--sl-text);
   }
 
-  /* Momento em que o AXEL fala — peso visual próprio */
+  /* Momento em que o AXEL fala - peso visual próprio */
   .sl-voice {
     background-color: var(--sl-voice);
     border: none;
@@ -507,7 +524,7 @@ body {
     box-shadow: var(--sl-shadow), 0 0 0 1px color-mix(in srgb, var(--sl-accent) 12%, transparent);
   }
 
-  /* Ícone em box — cards narrativos e episódios */
+  /* Ícone em box - cards narrativos e episódios */
   .sl-icon-box {
     width: 1.75rem;
     height: 1.75rem;
@@ -519,7 +536,7 @@ body {
     background: color-mix(in srgb, var(--sl-elevated) 75%, transparent);
   }
 
-  /* Chip de métrica — painéis analíticos */
+  /* Chip de métrica - painéis analíticos */
   .sl-stat-chip {
     border-radius: var(--sl-radius-sm);
     border: 1px solid var(--sl-border);
@@ -527,7 +544,7 @@ body {
     padding: 0.75rem;
   }
 
-  /* Estúdio de vidro — chrome flutuante com blur */
+  /* Estúdio de vidro - chrome flutuante com blur */
   .sl-glass-chrome {
     background: color-mix(in srgb, var(--sl-surface) 80%, transparent);
     -webkit-backdrop-filter: blur(16px) saturate(1.15);
@@ -538,7 +555,7 @@ body {
     background: color-mix(in srgb, var(--sl-surface) 82%, transparent);
   }
 
-  /* Shimmer — placeholders de carregamento */
+  /* Shimmer - placeholders de carregamento */
   .sl-shimmer {
     border-radius: var(--sl-radius-sm);
     background: linear-gradient(
@@ -551,7 +568,7 @@ body {
     animation: sl-shimmer 1.35s ease-in-out infinite;
   }
 
-  /* Toque físico — aplicar em botões interativos */
+  /* Toque físico - aplicar em botões interativos */
   .sl-touch {
     transition: transform 150ms ease-out, opacity 150ms ease-out, background-color 150ms ease-out, color 150ms ease-out, border-color 150ms ease-out;
   }
@@ -560,7 +577,7 @@ body {
     transform: scale(0.95);
   }
 
-  /* Scroll limpo — sem barra cinza no mobile */
+  /* Scroll limpo - sem barra cinza no mobile */
   .scrollbar-none {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -572,7 +589,7 @@ body {
     height: 0;
   }
 
-  /* Fundo login — gradiente suave, sem régua */
+  /* Fundo login - gradiente suave, sem régua */
   .sl-ruled-bg {
     background:
       radial-gradient(ellipse 120% 80% at 10% 0%, color-mix(in srgb, var(--sl-accent) 8%, transparent), transparent 50%),
@@ -589,7 +606,7 @@ body {
     background: radial-gradient(ellipse 70% 60% at 50% 40%, transparent 30%, var(--sl-canvas) 100%);
   }
 
-  /* Kanban — canvas limpo */
+  /* Kanban - canvas limpo */
   .sl-kanban-canvas {
     background: var(--sl-canvas);
   }
@@ -627,7 +644,7 @@ body {
   background: var(--sl-text-muted);
 }
 
-/* Scroll horizontal visível — faixas tipo “Concluídas recentemente” */
+/* Scroll horizontal visível - faixas tipo “Concluídas recentemente” */
 .custom-scrollbar-x {
   scrollbar-width: thin;
   scrollbar-color: var(--sl-text-muted) var(--sl-chrome);

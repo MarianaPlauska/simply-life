@@ -47,7 +47,7 @@ const KIND_ICON: Record<AxelDecisionKind, LucideIcon> = {
 function fmtEventWhen(iso: string): string
 {
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   return d.toLocaleString('pt-BR', {
     day: '2-digit',
     month: '2-digit',

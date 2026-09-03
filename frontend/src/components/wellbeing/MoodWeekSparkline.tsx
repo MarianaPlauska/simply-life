@@ -9,7 +9,7 @@ interface MoodWeekSparklineProps
   dias: DiaHumorAgregado[]
 }
 
-/** Sparkline de humor — pontos na cor do registro, altura de verdade */
+/** Sparkline de humor - pontos na cor do registro, altura de verdade */
 export function MoodWeekSparkline({ dias }: MoodWeekSparklineProps)
 {
   if (dias.length === 0)

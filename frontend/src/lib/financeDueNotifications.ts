@@ -68,7 +68,7 @@ export async function syncFinanceDueNotifications(
       user_id: uid,
       tipo: 'financeiro',
       titulo,
-      mensagem: `${bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} — vencimento ${bill.dueDate.split('-').reverse().join('/')}. Quando fizer sentido, dá uma olhada em Finanças.`,
+      mensagem: `${bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })} - vencimento ${bill.dueDate.split('-').reverse().join('/')}. Quando fizer sentido, dá uma olhada em Finanças.`,
       urgencia,
       score_urgencia: bill.daysUntil === 0 ? 95 : 85,
       lida: 0,

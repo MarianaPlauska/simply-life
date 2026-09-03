@@ -55,7 +55,7 @@ export async function resolveTaskEstimate(
     return {
       estimate_minutes: localMinutes,
       extension_days: difficultySignal ? 2 : 1,
-      reasoning: 'Estimativa local — IA do servidor indisponível (adicione GROQ_API_KEY ou GEMINI_API_KEY no Vercel).',
+      reasoning: 'Estimativa local - IA do servidor indisponível (adicione GROQ_API_KEY ou GEMINI_API_KEY no Vercel).',
       confidence: 0.4,
       source: 'local',
       iaDisponivel: false,

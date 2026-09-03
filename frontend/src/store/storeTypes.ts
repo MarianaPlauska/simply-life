@@ -1,4 +1,4 @@
-// tipos internos do store — tudo que não vai em types/index.ts
+// tipos internos do store - tudo que não vai em types/index.ts
 import type { AcademySessionDetail } from '../lib/academySessionDetail'
 
 export type ActiveView =
@@ -80,7 +80,7 @@ export interface MedicamentoConfig {
   categoria?: MedicamentoCategoria;
   uso_diario?: boolean;
   notas?: string;
-  /** 0=dom … 6=sáb — vazio = todos os dias */
+  /** 0=dom … 6=sáb - vazio = todos os dias */
   dias_semana?: number[];
   inicio_tratamento?: string;
   fim_tratamento?: string;
@@ -120,7 +120,7 @@ export interface AccessibilitySettings {
   focusVisible: boolean;
   soundFeedback: boolean;
   keyboardShortcuts: boolean;
-  /** Tema global — classe `dark` no html (Tailwind) */
+  /** Tema global - classe `dark` no html (Tailwind) */
   colorScheme: ColorScheme;
 }
 
@@ -169,7 +169,7 @@ export interface Transaction
 {
   id: number;
   descricao: string;
-  /** Nota explicativa — o que é aquele dinheiro (tooltip na lista) */
+  /** Nota explicativa - o que é aquele dinheiro (tooltip na lista) */
   observacao?: string | null;
   categoria: string; // Legado
   categoria_id?: number;
@@ -276,16 +276,16 @@ export interface HabitoDiarioConfig {
   meta_minutos?: number;
   ultima_data?: string;
   plano_semana?: Record<string, { titulo: string; meta_minutos: number }>;
-  /** Plano por data ISO (YYYY-MM-DD) — sobrescreve a semana naquele dia */
+  /** Plano por data ISO (YYYY-MM-DD) - sobrescreve a semana naquele dia */
   plano_por_data?: Record<string, { titulo: string; meta_minutos: number }>;
-  /** Hidratação — ml por unidade padrão e registro variável do dia */
+  /** Hidratação - ml por unidade padrão e registro variável do dia */
   ml_por_copo?: number;
   /** Atalhos de ml personalizados (além dos padrões do app) */
   ml_presets?: number[];
   /** Valores padrão do app que o usuário removeu dos atalhos */
   ml_ocultos?: number[];
   registros_ml?: number[];
-  /** Proteína — gramas registradas por refeição no dia */
+  /** Proteína - gramas registradas por refeição no dia */
   proteina_por_refeicao?: Record<string, number>;
   /** Kcal consumidas hoje (estimativa) */
   kcal_hoje?: number;
@@ -323,7 +323,7 @@ export interface SessaoTreino {
   finalizado_em: string | null;
   duracao_real_min: number | null;
   concluido: boolean;
-  /** Código estável do treino no plano (A, B, 01…) — coluna 043 */
+  /** Código estável do treino no plano (A, B, 01…) - coluna 043 */
   treino_codigo: string | null;
   /** Volume da sessão: soma de (peso_kg × reps) */
   volume_kg: number | null;

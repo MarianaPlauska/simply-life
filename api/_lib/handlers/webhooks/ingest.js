@@ -1,4 +1,4 @@
-// POST /api/webhooks/ingest — ingestão universal com orquestração de urgência antes do insert
+// POST /api/webhooks/ingest - ingestão universal com orquestração de urgência antes do insert
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { resolveWebhookPlainSecret } from '../../resolveWebhookAuth.js';
@@ -89,7 +89,7 @@ export default async function handler(req, res)
   {
     try
     {
-      // Middleware de IA — orquestra ANTES de gravar
+      // Middleware de IA - orquestra ANTES de gravar
       const orchestrated = await orchestrateIngestPayload({
         source: item.source,
         title: item.title,

@@ -1,7 +1,7 @@
 import { parseDueBucketDropId } from '../../lib/dueBucket'
 import type { TemporalHorizon } from '../../lib/temporalHorizon'
 
-// Rótulo semântico do drag — prazo vs fila de execução
+// Rótulo semântico do drag - prazo vs fila de execução
 
 const EXEC_HORIZONS: TemporalHorizon[] = ['hoje', 'semana', 'backlog']
 

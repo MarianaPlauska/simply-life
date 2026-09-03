@@ -45,7 +45,7 @@ export function isContaFixaPostedThisMonth(
   })
 }
 
-/** Fixa já lançada ou quitada no mês — evita auto-post e tarefa fantasma */
+/** Fixa já lançada ou quitada no mês - evita auto-post e tarefa fantasma */
 export function isContaFixaSatisfiedThisMonth(
   conta: ContaFixa,
   transactions: Transaction[],

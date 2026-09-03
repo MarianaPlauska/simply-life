@@ -1,5 +1,5 @@
 /**
- * Nome que o AXEL usa em voz — nunca e-mail cru, mas extrai o primeiro nome humano.
+ * Nome que o AXEL usa em voz - nunca e-mail cru, mas extrai o primeiro nome humano.
  */
 
 /** Mais longos primeiro para não casar "Ana" dentro de "Mariana". */

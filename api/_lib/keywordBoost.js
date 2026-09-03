@@ -1,4 +1,4 @@
-/** Keywords do usuário — preferencias_usuario + palavras_chave (Supabase) */
+/** Keywords do usuário - preferencias_usuario + palavras_chave (Supabase) */
 
 export const KEYWORD_BOOST_DEFAULT = 50;
 

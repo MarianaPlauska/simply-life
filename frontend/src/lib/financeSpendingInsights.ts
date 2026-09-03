@@ -42,7 +42,7 @@ export function getCurrentWeekRange(reference = new Date()): WeekRange
   return {
     start: fmtDay(monday),
     end: fmtDay(sunday),
-    label: `${startLabel} – ${endLabel}`,
+    label: `${startLabel} - ${endLabel}`,
   }
 }
 
@@ -168,7 +168,7 @@ export function topMonthlySpendingByCategory(
     .slice(0, limit)
 }
 
-/** Maiores gastos no cartão (fatura aberta ou semana — usa todas despesas do cartão no período) */
+/** Maiores gastos no cartão (fatura aberta ou semana - usa todas despesas do cartão no período) */
 export function topCardSpending(
   transactions: Transaction[],
   cardId: string,

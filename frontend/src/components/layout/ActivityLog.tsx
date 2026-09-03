@@ -13,9 +13,9 @@ const ACTIVITIES: ActivityItem[] = [
   { id: 1, icon: Key, color: 'text-emerald-400', text: 'Token do GitHub validado com sucesso', time: '2 min atrás' },
   { id: 2, icon: RefreshCw, color: 'text-violet-400', text: 'Worker atualizou 3 tarefas', time: '15 min atrás' },
   { id: 3, icon: Code2, color: 'text-zinc-400', text: 'PR #482 ingerido via GitHub', time: '28 min atrás' },
-  { id: 4, icon: Mail, color: 'text-amber-400', text: 'Novo e-mail classificado — Gmail', time: '1h atrás' },
+  { id: 4, icon: Mail, color: 'text-amber-400', text: 'Novo e-mail classificado - Gmail', time: '1h atrás' },
   { id: 5, icon: CheckCircle2, color: 'text-emerald-400', text: 'Sessão de foco concluída (25 min)', time: '2h atrás' },
-  { id: 6, icon: MessageSquare, color: 'text-blue-400', text: 'Resumo do standup processado — Teams', time: '3h atrás' },
+  { id: 6, icon: MessageSquare, color: 'text-blue-400', text: 'Resumo do standup processado - Teams', time: '3h atrás' },
 ];
 
 export function ActivityLog() {

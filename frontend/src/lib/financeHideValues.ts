@@ -5,7 +5,7 @@ function storageKey(uid: string | null): string
   return uid ? `${KEY_PREFIX}:${uid}` : `${KEY_PREFIX}:anonymous`
 }
 
-/** Preferência local — ocultar valores monetários na tela de Finanças */
+/** Preferência local - ocultar valores monetários na tela de Finanças */
 export function readFinanceHideValues(uid: string | null): boolean
 {
   try

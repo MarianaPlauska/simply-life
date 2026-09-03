@@ -1,4 +1,4 @@
-// Modelo de capacidade — softmin ponderado (gargalo suave, estilo rede neural)
+// Modelo de capacidade - softmin ponderado (gargalo suave, estilo rede neural)
 
 import type { CapacityMode } from './dayCapacity'
 
@@ -10,7 +10,7 @@ export interface CapacityFactorInput
   pct: number
 }
 
-/** Pesos de importância relativa — finanças pesa um pouco mais no dia a dia */
+/** Pesos de importância relativa - finanças pesa um pouco mais no dia a dia */
 export const CAPACITY_FACTOR_WEIGHTS: Record<CapacityFactorId, number> = {
   mood: 0.34,
   finance: 0.38,
@@ -25,7 +25,7 @@ function clamp01(n: number): number
 }
 
 /**
- * Softmin ponderado — aproximação diferenciável do mínimo (comum em redes de atenção).
+ * Softmin ponderado - aproximação diferenciável do mínimo (comum em redes de atenção).
  * Quanto menor a temperatura, mais o score segue o pior fator.
  */
 export function weightedSoftminScore(
@@ -56,7 +56,7 @@ export function weightedSoftminScore(
   return clamp01(weighted / Math.max(sumExp, 1e-9))
 }
 
-/** Dano por fator — quanto cada eixo “puxa” a capacidade para baixo */
+/** Dano por fator - quanto cada eixo “puxa” a capacidade para baixo */
 export function factorHarmScores(
   factors: CapacityFactorInput[],
   weights: Record<CapacityFactorId, number> = CAPACITY_FACTOR_WEIGHTS,

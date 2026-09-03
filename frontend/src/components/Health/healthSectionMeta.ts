@@ -9,7 +9,7 @@ export function healthHeaderSubtitle(
 {
   if (section === 'hoje' || section === 'cuidados')
   {
-    return 'Um passo de cada vez — o AXEL cuida com você.'
+    return 'Um passo de cada vez - o AXEL cuida com você.'
   }
   if (section === 'diario')
   {

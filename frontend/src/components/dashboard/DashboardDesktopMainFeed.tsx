@@ -8,7 +8,6 @@ import { AxelListRow } from '../ui/AxelListRow'
 import { AXEL_LINK, AXEL_METRIC_HAIRLINE, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import { ModuleSection } from '../ui/ModuleSection'
 
-/** Coluna principal desktop — conteúdo real, não tipografia inflada */
 export function DashboardDesktopMainFeed()
 {
   const navigate = useNavigate()

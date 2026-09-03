@@ -15,7 +15,7 @@ import {
   MODULE_WASH,
 } from '../../constants/axelSurfaces'
 
-/** Resumo da semana — humor, água hoje e ritual (dados reais) */
+/** Resumo da semana - humor, água hoje e ritual (dados reais) */
 export function HealthWeekSummary()
 {
   const humorSemana = useTaskStore((s) => s.humorSemanaAgregado)
@@ -53,7 +53,7 @@ export function HealthWeekSummary()
         </div>
       ) : (
         <p className={`text-[12px] mb-3 ${AXEL_TEXT_SECONDARY}`}>
-          Sem humor esta semana — registre quando quiser.
+          Sem humor esta semana - registre quando quiser.
         </p>
       )}
 

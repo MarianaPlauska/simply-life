@@ -28,7 +28,7 @@ export function maybeNudgeIntencoes(tarefas: TarefaUnificada[]): void
   const sample = abertas[0]?.titulo ?? 'uma intenção'
   toast.message('Intenção ainda sem hora', {
     description: abertas.length === 1
-      ? `${sample} — agende quando couber.`
+      ? `${sample} - agende quando couber.`
       : `${abertas.length} intenções esperando um horário. A primeira: ${sample}.`,
     duration: 6000,
   })

@@ -28,7 +28,7 @@ function markXpGranted(): void
   }
   catch
   {
-    // storage bloqueado — o addXP ainda é idempotente pelo lastActiveDate
+    // storage bloqueado - o addXP ainda é idempotente pelo lastActiveDate
   }
 }
 
@@ -38,7 +38,7 @@ export function recordHomeDayCheckin(): void
   useTaskStore.getState().recordDayCheckin()
 }
 
-/** XP mínimo silencioso — depois que user_stats já estiver hidratado. */
+/** XP mínimo silencioso - depois que user_stats já estiver hidratado. */
 export async function grantDailyCheckinXp(): Promise<void>
 {
   if (xpGrantedToday())

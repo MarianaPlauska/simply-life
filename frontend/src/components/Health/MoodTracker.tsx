@@ -8,7 +8,7 @@ import { mediaHumor } from '../../lib/moodInsights';
 
 interface MoodTrackerProps
 {
-  /** Diário desktop — menos altura e ruído visual */
+  /** Diário desktop - menos altura e ruído visual */
   dense?: boolean
 }
 

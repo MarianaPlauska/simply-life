@@ -78,7 +78,7 @@ export function AxelSetupWizard()
   const addXP = useTaskStore((s) => s.addXP)
 
   const [step, setStep] = useState(0)
-  // Sempre vazio — usuário preenche do zero (sem vazar email/login)
+  // Sempre vazio - usuário preenche do zero (sem vazar email/login)
   const [displayName, setDisplayName] = useState('')
   const [axelCallsYou, setAxelCallsYou] = useState('')
   const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('initials')
@@ -275,7 +275,7 @@ export function AxelSetupWizard()
           {step === 1 && (
             <div className="space-y-3 md:space-y-4">
               <p className={`text-[12px] md:text-sm leading-snug ${AXEL_TEXT_SECONDARY}`}>
-                Cor de acento e humor do mascote — privilégio desde o dia 1.
+                Cor de acento e humor do mascote - privilégio desde o dia 1.
               </p>
               <div className="grid grid-cols-2 gap-2 md:gap-3">
                 {(Object.keys(ACCENT_PALETTES) as AccentId[]).map((id) =>

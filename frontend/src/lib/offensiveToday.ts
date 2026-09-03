@@ -1,4 +1,4 @@
-// Regras da ofensiva diária — uma ação qualifica o dia
+// Regras da ofensiva diária - uma ação qualifica o dia
 
 export interface OffensiveChecklist
 {

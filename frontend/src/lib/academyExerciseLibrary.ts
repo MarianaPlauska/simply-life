@@ -1,4 +1,4 @@
-// Catálogo de exercícios — busca e criação de customizados
+// Catálogo de exercícios - busca e criação de customizados
 
 export interface LibraryExercise
 {

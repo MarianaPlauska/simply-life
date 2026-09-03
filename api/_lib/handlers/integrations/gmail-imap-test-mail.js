@@ -1,4 +1,4 @@
-// GET/POST /api/integrations/gmail/imap-test-mail — envia um e-mail de teste para a própria conta
+// GET/POST /api/integrations/gmail/imap-test-mail - envia um e-mail de teste para a própria conta
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { corsJson, getUserFromBearer } from '../../supabaseUser.js'

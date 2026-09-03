@@ -8,7 +8,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-/** Lista de usuários do sistema — visível apenas para contas admin */
+/** Lista de usuários do sistema - visível apenas para contas admin */
 export function ProfileAdminUsersPanel()
 {
   const [users, setUsers] = useState<AdminUserCard[]>([])

@@ -39,7 +39,7 @@ export function hasPaidExpenseForBill(
   })
 }
 
-/** Despesa paga no caixa em qualquer mês — evita contar Pagos sem lançamento duas vezes */
+/** Despesa paga no caixa em qualquer mês - evita contar Pagos sem lançamento duas vezes */
 export function hasPaidCashExpenseForBill(
   transactions: Transaction[],
   titulo: string,

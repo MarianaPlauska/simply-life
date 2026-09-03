@@ -9,7 +9,7 @@ import {
   type MobileNavModuleId,
 } from './mobileBottomNav'
 
-// Preferências de workspace — wizard, cor, ordem, privacidade social
+// Preferências de workspace - wizard, cor, ordem, privacidade social
 
 export type AccentId = 'meridian' | 'copper' | 'sky' | 'forest' | 'violet'
 export type DashboardPriority = 'finance' | 'tasks' | 'health'
@@ -21,14 +21,17 @@ export interface UserWorkspacePrefs
   display_name: string
   axel_calls_you: string
   accent: AccentId
-  /** Tema claro/escuro — backup na conta para sobreviver a limpeza do aparelho */
+  /** Tema claro/escuro - backup na conta para sobreviver a limpeza do aparelho */
   color_scheme?: 'light' | 'dark'
   mascot_mood: MascotMoodPref
   avatar_style: AvatarStyleId
   dashboard_priority: DashboardPriority
   /** Até 3 atalhos de cadastro rápido no dashboard */
   dashboard_quick_widgets?: DashboardWidgetId[]
-  /** Módulos da barra inferior mobile — Home sempre incluso */
+  /** Linha compacta da Home (Expo) - chaves humor|water|protein|tasks|finance|goals */
+  home_metric_cards?: string[]
+  home_metrics_configured_at?: string | null
+  /** Módulos da barra inferior mobile - Home sempre incluso */
   mobile_bottom_nav?: MobileNavModuleId[]
   month_goal_amount: number | null
   ai_coach_enabled: boolean
@@ -39,9 +42,9 @@ export interface UserWorkspacePrefs
     show_level: boolean
     show_episode: boolean
   }
-  /** Índice de rotação das frases AXEL — sincronizado via Supabase */
+  /** Índice de rotação das frases AXEL - sincronizado via Supabase */
   axel_care_rotation?: Record<string, number>
-  /** Oculta card de humor no dashboard até este instante (ISO) — regra: +12h após 1º registro do dia */
+  /** Oculta card de humor no dashboard até este instante (ISO) - regra: +12h após 1º registro do dia */
   wellbeing_dashboard_hidden_until?: string | null
 }
 
@@ -231,7 +234,7 @@ export async function saveWorkspacePrefs(patch: Partial<UserWorkspacePrefs>): Pr
     }
     catch
     {
-      /* cartão público opcional — migration 027/029 */
+      /* cartão público opcional - migration 027/029 */
     }
   }
   catch

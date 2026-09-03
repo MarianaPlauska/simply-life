@@ -13,7 +13,7 @@ import {
 } from '../../lib/kanbanCardGrammar'
 import { TaskLineRow } from './TaskLineRow'
 
-// KanbanCard — modo "classico" reescrito como card densa de 3 linhas
+// KanbanCard - modo "classico" reescrito como card densa de 3 linhas
 // Sem sombras, sem avatares falsos, prioridade pela borda esquerda
 
 interface KanbanCardProps
@@ -60,7 +60,7 @@ export function KanbanCard({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kanb
     transition: isDragging ? 'none' : 'all 200ms cubic-bezier(.4,0,.2,1)',
   }
 
-  // modo linha (Superhuman / temporal) — delega para TaskLineRow
+  // modo linha (Superhuman / temporal) - delega para TaskLineRow
   if (flat)
   {
     return (
@@ -97,7 +97,7 @@ export function KanbanCard({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kanb
       ].join(' ')}
       tabIndex={0}
     >
-      {/* linha 1 — origem + score + acoes */}
+      {/* linha 1 - origem + score + acoes */}
       <div className="flex items-center gap-2 px-2.5 pt-2 pb-1">
         <OriginIcon className={`w-3.5 h-3.5 shrink-0 ${origin.color}`} />
         <span className="text-[10px] text-zinc-500 font-medium truncate">{origin.label}</span>
@@ -141,7 +141,7 @@ export function KanbanCard({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kanb
         </div>
       </div>
 
-      {/* linha 2 — titulo (acionavel) */}
+      {/* linha 2 - titulo (acionavel) */}
       <h4
         className="px-2.5 text-[13px] font-medium text-zinc-100 leading-snug line-clamp-2 cursor-pointer hover:text-violet-300"
         onPointerDown={(e) => e.stopPropagation()}
@@ -150,7 +150,7 @@ export function KanbanCard({ tarefa, onEdit, onDelete, onDuplicate, flat }: Kanb
         {tarefa.titulo}
       </h4>
 
-      {/* linha 3 — metadados densos (data, sub, elapsed) */}
+      {/* linha 3 - metadados densos (data, sub, elapsed) */}
       <div className="flex items-center gap-3 px-2.5 pt-1 pb-2 text-[10px] text-zinc-500">
         {tarefa.data_vencimento && <DueDateChip date={tarefa.data_vencimento} />}
         {subTotal > 0 && (

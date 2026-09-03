@@ -4,7 +4,7 @@ import { Flame, Search, User, SlidersHorizontal, LogOut, Bell, CheckCheck, Info,
 import { listNotificacoesAcionaveis } from '../../lib/notificacaoUtils';
 import { useTaskStore } from '../../store/useTaskStore';
 
-// Mapa view -> rota — header precisa navegar de verdade (nao so setActiveView)
+// Mapa view -> rota - header precisa navegar de verdade (nao so setActiveView)
 const VIEW_TO_PATH: Record<string, string> = {
   dashboard: '/', kanban: '/kanban', anotacoes: '/anotacoes',
   configuracoes: '/configuracoes', superhuman: '/superhuman', financeiro: '/financeiro',

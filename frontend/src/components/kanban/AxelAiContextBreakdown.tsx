@@ -6,7 +6,7 @@ import { AxelRelevanceScoreInfo } from './AxelRelevanceScoreInfo'
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
-// Motor de Relevância — score + transparência (influência / semântica / prazo)
+// Motor de Relevância - score + transparência (influência / semântica / prazo)
 
 interface AxelAiContextBreakdownProps
 {
@@ -66,7 +66,7 @@ export function AxelAiContextBreakdown({
               </p>
               <div className="flex items-center gap-1">
                 <p className={`text-3xl font-mono font-bold tabular-nums leading-none ${isCreatingNew ? 'text-ink-muted' : urgencyScoreClass(breakdown?.total ?? 0)}`}>
-                  {isCreatingNew ? '—' : breakdown?.total}
+                  {isCreatingNew ? '-' : breakdown?.total}
                 </p>
                 {!isCreatingNew && breakdown && (
                   <AxelRelevanceScoreInfo
@@ -94,7 +94,7 @@ export function AxelAiContextBreakdown({
                   <span className="text-xs text-ink-muted">{f.label}</span>
                   <span className="text-xs font-mono tabular-nums text-ink">
                     {isCreatingNew
-                      ? '—'
+                      ? '-'
                       : `${f.points}/${f.maxPoints}`}
                   </span>
                 </div>

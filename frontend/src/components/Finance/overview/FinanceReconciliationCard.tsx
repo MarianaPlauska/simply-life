@@ -18,7 +18,7 @@ const fmt = (v: number) =>
 
 interface FinanceReconciliationCardProps
 {
-  /** Dentro do painel de conta corrente — sem card duplicado */
+  /** Dentro do painel de conta corrente - sem card duplicado */
   embedded?: boolean
 }
 
@@ -118,7 +118,7 @@ export function FinanceReconciliationCard({ embedded = false }: FinanceReconcili
         <div className="border border-line rounded-sl px-3 py-2 bg-chrome/30">
           <span className={AXEL_TEXT_SECONDARY}>Banco informado</span>
           <p className={`font-mono tabular-nums mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-            {snap.saldoBanco != null ? fmt(snap.saldoBanco) : '—'}
+            {snap.saldoBanco != null ? fmt(snap.saldoBanco) : '-'}
           </p>
         </div>
       </div>

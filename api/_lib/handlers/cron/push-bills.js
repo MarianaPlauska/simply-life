@@ -1,4 +1,4 @@
-// Handler — push de boletos ≤48h
+// Handler - push de boletos ≤48h
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import {

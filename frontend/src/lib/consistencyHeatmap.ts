@@ -1,4 +1,4 @@
-/** Grade tipo GitHub — consistência por dia (execução ou gasto) */
+/** Grade tipo GitHub - consistência por dia (execução ou gasto) */
 
 export type ConsistencyTone = 'health' | 'finance'
 
@@ -78,7 +78,7 @@ export function intensity01(count: number, maxCount: number): number
   return Math.min(1, count / maxCount)
 }
 
-/** Escala discreta 0–4 (Rise / GitHub) */
+/** Escala discreta 0-4 (Rise / GitHub) */
 export function intensityLevel(count: number, maxCount: number): 0 | 1 | 2 | 3 | 4
 {
   if (count <= 0 || maxCount <= 0)

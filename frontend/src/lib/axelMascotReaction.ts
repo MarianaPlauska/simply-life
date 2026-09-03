@@ -1,6 +1,6 @@
 import type { SpreadsheetMood } from './financeSpreadsheetMood'
 
-// Reações do mascote AXEL — humor + ofensiva
+// Reações do mascote AXEL - humor + ofensiva
 
 export interface AxelReaction
 {
@@ -23,7 +23,7 @@ export function resolveAxelReaction(input: {
     return {
       mood: 'stressed',
       headline: 'Ofensiva em risco',
-      message: 'Um passo hoje — tarefa ou humor — e a sequência continua viva.',
+      message: 'Um passo hoje - tarefa ou humor - e a sequência continua viva.',
     }
   }
 
@@ -51,7 +51,7 @@ export function resolveAxelReaction(input: {
       mood: 'ok',
       headline: 'Dia salvo',
       message: hasMoodToday
-        ? 'Humor registrado — amanhã seguimos com calma e foco.'
+        ? 'Humor registrado - amanhã seguimos com calma e foco.'
         : 'Missão cumprida hoje. Amanhã é outra chance de somar XP.',
     }
   }
@@ -61,7 +61,7 @@ export function resolveAxelReaction(input: {
     return {
       mood: 'tight',
       headline: 'Te esperando',
-      message: 'Registre humor ou conclua 1 tarefa — a ofensiva começa com um gesto pequeno.',
+      message: 'Registre humor ou conclua 1 tarefa - a ofensiva começa com um gesto pequeno.',
     }
   }
 

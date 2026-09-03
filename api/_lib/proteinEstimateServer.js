@@ -1,4 +1,4 @@
-// Estimativa de proteína — Groq/Gemini no servidor + fallback local
+// Estimativa de proteína - Groq/Gemini no servidor + fallback local
 
 import { estimateProteinLocal, estimateKcalLocal } from './proteinEstimateLocal.js'
 
@@ -82,7 +82,7 @@ export async function estimateProteinFromMeal({ texto, refeicao })
       kcal: estimateKcalLocal(texto, refeicao, local.gramas),
       matches: local.matches,
       confianca: local.confianca,
-      reasoning: 'Estimativa local — sem chave de IA no servidor.',
+      reasoning: 'Estimativa local - sem chave de IA no servidor.',
       source: 'local',
       iaDisponivel: false,
     }
@@ -158,7 +158,7 @@ Descrição: ${String(texto || '').slice(0, 800)}`
       kcal: estimateKcalLocal(texto, refeicao, local.gramas),
       matches: local.matches,
       confianca: local.confianca,
-      reasoning: 'IA indisponível — usei tabela local de alimentos.',
+      reasoning: 'IA indisponível - usei tabela local de alimentos.',
       source: 'local',
       iaDisponivel: Boolean(groqKey || geminiKey),
     }

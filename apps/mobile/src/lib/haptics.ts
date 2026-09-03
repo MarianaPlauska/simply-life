@@ -1,6 +1,6 @@
 import { Platform } from 'react-native'
 
-/** Haptic leve — expo-haptics no nativo; no-op no web */
+/** Haptic leve - expo-haptics no nativo; no-op no web */
 export function hapticLight(): void
 {
   if (Platform.OS === 'web') return

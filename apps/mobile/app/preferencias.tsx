@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View, Switch, TextInput, Platform } from 'react-native'
-import { Redirect } from 'expo-router'
+import { Redirect, useRouter } from 'expo-router'
 import { Screen, Text, Card, PillTabs, PrimaryButton, Field, Chip } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { useTheme } from '../src/theme/ThemeProvider'
@@ -31,6 +31,7 @@ export default function PreferenciasScreen()
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
   const signOut = useAuthStore((s) => s.signOut)
+  const router = useRouter()
   const { colors, space, mode, setMode } = useTheme()
   const prefs = usePrefsStore((s) => s.prefs)
   const keywords = usePrefsStore((s) => s.keywords)
@@ -74,9 +75,20 @@ export default function PreferenciasScreen()
               placeholder="Seu nome"
             />
             <Card tone="elevated" style={{ gap: space.sm }}>
-              <Text variant="section">Atalhos do Início</Text>
+              <Text variant="section">Personalize seu Início</Text>
               <Text variant="caption" muted>
-                Até 3 widgets. A escolha do setup passa a aparecer na Home.
+                Humor, Água, Proteína, Tarefas, Gastos e Metas - na linha de cards da Home.
+              </Text>
+              <PrimaryButton
+                label="Abrir personalização"
+                variant="secondary"
+                onPress={() => router.push('/personalizar-inicio')}
+              />
+            </Card>
+            <Card tone="elevated" style={{ gap: space.sm }}>
+              <Text variant="section">Widgets extras</Text>
+              <Text variant="caption" muted>
+                Até 3 widgets legados do setup.
               </Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
                 {DASHBOARD_WIDGET_CATALOG.map((w) => (
@@ -92,7 +104,7 @@ export default function PreferenciasScreen()
             <Card tone="elevated" style={{ gap: space.sm }}>
               <Text variant="section">Pomodoro</Text>
               <Text variant="caption" muted>
-                Usado no Modo foco — ligado ao mesmo store.
+                Usado no Modo foco - ligado ao mesmo store.
               </Text>
               <Text variant="label">Foco</Text>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -188,7 +200,7 @@ export default function PreferenciasScreen()
               />
             </View>
             <Text variant="caption" muted>
-              Paleta e navbar não mudam aqui — só claro/escuro da conta.
+              Paleta e navbar não mudam aqui - só claro/escuro da conta.
             </Text>
           </Card>
         )}
@@ -223,7 +235,7 @@ export default function PreferenciasScreen()
             <Card tone="elevated" style={{ gap: space.sm }}>
               <Text variant="section">Widget da tela inicial</Text>
               <Text variant="caption" muted>
-                Hoje os atalhos vivem dentro do app (Início). Widget nativo iOS/Android (WidgetKit) entra no build nativo — ainda não neste preview.
+                Hoje os atalhos vivem dentro do app (Início). Widget nativo iOS/Android (WidgetKit) entra no build nativo - ainda não neste preview.
               </Text>
             </Card>
           </View>
@@ -232,12 +244,22 @@ export default function PreferenciasScreen()
         {tab === 'seguranca' && (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="section">Conta</Text>
-            <Text variant="body">{email ?? '—'}</Text>
+            <Text variant="body">{email ?? '-'}</Text>
             {isGuest ? (
               <Text variant="caption" muted>
-                Modo convidado — dados ficam neste aparelho.
+                Modo convidado: dados ficam neste aparelho.
               </Text>
             ) : null}
+            <PrimaryButton
+              label="Perfil e 2FA"
+              variant="secondary"
+              onPress={() => router.push('/perfil')}
+            />
+            <PrimaryButton
+              label="Integrações"
+              variant="secondary"
+              onPress={() => router.push('/configuracoes')}
+            />
             <PrimaryButton
               label="Sair"
               variant="ghost"

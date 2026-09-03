@@ -34,7 +34,7 @@ function markSent(key: string): void
   catch { /* quota */ }
 }
 
-/** Lembretes de saúde no celular — SW quando permissão concedida */
+/** Lembretes de saúde no celular - SW quando permissão concedida */
 export function useHealthPushNotifications(enabled = true): void
 {
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn)

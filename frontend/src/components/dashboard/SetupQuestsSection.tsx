@@ -8,12 +8,6 @@ import { GlassCard } from '../ui/GlassCard';
 import { useTaskStore } from '../../store/useTaskStore';
 import type { ActiveView } from '../../store/useTaskStore';
 
-/* ══════════════════════════════════════════════════════════════
-   SetupQuestsSection — Onboarding Gamificado
-   Aparece quando o usuário novo tem < 3 módulos configurados.
-   Micro-missões guiam o setup enquanto geram XP.
-   ══════════════════════════════════════════════════════════════ */
-
 interface Quest
 {
   id: string;
@@ -23,10 +17,8 @@ interface Quest
   xp: number;
   accent: string;
   view: ActiveView;
-  checkFn: () => boolean; // retorna true se já completou
+  checkFn: () => boolean;
 }
-
-// confetti removido — visual minimalista, sem efeitos exagerados
 
 export function SetupQuestsSection()
 {
@@ -39,7 +31,6 @@ export function SetupQuestsSection()
   const dismissed = useTaskStore((s) => s.onboardingDismissed);
   const dismiss = useTaskStore((s) => s.dismissOnboarding);
 
-  // lista de quests com verificação dinâmica
   const quests: Quest[] = [
     {
       id: 'first-task',
@@ -108,7 +99,6 @@ export function SetupQuestsSection()
     },
   ];
 
-  // calcula quais estão completas
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [justCompleted, setJustCompleted] = useState<string | null>(null);
 
@@ -123,7 +113,6 @@ export function SetupQuestsSection()
       }
     });
 
-    // detecta se alguma nova quest foi completada (sem confetti)
     newCompleted.forEach((id) =>
     {
       if (!completedIds.has(id))
@@ -154,7 +143,6 @@ export function SetupQuestsSection()
     return null;
   }
 
-  // mapa de cores
   const accentMap: Record<string, { bg: string; text: string; border: string }> = {
     violet:  { bg: 'bg-violet-500/10',  text: 'text-violet-400',  border: 'border-violet-500/15' },
     emerald: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', border: 'border-emerald-500/15' },
@@ -297,7 +285,7 @@ export function SetupQuestsSection()
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span className="text-[12px] text-zinc-500">
               {completedCount === 0
-                ? 'Comece por qualquer missão — cada passo conta!'
+                ? 'Comece por qualquer missão - cada passo conta!'
                 : completedCount < 3
                   ? `Ótimo começo! Faltam ${totalCount - completedCount} para o setup completo.`
                   : 'Quase lá! Complete as últimas missões para desbloquear tudo.'

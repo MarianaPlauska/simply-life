@@ -5,7 +5,7 @@ import {
   inferWorkTypeTag,
 } from '../../lib/adaptiveOrchestration'
 
-// Orquestração adaptativa — velocidade, log de decisões, cap diário
+// Orquestração adaptativa - velocidade, log de decisões, cap diário
 
 const VELOCITY_KEY = 'axel-velocity-samples-v1'
 const LOG_MAX = 24

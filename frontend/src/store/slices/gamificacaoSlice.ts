@@ -1,4 +1,4 @@
-// slice de gamificação — rpg, xp, conquistas, e quests do Jarvis
+// slice de gamificação - rpg, xp, conquistas, e quests do Jarvis
 import type { StateCreator } from 'zustand'
 import { supabase } from '../../lib/supabase'
 import type { AxelStreakSlice } from './axelStreakSlice'
@@ -59,7 +59,7 @@ export interface GamificacaoSlice
   fetchAchievements: () => Promise<void>;
   fetchQuests: () => Promise<void>;
   addXP: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number, options?: { silent?: boolean }) => Promise<number>;
-  /** Debita XP total (prioriza módulo foco) — compras na loja AXEL */
+  /** Debita XP total (prioriza módulo foco) - compras na loja AXEL */
   spendXp: (amount: number) => Promise<boolean>;
   /** Desfaz crédito de XP (reabrir tarefa) */
   undoXp: (modulo: 'foco' | 'saude' | 'financeiro', quantidade: number) => Promise<void>;
@@ -391,14 +391,14 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
       return
     }
 
-    // Tarefas reais — updateTarefa dispara recompensa com score de urgência
+    // Tarefas reais - updateTarefa dispara recompensa com score de urgência
     if (taskId > 0 && typeof store.updateTarefa === 'function')
     {
       await store.updateTarefa(taskId, { status: 'concluida' })
       return
     }
 
-    // Mock / preview — XP direto no store
+    // Mock / preview - XP direto no store
     await get().addXP('foco', xpGain)
     const { toast } = await import('sonner')
     toast.success(`+${xpGain} XP`, {
@@ -506,7 +506,7 @@ export const createGamificacaoSlice: StateCreator<GamificacaoStore, [], [], Gami
         {
           novasDiarias.push({
             tipo: 'diaria',
-            titulo: 'Manter o ritmo Jarvis — registre 1 hábito de saúde',
+            titulo: 'Manter o ritmo Jarvis - registre 1 hábito de saúde',
             recompensa_xp: 5,
             progresso: 0,
             meta: 1,

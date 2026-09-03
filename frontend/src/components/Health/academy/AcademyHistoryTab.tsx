@@ -109,7 +109,7 @@ export function AcademyHistoryTab()
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-mono text-[12px] text-ink tabular-nums">
-                    {s.duracao_real_min != null ? `${s.duracao_real_min} min` : '—'}
+                    {s.duracao_real_min != null ? `${s.duracao_real_min} min` : '-'}
                   </p>
                   <p className={`text-[9px] font-mono uppercase ${
                     s.concluido ? 'text-concluido' : 'text-ink-muted'

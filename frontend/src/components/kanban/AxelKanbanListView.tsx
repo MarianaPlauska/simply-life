@@ -32,7 +32,7 @@ import { AXEL_KANBAN_TABLE } from '../../constants/axelKanbanTheme'
 import type { TarefaUnificada } from '../../types'
 import type { TemporalHorizon } from '../../lib/temporalHorizon'
 
-// Tabela alta densidade — estilo Linear/Notion, colunas ordenáveis
+// Tabela alta densidade - estilo Linear/Notion, colunas ordenáveis
 
 type SortKey = 'title' | 'project' | 'bucket' | 'score' | 'due' | 'status'
 type SortDir = 'asc' | 'desc'
@@ -175,7 +175,7 @@ function ListProgressCell({ tarefa }: { tarefa: TarefaUnificada })
         />
       </div>
       <span className={`text-[10px] font-mono tabular-nums w-8 text-right ${AXEL_TEXT_SECONDARY}`}>
-        {total > 0 ? `${done}/${total}` : '—'}
+        {total > 0 ? `${done}/${total}` : '-'}
       </span>
     </div>
   )
@@ -431,7 +431,7 @@ export function AxelKanbanListView({
                   <td className="hidden lg:table-cell px-4 py-2">
                     <span
                       className={`text-xs font-mono tabular-nums ${urgencyScoreClass(score)}`}
-                      title="Prioridade AXEL — maior = mais urgente na fila"
+                      title="Prioridade AXEL - maior = mais urgente na fila"
                     >
                       {score}
                     </span>

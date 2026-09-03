@@ -1,5 +1,5 @@
 /**
- * PreferenciasIA.tsx — Gerenciamento de palavras-chave do Motor de Triagem.
+ * PreferenciasIA.tsx - Gerenciamento de palavras-chave do Motor de Triagem.
  * Interface estilo "command palette" com badges removíveis e input com animação.
  */
 import { useState, useRef, useEffect } from 'react';
@@ -283,12 +283,12 @@ export function PreferenciasIA() {
                   <>
                     <Sparkles className="w-3.5 h-3.5" />
                     Match! Termo detectado: <span className="text-white font-bold">"{testResult.termo}"</span>
-                    — Tarefa criada com prioridade crítica.
+                    - Tarefa criada com prioridade crítica.
                   </>
                 ) : (
                   <>
                     <X className="w-3.5 h-3.5" />
-                    Nenhuma palavra-chave detectada — mensagem ignorada.
+                    Nenhuma palavra-chave detectada - mensagem ignorada.
                   </>
                 )}
               </motion.div>

@@ -27,6 +27,9 @@ import { tabBarScreenPadding } from '../../ui/chrome'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CardCarousel } from './CardCarousel'
 import { FinanceCardDetailSheet } from './FinanceCardDetailSheet'
+import { CardInvoiceSpendSheet } from './CardInvoiceSpendSheet'
+import { FinanceCardEditSheet } from './FinanceCardEditSheet'
+import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
 import { FinanceHealthMetrics } from './FinanceHealthMetrics'
 
 type Props = {
@@ -44,7 +47,7 @@ const QUICK = [
 ]
 
 /**
- * Finanças Início — hierarquia:
+ * Finanças Início - hierarquia:
  * N1: Saldo disponível (1 hero, número 32px cobre)
  * N2: atalhos / cartões / saúde financeira / donut
  * N3: movimentos recentes (lista)
@@ -63,6 +66,10 @@ export function FinanceHomeTab({
   const [catFilter, setCatFilter] = useState<string | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [visibleCardId, setVisibleCardId] = useState<string | null>(null)
+  const [sheetMode, setSheetMode] = useState<'invoice' | 'spend' | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [ledgerOpen, setLedgerOpen] = useState(false)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const txs = useDataStore((s) => s.finance)
   const cash = useDataStore((s) => s.cashAccount)
@@ -209,20 +216,127 @@ export function FinanceHomeTab({
       </View>
       <SectionHeader
         title="Seus cartões"
-        subtitle={cards.length > 1 ? 'Deslize para ver o próximo' : undefined}
+        subtitle={cards.length > 1 ? 'Use as setas ou as bolinhas' : undefined}
+        action={
+          <PrimaryButton
+            label="+ Novo"
+            size="sm"
+            variant="secondary"
+            onPress={() => setCreateOpen(true)}
+          />
+        }
       />
       {cards.length === 0 ? (
-        <Card tone="elevated">
-          <EmptyState title="Nenhum cartão" body="Cadastre cartões para acompanhar faturas." />
+        <Card tone="elevated" style={{ gap: space.md }}>
+          <EmptyState title="Nenhum cartão" body="Crie o primeiro cartão aqui." />
+          <PrimaryButton label="Novo cartão" onPress={() => setCreateOpen(true)} />
         </Card>
       ) : (
-        <CardCarousel
-          cards={cards}
-          selectedId={detailId ?? visibleCardId}
-          onSelect={(id) => setDetailId(id)}
-          onVisibleChange={setVisibleCardId}
-        />
+        <>
+          <CardCarousel
+            cards={cards}
+            selectedId={visibleCardId}
+            onSelect={(id) =>
+            {
+              setVisibleCardId(id)
+              setDetailId(id)
+            }}
+            onVisibleChange={setVisibleCardId}
+          />
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <PrimaryButton
+              label="Gasto"
+              size="sm"
+              onPress={() => setSheetMode('spend')}
+              style={{ flexGrow: 1 }}
+            />
+            <PrimaryButton
+              label="Lançamentos"
+              size="sm"
+              variant="secondary"
+              onPress={() => setLedgerOpen(true)}
+              style={{ flexGrow: 1 }}
+            />
+            <PrimaryButton
+              label="Editar"
+              size="sm"
+              variant="ghost"
+              onPress={() => setEditOpen(true)}
+              style={{ flexGrow: 1 }}
+            />
+            <PrimaryButton
+              label="Fatura"
+              size="sm"
+              variant="ghost"
+              onPress={() => setSheetMode('invoice')}
+              style={{ flexGrow: 1 }}
+            />
+          </View>
+          {primaryCard ? (
+            <Card tone="elevated" style={{ gap: 6 }}>
+              <Text variant="caption" muted>
+                {primaryCard.nome} · uso {Math.round(cardUsage)}%
+              </Text>
+              <Text variant="bodyStrong" color={colors.finance}>
+                Fatura {formatBRL(primaryCard.faturaAberta ?? 0)} · limite {formatBRL(primaryCard.limite)}
+              </Text>
+            </Card>
+          ) : null}
+          <FinanceCardDetailSheet
+            card={detailCard}
+            visible={detailId != null}
+            onClose={() => setDetailId(null)}
+            onEdit={() =>
+            {
+              setDetailId(null)
+              setEditOpen(true)
+            }}
+            onSpend={() =>
+            {
+              setDetailId(null)
+              setSheetMode('spend')
+            }}
+            onLedger={() =>
+            {
+              setDetailId(null)
+              setLedgerOpen(true)
+            }}
+          />
+          <CardInvoiceSpendSheet
+            card={primaryCard ?? null}
+            mode={sheetMode}
+            onClose={() => setSheetMode(null)}
+          />
+          <FinanceCardEditSheet
+            card={primaryCard ?? null}
+            mode="edit"
+            visible={editOpen}
+            onClose={() => setEditOpen(false)}
+          />
+          <FinanceCardEditSheet
+            card={null}
+            mode="create"
+            visible={createOpen}
+            onClose={() => setCreateOpen(false)}
+            onCreated={(id) => setVisibleCardId(id)}
+          />
+          <FinanceCardLedgerSheet
+            card={primaryCard ?? null}
+            visible={ledgerOpen}
+            onClose={() => setLedgerOpen(false)}
+            onSpend={() => setSheetMode('spend')}
+          />
+        </>
       )}
+      {cards.length === 0 ? (
+        <FinanceCardEditSheet
+          card={null}
+          mode="create"
+          visible={createOpen}
+          onClose={() => setCreateOpen(false)}
+          onCreated={(id) => setVisibleCardId(id)}
+        />
+      ) : null}
     </View>
   )
 
@@ -337,7 +451,7 @@ export function FinanceHomeTab({
     </View>
   ) : null
 
-  // Nível 2 — KPIs de suporte (abaixo do hero, números 22px)
+  // Nível 2 - KPIs de suporte (abaixo do hero, números 22px)
   const kpiRow = (
     <View style={{ flexDirection: 'row', gap: space.md }}>
       <Card tone="elevated" style={{ flex: 1, gap: 4, minHeight: 88, justifyContent: 'center' }}>
@@ -372,11 +486,6 @@ export function FinanceHomeTab({
     return (
       <View style={{ gap: space.lg }}>
         {cardsFocusView}
-        <FinanceCardDetailSheet
-          card={detailCard}
-          visible={detailId != null}
-          onClose={() => setDetailId(null)}
-        />
         <View style={{ marginBottom: fabClearance }} />
       </View>
     )
@@ -415,6 +524,45 @@ export function FinanceHomeTab({
         card={detailCard}
         visible={detailId != null}
         onClose={() => setDetailId(null)}
+        onEdit={() =>
+        {
+          setDetailId(null)
+          setEditOpen(true)
+        }}
+        onSpend={() =>
+        {
+          setDetailId(null)
+          setSheetMode('spend')
+        }}
+        onLedger={() =>
+        {
+          setDetailId(null)
+          setLedgerOpen(true)
+        }}
+      />
+      <CardInvoiceSpendSheet
+        card={primaryCard ?? null}
+        mode={sheetMode}
+        onClose={() => setSheetMode(null)}
+      />
+      <FinanceCardEditSheet
+        card={primaryCard ?? null}
+        mode="edit"
+        visible={editOpen}
+        onClose={() => setEditOpen(false)}
+      />
+      <FinanceCardEditSheet
+        card={null}
+        mode="create"
+        visible={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(id) => setVisibleCardId(id)}
+      />
+      <FinanceCardLedgerSheet
+        card={primaryCard ?? null}
+        visible={ledgerOpen}
+        onClose={() => setLedgerOpen(false)}
+        onSpend={() => setSheetMode('spend')}
       />
 
       <View style={{ marginBottom: fabClearance }} />

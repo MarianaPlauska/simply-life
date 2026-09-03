@@ -3,13 +3,13 @@ import type { Session } from '@supabase/supabase-js'
 
 const SESSION_TIMEOUT_MS = 8_000
 
-/** Sessão local de convidado — sem Supabase Auth */
+/** Sessão local de convidado - sem Supabase Auth */
 export function isLocalGuestUser(userId: string): boolean
 {
   return userId.startsWith('guest_')
 }
 
-/** getSession com timeout — evita spinner infinito se Supabase estiver inacessível */
+/** getSession com timeout - evita spinner infinito se Supabase estiver inacessível */
 export async function getSessionWithTimeout(
   timeoutMs = SESSION_TIMEOUT_MS,
 ): Promise<{ session: Session | null; timedOut: boolean }>

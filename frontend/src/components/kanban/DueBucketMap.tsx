@@ -1,7 +1,7 @@
 import { CalendarDays, CalendarRange, CircleDashed, Sun } from 'lucide-react'
 import { DUE_BUCKET_LABELS, type DueBucket } from '../../lib/dueBucket'
 
-// Navegação compacta entre faixas de prazo — grade sem scroll horizontal
+// Navegação compacta entre faixas de prazo - grade sem scroll horizontal
 
 interface DueBucketMapProps
 {

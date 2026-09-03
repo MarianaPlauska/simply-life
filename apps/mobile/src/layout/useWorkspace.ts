@@ -1,18 +1,20 @@
 import { useWindowDimensions } from 'react-native'
 import { BREAKPOINT } from '@simply-life/ui-tokens'
 
-/** Tablet/desktop: main + rail (Fase 3) */
 export function useWorkspace()
 {
   const { width } = useWindowDimensions()
-  const isTablet = width >= BREAKPOINT.tablet
+  const isMobile = width < BREAKPOINT.tablet
+  const isTablet = width >= BREAKPOINT.tablet && width < BREAKPOINT.desktop
   const isDesktop = width >= BREAKPOINT.desktop
+  const showRail = !isMobile
+
   return {
     width,
+    isMobile,
     isTablet,
     isDesktop,
-    showRail: isDesktop,
-    // Desktop ocupa a largura do painel (Medline); tablet ainda limita um pouco
+    showRail,
     contentMaxWidth: isDesktop ? undefined : isTablet ? 720 : undefined as number | undefined,
   }
 }

@@ -42,7 +42,6 @@ const TASK_BUCKETS = ACTIVE_DUE_BUCKETS.filter(
   (b) => b === 'vencido' || b === 'hoje' || b === 'esta_semana',
 )
 
-/** Contagens de prazo para a rail e o Mais no mobile */
 export function useDashboardDueItems(): DueBarItem[]
 {
   const tarefas = useTaskStore((s) => s.tarefas)
@@ -57,7 +56,6 @@ export function useDashboardDueItems(): DueBarItem[]
   }, [tarefas])
 }
 
-/** Barras horizontais de prazo — sem donut */
 export function DashboardTaskDueBars({ items }: DashboardTaskDueBarsProps)
 {
   const max = Math.max(...items.map((i) => i.count), 0)
@@ -102,7 +100,6 @@ export function DashboardTaskDueBars({ items }: DashboardTaskDueBarsProps)
   )
 }
 
-/** Bloco Tarefas com faixa do módulo, títulos vencidos e atalhos */
 export function DashboardTaskDueSection()
 {
   const items = useDashboardDueItems()

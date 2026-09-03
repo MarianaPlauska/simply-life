@@ -1,4 +1,4 @@
-// slice de foco — timer pomodoro, gamificação via supabase
+// slice de foco - timer pomodoro, gamificação via supabase
 import type { StateCreator } from 'zustand'
 import type { FocusState, GamificacaoProfile } from '../storeTypes'
 import { supabase } from '../../lib/supabase'

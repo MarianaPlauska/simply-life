@@ -6,8 +6,23 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    /* Bloco H: mobile <768 · tablet 768–1023 · desktop ≥1024 (md/lg padrão) */
+    screens: {
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
+        /* Aliases Bloco H */
+        'bg-canvas': 'var(--bg-canvas, var(--sl-canvas))',
+        'bg-surface': 'var(--bg-surface, var(--sl-surface))',
+        'bg-elevated': 'var(--bg-elevated, var(--sl-elevated))',
+        'border-hairline': 'var(--border-hairline, var(--sl-border))',
+        'text-primary': 'var(--text-primary, var(--sl-text))',
+        'text-muted-h': 'var(--text-muted, var(--sl-text-muted))',
         fundo: 'var(--sl-canvas)',
         card: 'var(--sl-surface)',
         chrome: 'var(--sl-chrome)',
@@ -62,9 +77,19 @@ export default {
       },
       fontSize: {
         'ui-caption': ['0.75rem', { lineHeight: '1rem' }],
-        'ui-body': ['1rem', { lineHeight: '1.5rem' }],
-        'ui-title': ['0.9375rem', { lineHeight: '1.375rem' }],
-        'ui-heading': ['1.125rem', { lineHeight: '1.5rem' }],
+        'ui-body': ['0.8125rem', { lineHeight: '1.25rem' }],
+        'ui-title': ['1rem', { lineHeight: '1.375rem' }],
+        'ui-heading': ['1.75rem', { lineHeight: '2.125rem' }],
+        /* Bloco H — H1 / H2 / hero / body */
+        h1: ['1.75rem', { lineHeight: '2.125rem', fontWeight: '700' }],
+        'h1-md': ['2rem', { lineHeight: '2.375rem', fontWeight: '700' }],
+        'h1-lg': ['2.25rem', { lineHeight: '2.625rem', fontWeight: '700' }],
+        h2: ['1rem', { lineHeight: '1.375rem', fontWeight: '600' }],
+        'h2-md': ['1.0625rem', { lineHeight: '1.5rem', fontWeight: '600' }],
+        'h2-lg': ['1.125rem', { lineHeight: '1.625rem', fontWeight: '600' }],
+        hero: ['1.375rem', { lineHeight: '1.75rem', fontWeight: '700' }],
+        'hero-md': ['1.625rem', { lineHeight: '2rem', fontWeight: '700' }],
+        'hero-lg': ['1.875rem', { lineHeight: '2.25rem', fontWeight: '700' }],
       },
     },
   },

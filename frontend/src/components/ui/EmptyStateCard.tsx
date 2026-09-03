@@ -14,7 +14,7 @@ interface EmptyStateCardProps
 }
 
 /**
- * EmptyStateCard — substitui o "—" e "0%" com uma chamada visual
+ * EmptyStateCard - substitui o "-" e "0%" com uma chamada visual
  *
  * Nunca mostra dados vazios sem contexto.
  * Sempre tem um ícone grande animado + CTA motivacional.

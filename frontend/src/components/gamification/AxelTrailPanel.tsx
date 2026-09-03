@@ -214,7 +214,7 @@ export function AxelTrailPanel({ compact = false }: AxelTrailPanelProps)
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className={`text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
-                      Nv {m.level} — {m.title}
+                      Nv {m.level} - {m.title}
                     </p>
                     {!reached && <Lock size={11} className="text-ink-muted" />}
                   </div>

@@ -7,7 +7,7 @@ import {
   sumInvoice,
 } from './financeCardCycle'
 
-/** Gasto no cartão — fatura aberta (crédito) ou total (VR/vale/débito) */
+/** Gasto no cartão - fatura aberta (crédito) ou total (VR/vale/débito) */
 export function sumCardTotalSpend(
   transactions: Transaction[],
   cardId: string,

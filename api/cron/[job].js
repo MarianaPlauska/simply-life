@@ -1,4 +1,4 @@
-// Roteador único — crons (limite Hobby: 12 serverless functions)
+// Roteador único - crons (limite Hobby: 12 serverless functions)
 
 import gmailSync from '../_lib/handlers/cron/gmail-sync.js';
 import pushBills from '../_lib/handlers/cron/push-bills.js';

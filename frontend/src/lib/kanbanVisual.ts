@@ -1,6 +1,6 @@
 import type { TemporalHorizon } from './temporalHorizon'
 
-// Utilitários visuais Kanban — prioridade discreta, editorial
+// Utilitários visuais Kanban - prioridade discreta, editorial
 
 export function urgencyStripeClass(score: number): string
 {
@@ -23,7 +23,7 @@ export function urgencyDotClass(score: number): string
   return 'bg-line'
 }
 
-/** Anel do checklist — urgente / atenção / neutro, sem caixa */
+/** Anel do checklist - urgente / atenção / neutro, sem caixa */
 export function checklistRingClass(score: number, completed = false): string
 {
   if (completed)

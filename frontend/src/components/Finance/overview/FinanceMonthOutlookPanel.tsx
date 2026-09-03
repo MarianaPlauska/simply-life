@@ -164,7 +164,7 @@ export function FinanceMonthOutlookPanel({
 
       {outlook.isFuture && outlook.sugestaoGastoDiario != null && outlook.sobraParaGastar > 0 && (
         <p className={`font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-          ~{fmt(outlook.sugestaoGastoDiario)}/dia em {outlook.diasNoMes} dias — referência para PIX e gastos do dia a dia
+          ~{fmt(outlook.sugestaoGastoDiario)}/dia em {outlook.diasNoMes} dias - referência para PIX e gastos do dia a dia
         </p>
       )}
 
@@ -192,7 +192,7 @@ export function FinanceMonthOutlookPanel({
                   empty=""
                   withNotes
                   headerAction={monthDupCount > 0 ? <FinanceReconcileButton label="Limpar dup." /> : undefined}
-                  dupHint={monthDupCount > 0 ? `${monthDupCount} duplicata(s) no mês — lista já deduplicada` : undefined}
+                  dupHint={monthDupCount > 0 ? `${monthDupCount} duplicata(s) no mês - lista já deduplicada` : undefined}
                 />
               )}
             </div>
@@ -341,7 +341,7 @@ function ComparisonBlock({
           </div>
         ) : (
           <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-            Defina quanto pretende gastar no mês — comparamos com o real ao final.
+            Defina quanto pretende gastar no mês - comparamos com o real ao final.
           </p>
         )}
       </div>

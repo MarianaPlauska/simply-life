@@ -1,7 +1,7 @@
 import type { Transaction } from '../store/storeTypes'
 import { settlementCanonicalKey } from './financeBillTaskDedup'
 
-/** Normaliza descrição como no fetchTransactions — une fixa/card no dedupe */
+/** Normaliza descrição como no fetchTransactions - une fixa/card no dedupe */
 export function normalizeTxDescription(descricao: string): string
 {
   return descricao
@@ -28,7 +28,7 @@ function statusRank(status: string): number
   return 2
 }
 
-/** Chave de negócio — une "Eric" e "[Boleto] Eric" no mesmo mês (ignora status) */
+/** Chave de negócio - une "Eric" e "[Boleto] Eric" no mesmo mês (ignora status) */
 export function transactionBusinessKey(tx: Transaction): string
 {
   const month = tx.data.slice(0, 7)
@@ -51,7 +51,7 @@ function pickBetterTransaction(a: Transaction, b: Transaction): Transaction
   return a.id < b.id ? a : b
 }
 
-/** Mantém um lançamento por chave — o de menor id */
+/** Mantém um lançamento por chave - o de menor id */
 export function dedupeLedgerEntries(transactions: Transaction[]): Transaction[]
 {
   const byKey = new Map<string, Transaction>()
@@ -69,7 +69,7 @@ export function dedupeLedgerEntries(transactions: Transaction[]): Transaction[]
   return [...byKey.values()].sort((a, b) => a.data.localeCompare(b.data) || a.id - b.id)
 }
 
-/** Deduplica para saldo e KPIs — mesmo boleto no mês conta uma vez (prefere pago) */
+/** Deduplica para saldo e KPIs - mesmo boleto no mês conta uma vez (prefere pago) */
 export function dedupeTransactionsForLedger(transactions: Transaction[]): Transaction[]
 {
   const byKey = new Map<string, Transaction>()

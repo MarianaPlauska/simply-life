@@ -16,7 +16,7 @@ interface FinanceGlobalMoodBannerProps
   billAlertHref?: string
 }
 
-// Mascote AXEL em todas as abas de Finanças — humor conforme entradas × saídas do mês
+// Mascote AXEL em todas as abas de Finanças - humor conforme entradas × saídas do mês
 
 export function FinanceGlobalMoodBanner({
   monthLabel,

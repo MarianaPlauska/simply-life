@@ -527,7 +527,7 @@ export function PreferencesView() {
         <SectionHeader
           icon={Sparkles}
           title="Cor do sistema"
-          subtitle="Acento do AXEL — a mesma escolha do primeiro setup."
+          subtitle="Acento do AXEL - a mesma escolha do primeiro setup."
           iconColor="text-orange-400"
         />
         <div className="flex flex-wrap gap-2 mb-4">
@@ -640,7 +640,7 @@ export function PreferencesView() {
       </SectionCard>
 
       <SectionCard>
-        <SectionHeader icon={Bell} title="Resumo semanal" subtitle="AXEL, 50/30/20 e hábitos — e-mail e/ou push no dia escolhido." iconColor="text-amber-400" />
+        <SectionHeader icon={Bell} title="Resumo semanal" subtitle="AXEL, 50/30/20 e hábitos - e-mail e/ou push no dia escolhido." iconColor="text-amber-400" />
         <WeeklyDigestPrefs />
       </SectionCard>
     </div>
@@ -650,7 +650,7 @@ export function PreferencesView() {
   const renderSeguranca = () => (
     <div className="space-y-6">
       <SectionCard>
-        <SectionHeader icon={Shield} title="Autenticação" subtitle="2FA é opcional — TOTP nativo do Supabase." iconColor="text-emerald-400" />
+        <SectionHeader icon={Shield} title="Autenticação" subtitle="2FA é opcional - TOTP nativo do Supabase." iconColor="text-emerald-400" />
         <div className="px-1 pb-4">
           <MfaEnrollPanel />
         </div>

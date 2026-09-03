@@ -8,7 +8,7 @@ interface ProteinQuickTapGridProps
   busy?: boolean
 }
 
-/** Atalhos 1-toque — padrão da hidratação */
+/** Atalhos 1-toque - padrão da hidratação */
 export function ProteinQuickTapGrid({ refeicao, onAdd, busy = false }: ProteinQuickTapGridProps)
 {
   const foods = ALIMENTOS_PROTEINA[refeicao].slice(0, 4)

@@ -8,7 +8,7 @@ type ChipItem = {
   dotColor?: string
 }
 
-/** Chips em faixa horizontal — compactos, sem empilhar em coluna. */
+/** Chips em faixa horizontal - compactos, sem empilhar em coluna. */
 export function ChipGrid({
   items,
   value,

@@ -42,7 +42,7 @@ interface Props
   autoOpenAdd?: boolean
   initialGrupo?: CategoryGrupo
   onCategoryCreated?: (cat: Category) => void
-  /** Tipo do lançamento — habilita toque para fixar atalho */
+  /** Tipo do lançamento - habilita toque para fixar atalho */
   pinTipo?: 'receita' | 'despesa'
 }
 
@@ -149,7 +149,7 @@ export function FinanceCategories({
     }
     if (cat.tipo !== pinTipo)
     {
-      toast.message(`Esta categoria é de ${cat.tipo} — escolha uma de ${pinTipo}`)
+      toast.message(`Esta categoria é de ${cat.tipo} - escolha uma de ${pinTipo}`)
       return
     }
     if (pinnedIds.has(cat.id))

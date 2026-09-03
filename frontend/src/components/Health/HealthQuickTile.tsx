@@ -11,7 +11,7 @@ interface HealthQuickTileProps
   onClick: () => void
 }
 
-/** Linha de cuidado — checklist, cor de saúde, sem rainbow */
+/** Linha de cuidado - checklist, cor de saúde, sem rainbow */
 export function HealthQuickTile({
   icon: Icon,
   label,

@@ -109,7 +109,7 @@ export function CalendarView() {
         <div className="mb-6 rounded-sl border border-line bg-card p-10 flex flex-col items-center gap-3 text-center">
           <CalendarDays className="w-10 h-10 text-ink-muted" />
           <p className="text-sm text-ink-muted">Nenhum compromisso com data.</p>
-          <p className="text-xs text-ink-faint">Despeje a cabeça no + — o lote com horário aparece aqui.</p>
+          <p className="text-xs text-ink-faint">Despeje a cabeça no + - o lote com horário aparece aqui.</p>
         </div>
       )}
 

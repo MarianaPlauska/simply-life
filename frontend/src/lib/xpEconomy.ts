@@ -1,9 +1,9 @@
-// Economia de XP — progressão lenta e previsível (Duolingo / Finch endgame)
+// Economia de XP - progressão lenta e previsível (Duolingo / Finch endgame)
 
-/** XP total necessário para subir um nível (~5–8 dias ativos com teto diário) */
+/** XP total necessário para subir um nível (~5-8 dias ativos com teto diário) */
 export const XP_PER_LEVEL = 500
 
-/** Teto diário — impede rush no primeiro dia */
+/** Teto diário - impede rush no primeiro dia */
 export const DAILY_XP_CAP = 90
 
 const DAILY_KEY_PREFIX = 'axel-xp-daily'
@@ -88,7 +88,7 @@ export function refundDailyXp(amount: number): void
   catch { /* ignore */ }
 }
 
-/** XP por conclusão de tarefa — score alto não pula níveis */
+/** XP por conclusão de tarefa - score alto não pula níveis */
 export function xpFromTaskScore(score: number): number
 {
   const base = Math.max(8, Math.round((score || 20) * 0.22))

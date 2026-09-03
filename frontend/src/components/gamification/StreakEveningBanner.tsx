@@ -3,7 +3,7 @@ import { Flame, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useTaskStore } from '../../store/useTaskStore'
 
-// Lembrete noturno — proteger ofensiva antes do dia acabar
+// Lembrete noturno - proteger ofensiva antes do dia acabar
 
 function sessionDismissKey(): string
 {
@@ -51,7 +51,7 @@ export function StreakEveningBanner()
           Quando fizer sentido
         </p>
         <p className="text-sm text-ink mt-0.5">
-          Você tem <strong>{streakCount}</strong> {streakCount === 1 ? 'dia' : 'dias'} de sequência —
+          Você tem <strong>{streakCount}</strong> {streakCount === 1 ? 'dia' : 'dias'} de sequência -
           ela pausa, não zera. Abrir o resumo do dia já conta.
         </p>
       </div>

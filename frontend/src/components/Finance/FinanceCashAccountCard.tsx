@@ -276,7 +276,7 @@ export function FinanceCashAccountCard({
           </button>
           <p className="pr-8">
             Detectamos {dupCount} lançamento{dupCount === 1 ? '' : 's'} duplicado{dupCount === 1 ? '' : 's'}.
-            Use <strong>Recalcular</strong> para limpar — ou <strong>Ajustar saldos</strong> com seus valores reais.
+            Use <strong>Recalcular</strong> para limpar - ou <strong>Ajustar saldos</strong> com seus valores reais.
           </p>
         </div>
       )}

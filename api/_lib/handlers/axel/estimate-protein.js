@@ -1,4 +1,4 @@
-// POST /api/estimate-protein — estimativa de proteína (Groq/Gemini + fallback local)
+// POST /api/estimate-protein - estimativa de proteína (Groq/Gemini + fallback local)
 // Exige JWT Supabase
 
 import { applyCors } from '../../cors.js'
@@ -27,7 +27,7 @@ export default async function handler(req, res)
   const user = await getUserFromBearer(req)
   if (!user)
   {
-    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' })
+    return res.status(401).json({ error: 'Não autenticado - envie Authorization: Bearer <jwt>' })
   }
 
   const { texto, refeicao } = req.body ?? {}

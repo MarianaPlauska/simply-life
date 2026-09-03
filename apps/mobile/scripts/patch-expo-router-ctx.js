@@ -1,6 +1,6 @@
 /**
  * Metro exige string literal em require.context.
- * No monorepo o babel às vezes não embute EXPO_ROUTER_* — patch local.
+ * No monorepo o babel às vezes não embute EXPO_ROUTER_* - patch local.
  */
 const fs = require('fs')
 const path = require('path')

@@ -33,7 +33,7 @@ export interface ReceitaEntradaPatch
 interface FinanceExtraIncomeSectionProps
 {
   onPatch: (patch: ReceitaEntradaPatch) => void
-  /** Oculta crédito no próximo mês — só entra no saldo agora */
+  /** Oculta crédito no próximo mês - só entra no saldo agora */
   somenteAgora?: boolean
 }
 
@@ -48,7 +48,7 @@ function resolveCreditDate(when: ReceitaCreditoQuando): string
   return new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString().slice(0, 10)
 }
 
-// Seção de renda extra — usada no drawer Novo lançamento (aba Receita)
+// Seção de renda extra - usada no drawer Novo lançamento (aba Receita)
 
 export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: FinanceExtraIncomeSectionProps)
 {
@@ -166,7 +166,7 @@ export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: Fin
       creditoQuando,
     })
     toast.success(
-      `${fmt(overtimePreview.total)} no valor — salve o lançamento abaixo`,
+      `${fmt(overtimePreview.total)} no valor - salve o lançamento abaixo`,
       {
         description: creditoQuando === 'proximo-mes'
           ? 'Agendado para o dia 1º do próximo mês.'
@@ -195,7 +195,7 @@ export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: Fin
           Tipo de entrada
         </p>
         <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_PRIMARY}`}>
-          Escolha como você ganhou — hora extra calcula sozinha.
+          Escolha como você ganhou - hora extra calcula sozinha.
         </p>
       </div>
 
@@ -325,7 +325,7 @@ export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: Fin
               </div>
               <p className={`text-[10px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
                 Fórmula CLT: salário ÷ 220 = hora normal · dia útil × 1,5 · domingo × 2.
-                Salve cada plantão separado — o total do mês soma automaticamente.
+                Salve cada plantão separado - o total do mês soma automaticamente.
               </p>
             </div>
           )}
@@ -343,7 +343,7 @@ export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: Fin
 
       {kind !== 'normal' && kind !== 'hora-extra' && (
         <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
-          Preencha descrição e valor abaixo — já marcamos como renda extra.
+          Preencha descrição e valor abaixo - já marcamos como renda extra.
         </p>
       )}
 

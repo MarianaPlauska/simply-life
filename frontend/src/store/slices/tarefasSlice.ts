@@ -1,4 +1,4 @@
-// slice de tarefas — crud, subtarefas, labels, templates via supabase
+// slice de tarefas - crud, subtarefas, labels, templates via supabase
 import type { StateCreator } from 'zustand'
 import type { TarefaUnificada, Label, Subtarefa } from '../../types'
 import { supabase } from '../../lib/supabase'
@@ -171,7 +171,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
       const uid = (await supabase.auth.getUser()).data.user?.id
       if (!uid) return
 
-      // calcula score local — palavras como "urgente" jogam para "Fazer em 1h"
+      // calcula score local - palavras como "urgente" jogam para "Fazer em 1h"
       const { localScoreFromText } = await import('../../utils/localScore')
       const { score, prioridade } = localScoreFromText(`${titulo} ${notas || ''}`)
 
@@ -293,7 +293,7 @@ export const createTarefasSlice: StateCreator<TarefasSlice, [], [], TarefasSlice
         .from('tarefas_unificadas')
         .insert({
           user_id: uid,
-          titulo: `Consulta — renovar ${opts.nome}`,
+          titulo: `Consulta - renovar ${opts.nome}`,
           notas_locais: `Renovar receita de ${opts.nome}. Consulta em ${opts.consultaData}.`,
           snippet_100_char: phantomKey,
           score_urgencia: score,

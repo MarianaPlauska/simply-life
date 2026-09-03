@@ -175,7 +175,7 @@ export function buildFinanceCoachContext(input: {
   }
 }
 
-/** Conselho local — números reais do usuário, sem IA */
+/** Conselho local - números reais do usuário, sem IA */
 export function buildLocalFinanceCoachAdvice(
   ctx: FinanceCoachContext,
   transactions: Transaction[],

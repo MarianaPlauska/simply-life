@@ -81,16 +81,16 @@ export function buildFinanceDailyBrief(input: {
 
   if (position.saldoDisponivel < 0)
   {
-    headline = 'Caixa negativo — priorize essenciais'
+    headline = 'Caixa negativo - priorize essenciais'
   }
   else if (diasRestantes <= 5 && position.saldoProjetadoDisponivel < position.saldoDisponivel * 0.4)
   {
-    headline = 'Fim de mês apertado — segure variáveis'
+    headline = 'Fim de mês apertado - segure variáveis'
   }
 
   const detail = parts.length > 0
     ? parts.join(' · ')
-    : `${diasRestantes} dias no mês — ritmo tranquilo por enquanto.`
+    : `${diasRestantes} dias no mês - ritmo tranquilo por enquanto.`
 
   return {
     headline,

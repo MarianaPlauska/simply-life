@@ -11,7 +11,7 @@ import {
 } from '../lib/financeBillOrchestrator'
 import { hasPendingBillTask } from '../lib/financeBillTaskDedup'
 
-/** Sincroniza boletos/contas a vencer como tarefas no Kanban — hoje ou 1 dia antes */
+/** Sincroniza boletos/contas a vencer como tarefas no Kanban - hoje ou 1 dia antes */
 export function useFinanceBillKanbanSync(enabled = true)
 {
   const userSessionReady = useTaskStore((s) => s.userSessionReady)

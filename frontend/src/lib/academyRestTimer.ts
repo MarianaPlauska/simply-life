@@ -1,4 +1,4 @@
-// Descanso no Modo Academia — wake lock, título da aba e notificação
+// Descanso no Modo Academia - wake lock, título da aba e notificação
 
 import { showHealthNotification } from './healthNotifications'
 

@@ -1,4 +1,4 @@
-// WeekView — planejamento semanal com colunas de dias da semana
+// WeekView - planejamento semanal com colunas de dias da semana
 // exibe tarefas organizadas por dia baseado na data_vencimento
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Plus, GripVertical } from 'lucide-react'
@@ -133,7 +133,7 @@ export function WeekView ({ tarefas, onSelectTarefa, onCreateTarefa }: WeekViewP
   {
     const first = weekDays[0]
     const last = weekDays[6]
-    return `${first.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} — ${last.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
+    return `${first.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })} - ${last.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
   }, [weekDays])
 
   return (
@@ -226,7 +226,7 @@ export function WeekView ({ tarefas, onSelectTarefa, onCreateTarefa }: WeekViewP
                 ))}
                 {dayTasks.length === 0 && (
                   <div className="flex items-center justify-center h-16">
-                    <span className="text-[10px] text-zinc-700">—</span>
+                    <span className="text-[10px] text-zinc-700">-</span>
                   </div>
                 )}
               </div>

@@ -10,15 +10,11 @@ interface DashboardCollapsibleProps
   className?: string
   bodyClassName?: string
   icon?: ReactNode
-  /** À direita do título (links — use stopPropagation no clique) */
   trailing?: ReactNode
-  /** Conteúdo extra no summary, abaixo do título */
   summaryExtra?: ReactNode
   borderless?: boolean
   children: ReactNode
 }
-
-// Seção recolhível — chevron consistente em todo o dashboard
 
 export function DashboardCollapsible({
   title,

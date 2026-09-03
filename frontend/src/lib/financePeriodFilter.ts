@@ -123,7 +123,7 @@ export function resolveFinancePeriod(
     return {
       start,
       end,
-      label: `Semana ${idx + 1} · ${formatBr(start)} – ${formatBr(end)}`,
+      label: `Semana ${idx + 1} · ${formatBr(start)} - ${formatBr(end)}`,
       shortLabel: `Sem. ${idx + 1}`,
       weekCount,
     }
@@ -154,7 +154,7 @@ export function resolveFinancePeriod(
   return {
     start: a,
     end: b,
-    label: `${formatBr(a)} – ${formatBr(b)}`,
+    label: `${formatBr(a)} - ${formatBr(b)}`,
     shortLabel: 'Personalizado',
     weekCount,
   }

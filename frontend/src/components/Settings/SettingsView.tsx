@@ -81,7 +81,7 @@ function GoogleCalendarCard() {
     try {
       const result = await sincronizarGmail();
       if (!result) {
-        toast.error('Sync não disponível — faça login ou conecte o Google');
+        toast.error('Sync não disponível - faça login ou conecte o Google');
         return;
       }
       toast.success(`${result.tarefas_geradas} tarefa(s) de ${result.emails_lidos} e-mail(s)`);
@@ -100,7 +100,7 @@ function GoogleCalendarCard() {
           <h3 className={S.rowTitle}>Google OAuth (opcional)</h3>
           <p className={S.rowHint}>
             {connected
-              ? 'OAuth ativo — exige projeto no Google Cloud'
+              ? 'OAuth ativo - exige projeto no Google Cloud'
               : 'Opcional. Para e-mail grátis, use Gmail com senha de app acima.'}
           </p>
         </div>

@@ -22,7 +22,7 @@ export const DASHBOARD_WIDGET_CATALOG: {
   { id: 'finance_brief', label: 'Finanças', hint: 'Resumo + novo lançamento' },
 ]
 
-/** quick_spend legado — fundido em finance_brief */
+/** quick_spend legado - fundido em finance_brief */
 function normalizeWidgetIds(widgets: DashboardWidgetId[]): DashboardWidgetId[]
 {
   const out: DashboardWidgetId[] = []

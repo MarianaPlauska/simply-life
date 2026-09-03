@@ -55,11 +55,9 @@ const SCHEME_ICON: Record<ColorScheme, typeof Sun> = {
 
 interface AccessibilityPanelProps
 {
-  /** menu = dropdown compacto; page = aba de configurações */
   variant?: 'menu' | 'page'
 }
 
-/** Painel de acessibilidade — layout AXEL (tokens sl-*) */
 export function AccessibilityPanel({ variant = 'menu' }: AccessibilityPanelProps)
 {
   const accessibility = useTaskStore((s) => s.accessibility)

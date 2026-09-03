@@ -1,4 +1,4 @@
-// "Posso fazer isso hoje?" — veredito explicável (dinheiro, energia, prazo)
+// "Posso fazer isso hoje?" - veredito explicável (dinheiro, energia, prazo)
 
 import type { TarefaUnificada } from '../types'
 import type {
@@ -205,13 +205,13 @@ export function buildAxelTodayVerdict(input: AxelTodayVerdictInput): AxelTodayVe
     {
       tone = 'wait'
       headline = 'Melhor remarcar ou encurtar'
-      summary = 'Humor/energia baixos — compromissos longos drenam mais do que parecem.'
+      summary = 'Humor/energia baixos - compromissos longos drenam mais do que parecem.'
     }
     else if (kanbanFactor.pct < 45)
     {
       tone = 'caution'
       headline = 'Vai, mas proteja o resto do dia'
-      summary = 'Agenda já pesada — combine horário que não roube o Kanban de Hoje.'
+      summary = 'Agenda já pesada - combine horário que não roube o Kanban de Hoje.'
     }
     else
     {
@@ -220,7 +220,7 @@ export function buildAxelTodayVerdict(input: AxelTodayVerdictInput): AxelTodayVe
       summary = 'Energia e folga ok para um compromisso pontual.'
     }
     prazoDetail = activeHoje.length >= 5
-      ? 'Dia cheio — prefira fim de tarde ou outro dia'
+      ? 'Dia cheio - prefira fim de tarde ou outro dia'
       : 'Há espaço na agenda de Hoje'
   }
 
@@ -234,20 +234,20 @@ export function buildAxelTodayVerdict(input: AxelTodayVerdictInput): AxelTodayVe
     {
       tone = 'wait'
       headline = 'Não aceite agora'
-      summary = `Kanban em ${load.percent}% — projeto extra quebra a ofensiva.`
+      summary = `Kanban em ${load.percent}% - projeto extra quebra a ofensiva.`
     }
     else if (lazer.pct >= 90 || financeFactor.pct < 45)
     {
       tone = 'caution'
       headline = 'Só se pagar bem e for curto'
-      summary = `${lazer.nome} em ${lazer.pct}% do orçamento — negocie prazo e valor.`
+      summary = `${lazer.nome} em ${lazer.pct}% do orçamento - negocie prazo e valor.`
       dinheiroDetail = `Orçamento ${lazer.nome}: ${lazer.pct}% usado`
     }
     else
     {
       tone = moodFactor.pct >= 55 ? 'ok' : 'caution'
       headline = tone === 'ok' ? 'Pode aceitar com limite' : 'Aceite só se for leve'
-      summary = 'Capacidade e caixa aguentam — defina teto de horas na semana.'
+      summary = 'Capacidade e caixa aguentam - defina teto de horas na semana.'
     }
     prazoDetail = `Cap Kanban: ${input.dailyScoreCap} pts · ${load.percent}% usado`
   }
@@ -267,7 +267,7 @@ export function buildAxelTodayVerdict(input: AxelTodayVerdictInput): AxelTodayVe
     {
       tone = 'caution'
       headline = 'Social leve, sem pressão'
-      summary = 'Energia baixa — encontro curto e barato, se fizer sentido.'
+      summary = 'Energia baixa - encontro curto e barato, se fizer sentido.'
     }
     else
     {
@@ -301,7 +301,7 @@ export function buildAxelTodayVerdict(input: AxelTodayVerdictInput): AxelTodayVe
       tone === 'wait'
         ? 'Adie para outro dia ou reduza o escopo.'
         : tone === 'caution'
-          ? 'Faça versão mínima — confirme depois no Kanban.'
+          ? 'Faça versão mínima - confirme depois no Kanban.'
           : 'Vá em frente e registre o que fizer.',
     rulesApplied,
   }

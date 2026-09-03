@@ -1,7 +1,7 @@
-// Boot de tema antes do React — evita flash ao recarregar
+// Boot de tema antes do React: evita flash ao recarregar
 (function ()
 {
-  var THEME_DARK = '#0A0A0C'
+  var THEME_DARK = '#121214'
   var THEME_LIGHT = '#F5F1EC'
   var STORE = 'simply-life-store'
   var DEDICATED = 'simply-life-color-scheme'

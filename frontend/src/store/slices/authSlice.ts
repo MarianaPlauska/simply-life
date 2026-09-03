@@ -1,4 +1,4 @@
-// slice de auth — login, logout, perfil via supabase auth
+// slice de auth - login, logout, perfil via supabase auth
 import type { StateCreator } from 'zustand'
 import type { UserProfile } from '../storeTypes'
 import { supabase } from '../../lib/supabase'
@@ -10,7 +10,7 @@ export interface AuthSlice
   isLoggedIn: boolean
   userProfile: UserProfile
   userId: string
-  /** Falso até troca de conta + fetch remoto — evita sync com cache de outro usuário */
+  /** Falso até troca de conta + fetch remoto - evita sync com cache de outro usuário */
   userSessionReady: boolean
   login: (email: string, nome: string, id?: string) => void
   logout: () => void

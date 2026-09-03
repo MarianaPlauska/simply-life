@@ -8,7 +8,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Escudo grátis 1×/mês — estilo Duolingo Streak Freeze
+// Escudo grátis 1×/mês - estilo Duolingo Streak Freeze
 
 export function MonthlyStreakShieldCard()
 {
@@ -60,7 +60,7 @@ export function MonthlyStreakShieldCard()
 
       <p className={`text-[13px] mb-4 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
         Um escudo absorve 1 dia perdido sem zerar sua sequência. Você ganha{' '}
-        <strong className="text-ink">1 grátis por mês</strong> — extras custam 500 XP.
+        <strong className="text-ink">1 grátis por mês</strong> - extras custam 500 XP.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-2">

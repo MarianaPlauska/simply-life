@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 import { Info } from 'lucide-react'
 import type { RelevanceUrgencyLog } from '../../lib/relevanceEngine'
 
-// Transparência do Motor de Relevância — reason + breakdown
+// Transparência do Motor de Relevância - reason + breakdown
 
 interface AxelRelevanceScoreInfoProps
 {

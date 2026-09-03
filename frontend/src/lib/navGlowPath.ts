@@ -1,4 +1,4 @@
-/** Linha na base da barra — arco baixo, não sobe até o rótulo. viewBox 0 0 100 12 */
+/** Linha na base da barra - arco baixo, não sobe até o rótulo. viewBox 0 0 100 12 */
 
 export function navGlowPath(centerPct: number): string
 {

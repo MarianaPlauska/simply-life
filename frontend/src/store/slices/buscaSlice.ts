@@ -1,4 +1,4 @@
-// slice de busca — busca global via supabase full-text
+// slice de busca - busca global via supabase full-text
 import type { StateCreator } from 'zustand'
 import type { BuscaResult } from '../../types'
 import { supabase } from '../../lib/supabase'

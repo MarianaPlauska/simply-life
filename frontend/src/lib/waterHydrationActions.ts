@@ -27,7 +27,7 @@ export function hapticWaterGoalIfReached(
   }
 }
 
-/** Estado fresco do hábito água — evita patch com config desatualizada. */
+/** Estado fresco do hábito água - evita patch com config desatualizada. */
 export function freshAguaHabit(fallback?: HabitoDiario): HabitoDiario | undefined
 {
   const id = fallback?.id
@@ -85,7 +85,7 @@ export async function saveAguaMlPreset(
   await useTaskStore.getState().updateHabitoConfig(ensured.id, patch)
 }
 
-/** Um copo na hora — captura rápida sem abrir Saúde */
+/** Um copo na hora - captura rápida sem abrir Saúde */
 export async function addOneWaterCup(): Promise<number | null>
 {
   const ensured = await ensureAguaHabit()

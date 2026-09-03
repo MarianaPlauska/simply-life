@@ -12,7 +12,7 @@ import {
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
-// Timeline Gantt — barras monocromáticas com acento por urgência
+// Timeline Gantt - barras monocromáticas com acento por urgência
 
 interface AxelKanbanTimelineViewProps
 {

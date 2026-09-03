@@ -7,7 +7,7 @@ interface AcademyRestOverlayProps
   onSkip: () => void
 }
 
-// Tela de descanso em foco — visível mesmo com celular bloqueado parcialmente (wake lock)
+// Tela de descanso em foco - visível mesmo com celular bloqueado parcialmente (wake lock)
 
 export function AcademyRestOverlay({
   secondsLeft,

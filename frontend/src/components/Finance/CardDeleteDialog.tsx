@@ -40,7 +40,7 @@ export function CardDeleteDialog({ card, onConfirm, onCancel }: CardDeleteDialog
               Excluir &quot;{card.nome}&quot;?
             </h4>
             <p id="card-delete-desc" className={`text-[12px] mt-1.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-              O cartão some da lista. Lançamentos antigos podem ficar sem cartão vinculado — o histórico financeiro não é apagado.
+              O cartão some da lista. Lançamentos antigos podem ficar sem cartão vinculado - o histórico financeiro não é apagado.
             </p>
           </div>
         </div>

@@ -12,7 +12,7 @@ import { supabase } from './supabase'
 function billLabelFromTitle(titulo: string): string | null
 {
   const t = titulo.trim()
-  const boleto = t.match(/\[Boleto\]\s*(.+?)\s*[—–-]/i)
+  const boleto = t.match(/\[Boleto\]\s*(.+?)\s*[---]/i)
   if (boleto) return boleto[1].replace(/\s*\[fixa:\d+\]/gi, '').trim()
 
   const emoji = t.match(/^📄\s*(.+?)\s+vence/i)

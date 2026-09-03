@@ -22,7 +22,7 @@ export function diffDaysUntilDue(
   return Math.round((dueDay - today) / 86_400_000)
 }
 
-/** Rótulo curto para UI — chip de prazo. */
+/** Rótulo curto para UI - chip de prazo. */
 export function formatDaysRemaining(
   dataVencimento: string | null | undefined,
   now: Date = new Date(),

@@ -26,7 +26,7 @@ interface FinanceBudgetProgressStripProps
   onConfigure?: () => void
 }
 
-// Barras de orçamento por categoria — restante em destaque
+// Barras de orçamento por categoria - restante em destaque
 
 export function FinanceBudgetProgressStrip({
   categories,

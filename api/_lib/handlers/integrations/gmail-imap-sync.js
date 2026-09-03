@@ -1,4 +1,4 @@
-// POST /api/integrations/gmail/imap-sync — sync gratuito via IMAP (senha de app)
+// POST /api/integrations/gmail/imap-sync - sync gratuito via IMAP (senha de app)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { fetchUnreadViaImap } from '../../gmailImap.js'

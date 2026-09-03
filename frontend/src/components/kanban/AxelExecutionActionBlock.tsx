@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Pause, Play } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 
-// Motor de Execução — timer ativo + status em_progresso
+// Motor de Execução - timer ativo + status em_progresso
 
 interface AxelExecutionActionBlockProps
 {

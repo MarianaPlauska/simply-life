@@ -1,5 +1,5 @@
 /**
- * Recarrega dados remotos após troca de conta — evita misturar cache entre usuários.
+ * Recarrega dados remotos após troca de conta - evita misturar cache entre usuários.
  */
 import { useTaskStore } from '../store/useTaskStore'
 

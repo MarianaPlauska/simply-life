@@ -1,6 +1,6 @@
 import type { TarefaUnificada } from '../types'
 
-/** Colunas do board temporal legado — partição exclusiva (sem card em duas faixas) */
+/** Colunas do board temporal legado - partição exclusiva (sem card em duas faixas) */
 
 export function isFazer1h(t: TarefaUnificada): boolean
 {

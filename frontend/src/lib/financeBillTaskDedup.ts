@@ -16,7 +16,7 @@ export function parseBillAmountFromTitle(titulo: string): number
 export function parseBillNameFromTitle(titulo: string): string | null
 {
   const t = titulo.trim()
-  const boleto = t.match(/\[Boleto\]\s*(.+?)\s*[—–-]\s*R\$/i)
+  const boleto = t.match(/\[Boleto\]\s*(.+?)\s*[---]\s*R\$/i)
   if (boleto?.[1])
   {
     return boleto[1].replace(/\s*\[fixa:\d+\]/gi, '').trim()
@@ -30,14 +30,14 @@ export function parseBillNameFromTitle(titulo: string): string | null
 
   if (t.toLowerCase().includes('boleto'))
   {
-    const bare = t.replace(/^\[Boleto\]\s*/i, '').split(/\s*[—–-]\s*/)[0]
+    const bare = t.replace(/^\[Boleto\]\s*/i, '').split(/\s*[---]\s*/)[0]
     return bare.replace(/\s*\[fixa:\d+\]/gi, '').trim() || null
   }
 
   return null
 }
 
-/** Chave canônica nome+valor — une formatos [Boleto], 📄 e phantom */
+/** Chave canônica nome+valor - une formatos [Boleto], 📄 e phantom */
 export function billCanonicalKey(input: { titulo: string }): string | null
 {
   const nome = parseBillNameFromTitle(input.titulo)
@@ -46,7 +46,7 @@ export function billCanonicalKey(input: { titulo: string }): string | null
   return `bill|${nome.toLowerCase()}|${valor.toFixed(2)}`
 }
 
-/** Nome do credor normalizado — une "Eric", "Eric [fixa:2]" e "[Boleto] Eric — R$ 10" */
+/** Nome do credor normalizado - une "Eric", "Eric [fixa:2]" e "[Boleto] Eric - R$ 10" */
 export function normalizeBillCreditorName(titulo: string): string
 {
   const parsed = parseBillNameFromTitle(titulo)
@@ -57,7 +57,7 @@ export function normalizeBillCreditorName(titulo: string): string
 
   let s = titulo.trim()
   s = s.replace(/^\[Boleto\]\s*/i, '')
-  s = s.split(/\s*[—–-]\s*R\$/i)[0] ?? s
+  s = s.split(/\s*[---]\s*R\$/i)[0] ?? s
   s = s.replace(/\s*\[fixa:\d+\]/gi, '')
   return s.trim().toLowerCase()
 }
@@ -85,7 +85,7 @@ export function isFinanceBillTask(t: TarefaUnificada): boolean
   return false
 }
 
-/** Chave estável para agrupar duplicatas — qualquer status */
+/** Chave estável para agrupar duplicatas - qualquer status */
 export function billTaskReferenceKey(t: TarefaUnificada): string | null
 {
   if (t.snippet_100_char?.startsWith('phantom_fin_'))
@@ -94,7 +94,7 @@ export function billTaskReferenceKey(t: TarefaUnificada): string | null
   }
 
   const titulo = t.titulo.trim()
-  const boletoMatch = titulo.match(/\[Boleto\]\s*(.+?)\s*[—–-]\s*(R\$\s*[\d.,]+)/i)
+  const boletoMatch = titulo.match(/\[Boleto\]\s*(.+?)\s*[---]\s*(R\$\s*[\d.,]+)/i)
   if (boletoMatch)
   {
     const nome = boletoMatch[1].replace(/\s*\[fixa:\d+\]/gi, '').trim().toLowerCase()

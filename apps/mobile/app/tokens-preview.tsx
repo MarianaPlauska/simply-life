@@ -14,7 +14,7 @@ const SWATCHES: { key: keyof typeof COLOR_DARK; label: string }[] = [
   { key: 'tasks', label: 'tasks' },
 ]
 
-/** Prova visual Fase A — tokens + MoodFace sem emoji */
+/** Prova visual Fase A - tokens + MoodFace sem emoji */
 export default function TokensPreviewScreen()
 {
   const { colors, space, mode, setMode } = useTheme()

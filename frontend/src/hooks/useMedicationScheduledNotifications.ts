@@ -4,7 +4,7 @@ import { scheduleMedicationNotifications } from '../lib/medicationNotificationSc
 import { showHealthNotification } from '../lib/healthNotifications'
 import { useTaskStore } from '../store/useTaskStore'
 
-/** Lembretes no horário da dose — SW + toast quando permissão negada */
+/** Lembretes no horário da dose - SW + toast quando permissão negada */
 export function useMedicationScheduledNotifications(enabled = true): void
 {
   const isLoggedIn = useTaskStore((s) => s.isLoggedIn)

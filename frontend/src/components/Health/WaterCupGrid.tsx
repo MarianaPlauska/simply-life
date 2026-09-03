@@ -114,7 +114,7 @@ export function WaterCupGrid({
   const baseId = useId()
   const metaGoal = baseGoal ?? goal
   const current = entries.length
-  // Sempre mostra a grade da meta (2 L) — extra só quando a meta já foi batida
+  // Sempre mostra a grade da meta (2 L) - extra só quando a meta já foi batida
   const cupCount = Math.min(Math.max(metaGoal, current >= metaGoal ? current + 1 : metaGoal), 16)
   const cols = columnCount(cupCount)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -189,7 +189,7 @@ export function WaterCupGrid({
         className={`grid w-full max-w-md min-w-0 justify-items-center ${gridGap}`}
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
         role="group"
-        aria-label={`${current} de ${metaGoal} copos — ${totalMl} de ${metaMl} ml`}
+        aria-label={`${current} de ${metaGoal} copos - ${totalMl} de ${metaMl} ml`}
       >
         {Array.from({ length: cupCount }, (_, i) =>
         {
@@ -217,8 +217,8 @@ export function WaterCupGrid({
               ].join(' ')}
               aria-label={
                 filled
-                  ? `${garrafa ? 'Garrafa' : 'Copo'} ${i + 1} — ${ml} ml — toque para editar`
-                  : `Vazio — toque para adicionar ${defaultMl} ml`
+                  ? `${garrafa ? 'Garrafa' : 'Copo'} ${i + 1} - ${ml} ml - toque para editar`
+                  : `Vazio - toque para adicionar ${defaultMl} ml`
               }
               aria-pressed={filled}
             >

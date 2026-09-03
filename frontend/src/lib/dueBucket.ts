@@ -1,6 +1,6 @@
 import type { TarefaUnificada } from '../types'
 
-// Classificação por prazo — ortogonal à fila Executar agora (ExecQueue)
+// Classificação por prazo - ortogonal à fila Executar agora (ExecQueue)
 
 export type DueBucket =
   | 'vencido'
@@ -23,7 +23,7 @@ export const ACTIVE_DUE_BUCKETS: DueBucket[] = DUE_BUCKET_ORDER.filter(
   (b) => b !== 'concluido',
 )
 
-/** Só "hoje" fica visível vazia — demais faixas aparecem quando têm itens */
+/** Só "hoje" fica visível vazia - demais faixas aparecem quando têm itens */
 export const DUE_BUCKET_ALWAYS_VISIBLE: DueBucket[] = [
   'hoje',
 ]
@@ -37,14 +37,14 @@ export const DUE_BUCKET_LABELS: Record<DueBucket, string> = {
   concluido: 'Já concluídas',
 }
 
-/** Explicação curta — o que entra em cada faixa (só prazo, não fila de execução). */
+/** Explicação curta - o que entra em cada faixa (só prazo, não fila de execução). */
 export const DUE_BUCKET_HINTS: Record<DueBucket, string> = {
-  vencido: 'A data passou e o item segue aberto. O AXEL já reclassificou a carga — sem alarme.',
+  vencido: 'A data passou e o item segue aberto. O AXEL já reclassificou a carga - sem alarme.',
   hoje: 'A data de vencimento é hoje.',
   esta_semana: 'Vence entre amanhã e os próximos 7 dias.',
   proxima_semana: 'Vence daqui a mais de uma semana.',
-  sem_prazo: 'Ainda sem hora — não é atraso. Agende quando fizer sentido.',
-  concluido: 'Tarefas finalizadas — não entram na fila de execução.',
+  sem_prazo: 'Ainda sem hora - não é atraso. Agende quando fizer sentido.',
+  concluido: 'Tarefas finalizadas - não entram na fila de execução.',
 }
 
 export const DUE_BUCKET_META: Record<
@@ -91,7 +91,7 @@ function parseDueDate(dataVencimento: string | null | undefined): Date | null
   return due
 }
 
-/** Data civil YYYY-MM-DD ou ISO — meio-dia local evita virar dia anterior no fuso BR */
+/** Data civil YYYY-MM-DD ou ISO - meio-dia local evita virar dia anterior no fuso BR */
 export function parseCalendarDate(dataVencimento: string | null | undefined): Date | null
 {
   return parseDueDate(dataVencimento)

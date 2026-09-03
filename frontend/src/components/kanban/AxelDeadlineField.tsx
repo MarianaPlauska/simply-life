@@ -1,6 +1,6 @@
 import { CalendarClock } from 'lucide-react'
 
-// Prazo fatal — DatePicker compacto
+// Prazo fatal - DatePicker compacto
 
 interface AxelDeadlineFieldProps
 {

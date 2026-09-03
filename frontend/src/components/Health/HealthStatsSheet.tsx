@@ -31,7 +31,7 @@ function formatDay(key: string): string
   })
 }
 
-/** Estatísticas de saúde — donut do ritual + recordes de streak */
+/** Estatísticas de saúde - donut do ritual + recordes de streak */
 export function HealthStatsSheet({ open, onClose }: HealthStatsSheetProps)
 {
   const snapshot = useHealthRitualSnapshot()

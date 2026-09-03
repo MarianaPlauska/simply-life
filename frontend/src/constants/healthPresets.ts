@@ -18,7 +18,7 @@ export const PROTEINA_PRESET = {
 
 export const DEFAULT_TREINO_MINUTOS = 45;
 
-/** Hábito mínimo de treino — sem plano pré-preenchido */
+/** Hábito mínimo de treino - sem plano pré-preenchido */
 export const TREINO_PRESET = {
   tipo: 'treino',
   nome_exibicao: 'Treino',

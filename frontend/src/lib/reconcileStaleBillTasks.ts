@@ -87,7 +87,7 @@ export function findStaleBillTasks(
   return stale
 }
 
-/** Fecha no banco tarefas órfãs de boleto — sem XP nem novo registro de pagamento */
+/** Fecha no banco tarefas órfãs de boleto - sem XP nem novo registro de pagamento */
 export async function reconcileStaleBillTasks(
   tarefas: TarefaUnificada[],
   patchLocal: (id: number, dados: Partial<TarefaUnificada>) => void,

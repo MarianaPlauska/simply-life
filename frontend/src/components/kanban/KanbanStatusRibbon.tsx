@@ -1,7 +1,7 @@
 import type { DueBucket } from '../../lib/dueBucket'
 import { AXEL_STATUS_BADGE, AXEL_STATUS_BADGE_URGENT, AXEL_STATUS_BADGE_WARN } from '../../constants/axelSurfaces'
 
-// Faixa de status — leitura rápida antes do board
+// Faixa de status - leitura rápida antes do board
 
 interface KanbanStatusRibbonProps
 {

@@ -5,7 +5,7 @@ import type { TarefaUnificada } from '../types'
 export interface MorningBrief
 {
   headline: string
-  /** Carga e ritmo — segunda linha, nunca a primeira */
+  /** Carga e ritmo - segunda linha, nunca a primeira */
   loadLine: string
   detail: string
   criticalCount: number
@@ -41,7 +41,7 @@ export function buildMorningBrief(
   let headline: string
   if (hojeCount === 0)
   {
-    headline = 'Como você está hoje? A fila de Hoje está quieta — dá para respirar.'
+    headline = 'Como você está hoje? A fila de Hoje está quieta - dá para respirar.'
   }
   else if (mood?.profile === 'recuperacao')
   {

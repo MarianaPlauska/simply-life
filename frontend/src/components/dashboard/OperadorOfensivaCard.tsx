@@ -15,8 +15,6 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Momentum AXEL — prova de trabalho, não RPG no dashboard
-
 interface AtributoChip
 {
   key: 'foco' | 'vitalidade' | 'estabilidade'
@@ -99,7 +97,7 @@ export function OperadorOfensivaCard()
           )}
           {streakPaused && (
             <p className={`font-mono text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-              Pausada — não zerou
+              Pausada - não zerou
             </p>
           )}
         </div>

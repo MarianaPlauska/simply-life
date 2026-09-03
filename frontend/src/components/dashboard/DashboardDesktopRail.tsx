@@ -12,7 +12,6 @@ import { DashboardFinanceGlance } from './DashboardFinanceGlance'
 import { DashboardMoodWeek } from './DashboardMoodWeek'
 import { DashboardTaskDueSection } from './DashboardTaskDueBars'
 
-/** Rail do Dashboard em xl — finanças, cuidado, prazos e humor da semana */
 export function DashboardDesktopRail()
 {
   const ritual = useHealthRitualSnapshot()

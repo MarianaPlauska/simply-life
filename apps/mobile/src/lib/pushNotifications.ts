@@ -1,4 +1,4 @@
-/** Stub web — Expo Push só existe no iOS/Android. */
+/** Stub web - Expo Push só existe no iOS/Android. */
 export async function requestNativePushPermission(): Promise<boolean>
 {
   return false

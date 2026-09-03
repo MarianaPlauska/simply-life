@@ -60,7 +60,7 @@ O usuário quer saber se pode fazer uma compra AGORA. Responda em JSON:
 {
   "tone": "ok|caution|wait",
   "headline": "até 5 palavras",
-  "detail": "2 frases em PT-BR, tom de amigo inteligente — cite valores R$ do contexto",
+  "detail": "2 frases em PT-BR, tom de amigo inteligente - cite valores R$ do contexto",
   "diasSugeridos": número ou null
 }
 
@@ -69,7 +69,7 @@ Regras:
 - Se categoriaPctApos >= 100 → wait, nomeie a categoria
 - Se compra > limiteDiarioRestante * 1.3 → caution
 - Se ok, seja encorajador mas mencione folga restante
-- Nunca seja genérico — use descricao, valor, categoria, cartão do contexto
+- Nunca seja genérico - use descricao, valor, categoria, cartão do contexto
 - Tom humano, não robô`
 
   const userPrompt = `Compra proposta:

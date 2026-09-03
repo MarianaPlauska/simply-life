@@ -1,4 +1,4 @@
-// Push — medicamentos na janela + lembrete de bem-estar (humor do dia)
+// Push - medicamentos na janela + lembrete de bem-estar (humor do dia)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { enrichPushPayload } from '../../pushActionPayload.js';

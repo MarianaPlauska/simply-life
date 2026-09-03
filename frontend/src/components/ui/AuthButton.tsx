@@ -1,5 +1,5 @@
 /**
- * ui/AuthButton.tsx — Botão primário de submit com estado loading (sem lógica de negócio)
+ * ui/AuthButton.tsx - Botão primário de submit com estado loading (sem lógica de negócio)
  */
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces';

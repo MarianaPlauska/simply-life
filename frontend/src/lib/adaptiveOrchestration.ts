@@ -2,7 +2,7 @@ import { getProjectTag } from './contextRationale'
 import { calculateUrgency, type RelevanceUrgencyResult } from './relevanceEngine'
 import type { TarefaUnificada } from '../types'
 
-// Motor de Orquestração Adaptativa — carga cognitiva + fluxo + velocidade
+// Motor de Orquestração Adaptativa - carga cognitiva + fluxo + velocidade
 
 export const DEFAULT_DAILY_SCORE_CAP = 400
 
@@ -70,7 +70,7 @@ export function sumHojeScore(hojeTasks: TarefaUnificada[]): number
     .reduce((acc, t) => acc + (t.score_urgencia ?? 0), 0)
 }
 
-/** Multiplicador de contexto — mesma stack/projeto da tarefa em progresso */
+/** Multiplicador de contexto - mesma stack/projeto da tarefa em progresso */
 export function computeContextBoost(
   task: TarefaUnificada,
   allTasks: TarefaUnificada[],

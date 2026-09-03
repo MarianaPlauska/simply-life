@@ -1,4 +1,4 @@
-// Agenda de medicamentos — espelho isomórfico do frontend (cron push)
+// Agenda de medicamentos - espelho isomórfico do frontend (cron push)
 
 const JANELA_ANTES_MIN = 30;
 const JANELA_DEPOIS_MIN = 120;
@@ -115,7 +115,7 @@ export function mensagemGentilDose(dose)
 {
   if (dose.status === 'janela')
   {
-    return `Já tomou ${dose.nome} (${dose.horario})? Um toque registra — sem julgamento.`;
+    return `Já tomou ${dose.nome} (${dose.horario})? Um toque registra - sem julgamento.`;
   }
   return `Passou do horário de ${dose.nome} (${dose.horario}). Quando puder, registre aqui.`;
 }

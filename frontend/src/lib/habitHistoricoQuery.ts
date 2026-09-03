@@ -14,7 +14,7 @@ export interface HabitHistoricoRow
   concluido: number
 }
 
-/** Histórico diário de um hábito — últimas N semanas */
+/** Histórico diário de um hábito - últimas N semanas */
 export async function fetchHabitHistoricoRows(
   habitoId: number,
   weeks = 12,

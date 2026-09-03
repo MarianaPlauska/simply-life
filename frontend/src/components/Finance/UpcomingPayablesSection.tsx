@@ -81,7 +81,7 @@ function payableResolvedBySettlements(
   return settlements.some((s) => s.bill_id === `tx:${key}`)
 }
 
-/** PIX, boletos avulsos e lançamentos futuros — lembrete visual como nas fixas */
+/** PIX, boletos avulsos e lançamentos futuros - lembrete visual como nas fixas */
 export function UpcomingPayablesSection()
 {
   const contasFixas = useTaskStore((s) => s.contasFixas)
@@ -145,7 +145,7 @@ export function UpcomingPayablesSection()
           Próximos pagamentos
         </p>
         <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-          PIX, boletos e contas avulsas — lembrete no Kanban 1 dia antes.
+          PIX, boletos e contas avulsas - lembrete no Kanban 1 dia antes.
         </p>
       </header>
       <ul className="divide-y divide-line">

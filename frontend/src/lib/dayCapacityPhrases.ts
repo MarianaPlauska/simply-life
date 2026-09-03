@@ -51,7 +51,7 @@ const PLENO_PHRASES: PhraseTemplate[] = [
 ]
 
 const PLENO_IMPULSE_PHRASES: PhraseTemplate[] = [
-  (c) => `Margem boa — só evita compra por impulso. ${c.bottleneckLabel} pede calma.`,
+  (c) => `Margem boa - só evita compra por impulso. ${c.bottleneckLabel} pede calma.`,
   (c) => `Caixa e humor ok. Segura gasto reativo e segue ${priorities(c.importantTasks)}.`,
   (c) => `Até ${priorities(c.importantTasks)} · confortável, sem compras no piloto.`,
 ]

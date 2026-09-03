@@ -1,7 +1,7 @@
 import type { TarefaUnificada } from '../types'
 import type { TemporalHorizon } from './temporalHorizon'
 
-// Degradação térmica — contexto esfria em HOJE / ESTA SEMANA
+// Degradação térmica - contexto esfria em HOJE / ESTA SEMANA
 
 const DECAY_COLUMNS: TemporalHorizon[] = ['hoje', 'semana']
 const THERMAL_DECAY_DAYS = 3
@@ -52,4 +52,4 @@ export function isThermalDecay(
 }
 
 export const TASK_DECAY_TOOLTIP =
-  'Contexto esfriando — rebaixe ao Backlog ou retome com foco'
+  'Contexto esfriando - rebaixe ao Backlog ou retome com foco'

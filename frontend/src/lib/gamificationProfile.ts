@@ -1,7 +1,7 @@
 import type { UserStats } from '../store/slices/gamificacaoSlice'
 import { XP_PER_LEVEL, levelFromTotalXp, xpProgressInLevel } from './xpEconomy'
 
-// Perfil RPG derivado do store — level, XP no nível e meta
+// Perfil RPG derivado do store - level, XP no nível e meta
 
 export { XP_PER_LEVEL }
 

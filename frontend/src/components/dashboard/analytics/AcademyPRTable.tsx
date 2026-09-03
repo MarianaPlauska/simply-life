@@ -18,7 +18,7 @@ export function AcademyPRTable({ prs }: AcademyPRTableProps)
   {
     return (
       <p className={`text-[12px] py-2 ${AXEL_TEXT_SECONDARY}`}>
-        Nenhum recorde novo neste período — continue registrando séries.
+        Nenhum recorde novo neste período - continue registrando séries.
       </p>
     )
   }

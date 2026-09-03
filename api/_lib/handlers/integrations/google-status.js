@@ -1,4 +1,4 @@
-// GET /api/integrations/google/status — verifica conexão Google
+// GET /api/integrations/google/status - verifica conexão Google
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { corsJson, getUserFromBearer } from '../../supabaseUser.js';

@@ -9,6 +9,7 @@ export function CheckRow({
   done,
   onPress,
   onToggle,
+  onLongPress,
   showSeparator,
   dense,
 }: {
@@ -17,6 +18,7 @@ export function CheckRow({
   done?: boolean
   onPress?: () => void
   onToggle?: () => void
+  onLongPress?: () => void
   showSeparator?: boolean
   dense?: boolean
 })
@@ -27,7 +29,9 @@ export function CheckRow({
     <View>
       <Pressable
         onPress={onPress}
-        disabled={!onPress && !onToggle}
+        onLongPress={onLongPress}
+        delayLongPress={380}
+        disabled={!onPress && !onToggle && !onLongPress}
         style={({ pressed }) => ({
           minHeight: dense ? 48 : 52,
           flexDirection: 'row',

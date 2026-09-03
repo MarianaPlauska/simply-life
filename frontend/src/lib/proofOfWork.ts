@@ -1,4 +1,4 @@
-// Prova de trabalho — regras para manter a ofensiva diária
+// Prova de trabalho - regras para manter a ofensiva diária
 
 export const STREAK_MIN_SCORE = 70
 export const STREAK_MIN_FOCUS_MINUTES = 15

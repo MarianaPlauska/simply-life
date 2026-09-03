@@ -1,4 +1,4 @@
-// Heatmap de produtividade — níveis de cor por horas de foco
+// Heatmap de produtividade - níveis de cor por horas de foco
 
 export type HeatmapLevel = 'none' | 'light' | 'ideal' | 'deep'
 

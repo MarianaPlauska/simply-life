@@ -1,4 +1,4 @@
-// Modo Academia — exercícios, séries, descanso e histórico de carga
+// Modo Academia - exercícios, séries, descanso e histórico de carga
 
 import type { LibraryExercise } from './academyExerciseLibrary'
 import { localTodayIso } from './healthDayBoundary'
@@ -26,7 +26,7 @@ export interface AcademyTreinoConfig
 {
   descanso_segundos?: number
   exercicios_por_dia?: Record<string, AcademyExercise[]>
-  /** Exercícios por data ISO — prioridade sobre o dia da semana */
+  /** Exercícios por data ISO - prioridade sobre o dia da semana */
   exercicios_por_data?: Record<string, AcademyExercise[]>
   historico_cargas?: Record<string, AcademyLoadEntry[]>
   exercicios_customizados?: LibraryExercise[]

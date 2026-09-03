@@ -77,7 +77,7 @@ export function ForgotPasswordSheet({ visible, initialEmail, onClose }: Props)
             </Text>
             {!supabaseConfigured ? (
               <Text variant="caption" muted>
-                Modo offline — recuperação indisponível. Use convidado ou qualquer email para entrar.
+                Modo offline: recuperação indisponível. Use convidado ou qualquer email para entrar.
               </Text>
             ) : null}
             {!sent ? (

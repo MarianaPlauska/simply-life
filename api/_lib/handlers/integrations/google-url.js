@@ -1,4 +1,4 @@
-// GET /api/integrations/google/url — URL de autorização OAuth Google
+// GET /api/integrations/google/url - URL de autorização OAuth Google
 
 import { buildGoogleAuthUrl } from '../../googleOAuth.js';
 import { corsJson, getUserFromBearer } from '../../supabaseUser.js';

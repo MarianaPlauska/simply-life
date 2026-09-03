@@ -43,7 +43,7 @@ export default function RelatoriosScreen()
     { label: 'Tarefas feitas', value: String(done), color: colors.tasks },
     { label: 'Em aberto', value: String(open) },
     { label: 'Atrasadas', value: String(overdue), color: overdue > 0 ? colors.danger : undefined },
-    { label: 'Humor médio', value: moodAvg != null ? String(moodAvg) : '—' },
+    { label: 'Humor médio', value: moodAvg != null ? String(moodAvg) : '-' },
     { label: 'Água', value: `${habitPct(agua)}%`, color: colors.health },
     { label: 'Treino', value: treino && treino.progressoAtual > 0 ? 'Feito' : 'Pendente' },
     { label: 'Gastos', value: formatBRL(despesas), color: colors.finance },
@@ -60,7 +60,7 @@ export default function RelatoriosScreen()
             {burnout >= 2 ? 'Alto' : burnout === 1 ? 'Atenção' : 'Estável'}
           </Text>
           <Text variant="caption" muted>
-            Combina atraso, humor baixo e volume de tarefas abertas — o mesmo sinal do PWA.
+            Combina atraso, humor baixo e volume de tarefas abertas - o mesmo sinal do PWA.
           </Text>
         </Card>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>

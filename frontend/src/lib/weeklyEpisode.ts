@@ -2,7 +2,7 @@ import type { TarefaUnificada } from '../types'
 import type { UserQuest } from '../store/slices/gamificacaoSlice'
 import type { ContaFixa, FinanceBillSettlement, Transaction } from '../store/storeTypes'
 
-// Episódio semanal — narrativa editável (Finch / Waterllama share)
+// Episódio semanal - narrativa editável (Finch / Waterllama share)
 
 export type EpisodeMomentType = 'conquista' | 'susto' | 'cuidado'
 
@@ -44,7 +44,7 @@ function weekPeriodLabel(): string
   const start = new Date()
   start.setDate(end.getDate() - 6)
   const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
-  return `${fmt(start)} – ${fmt(end)}`
+  return `${fmt(start)} - ${fmt(end)}`
 }
 
 function media(nums: number[]): number
@@ -126,7 +126,7 @@ function buildMomentos(input: {
     momentos.push({
       tipo: 'susto',
       titulo: 'Susto',
-      texto: `Humor médio ${input.humorMedio.toFixed(1)}/5 — semana pesada por dentro.`,
+      texto: `Humor médio ${input.humorMedio.toFixed(1)}/5 - semana pesada por dentro.`,
     })
   }
   else if (input.ofensivasSalvas <= 2 && input.tarefasConcluidas >= 3)
@@ -134,7 +134,7 @@ function buildMomentos(input: {
     momentos.push({
       tipo: 'susto',
       titulo: 'Susto',
-      texto: 'Muita execução, pouca ofensiva — o fio da consistência ficou fino.',
+      texto: 'Muita execução, pouca ofensiva - o fio da consistência ficou fino.',
     })
   }
   else if (input.ofensivasSalvas === 0 && input.tarefasConcluidas === 0 && input.focoMinutos === 0)
@@ -142,7 +142,7 @@ function buildMomentos(input: {
     momentos.push({
       tipo: 'susto',
       titulo: 'Susto',
-      texto: 'Semana quietinha — um check-in ou tarefa já religa o episódio.',
+      texto: 'Semana quietinha - um check-in ou tarefa já religa o episódio.',
     })
   }
 
@@ -151,7 +151,7 @@ function buildMomentos(input: {
     momentos.push({
       tipo: 'cuidado',
       titulo: 'Cuidado',
-      texto: `${input.ofensivasSalvas} dias de ofensiva — você se priorizou de verdade.`,
+      texto: `${input.ofensivasSalvas} dias de ofensiva - você se priorizou de verdade.`,
     })
   }
   else if (input.humorMedio >= 3.5)
@@ -159,7 +159,7 @@ function buildMomentos(input: {
     momentos.push({
       tipo: 'cuidado',
       titulo: 'Cuidado',
-      texto: `Humor ${input.humorMedio.toFixed(1)}/5 — corpo e mente alinhados na média.`,
+      texto: `Humor ${input.humorMedio.toFixed(1)}/5 - corpo e mente alinhados na média.`,
     })
   }
   else if (input.focoMinutos >= 45)
@@ -167,7 +167,7 @@ function buildMomentos(input: {
     momentos.push({
       tipo: 'cuidado',
       titulo: 'Cuidado',
-      texto: `${input.focoMinutos} minutos de foco profundo — investimento em você.`,
+      texto: `${input.focoMinutos} minutos de foco profundo - investimento em você.`,
     })
   }
 
@@ -192,7 +192,7 @@ function buildCliffhanger(
   }
   else if (streakCount > 0)
   {
-    parts.push(`${streakCount} dias seguidos usando o app — continue assim`)
+    parts.push(`${streakCount} dias seguidos usando o app - continue assim`)
   }
 
   if (billHint)
@@ -270,7 +270,7 @@ export function buildWeeklyEpisode(input: {
   }
   else if (tarefasConcluidas >= 5)
   {
-    headline = 'Muita execução — parabéns'
+    headline = 'Muita execução - parabéns'
   }
 
   const partes: string[] = []
@@ -294,7 +294,7 @@ export function buildWeeklyEpisode(input: {
     : `Semana tranquila. Um registro de humor ou uma tarefa já abre o próximo episódio.`
 
   const shareText = [
-    `📺 Meu episódio AXEL — ${weekPeriodLabel()}`,
+    `📺 Meu episódio AXEL - ${weekPeriodLabel()}`,
     capituloTitulo,
     '',
     ...momentos.map((m) => `${m.tipo === 'conquista' ? '✨' : m.tipo === 'susto' ? '⚡' : '💛'} ${m.titulo}: ${m.texto}`),

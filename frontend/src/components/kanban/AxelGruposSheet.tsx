@@ -6,7 +6,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { useMobileSnapSheet } from '../../hooks/useMobileSnapSheet'
 import type { Label } from '../../types'
 
-// Pastas e flags cadastradas — visão geral
+// Pastas e flags cadastradas - visão geral
 
 interface AxelGruposSheetProps
 {

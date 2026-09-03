@@ -1,4 +1,4 @@
-// Desbloqueios por nível e ofensiva — cosmético, sem paywall
+// Desbloqueios por nível e ofensiva - cosmético, sem paywall
 
 import {
   AXEL_COSMETICS_CATALOG,

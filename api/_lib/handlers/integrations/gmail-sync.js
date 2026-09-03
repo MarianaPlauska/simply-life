@@ -1,4 +1,4 @@
-// POST /api/integrations/gmail/sync — sync manual Gmail + ingest Groq
+// POST /api/integrations/gmail/sync - sync manual Gmail + ingest Groq
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { resolveGoogleAccessToken } from '../../googleOAuth.js';

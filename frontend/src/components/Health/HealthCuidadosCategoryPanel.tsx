@@ -12,7 +12,7 @@ interface HealthCuidadosCategoryPanelProps
   active: CuidadosTab
 }
 
-/** Detalhe de uma categoria — sob demanda, após chips */
+/** Detalhe de uma categoria - sob demanda, após chips */
 export function HealthCuidadosCategoryPanel({ active }: HealthCuidadosCategoryPanelProps)
 {
   const sessaoTreinoAtiva = useTaskStore((s) => s.sessaoTreinoAtiva)

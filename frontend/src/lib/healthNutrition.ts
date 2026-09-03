@@ -1,4 +1,4 @@
-// Resumo nutricional do dia — proteína + kcal no hábito `proteina`
+// Resumo nutricional do dia - proteína + kcal no hábito `proteina`
 
 import type { HabitoDiario } from '../store/useTaskStore'
 import { PROTEINA_PRESET } from '../constants/healthPresets'

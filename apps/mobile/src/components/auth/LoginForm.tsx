@@ -27,7 +27,7 @@ type FieldErrors = {
   confirm?: string
 }
 
-/** Formulário de login/cadastro — estrutura rotulada (referência split-screen) */
+/** Formulário de login/cadastro - estrutura rotulada (referência split-screen) */
 export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'card' }: Props)
 {
   const { colors, space, elevation } = useTheme()
@@ -35,8 +35,13 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
   const signIn = useAuthStore((s) => s.signIn)
   const signUp = useAuthStore((s) => s.signUp)
   const enterGuest = useAuthStore((s) => s.enterGuest)
+  const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
+  const verifyMfa = useAuthStore((s) => s.verifyMfa)
+  const mfaPendingFactorId = useAuthStore((s) => s.mfaPendingFactorId)
 
   const [nome, setNome] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [googleLoading, setGoogleLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -100,6 +105,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
       await saveRememberedEmail(remember ? email : null)
       const res = await signIn(email, password)
       if (res.error) setError(res.error)
+      if (res.needsMfa) setMfaCode('')
       setLoading(false)
       return
     }
@@ -145,11 +151,49 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
     <View style={{ gap: space.md }}>
         {!supabaseConfigured ? (
           <Text variant="caption" muted>
-            Modo offline — use convidado ou qualquer email.
+            Modo offline: use convidado ou qualquer email.
           </Text>
         ) : null}
 
-        {mode === 'register' ? (
+        {mfaPendingFactorId ? (
+          <View style={{ gap: space.sm }}>
+            <Text variant="body" muted>
+              Digite o código de 6 dígitos do autenticador.
+            </Text>
+            <AuthField
+              label="Código 2FA"
+              leadingIcon="shield-checkmark-outline"
+              placeholder="000000"
+              keyboardType="number-pad"
+              autoComplete="one-time-code"
+              value={mfaCode}
+              onChangeText={(t) => setMfaCode(t.replace(/\D/g, '').slice(0, 6))}
+            />
+            {error ? (
+              <Text variant="caption" color={colors.danger}>
+                {error}
+              </Text>
+            ) : null}
+            <PrimaryButton
+              label="Confirmar 2FA"
+              loading={loading}
+              onPress={() =>
+              {
+                void (async () =>
+                {
+                  setLoading(true)
+                  setError('')
+                  const res = await verifyMfa(mfaCode)
+                  if (res.error) setError(res.error)
+                  setLoading(false)
+                })()
+              }}
+              style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
+            />
+          </View>
+        ) : null}
+
+        {!mfaPendingFactorId && mode === 'register' ? (
           <AuthField
             label="Nome"
             leadingIcon="person-outline"
@@ -166,6 +210,8 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
           />
         ) : null}
 
+        {!mfaPendingFactorId ? (
+          <>
         <AuthField
           label="E-mail"
           leadingIcon="mail-outline"
@@ -295,6 +341,28 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
           onPress={enterGuest}
           style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
         />
+
+        {supabaseConfigured && mode === 'login' ? (
+          <PrimaryButton
+            label="Continuar com Google"
+            variant="secondary"
+            loading={googleLoading}
+            onPress={() =>
+            {
+              void (async () =>
+              {
+                setGoogleLoading(true)
+                setError('')
+                const res = await signInWithGoogle()
+                if (res.error) setError(res.error)
+                setGoogleLoading(false)
+              })()
+            }}
+            style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
+          />
+        ) : null}
+          </>
+        ) : null}
     </View>
   )
 

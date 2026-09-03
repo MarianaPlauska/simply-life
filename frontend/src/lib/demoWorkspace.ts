@@ -1,4 +1,4 @@
-/** Conta demo compartilhada — o e-mail público não é segredo; a senha vem do env. */
+/** Conta demo compartilhada - o e-mail público não é segredo; a senha vem do env. */
 
 export function demoLoginEmail(): string
 {

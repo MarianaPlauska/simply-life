@@ -1,4 +1,4 @@
-// Explicação auditável da capacidade — passo a passo para o usuário
+// Explicação auditável da capacidade - passo a passo para o usuário
 
 import type { DayCapacityFactor } from './dayCapacity'
 import {
@@ -52,7 +52,7 @@ export function buildCapacityExplanation(
         title: 'Humor / energia',
         detail: f.detail === 'Sem registro hoje'
           ? 'Sem humor hoje → estimamos 32% (conservador até você registrar).'
-          : `Média de humor/energia convertida em escala 0–100 → ${fmtPct(f.pct)} (${f.detail}).`,
+          : `Média de humor/energia convertida em escala 0-100 → ${fmtPct(f.pct)} (${f.detail}).`,
       })
     }
     if (f.id === 'finance')
@@ -95,7 +95,7 @@ export function buildCapacityExplanation(
   })
 
   const bottleneckReason =
-    `Gargalo: ${bottleneckFactor.shortLabel} — dano ${(bottleneckHarm.harm * 100).toFixed(1)} (${harmLines}). `
+    `Gargalo: ${bottleneckFactor.shortLabel} - dano ${(bottleneckHarm.harm * 100).toFixed(1)} (${harmLines}). `
     + `Mesmo com outros eixos melhores, este puxa a recomendação do dia.`
 
   const formulaSummary =

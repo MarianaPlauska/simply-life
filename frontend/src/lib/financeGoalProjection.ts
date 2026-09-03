@@ -95,7 +95,7 @@ export function projectFinancialGoal(
       monthsToTarget: 0,
       projectedLabel: null,
       onTrack: true,
-      paceMessage: 'Meta alcançada — parabéns!',
+      paceMessage: 'Meta alcançada - parabéns!',
     }
   }
 
@@ -132,7 +132,7 @@ export function projectFinancialGoal(
       }
       else
       {
-        paceMessage = `Dentro do prazo (${prazoFmt}) — projeção ${projectedLabel}.`
+        paceMessage = `Dentro do prazo (${prazoFmt}) - projeção ${projectedLabel}.`
       }
     }
   }

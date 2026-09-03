@@ -59,7 +59,7 @@ export function MfaEnrollPanel()
 
     if (error || !data)
     {
-      toast.error(error?.message ?? 'MFA indisponível — ative TOTP no Supabase Dashboard (Auth → MFA)')
+      toast.error(error?.message ?? 'MFA indisponível - ative TOTP no Supabase Dashboard (Auth → MFA)')
       setEnrolling(false)
       return
     }
@@ -95,7 +95,7 @@ export function MfaEnrollPanel()
     setVerifying(false)
     if (error)
     {
-      toast.error('Código inválido — tente novamente')
+      toast.error('Código inválido - tente novamente')
       return
     }
 
@@ -125,7 +125,7 @@ export function MfaEnrollPanel()
     <div className="space-y-4">
       <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
         Proteja sua conta com TOTP (Google Authenticator, Authy, 1Password).
-        É opcional — nunca obrigatório. No Supabase: Authentication → MFA (TOTP).
+        É opcional - nunca obrigatório. No Supabase: Authentication → MFA (TOTP).
       </p>
 
       {loading ? (

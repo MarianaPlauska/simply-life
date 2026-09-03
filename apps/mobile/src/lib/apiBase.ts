@@ -1,5 +1,5 @@
 /**
- * Base da API Vercel — push-subscribe / push-test / push-action.
+ * Base da API Vercel - push-subscribe / push-test / push-action.
  * Metro (8082) não serve a API: use EXPO_PUBLIC_API_URL ou vercel dev :3000.
  */
 import { Platform } from 'react-native'

@@ -18,11 +18,9 @@ const fmt = (v: number) =>
 interface DashboardFinanceGlanceProps
 {
   showLink?: boolean
-  /** Rail desktop — saldo já está no herói contextual da coluna principal */
   compactRail?: boolean
 }
 
-/** Saldo + envelope — faixa finance, wash só no número */
 export function DashboardFinanceGlance({ showLink = false, compactRail = false }: DashboardFinanceGlanceProps)
 {
   const { display } = useCashPosition()

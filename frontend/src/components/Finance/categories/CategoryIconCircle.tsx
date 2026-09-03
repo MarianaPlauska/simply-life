@@ -18,7 +18,7 @@ interface CategoryIconCircleProps
   receita?: boolean
 }
 
-/** Ícone de categoria em badge padronizado — Finanças */
+/** Ícone de categoria em badge padronizado - Finanças */
 export function CategoryIconCircle({
   icone,
   cor,

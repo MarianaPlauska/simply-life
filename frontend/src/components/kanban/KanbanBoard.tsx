@@ -84,7 +84,7 @@ export function KanbanBoard() {
   const [selectedTarefa, setSelectedTarefa] = useState<TarefaUnificada | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
-  // sensors com tolerancia de 6px — sem isso o click vira drag e bloqueia onClick
+  // sensors com tolerancia de 6px - sem isso o click vira drag e bloqueia onClick
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 6 },
@@ -187,7 +187,7 @@ export function KanbanBoard() {
         {
           key = 'Sem label';
         } else {
-          // uma swimlane por tarefa — a primeira flag (evita o mesmo card em N colunas)
+          // uma swimlane por tarefa - a primeira flag (evita o mesmo card em N colunas)
           key = lbls[0].nome;
         }
       }
@@ -396,7 +396,7 @@ export function KanbanBoard() {
       );
     }
 
-    // renderização padrão — colunas lado a lado com gap menor (densidade §2.4)
+    // renderização padrão - colunas lado a lado com gap menor (densidade §2.4)
     return (
       <div
         className="flex items-start gap-4 overflow-x-auto pb-4"
@@ -460,7 +460,7 @@ export function KanbanBoard() {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="max-w-7xl mx-auto w-full pb-16 relative px-1">
-        {/* cabeçalho principal — espaçamento reduzido para densidade */}
+        {/* cabeçalho principal - espaçamento reduzido para densidade */}
         <div className="mb-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -484,7 +484,7 @@ export function KanbanBoard() {
               </p>
             </div>
 
-            {/* toolbar — visual plano, separadores sutis (§2.4) */}
+            {/* toolbar - visual plano, separadores sutis (§2.4) */}
             <div className="flex items-center gap-2 flex-wrap">
               {/* abas: ativas / arquivo */}
               <div className="flex items-center gap-0.5 border-r border-zinc-900 pr-2 mr-1">

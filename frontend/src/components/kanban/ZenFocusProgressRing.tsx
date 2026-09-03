@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-// Anel de progresso sutil — sem segundos, avanço lento
+// Anel de progresso sutil - sem segundos, avanço lento
 
 interface ZenFocusProgressRingProps
 {

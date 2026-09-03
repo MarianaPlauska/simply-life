@@ -1,4 +1,4 @@
-// cliente supabase — ponto central de acesso ao banco e auth
+// cliente supabase - ponto central de acesso ao banco e auth
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
@@ -20,7 +20,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 })
 
-/** URL de retorno após OAuth (Google) — deve estar nas Redirect URLs do Supabase */
+/** URL de retorno após OAuth (Google) - deve estar nas Redirect URLs do Supabase */
 export function getAuthCallbackUrl(): string
 {
   return `${window.location.origin}/auth/callback`

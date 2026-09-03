@@ -5,7 +5,7 @@ import {
   habitPct,
   medsTakenCount,
 } from '@simply-life/shared'
-import { Card, Text, SectionHeader, PressableScale } from '../../ui'
+import { Card, Text, SectionHeader, PressableScale, IconBadge, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import type { CuidadosTab } from './healthNav'
@@ -14,7 +14,12 @@ type Props = {
   onGoCuidados: (tab: CuidadosTab) => void
 }
 
-const TILES: { id: CuidadosTab; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+
+const TILES: {
+  id: CuidadosTab
+  label: string
+  icon: keyof typeof Ionicons.glyphMap
+}[] = [
   { id: 'hidratacao', label: 'Água', icon: 'water' },
   { id: 'alimentacao', label: 'Comida', icon: 'restaurant' },
   { id: 'academia', label: 'Academia', icon: 'barbell' },
@@ -43,17 +48,35 @@ export function HealthTodayTab({ onGoCuidados }: Props)
 
   return (
     <View style={{ gap: space.lg }}>
-      {lastAxelCare ? (
-        <Card tone="hero" style={{ gap: space.sm }}>
-          <Text variant="caption" color={colors.axel}>
+      {/* Acento AXEL - cobre (1-2× por tela) */}
+      <Card
+        tone="elevated"
+        style={{
+          gap: space.sm,
+          borderRadius: 18,
+          borderTopWidth: 1,
+          borderTopColor: colors.axel,
+          flexDirection: 'row',
+          alignItems: 'flex-start',
+        }}
+      >
+        <IconBadge name="sparkles" color={colors.axel} size={44} iconSize={22} />
+        <View style={{ flex: 1, gap: 6 }}>
+          <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             AXEL
           </Text>
-          <Text variant="voice">{lastAxelCare}</Text>
-        </Card>
-      ) : null}
+          <Text variant="voice">
+            {lastAxelCare
+              || 'Um cuidado de cada vez. Água, comida e movimento no seu ritmo.'}
+          </Text>
+        </View>
+      </Card>
 
-      <Card tone="elevated" style={{ gap: space.md }}>
-        <SectionHeader title="Cuidado de hoje" subtitle={`${ritualDone} de ${ritualTotal} registrados`} />
+      <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
+        <SectionHeader
+          title="Cuidado de hoje"
+          subtitle={`${ritualDone} de ${ritualTotal} registrados`}
+        />
         <View
           style={{
             height: 8,
@@ -70,30 +93,35 @@ export function HealthTodayTab({ onGoCuidados }: Props)
             }}
           />
         </View>
-        <Text variant="caption" muted>
-          {ritualPct >= 100 ? 'Ritual completo — parabéns!' : 'Toque em um cuidado para registrar'}
-        </Text>
+        <StatusPill
+          label={ritualPct >= 100 ? 'Ritual completo' : `${ritualDone}/${ritualTotal} cuidados`}
+          color={ritualPct >= 100 ? colors.health : colors.axel}
+        />
       </Card>
 
       <View style={{ gap: space.sm }}>
         {TILES.map((tile) =>
         {
-          let value = '—'
+          let value = '-'
           let done = false
+          let pillLabel = 'Pendente'
           if (tile.id === 'hidratacao')
           {
-            value = agua ? `${agua.progressoAtual}/${agua.metaDiaria} copos` : '—'
+            value = agua ? `${agua.progressoAtual}/${agua.metaDiaria} copos` : '-'
             done = Boolean(agua && agua.progressoAtual >= agua.metaDiaria)
+            pillLabel = done ? 'Meta ok' : value
           }
           else if (tile.id === 'alimentacao')
           {
-            value = proteina ? `${proteina.progressoAtual}g · ${habitPct(proteina)}%` : '—'
+            value = proteina ? `${proteina.progressoAtual}g · ${habitPct(proteina)}%` : '-'
             done = Boolean(proteina && proteina.progressoAtual >= proteina.metaDiaria)
+            pillLabel = done ? 'Meta ok' : value
           }
           else if (tile.id === 'academia')
           {
             value = treino?.progressoAtual ? 'Sessão feita' : 'Pendente'
             done = Boolean(treino?.progressoAtual)
+            pillLabel = done ? 'Feito' : 'Pendente'
           }
           else
           {
@@ -101,6 +129,9 @@ export function HealthTodayTab({ onGoCuidados }: Props)
               ? `${medsDone}/${medicamentos.length} doses`
               : 'Nada cadastrado'
             done = medicamentos.length > 0 && medsDone >= medicamentos.length
+            pillLabel = medicamentos.length
+              ? `${medsDone}/${medicamentos.length} doses`
+              : 'Pendente'
           }
 
           return (
@@ -111,30 +142,21 @@ export function HealthTodayTab({ onGoCuidados }: Props)
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: space.md,
-                  borderColor: done ? colors.healthMuted : colors.hairline,
+                  borderRadius: 18,
                 }}
               >
-                <View
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 12,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: done ? colors.healthMuted : colors.elevated,
-                  }}
-                >
-                  <Ionicons
-                    name={tile.icon}
-                    size={20}
-                    color={done ? colors.health : colors.inkMuted}
-                  />
-                </View>
-                <View style={{ flex: 1, gap: 2 }}>
+                <IconBadge
+                  name={tile.icon}
+                  color={done ? colors.health : colors.health}
+                  size={40}
+                  iconSize={20}
+                />
+                <View style={{ flex: 1, gap: 6 }}>
                   <Text variant="bodyStrong">{tile.label}</Text>
-                  <Text variant="caption" muted>
-                    {value}
-                  </Text>
+                  <StatusPill
+                    label={pillLabel}
+                    color={done ? colors.health : colors.axel}
+                  />
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={colors.inkFaint} />
               </Card>

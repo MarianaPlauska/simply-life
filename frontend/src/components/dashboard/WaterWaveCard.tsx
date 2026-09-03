@@ -24,7 +24,6 @@ import { promoteAguaMetaTo2L, saveAguaDefaultMl, saveAguaMlPreset, hapticWaterGo
 interface WaterWaveCardProps
 {
   hero?: boolean
-  /** Sem caixa — entra no ritual da home */
   embedded?: boolean
   className?: string
 }
@@ -111,9 +110,9 @@ export function WaterWaveCard({ hero = true, embedded = false, className = '' }:
   const statusLine = done
     ? extra > 0
       ? `Meta batida · +${extra} extra · ${totalMl} ml`
-      : `Meta completa — ${totalMl} ml hoje`
+      : `Meta completa - ${totalMl} ml hoje`
     : ritualOk
-      ? `Ritual ok — ${totalMl} / ${metaTotalMl} ml`
+      ? `Ritual ok - ${totalMl} / ${metaTotalMl} ml`
       : `${Math.max(0, goal - current)} copo${goal - current !== 1 ? 's' : ''} · ${totalMl} ml`
 
   if (embedded)

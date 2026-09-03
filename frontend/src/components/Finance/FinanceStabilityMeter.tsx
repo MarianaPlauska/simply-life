@@ -15,7 +15,7 @@ interface FinanceStabilityMeterProps
   className?: string
 }
 
-/** Faixa tranquilo / atenção / apertado — sem vermelho de alarme */
+/** Faixa tranquilo / atenção / apertado - sem vermelho de alarme */
 export function FinanceStabilityMeter({
   tone,
   showHint = false,

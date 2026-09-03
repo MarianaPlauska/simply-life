@@ -36,7 +36,7 @@ export const ENERGY_LEVELS: EnergyOption[] = [
   { value: 3, icon: BatteryFull, label: 'Alta' },
 ]
 
-/** Contextos opcionais — inspirado em Daylio/Bearable, sem obrigar preenchimento */
+/** Contextos opcionais - inspirado em Daylio/Bearable, sem obrigar preenchimento */
 export const MOOD_CONTEXT_TAGS = [
   { id: 'trabalho', label: 'Trabalho' },
   { id: 'sono', label: 'Sono' },
@@ -48,5 +48,5 @@ export const MOOD_CONTEXT_TAGS = [
 
 export function moodLabel(value: number): string
 {
-  return MOODS.find((m) => m.value === value)?.label ?? '—'
+  return MOODS.find((m) => m.value === value)?.label ?? '-'
 }

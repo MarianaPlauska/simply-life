@@ -41,6 +41,18 @@ export function demoTasks(): MobileTask[]
       prioridade: 2,
     },
     {
+      id: 't1b',
+      titulo: 'Enviar relatório semanal',
+      status: 'todo',
+      dataVencimento: isoDaysAgo(1),
+      horaMinutos: 17 * 60,
+      estimativaMinutos: 30,
+      progresso: 0,
+      checklist: [],
+      anotacao: '',
+      prioridade: 1,
+    },
+    {
       id: 't2',
       titulo: 'Reunião com o time',
       status: 'doing',
@@ -97,6 +109,33 @@ export function demoFinance(): FinanceTx[]
     { id: 'f6', titulo: 'Farmácia', valor: 55, categoria: 'saude', data: today, tipo: 'despesa' },
     { id: 'f7', titulo: 'Curso online', valor: 120, categoria: 'educacao', data: isoDaysAgo(4), tipo: 'despesa' },
     { id: 'f8', titulo: 'Roupas', valor: 180, categoria: 'compras', data: isoDaysAgo(6), tipo: 'despesa' },
+    {
+      id: 'f9',
+      titulo: '[Nubank] Assinatura streaming',
+      valor: 55,
+      categoria: 'lazer',
+      data: isoDaysAgo(2),
+      tipo: 'despesa',
+      cardId: 'c1',
+    },
+    {
+      id: 'f10',
+      titulo: '[Nubank] Farmácia',
+      valor: 120,
+      categoria: 'saude',
+      data: isoDaysAgo(1),
+      tipo: 'despesa',
+      cardId: 'c1',
+    },
+    {
+      id: 'f11',
+      titulo: '[Inter] Combustível',
+      valor: 200,
+      categoria: 'transporte',
+      data: isoDaysAgo(3),
+      tipo: 'despesa',
+      cardId: 'c2',
+    },
   ]
 }
 
@@ -106,20 +145,10 @@ export interface DashboardGlance
   label: string
   value: string
   tone: 'axel' | 'health' | 'finance' | 'tasks'
-  /** 0–100 para barra/anel de progresso na Home */
+  /** 0-100 para barra/anel de progresso na Home */
   progress: number
   /** Nome Ionicons (ex.: water-outline) */
   icon: string
-}
-
-export function demoGlances(): DashboardGlance[]
-{
-  return buildDashboardGlances({
-    humor: demoHumor(),
-    tasks: demoTasks(),
-    finance: demoFinance(),
-    habits: demoHabits(),
-  })
 }
 
 export function buildDashboardGlances(input: {
@@ -129,20 +158,23 @@ export function buildDashboardGlances(input: {
   habits?: HabitoDiario[]
 }): DashboardGlance[]
 {
-  const lastHumor = [...input.humor].sort((a, b) =>
+  const humorList = input.humor ?? []
+  const taskList = input.tasks ?? []
+  const financeList = input.finance ?? []
+  const lastHumor = [...humorList].sort((a, b) =>
   {
     const ta = a.created_at || a.data
     const tb = b.created_at || b.data
     return tb.localeCompare(ta)
   })[0]
-  const open = input.tasks.filter((t) => t.status !== 'done').length
-  const gastos = monthExpenseTotal(input.finance)
-  const receitas = monthIncomeTotal(input.finance)
+  const open = taskList.filter((t) => t.status !== 'done').length
+  const gastos = monthExpenseTotal(financeList) ?? 0
+  const receitas = monthIncomeTotal(financeList) ?? 0
   const agua = findHabit(input.habits ?? [], 'agua')
   const proteina = findHabit(input.habits ?? [], 'proteina')
 
   const today = todayIso()
-  const todayTasks = input.tasks.filter((t) =>
+  const todayTasks = taskList.filter((t) =>
   {
     if (t.dataVencimento?.slice(0, 10) === today) return true
     if (t.horaMinutos != null && !t.dataVencimento) return true
@@ -161,12 +193,16 @@ export function buildDashboardGlances(input: {
     receitas > 0
       ? Math.min(100, Math.round((gastos / receitas) * 100))
       : 0
+  const goalsProgress =
+    todayTasks.length > 0
+      ? Math.round((doneToday / todayTasks.length) * 100)
+      : 0
 
   return [
     {
       id: 'g-humor',
       label: 'Humor',
-      value: lastHumor ? moodLabel(lastHumor.humor) : '—',
+      value: lastHumor ? moodLabel(lastHumor.humor) : '-',
       tone: 'axel',
       progress: humorProgress,
       icon: 'happy-outline',
@@ -174,23 +210,23 @@ export function buildDashboardGlances(input: {
     {
       id: 'g-agua',
       label: 'Água',
-      value: agua ? `${agua.progressoAtual}/${agua.metaDiaria} · ${habitPct(agua)}%` : '—',
+      value: agua ? `${agua.progressoAtual}/${agua.metaDiaria}` : '-',
       tone: 'health',
-      progress: habitPct(agua),
+      progress: habitPct(agua) ?? 0,
       icon: 'water-outline',
     },
     {
       id: 'g-proteina',
       label: 'Proteína',
-      value: proteina ? `${proteina.progressoAtual}g` : '—',
+      value: proteina ? `${proteina.progressoAtual}g` : '-',
       tone: 'health',
-      progress: habitPct(proteina),
+      progress: habitPct(proteina) ?? 0,
       icon: 'nutrition-outline',
     },
     {
       id: 'g-tasks',
       label: 'Tarefas',
-      value: open === 1 ? '1 em aberto' : `${open} em aberto`,
+      value: open === 1 ? '1 aberta' : `${open} abertas`,
       tone: 'tasks',
       progress: tasksProgress,
       icon: 'checkbox-outline',
@@ -198,10 +234,18 @@ export function buildDashboardGlances(input: {
     {
       id: 'g-finance',
       label: 'Gastos',
-      value: formatBRL(gastos),
+      value: formatBRL(gastos ?? 0),
       tone: 'finance',
       progress: financeProgress,
       icon: 'wallet-outline',
+    },
+    {
+      id: 'g-goals',
+      label: 'Metas do dia',
+      value: todayTasks.length > 0 ? `${doneToday}/${todayTasks.length}` : '-',
+      tone: 'tasks',
+      progress: goalsProgress,
+      icon: 'flag-outline',
     },
   ]
 }

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-// Log de Decisão da IA — transparência da orquestração adaptativa
+// Log de Decisão da IA - transparência da orquestração adaptativa
 
 interface AxelAiDecisionLogProps
 {

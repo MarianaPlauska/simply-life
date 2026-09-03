@@ -7,7 +7,7 @@ import {
   AXEL_TEXT_SECONDARY,
 } from '../../constants/axelSurfaces'
 
-// Conquistas desbloqueadas — vitrine no perfil
+// Conquistas desbloqueadas - vitrine no perfil
 
 export function ProfileAchievementsGrid()
 {
@@ -22,7 +22,7 @@ export function ProfileAchievementsGrid()
           <h2 className={AXEL_SECTION_TITLE}>Conquistas</h2>
         </header>
         <p className={`text-[13px] ${AXEL_TEXT_SECONDARY}`}>
-          Complete missões e mantenha a ofensiva — badges aparecem aqui.
+          Complete missões e mantenha a ofensiva - badges aparecem aqui.
         </p>
       </section>
     )

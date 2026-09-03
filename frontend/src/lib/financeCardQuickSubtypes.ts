@@ -1,4 +1,4 @@
-// Subtipos para lançamento rápido no cartão — descrição + categoria prontas
+// Subtipos para lançamento rápido no cartão - descrição + categoria prontas
 
 export interface CardQuickSubtype
 {
@@ -25,7 +25,7 @@ export const CARD_QUICK_SUBTYPES: CardQuickSubtype[] = [
 /** Valores comuns para toque rápido (VR, lanches, etc.) */
 export const CARD_QUICK_AMOUNT_HINTS = [8, 12, 15, 20, 25, 30, 40, 50, 80, 100]
 
-/** Menos chips — cabe em uma linha no dashboard */
+/** Menos chips - cabe em uma linha no dashboard */
 export const CARD_QUICK_AMOUNT_HINTS_COMPACT = [8, 15, 20, 30, 50, 100]
 
 const STORAGE_KEY = 'simply-life-card-quick-subtype'

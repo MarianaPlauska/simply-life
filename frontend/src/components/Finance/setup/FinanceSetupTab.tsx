@@ -94,7 +94,7 @@ export function FinanceSetupTab({
           <h2 className={AXEL_SECTION_TITLE}>Configurar finanças</h2>
         </div>
         <p className={`text-[11px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-          Conta corrente, cartões, contas fixas e faturas — tudo num só lugar.
+          Conta corrente, cartões, contas fixas e faturas - tudo num só lugar.
         </p>
       </header>
 
@@ -124,7 +124,7 @@ export function FinanceSetupTab({
 
         {cards.length === 0 && (
           <p className={`text-[12px] py-4 text-center ${AXEL_TEXT_SECONDARY}`}>
-            Nenhum cartão — adicione na aba Cartões.
+            Nenhum cartão - adicione na aba Cartões.
           </p>
         )}
 

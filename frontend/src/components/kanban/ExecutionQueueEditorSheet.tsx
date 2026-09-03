@@ -130,7 +130,7 @@ export function ExecutionQueueEditorSheet({
               Na fila ({ordered.length}/{WIP_LIMIT})
             </h3>
             {ordered.length === 0 ? (
-              <p className="text-sm text-zinc-500 py-2">Nenhuma tarefa — adicione abaixo.</p>
+              <p className="text-sm text-zinc-500 py-2">Nenhuma tarefa - adicione abaixo.</p>
             ) : (
               <ul className="space-y-2">
                 {ordered.map((t, idx) =>

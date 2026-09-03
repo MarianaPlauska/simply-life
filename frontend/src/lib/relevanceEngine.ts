@@ -6,7 +6,7 @@ import {
 import { analyzeTaskIntent, type IntentAnalysis } from './intentAnalyzer'
 import type { TarefaUnificada } from '../types'
 
-// Motor de Relevância AXEL — influência social + densidade semântica + prazo
+// Motor de Relevância AXEL - influência social + densidade semântica + prazo
 
 const HIGH_PRIORITY_TERMS = [
   { term: 'urgente', label: 'Urgência' },
@@ -60,7 +60,7 @@ export interface RelevanceUrgencyResult
   intent: IntentAnalysis
 }
 
-/** Análise semântica básica do título (0–100) */
+/** Análise semântica básica do título (0-100) */
 export function analyzeTitle(title: string): SemanticAnalysis
 {
   const text = String(title || '')
@@ -107,7 +107,7 @@ export function analyzeTitle(title: string): SemanticAnalysis
   }
 }
 
-/** Fator de prazo 0–100 */
+/** Fator de prazo 0-100 */
 export function computeDeadlineFactor(dueIso: string | null | undefined): number
 {
   if (!dueIso) return 25

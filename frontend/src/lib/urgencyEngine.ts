@@ -2,7 +2,7 @@ import { calculateAdaptiveUrgency } from './adaptiveOrchestration'
 import { fetchOrchestrateScores } from './orchestrateApi'
 import type { TarefaUnificada } from '../types'
 
-// Motor de Urgência AXEL — IA no servidor → cliente (dev) → heurística local
+// Motor de Urgência AXEL - IA no servidor → cliente (dev) → heurística local
 
 export interface UrgencyScoreEntry
 {
@@ -12,7 +12,7 @@ export interface UrgencyScoreEntry
   source: 'ai' | 'mock'
 }
 
-/** @deprecated prompt usado no servidor — api/_lib/urgencyOrchestrator.js */
+/** @deprecated prompt usado no servidor - api/_lib/urgencyOrchestrator.js */
 export const URGENCY_SYSTEM_PROMPT = ''
 
 function mockScoreTask(task: TarefaUnificada, allTasks: TarefaUnificada[]): UrgencyScoreEntry
@@ -33,7 +33,7 @@ function mockCalculateUrgencyScores(tasks: TarefaUnificada[]): UrgencyScoreEntry
   return active.map((t) => mockScoreTask(t, active))
 }
 
-/** Fallback dev — chaves VITE_* só em desenvolvimento local; nunca em produção */
+/** Fallback dev - chaves VITE_* só em desenvolvimento local; nunca em produção */
 async function fetchUrgencyFromClientAI(tasks: TarefaUnificada[]): Promise<UrgencyScoreEntry[]>
 {
   if (!import.meta.env.DEV)
@@ -124,7 +124,7 @@ async function fetchUrgencyFromClientAI(tasks: TarefaUnificada[]): Promise<Urgen
 }
 
 /**
- * Calcula scores — ordem: API servidor (IA) → cliente dev → motor local.
+ * Calcula scores - ordem: API servidor (IA) → cliente dev → motor local.
  */
 export async function calculateUrgencyScores(tasks: TarefaUnificada[]): Promise<UrgencyScoreEntry[]>
 {

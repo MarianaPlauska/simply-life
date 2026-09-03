@@ -1,4 +1,4 @@
-/** Traço de prioridade — design linha (§2.4) */
+/** Traço de prioridade - design linha (§2.4) */
 export function prioStripClass(prio: string | undefined): string
 {
   if (prio === 'critica')

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-/** Campos opcionais — removidos em ordem se o schema remoto ainda não tiver a coluna */
+/** Campos opcionais - removidos em ordem se o schema remoto ainda não tiver a coluna */
 const OPTIONAL_DESPESA_KEYS = [
   'observacao',
   'tipo',
@@ -20,7 +20,7 @@ function missingColumnFromError(message?: string | null): string | null
   return schema?.[1] ?? null
 }
 
-/** Insert resiliente — compatível com Supabase sem migrations recentes */
+/** Insert resiliente - compatível com Supabase sem migrations recentes */
 export async function insertDespesaResilient(
   client: SupabaseClient,
   payload: Record<string, unknown>,

@@ -1,11 +1,14 @@
-import { View, Pressable } from 'react-native'
+import { useState } from 'react'
+import { View, Pressable, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Text } from '../../ui'
 import { BrandMark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useWorkspace } from '../../layout/useWorkspace'
 import { useCaptureStore } from '../../store/captureStore'
 import { useAuthStore } from '../../store/authStore'
+import { usePrefsStore } from '../../store/prefsStore'
 
 const NAV = [
   { href: '/(tabs)', match: '/(tabs)', exact: true, label: 'Início', icon: 'home-outline' as const },
@@ -14,36 +17,40 @@ const NAV = [
   { href: '/(tabs)/financeiro', match: 'financeiro', label: 'Finanças', icon: 'wallet-outline' as const },
 ]
 
-/** Largura rail desktop — labels + ícone */
 export const DESKTOP_SIDEBAR_WIDTH = 220
-
-/** Raio das curvas que “mordem” a borda da sidebar (efeito SoftTech / CodePen) */
-const NOTCH = 22
+export const DESKTOP_SIDEBAR_COLLAPSED = 68
+const NOTCH = 14
 
 /**
- * Sidebar desktop com item ativo em entalhe:
- * pill do canvas + curvas côncavas em cima/baixo, fundindo com o conteúdo.
+ * Sidebar colapsável. Expandida: labels. Colapsada: ícones + tooltip.
+ * Estado persistido em workspace prefs.
  */
 export function DesktopSidebar()
 {
-  const { colors, space, mode } = useTheme()
+  const { space, colors } = useTheme()
+  const { isTablet, isDesktop } = useWorkspace()
   const router = useRouter()
   const pathname = usePathname()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const email = useAuthStore((s) => s.sessionEmail)
   const name = email?.split('@')[0] ?? 'Você'
+  const prefsCollapsed = Boolean(usePrefsStore((s) => s.prefs.sidebar_collapsed))
+  const patchPrefs = usePrefsStore((s) => s.patch)
+  /** Tablet: começa colapsada; expansível só nesta sessão */
+  const [tabletExpanded, setTabletExpanded] = useState(false)
+  const collapsed = isTablet && !isDesktop ? !tabletExpanded : prefsCollapsed
 
-  // Rail Drive: navy black no escuro; Chinese Black no claro
-  const sidebarBg = mode === 'dark' ? '#0D1020' : '#0C1519'
-  const contentBg = colors.canvas
-  const inkOnBrand = 'rgba(245, 241, 236, 0.92)'
-  const inkMutedOnBrand = 'rgba(245, 241, 236, 0.62)'
-  const activeFg = colors.ink
-  const pressedBg = 'rgba(245, 241, 236, 0.12)'
-  const divider = 'rgba(245, 241, 236, 0.18)'
-  const avatarBg = 'rgba(245, 241, 236, 0.14)'
-  const ctaBg = 'rgba(245, 241, 236, 0.14)'
-  const ctaFg = '#F5F1EC'
+  const width = collapsed ? DESKTOP_SIDEBAR_COLLAPSED : DESKTOP_SIDEBAR_WIDTH
+  const ORANGE = colors.axel
+  const CREAM = colors.ink
+  const sidebarBg = colors.canvas
+  const activePill = CREAM
+  const inkOnBrand = 'rgba(243, 230, 216, 0.88)'
+  const inkMutedOnBrand = 'rgba(243, 230, 216, 0.55)'
+  const pressedBg = colors.axelMuted
+  const divider = 'rgba(243, 230, 216, 0.14)'
+  const avatarBg = colors.axelMuted
+  const ctaBg = colors.axelMuted
 
   const isActive = (item: (typeof NAV)[0]) =>
   {
@@ -54,53 +61,93 @@ export function DesktopSidebar()
     return pathname.includes(item.match)
   }
 
+  const toggleCollapsed = () =>
+  {
+    if (isTablet && !isDesktop)
+    {
+      setTabletExpanded((v) => !v)
+      return
+    }
+    void patchPrefs({ sidebar_collapsed: !prefsCollapsed })
+  }
+
   return (
     <View
       style={{
-        width: DESKTOP_SIDEBAR_WIDTH,
+        width,
         alignSelf: 'stretch',
         backgroundColor: sidebarBg,
         paddingTop: space.lg,
         paddingBottom: space.lg,
-        // Sem padding à direita: o entalhe encosta no canvas
-        paddingLeft: space.md,
+        paddingLeft: collapsed ? 0 : 12,
         justifyContent: 'space-between',
+        // Transição suave (web)
+        ...(Platform.OS === 'web'
+          ? ({ transitionProperty: 'width', transitionDuration: '220ms' } as object)
+          : null),
       }}
     >
       <View style={{ gap: space.md }}>
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: collapsed ? 'column' : 'row',
             alignItems: 'center',
             gap: 10,
-            paddingHorizontal: space.sm,
+            paddingHorizontal: collapsed ? 0 : 8,
             paddingBottom: space.sm,
+            justifyContent: 'center',
           }}
         >
-          <BrandMark size={32} onFill />
-          <Text
-            variant="bodyStrong"
-            style={{ color: '#F5F1EC', letterSpacing: -0.2, fontSize: 15 }}
-            numberOfLines={1}
+          <BrandMark size={collapsed ? 28 : 28} onFill />
+          {!collapsed ? (
+            <Text
+              variant="bodyStrong"
+              style={{ color: CREAM, letterSpacing: -0.2, fontSize: 14, flex: 1 }}
+              numberOfLines={1}
+            >
+              Simply Life
+            </Text>
+          ) : null}
+          <Pressable
+            onPress={toggleCollapsed}
+            accessibilityRole="button"
+            accessibilityLabel={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            {...(Platform.OS === 'web'
+              ? { title: collapsed ? 'Expandir' : 'Recolher' }
+              : null)}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 999,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: pressedBg,
+            }}
           >
-            Simply Life
-          </Text>
+            <Ionicons
+              name={collapsed ? 'chevron-forward' : 'chevron-back'}
+              size={16}
+              color={CREAM}
+            />
+          </Pressable>
         </View>
 
-        <Text
-          variant="micro"
-          style={{
-            color: inkMutedOnBrand,
-            paddingHorizontal: space.md,
-            textTransform: 'uppercase',
-            letterSpacing: 0.8,
-            fontSize: 10,
-          }}
-        >
-          Menu
-        </Text>
+        {!collapsed ? (
+          <Text
+            variant="micro"
+            style={{
+              color: inkMutedOnBrand,
+              paddingHorizontal: 14,
+              textTransform: 'uppercase',
+              letterSpacing: 0.8,
+              fontSize: 10,
+            }}
+          >
+            Menu
+          </Text>
+        ) : null}
 
-        <View style={{ gap: 0 }}>
+        <View style={{ gap: 4, alignItems: collapsed ? 'center' : 'stretch' }}>
           {NAV.map((item) =>
           {
             const active = isActive(item)
@@ -110,11 +157,12 @@ export function DesktopSidebar()
                 style={{
                   position: 'relative',
                   zIndex: active ? 2 : 1,
+                  marginVertical: active && !collapsed ? 2 : 0,
+                  width: collapsed ? 48 : '100%',
                 }}
               >
-                {active ? (
+                {active && !collapsed ? (
                   <>
-                    {/* Curva superior — “mordida” no rail */}
                     <View
                       pointerEvents="none"
                       style={{
@@ -123,7 +171,7 @@ export function DesktopSidebar()
                         right: 0,
                         width: NOTCH,
                         height: NOTCH,
-                        backgroundColor: contentBg,
+                        backgroundColor: activePill,
                         zIndex: 3,
                       }}
                     >
@@ -135,7 +183,6 @@ export function DesktopSidebar()
                         }}
                       />
                     </View>
-                    {/* Curva inferior */}
                     <View
                       pointerEvents="none"
                       style={{
@@ -144,7 +191,7 @@ export function DesktopSidebar()
                         right: 0,
                         width: NOTCH,
                         height: NOTCH,
-                        backgroundColor: contentBg,
+                        backgroundColor: activePill,
                         zIndex: 3,
                       }}
                     >
@@ -163,20 +210,28 @@ export function DesktopSidebar()
                   onPress={() => router.push(item.href as never)}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
+                  accessibilityLabel={item.label}
+                  {...(Platform.OS === 'web' ? { title: item.label } : null)}
                   style={({ pressed }) => ({
                     flexDirection: 'row',
                     alignItems: 'center',
-                    gap: 12,
-                    minHeight: 48,
-                    paddingLeft: 16,
-                    paddingRight: 18,
-                    borderTopLeftRadius: active ? NOTCH + 6 : 0,
-                    borderBottomLeftRadius: active ? NOTCH + 6 : 0,
+                    justifyContent: collapsed ? 'center' : 'flex-start',
+                    gap: 10,
+                    minHeight: active ? 36 : 40,
+                    paddingVertical: active ? 6 : 8,
+                    paddingLeft: collapsed ? 0 : 12,
+                    paddingRight: collapsed ? 0 : 14,
+                    borderTopLeftRadius: active ? (collapsed ? 999 : 999) : 0,
+                    borderBottomLeftRadius: active ? 999 : 0,
+                    borderTopRightRadius: collapsed && active ? 999 : 0,
+                    borderBottomRightRadius: collapsed && active ? 999 : 0,
                     backgroundColor: active
-                      ? contentBg
+                      ? activePill
                       : pressed
                         ? pressedBg
                         : 'transparent',
+                    borderLeftWidth: active && !collapsed ? 3 : 0,
+                    borderLeftColor: active ? ORANGE : 'transparent',
                   })}
                 >
                   <Ionicons
@@ -186,18 +241,20 @@ export function DesktopSidebar()
                         : item.icon
                     }
                     size={18}
-                    color={active ? activeFg : inkOnBrand}
+                    color={active ? ORANGE : inkOnBrand}
                   />
-                  <Text
-                    variant="label"
-                    style={{
-                      color: active ? activeFg : inkOnBrand,
-                      fontSize: 14,
-                      fontWeight: active ? '700' : '500',
-                    }}
-                  >
-                    {item.label}
-                  </Text>
+                  {!collapsed ? (
+                    <Text
+                      variant="label"
+                      style={{
+                        color: active ? ORANGE : inkOnBrand,
+                        fontSize: 13,
+                        fontWeight: active ? '700' : '500',
+                      }}
+                    >
+                      {item.label}
+                    </Text>
+                  ) : null}
                 </Pressable>
               </View>
             )
@@ -208,10 +265,12 @@ export function DesktopSidebar()
           onPress={() => openCapture('dump')}
           accessibilityRole="button"
           accessibilityLabel="Capturar"
+          {...(Platform.OS === 'web' ? { title: 'Capturar' } : null)}
           style={({ pressed }) => ({
             marginTop: space.sm,
-            marginRight: space.md,
-            minHeight: 44,
+            marginRight: collapsed ? 0 : 12,
+            marginHorizontal: collapsed ? 10 : undefined,
+            minHeight: 40,
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
@@ -219,51 +278,60 @@ export function DesktopSidebar()
             borderWidth: 1,
             borderColor: divider,
             opacity: pressed ? 0.9 : 1,
+            paddingHorizontal: collapsed ? 0 : 12,
           })}
         >
-          <Text variant="label" style={{ color: ctaFg, fontSize: 13, fontWeight: '700' }}>
-            + Capturar
-          </Text>
+          {collapsed ? (
+            <Ionicons name="add" size={20} color={CREAM} />
+          ) : (
+            <Text variant="label" style={{ color: CREAM, fontSize: 12, fontWeight: '700' }}>
+              + Capturar
+            </Text>
+          )}
         </Pressable>
       </View>
 
       <Pressable
-        onPress={() => router.push('/preferencias')}
+        onPress={() => router.push('/perfil')}
         accessibilityRole="button"
-        accessibilityLabel="Abrir preferências"
+        accessibilityLabel="Abrir perfil"
+        {...(Platform.OS === 'web' ? { title: 'Perfil' } : null)}
         style={{
-          flexDirection: 'row',
+          flexDirection: collapsed ? 'column' : 'row',
           alignItems: 'center',
           gap: 10,
-          paddingHorizontal: space.sm,
+          paddingHorizontal: collapsed ? 0 : 8,
           paddingTop: space.md,
-          marginRight: space.md,
+          marginRight: collapsed ? 0 : 12,
           borderTopWidth: 1,
           borderTopColor: divider,
+          justifyContent: 'center',
         }}
       >
         <View
           style={{
-            width: 36,
-            height: 36,
+            width: 32,
+            height: 32,
             borderRadius: 999,
             backgroundColor: avatarBg,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Text variant="label" style={{ color: '#F5F1EC', fontSize: 13 }}>
+          <Text variant="label" style={{ color: CREAM, fontSize: 12 }}>
             {name.slice(0, 1).toUpperCase()}
           </Text>
         </View>
-        <View style={{ flex: 1, minWidth: 0 }}>
-          <Text variant="label" numberOfLines={1} style={{ color: '#F5F1EC', fontSize: 13 }}>
-            {name}
-          </Text>
-          <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 11 }}>
-            Preferências
-          </Text>
-        </View>
+        {!collapsed ? (
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text variant="label" numberOfLines={1} style={{ color: CREAM, fontSize: 12 }}>
+              {name}
+            </Text>
+            <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 10 }}>
+              Perfil
+            </Text>
+          </View>
+        ) : null}
       </Pressable>
     </View>
   )

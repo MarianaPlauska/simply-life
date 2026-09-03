@@ -8,7 +8,7 @@ import { useSuperhumanTasks } from '../../hooks/useSuperhumanTasks'
 import { SuperhumanTaskRow } from './SuperhumanTaskRow'
 import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
-// Modo Superhuman — lista hiperdensa por score (§2.4 "tudo é linha")
+// Modo Superhuman - lista hiperdensa por score (§2.4 "tudo é linha")
 
 export function SuperhumanView()
 {
@@ -54,7 +54,7 @@ export function SuperhumanView()
             </span>
           </h1>
           <p className="text-[13px] text-ink-muted mt-1">
-            Lista densa por score — mesma linguagem do Kanban temporal.
+            Lista densa por score - mesma linguagem do Kanban temporal.
           </p>
         </div>
         <div className="relative">
@@ -69,7 +69,7 @@ export function SuperhumanView()
         </div>
       </header>
 
-      {/* lista de tarefas — divisor entre linhas com cor sutil de fundo */}
+      {/* lista de tarefas - divisor entre linhas com cor sutil de fundo */}
       <div role="list" className="flex flex-col gap-0.5 border-t border-line">
         {isLoading && activeTasks.length === 0 && (
           <div className="flex flex-col items-center py-16 gap-2">

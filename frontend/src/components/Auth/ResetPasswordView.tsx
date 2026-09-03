@@ -1,4 +1,4 @@
-// tela de redefinição de senha — quando o user clica no link do email de recuperação
+// tela de redefinição de senha - quando o user clica no link do email de recuperação
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertCircle, Lock, Eye, EyeOff, CheckCircle2, Loader2 } from 'lucide-react'
@@ -30,7 +30,7 @@ export function ResetPasswordView ()
       }
     })
 
-    // fallback — checa se já tem sessão
+    // fallback - checa se já tem sessão
     supabase.auth.getSession().then(({ data: { session } }) =>
     {
       if (session) setHasSession(true)

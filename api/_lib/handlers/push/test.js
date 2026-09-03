@@ -1,4 +1,4 @@
-// POST /api/push-test — Web + Expo
+// POST /api/push-test - Web + Expo
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js'
@@ -53,7 +53,7 @@ export default async function handler(req, res)
 
   const payload = enrichPushPayload({
     title: 'Simply-Life · teste',
-    body: 'Push OK — web ou Expo. Toque para abrir o app.',
+    body: 'Push OK - web ou Expo. Toque para abrir o app.',
     url: '/kanban?foco=1',
     tag: 'simply-life-test',
   }, {

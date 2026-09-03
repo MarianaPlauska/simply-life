@@ -26,7 +26,7 @@ export interface CashPosition extends LedgerSummary
   saldoDisponivel: number
   saldoProjetadoDisponivel: number
   reservaRestante: number
-  /** Contas fixas do mês ainda não lançadas — já descontadas do projetado */
+  /** Contas fixas do mês ainda não lançadas - já descontadas do projetado */
   compromissosFixas: number
 }
 
@@ -45,7 +45,7 @@ export interface ReservationOptions
   transactions?: Transaction[]
 }
 
-/** Reserva efetiva — ignora boletos já pagos (Pagos) ou com despesa no extrato */
+/** Reserva efetiva - ignora boletos já pagos (Pagos) ou com despesa no extrato */
 export function effectiveReservedForBill(
   bill: ReservedBill,
   settlements: FinanceBillSettlement[] = [],
@@ -64,7 +64,7 @@ export function effectiveReservedForBill(
   return remaining
 }
 
-/** Pagamentos em Pagos sem lançamento no caixa — só desconta do mês corrente */
+/** Pagamentos em Pagos sem lançamento no caixa - só desconta do mês corrente */
 function sumSettlementCashGaps(
   settlements: FinanceBillSettlement[],
   transactions: Transaction[],

@@ -1,6 +1,6 @@
 /**
  * Insere tarefa triada no Supabase.
- * Dedup por (user_id, external_ref) — mesma mensagem IMAP/webhook não vira duas tasks.
+ * Dedup por (user_id, external_ref) - mesma mensagem IMAP/webhook não vira duas tasks.
  * @param {import('@supabase/supabase-js').SupabaseClient} supabase
  */
 export async function insertTriagedTask(supabase, userId, item, scored, extra = {})

@@ -13,7 +13,7 @@ interface FinanceUpcomingBillsStripProps
   onOpenBills?: () => void
 }
 
-// Linha do tempo de contas — fluxo de caixa previsto (Organizze/Mobills)
+// Linha do tempo de contas - fluxo de caixa previsto (Organizze/Mobills)
 
 export function FinanceUpcomingBillsStrip({
   days = 14,

@@ -1,4 +1,4 @@
-// Rotas da página Saúde — seção principal + subaba de cuidados (hash retrocompatível)
+// Rotas da página Saúde - seção principal + subaba de cuidados (hash retrocompatível)
 
 export type HealthSection = 'hoje' | 'cuidados' | 'diario' | 'bem_estar'
 

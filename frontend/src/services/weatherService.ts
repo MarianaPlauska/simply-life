@@ -1,5 +1,5 @@
 // serviço de clima usando Open-Meteo (100% gratuito, sem API key)
-// https://open-meteo.com — sem limites para uso pessoal
+// https://open-meteo.com - sem limites para uso pessoal
 
 export interface WeatherData
 {
@@ -148,7 +148,7 @@ export function generateLocalGreeting(weather: WeatherData | null, context: {
   // streak positivo
   if (context.streak >= 5 && parts.length < 3)
   {
-    parts.push(`${context.streak} dias de streak — mantenha o ritmo.`);
+    parts.push(`${context.streak} dias de streak - mantenha o ritmo.`);
   }
 
   // monta a saudação final (max 2 destaques)

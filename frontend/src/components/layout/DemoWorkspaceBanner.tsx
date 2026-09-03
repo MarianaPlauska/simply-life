@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { isDemoEmail } from '../../lib/demoWorkspace'
 import { useTaskStore } from '../../store/useTaskStore'
 
-/** Aviso discreto — dados da demo voltam ao seed no próximo login / cron. */
+/** Aviso discreto - dados da demo voltam ao seed no próximo login / cron. */
 export function DemoWorkspaceBanner()
 {
   const email = useTaskStore((s) => s.userProfile.email)
@@ -18,7 +18,7 @@ export function DemoWorkspaceBanner()
         className="flex items-start gap-3 rounded-sl border border-accent/35 bg-accent/10 px-3 py-2.5"
       >
         <p className="min-w-0 flex-1 text-[13px] text-ink leading-relaxed">
-          Ambiente de demonstração — Kanban, finanças e hábitos são de exemplo e
+          Ambiente de demonstração - Kanban, finanças e hábitos são de exemplo e
           reiniciam a cada visita.
         </p>
         <button

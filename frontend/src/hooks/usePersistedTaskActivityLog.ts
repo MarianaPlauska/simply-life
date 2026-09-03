@@ -25,9 +25,9 @@ interface UsePersistedTaskActivityLogOptions
 
 function formatDateShort(iso: string | null): string
 {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   return d.toLocaleString('pt-BR', {
     day: '2-digit',
     month: 'short',
@@ -68,7 +68,7 @@ export function usePersistedTaskActivityLog({
     if (state.semPrazo !== prev.semPrazo)
     {
       onLog(
-        state.semPrazo ? 'Prazo removido — sem data definida' : 'Prazo reativado',
+        state.semPrazo ? 'Prazo removido - sem data definida' : 'Prazo reativado',
         'progress',
       )
     }

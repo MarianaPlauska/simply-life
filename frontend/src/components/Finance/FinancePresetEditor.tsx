@@ -137,7 +137,7 @@ export function FinancePresetEditor({ onClose }: FinancePresetEditorProps)
             <input
               value={draft.label}
               onChange={(e) => setDraft({ ...draft, label: e.target.value })}
-              placeholder="Nome — ex: Padaria"
+              placeholder="Nome - ex: Padaria"
               className="col-span-8 border border-line rounded-sl bg-chrome px-3 py-2 text-sm text-ink"
             />
             <MoneyInput

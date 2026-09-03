@@ -1,4 +1,4 @@
-// Detalhe estruturado da sessão — alimenta relatórios e analytics
+// Detalhe estruturado da sessão - alimenta relatórios e analytics
 
 import type { AcademyCompletedSet, AcademyExercise } from './academyWorkouts'
 
@@ -44,7 +44,7 @@ export function computeSetVolume(pesoKg: number, reps: number): number
   return Math.max(0, pesoKg) * Math.max(0, reps)
 }
 
-/** Σ (carga × reps) — volume de treino em kg·rep */
+/** Σ (carga × reps) - volume de treino em kg·rep */
 export function computeSessionVolume(
   sets: { peso_kg: number; reps: number }[],
 ): number

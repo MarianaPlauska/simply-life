@@ -63,7 +63,7 @@ export function NotificationPermissionPrompt()
       <Bell className="w-4 h-4 text-accent shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <p className="text-[13px] text-ink leading-snug">
-          Ative lembretes de medicamentos, humor e boletos — mesmo com o app fechado.
+          Ative lembretes de medicamentos, humor e boletos - mesmo com o app fechado.
         </p>
         <div className="flex flex-wrap gap-2 mt-2">
           <button

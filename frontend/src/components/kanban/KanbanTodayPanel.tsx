@@ -8,7 +8,7 @@ import { axelCompleteTask } from '../../lib/axelTaskCompletion'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
-// Painel Hoje — fila + detalhe (sem duplicar coluna no board)
+// Painel Hoje - fila + detalhe (sem duplicar coluna no board)
 
 interface KanbanTodayPanelProps
 {

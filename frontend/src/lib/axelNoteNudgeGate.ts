@@ -1,4 +1,4 @@
-// Máximo 1 nudge de nota por dia — tom Finch, sem spam
+// Máximo 1 nudge de nota por dia - tom Finch, sem spam
 
 import { readScopedJson, writeScopedJson } from './userScopedStorage'
 

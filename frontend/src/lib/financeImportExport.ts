@@ -47,7 +47,7 @@ th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}
 th{font-size:10px;text-transform:uppercase;color:#666}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 </style></head><body>
-<h1>Simply-Life — ${monthLabel}</h1>
+<h1>Simply-Life - ${monthLabel}</h1>
 <p>${rows.length} lançamentos</p>
 <table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th class="num">Valor</th><th>Categoria</th></tr></thead><tbody>
 ${rows.map((t) => `<tr>

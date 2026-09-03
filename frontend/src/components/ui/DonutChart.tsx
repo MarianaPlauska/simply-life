@@ -13,7 +13,7 @@ interface DonutChartProps
   centerLabel?: string
 }
 
-/** Donut SVG leve — sem Recharts */
+/** Donut SVG leve - sem Recharts */
 export function DonutChart({ items, size = 120, centerLabel }: DonutChartProps)
 {
   const filtered = items.filter((i) => i.value > 0)
@@ -28,7 +28,7 @@ export function DonutChart({ items, size = 120, centerLabel }: DonutChartProps)
         className="rounded-full border border-line bg-chrome flex items-center justify-center text-[11px] text-ink-muted"
         style={{ width: size, height: size }}
       >
-        —
+        -
       </div>
     )
   }

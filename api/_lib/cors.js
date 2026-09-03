@@ -1,5 +1,5 @@
 /**
- * CORS restrito em produção — lista em ALLOWED_ORIGINS (vírgula).
+ * CORS restrito em produção - lista em ALLOWED_ORIGINS (vírgula).
  * Ex.: https://seu-app.vercel.app,http://localhost:5173
  */
 export function applyCors(req, res, options = {})

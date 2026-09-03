@@ -1,6 +1,6 @@
 import type { TarefaUnificada } from '../types'
 
-// Alertas globais — prazos nas próximas 48h (2 dias)
+// Alertas globais - prazos nas próximas 48h (2 dias)
 
 const HOUR_MS = 3_600_000
 const TASK_DUE_ALERT_HOURS = 48

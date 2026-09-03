@@ -36,7 +36,7 @@ export function buildReconciliationSnapshot(
   const alinhado = absDelta != null && absDelta <= TOLERANCE
 
   let axelHeadline = 'Bata o saldo com o banco'
-  let axelDetail = 'Abra o app do banco e informe o saldo disponível aqui — leva 10 segundos e evita surpresas.'
+  let axelDetail = 'Abra o app do banco e informe o saldo disponível aqui - leva 10 segundos e evita surpresas.'
 
   if (saldoBanco != null && alinhado)
   {

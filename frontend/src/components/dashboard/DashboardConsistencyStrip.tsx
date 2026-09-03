@@ -15,7 +15,6 @@ interface DashboardConsistencyStripProps
   compact?: boolean
 }
 
-/** Quadradinhos de rotina — execução e gasto, fora da dobra da Home */
 export function DashboardConsistencyStrip({ compact = false }: DashboardConsistencyStripProps)
 {
   const focusMinutesByDate = useTaskStore((s) => s.focusMinutesByDate)
@@ -46,7 +45,7 @@ export function DashboardConsistencyStrip({ compact = false }: DashboardConsiste
         tone="health"
         weeks={compact ? 12 : 16}
         label="Rotina de execução"
-        emptyHint="Execute ou foque um bloco — os quadrados começam a preencher."
+        emptyHint="Execute ou foque um bloco - os quadrados começam a preencher."
         formatTooltip={formatExecutionTooltip}
         compact={compact}
       />

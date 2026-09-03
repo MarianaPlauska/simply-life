@@ -63,7 +63,7 @@ function resolveCategoryName(t: Transaction, categories: Category[]): string
   {
     return categories.find((c) => c.id === t.categoria_id)?.nome ?? t.categoria
   }
-  return t.categoria || '—'
+  return t.categoria || '-'
 }
 
 export function computeSpreadsheetOpening(
@@ -162,7 +162,7 @@ export function buildPeriodIncomeBreakdown(
   }
 }
 
-/** Extrato com coluna acumulado — estilo planilha pessoal */
+/** Extrato com coluna acumulado - estilo planilha pessoal */
 export function buildSpreadsheetLedger(
   periodTransactions: Transaction[],
   categories: Category[],

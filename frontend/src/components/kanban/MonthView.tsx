@@ -1,4 +1,4 @@
-// MonthView — calendário mensal com tarefas nos dias
+// MonthView - calendário mensal com tarefas nos dias
 // visual clean tipo calendário Google/Notion com tarefas como chips
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, Circle, CheckCircle2 } from 'lucide-react'

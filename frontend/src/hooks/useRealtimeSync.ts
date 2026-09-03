@@ -1,4 +1,4 @@
-// Realtime Supabase — tarefas no Kanban/Superhuman sem F5
+// Realtime Supabase - tarefas no Kanban/Superhuman sem F5
 import { useEffect, useRef } from 'react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useTaskStore } from '../store/useTaskStore'
@@ -183,7 +183,7 @@ export function useRealtimeSync(): void
           else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT')
           {
             setRealtimeStatus('error')
-            console.warn('[Realtime] Falha no canal — rode migration 011 e ative Realtime em tarefas_unificadas.')
+            console.warn('[Realtime] Falha no canal - rode migration 011 e ative Realtime em tarefas_unificadas.')
 
             if (retryRef.current < 2)
             {

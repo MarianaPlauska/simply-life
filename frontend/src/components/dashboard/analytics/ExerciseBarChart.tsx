@@ -12,8 +12,6 @@ import { useAxelChartTheme } from '../../../hooks/useAxelChartTheme'
 import { AXEL_DISPLAY_STAT, AXEL_TEXT_SECONDARY } from '../../../constants/axelSurfaces'
 import { AxelChartTooltip, axelChartCursorFill, CHART_HEIGHT, type AxelTooltipProps } from './axelChartConfig'
 
-// Modo Academia — barras com fill/stroke dependentes do tema
-
 interface ExerciseBarChartProps
 {
   rows: AnalyticsChartRow[]

@@ -1,4 +1,4 @@
-// Avatares do wizard — iniciais ou companheiros SVG (sem API externa)
+// Avatares do wizard - iniciais ou companheiros SVG (sem API externa)
 
 export type AvatarStyleId =
   | 'initials'

@@ -1,4 +1,4 @@
-// SMTP da mesma conta IMAP (Gmail senha de app) — sem Resend/Brevo
+// SMTP da mesma conta IMAP (Gmail senha de app) - sem Resend/Brevo
 
 import nodemailer from 'nodemailer'
 import { decryptSecret } from './cryptoSecret.js'

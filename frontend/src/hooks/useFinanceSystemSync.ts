@@ -18,7 +18,7 @@ import { supabase } from '../lib/supabase'
 
 const SINO_DESTAQUE_MS = 6000
 
-/** Sincroniza finanças ao entrar no sistema — alertas, fixas, receitas e resumo diário */
+/** Sincroniza finanças ao entrar no sistema - alertas, fixas, receitas e resumo diário */
 export function useFinanceSystemSync(): void
 {
   const syncingRef = useRef(false)
@@ -105,7 +105,7 @@ export function useFinanceSystemSync(): void
         if (postedFixas.length > 0 && !cancelled)
         {
           const label = postedFixas.length === 1 ? postedFixas[0] : `${postedFixas.length} contas fixas`
-          toast.info(`Axel lançou ${label} — vencimento de hoje`, { duration: 4500 })
+          toast.info(`Axel lançou ${label} - vencimento de hoje`, { duration: 4500 })
         }
 
         if (postedReceitas.length > 0 && !cancelled)

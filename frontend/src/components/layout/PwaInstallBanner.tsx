@@ -16,7 +16,7 @@ function isStandaloneMode(): boolean
     || (window.navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
-/** Banner de instalação PWA — Android/Chrome (beforeinstallprompt) */
+/** Banner de instalação PWA - Android/Chrome (beforeinstallprompt) */
 export function PwaInstallBanner()
 {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null)
@@ -70,7 +70,7 @@ export function PwaInstallBanner()
           <p className="text-sm font-medium text-ink">Instalar no iPhone</p>
           <p className="text-[11px] text-ink-muted mt-1 leading-relaxed">
             Safari → Compartilhar → Adicionar à Tela de Início. Abre em tela cheia como app.
-            Push só no iOS 16.4+, depois de instalado — o Safari na aba não pede permissão.
+            Push só no iOS 16.4+, depois de instalado - o Safari na aba não pede permissão.
           </p>
           <button
             type="button"
@@ -103,7 +103,7 @@ export function PwaInstallBanner()
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-ink">Instalar Simply-Life</p>
           <p className="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
-            Adicione à tela inicial para abrir como app — alertas, finanças e tarefas na palma da mão.
+            Adicione à tela inicial para abrir como app - alertas, finanças e tarefas na palma da mão.
           </p>
           <div className="flex gap-2 mt-3">
             <button

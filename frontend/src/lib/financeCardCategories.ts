@@ -1,4 +1,4 @@
-// Categorias por cartão — nomes e ícones Lucide próprios do extrato
+// Categorias por cartão - nomes e ícones Lucide próprios do extrato
 
 import { readScopedJson, writeScopedJson } from './userScopedStorage'
 
@@ -100,7 +100,7 @@ export function labelCardCategory(cardId: string, categoryId: string): string
   return cat?.nome ?? categoryId
 }
 
-/** Nome puro — sem emoji legado */
+/** Nome puro - sem emoji legado */
 export function cardCategoryNome(cat: CardCategory | undefined): string
 {
   return cat?.nome?.trim() || 'Outros'

@@ -29,7 +29,7 @@ function addBusinessDays(from: Date, days: number): Date
 
 /**
  * Gera propostas de prazo quando carga, bloqueio ou atraso exigem ajuste.
- * Nunca altera o prazo — só sugere para aceite do usuário.
+ * Nunca altera o prazo - só sugere para aceite do usuário.
  */
 export function computeDeadlineProposals(
   tasks: TarefaUnificada[],
@@ -66,7 +66,7 @@ export function computeDeadlineProposals(
         taskId: task.id,
         currentDue: task.data_vencimento,
         proposedDue: proposed.toISOString(),
-        reason: 'Dependência pendente — prazo irrealista para concluir agora.',
+        reason: 'Dependência pendente - prazo irrealista para concluir agora.',
         createdAt: now.toISOString(),
       })
       continue
@@ -80,7 +80,7 @@ export function computeDeadlineProposals(
         taskId: task.id,
         currentDue: task.data_vencimento,
         proposedDue: proposed.toISOString(),
-        reason: `Carga de prazo hoje acima do cap (${dailyScoreCap} pts) — sugere reagendar.`,
+        reason: `Carga de prazo hoje acima do cap (${dailyScoreCap} pts) - sugere reagendar.`,
         createdAt: now.toISOString(),
       })
       continue
@@ -99,13 +99,13 @@ export function computeDeadlineProposals(
         taskId: task.id,
         currentDue: task.data_vencimento,
         proposedDue: proposed.toISOString(),
-        reason: 'Velocidade abaixo da meta — mais 2 dias para entrega sustentável.',
+        reason: 'Velocidade abaixo da meta - mais 2 dias para entrega sustentável.',
         createdAt: now.toISOString(),
       })
     }
   }
 
-  // Uma proposta por tarefa — a mais recente vence
+  // Uma proposta por tarefa - a mais recente vence
   const byTask = new Map<number, DeadlineProposal>()
   for (const p of proposals)
   {

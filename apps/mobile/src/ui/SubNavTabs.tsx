@@ -8,7 +8,7 @@ export type SubNavTab<T extends string> = {
   count?: number
 }
 
-/** Sub-navegação com divisória fina — padrão web AXEL */
+/** Sub-navegação com divisória fina - padrão web AXEL */
 export function SubNavTabs<T extends string>({
   tabs,
   value,

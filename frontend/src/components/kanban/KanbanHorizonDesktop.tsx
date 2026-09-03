@@ -11,7 +11,7 @@ interface KanbanHorizonDesktopProps
   onStartExecute?: (task: TarefaUnificada) => void
 }
 
-/** Board desktop — colunas de prazo em largura fixa, overflow-x se sobrar espaço */
+/** Board desktop - colunas de prazo em largura fixa, overflow-x se sobrar espaço */
 export function KanbanHorizonDesktop({
   tarefas,
   executionQueueIds,

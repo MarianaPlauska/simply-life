@@ -30,7 +30,7 @@ function parseDueKey(dataVencimento: string): string | null
   return dateKey(due)
 }
 
-/** Mini-calendário + próximas 48h — rail do Kanban em lg+ */
+/** Mini-calendário + próximas 48h - rail do Kanban em lg+ */
 export function KanbanDesktopRail({ tarefas, onOpen }: KanbanDesktopRailProps)
 {
   const navigate = useNavigate()

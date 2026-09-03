@@ -12,7 +12,7 @@ interface MoneyInputProps
   id?: string
 }
 
-/** Campo BRL — digitação centavos → reais (ex.: 3 → 0,03 · 30 → 0,30 · 3000 → 30,00) */
+/** Campo BRL - digitação centavos → reais (ex.: 3 → 0,03 · 30 → 0,30 · 3000 → 30,00) */
 export function MoneyInput({
   value,
   onChange,

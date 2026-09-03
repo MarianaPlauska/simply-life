@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Flame } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 
-// Contador de Ofensiva — header premium com animação ao incrementar
+// Contador de Ofensiva - header premium com animação ao incrementar
 
 export function AxelStreakBadge()
 {

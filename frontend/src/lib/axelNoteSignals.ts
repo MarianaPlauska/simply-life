@@ -1,4 +1,4 @@
-// Anotações como sinais — regras explicáveis para o AXEL
+// Anotações como sinais - regras explicáveis para o AXEL
 
 import { buildUnifiedNoteSnippet } from './axelUnifiedNotes'
 
@@ -82,7 +82,7 @@ export function buildNoteSignalNudge(
     rules.push(RULES.compra_pendente.label, 'orçamento lazer/presentes')
     return {
       title: 'Presente virou missão?',
-      body: 'Posso sugerir uma main quest leve no Kanban — sem pressão de comprar hoje.',
+      body: 'Posso sugerir uma main quest leve no Kanban - sem pressão de comprar hoje.',
       action: 'kanban',
       rules,
     }
@@ -93,7 +93,7 @@ export function buildNoteSignalNudge(
     rules.push(RULES.trabalho_extra.label, 'cap Kanban alto')
     return {
       title: 'Projeto extra na fila',
-      body: 'Sua nota fala em demanda — o Kanban já está cheio. Negocie prazo antes de aceitar.',
+      body: 'Sua nota fala em demanda - o Kanban já está cheio. Negocie prazo antes de aceitar.',
       action: 'kanban',
       rules,
     }
@@ -104,7 +104,7 @@ export function buildNoteSignalNudge(
     rules.push(RULES.autocuidado.label, 'modo recuperação')
     return {
       title: 'Dia de menos é válido',
-      body: 'Registrei seu cansaço. Priorize ritual e humor — tarefas pesadas podem esperar.',
+      body: 'Registrei seu cansaço. Priorize ritual e humor - tarefas pesadas podem esperar.',
       action: 'wellbeing',
       rules,
     }

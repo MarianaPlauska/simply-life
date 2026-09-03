@@ -3,7 +3,7 @@ import { DEFAULT_INFLUENCE_MAP } from './influenceMap'
 import { HOJE_SCORE_FLOOR } from './temporalHorizon'
 import type { TarefaUnificada } from '../types'
 
-// IntentAnalyzer — classifica intenção a partir do texto e metadados do e-mail
+// IntentAnalyzer - classifica intenção a partir do texto e metadados do e-mail
 
 export type TaskIntentCategory = 'bloqueio' | 'alinhamento' | 'execucao'
 
@@ -115,9 +115,9 @@ function buildUrgencyReason(
     case 'bloqueio':
       return `Classificado como Bloqueio: ${senderPart} menciona ${detail}.`
     case 'alinhamento':
-      return `Classificado como Alinhamento: ${senderPart} compartilha ${detail} — prazo secundário.`
+      return `Classificado como Alinhamento: ${senderPart} compartilha ${detail} - prazo secundário.`
     case 'execucao':
-      return `Classificado como Execução: ${senderPart} — ${detail}, tarefa acionável.`
+      return `Classificado como Execução: ${senderPart} - ${detail}, tarefa acionável.`
   }
 }
 

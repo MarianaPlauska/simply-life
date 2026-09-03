@@ -5,12 +5,12 @@ type MoodValue = 1 | 2 | 3 | 4 | 5
 interface AxelMoodFaceProps
 {
   level: number
-  /** Presença da Home — sobrepõe o humor 1–5 quando informada */
+  /** Presença da Home - sobrepõe o humor 1-5 quando informada */
   presence?: 'calmo' | 'atento' | 'positivo'
   size?: number
   className?: string
   title?: string
-  /** Sem a brasa — seletor de humor, não a voz do AXEL */
+  /** Sem a brasa - seletor de humor, não a voz do AXEL */
   quiet?: boolean
 }
 
@@ -35,7 +35,7 @@ const PRESENCE_MOUTH: Record<'calmo' | 'atento' | 'positivo', MoodValue> = {
   positivo: 5,
 }
 
-/** Rosto-assinatura do AXEL — brasa laranja em todos os estados, sem emoji */
+/** Rosto-assinatura do AXEL - brasa laranja em todos os estados, sem emoji */
 export function AxelMoodFace({
   level,
   presence,

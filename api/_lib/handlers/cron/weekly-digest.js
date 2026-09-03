@@ -1,4 +1,4 @@
-// Cron + disparo manual — resumo semanal (e-mail IMAP e/ou web push)
+// Cron + disparo manual - resumo semanal (e-mail IMAP e/ou web push)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { sendPushToSubscriptions } from '../../sendPushFanout.js'

@@ -1,4 +1,4 @@
-// Handler — sync Gmail (OAuth + IMAP)
+// Handler - sync Gmail (OAuth + IMAP)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { resolveGoogleAccessToken } from '../../googleOAuth.js';

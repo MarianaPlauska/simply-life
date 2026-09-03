@@ -20,7 +20,7 @@ function addDays(base: Date, days: number): string
   return d.toISOString().slice(0, 10)
 }
 
-/** Faturas de demonstração — datas relativas a hoje */
+/** Faturas de demonstração - datas relativas a hoje */
 export function buildFinanceReservedBillsMock(reference = new Date()): ReservedBillsMockSnapshot
 {
   const bills: ReservedBill[] = [
@@ -78,7 +78,7 @@ export function buildFinanceReservedBillsMock(reference = new Date()): ReservedB
     {
       id: 910_003,
       fatura_reserva_id: MOCK_BILL_IDS.nubank,
-      descricao: 'Compra errada — devolver',
+      descricao: 'Compra errada - devolver',
       valor: 389,
       destaque: 'erro',
       created_at: addDays(reference, -2),

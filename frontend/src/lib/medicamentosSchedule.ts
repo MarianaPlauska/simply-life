@@ -1,7 +1,7 @@
 import type { Medicamento, MedicamentoTomada } from '../store/storeTypes'
 import { localTodayIso } from './healthDayBoundary'
 
-// Agenda de medicamentos — horários, tomadas e tom acolhedor (sem culpa)
+// Agenda de medicamentos - horários, tomadas e tom acolhedor (sem culpa)
 
 export interface DoseHoje
 {
@@ -31,7 +31,7 @@ export function formatHorarioDisplay(horario: string): string
   return horario.trim().slice(0, 5)
 }
 
-/** Horários do remédio — config.horarios ou legado horario único */
+/** Horários do remédio - config.horarios ou legado horario único */
 export function horariosDoMedicamento(med: Medicamento): string[]
 {
   const fromConfig = med.config?.horarios?.filter(Boolean) ?? []
@@ -136,15 +136,15 @@ export function mensagemGentilDose(dose: DoseHoje): string
   if (dose.status === 'tomado' && dose.tomada)
   {
     const hora = new Date(dose.tomada.tomado_em).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    return `${dose.nome} (${dose.horario}) — registrado às ${hora}.`
+    return `${dose.nome} (${dose.horario}) - registrado às ${hora}.`
   }
   if (dose.status === 'futuro')
   {
-    return `${dose.nome} às ${dose.horario} — ainda não é hora, sem pressa.`
+    return `${dose.nome} às ${dose.horario} - ainda não é hora, sem pressa.`
   }
   if (dose.status === 'janela')
   {
-    return `Já tomou ${dose.nome} (${dose.horario})? Um toque registra — sem julgamento.`
+    return `Já tomou ${dose.nome} (${dose.horario})? Um toque registra - sem julgamento.`
   }
   return `Passou do horário de ${dose.nome} (${dose.horario}). Quando puder, registre aqui.`
 }

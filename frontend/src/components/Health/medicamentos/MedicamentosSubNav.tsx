@@ -9,7 +9,7 @@ interface MedicamentosSubNavProps
   tabs: { id: MedicamentosSubTab; label: string; short: string; Icon: LucideIcon }[]
 }
 
-/** Subabas de medicamentos — estilo da nav principal (scroll horizontal) */
+/** Subabas de medicamentos - estilo da nav principal (scroll horizontal) */
 export function MedicamentosSubNav({ active, onSelect, tabs }: MedicamentosSubNavProps)
 {
   return (

@@ -1,7 +1,7 @@
 import type { ReservedBill, VirtualCard } from '../store/storeTypes'
 import type { BillVisualStatus } from './financeBillVisual'
 
-/** Superfície suave da fatura — cor vem do cartão */
+/** Superfície suave da fatura - cor vem do cartão */
 export interface BillCardSurface
 {
   stripe: string
@@ -78,7 +78,7 @@ export const CASH_BILL_SURFACE: BillCardSurface = {
   label: 'Conta corrente',
 }
 
-/** Badge de situação — discreto, não pinta o card inteiro */
+/** Badge de situação - discreto, não pinta o card inteiro */
 export const STATUS_BADGE_SOFT: Record<BillVisualStatus, string> = {
   tranquila: '',
   vencendo: 'text-atencao/90 border-atencao/20 bg-atencao/[0.06]',
@@ -108,7 +108,7 @@ export function resolveBillCardSurface(
   const card = cards.find((c) => c.id === bill.card_id)
   if (card) return CARD_BILL_SURFACES[card.tipo_gradiente]
 
-  // Mock sem cartão cadastrado — inferência pelo id legado
+  // Mock sem cartão cadastrado - inferência pelo id legado
   if (bill.card_id.includes('nubank') || bill.card_id.includes('purple'))
   {
     return CARD_BILL_SURFACES.purple

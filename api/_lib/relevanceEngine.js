@@ -1,4 +1,4 @@
-// Motor de Relevância AXEL — influência + semântica + prazo
+// Motor de Relevância AXEL - influência + semântica + prazo
 
 import {
   DEFAULT_INFLUENCE_MAP,
@@ -31,7 +31,7 @@ const LOW_PRIORITY_TERMS = [
 ];
 
 /**
- * Análise semântica básica do título (0–100).
+ * Análise semântica básica do título (0-100).
  * @param {string} title
  */
 export function analyzeTitle(title)
@@ -79,7 +79,7 @@ export function analyzeTitle(title)
 }
 
 /**
- * Fator de prazo 0–100.
+ * Fator de prazo 0-100.
  * @param {string | null | undefined} dueIso
  */
 export function computeDeadlineFactor(dueIso)
@@ -142,7 +142,7 @@ export function calculateUrgency(task, sender, options = {})
     semantic.matchedLow[0] ??
     'contexto neutro';
 
-  let reason = `Prioridade moderada — origem [${senderLabel}] com contexto [${termLabel}].`;
+  let reason = `Prioridade moderada - origem [${senderLabel}] com contexto [${termLabel}].`;
 
   if (score >= 75)
   {
@@ -150,7 +150,7 @@ export function calculateUrgency(task, sender, options = {})
   }
   else if (score < 40)
   {
-    reason = `Prioridade baixa — remetente [${senderLabel}] e linguagem de [${termLabel}] sugerem triagem posterior.`;
+    reason = `Prioridade baixa - remetente [${senderLabel}] e linguagem de [${termLabel}] sugerem triagem posterior.`;
   }
 
   if (deadlineFactor >= 90 && !reason.includes('prazo'))

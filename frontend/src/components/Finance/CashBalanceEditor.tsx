@@ -131,7 +131,7 @@ export function CashBalanceEditor({
     {
       key: 'disponivel',
       label: 'Disponível agora',
-      hint: 'Quanto você tem livre hoje — igual ao app do banco, já descontando o que está reservado',
+      hint: 'Quanto você tem livre hoje - igual ao app do banco, já descontando o que está reservado',
     },
     {
       key: 'projetado',

@@ -12,7 +12,7 @@ interface AxelCareMomentProps
 {
   avatarStyle: AvatarStyleId
   displayName?: string
-  /** Humor 1–5 ou omitir para mensagem de ofensiva */
+  /** Humor 1-5 ou omitir para mensagem de ofensiva */
   moodLevel?: MoodLevel
   streak?: boolean
   /** Duração visível em ms */

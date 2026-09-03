@@ -75,7 +75,7 @@ function collectStoreKeys(): string[]
   return [...new Set(keys)]
 }
 
-/** Lê o tema salvo no disco — chave dedicada primeiro, depois persist Zustand. */
+/** Lê o tema salvo no disco - chave dedicada primeiro, depois persist Zustand. */
 export function readPersistedColorScheme(): ColorScheme
 {
   const dedicated = readDedicatedColorScheme()
@@ -100,7 +100,7 @@ export function overlayRememberedColorScheme(accessibility: { colorScheme?: stri
   return remembered
 }
 
-/** Aplica tema salvo sem esperar o React — evita flash claro/escuro. */
+/** Aplica tema salvo sem esperar o React - evita flash claro/escuro. */
 export function bootstrapColorSchemeFromStorage(): ColorScheme
 {
   const scheme = readPersistedColorScheme()

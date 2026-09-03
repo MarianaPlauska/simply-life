@@ -1,4 +1,4 @@
-// POST /api/integrations/gmail/imap-settings — salva e-mail + senha de app cifrada
+// POST /api/integrations/gmail/imap-settings - salva e-mail + senha de app cifrada
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { corsJson, getUserFromBearer } from '../../supabaseUser.js'

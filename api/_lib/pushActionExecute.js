@@ -123,7 +123,7 @@ export async function executePushAction(supabase, payload, action)
       });
     }
 
-    return { ok: true, action: 'done', message: 'Tudo bem — quando quiser, registre o humor no app' };
+    return { ok: true, action: 'done', message: 'Tudo bem - quando quiser, registre o humor no app' };
   }
 
   return { ok: false, error: 'Tipo de lembrete desconhecido' };

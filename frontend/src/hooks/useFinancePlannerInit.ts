@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
 
-/** Promise única por sessão — remounts reutilizam o mesmo carregamento */
+/** Promise única por sessão - remounts reutilizam o mesmo carregamento */
 let sessionInitPromise: Promise<void> | null = null
 let sessionInitDone = false
 

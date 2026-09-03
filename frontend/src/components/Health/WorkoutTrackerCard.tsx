@@ -3,7 +3,7 @@ import { Dumbbell, ChevronRight, Timer } from 'lucide-react'
 import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 
-// Atalho Academia — card touch-friendly alinhado ao AXEL
+// Atalho Academia - card touch-friendly alinhado ao AXEL
 
 export function WorkoutTrackerCard()
 {

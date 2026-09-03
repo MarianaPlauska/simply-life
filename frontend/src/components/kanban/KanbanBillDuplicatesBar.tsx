@@ -53,7 +53,7 @@ export function KanbanBillDuplicatesBar()
           {duplicateCount} lembrete{duplicateCount !== 1 ? 's' : ''} de boleto repetido{duplicateCount !== 1 ? 's' : ''}
         </p>
         <p className="text-[11px] text-ink-muted mt-0.5">
-          Mantemos só um aviso por conta — o restante pode sair.
+          Mantemos só um aviso por conta - o restante pode sair.
         </p>
       </div>
       <button

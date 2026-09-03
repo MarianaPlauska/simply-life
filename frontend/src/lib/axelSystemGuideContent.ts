@@ -1,4 +1,4 @@
-// Textos do guia — como o Simply-Life organiza tarefas e prioridades
+// Textos do guia - como o Simply-Life organiza tarefas e prioridades
 
 export interface GuideSection
 {
@@ -22,7 +22,7 @@ export const AXEL_SYSTEM_GUIDE: GuideSection[] = [
   {
     id: 'execucao',
     title: 'Executar agora vs Prazo',
-    body: 'São visões diferentes da mesma tarefa — não se excluem.',
+    body: 'São visões diferentes da mesma tarefa - não se excluem.',
     bullets: [
       'Prazo: agrupa por data de vencimento (calendário).',
       'Executar agora: fila curta (máx. 8) do que fazer neste ciclo.',
@@ -32,9 +32,9 @@ export const AXEL_SYSTEM_GUIDE: GuideSection[] = [
   {
     id: 'score-visao',
     title: 'Prioridade (score)',
-    body: 'Número de 0 a 100. Quanto maior, mais acima na fila e mais XP ao concluir. Aparece no card e na lista — não precisa decorar a fórmula.',
+    body: 'Número de 0 a 100. Quanto maior, mais acima na fila e mais XP ao concluir. Aparece no card e na lista - não precisa decorar a fórmula.',
     bullets: [
-      '80+ → crítica (vermelho) · 55–79 → alta · 30–54 → média · abaixo → baixa.',
+      '80+ → crítica (vermelho) · 55-79 → alta · 30-54 → média · abaixo → baixa.',
       'O AXEL recalcula ao reorganizar o pipeline ou ao triar e-mails.',
       'Você pode fixar uma tarefa em Executar (ícone de pin no painel).',
     ],
@@ -44,10 +44,10 @@ export const AXEL_SYSTEM_GUIDE: GuideSection[] = [
     title: 'Como o score é calculado',
     body: 'O motor soma fatores e limita em 100. Tarefas criadas manualmente usam palavras-chave locais; e-mails e integrações passam pelo motor completo.',
     bullets: [
-      'Origem: reunião/calendário (+50), GitHub (+30–35), e-mail (+15), manual (+10).',
+      'Origem: reunião/calendário (+50), GitHub (+30-35), e-mail (+15), manual (+10).',
       'Texto: “urgente”, “bloqueado”, “hotfix” elevam; newsletter/marketing reduzem.',
       'IA: flags VIP, bug ou urgente somam pontos extras nas triagens.',
-      'Envelhecimento: +2 por dia parada (até +20) — evita esquecer demandas antigas.',
+      'Envelhecimento: +2 por dia parada (até +20) - evita esquecer demandas antigas.',
       'Prazo hoje ou score > 90 empurra para Executar; esta semana se score > 70 ou em progresso.',
       'Palavras-chave em Preferências → IA reforçam o que importa para você.',
     ],
@@ -65,7 +65,7 @@ export const AXEL_SYSTEM_GUIDE: GuideSection[] = [
   {
     id: 'humor',
     title: 'Humor e carga do dia',
-    body: 'O registro de humor no dashboard ajusta quantos pontos de score cabem na fila do dia — dias difíceis, fila menor.',
+    body: 'O registro de humor no dashboard ajusta quantos pontos de score cabem na fila do dia - dias difíceis, fila menor.',
   },
   {
     id: 'notificacoes',

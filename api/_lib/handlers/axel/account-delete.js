@@ -1,4 +1,4 @@
-// POST /api/axel/account-delete — apaga o usuário Auth (CASCADE nos dados)
+// POST /api/axel/account-delete - apaga o usuário Auth (CASCADE nos dados)
 
 import { applyCors } from '../../cors.js'
 import { getUserFromBearer } from '../../supabaseUser.js'

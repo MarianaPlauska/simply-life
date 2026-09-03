@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti'
 
-// Celebrações — confetti, som leve, marcos de ofensiva
+// Celebrações - confetti, som leve, marcos de ofensiva
 
 export const STREAK_MILESTONES = [7, 30, 100] as const
 

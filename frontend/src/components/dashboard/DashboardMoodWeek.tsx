@@ -3,7 +3,6 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { MoodWeekSparkline } from '../wellbeing/MoodWeekSparkline'
 import { ModuleSection } from '../ui/ModuleSection'
 
-/** Humor da semana — sparkline, sem donut */
 export function DashboardMoodWeek()
 {
   const humorSemana = useTaskStore((s) => s.humorSemanaAgregado)

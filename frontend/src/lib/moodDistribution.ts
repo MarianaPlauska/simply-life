@@ -10,7 +10,7 @@ export interface MoodDistributionSlice
   mood: number
 }
 
-/** Contagem por categoria de humor (1–5) no período */
+/** Contagem por categoria de humor (1-5) no período */
 export function buildMoodDistribution(registros: HumorRegistro[]): MoodDistributionSlice[]
 {
   const counts = new Map<number, number>()
@@ -53,7 +53,7 @@ function dayKey(d: Date): string
   return `${y}-${m}-${day}`
 }
 
-/** Grade do mês corrente — semanas × dias da semana (segunda primeiro) */
+/** Grade do mês corrente - semanas × dias da semana (segunda primeiro) */
 export function buildCurrentMonthCalendar(
   agregados: DiaHumorAgregado[],
   reference = new Date(),

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Subtarefa } from '../types'
 
-// Progresso de checklist — merge servidor + localStorage (mock)
+// Progresso de checklist - merge servidor + localStorage (mock)
 
 const STORAGE_KEY = 'axel-local-subtasks-v1'
 export const SUBTASKS_CHANGED_EVENT = 'axel-local-subtasks-changed'
@@ -29,7 +29,7 @@ export function notifySubtasksChanged(taskId: number): void
   )
 }
 
-/** Remove checklist local — rascunho de criação ou tarefa mock */
+/** Remove checklist local - rascunho de criação ou tarefa mock */
 export function clearLocalSubtasks(taskId?: number): void
 {
   try

@@ -1,4 +1,4 @@
-/** O + do chrome muda conforme a tela — não é sempre o dump. */
+/** O + do chrome muda conforme a tela - não é sempre o dump. */
 
 export type CaptureIntent = 'dump' | 'finance' | 'task' | 'note'
 

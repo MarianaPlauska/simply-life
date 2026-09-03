@@ -18,7 +18,7 @@ const ICON_SIZE: Record<NonNullable<AxelLoaderProps['size']>, number> = {
   lg: 22,
 }
 
-/** Loader AXEL — sparkles com respiração suave */
+/** Loader AXEL - sparkles com respiração suave */
 export function AxelLoader({ size = 'md', className = '' }: AxelLoaderProps)
 {
   return (

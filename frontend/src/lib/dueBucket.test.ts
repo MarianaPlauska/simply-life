@@ -45,7 +45,7 @@ describe('resolveDueBucket', () =>
     expect(resolveDueBucket(t, NOW)).toBe('hoje')
   })
 
-  it('classifica esta semana (1–7 dias)', () =>
+  it('classifica esta semana (1-7 dias)', () =>
   {
     const t = task({ id: 3, data_vencimento: '2026-06-15T17:00:00.000Z' })
     expect(resolveDueBucket(t, NOW)).toBe('esta_semana')

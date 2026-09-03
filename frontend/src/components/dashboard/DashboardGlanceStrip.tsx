@@ -18,7 +18,6 @@ interface DashboardGlanceStripProps
   overdueCount: number
 }
 
-/** Resumos horizontais — só chips com dado real */
 export function DashboardGlanceStrip({
   chips,
   saldoDisponivel,

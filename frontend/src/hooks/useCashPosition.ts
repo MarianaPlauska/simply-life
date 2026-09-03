@@ -10,7 +10,7 @@ export interface CashPositionPair
 {
   /** Valores calculados pelo extrato (sem override manual) */
   computed: CashPosition
-  /** Valores exibidos — respeita saldos fixados manualmente */
+  /** Valores exibidos - respeita saldos fixados manualmente */
   display: CashPosition
 }
 

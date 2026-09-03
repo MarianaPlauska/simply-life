@@ -1,4 +1,4 @@
-// Parser estruturado de e-mail — Groq/Gemini (score, prazo, intenção)
+// Parser estruturado de e-mail - Groq/Gemini (score, prazo, intenção)
 
 import { applyHojeFloor, mapScoreToPrioridade } from './triageScore.js';
 
@@ -16,7 +16,7 @@ export async function parseEmailWithAI(email, keys = {})
     user_keywords: keywords || 'nenhuma',
   })
 
-  const systemPrompt = `Você é o AXEL — triagem de e-mails para Kanban pessoal.
+  const systemPrompt = `Você é o AXEL - triagem de e-mails para Kanban pessoal.
 Responda APENAS JSON válido:
 {
   "titulo": "string curta para a tarefa",
@@ -121,7 +121,7 @@ function normalizeEmailParse(parsed, email)
   }
 }
 
-/** Fallback sem IA — heurística local */
+/** Fallback sem IA - heurística local */
 export function heuristicEmailParse(email)
 {
   const subject = email.subject || ''

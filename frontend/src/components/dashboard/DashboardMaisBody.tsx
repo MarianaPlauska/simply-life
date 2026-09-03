@@ -8,10 +8,6 @@ import { HealthRitualStrip } from '../wellbeing/HealthRitualStrip'
 import { AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
 import { ModuleSection } from '../ui/ModuleSection'
 
-/**
- * Abaixo da dobra: só o que o mercado usa para voltar amanhã.
- * No mobile a rail some — prazos, humor e foco reaparecem aqui.
- */
 export function DashboardMaisBody()
 {
   return (

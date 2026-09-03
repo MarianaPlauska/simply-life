@@ -10,7 +10,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode })
   const userId = useTaskStore((s) => s.userId);
   const login = useTaskStore((s) => s.login);
   const logout = useTaskStore((s) => s.logout);
-  // Já logado (ex.: voltando do /setup) — não bloquear a tela de novo
+  // Já logado (ex.: voltando do /setup) - não bloquear a tela de novo
   const [checking, setChecking] = useState(() => !useTaskStore.getState().isLoggedIn);
 
   useEffect(() =>

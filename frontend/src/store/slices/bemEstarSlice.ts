@@ -1,4 +1,4 @@
-// slice de bem-estar mental — humor, diário, weekly review via supabase
+// slice de bem-estar mental - humor, diário, weekly review via supabase
 import type { StateCreator } from 'zustand'
 import { supabase } from '../../lib/supabase'
 import { aggregateHumorByDay, ultimoRegistro } from '../../lib/moodInsights'
@@ -78,7 +78,7 @@ export interface BemEstarSlice
   weeklyReview: WeeklyReview | null
   correlacao: Correlacao | null
   promptDoDia: string
-  /** Mensagem do AXEL após humor — visível no dashboard por ~1 min */
+  /** Mensagem do AXEL após humor - visível no dashboard por ~1 min */
   axelMoodCare: AxelMoodCareSession | null
   clearAxelMoodCare: () => void
 
@@ -263,7 +263,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       contexto: opts?.contexto ?? null,
     }
 
-    // Mensagem do AXEL — some sozinha em 25s
+    // Mensagem do AXEL - some sozinha em 25s
     const moodLevelOtimista = Math.min(5, Math.max(1, humor)) as MoodLevel
     set((s) =>
     {
@@ -293,7 +293,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
 
       if (inserted.error)
       {
-        // Schema antigo: 1 registro/dia — atualiza em vez de falhar
+        // Schema antigo: 1 registro/dia - atualiza em vez de falhar
         if (inserted.error.code === '23505')
         {
           const updated = await supabase
@@ -336,7 +336,7 @@ export const createBemEstarSlice: StateCreator<BemEstarStore, [], [], BemEstarSl
       if (anyGet.addXP) await anyGet.addXP('saude', 8)
       if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('bem-estar', 1)
 
-      // Primeiro humor do dia — oculta card no dashboard por 12h (persistido no Supabase)
+      // Primeiro humor do dia - oculta card no dashboard por 12h (persistido no Supabase)
       if (isFirstToday && anyGet.patchWorkspacePrefs)
       {
         await anyGet.patchWorkspacePrefs({

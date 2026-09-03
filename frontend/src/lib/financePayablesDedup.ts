@@ -12,7 +12,7 @@ export function payablesDedupKey(bill: Pick<UpcomingBill, 'label' | 'valor' | 'd
   return `${bill.kind}|${label}|${bill.valor.toFixed(2)}|${month}`
 }
 
-/** Remove duplicatas — mantém o item com menor transactionId ou primeiro da lista */
+/** Remove duplicatas - mantém o item com menor transactionId ou primeiro da lista */
 export function dedupeUpcomingBills(bills: UpcomingBill[]): UpcomingBill[]
 {
   const byKey = new Map<string, UpcomingBill>()

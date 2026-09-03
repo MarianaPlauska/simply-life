@@ -1,4 +1,4 @@
-// Boletos próximos — versão servidor para cron de push (contas fixas + despesas pendentes)
+// Boletos próximos - versão servidor para cron de push (contas fixas + despesas pendentes)
 
 const WINDOW_HOURS = 48;
 const HORIZON_DAYS = 45;
@@ -103,7 +103,7 @@ export function formatBillPushPayload(bill)
     : `Uma conta em ${bill.daysUntil} dia(s)`;
 
   const valor = bill.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  const body = `${bill.label} — ${valor}. Quando fizer sentido, dá uma olhada.`;
+  const body = `${bill.label} - ${valor}. Quando fizer sentido, dá uma olhada.`;
 
   return {
     title,

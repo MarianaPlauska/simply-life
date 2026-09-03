@@ -18,7 +18,7 @@ export function cardTemCicloFatura(m?: CardModalidade): boolean
   return (m ?? 'credito') === 'credito'
 }
 
-/** VR e vale — extrato, não fatura de crédito */
+/** VR e vale - extrato, não fatura de crédito */
 export function cardUsaExtrato(m?: CardModalidade): boolean
 {
   const mod = m ?? 'credito'

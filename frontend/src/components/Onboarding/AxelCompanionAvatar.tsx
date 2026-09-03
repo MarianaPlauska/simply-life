@@ -88,7 +88,7 @@ function OwlEyes({ leftX, rightX, y, r = 4 }: { leftX: number; rightX: number; y
   )
 }
 
-/** Companheiros SVG — mesmo vocabulário visual (fundo arredondado, rosto legível) */
+/** Companheiros SVG - mesmo vocabulário visual (fundo arredondado, rosto legível) */
 export function AxelCompanionAvatar({
   style,
   initials = '',

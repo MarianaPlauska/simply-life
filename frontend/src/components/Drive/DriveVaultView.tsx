@@ -35,7 +35,7 @@ export function DriveVaultView() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragging(false);
-    // Mock — in real app would upload the files
+    // Mock - in real app would upload the files
   };
 
   return (

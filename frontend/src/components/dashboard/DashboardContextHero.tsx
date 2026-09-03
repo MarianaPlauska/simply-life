@@ -9,7 +9,6 @@ interface DashboardContextHeroProps
   saldoDisponivel: number
 }
 
-/** Um único número herói por tela — contextual no desktop */
 export function DashboardContextHero({ overdueCount, saldoDisponivel }: DashboardContextHeroProps)
 {
   const urgent = overdueCount > 0

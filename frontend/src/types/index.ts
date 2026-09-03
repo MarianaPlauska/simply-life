@@ -30,23 +30,23 @@ export interface TarefaUnificada {
   contexto?: { titulo: string; cor: string };
   /** IDs de tarefas predecessoras (soft lock até status concluída) */
   blockedBy?: string[];
-  /** Dias sem movimento — degradação térmica no Kanban */
+  /** Dias sem movimento - degradação térmica no Kanban */
   daysStagnant?: number;
-  /** E-mail ou identificador do remetente — Motor de Relevância */
+  /** E-mail ou identificador do remetente - Motor de Relevância */
   remetente?: string | null;
   /** Justificativa explicativa do score (Motor de Relevância) */
   score_reason?: string | null;
-  /** Intenção detectada — bloqueio | alinhamento | execucao */
+  /** Intenção detectada - bloqueio | alinhamento | execucao */
   intent_category?: 'bloqueio' | 'alinhamento' | 'execucao' | null;
   /** Razão da urgência (IntentAnalyzer) */
   urgency_reason?: string | null;
-  /** Horizonte fixado pelo usuário — o pipeline não sobrescreve até Recalcular */
+  /** Horizonte fixado pelo usuário - o pipeline não sobrescreve até Recalcular */
   horizon_override?: 'hoje' | 'semana' | 'backlog' | null;
-  /** Chave estável da origem (IMAP UID / webhook) — evita duplicar ingestão */
+  /** Chave estável da origem (IMAP UID / webhook) - evita duplicar ingestão */
   external_ref?: string | null;
 }
 
-// sprint D — recorrência, dependências, atividade
+// sprint D - recorrência, dependências, atividade
 export interface RecorrenciaTarefa {
   id: number;
   tarefa_id: number;

@@ -38,7 +38,7 @@ export interface BudgetRemainingDisplay
   tone: string
 }
 
-/** Hero + legenda — valor restante em destaque */
+/** Hero + legenda - valor restante em destaque */
 export function budgetRemainingDisplay(
   row: CategoryBudgetRow,
   fmt: (v: number) => string,
@@ -131,7 +131,7 @@ export function filterActiveBudgetRows(rows: CategoryBudgetRow[]): CategoryBudge
     .sort((a, b) => b.pct - a.pct)
 }
 
-/** Categoria com teto e maior % usada — o envelope que mais aperta */
+/** Categoria com teto e maior % usada - o envelope que mais aperta */
 export function worstBudgetEnvelope(rows: CategoryBudgetRow[]): CategoryBudgetRow | null
 {
   const withLimit = rows.filter((r) => r.limite > 0)

@@ -1,4 +1,4 @@
-// Tokens visuais — Configurações (alinha ao design system AXEL)
+// Tokens visuais - Configurações (alinha ao design system AXEL)
 
 export const SETTINGS = {
   title: 'text-xl sm:text-2xl font-display text-ink tracking-tight',

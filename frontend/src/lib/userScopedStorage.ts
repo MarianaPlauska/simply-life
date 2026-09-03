@@ -1,5 +1,5 @@
 /**
- * Isolamento de cache local por usuário — evita vazamento entre contas no mesmo navegador.
+ * Isolamento de cache local por usuário - evita vazamento entre contas no mesmo navegador.
  */
 
 const LEGACY_STORE_KEY = 'simply-life-store'

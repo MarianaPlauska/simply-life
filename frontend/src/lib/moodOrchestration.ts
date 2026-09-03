@@ -61,7 +61,7 @@ function resolveMultiplier(profile: MoodProfile, energia: number | null): number
   else if (profile === 'cuidado') mult = 0.78
   else if (profile === 'equilibrado') mult = 0.95
   else if (profile === 'energizado') mult = 1.05
-  else mult = 0.9 // sem registro — levemente conservador
+  else mult = 0.9 // sem registro - levemente conservador
 
   if (energia === 1) mult *= 0.88
   else if (energia === 2) mult *= 0.96
@@ -124,17 +124,17 @@ function buildAxelNote(
   }
   if (profile === 'recuperacao')
   {
-    return `Humor ${humorMedia}/5 — AXEL reduziu Hoje para ${effectiveCap} pts (era ${baseCap}). Priorize o essencial.`
+    return `Humor ${humorMedia}/5 - AXEL reduziu Hoje para ${effectiveCap} pts (era ${baseCap}). Priorize o essencial.`
   }
   if (profile === 'cuidado')
   {
-    return `Humor ${humorMedia}/5 (${moodLabel(Math.round(humorMedia!))}) — cap ajustado para ${effectiveCap} pts.`
+    return `Humor ${humorMedia}/5 (${moodLabel(Math.round(humorMedia!))}) - cap ajustado para ${effectiveCap} pts.`
   }
   if (profile === 'energizado')
   {
-    return `Humor ${humorMedia}/5 — você tem espaço para até ${effectiveCap} pts em Hoje.`
+    return `Humor ${humorMedia}/5 - você tem espaço para até ${effectiveCap} pts em Hoje.`
   }
-  return `Humor ${humorMedia}/5 — cap do dia: ${effectiveCap} pts.`
+  return `Humor ${humorMedia}/5 - cap do dia: ${effectiveCap} pts.`
 }
 
 export function buildMoodOrchestrationContext(
@@ -150,7 +150,7 @@ export function buildMoodOrchestrationContext(
 
   let profile = resolveProfile(humorMedia, hasMoodToday)
 
-  // Semana difícil — não força modo alto mesmo com um dia bom isolado
+  // Semana difícil - não força modo alto mesmo com um dia bom isolado
   if (profile === 'energizado' && humorSemana.length >= 3)
   {
     const mediaSemana = humorSemana.reduce((s, d) => s + d.humor, 0) / humorSemana.length
@@ -175,7 +175,7 @@ export function buildMoodOrchestrationContext(
 
   const snoozeReason =
     profile === 'recuperacao' || profile === 'cuidado'
-      ? 'AXEL adiou — carga ajustada ao seu humor de hoje'
+      ? 'AXEL adiou - carga ajustada ao seu humor de hoje'
       : 'Excesso de carga para hoje'
 
   return {

@@ -1,4 +1,4 @@
-// Regras de quando sugerir check-in — sem culpa, sem modal bloqueante
+// Regras de quando sugerir check-in - sem culpa, sem modal bloqueante
 // Baseado em episodic re-entry (ViviDiary) e check-in ativo de 3s
 
 const SNOOZE_KEY = 'axel-wellbeing-snooze-until'
@@ -100,7 +100,7 @@ export function decideWellbeingNudge(opts: {
 
   const absentDays = daysSinceLastEntry(opts.lastEntryDate)
 
-  // Re-entry após ausência — acolhedor, sem mencionar dias perdidos
+  // Re-entry após ausência - acolhedor, sem mencionar dias perdidos
   if (absentDays >= 7)
   {
     return {
@@ -109,7 +109,7 @@ export function decideWellbeingNudge(opts: {
     }
   }
 
-  // Já registrou nas últimas 3h — não insistir
+  // Já registrou nas últimas 3h - não insistir
   if (opts.entriesTodayCount > 0 && hoursSinceLastEntry(opts.lastEntryAt) < 3)
   {
     return { mode: 'none', message: '' }
@@ -128,7 +128,7 @@ export function decideWellbeingNudge(opts: {
   {
     return {
       mode: 'gentle',
-      message: `Seu humor de ${periodLabel} ainda não foi registrado — um toque ajuda o AXEL a te acolher melhor.`,
+      message: `Seu humor de ${periodLabel} ainda não foi registrado - um toque ajuda o AXEL a te acolher melhor.`,
     }
   }
 

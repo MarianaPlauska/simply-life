@@ -20,7 +20,7 @@ function arquetipo(level: number): string
   return 'Recruta'
 }
 
-// Hero do perfil — companheiro escolhido + mascote de humor
+// Hero do perfil - companheiro escolhido + mascote de humor
 
 export function ProfileAxelHero()
 {

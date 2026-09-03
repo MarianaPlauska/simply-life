@@ -75,7 +75,7 @@ export interface MonthGoalProgress
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-/** Progresso da meta mensal — sobra do mês (receita − despesas) */
+/** Progresso da meta mensal - sobra do mês (receita − despesas) */
 export function computeMonthGoalProgress(
   monthTx: Transaction[],
   valorAlvo: number,
@@ -110,7 +110,7 @@ export function computeMonthGoalProgress(
   else if (daysLeft === 0)
   {
     paceMessage = falta > 0
-      ? `Último dia — faltam ${fmt(falta)} para a meta.`
+      ? `Último dia - faltam ${fmt(falta)} para a meta.`
       : 'Fechando o mês no alvo.'
   }
   else if (!onTrack && pacePerDay != null)
@@ -119,7 +119,7 @@ export function computeMonthGoalProgress(
   }
   else if (pacePerDay != null)
   {
-    paceMessage = `No ritmo certo — ~${fmt(pacePerDay)}/dia até dia ${lastDay}.`
+    paceMessage = `No ritmo certo - ~${fmt(pacePerDay)}/dia até dia ${lastDay}.`
   }
   else
   {

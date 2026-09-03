@@ -13,7 +13,6 @@ interface DashboardMobilePriorityCardProps
   onOpenTask?: (taskId: number) => void
 }
 
-/** Card único acima da dobra no mobile — humor, vencido ou agora */
 export function DashboardMobilePriorityCard({
   priority,
   overdueList,

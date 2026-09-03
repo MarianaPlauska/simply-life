@@ -1,4 +1,4 @@
-// Gmail via IMAP + senha de app — gratuito, sem Google Cloud OAuth
+// Gmail via IMAP + senha de app - gratuito, sem Google Cloud OAuth
 
 import { ImapFlow } from 'imapflow'
 

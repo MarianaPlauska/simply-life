@@ -1,5 +1,5 @@
 /**
- * Limpa estado em memória ao trocar de conta — complementa persistência por usuário.
+ * Limpa estado em memória ao trocar de conta - complementa persistência por usuário.
  */
 import type { TaskStore } from './useTaskStore'
 import { DEFAULT_EXPENSE_PRESETS } from '../lib/financeExpensePresets'

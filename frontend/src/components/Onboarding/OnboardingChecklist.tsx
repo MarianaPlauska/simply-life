@@ -1,4 +1,4 @@
-// widget flutuante de onboarding — checklist de 5 passos para novos usuários
+// widget flutuante de onboarding - checklist de 5 passos para novos usuários
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

@@ -22,7 +22,7 @@ import type { TarefaUnificada } from '../types'
 const STAGNATION_DAYS = 3
 const STAGNATION_SCORE_PENALTY = 8
 
-// Pipeline único — score → horizonte → cap de carga → decisões explicáveis
+// Pipeline único - score → horizonte → cap de carga → decisões explicáveis
 
 export interface OrchestrationDecision
 {
@@ -43,13 +43,13 @@ export interface PipelineOrchestrationResult
   source: 'ai' | 'mock'
 }
 
-/** Regras exibidas na UI — o usuário entende por que o AXEL decidiu */
+/** Regras exibidas na UI - o usuário entende por que o AXEL decidiu */
 export const AXEL_PLACEMENT_RULES = [
   { id: 'hoje', label: 'Hoje', rule: 'Score acima de 90, prazo hoje, urgente no título ou remetente chave' },
   { id: 'semana', label: 'Semana', rule: 'Score acima de 70, em progresso ou prazo em 7 dias' },
   { id: 'backlog', label: 'Entrada', rule: 'Demais demandas aguardando sinal' },
   { id: 'carga', label: 'Carga mental', rule: 'Excesso em Hoje adia automaticamente para Semana' },
-  { id: 'cuidado', label: 'Cuidado', rule: 'Humor baixo adia prazos leves — urgente e VIP ficam' },
+  { id: 'cuidado', label: 'Cuidado', rule: 'Humor baixo adia prazos leves - urgente e VIP ficam' },
 ] as const
 
 /** Mescla horizonte automático com override manual (manual vence) */
@@ -81,7 +81,7 @@ function applyScoreAdjustments(
   const adjusted = tasks.map((task) =>
   {
     if (task.status === 'concluida') return task
-    // override manual — o AXEL não mexe no score até Recalcular
+    // override manual - o AXEL não mexe no score até Recalcular
     if (task.horizon_override) return task
 
     let score = task.score_urgencia ?? 0
@@ -96,7 +96,7 @@ function applyScoreAdjustments(
       {
         decisions.push({
           taskId: task.id,
-          message: `「${task.titulo.slice(0, 40)}」— contexto esfriando (${stagnantDays}d parada) · score ${score}→${next}`,
+          message: `「${task.titulo.slice(0, 40)}」- contexto esfriando (${stagnantDays}d parada) · score ${score}→${next}`,
         })
         score = next
       }
@@ -135,7 +135,7 @@ export function assignOrchestratedHorizons(
     autoHorizons[task.id] = resolveTemporalHorizon(task)
   }
 
-  // Dependências — bloqueada até predecessor concluir
+  // Dependências - bloqueada até predecessor concluir
   for (const task of active)
   {
     if (task.horizon_override) continue
@@ -146,11 +146,11 @@ export function assignOrchestratedHorizons(
     const deps = (task.blockedBy ?? []).join(', ')
     decisions.push({
       taskId: task.id,
-      message: `「${task.titulo.slice(0, 36)}」— aguarda dependência (${deps}) · mantida em Semana`,
+      message: `「${task.titulo.slice(0, 36)}」- aguarda dependência (${deps}) · mantida em Semana`,
     })
   }
 
-  // Decay térmico — parada há dias sai de Hoje/Semana
+  // Decay térmico - parada há dias sai de Hoje/Semana
   for (const task of active)
   {
     if (task.horizon_override) continue
@@ -165,7 +165,7 @@ export function assignOrchestratedHorizons(
     decisions.push({
       taskId: task.id,
       kind: 'decay_backlog',
-      message: `「${task.titulo.slice(0, 36)}」— ${stagnantDays}d sem movimento · AXEL enviou ao Backlog`,
+      message: `「${task.titulo.slice(0, 36)}」- ${stagnantDays}d sem movimento · AXEL enviou ao Backlog`,
     })
   }
 
@@ -228,8 +228,8 @@ export async function runPipelineOrchestration(
       taskId: dueShifts[0].taskId,
       kind: 'deferred_load',
       message: n === 1
-        ? 'Adiei 1 prazo leve — seu humor pede menos pressão hoje.'
-        : `Adiei ${n} prazos leves — seu humor pede menos pressão hoje.`,
+        ? 'Adiei 1 prazo leve - seu humor pede menos pressão hoje.'
+        : `Adiei ${n} prazos leves - seu humor pede menos pressão hoje.`,
     })
   }
 

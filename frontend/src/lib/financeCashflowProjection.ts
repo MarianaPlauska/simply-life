@@ -37,7 +37,7 @@ function avgMonthly(
   return total / byMonth.size
 }
 
-/** Projeção — recorrentes + média histórica + saldo atual */
+/** Projeção - recorrentes + média histórica + saldo atual */
 export function buildCashflowProjection(
   transactions: Transaction[],
   recurringIncomes: RecurringIncome[],

@@ -8,7 +8,7 @@ interface AxelPageBackProps
   className?: string
 }
 
-/** Voltar discreto — padrão de apps grandes, sem ocupar espaço */
+/** Voltar discreto - padrão de apps grandes, sem ocupar espaço */
 export function AxelPageBack({ className = '' }: AxelPageBackProps)
 {
   const navigate = useNavigate()

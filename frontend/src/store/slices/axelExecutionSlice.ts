@@ -2,7 +2,7 @@ import type { StateCreator } from 'zustand'
 import { applyVelocityToEstimate } from '../../lib/adaptiveOrchestration'
 import type { TarefaUnificada } from '../../types'
 
-// Execution Engine — timer, estimativas e tempo real acumulado
+// Execution Engine - timer, estimativas e tempo real acumulado
 
 const ESTIMATES_KEY = 'axel-task-estimates-v1'
 const ELAPSED_KEY = 'axel-task-elapsed-v1'
@@ -138,7 +138,7 @@ export const createAxelExecutionSlice: StateCreator<
             ? 'Local (IA não configurada no servidor) · '
             : 'Local · '
         get().pushAiDecision(
-          `${prefix}Estimativa ${finalEstimate} min — ${resolved.reasoning}`,
+          `${prefix}Estimativa ${finalEstimate} min - ${resolved.reasoning}`,
         )
       }
     },

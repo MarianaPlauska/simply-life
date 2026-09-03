@@ -1,4 +1,4 @@
-// Pastas/contextos — CRUD mínimo para o drawer
+// Pastas/contextos - CRUD mínimo para o drawer
 
 import { supabase } from './supabase'
 

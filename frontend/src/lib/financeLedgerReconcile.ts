@@ -72,7 +72,7 @@ export function isPaidInSettlements(
   return settlements.some((s) => settlementCanonicalKey(s) === key)
 }
 
-/** Remove lançamentos duplicados no Supabase — mantém o mais antigo por chave */
+/** Remove lançamentos duplicados no Supabase - mantém o mais antigo por chave */
 export async function dedupeDuplicateTransactionsRemote(): Promise<number>
 {
   const uid = (await supabase.auth.getUser()).data.user?.id
@@ -194,7 +194,7 @@ export async function reconcilePaidReservedBills(
   return closed
 }
 
-/** Remove settlements duplicados no Supabase — mantém o mais recente por boleto */
+/** Remove settlements duplicados no Supabase - mantém o mais recente por boleto */
 export async function dedupeBillSettlementsRemote(): Promise<number>
 {
   const uid = (await supabase.auth.getUser()).data.user?.id
@@ -241,7 +241,7 @@ export async function dedupeBillSettlementsRemote(): Promise<number>
   return toDelete.length
 }
 
-/** Remove pendentes duplicados — mantém o de menor id */
+/** Remove pendentes duplicados - mantém o de menor id */
 export async function reconcilePendingBillTransactions(
   transactions: Transaction[],
 ): Promise<number>
@@ -346,7 +346,7 @@ export async function removePendingDuplicatesWhenPaid(
 }
 
 
-/** Limpeza profunda — tarefas órfãs, duplicatas e lançamentos de pagamento faltantes */
+/** Limpeza profunda - tarefas órfãs, duplicatas e lançamentos de pagamento faltantes */
 export async function reconcileFinanceLedger(
   input: FinanceLedgerReconcileInput,
 ): Promise<FinanceLedgerReconcileResult>

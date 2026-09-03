@@ -17,7 +17,7 @@ export function PushTestSection()
       const { sent } = await sendPushTest()
       toast.success(sent > 0
         ? `Notificação enviada (${sent} dispositivo${sent === 1 ? '' : 's'})`
-        : 'Pedido enviado — se nada aparecer, instale o app e permita alertas')
+        : 'Pedido enviado - se nada aparecer, instale o app e permita alertas')
     }
     catch (err)
     {

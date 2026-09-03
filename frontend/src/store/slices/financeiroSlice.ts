@@ -1,4 +1,4 @@
-// slice financeiro — despesas, transações, orçamento via supabase
+// slice financeiro - despesas, transações, orçamento via supabase
 import type { StateCreator } from 'zustand'
 import type {
   Despesa,
@@ -209,7 +209,7 @@ function notifyBudgetAlert(
   const title = check.alert === 'over' ? 'Orçamento estourado' : 'Orçamento em alerta'
   const description = check.alert === 'over'
     ? `${check.categoryName}: ${check.pct.toFixed(0)}% do limite (R$ ${check.gastoApos.toFixed(2)} de R$ ${check.limite.toFixed(2)}).`
-    : `${check.categoryName} em ${check.pct.toFixed(0)}% do limite — revise os gastos.`
+    : `${check.categoryName} em ${check.pct.toFixed(0)}% do limite - revise os gastos.`
 
   toast.warning(title, { description })
 }
@@ -401,7 +401,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             ...s.transactions,
           ]
 
-          // Alerta de limite — só quando crítico (≥95%); barra no cartão cobre o resto
+          // Alerta de limite - só quando crítico (≥95%); barra no cartão cobre o resto
           if (t.card_id && t.tipo === 'despesa')
           {
             const card = s.cards.find((c) => c.id === t.card_id)
@@ -436,7 +436,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     catch (e)
     {
       console.error('addTransaction error:', e)
-      toast.error('Não foi possível salvar no servidor — mantido localmente')
+      toast.error('Não foi possível salvar no servidor - mantido localmente')
       set((s) => ({ transactions: [{ id: Date.now(), ...t }, ...s.transactions] }))
       notifyBudgetAlert(get, t)
     }
@@ -576,7 +576,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
     }
     catch
     {
-      /* offline — mantém estado local */
+      /* offline - mantém estado local */
     }
   },
 
@@ -815,7 +815,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       status: card.status,
     }
 
-    // Atualiza na hora — não depende do Supabase para aparecer na UI
+    // Atualiza na hora - não depende do Supabase para aparecer na UI
     set((s) => ({ cards: [...s.cards, fullCard] }))
 
     const uid = (await supabase.auth.getUser()).data.user?.id
@@ -1739,7 +1739,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       toast.success('Finanças reconciliadas', {
         description: parts.length > 0
           ? `Removido: ${parts.join(' · ')}`
-          : 'Nenhuma duplicata encontrada — histórico já está limpo.',
+          : 'Nenhuma duplicata encontrada - histórico já está limpo.',
       })
     }
     catch (e)

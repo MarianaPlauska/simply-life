@@ -1,4 +1,4 @@
-// OAuth Google — URL, troca de code e refresh de token
+// OAuth Google - URL, troca de code e refresh de token
 
 const GMAIL_SCOPES = [
   'openid',

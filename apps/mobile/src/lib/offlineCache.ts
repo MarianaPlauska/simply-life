@@ -1,5 +1,5 @@
 /**
- * Cache offline básico — humor e tarefas em memória + AsyncStorage-like (SecureStore/web).
+ * Cache offline básico - humor e tarefas em memória + AsyncStorage-like (SecureStore/web).
  * Fase 4: stub pronto para hidratar store remoto.
  */
 import { Platform } from 'react-native'

@@ -13,7 +13,7 @@ export function isNotificacaoLida(lida: Notificacao['lida'] | number | string | 
   return lida === true || lida === 1 || lida === '1'
 }
 
-/** Resumos de rotina e avisos redundantes — não devem acionar o sino */
+/** Resumos de rotina e avisos redundantes - não devem acionar o sino */
 export function isNotificacaoRuido(n: Notificacao): boolean
 {
   if (n.tipo !== 'financeiro') return false

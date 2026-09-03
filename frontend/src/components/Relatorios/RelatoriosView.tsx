@@ -1,5 +1,3 @@
-// frontend/src/components/Relatorios/RelatoriosView.tsx
-// Relatórios de Produtividade — estilo Last.fm weekly/monthly reports
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -16,19 +14,18 @@ import { DashboardConsistencyStrip } from '../dashboard/DashboardConsistencyStri
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, margin: '-40px' }, transition: { duration: 0.5 } };
 
-
-
-/* ── Bar Chart (SVG) ─────────────────────────────────────── */
 function BarChart({ data, color = '#10b981', height = 120 }: {
   data: TrendPoint[];
   color?: string;
   height?: number;
-}) {
+})
+{
   const max = Math.max(...data.map(d => d.valor), 1);
 
   return (
     <div className="flex items-end gap-1 justify-between" style={{ height }}>
-      {data.map((d, i) => {
+      {data.map((d, i) =>
+      {
         const h = (d.valor / max) * (height - 20);
         const isLast = i === data.length - 1;
         return (
@@ -52,7 +49,6 @@ function BarChart({ data, color = '#10b981', height = 120 }: {
   );
 }
 
-/* ── Donut Chart (SVG) ───────────────────────────────────── */
 function DonutChart({ items, size = 120 }: { items: RankingItem[]; size?: number })
 {
   const total = items.reduce((s, i) => s + i.valor, 0) || 1;
@@ -86,23 +82,29 @@ function DonutChart({ items, size = 120 }: { items: RankingItem[]; size?: number
   );
 }
 
-/* ── Variação Badge ──────────────────────────────────────── */
-function VariacaoBadge({ valor }: { valor: number }) {
-  if (valor > 0) return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-emerald-400">
-      <ArrowUpRight className="w-3 h-3" />{valor}%
-    </span>
-  );
-  if (valor < 0) return (
-    <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-rose-400">
-      <ArrowDownRight className="w-3 h-3" />{Math.abs(valor)}%
-    </span>
-  );
-  return <span className="text-[11px] text-ink-muted">—</span>;
+function VariacaoBadge({ valor }: { valor: number })
+{
+  if (valor > 0)
+  {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-emerald-400">
+        <ArrowUpRight className="w-3 h-3" />{valor}%
+      </span>
+    );
+  }
+  if (valor < 0)
+  {
+    return (
+      <span className="inline-flex items-center gap-0.5 text-[11px] font-medium text-rose-400">
+        <ArrowDownRight className="w-3 h-3" />{Math.abs(valor)}%
+      </span>
+    );
+  }
+  return <span className="text-[11px] text-ink-muted">-</span>;
 }
 
-/* ── Score Ring ───────────────────────────────────────────── */
-function ScoreRing({ score, label, size = 120 }: { score: number; label: string; size?: number }) {
+function ScoreRing({ score, label, size = 120 }: { score: number; label: string; size?: number })
+{
   const r = (size - 12) / 2;
   const circumference = 2 * Math.PI * r;
   const strokeDash = (score / 100) * circumference;
@@ -131,8 +133,8 @@ function ScoreRing({ score, label, size = 120 }: { score: number; label: string;
   );
 }
 
-/* ── Ranking Bar ─────────────────────────────────────────── */
-function RankingBar({ items, maxVal, unit = '' }: { items: RankingItem[]; maxVal?: number; unit?: string }) {
+function RankingBar({ items, maxVal, unit = '' }: { items: RankingItem[]; maxVal?: number; unit?: string })
+{
   const mx = maxVal || Math.max(...items.map(i => i.valor), 1);
   return (
     <div className="space-y-2">
@@ -159,8 +161,8 @@ function RankingBar({ items, maxVal, unit = '' }: { items: RankingItem[]; maxVal
   );
 }
 
-/* ══ MAIN VIEW ═══════════════════════════════════════════════ */
-export function RelatoriosView() {
+export function RelatoriosView()
+{
   const periodo = useTaskStore((s) => s.relatoriosPeriodo);
   const setPeriodo = useTaskStore((s) => s.setRelatoriosPeriodo);
   const semanal = useTaskStore((s) => s.relatorioSemanal);
@@ -172,7 +174,10 @@ export function RelatoriosView() {
 
   useEffect(() =>
   {
-    if (hasFetched.current) return;
+    if (hasFetched.current)
+    {
+      return;
+    }
     hasFetched.current = true;
     fetchSemanal();
     fetchMensal();
@@ -183,8 +188,8 @@ export function RelatoriosView() {
   const ant = report?.periodo_anterior;
   const v = report?.variacao_pct ?? {};
 
-  /* ── Loading ───── */
-  if (loading && !report) {
+  if (loading && !report)
+  {
     return (
       <div className={`${AXEL_PAGE_SHELL} p-6 space-y-8`}>
         <div className="h-10 w-72 bg-chrome rounded-xl animate-pulse" />
@@ -200,7 +205,7 @@ export function RelatoriosView() {
       <motion.div {...fadeUp}>
         <PageIntro
           title="Relatórios"
-          lede={p ? `${p.inicio} — ${p.fim}` : 'Carregando…'}
+          lede={p ? `${p.inicio} - ${p.fim}` : 'Carregando…'}
           actions={
             <>
               <div className="flex gap-1 bg-chrome border border-line rounded-sl p-1">
@@ -225,9 +230,7 @@ export function RelatoriosView() {
         />
       </motion.div>
 
-      {/* ── KPI Cards (3) ───────────────────────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Tarefas */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -242,7 +245,6 @@ export function RelatoriosView() {
           </p>
         </div>
 
-        {/* Foco */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4 text-cyan-400" />
@@ -257,7 +259,6 @@ export function RelatoriosView() {
           </p>
         </div>
 
-        {/* XP */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-1">
             <Zap className="w-4 h-4 text-amber-400" />
@@ -273,9 +274,7 @@ export function RelatoriosView() {
         </div>
       </motion.div>
 
-      {/* ── Score de Eficiência + Tendência ──────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        {/* Score Ring */}
         <div className="md:col-span-2 sl-panel p-5 flex flex-col items-center justify-center gap-4">
           <ScoreRing score={p?.score_eficiencia ?? 0} label="Score de Eficiência" size={160} />
           <div className="flex items-center gap-2 text-xs">
@@ -294,11 +293,10 @@ export function RelatoriosView() {
           </div>
         </div>
 
-        {/* Tendência de Score — últimas 8 semanas */}
         <div className="md:col-span-3 sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-4 h-4 text-tasks" />
-            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Tendência — Últimas 8 Semanas</span>
+            <span className="text-[11px] text-ink-muted uppercase tracking-wider">Tendência - Últimas 8 Semanas</span>
           </div>
           {report?.tendencia_score && (
             <BarChart data={report.tendencia_score} color="#8b5cf6" height={140} />
@@ -306,9 +304,7 @@ export function RelatoriosView() {
         </div>
       </motion.div>
 
-      {/* ── Gráficos de Tarefas e Foco ──────────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tarefas trend */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Target className="w-4 h-4 text-emerald-400" />
@@ -319,7 +315,6 @@ export function RelatoriosView() {
           )}
         </div>
 
-        {/* Foco trend */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Brain className="w-4 h-4 text-cyan-400" />
@@ -331,9 +326,7 @@ export function RelatoriosView() {
         </div>
       </motion.div>
 
-      {/* ── Rankings ─────────────────────────────────────── */}
       <motion.div {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Dias mais produtivos */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Trophy className="w-4 h-4 text-amber-400" />
@@ -346,7 +339,6 @@ export function RelatoriosView() {
           )}
         </div>
 
-        {/* Mix de Origens (como Traffic Mix do Last.fm) */}
         <div className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
             <Star className="w-4 h-4 text-finance" />
@@ -373,7 +365,6 @@ export function RelatoriosView() {
         </div>
       </motion.div>
 
-      {/* ── Distribuição da semana (heat map style) ──────── */}
       {p?.tarefas_por_dia && (
         <motion.div {...fadeUp} className="sl-panel p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -381,7 +372,8 @@ export function RelatoriosView() {
             <span className="text-[11px] text-ink-muted uppercase tracking-wider">Atividade por Dia da Semana</span>
           </div>
           <div className="grid grid-cols-7 gap-2">
-            {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'].map(dia => {
+            {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab', 'Dom'].map((dia) =>
+            {
               const tarefas = p.tarefas_por_dia[dia] ?? 0;
               const foco = p.foco_por_dia[dia] ?? 0;
               const maxT = Math.max(...Object.values(p.tarefas_por_dia), 1);
@@ -407,17 +399,14 @@ export function RelatoriosView() {
         </motion.div>
       )}
 
-      {/* ── Rotina (12 semanas) — não cabe no Kanban ─────── */}
       <motion.div {...fadeUp} className="sl-panel p-5">
         <DashboardConsistencyStrip />
       </motion.div>
 
-      {/* ── Saúde & Academia ─────────────────────────────── */}
       <motion.div {...fadeUp} className="sl-panel p-5">
         <AcademyAnalyticsSection />
       </motion.div>
 
-      {/* ── All-time Stats Footer ───────────────────────── */}
       <motion.div {...fadeUp} className="sl-panel p-5">
         <div className="flex items-center gap-2 mb-4">
           <Flame className="w-4 h-4 text-orange-400" />

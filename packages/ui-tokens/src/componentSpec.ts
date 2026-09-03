@@ -1,5 +1,5 @@
 /**
- * Spec dos componentes base — contrato visual para Expo e (opcional) web.
+ * Spec dos componentes base - contrato visual para Expo e (opcional) web.
  */
 
 export const COMPONENT_SPEC = {
@@ -9,8 +9,8 @@ export const COMPONENT_SPEC = {
     background: 'canvas',
   },
   Card: {
-    radius: 20,
-    padding: 16,
+    radius: 18,
+    padding: 22,
     background: 'surface',
     elevation: 'card',
   },
@@ -37,7 +37,7 @@ export const COMPONENT_SPEC = {
   },
   PrimaryButton: {
     minHeight: 48,
-    radius: 12,
+    radius: 999,
     background: 'axel',
     foreground: 'axelOnFill',
     labelRole: 'bodyStrong',
@@ -61,7 +61,7 @@ export const COMPONENT_SPEC = {
   },
 } as const
 
-/** Critérios de aceite visual — “parece app de loja” */
+/** Critérios de aceite visual - “parece app de loja” */
 export const ACCEPTANCE = {
   minBodyPx: 13,
   cardRadiusMin: 16,

@@ -65,7 +65,7 @@ export function AxelActivityEventPanel({
     }
 
     onLog(
-      `Andamento — fase: ${nextMeta.phase} (${nextMeta.label}). Anterior: ${current.phase} (${current.label}).`,
+      `Andamento - fase: ${nextMeta.phase} (${nextMeta.label}). Anterior: ${current.phase} (${current.label}).`,
       'progress',
     )
     setMode('idle')
@@ -74,7 +74,7 @@ export function AxelActivityEventPanel({
   const submitBlocker = () =>
   {
     const note = blockerNote.trim() || 'Bloqueio registrado sem detalhe adicional.'
-    onLog(`Bloqueio — ${note}`, 'blocker')
+    onLog(`Bloqueio - ${note}`, 'blocker')
     setBlockerNote('')
     setMode('idle')
   }

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, KanbanSquare, CalendarDays, StickyNote,
   Wallet, PanelLeftClose, PanelLeft, Settings,
@@ -10,7 +11,7 @@ import {
 } from '../../constants/axelSurfaces'
 import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
-// Sidebar — plano de navegação (#121214) separado do conteúdo (#09090B)
+// Sidebar - plano de navegação (#121214) separado do conteúdo (#09090B)
 
 interface NavItem
 {
@@ -74,6 +75,30 @@ export function Sidebar()
   const toggleSidebar = useTaskStore((s) => s.toggleSidebar)
   const registerInteraction = useTaskStore((s) => s.registerInteraction)
   const setCommandPaletteOpen = useTaskStore((s) => s.setCommandPaletteOpen)
+  /** Tablet 768-1023: colapsada por padrão; expansível nesta sessão (Bloco H) */
+  const [isTabletRange, setIsTabletRange] = useState(false)
+  const [tabletExpanded, setTabletExpanded] = useState(false)
+
+  useEffect(() =>
+  {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia('(min-width: 768px) and (max-width: 1023px)')
+    const apply = () => setIsTabletRange(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  const collapsed = isTabletRange ? !tabletExpanded : sidebarCollapsed
+  const onToggleSidebar = () =>
+  {
+    if (isTabletRange)
+    {
+      setTabletExpanded((v) => !v)
+      return
+    }
+    toggleSidebar()
+  }
 
   const handleNav = (item: NavItem) =>
   {
@@ -81,11 +106,11 @@ export function Sidebar()
     if (item.moduleKey) registerInteraction(item.moduleKey)
   }
 
-  if (sidebarCollapsed)
+  if (collapsed)
   {
     return (
       <aside className={`hidden md:flex w-14 shrink-0 min-h-dvh sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col items-center py-4 gap-1`}>
-        <button onClick={toggleSidebar} className="p-2 text-ink-muted hover:text-ink hover:bg-chrome transition-colors mb-4">
+        <button onClick={onToggleSidebar} className="p-2 text-ink-muted hover:text-ink hover:bg-chrome transition-colors mb-4">
           <PanelLeft className="w-4 h-4" />
         </button>
         {NAV_GROUPS.flatMap((g) => g.items).map(({ id, icon: Icon, path, moduleKey }) =>
@@ -110,7 +135,7 @@ export function Sidebar()
     <aside className={`hidden md:flex w-60 shrink-0 min-h-dvh sticky top-0 self-start ${AXEL_NAV_PLANE} flex-col overflow-hidden`}>
       <div className="px-5 h-16 flex items-center justify-between shrink-0">
         <SimplyLifeMark variant="lockup" />
-        <button onClick={toggleSidebar} className="p-1.5 text-ink-muted hover:text-ink hover:bg-chrome transition-colors">
+        <button onClick={onToggleSidebar} className="p-1.5 text-ink-muted hover:text-ink hover:bg-chrome transition-colors">
           <PanelLeftClose className="w-4 h-4" />
         </button>
       </div>

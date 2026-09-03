@@ -1,4 +1,4 @@
-// Checklist em texto — listas de compras e tarefas leves nas anotações
+// Checklist em texto - listas de compras e tarefas leves nas anotações
 
 export interface ChecklistLine
 {

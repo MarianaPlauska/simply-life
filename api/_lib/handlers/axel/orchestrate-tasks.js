@@ -1,4 +1,4 @@
-// POST /api/orchestrate-tasks — priorização em lote com IA (Groq/Gemini no servidor)
+// POST /api/orchestrate-tasks - priorização em lote com IA (Groq/Gemini no servidor)
 // POST exige JWT Supabase; GET (status) permanece público
 
 import { orchestrateTasksBatch } from '../../urgencyOrchestrator.js';
@@ -54,7 +54,7 @@ export default async function handler(req, res)
   const user = await getUserFromBearer(req);
   if (!user)
   {
-    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' });
+    return res.status(401).json({ error: 'Não autenticado - envie Authorization: Bearer <jwt>' });
   }
 
   const limited = await enforceRateLimit(req, {

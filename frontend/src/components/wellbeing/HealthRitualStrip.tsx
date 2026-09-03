@@ -115,7 +115,7 @@ export function HealthRitualStrip()
   const headline = ritualHeadline(snapshot)
   const prioritizeMood = location.pathname === '/' && humorHojeLista.length === 0
 
-  // Humor pendente: check-in acima da dobra já cobre — evita bloco repetido no mobile
+  // Humor pendente: check-in acima da dobra já cobre - evita bloco repetido no mobile
   if (prioritizeMood)
   {
     return null
@@ -151,7 +151,7 @@ export function HealthRitualStrip()
     {
       return false
     }
-    // Humor já está no check-in acima — não repetir a linha
+    // Humor já está no check-in acima - não repetir a linha
     if (i.id === 'humor' && location.pathname === '/')
     {
       return false

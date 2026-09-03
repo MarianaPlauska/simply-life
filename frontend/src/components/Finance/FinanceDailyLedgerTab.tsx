@@ -165,7 +165,7 @@ export function FinanceDailyLedgerTab({
     setQuickVal('')
     const msg = isCard
       ? 'Lançado no cartão'
-      : 'Lançado — descontou da conta corrente'
+      : 'Lançado - descontou da conta corrente'
     toast.success(msg)
   }
 
@@ -312,7 +312,7 @@ export function FinanceDailyLedgerTab({
             ? activeCategories.find((c) => c.id === t.categoria_id)?.nome
             : t.categoria
           const status = t.status_pagamento ?? 'pendente'
-          const bits = [cat ?? '—', paymentMethodLabel(t)]
+          const bits = [cat ?? '-', paymentMethodLabel(t)]
           if (status !== 'pago') bits.push(STATUS_LABEL[status] ?? status)
           return (
             <AxelListRow
@@ -353,7 +353,7 @@ export function FinanceDailyLedgerTab({
               return (
                 <tr key={t.id} className={`border-b border-line/60 ${AXEL_ROW_HOVER}`}>
                   <td className={`px-3 py-2 ${AXEL_TEXT_PRIMARY}`}>{t.descricao}</td>
-                  <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>{cat ?? '—'}</td>
+                  <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>{cat ?? '-'}</td>
                   <td className={`px-3 py-2 font-mono text-[10px] ${AXEL_TEXT_SECONDARY}`}>
                     {paymentMethodLabel(t)}
                     {status !== 'pago' && (

@@ -27,7 +27,7 @@ function DonutTooltip({
   )
 }
 
-/** Rosca — distribuição de humor no período */
+/** Rosca - distribuição de humor no período */
 export function MoodDistributionDonut({ slices, total }: MoodDistributionDonutProps)
 {
   if (total === 0)
@@ -91,7 +91,7 @@ export function MoodDistributionDonut({ slices, total }: MoodDistributionDonutPr
               />
               <span className={`text-[12px] flex-1 truncate ${AXEL_TEXT_PRIMARY}`}>{m.label}</span>
               <span className={`font-mono text-[11px] tabular-nums shrink-0 ${AXEL_TEXT_SECONDARY}`}>
-                {count > 0 ? `${count} · ${pct}%` : '—'}
+                {count > 0 ? `${count} · ${pct}%` : '-'}
               </span>
             </li>
           )

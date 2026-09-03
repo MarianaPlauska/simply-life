@@ -9,7 +9,7 @@ interface KanbanOriginMarkProps
   origem: string | null | undefined
 }
 
-/** Ponto + rótulo curto da origem — sem pintar o card inteiro */
+/** Ponto + rótulo curto da origem - sem pintar o card inteiro */
 export function KanbanOriginMark({ origem }: KanbanOriginMarkProps)
 {
   const tone = kanbanOriginTone(origem)

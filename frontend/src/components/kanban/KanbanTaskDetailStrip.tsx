@@ -13,7 +13,7 @@ import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import type { TarefaUnificada } from '../../types'
 
-// Detalhe compacto da tarefa selecionada — vive dentro do painel Hoje
+// Detalhe compacto da tarefa selecionada - vive dentro do painel Hoje
 
 interface KanbanTaskDetailStripProps
 {
@@ -24,7 +24,7 @@ interface KanbanTaskDetailStripProps
   compact?: boolean
 }
 
-// Janela útil do dia para uma demanda: 14h — nudge após 5h de foco contínuo
+// Janela útil do dia para uma demanda: 14h - nudge após 5h de foco contínuo
 const NUDGE_FOCUS_HOURS = 5
 const NUDGE_MIN_SECONDS = NUDGE_FOCUS_HOURS * 60 * 60
 
@@ -134,7 +134,7 @@ export function KanbanTaskDetailStrip({
             )}
             {nudge && (
               <p className="text-[9px] text-atencao mt-1 leading-snug">
-                Foco há {NUDGE_FOCUS_HOURS}h+ — concluiu ou precisa de mais prazo?
+                Foco há {NUDGE_FOCUS_HOURS}h+ - concluiu ou precisa de mais prazo?
               </p>
             )}
           </div>
@@ -144,7 +144,7 @@ export function KanbanTaskDetailStrip({
               onClick={handleDifficulty}
               disabled={extending}
               className="inline-flex items-center justify-center min-w-[2.75rem] px-1.5 py-2 rounded-md border border-atencao/40 text-atencao hover:bg-atencao/10 shrink-0 transition-colors disabled:opacity-50"
-              aria-label="Estou com dificuldade — pedir mais prazo"
+              aria-label="Estou com dificuldade - pedir mais prazo"
               title="Preciso de mais prazo"
             >
               <CalendarClock size={14} strokeWidth={1.75} />
@@ -157,7 +157,7 @@ export function KanbanTaskDetailStrip({
               nudge ? 'animate-axel-nudge-complete' : ''
             }`}
             aria-label="Concluir tarefa"
-            title={nudge ? 'Concluir — foco ativo há um tempo' : 'Concluir'}
+            title={nudge ? 'Concluir - foco ativo há um tempo' : 'Concluir'}
           >
             <CheckCircle2 size={14} strokeWidth={1.75} />
           </button>

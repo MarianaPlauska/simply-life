@@ -276,7 +276,7 @@ export function WeeklyEpisodeCard({ embedded = false, compact = false }: WeeklyE
         <StatPill icon={Flame} label="Ofens." value={String(episode.ofensivasSalvas)} iconClass="text-orange-500" />
         <StatPill icon={ListChecks} label="Tarefas" value={String(episode.tarefasConcluidas)} iconClass="text-accent" />
         <StatPill icon={Clock} label="Foco" value={`${episode.focoMinutos}m`} iconClass="text-ink-muted" />
-        <StatPill icon={Heart} label="Humor" value={episode.humorMedio > 0 ? episode.humorMedio.toFixed(1) : '—'} iconClass="text-atencao" />
+        <StatPill icon={Heart} label="Humor" value={episode.humorMedio > 0 ? episode.humorMedio.toFixed(1) : '-'} iconClass="text-atencao" />
       </div>
 
       <div className="p-2.5 rounded-sl border border-dashed border-accent/40 bg-accent/5">

@@ -1,4 +1,4 @@
-// Vista Gantt — linha do tempo por data de vencimento (só tarefas com prazo)
+// Vista Gantt - linha do tempo por data de vencimento (só tarefas com prazo)
 import { useMemo, useState } from 'react'
 import type { TarefaUnificada } from '../../types'
 import { STATUS_CONFIG } from '../../constants/kanbanConfig'

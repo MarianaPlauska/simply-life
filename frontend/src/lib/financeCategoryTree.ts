@@ -23,12 +23,12 @@ export function findCategory(categories: Category[], id: number | undefined): Ca
   return categories.find((c) => c.id === id)
 }
 
-/** Rótulo para exibição — "Alimentação › Aniversário" */
+/** Rótulo para exibição - "Alimentação › Aniversário" */
 export function formatCategoryPath(categories: Category[], categoryId: number | undefined): string
 {
-  if (categoryId == null) return '—'
+  if (categoryId == null) return '-'
   const cat = findCategory(categories, categoryId)
-  if (!cat) return '—'
+  if (!cat) return '-'
   if (cat.parent_id == null) return cat.nome
   const parent = findCategory(categories, cat.parent_id)
   return parent ? `${parent.nome} › ${cat.nome}` : cat.nome

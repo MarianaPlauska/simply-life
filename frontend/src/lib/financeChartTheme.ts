@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-/** Paleta para Recharts — lê tokens Instrumento (--sl-*) no DOM */
+/** Paleta para Recharts - lê tokens Instrumento (--sl-*) no DOM */
 export interface FinanceChartTheme
 {
   receita: string

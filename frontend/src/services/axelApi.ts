@@ -1,7 +1,7 @@
 import { supabaseAuthHeaders } from '../lib/supabaseAuthHeaders'
 import type { AxelTodayVerdict } from '../lib/axelTodayVerdict'
 
-// Cliente AXEL — API routes serverless (/api/* → /api/axel/*)
+// Cliente AXEL - API routes serverless (/api/* → /api/axel/*)
 const API_BASE = '/api'
 
 export async function processEventIA(params: {
@@ -140,7 +140,7 @@ export interface AxelTodayVerdictIAResponse extends AxelTodayVerdict
   iaDisponivel?: boolean
 }
 
-/** AXEL — "posso comprar?" antes de confirmar gasto */
+/** AXEL - "posso comprar?" antes de confirmar gasto */
 export async function fetchFinancePurchaseCheckIA(params: {
   context: Record<string, unknown>
   localVerdict: Record<string, unknown>
@@ -159,7 +159,7 @@ export async function fetchFinancePurchaseCheckIA(params: {
   return res.json()
 }
 
-/** AXEL — "posso fazer isso hoje?" com refinamento IA */
+/** AXEL - "posso fazer isso hoje?" com refinamento IA */
 export async function fetchAxelTodayVerdictIA(params: {
   context: Record<string, unknown>
   localVerdict: AxelTodayVerdict

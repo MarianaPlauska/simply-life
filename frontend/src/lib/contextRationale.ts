@@ -1,6 +1,6 @@
 import type { TarefaUnificada } from '../types'
 
-// Razão do contexto — explicação legível da priorização AXEL
+// Razão do contexto - explicação legível da priorização AXEL
 
 const TAG_FROM_TITLE = /\[(AXEL|FRONTEND|CORE|HUB|API|UX|BACKEND)\]/i
 
@@ -31,7 +31,7 @@ export function getContextRationale(
 
   if (score > 90)
   {
-    return `Priorizado: score ${score} — prazo crítico e alto impacto no módulo ${tag}.`
+    return `Priorizado: score ${score} - prazo crítico e alto impacto no módulo ${tag}.`
   }
 
   if (origem.includes('gmail') || origem.includes('webhook'))
@@ -41,20 +41,20 @@ export function getContextRationale(
 
   if (title.includes('drawer') || title.includes('kanban'))
   {
-    return 'Reordenado: entrega de UX no fluxo principal do board — desbloqueia uso diário do AXEL.'
+    return 'Reordenado: entrega de UX no fluxo principal do board - desbloqueia uso diário do AXEL.'
   }
 
   if (title.includes('score') || title.includes('urgência') || title.includes('urgencia'))
   {
-    return 'Reordenado: evolução do motor de priorização — transparência para o gestor.'
+    return 'Reordenado: evolução do motor de priorização - transparência para o gestor.'
   }
 
   if (score > 70)
   {
-    return `Priorizado: score ${score} — contexto ativo com prazo ou prioridade elevada em ${tag}.`
+    return `Priorizado: score ${score} - contexto ativo com prazo ou prioridade elevada em ${tag}.`
   }
 
-  return `Na fila: score ${score} — aguardando orquestração; critérios de produtividade do AXEL.`
+  return `Na fila: score ${score} - aguardando orquestração; critérios de produtividade do AXEL.`
 }
 
 function formatEngineRationale(raw: string, tarefa: TarefaUnificada): string

@@ -25,7 +25,7 @@ export function writeLocalOuro(uid: string, amount: number): void
   catch { /* quota */ }
 }
 
-/** Medo 0–2 nas notas do dump (`medo:1`) — multiplicador suave */
+/** Medo 0-2 nas notas do dump (`medo:1`) - multiplicador suave */
 export function parseMedoNotas(notas: string | null | undefined): 0 | 1 | 2
 {
   const m = notas?.match(/medo:([012])/)

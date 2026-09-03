@@ -1,4 +1,4 @@
-// slice de onboarding — checklist de ativação para novos usuários
+// slice de onboarding - checklist de ativação para novos usuários
 import type { StateCreator } from 'zustand';
 
 export interface OnboardingSlice

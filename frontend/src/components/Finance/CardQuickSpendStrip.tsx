@@ -37,12 +37,12 @@ interface CardQuickSpendStripProps
   showCardPicker?: boolean
   /** dashboard = recolhível e denso; full = Finanças início */
   variant?: CardQuickSpendVariant
-  /** Sempre aberto no dashboard — ideal para mobile */
+  /** Sempre aberto no dashboard - ideal para mobile */
   prominent?: boolean
   className?: string
 }
 
-// Lançamento rápido no cartão — mobile-first, layout compacto no dashboard
+// Lançamento rápido no cartão - mobile-first, layout compacto no dashboard
 
 export function CardQuickSpendStrip({
   showCardPicker = true,

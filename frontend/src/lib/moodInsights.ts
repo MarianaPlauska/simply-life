@@ -8,7 +8,7 @@ export interface DiaHumorAgregado
   registros: number
 }
 
-/** Média diária — vários check-ins no mesmo dia viram um ponto */
+/** Média diária - vários check-ins no mesmo dia viram um ponto */
 export function aggregateHumorByDay(registros: HumorRegistro[]): DiaHumorAgregado[]
 {
   const map = new Map<string, { sum: number; count: number }>()
@@ -68,7 +68,7 @@ export function insightHumorHoje(
 {
   if (hoje.length === 0)
   {
-    return 'Registre seu humor — o AXEL usa isso para calibrar ritmo e carga hoje.'
+    return 'Registre seu humor - o AXEL usa isso para calibrar ritmo e carga hoje.'
   }
 
   const ultimo = ultimoRegistro(hoje)

@@ -1,4 +1,4 @@
-// Perfil de renda — salário base para cálculo de hora extra (localStorage)
+// Perfil de renda - salário base para cálculo de hora extra (localStorage)
 
 const STORAGE_KEY = 'simply-life-finance-income-profile'
 

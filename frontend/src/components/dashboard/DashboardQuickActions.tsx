@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useCapture } from '../capture/CaptureProvider'
 import { PREMIUM_BTN_MODULE } from '../../constants/axelSurfaces'
 
-/** Humor, água e lançar — botões premium, horizontal no desktop */
 export function DashboardQuickActions()
 {
   const navigate = useNavigate()

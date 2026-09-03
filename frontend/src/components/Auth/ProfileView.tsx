@@ -197,7 +197,7 @@ export function ProfileView()
                 {userProfile.nome || 'Convidado'}
               </h2>
               <p className={`text-[12px] truncate ${AXEL_TEXT_SECONDARY}`}>
-                {userProfile.email || '—'}
+                {userProfile.email || '-'}
               </p>
             </div>
           </div>

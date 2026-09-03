@@ -1,4 +1,4 @@
-// Trilha AXEL — níveis, XP e desbloqueios (Finch + Duolingo + LifeForge)
+// Trilha AXEL - níveis, XP e desbloqueios (Finch + Duolingo + LifeForge)
 
 import type { UserWorkspacePrefs } from './userWorkspacePrefs'
 import type { DashboardWidgetId } from './dashboardWidgets'
@@ -27,7 +27,7 @@ export interface TrailMilestone
   featureUnlock?: string
 }
 
-/** Como ganhar XP — visível na trilha (pesquisa: feedback claro = retenção) */
+/** Como ganhar XP - visível na trilha (pesquisa: feedback claro = retenção) */
 export const XP_SOURCE_RULES: XpSourceRule[] = [
   {
     id: 'task',
@@ -35,7 +35,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     icon: 'task',
     action: 'Concluir tarefa no Kanban',
     xp: '+8 a +28',
-    hint: 'Score de urgência com teto — não pula níveis de uma vez.',
+    hint: 'Score de urgência com teto - não pula níveis de uma vez.',
   },
   {
     id: 'focus',
@@ -59,7 +59,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     icon: 'water',
     action: 'Registrar água, medicamento ou treino',
     xp: '+5 a +12',
-    hint: 'Pequenas vitórias contam — estilo Finch.',
+    hint: 'Pequenas vitórias contam - estilo Finch.',
   },
   {
     id: 'mood',
@@ -91,7 +91,7 @@ export const XP_SOURCE_RULES: XpSourceRule[] = [
     icon: 'daily_cap',
     action: 'Teto diário de XP',
     xp: `${DAILY_XP_CAP}/dia`,
-    hint: `${XP_PER_LEVEL} XP por nível — ~6 dias ativos para subir.`,
+    hint: `${XP_PER_LEVEL} XP por nível - ~6 dias ativos para subir.`,
   },
 ]
 
@@ -104,7 +104,7 @@ export interface TrailSkillNode
   icon: string
 }
 
-/** Trilha estilo Duolingo — nós de habilidade por nível */
+/** Trilha estilo Duolingo - nós de habilidade por nível */
 export const TRAIL_SKILL_PATH: TrailSkillNode[] = [
   { level: 1, module: 'foco', skill: 'Ofensiva', unlock: 'Dashboard + streak', icon: 'streak' },
   { level: 2, module: 'vitalidade', skill: 'Hidratação', unlock: 'Widget água', icon: 'water' },
@@ -133,7 +133,7 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 2,
     title: 'Primeiro brilho',
     reward: 'Tom Cobre + widget Água',
-    funCopy: 'Hidratação vira ritual — igual Waterllama, mas no seu Life OS.',
+    funCopy: 'Hidratação vira ritual - igual Waterllama, mas no seu Life OS.',
     cosmeticIds: ['accent_copper'],
     featureUnlock: 'widget_água',
   },
@@ -141,7 +141,7 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 3,
     title: 'Operador em formação',
     reward: 'Cores Céu e Floresta + Consulta AXEL',
-    funCopy: 'Pergunte “posso fazer isso hoje?” — compras, compromissos, projetos.',
+    funCopy: 'Pergunte “posso fazer isso hoje?” - compras, compromissos, projetos.',
     cosmeticIds: ['accent_sky', 'accent_forest'],
     featureUnlock: 'capacidade_do_dia',
   },
@@ -149,7 +149,7 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 4,
     title: 'Narrador da própria vida',
     reward: 'Episódio semanal no dashboard',
-    funCopy: 'Sua semana vira capítulo — não só números.',
+    funCopy: 'Sua semana vira capítulo - não só números.',
     featureUnlock: 'episodio_dashboard',
   },
   {
@@ -171,7 +171,7 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 7,
     title: 'Coach direto',
     reward: 'Tom IA direto + reordenar dashboard',
-    funCopy: 'O AXEL fala menos rodeio — você manda no layout.',
+    funCopy: 'O AXEL fala menos rodeio - você manda no layout.',
     cosmeticIds: ['ai_tone_direct'],
     featureUnlock: 'dashboard_custom',
   },
@@ -179,14 +179,14 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 8,
     title: 'Leitor de sinais',
     reward: 'Notas viram pistas do AXEL',
-    funCopy: 'Diário e anotações alimentam nudges explicáveis — 1 por dia, tom Finch.',
+    funCopy: 'Diário e anotações alimentam nudges explicáveis - 1 por dia, tom Finch.',
     featureUnlock: 'sinais_notas',
   },
   {
     level: 9,
     title: 'Cartógrafo da semana',
     reward: 'Previsão 7 dias no dashboard',
-    funCopy: 'Contas, ritmo de gasto e humor — mini forecast sem planilha.',
+    funCopy: 'Contas, ritmo de gasto e humor - mini forecast sem planilha.',
     featureUnlock: 'forecast_7d',
   },
   {
@@ -200,7 +200,7 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 11,
     title: 'Guardião gentil',
     reward: 'Modo recuperação automático',
-    funCopy: 'Humor baixo + carga alta? O AXEL reduz o dia sozinho — estilo Finch.',
+    funCopy: 'Humor baixo + carga alta? O AXEL reduz o dia sozinho - estilo Finch.',
     featureUnlock: 'recuperacao_auto',
   },
   {
@@ -214,7 +214,7 @@ export const TRAIL_MILESTONES: TrailMilestone[] = [
     level: 20,
     title: 'Mestre',
     reward: 'Badge 👑',
-    funCopy: 'Você não usa o app — você vive a série.',
+    funCopy: 'Você não usa o app - você vive a série.',
     cosmeticIds: ['badge_master'],
   },
 ]
@@ -244,7 +244,7 @@ export function getNextMilestone(level: number): TrailMilestone | null
 export function describeLevelUp(level: number): string
 {
   const m = getMilestone(level)
-  if (!m) return `Nível ${level} — continue explorando a trilha.`
+  if (!m) return `Nível ${level} - continue explorando a trilha.`
   const parts = [m.reward]
   if (m.featureUnlock)
   {
@@ -262,7 +262,7 @@ function ensureWidget(widgets: DashboardWidgetId[] | undefined, id: DashboardWid
   return [id, ...base.filter((w) => w !== id)].slice(0, 3)
 }
 
-/** Desbloqueios automáticos de produto ao subir de nível (retenção D1–D14) */
+/** Desbloqueios automáticos de produto ao subir de nível (retenção D1-D14) */
 export function buildLevelUnlockPatch(
   level: number,
   prefs: UserWorkspacePrefs,

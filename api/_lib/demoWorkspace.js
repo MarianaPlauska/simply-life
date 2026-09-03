@@ -1,5 +1,5 @@
 /**
- * Conta demo compartilhada — nunca misturar com user_id de produção.
+ * Conta demo compartilhada - nunca misturar com user_id de produção.
  */
 
 export function demoEmailFromEnv()

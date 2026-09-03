@@ -16,7 +16,7 @@ export function isExpoSubscriptionRow(row)
 
 /**
  * @param {string} token
- * @param {object} payload — mesmo shape do Web Push (title, body, url, tag, ...)
+ * @param {object} payload - mesmo shape do Web Push (title, body, url, tag, ...)
  */
 export async function sendExpoPush(token, payload)
 {

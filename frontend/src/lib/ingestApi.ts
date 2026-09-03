@@ -1,4 +1,4 @@
-// Cliente HTTP — endpoint universal de ingestão AXEL
+// Cliente HTTP - endpoint universal de ingestão AXEL
 
 export interface AxelIngestPayload
 {

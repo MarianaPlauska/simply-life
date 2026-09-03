@@ -33,7 +33,7 @@ export function InviteFriendPanel()
       return
     }
     setInviteUrl(result.url)
-    toast.success('Link pronto — válido por 7 dias')
+    toast.success('Link pronto - válido por 7 dias')
   }
 
   const copy = async () =>
@@ -52,7 +52,7 @@ export function InviteFriendPanel()
           <div>
             <h3 className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>Círculo de amigos</h3>
             <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-              Alcance o nível 5 para convidar até 8 pessoas — streak leve, sem feed infinito.
+              Alcance o nível 5 para convidar até 8 pessoas - streak leve, sem feed infinito.
             </p>
           </div>
         </div>
@@ -71,7 +71,7 @@ export function InviteFriendPanel()
         <div>
           <h3 className={`text-sm font-medium ${AXEL_TEXT_PRIMARY}`}>Convidar ao Círculo</h3>
           <p className={`text-[12px] mt-1 ${AXEL_TEXT_SECONDARY}`}>
-            Link ou QR — cada convite vale para até 8 pessoas (3–8 no círculo ideal).
+            Link ou QR - cada convite vale para até 8 pessoas (3-8 no círculo ideal).
           </p>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import type { TemporalHorizon } from '../../lib/temporalHorizon'
 
-// Indicador de fluxo temporal — reforça o modelo mental único do produto
+// Indicador de fluxo temporal - reforça o modelo mental único do produto
 
 const STEPS: { id: TemporalHorizon; label: string }[] = [
   { id: 'hoje', label: 'Hoje' },

@@ -11,7 +11,7 @@ import { loadTaskDrawerPrefs, saveTaskDrawerPrefs } from '../../lib/taskDrawerPr
 import { AXEL_BTN_PRIMARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
-// Faixa horizontal de metadados — datas, prazo e timer inline
+// Faixa horizontal de metadados - datas, prazo e timer inline
 
 interface AxelDrawerDetailsStripProps
 {
@@ -31,9 +31,9 @@ const TAG =
 
 function formatDateTag(iso: string | null): string
 {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
 }
 
@@ -235,7 +235,7 @@ export function AxelDrawerDetailsStrip({
                     onDeadlineChange(new Date(v).toISOString())
                   }}
                   className="text-xs font-mono text-ink bg-transparent border-none outline-none focus:ring-0 p-0 w-full min-w-0 disabled:cursor-not-allowed"
-                  title={semPrazo ? 'Intenção — ainda sem hora' : (deadline ? formatDrawerDate(deadline) : 'Definir prazo')}
+                  title={semPrazo ? 'Intenção - ainda sem hora' : (deadline ? formatDrawerDate(deadline) : 'Definir prazo')}
                 />
               </label>
             ) : (
@@ -262,7 +262,7 @@ export function AxelDrawerDetailsStrip({
                 }}
                 className="h-4 w-4 rounded border-line accent-accent shrink-0"
               />
-              <span className="text-[11px]">Intenção sem hora — não é atraso. Agende quando couber.</span>
+              <span className="text-[11px]">Intenção sem hora - não é atraso. Agende quando couber.</span>
             </label>
           )}
         </div>

@@ -54,7 +54,7 @@ export function GmailImapSection()
       setSavedEmail(email.trim().toLowerCase())
       setAppPassword('')
       completeOnboardingStep('connect_email')
-      toast.success('Gmail configurado — gratuito, sem Google Cloud')
+      toast.success('Gmail configurado - gratuito, sem Google Cloud')
     }
     catch (err)
     {
@@ -123,7 +123,7 @@ export function GmailImapSection()
             <Mail className="w-5 h-5 text-violet-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-semibold text-white">Gmail — plano gratuito</h3>
+            <h3 className="text-[15px] font-semibold text-white">Gmail - plano gratuito</h3>
             <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
               Sem Google Cloud e sem cartão. Use uma senha de app do Gmail; o AXEL tria com Groq e
               cria tarefas urgentes no Kanban.
@@ -151,7 +151,7 @@ export function GmailImapSection()
               <ExternalLink className="w-3 h-3" />
             </a>
           </li>
-          <li>Cole abaixo e salve — depois use Sync Gmail</li>
+          <li>Cole abaixo e salve - depois use Sync Gmail</li>
         </ol>
 
         <div className="grid gap-3 sm:grid-cols-2 mb-3">

@@ -1,4 +1,4 @@
-// slice de inbox unificado — unified_events do Supabase
+// slice de inbox unificado - unified_events do Supabase
 import type { StateCreator } from 'zustand'
 import { supabase } from '../../lib/supabase'
 

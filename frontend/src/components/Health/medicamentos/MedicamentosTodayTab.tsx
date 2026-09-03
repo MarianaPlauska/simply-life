@@ -145,7 +145,7 @@ export function MedicamentosTodayTab({ onGoCadastrar }: MedicamentosTodayTabProp
             Nenhum remédio cadastrado ainda
           </p>
           <p className={`text-[13px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-            Quer que eu te lembre de algum? Cadastre nome e horários — sem cobrança.
+            Quer que eu te lembre de algum? Cadastre nome e horários - sem cobrança.
           </p>
           <button
             type="button"

@@ -7,7 +7,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 /** Proporção ISO/IEC 7810 ID-1 (~85.6×53.98mm) */
 export const CARD_ASPECT = 1.586
 
-/** Skins metálicos — saturação baixa/média (cartão real, não alerta) */
+/** Skins metálicos - saturação baixa/média (cartão real, não alerta) */
 const SKINS: Record<FinanceCardGradient, [string, string, string]> = {
   purple: ['#3D3560', '#2A2640', '#1C1A2A'],
   obsidian: ['#3F3F46', '#27272A', '#18181B'],
@@ -24,7 +24,7 @@ type Props = {
   onPress?: () => void
 }
 
-/** Representação visual de cartão — referência Mercury/Copilot + web CreditCardVisual */
+/** Representação visual de cartão - referência Mercury/Copilot + web CreditCardVisual */
 export function CreditCardVisual({ card, width, selected, onPress }: Props)
 {
   const { colors, radius } = useTheme()

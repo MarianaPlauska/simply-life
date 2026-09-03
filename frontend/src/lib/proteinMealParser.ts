@@ -106,7 +106,7 @@ export function estimateProteinFromText(text: string, refeicao: RefeicaoId): Pro
 
   if (gramas === 0)
   {
-    // Refeição genérica sem detalhe — estimativa conservadora por tipo
+    // Refeição genérica sem detalhe - estimativa conservadora por tipo
     const fallback: Record<RefeicaoId, number> = {
       cafe: 12,
       almoco: 28,

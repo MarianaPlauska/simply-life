@@ -13,7 +13,7 @@ import { initSentry } from './lib/sentryInit'
 bootstrapColorSchemeFromStorage()
 initSentry()
 
-// Service worker só em produção — evita workbox no dev (cache Vite instável)
+// Service worker só em produção - evita workbox no dev (cache Vite instável)
 if (import.meta.env.PROD)
 {
   registerSW({
@@ -42,5 +42,5 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-// métricas de performance — loga no console em dev
+// métricas de performance - loga no console em dev
 reportWebVitals()

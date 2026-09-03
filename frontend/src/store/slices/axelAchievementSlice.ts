@@ -6,7 +6,7 @@ import {
   writeScopedJson,
 } from '../../lib/userScopedStorage'
 
-// Rastro de Conquistas — tarefas concluídas recentemente (isolado por usuário)
+// Rastro de Conquistas - tarefas concluídas recentemente (isolado por usuário)
 
 export const ACHIEVEMENTS_BASE_KEY = 'axel-recent-achievements-v1'
 const MAX_ACHIEVEMENTS = 16
@@ -37,7 +37,7 @@ export function loadAchievementsForUser(userId?: string | null): AchievementEntr
   const uid = userId !== undefined ? userId : getActiveStorageUserId()
   if (!uid) return []
 
-  // Descarta cache global legado — vazava dados entre contas no mesmo navegador
+  // Descarta cache global legado - vazava dados entre contas no mesmo navegador
   try
   {
     localStorage.removeItem(ACHIEVEMENTS_BASE_KEY)

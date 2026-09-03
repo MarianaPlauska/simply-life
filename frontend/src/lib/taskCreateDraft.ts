@@ -3,7 +3,7 @@ import type { Subtarefa, TarefaUnificada } from '../types'
 
 export type TaskCreateManualPriority = 'alta' | 'normal' | 'quando_der'
 
-// Rascunho local de nova demanda — persiste ao fechar drawer ou trocar de tela
+// Rascunho local de nova demanda - persiste ao fechar drawer ou trocar de tela
 
 const STORAGE_KEY = 'simply-life:task-create-draft-v1'
 

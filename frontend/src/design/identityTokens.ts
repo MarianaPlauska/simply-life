@@ -1,5 +1,5 @@
 /**
- * Identidade visual Simply-Life / AXEL — legado web (PWA).
+ * Identidade visual Simply-Life / AXEL - legado web (PWA).
  *
  * Fonte da verdade do redesign mobile: packages/ui-tokens (AXEL Premium).
  * Ver docs/AXEL_PREMIUM.md e docs/PWA_DESTINO.md.
@@ -8,92 +8,84 @@
  * Princípio: o laranja é a voz do AXEL. Módulos de dados têm cor própria.
  */
 
-export const IDENTITY_VERSION = '2026.09-drive-p2p-v1'
+export const IDENTITY_VERSION = '2026.09-bloco-h-cream-onyx'
 export const PREMIUM_TOKENS_PATH = '@simply-life/ui-tokens'
 
-/* ── Superfícies (tema escuro = P2P preto + laranja) ─────────── */
+/* ── Superfícies escuro (Dark Onyx Bloco H) ─ */
 
 export const COLOR = {
-  canvas: '#0A0A0C',
-  chrome: '#141418',
-  surface: '#141418',
-  /** Sidebar navy black */
-  voice: '#0D1020',
-  elevated: '#1C1C24',
+  canvas: '#373539',
+  chrome: '#403C40',
+  surface: '#403C40',
+  voice: '#4A454A',
+  elevated: '#4A454A',
 
-  ink: '#F5F5F7',
-  inkMuted: '#9A9AA6',
-  inkFaint: '#6E6E78',
+  ink: '#F5F1EC',
+  inkMuted: '#B0A9A6',
+  inkFaint: 'rgba(176, 169, 166, 0.72)',
 
-  hairline: 'rgba(245, 245, 247, 0.10)',
-  hairlineStrong: 'rgba(255, 106, 43, 0.35)',
+  hairline: '#504B4F',
+  hairlineStrong: 'rgba(232, 115, 74, 0.55)',
 
-  /**
-   * Voz do AXEL — laranja vivo (refs P2P / Task).
-   */
-  axel: '#FF6A2B',
-  axelHover: '#FF8A4C',
-  axelMuted: 'rgba(255, 106, 43, 0.18)',
-  axelOnFill: '#0A0A0C',
+  /** Voz do AXEL - accent Bloco H */
+  axel: '#E8734A',
+  axelHover: '#C45A32',
+  axelMuted: 'rgba(232, 115, 74, 0.22)',
+  axelOnFill: '#373539',
 
-  health: '#5FD39A',
-  healthMuted: 'rgba(95, 211, 154, 0.16)',
-  healthOnFill: '#0A0A0C',
+  health: '#7BC9A0',
+  healthMuted: 'rgba(123, 201, 160, 0.16)',
+  healthOnFill: '#373539',
 
-  finance: '#F0B45A',
-  financeMuted: 'rgba(240, 180, 90, 0.16)',
-  financeOnFill: '#0A0A0C',
+  finance: '#F5F1EC',
+  financeMuted: 'rgba(245, 241, 236, 0.12)',
+  financeOnFill: '#373539',
 
-  tasks: '#8BA4C7',
-  tasksMuted: 'rgba(139, 164, 199, 0.16)',
-  tasksOnFill: '#0A0A0C',
+  tasks: '#F5F1EC',
+  tasksMuted: 'rgba(245, 241, 236, 0.10)',
+  tasksOnFill: '#373539',
 
-  danger: '#FF6B7A',
-  dangerMuted: 'rgba(255, 107, 122, 0.14)',
-  done: '#5FD39A',
-  attention: '#F0B45A',
+  danger: '#E07A6A',
+  dangerMuted: 'rgba(224, 122, 106, 0.14)',
+  done: '#7BC9A0',
+  attention: '#E8734A',
 } as const
 
-/* ── Claro (Pantone Tortilla / Gold Leaf / Terracotta) ──────── */
+/* ── Claro (creme quente Bloco H) ──────── */
 
 export const COLOR_LIGHT = {
-  /** Tortilla lavado */
-  canvas: '#F5F1EC',
-  chrome: '#FFFCFA',
-  surface: '#FFFCFA',
-  voice: '#EDE4D8',
-  elevated: '#EDE4D8',
-  ink: '#0C1519',
-  inkMuted: '#5C534C',
-  inkFaint: '#8A7E74',
-  hairline: 'rgba(12, 21, 25, 0.10)',
-  hairlineStrong: 'rgba(198, 161, 126, 0.55)',
-  /**
-   * Terracotta Pantone 2429 — escurecido para AA no cream.
-   */
-  axel: '#A05C3D',
-  health: '#3F6B5A',
-  finance: '#7A6540',
+  canvas: '#F6EEE3',
+  chrome: '#FDF9F3',
+  surface: '#FDF9F3',
+  voice: '#E8DDC9',
+  elevated: '#FFFFFF',
+  ink: '#2A2622',
+  inkMuted: '#8C8275',
+  inkFaint: 'rgba(140, 130, 117, 0.72)',
+  hairline: '#E8DDC9',
+  hairlineStrong: 'rgba(232, 115, 74, 0.45)',
+  axel: '#E8734A',
+  health: '#3D8F6A',
+  finance: '#B8956B',
   tasks: '#4A5560',
-  danger: '#9A4545',
-  attention: '#9A7A3A',
-  done: '#4A6B58',
-  axelOnFill: '#F5F1EC',
-  healthOnFill: '#F5F1EC',
-  financeOnFill: '#F5F1EC',
-  tasksOnFill: '#F5F1EC',
-  /** Gold Leaf / Tortilla */
-  sand: '#C6A17E',
-  tortilla: '#CABAAA',
-  terracotta: '#B87252',
-  semanticWarm: '#E8D5C8',
+  danger: '#C44B4B',
+  attention: '#E8734A',
+  done: '#3D8F6A',
+  axelOnFill: '#FFFFFF',
+  healthOnFill: '#FFFFFF',
+  financeOnFill: '#FFFFFF',
+  tasksOnFill: '#FFFFFF',
+  sand: '#B8956B',
+  tortilla: '#F6EEE3',
+  terracotta: '#E8734A',
+  semanticWarm: '#F6EEE3',
   semanticRose: '#E5B8B8',
   semanticMint: '#B8D4C8',
   semanticSky: '#B8C8D4',
-  semanticButter: '#F0E4D0',
+  semanticButter: '#FDF9F3',
 } as const
 
-/* ── WCAG 2.2 AA — pares que a UI pode usar ─────────────────
+/* ── WCAG 2.2 AA - pares que a UI pode usar ─────────────────
  *
  * Texto normal ≥ 4.5:1 · texto grande (≥18px ou 14px bold) ≥ 3:1
  * Controles / ícones ≥ 3:1
@@ -113,7 +105,7 @@ export const CONTRAST = {
   financeOnCanvas: 6.5,
   tasksOnCanvas: 5.5,
   dangerOnCanvas: 5.0,
-  /** cream sobre #E8734A — não usar */
+  /** cream sobre #E8734A - não usar */
   creamOnAxelFail: 2.3,
   graphiteOnAxel: 5.2,
 } as const
@@ -123,7 +115,7 @@ export const CONTRAST = {
 export const TYPE = {
   /**
    * Voz do AXEL (saudação, recomendação, copy falada).
-   * Fraunces: serif com “optical size” e terminais macios —
+   * Fraunces: serif com “optical size” e terminais macios -
    * parece falada, não editorial (Lora) nem display de poster.
    */
   voice: '"Fraunces", "Iowan Old Style", Georgia, serif',
@@ -141,17 +133,17 @@ export const TYPE = {
 } as const
 
 export const TYPE_ROLE = {
-  /** Fraunces 28–36 / 500 — “Bom dia, Mariana.” */
+  /** Fraunces 28-36 / 500 - “Bom dia, Mariana.” */
   axelGreeting: { family: 'voice', sizePx: 24, weight: 500, lineHeight: 1.2 },
   /** Fraunces 15 / 400. Frase de recomendação */
   axelSpeech: { family: 'voice', sizePx: 15, weight: 400, lineHeight: 1.4 },
-  /** Manrope 11 / 600 uppercase tracking — nome do módulo, não o herói */
+  /** Manrope 11 / 600 uppercase tracking - nome do módulo, não o herói */
   moduleKicker: { family: 'ui', sizePx: 11, weight: 600, lineHeight: 1.2, trackingEm: 0.06 },
-  /** Manrope 32–40 / 500 tabular — o número É o card */
+  /** Manrope 32-40 / 500 tabular - o número É o card */
   metric: { family: 'ui', sizePx: 28, weight: 500, lineHeight: 1.05, tabular: true },
-  /** Manrope 15–16 / 400 — corpo */
+  /** Manrope 15-16 / 400 - corpo */
   body: { family: 'ui', sizePx: 16, weight: 400, lineHeight: 1.5 },
-  /** Manrope 14 / 600 — botão, ação */
+  /** Manrope 14 / 600 - botão, ação */
   action: { family: 'ui', sizePx: 14, weight: 600, lineHeight: 1.2 },
   pageTitle: { family: 'voice', sizePx: 24, weight: 500, lineHeight: 1.2 },
 } as const
@@ -171,9 +163,9 @@ export const SPACE = {
 export const RADIUS = {
   /** Botões, chips, inputs */
   control: 12,
-  /** Card de dado — discreto, não “app genérico 20px” */
+  /** Card de dado - discreto, não “app genérico 20px” */
   data: 16,
-  /** Fala do AXEL — mais aberto, quase envelope */
+  /** Fala do AXEL - mais aberto, quase envelope */
   voice: 24,
   pill: 9999,
 } as const
@@ -203,7 +195,7 @@ export const SURFACE_ROLE = {
     shadow: 'data',
     border: 'hairline',
     type: 'metric',
-    /** Cor só no número e no ícone SVG — nunca na moldura toda */
+    /** Cor só no número e no ícone SVG - nunca na moldura toda */
     accentOn: 'value+icon',
   },
   chrome: {
@@ -219,23 +211,23 @@ export const SURFACE_ROLE = {
 export const ICON = {
   library: 'lucide-react',
   stroke: 1.75,
-  /** Toque ≥ 44px no alvo; o glifo fica 20–24 */
+  /** Toque ≥ 44px no alvo; o glifo fica 20-24 */
   sizeNav: 22,
   sizeModule: 20,
   sizeInline: 16,
 } as const
 
 /**
- * Humor do AXEL — não é Lucide Smile/Frown (genérico) nem emoji.
+ * Humor do AXEL - não é Lucide Smile/Frown (genérico) nem emoji.
  *
  * Família própria, 5 estados, mesmo esqueleto:
  * - canvas 24×24, cantos 7px (rosto-retângulo, não carinha redonda)
  * - dois olhos (pontos), boca = uma curva que só muda tensão
  * - “brasa”: círculo 3px em `COLOR.axel` no canto inferior direito
- *   (marca registrada — presente em TODOS os estados)
+ *   (marca registrada - presente em TODOS os estados)
  *
  * Presença na Home (calmo / atento / positivo):
- * mesmo esqueleto, boca 4 / 3 / 5, sempre `text-axel` — nunca cinza triste.
+ * mesmo esqueleto, boca 4 / 3 / 5, sempre `text-axel` - nunca cinza triste.
  * Os SVG entram na etapa 2 (Home), neste arquivo só a regra.
  */
 export const AXEL_MOOD = {
@@ -258,7 +250,7 @@ export const AXEL_MOOD = {
 
 export const ACTION = {
   /**
-   * CTA do produto: invertido cream/grafite — alto contraste,
+   * CTA do produto: invertido cream/grafite - alto contraste,
    * zero laranja. O laranja não “pede clique”; ele “é o AXEL”.
    */
   primaryBg: 'ink',

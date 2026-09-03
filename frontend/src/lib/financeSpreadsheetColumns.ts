@@ -33,7 +33,7 @@ export function resolveSpreadsheetPaymentMethod(t: Transaction): string
 export function resolvePaymentDate(t: Transaction): string
 {
   const status = t.status_pagamento ?? 'pendente'
-  if (status !== 'pago') return '—'
+  if (status !== 'pago') return '-'
 
   const iso = t.data.slice(0, 10)
   return iso.split('-').reverse().join('/')

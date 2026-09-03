@@ -135,7 +135,7 @@ function UnscheduledRow({
   )
 }
 
-/** Linha do tempo vertical do dia — tarefas com horário em blocos, sem horário no topo */
+/** Linha do tempo vertical do dia - tarefas com horário em blocos, sem horário no topo */
 export function KanbanDayTimelineView({ tarefas, onOpen }: KanbanDayTimelineViewProps)
 {
   const [unscheduledOpen, setUnscheduledOpen] = useState(true)

@@ -55,7 +55,7 @@ function WaterWidget()
             Água
           </Text>
           <Text variant="title" color={colors.health}>
-            {agua ? `${agua.progressoAtual}/${agua.metaDiaria}` : '—'}
+            {agua ? `${agua.progressoAtual}/${agua.metaDiaria}` : '-'}
           </Text>
         </View>
         <PrimaryButton label="+ Copo" size="sm" onPress={() => void addWaterCup(isGuest)} />
@@ -209,7 +209,7 @@ function WidgetById({ id }: { id: DashboardWidgetId })
   }
 }
 
-/** Atalhos escolhidos no setup / Preferências — não são glances genéricos. */
+/** Atalhos escolhidos no setup / Preferências - não são glances genéricos. */
 export function DashboardQuickWidgets()
 {
   const { space } = useTheme()

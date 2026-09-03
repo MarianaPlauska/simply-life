@@ -13,7 +13,7 @@ interface MoodMonthCalendarHeatmapProps
   agregados: DiaHumorAgregado[]
 }
 
-/** Calendário do mês — colunas = dias da semana, linhas = semanas */
+/** Calendário do mês - colunas = dias da semana, linhas = semanas */
 export function MoodMonthCalendarHeatmap({ agregados }: MoodMonthCalendarHeatmapProps)
 {
   const cells = useMemo(() => buildCurrentMonthCalendar(agregados), [agregados])

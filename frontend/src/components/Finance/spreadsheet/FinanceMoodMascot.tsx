@@ -15,7 +15,7 @@ interface FinanceMoodMascotProps
   className?: string
   size?: 'sm' | 'lg'
   showLabel?: boolean
-  /** Contas a vencer em 48h — badge no mascote */
+  /** Contas a vencer em 48h - badge no mascote */
   billAlertCount?: number
 }
 

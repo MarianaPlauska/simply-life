@@ -44,7 +44,7 @@ export function HealthTodayPanel({ onSelectTab }: HealthTodayPanelProps)
           {headline}
         </p>
         <p className={`text-[13px] mt-1.5 ${AXEL_TEXT_SECONDARY}`}>
-          {snapshot.doneCount} de {snapshot.totalApplicable} — o que falta cabe hoje
+          {snapshot.doneCount} de {snapshot.totalApplicable} - o que falta cabe hoje
         </p>
         <div
           className="mt-3 h-2 overflow-hidden rounded-full bg-chrome"

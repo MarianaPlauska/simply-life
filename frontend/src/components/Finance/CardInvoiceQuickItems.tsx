@@ -154,7 +154,7 @@ export function CardInvoiceQuickItems({ card, items }: CardInvoiceQuickItemsProp
           Itens da fatura
         </p>
         <p className={`text-[10px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-          Adicione ou edite compras aqui — sem abrir outro modal.
+          Adicione ou edite compras aqui - sem abrir outro modal.
         </p>
       </div>
 

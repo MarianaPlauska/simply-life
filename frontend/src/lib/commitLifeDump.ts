@@ -17,7 +17,7 @@ async function requestNotifIfNeeded(): Promise<void>
   catch { /* ignore */ }
 }
 
-/** Grava cartões confirmados — nada entra sem kept */
+/** Grava cartões confirmados - nada entra sem kept */
 export async function commitLifeDump(cards: DumpCard[]): Promise<number>
 {
   const kept = cards.filter((c) => c.kept)

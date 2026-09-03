@@ -4,7 +4,7 @@ import { COLOR_DARK } from '@simply-life/ui-tokens'
 import { Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 
-/** Marca SL — mesmo desenho do favicon.svg (web) */
+/** Marca SL - mesmo desenho do favicon.svg (web) */
 export function BrandMark({
   size = 72,
   lockup,
@@ -12,7 +12,7 @@ export function BrandMark({
 }: {
   size?: number
   lockup?: boolean
-  /** Sobre fundo cobre — mantém contraste do favicon */
+  /** Sobre fundo cobre - mantém contraste do favicon */
   onFill?: boolean
 })
 {

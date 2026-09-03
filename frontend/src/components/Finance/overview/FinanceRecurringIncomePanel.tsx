@@ -103,7 +103,7 @@ export function FinanceRecurringIncomePanel({ activeCategories }: FinanceRecurri
         <div>
           <h2 className={AXEL_SECTION_TITLE}>Receitas recorrentes</h2>
           <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            Salário, freelance — alimentam a projeção de caixa
+            Salário, freelance - alimentam a projeção de caixa
           </p>
         </div>
         <div className="text-right">

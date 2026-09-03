@@ -69,7 +69,7 @@ export function buildMonthCloseRitual(input: {
     else
     {
       headline = 'Mês dentro do previsto'
-      detail = 'Boa previsibilidade — mantenha o ritual de reconciliar com o banco toda semana.'
+      detail = 'Boa previsibilidade - mantenha o ritual de reconciliar com o banco toda semana.'
     }
 
     if (cmp.deltaCompromissos > 100)

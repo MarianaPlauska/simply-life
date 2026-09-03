@@ -1,4 +1,4 @@
-// empty state genérico — tokens AXEL (sem violeta legado)
+// empty state genérico - tokens AXEL (sem violeta legado)
 import type { ElementType } from 'react'
 
 type EmptyStateTone = 'accent' | 'teal' | 'amber'

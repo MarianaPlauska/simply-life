@@ -74,7 +74,7 @@ export function AxelRewardShop()
           <div className="flex-1">
             <p className={`text-sm ${AXEL_TEXT_PRIMARY}`}>Mais cosméticos</p>
             <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-              Veja a Coleção AXEL acima — skins, tons de IA e molduras
+              Veja a Coleção AXEL acima - skins, tons de IA e molduras
             </p>
           </div>
         </div>

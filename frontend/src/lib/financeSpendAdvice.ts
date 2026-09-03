@@ -1,4 +1,4 @@
-// Conselho AXEL — consumir agora vs esperar (heurística local, sem IA)
+// Conselho AXEL - consumir agora vs esperar (heurística local, sem IA)
 
 import type { MoodProfile } from './moodOrchestration'
 
@@ -97,7 +97,7 @@ export function applyMoodToSpendAdvice(advice: SpendAdvice, profile?: MoodProfil
 
   const heavy = profile === 'recuperacao'
   const moodNote = heavy
-    ? ' Seu humor hoje pede ritmo leve — priorize necessidades.'
+    ? ' Seu humor hoje pede ritmo leve - priorize necessidades.'
     : ' Humor mais baixo: evite compras por impulso.'
 
   if (advice.tone === 'ok')
@@ -105,7 +105,7 @@ export function applyMoodToSpendAdvice(advice: SpendAdvice, profile?: MoodProfil
     return {
       ...advice,
       tone: 'caution',
-      headline: heavy ? 'Dia pesado — cautela' : 'Consumo com cautela',
+      headline: heavy ? 'Dia pesado - cautela' : 'Consumo com cautela',
       detail: `${advice.detail}${moodNote}`,
     }
   }

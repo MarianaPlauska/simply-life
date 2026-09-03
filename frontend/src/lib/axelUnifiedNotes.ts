@@ -1,4 +1,4 @@
-// Diário + anotações — contexto unificado para veredito AXEL e carta de ontem
+// Diário + anotações - contexto unificado para veredito AXEL e carta de ontem
 
 export type UnifiedNoteSource = 'diario' | 'anotacao'
 
@@ -98,7 +98,7 @@ export function buildUnifiedNoteSnippet(
   return parts.join(' · ').slice(0, maxChars)
 }
 
-/** Texto do dia (ontem ou qualquer ISO) — diário tem prioridade sobre anotação */
+/** Texto do dia (ontem ou qualquer ISO) - diário tem prioridade sobre anotação */
 export function findUnifiedNoteForDate(
   iso: string,
   anotacoes: AnotacaoLike[] | null | undefined,

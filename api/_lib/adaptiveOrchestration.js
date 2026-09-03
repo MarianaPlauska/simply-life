@@ -1,4 +1,4 @@
-// Motor de Orquestração Adaptativa — espelho do frontend (ingest/API)
+// Motor de Orquestração Adaptativa - espelho do frontend (ingest/API)
 
 import { calculateUrgency } from './relevanceEngine.js';
 import { getInfluenceWeight } from './influenceMap.js';

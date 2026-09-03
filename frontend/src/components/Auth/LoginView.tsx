@@ -54,7 +54,7 @@ export function LoginView()
 
   const [mode, setMode] = useState<'login' | 'register'>('login');
 
-  // Campos separados — evita vazar email/senha de login no cadastro (autofill)
+  // Campos separados - evita vazar email/senha de login no cadastro (autofill)
   const [loginEmail, setLoginEmail] = useState('');
   const [loginSenha, setLoginSenha] = useState('');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -341,27 +341,35 @@ export function LoginView()
   const isRegisterDisabled = !regEmail.trim() || !regSenha.trim() || !regConfirm.trim() || !regNome.trim();
 
   return (
-    <div className="relative min-h-screen w-screen bg-fundo sl-ruled-bg overflow-hidden">
-      <div className="absolute inset-0 sl-login-vignette pointer-events-none" />
+    <div className="relative min-h-screen w-screen bg-fundo overflow-hidden">
+      <div className="absolute inset-0 sl-login-vignette pointer-events-none hidden lg:block" />
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-5xl grid lg:grid-cols-[1fr_420px] gap-10 xl:gap-16 items-center">
-          <LoginHero />
+      {/* Mobile / tablet: marca compacta no topo (Bloco H) - escuro: Dark Onyx + brilho accent */}
+      <div className="lg:hidden relative h-[150px] w-full overflow-hidden bg-gradient-to-br from-axel via-accent to-accent-hover dark:bg-[var(--bg-canvas)] dark:bg-none">
+        <div
+          className="pointer-events-none absolute inset-0 hidden dark:block"
+          style={{
+            background:
+              'radial-gradient(ellipse 55% 60% at 50% 42%, rgba(232,115,74,0.5) 0%, rgba(232,115,74,0.18) 42%, transparent 70%), linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-surface) 55%, var(--bg-canvas) 100%)',
+          }}
+        />
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pt-2">
+          <SimplyLifeMark variant="icon" className="w-10 h-10" />
+          <p className="text-[18px] font-semibold text-[#F5F1EC] tracking-tight">Simply Life</p>
+        </div>
+      </div>
 
-          <div className="w-full max-w-md mx-auto lg:max-w-none">
-            <div className="lg:hidden mb-8 text-center">
-              <div className="flex justify-center mb-4">
-                <SimplyLifeMark variant="icon" className="w-14 h-14" />
-              </div>
-              <p className="sl-eyebrow mb-3">Simply-Life OS</p>
-              <h1 className="text-[26px] font-display text-ink leading-tight">{t('login.title')}</h1>
-              <p className="text-[13px] text-ink-muted mt-2">{t('login.subtitle')}</p>
-            </div>
+      <div className="relative z-10 min-h-[calc(100dvh-150px)] lg:min-h-screen flex items-stretch lg:items-center justify-center px-0 lg:px-4 py-0 lg:py-10">
+        <div className="w-full max-w-5xl grid lg:grid-cols-[1fr_420px] gap-0 lg:gap-10 xl:gap-16 items-stretch lg:items-center">
+          <div className="hidden lg:block">
+            <LoginHero />
+          </div>
 
-            <div className="sl-panel sl-login-glow p-8">
-              <div className="hidden lg:block mb-6">
-                <h2 className="text-xl font-display text-ink">{t('login.title')}</h2>
-                <p className="text-[13px] text-ink-muted mt-1">{t('login.subtitle')}</p>
+          <div className="w-full max-w-none mx-auto lg:max-w-md -mt-3 lg:mt-0 rounded-t-[20px] lg:rounded-none bg-[var(--bg-surface)] lg:bg-transparent px-5 sm:px-6 lg:px-0 pt-6 pb-8 min-h-[calc(100dvh-138px)] lg:min-h-0">
+            <div className="sl-panel sl-login-glow p-5 sm:p-6 lg:p-8 border-0 lg:border shadow-none lg:shadow bg-[var(--bg-surface)]">
+              <div className="mb-5 lg:mb-6">
+                <h2 className="text-h1 md:text-h1-md lg:text-h1-lg font-display text-ink">{t('login.title')}</h2>
+                <p className="text-[13px] lg:text-[14px] text-ink-muted mt-1">{t('login.subtitle')}</p>
               </div>
 
               <TabToggle

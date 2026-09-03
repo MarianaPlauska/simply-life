@@ -75,7 +75,7 @@ export function Rule503020Section({
         <div>
           <h2 className={AXEL_SECTION_TITLE}>Distribuição 50-30-20</h2>
           <p className={`text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            Meta vs real — baseado na receita do mês
+            Meta vs real - baseado na receita do mês
           </p>
         </div>
         {receita > 0 && (

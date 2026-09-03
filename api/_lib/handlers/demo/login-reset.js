@@ -1,4 +1,4 @@
-// POST /api/demo/login-reset — restaura o seed da conta demo (só o UUID/email demo)
+// POST /api/demo/login-reset - restaura o seed da conta demo (só o UUID/email demo)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js'

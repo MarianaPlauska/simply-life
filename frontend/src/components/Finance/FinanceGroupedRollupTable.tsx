@@ -17,7 +17,7 @@ interface FinanceGroupedRollupTableProps
   transactions: Transaction[]
   activeCategories: Category[]
   periodLabel: string
-  /** Dentro de collapsible — sem painel nem título duplicado */
+  /** Dentro de collapsible - sem painel nem título duplicado */
   embedded?: boolean
 }
 

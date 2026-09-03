@@ -2,7 +2,7 @@ import type { ReservedBill, ReservedBillItem } from '../store/storeTypes'
 import { billProgress } from './financeReservedBills'
 import { resolveBillItemHighlight } from './financeBillItems'
 
-/** Situação visual da fatura — cor e badge */
+/** Situação visual da fatura - cor e badge */
 export type BillVisualStatus =
   | 'tranquila'
   | 'vencendo'

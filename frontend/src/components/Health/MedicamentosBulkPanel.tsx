@@ -52,7 +52,7 @@ const EMPTY_DRAFT = (): DraftMed => ({
   consultaRenovacao: '',
 })
 
-// Cadastro estruturado — períodos, dosagem e tipo para alertas do AXEL
+// Cadastro estruturado - períodos, dosagem e tipo para alertas do AXEL
 
 export function MedicamentosBulkPanel({
   variant = 'full',

@@ -4,35 +4,44 @@ import {
   KeyboardAvoidingView,
   Platform,
   useWindowDimensions,
+  Pressable,
 } from 'react-native'
 import { Redirect } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Ionicons } from '@expo/vector-icons'
 import { BREAKPOINT } from '@simply-life/ui-tokens'
-import { Screen } from '../src/ui'
+import { Screen, Text } from '../src/ui'
 import { AuthHeader } from '../src/components/auth/AuthHeader'
 import { LoginBrandPanel } from '../src/components/auth/LoginBrandPanel'
 import { LoginForm, type AuthMode } from '../src/components/auth/LoginForm'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
+import { usePrefsStore } from '../src/store/prefsStore'
 
-const SHELL_MAX = 440
-const PAD_X = 24
+const PAD_X = 22
 
-/** Login — mobile: onda + form (ref Sign in); desktop: split-screen */
+/** Login - mobile: marca compacta + form; desktop: split-screen */
 export default function LoginScreen()
 {
-  const { colors, space } = useTheme()
+  const { colors, space, mode, setMode } = useTheme()
+  const patchPrefs = usePrefsStore((s) => s.patch)
   const insets = useSafeAreaInsets()
   const { width: vw, height: winH } = useWindowDimensions()
   const isDesktop = vw >= BREAKPOINT.desktop
   const userId = useAuthStore((s) => s.userId)
-  const [mode, setMode] = useState<AuthMode>('login')
+  const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
+  const [authMode, setAuthMode] = useState<AuthMode>('login')
 
-  if (userId) return <Redirect href="/(tabs)" />
+  if (userId && !mfaPending) return <Redirect href="/(tabs)" />
 
-  const shellMax = Math.min(isDesktop ? 480 : vw, SHELL_MAX)
-  const contentPad = !isDesktop && vw > SHELL_MAX ? Math.max((vw - SHELL_MAX) / 2, 0) : 0
   const minH = Math.max(winH - insets.top, 640)
+
+  const toggleTheme = () =>
+  {
+    const next = mode === 'dark' ? 'light' : 'dark'
+    setMode(next)
+    void patchPrefs({ color_scheme: next })
+  }
 
   if (isDesktop)
   {
@@ -50,46 +59,84 @@ export default function LoginScreen()
             paddingHorizontal: space.xxl,
             paddingVertical: Math.max(insets.top, space.xl),
             paddingBottom: Math.max(insets.bottom, space.xl),
+            backgroundColor: colors.canvas,
           }}
         >
-          <LoginForm mode={mode} onModeChange={setMode} showHeading />
+          <View
+            style={{
+              width: '100%',
+              maxWidth: 420,
+              backgroundColor: colors.surface,
+              borderRadius: 20,
+              padding: space.xl,
+              borderWidth: 1,
+              borderColor: colors.hairline,
+            }}
+          >
+            <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading />
+          </View>
         </KeyboardAvoidingView>
       </View>
     )
   }
 
+  // Mobile / tablet < desktop - marca no topo + form full-width
   return (
     <Screen scroll tabBarInset={false} padded={false} style={{ flexGrow: 1, minHeight: minH }}>
       <View
         style={{
           flexGrow: 1,
           width: '100%',
-          maxWidth: SHELL_MAX,
-          alignSelf: 'center',
-          overflow: 'hidden',
-          marginHorizontal: contentPad > 0 ? 0 : undefined,
-          backgroundColor: colors.elevated,
+          backgroundColor: colors.canvas,
         }}
       >
-        <AuthHeader
-          welcomeLabel={mode === 'login' ? 'Bem-vindo' : 'Olá'}
-          compact={mode === 'register'}
-          width={shellMax}
-        />
+        <View style={{ position: 'relative' }}>
+          <AuthHeader
+            welcomeLabel={authMode === 'login' ? 'Bem-vindo' : 'Olá'}
+            compact={authMode === 'register'}
+            width={vw}
+          />
+          <Pressable
+            onPress={toggleTheme}
+            accessibilityLabel={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+            style={{
+              position: 'absolute',
+              right: 16,
+              top: Math.max(insets.top, 8) + 8,
+              width: 40,
+              height: 40,
+              borderRadius: 999,
+              backgroundColor: 'rgba(0,0,0,0.22)',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons
+              name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
+              size={18}
+              color="#F2EDE6"
+            />
+          </Pressable>
+        </View>
 
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{
             flexGrow: 1,
             paddingHorizontal: PAD_X,
-            paddingTop: space.md,
+            paddingTop: space.lg,
             paddingBottom: Math.max(insets.bottom, space.lg),
-            backgroundColor: colors.elevated,
-            borderTopLeftRadius: 0,
+            backgroundColor: colors.surface,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            marginTop: -12,
+            minHeight: winH * 0.62,
           }}
         >
-          {/* Título no bloco branco — layout Sign in da ref */}
-          <LoginForm mode={mode} onModeChange={setMode} showHeading variant="wave" />
+          <Text variant="caption" muted style={{ marginBottom: space.sm }}>
+            {mode === 'dark' ? 'Modo escuro' : 'Modo claro'}
+          </Text>
+          <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading variant="wave" />
         </KeyboardAvoidingView>
       </View>
     </Screen>

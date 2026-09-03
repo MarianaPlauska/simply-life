@@ -18,7 +18,7 @@ interface FinanceHomeRailProps
   onNavigate: (tab: PlannerLeafTab | FinanceAlertTab) => void
 }
 
-/** Envelope, categorias do mês, heatmap e alertas — rail da Home no xl */
+/** Envelope, categorias do mês, heatmap e alertas - rail da Home no xl */
 export function FinanceHomeRail({
   transactions,
   categories,

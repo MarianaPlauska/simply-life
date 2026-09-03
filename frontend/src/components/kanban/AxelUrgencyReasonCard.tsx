@@ -3,7 +3,7 @@ import { analyzeTaskIntent, INTENT_CATEGORY_STYLES } from '../../lib/intentAnaly
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
 import type { TarefaUnificada } from '../../types'
 
-// Razão da Urgência — transparência do IntentAnalyzer
+// Razão da Urgência - transparência do IntentAnalyzer
 
 interface AxelUrgencyReasonCardProps
 {
@@ -79,7 +79,7 @@ export function AxelUrgencyReasonCard({
         {intent.category === 'alinhamento' && (
           <p className="mt-2 text-[10px] text-ink-muted flex items-center gap-1">
             <Info size={12} strokeWidth={1.5} aria-hidden />
-            Informação — não força prioridade por prazo.
+            Informação - não força prioridade por prazo.
           </p>
         )}
       </div>

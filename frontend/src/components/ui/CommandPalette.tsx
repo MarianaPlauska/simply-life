@@ -85,7 +85,7 @@ export function CommandPalette ()
     }
   }, [isOpen]);
 
-  // debounce da busca — dispara 250ms depois de parar de digitar
+  // debounce da busca - dispara 250ms depois de parar de digitar
   useEffect(() =>
   {
     if ( debounceRef.current ) clearTimeout(debounceRef.current);
@@ -255,7 +255,7 @@ export function CommandPalette ()
             transition={{ duration: 0.18, ease: 'easeOut' }}
             className="w-full max-w-xl mx-4 bg-card border border-line rounded-sl-lg shadow-sl-lg overflow-hidden"
           >
-            {/* input de busca — mostra spinner quando está carregando */}
+            {/* input de busca - mostra spinner quando está carregando */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-line">
               {searchLoading
                 ? <Loader2 className="w-4 h-4 text-ink shrink-0 animate-spin" />

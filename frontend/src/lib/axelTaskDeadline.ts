@@ -2,7 +2,7 @@ import { resolveTaskEstimate } from '../services/axelTaskEstimateService'
 import { useTaskStore } from '../store/useTaskStore'
 import type { TarefaUnificada } from '../types'
 
-/** Usuário sinalizou dificuldade — AXEL estende prazo e recalibra estimativa */
+/** Usuário sinalizou dificuldade - AXEL estende prazo e recalibra estimativa */
 export async function axelExtendTaskDeadline(task: TarefaUnificada): Promise<number>
 {
   const store = useTaskStore.getState()
@@ -20,7 +20,7 @@ export async function axelExtendTaskDeadline(task: TarefaUnificada): Promise<num
   }
 
   store.pushAiDecision(
-    `Prazo +${days} dias — ${resolved.reasoning}`,
+    `Prazo +${days} dias - ${resolved.reasoning}`,
   )
 
   void store.refreshTaskEstimateFromTask(

@@ -2,7 +2,7 @@ import type { TarefaUnificada } from '../types'
 import type { UrgencyScoreEntry } from './urgencyEngine'
 import { supabaseAuthHeaders } from './supabaseAuthHeaders'
 
-// Cliente da API de orquestração — IA no servidor (chaves não vão ao browser)
+// Cliente da API de orquestração - IA no servidor (chaves não vão ao browser)
 
 export type IntelligenceMode = 'ai' | 'local' | 'ai_ready' | 'unknown'
 

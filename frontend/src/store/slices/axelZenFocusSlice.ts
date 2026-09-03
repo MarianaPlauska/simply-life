@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand'
 
-// Modo Foco Absoluto — canvas zen sem chrome do app
+// Modo Foco Absoluto - canvas zen sem chrome do app
 
 export interface AxelZenFocusSlice
 {

@@ -1,4 +1,4 @@
-// Atalhos de gasto — lançamento em 1 clique (persistência local por usuário)
+// Atalhos de gasto - lançamento em 1 clique (persistência local por usuário)
 
 import type { FinancePaymentMethod } from '../store/storeTypes'
 import {
@@ -11,7 +11,7 @@ export interface ExpensePreset
 {
   id: string
   label: string
-  /** Chave do ícone Lucide — ver axelIconMap */
+  /** Chave do ícone Lucide - ver axelIconMap */
   icon?: string
   /** @deprecated migrado para icon */
   emoji?: string

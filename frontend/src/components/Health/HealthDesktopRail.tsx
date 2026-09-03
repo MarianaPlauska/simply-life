@@ -17,7 +17,7 @@ function formatDay(iso: string): string
   })
 }
 
-/** Histórico e constância — workspace lg+ */
+/** Histórico e constância - workspace lg+ */
 export function HealthDesktopRail({
   activeTab,
   onOpenStats,

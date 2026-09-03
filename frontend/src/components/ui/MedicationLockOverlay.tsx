@@ -3,7 +3,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { buildDosesHoje, proximaDosePendente, mensagemGentilDose } from '../../lib/medicamentosSchedule'
 import { Pill, X } from 'lucide-react'
 
-// Lembrete gentil — sem bloquear a navegação
+// Lembrete gentil - sem bloquear a navegação
 
 export function MedicationLockOverlay()
 {

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { AXEL_ANALYTICS_CARD, AXEL_PROGRESS_THICK, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
 
-/** Bloco com efeito shimmer — respeita tokens do tema */
+/** Bloco com efeito shimmer - respeita tokens do tema */
 export function Shimmer({ className = '' }: { className?: string })
 {
   return (
@@ -35,7 +35,7 @@ interface BentoGridSkeletonProps
   variant?: 'health' | 'finance' | 'kanban' | 'default'
 }
 
-/** Placeholders no formato Bento — evita tela vazia durante fetch */
+/** Placeholders no formato Bento - evita tela vazia durante fetch */
 export function BentoGridSkeleton({ variant = 'default' }: BentoGridSkeletonProps)
 {
   if (variant === 'finance')

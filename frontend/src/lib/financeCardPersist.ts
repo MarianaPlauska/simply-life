@@ -1,4 +1,4 @@
-// Persistência resiliente de cartões — tolera colunas opcionais ausentes no schema
+// Persistência resiliente de cartões - tolera colunas opcionais ausentes no schema
 // (migrations 014 dia_fechamento/dia_vencimento e 032 modalidade podem não estar aplicadas)
 import type { VirtualCard } from '../store/storeTypes'
 import { supabase } from './supabase'
@@ -57,7 +57,7 @@ export interface CardPersistResult
 
 /**
  * Salva um cartão via upsert por id. Tenta a linha completa; se o banco recusar
- * por coluna ausente, refaz com as colunas base — assim sempre persiste por user_id.
+ * por coluna ausente, refaz com as colunas base - assim sempre persiste por user_id.
  */
 export async function persistCardToServer(uid: string, card: VirtualCard): Promise<CardPersistResult>
 {

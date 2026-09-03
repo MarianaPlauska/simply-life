@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { buildFinanceAlerts, type FinanceAlert } from '../lib/financeAlerts'
 import { useTaskStore } from '../store/useTaskStore'
 
-/** Alertas financeiros unificados — orçamento, faturas, fixas, cartões, metas */
+/** Alertas financeiros unificados - orçamento, faturas, fixas, cartões, metas */
 export function useFinanceAlerts(monthTransactions?: import('../store/storeTypes').Transaction[]): FinanceAlert[]
 {
   const transactions = useTaskStore((s) => s.transactions)

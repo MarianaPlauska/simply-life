@@ -1,4 +1,4 @@
-// Sparkline SVG mínimo — linha de tendência sem eixos ou fundo
+// Sparkline SVG mínimo - linha de tendência sem eixos ou fundo
 
 interface SparklineProps
 {

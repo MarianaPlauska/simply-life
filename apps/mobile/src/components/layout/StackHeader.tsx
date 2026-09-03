@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
-/** Cabeçalho de telas fora das tabs — Voltar + título. */
+/** Cabeçalho de telas fora das tabs - Voltar + título. */
 export function StackHeader({
   title,
   subtitle,

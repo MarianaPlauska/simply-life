@@ -5,13 +5,13 @@ import { AXEL_CHROME_PLANE } from '../../constants/axelSurfaces'
 import { cleanTitleForDisplay } from './axelKanbanUtils'
 import { billTaskReferenceKey, settlementCanonicalKey } from '../../lib/financeBillTaskDedup'
 
-// Rastro de conquistas — faixa inferior editorial
+// Rastro de conquistas - faixa inferior editorial
 
 function fmtDate(iso: string | undefined): string
 {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso.includes('T') ? iso : `${iso}T12:00:00`)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   return d.toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: 'short',

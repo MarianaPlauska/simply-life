@@ -1,4 +1,4 @@
-// slice de anotações — crud via supabase
+// slice de anotações - crud via supabase
 import type { StateCreator } from 'zustand'
 import type { Anotacao } from '../storeTypes'
 import { supabase } from '../../lib/supabase'

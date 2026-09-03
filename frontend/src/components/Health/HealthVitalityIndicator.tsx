@@ -12,7 +12,7 @@ interface HealthVitalityIndicatorProps
   onOpenStats?: () => void
 }
 
-/** Energia do dia — só sobe; nunca “definha” por ausência */
+/** Energia do dia - só sobe; nunca “definha” por ausência */
 export function HealthVitalityIndicator({ onOpenStats }: HealthVitalityIndicatorProps)
 {
   const snapshot = useHealthRitualSnapshot()

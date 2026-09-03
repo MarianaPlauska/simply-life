@@ -11,7 +11,7 @@ type Props = TextInputProps & {
   trailing?: ReactNode
 }
 
-/** Campo de autenticação — label, ícone à esquerda e slot trailing (ex.: Mostrar/Ocultar) */
+/** Campo de autenticação - label, ícone à esquerda e slot trailing (ex.: Mostrar/Ocultar) */
 export function AuthField({
   label,
   error,

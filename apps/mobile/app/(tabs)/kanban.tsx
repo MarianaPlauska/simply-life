@@ -1,45 +1,58 @@
 import { useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { useRouter } from 'expo-router'
-import {
-  partitionTodayTimeline,
-  minutesToLabel,
-  type MobileTask,
-} from '@simply-life/shared'
+import { syncGmailNow, type AxelDecisionEvent } from '@simply-life/shared'
 import {
   Screen,
-  Text,
-  Card,
-  SectionHeader,
   PillTabs,
-  EmptyState,
-  CheckRow,
+  PrimaryButton,
 } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
+import { useGamificationStore } from '../../src/store/gamificationStore'
 import { ScreenIntro } from '../../src/components/dashboard/ScreenIntro'
-import { MetricCards } from '../../src/components/dashboard/MetricCards'
 import { TabShell } from '../../src/components/dashboard/TabShell'
+import { DueBucketColumns } from '../../src/components/kanban/DueBucketColumns'
+import { KanbanCalendarPane } from '../../src/components/kanban/KanbanCalendarPane'
+import { KanbanGanttPane } from '../../src/components/kanban/KanbanGanttPane'
+import { KanbanListPane } from '../../src/components/kanban/KanbanListPane'
+import { KanbanTimelinePane } from '../../src/components/kanban/KanbanTimelinePane'
+import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
+import { KanbanOrchestratorBar } from '../../src/components/kanban/KanbanOrchestratorBar'
+import { KanbanDecisionLogSheet } from '../../src/components/kanban/KanbanDecisionLogSheet'
+import { authedApi } from '../../src/lib/integrationsApi'
 
-type ViewMode = 'timeline' | 'lista'
+type ViewMode = 'overview' | 'colunas' | 'lista' | 'timeline' | 'calendario' | 'gantt'
 
 export default function KanbanScreen()
 {
-  const { colors, space } = useTheme()
-  const router = useRouter()
-  const [mode, setMode] = useState<ViewMode>('timeline')
-  const tasks = useDataStore((s) => s.tasks)
+  const { space } = useTheme()
+  const [mode, setMode] = useState<ViewMode>('overview')
+  const [logOpen, setLogOpen] = useState(false)
+  const [syncMsg, setSyncMsg] = useState('')
+  const tasks = useDataStore((s) => s.tasks) ?? []
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
-  const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
   const isGuest = useAuthStore((s) => s.isGuest)
-  const timeline = useMemo(() => partitionTodayTimeline(tasks), [tasks])
-  const openCount = useMemo(() => tasks.filter((t) => t.status !== 'done').length, [tasks])
-  const doneToday = useMemo(
-    () => timeline.filter((t) => t.status === 'done').length,
-    [timeline],
+  const history = useGamificationStore((s) => s.history)
+  const logEvent = useGamificationStore((s) => s.logEvent)
+  const openCount = useMemo(
+    () => tasks.filter((t) => t.status !== 'done').length,
+    [tasks],
   )
+
+  const events: AxelDecisionEvent[] = history
+    .filter((h) => h.kind === 'decision')
+    .map((h) => ({
+      id: h.id,
+      user_id: 'local',
+      task_id: null,
+      kind: 'manual_override',
+      rationale: h.detail ?? h.title,
+      score: null,
+      horizon: null,
+      created_at: h.at,
+    }))
 
   return (
     <Screen
@@ -50,166 +63,80 @@ export default function KanbanScreen()
       <TabShell>
         <ScreenIntro
           title="Tarefas"
-          subtitle="Timeline do dia — o essencial primeiro."
+          subtitle="Overview, colunas e análise - mesma fonte."
         />
 
-        <MetricCards
-          items={[
-            {
-              label: 'Em aberto',
-              value: String(openCount).padStart(2, '0'),
-              color: colors.tasks,
-            },
-            {
-              label: 'Concluídas hoje',
-              value: String(doneToday).padStart(2, '0'),
-              color: colors.done,
-            },
-          ]}
-        />
+        {mode !== 'overview' ? <KanbanOrchestratorBar tasks={tasks} /> : null}
+
+        {mode !== 'overview' ? (
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <PrimaryButton
+              label="Decision log"
+              variant="secondary"
+              size="sm"
+              onPress={() => setLogOpen(true)}
+            />
+            <PrimaryButton
+              label="Sincronizar Gmail"
+              variant="ghost"
+              size="sm"
+              disabled={isGuest}
+              onPress={() =>
+              {
+                void (async () =>
+                {
+                  try
+                  {
+                    const api = await authedApi()
+                    const r = await syncGmailNow(api)
+                    setSyncMsg(`${r.tarefas_geradas} tarefa(s) de ${r.emails_lidos} e-mail(s)`)
+                    logEvent(
+                      'system',
+                      'Sync Gmail',
+                      `${r.tarefas_geradas} tarefas de ${r.emails_lidos} emails`,
+                    )
+                    await refreshAll({ isGuest })
+                  }
+                  catch (e)
+                  {
+                    setSyncMsg(e instanceof Error ? e.message : 'Sync indisponível')
+                  }
+                })()
+              }}
+            />
+          </View>
+        ) : null}
+        {syncMsg ? (
+          <PrimaryButton label={syncMsg} variant="link" onPress={() => setSyncMsg('')} />
+        ) : null}
 
         <PillTabs
           tabs={[
-            { id: 'timeline', label: 'Timeline', count: timeline.length },
-            { id: 'lista', label: 'Lista', count: openCount },
+            { id: 'overview', label: 'Overview', count: openCount },
+            { id: 'colunas', label: 'Colunas' },
+            { id: 'lista', label: 'Lista' },
+            { id: 'timeline', label: 'Timeline' },
+            { id: 'calendario', label: 'Calendário' },
+            { id: 'gantt', label: 'Gantt' },
           ]}
           value={mode}
           onChange={setMode}
         />
 
-        {mode === 'timeline' && (
-          <View>
-            <SectionHeader title="Hoje" subtitle={`${timeline.length} itens`} />
-            {timeline.length === 0 ? (
-              <Card tone="elevated">
-                <EmptyState
-                  title="Nada para hoje"
-                  body="Use o + para capturar uma tarefa."
-                />
-              </Card>
-            ) : (
-              <Card tone="elevated" style={{ paddingVertical: space.sm }}>
-                {timeline.map((task, index) => (
-                  <TimelineRow
-                    key={task.id}
-                    task={task}
-                    isLast={index === timeline.length - 1}
-                    onPress={() => router.push(`/task/${task.id}`)}
-                    onToggle={() => void toggleTaskDone(task.id, isGuest)}
-                  />
-                ))}
-              </Card>
-            )}
-          </View>
-        )}
-
-        {mode === 'lista' && (
-          <Card tone="elevated" style={{ paddingVertical: space.sm }}>
-            {tasks.length === 0 ? (
-              <EmptyState
-                title="Sem tarefas"
-                body="Use o + para capturar o que precisa ser feito."
-              />
-            ) : (
-              tasks.map((t, i, arr) => (
-                <CheckRow
-                  key={t.id}
-                  dense
-                  title={t.titulo}
-                  subtitle={t.status === 'done' ? 'Concluída' : 'Em aberto'}
-                  done={t.status === 'done'}
-                  onPress={() => router.push(`/task/${t.id}`)}
-                  onToggle={() => void toggleTaskDone(t.id, isGuest)}
-                  showSeparator={i < arr.length - 1}
-                />
-              ))
-            )}
-          </Card>
-        )}
-      </TabShell>
-    </Screen>
-  )
-}
-
-function TimelineRow({
-  task,
-  isLast,
-  onPress,
-  onToggle,
-}: {
-  task: MobileTask
-  isLast: boolean
-  onPress: () => void
-  onToggle: () => void
-})
-{
-  const { colors, space } = useTheme()
-  const time = task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : '—'
-  const done = task.status === 'done'
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        gap: space.md,
-        opacity: done ? 0.55 : 1,
-        minHeight: 64,
-      }}
-    >
-      <View style={{ width: 44, alignItems: 'flex-end', paddingTop: 14 }}>
-        <Text variant="caption" color={colors.tasks}>
-          {time}
-        </Text>
-      </View>
-      <View style={{ width: 14, alignItems: 'center' }}>
-        <View
-          style={{
-            width: 10,
-            height: 10,
-            borderRadius: 999,
-            marginTop: 16,
-            backgroundColor: done ? colors.done : colors.tasks,
-          }}
-        />
-        {!isLast ? (
-          <View
-            style={{
-              flex: 1,
-              width: 2,
-              marginTop: 4,
-              backgroundColor: colors.hairline,
-            }}
-          />
-        ) : null}
-      </View>
-      <View style={{ flex: 1, paddingBottom: space.sm }}>
-        <CheckRow
-          dense
-          title={task.titulo}
-          subtitle={`${task.estimativaMinutos} min`}
-          done={done}
-          onPress={onPress}
-          onToggle={onToggle}
-        />
-        <View
-          style={{
-            height: 4,
-            borderRadius: 999,
-            backgroundColor: colors.hairline,
-            overflow: 'hidden',
-            marginHorizontal: space.sm,
-            marginBottom: 4,
-          }}
-        >
-          <View
-            style={{
-              width: `${Math.round(task.progresso * 100)}%`,
-              height: '100%',
-              backgroundColor: colors.tasks,
-            }}
-          />
+        <View style={{ marginTop: space.sm }}>
+          {mode === 'overview' ? <KanbanOverviewPane tasks={tasks} /> : null}
+          {mode === 'colunas' ? <DueBucketColumns tasks={tasks} /> : null}
+          {mode === 'lista' ? <KanbanListPane tasks={tasks} /> : null}
+          {mode === 'timeline' ? <KanbanTimelinePane tasks={tasks} /> : null}
+          {mode === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
+          {mode === 'gantt' ? <KanbanGanttPane tasks={tasks} /> : null}
         </View>
-      </View>
-    </View>
+      </TabShell>
+      <KanbanDecisionLogSheet
+        visible={logOpen}
+        events={events}
+        onClose={() => setLogOpen(false)}
+      />
+    </Screen>
   )
 }

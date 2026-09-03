@@ -1,7 +1,7 @@
 import type { Category, Transaction } from '../store/storeTypes'
 import { dedupeTransactionsForLedger } from './financeTransactionDedup'
 
-// Razão contábil — saldo corrente vs projetado (pago / pendente / agendado)
+// Razão contábil - saldo corrente vs projetado (pago / pendente / agendado)
 
 export interface LedgerRow
 {
@@ -22,7 +22,7 @@ export interface LedgerSummary
   agendados: number
 }
 
-/** Caixa — compras no cartão não debitam até pagamento da fatura */
+/** Caixa - compras no cartão não debitam até pagamento da fatura */
 export function affectsCashBalance(t: Transaction): boolean
 {
   const status = t.status_pagamento ?? 'pendente'
@@ -48,7 +48,7 @@ function resolveCategoryName(t: Transaction, categories: Category[]): string
   {
     return categories.find((c) => c.id === t.categoria_id)?.nome ?? t.categoria
   }
-  return t.categoria || '—'
+  return t.categoria || '-'
 }
 
 /** Extrai YYYY-MM-DD local a partir do campo data da transação */
@@ -81,7 +81,7 @@ export function filterTransactionsByDay(transactions: Transaction[], dayKey: str
   return transactions.filter((t) => transactionDayKey(t.data) === dayKey)
 }
 
-/** Saldo acumulado cronológico — estilo extrato bancário */
+/** Saldo acumulado cronológico - estilo extrato bancário */
 export function buildRunningLedger(
   transactions: Transaction[],
   categories: Category[],
@@ -112,7 +112,7 @@ export function buildRunningLedger(
   })
 }
 
-/** Resumo — saldo inicial + movimentações que afetam caixa (sem duplicatas de boleto) */
+/** Resumo - saldo inicial + movimentações que afetam caixa (sem duplicatas de boleto) */
 export function summarizeLedger(transactions: Transaction[], initialBalance = 0): LedgerSummary
 {
   const unique = dedupeTransactionsForLedger(transactions)
@@ -143,7 +143,7 @@ export function summarizeLedger(transactions: Transaction[], initialBalance = 0)
     }
     else if (status === 'agendado' && t.tipo !== 'receita')
     {
-      // Futuro no cartão ou no caixa — compromete o projetado
+      // Futuro no cartão ou no caixa - compromete o projetado
       agendados += t.valor
       saldoProjetado += signed
     }

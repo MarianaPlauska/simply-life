@@ -1,4 +1,4 @@
-// Cron diário único — Gmail + push de boletos (plano Hobby: 1×/dia)
+// Cron diário único - Gmail + push de boletos (plano Hobby: 1×/dia)
 
 import gmailSync from './gmail-sync.js';
 import pushBills from './push-bills.js';

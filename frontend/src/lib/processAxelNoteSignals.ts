@@ -1,4 +1,4 @@
-// Processa sinais de anotações — 1 nudge/dia, log explicável
+// Processa sinais de anotações - 1 nudge/dia, log explicável
 
 import { toast } from 'sonner'
 import { useTaskStore } from '../store/useTaskStore'

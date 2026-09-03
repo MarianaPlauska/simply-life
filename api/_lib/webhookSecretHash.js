@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-/** SHA-256 do secret — mesmo algoritmo da migration 037 */
+/** SHA-256 do secret - mesmo algoritmo da migration 037 */
 export function hashWebhookSecret(plain)
 {
   return crypto.createHash('sha256').update(String(plain)).digest('hex');
@@ -25,7 +25,7 @@ export function verifyWebhookBearer(plain, storedHash)
   }
 }
 
-/** Bearer do webhook — nunca persiste em log */
+/** Bearer do webhook - nunca persiste em log */
 export function extractWebhookBearer(req)
 {
   const auth = req.headers.authorization || req.headers.Authorization || '';

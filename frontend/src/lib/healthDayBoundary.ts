@@ -24,7 +24,7 @@ export function writeCachedWaterEntries(entries: number[]): void
   })
 }
 
-// Data local do usuário (YYYY-MM-DD) — base para reset diário de saúde
+// Data local do usuário (YYYY-MM-DD) - base para reset diário de saúde
 
 const STORAGE_KEY = 'simply-life:health-day-iso'
 
@@ -117,7 +117,7 @@ export function mergeHabitosAfterFetch(
   return [...merged, ...localOnly]
 }
 
-/** Config após virada do dia — zera registros de água mas mantém ml_por_copo e demais prefs */
+/** Config após virada do dia - zera registros de água mas mantém ml_por_copo e demais prefs */
 export function configAposResetDiario(
   config: HabitoDiarioConfig | undefined,
   today: string,

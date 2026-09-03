@@ -6,7 +6,7 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { AXEL_NAV_PLANE, AXEL_NAV_ACTIVE, AXEL_NAV_IDLE } from '../../constants/axelSurfaces'
 import { SimplyLifeMark } from '../brand/SimplyLifeMark'
 
-// Drawer de navegação no mobile — mesma estrutura da sidebar desktop
+// Drawer de navegação no mobile - mesma estrutura da sidebar desktop
 
 export function MobileSidebarDrawer()
 {

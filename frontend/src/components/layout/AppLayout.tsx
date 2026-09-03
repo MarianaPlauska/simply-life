@@ -32,7 +32,7 @@ import { NewTransactionModal } from '../Finance/NewTransactionModal'
 import { AxelLoader } from '../ui/AxelLoader'
 import { AXEL_CANVAS } from '../../constants/axelSurfaces'
 
-// Layout global — sidebar, header, conteúdo (flex-1) e footer no fundo do viewport
+// Layout global - sidebar, header, conteúdo (flex-1) e footer no fundo do viewport
 
 function PageLoader()
 {

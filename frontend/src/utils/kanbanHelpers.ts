@@ -5,7 +5,7 @@ import type { TarefaUnificada } from '../types';
 
 export function formatDate (dateStr: string | null): string
 {
-  if ( !dateStr ) return '—';
+  if ( !dateStr ) return '-';
   const d = new Date(dateStr);
   return d.toLocaleDateString('pt-BR', {
     day: '2-digit', month: 'short', year: 'numeric',

@@ -24,7 +24,7 @@ import { resolveTreinoCodigo, labelTreinoPlano } from '../../lib/academyTreinoCo
 import { localTodayIso } from '../../lib/healthDayBoundary'
 import type { HabitoDiarioConfig } from '../../store/storeTypes'
 
-// Modo Academia — treino guiado com séries, descanso e evolução de carga
+// Modo Academia - treino guiado com séries, descanso e evolução de carga
 
 export function AcademyModeView()
 {
@@ -128,7 +128,7 @@ export function AcademyModeView()
     }
     if (!temRotina)
     {
-      toast.message('Nenhum exercício para hoje — configure em Saúde')
+      toast.message('Nenhum exercício para hoje - configure em Saúde')
       navigate('/saude#academia')
       return
     }
@@ -364,7 +364,7 @@ export function AcademyModeView()
             onClick={() => void handleFinalizar()}
             className="w-full py-4 rounded-lg bg-emerald-500 text-black text-[15px] font-semibold"
           >
-            Treino completo — finalizar
+            Treino completo - finalizar
           </button>
         ) : session.phase === 'rest' ? null : (
           <>

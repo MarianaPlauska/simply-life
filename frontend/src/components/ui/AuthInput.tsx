@@ -1,5 +1,5 @@
 /**
- * ui/AuthInput.tsx — Input de autenticação (reutilizável, sem lógica de negócio)
+ * ui/AuthInput.tsx - Input de autenticação (reutilizável, sem lógica de negócio)
  */
 import { useState, type ReactNode, type FocusEvent } from 'react';
 

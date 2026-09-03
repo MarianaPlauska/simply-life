@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
-// Histórico automatizado — eventos funcionais do drawer
+// Histórico automatizado - eventos funcionais do drawer
 
 export type ActivityEventKind = 'blocker' | 'progress' | 'dependency' | 'rascunho'
 

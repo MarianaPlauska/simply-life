@@ -131,7 +131,7 @@ function correlacaoHabito(
 
   const insight = diff > 0
     ? `Nos dias com ${labelCom}, seu humor médio foi ${mediaCom}/5 (${diff > 0 ? '+' : ''}${diff}% vs dias sem).`
-    : `Sem ${labelCom}, o humor tende a ser ${mediaSem}/5 — vale observar o padrão.`
+    : `Sem ${labelCom}, o humor tende a ser ${mediaSem}/5 - vale observar o padrão.`
 
   return {
     insight,
@@ -199,7 +199,7 @@ export function buildMoodCorrelations(input: CorrelationInput): CorrelationResul
 
   if (insights.length === 0 && humorPorDia.length >= 3)
   {
-    insights.push('Continue registrando humor e hábitos — padrões aparecem com mais dias de dados.')
+    insights.push('Continue registrando humor e hábitos - padrões aparecem com mais dias de dados.')
   }
 
   return { insights, dados }
@@ -234,7 +234,7 @@ function weekLabel(): string
   const start = new Date(now)
   start.setDate(now.getDate() - 6)
   const fmt = (d: Date) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
-  return `${fmt(start)} – ${fmt(now)}`
+  return `${fmt(start)} - ${fmt(now)}`
 }
 
 export function buildWeeklyReview(input: WeeklyReviewInput): WeeklyReviewResult
@@ -255,7 +255,7 @@ export function buildWeeklyReview(input: WeeklyReviewInput): WeeklyReviewResult
   let insight = ''
   if (humorMedia >= 4)
   {
-    insight = 'Semana leve no conjunto. Mantenha o ritmo que funcionou — sem pressa de fazer mais.'
+    insight = 'Semana leve no conjunto. Mantenha o ritmo que funcionou - sem pressa de fazer mais.'
   }
   else if (humorMedia >= 3)
   {
@@ -263,7 +263,7 @@ export function buildWeeklyReview(input: WeeklyReviewInput): WeeklyReviewResult
   }
   else if (humorMedia > 0)
   {
-    insight = 'Semana exigente. O AXEL já reduz carga quando você registra humor baixo — isso é cuidado, não falha.'
+    insight = 'Semana exigente. O AXEL já reduz carga quando você registra humor baixo - isso é cuidado, não falha.'
   }
   else
   {

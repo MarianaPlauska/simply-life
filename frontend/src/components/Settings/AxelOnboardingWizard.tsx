@@ -8,7 +8,7 @@ const WIZARD_STEPS = [
   {
     id: 'connect_email',
     label: 'Conectar Gmail (grátis)',
-    description: 'Senha de app do Gmail — sem Google Cloud. Configure na seção acima.',
+    description: 'Senha de app do Gmail - sem Google Cloud. Configure na seção acima.',
     icon: Mail,
     actionLabel: 'Ver Gmail',
     tab: 'integracoes' as const,

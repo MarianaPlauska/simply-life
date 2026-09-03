@@ -1,4 +1,4 @@
-// modal de simulação de triagem — envia itens brutos para o motor de score (IA + matemática)
+// modal de simulação de triagem - envia itens brutos para o motor de score (IA + matemática)
 import { useState } from 'react';
 import { FlaskConical, X, Send, Loader2, Mail, GitBranch, Calendar } from 'lucide-react';
 import { useTaskStore } from '../../store/useTaskStore';

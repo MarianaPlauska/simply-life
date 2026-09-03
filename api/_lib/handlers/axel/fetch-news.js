@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
     for (const topic of topicList.slice(0, 5)) { // max 5 tópicos
       try {
-        // Google News RSS — 100% grátis, sem key, sem limites
+        // Google News RSS - 100% grátis, sem key, sem limites
         const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(topic)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
         const rssRes = await fetch(rssUrl);
 

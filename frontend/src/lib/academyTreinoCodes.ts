@@ -1,4 +1,4 @@
-// Códigos estáveis de treino — Treino A, B, 01…
+// Códigos estáveis de treino - Treino A, B, 01…
 
 import type { AcademyPlanoDia } from './academyWorkouts'
 import { DIAS_SEMANA, hojeDiaTreinoKey } from './academyWorkouts'
@@ -17,7 +17,7 @@ export function codigoFromDiaSemana(diaKey: string): string
   return diaKey.slice(0, 2).toUpperCase()
 }
 
-/** Código numérico do dia do mês (01–31) para planos por data */
+/** Código numérico do dia do mês (01-31) para planos por data */
 export function codigoFromIso(iso: string): string
 {
   const day = iso.slice(8, 10)
@@ -72,14 +72,14 @@ export function sugerirCodigoPlano(
   return codigoFromIso(localTodayIso())
 }
 
-/** Rótulo exibido: Treino A — Peito/Tríceps */
+/** Rótulo exibido: Treino A - Peito/Tríceps */
 export function formatTreinoLabel(codigo: string, titulo?: string): string
 {
   const code = codigo.trim().toUpperCase()
   const name = titulo?.trim()
   if (code && name)
   {
-    return `Treino ${code} — ${name}`
+    return `Treino ${code} - ${name}`
   }
   if (code)
   {

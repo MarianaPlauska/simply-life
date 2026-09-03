@@ -208,8 +208,8 @@ function fixedBillAlerts(
       severity: days <= 2 ? 'urgent' : 'caution',
       title: `Conta fixa · ${conta.nome}`,
       message: days === 0
-        ? `Vence hoje — R$ ${conta.valor.toFixed(2)}.`
-        : `Vence em ${days} dia(s) — R$ ${conta.valor.toFixed(2)}.`,
+        ? `Vence hoje - R$ ${conta.valor.toFixed(2)}.`
+        : `Vence em ${days} dia(s) - R$ ${conta.valor.toFixed(2)}.`,
       source: 'fixa',
       actionTab: 'contas-fixas',
     })

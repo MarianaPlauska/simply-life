@@ -69,7 +69,7 @@ export function CategoryLinkPicker({
             setOpen(true)
           }}
           onFocus={() => setOpen(true)}
-          placeholder={selected ? selected.nome : `Buscar — ${emptyLabel.toLowerCase()}`}
+          placeholder={selected ? selected.nome : `Buscar - ${emptyLabel.toLowerCase()}`}
           className="flex-1 min-w-0 px-2 py-2.5 text-sm text-ink bg-transparent placeholder:text-ink-muted"
           autoComplete="off"
         />

@@ -15,7 +15,7 @@ interface AxelListRowProps
   titleClassName?: string
 }
 
-/** Linha densa 56–64px — ícone 20px, título + data, valor à direita, sem card */
+/** Linha densa 56-64px - ícone 20px, título + data, valor à direita, sem card */
 export function AxelListRow({
   title,
   subtitle,

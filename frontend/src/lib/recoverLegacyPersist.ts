@@ -1,6 +1,6 @@
 /**
  * Recupera dados do persist antigo (simply-life-store global) após migração por usuário.
- * Desativado para campos sensíveis — evita vazamento entre contas no mesmo navegador.
+ * Desativado para campos sensíveis - evita vazamento entre contas no mesmo navegador.
  */
 import type { VirtualCard } from '../store/storeTypes'
 import { getPersistStorageKey } from './userScopedStorage'
@@ -24,7 +24,7 @@ function readZustandPersistState(raw: string | null): Record<string, unknown> | 
   }
 }
 
-/** Não mescla mais finanças/saúde do persist global — só migra envelope vazio se necessário */
+/** Não mescla mais finanças/saúde do persist global - só migra envelope vazio se necessário */
 export function mergeLegacyPersistIntoScoped(_userId: string): void
 {
   /* intencionalmente vazio */

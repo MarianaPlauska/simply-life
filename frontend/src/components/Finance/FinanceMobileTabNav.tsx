@@ -16,7 +16,7 @@ interface FinanceMobileTabNavProps
   onTabChange: (id: string) => void
 }
 
-/** Navegação mobile — apenas seletor em coluna única, sem barra lateral */
+/** Navegação mobile - apenas seletor em coluna única, sem barra lateral */
 export function FinanceMobileTabNav({
   tabs,
   activeTab,

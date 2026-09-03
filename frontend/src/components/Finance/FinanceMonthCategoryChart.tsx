@@ -45,7 +45,7 @@ function ChartTooltip({
   )
 }
 
-/** Top categorias de despesa do mês — rail desktop */
+/** Top categorias de despesa do mês - rail desktop */
 export function FinanceMonthCategoryChart({
   transactions,
   categories,

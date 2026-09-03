@@ -4,7 +4,7 @@ import { Plus, Loader2 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTaskStore } from '../../store/useTaskStore'
 
-// Coluna do Kanban — padrão "data container plano" (§2.2 / §2.4)
+// Coluna do Kanban - padrão "data container plano" (§2.2 / §2.4)
 // Sem sombras, sem bordas grossas, header minimalista colado ao fundo
 
 interface KanbanColumnProps
@@ -59,7 +59,7 @@ export function KanbanColumn({ id, title, count, wipLimit, dotColor, children, f
         isOver && !flat ? 'bg-card/40' : '',
       ].join(' ')}
     >
-      {/* cabeçalho — sticky leve, sem blur excessivo */}
+      {/* cabeçalho - sticky leve, sem blur excessivo */}
       <div className="py-2 px-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export function KanbanColumn({ id, title, count, wipLimit, dotColor, children, f
         )}
       </div>
 
-      {/* lista de tarefas — gap pequeno mantém o ritmo de linha */}
+      {/* lista de tarefas - gap pequeno mantém o ritmo de linha */}
       <div
         className="flex-1 px-0.5 flex flex-col gap-0.5 overflow-y-auto min-h-[120px] max-h-[calc(100vh-220px)]"
         role="list"

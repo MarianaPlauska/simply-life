@@ -5,7 +5,7 @@ describe('localScoreFromText', () =>
 {
   it('manda urgente para o piso de Hoje', () =>
   {
-    expect(localScoreFromText('URGENTE — revisar contrato')).toEqual({
+    expect(localScoreFromText('URGENTE - revisar contrato')).toEqual({
       score: 92,
       prioridade: 'critica',
     })

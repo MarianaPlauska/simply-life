@@ -1,4 +1,4 @@
-// Roteador único — APIs AXEL/IA (limite Hobby: 12 serverless functions)
+// Roteador único - APIs AXEL/IA (limite Hobby: 12 serverless functions)
 
 import morningBrief from '../_lib/handlers/axel/morning-brief.js';
 import orchestrateTasks from '../_lib/handlers/axel/orchestrate-tasks.js';

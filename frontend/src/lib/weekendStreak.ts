@@ -1,4 +1,4 @@
-// Congelamento de ofensiva no fim de semana — dias úteis contam para quebra
+// Congelamento de ofensiva no fim de semana - dias úteis contam para quebra
 
 export function isWeekend(date: Date = new Date()): boolean
 {
@@ -6,7 +6,7 @@ export function isWeekend(date: Date = new Date()): boolean
   return dow === 0 || dow === 6
 }
 
-/** Fim de semana sem prova de trabalho — ofensiva não quebra */
+/** Fim de semana sem prova de trabalho - ofensiva não quebra */
 export function isWeekendStreakFrozen(): boolean
 {
   return isWeekend()

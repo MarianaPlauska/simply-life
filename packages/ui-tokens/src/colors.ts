@@ -1,56 +1,24 @@
-/**
- * AXEL Premium — tons quentes de referência:
- * Claro: Pantone Gold Leaf / 2429 terracotta / Tortilla
- * Escuro: P2P / Task — preto profundo + laranja vivo
- *
- * O acento é a voz do AXEL: no máx. 1–2 usos por tela.
- */
+export const AXEL_PREMIUM_VERSION = '2026.09-bloco-h-cream-onyx'
 
-export const AXEL_PREMIUM_VERSION = '2026.09-drive-p2p-v1'
-
-/**
- * Escuro — preto-azulado / charcoal / laranja (refs P2P + Task)
- */
-export const GUIDE_DARK = {
-  /** Canvas quase preto */
-  inkBlack: '#0A0A0C',
-  /** Sidebar Drive — navy black */
-  navyBlack: '#0D1020',
-  charcoal: '#141418',
-  elevated: '#1C1C24',
-  /** Laranja vivo (CTAs das refs) */
-  ember: '#FF6A2B',
-  emberSoft: '#FF8A4C',
-  ash: '#9A9AA6',
-  /** aliases legados */
-  chineseBlack: '#0A0A0C',
-  jungle: '#141418',
-  jet: '#1C1C24',
-  coffee: '#0D1020',
-  antiqueBrass: '#FF6A2B',
-  canvas: '#0A0A0C',
-  umber: '#0D1020',
-  rust: '#E85A24',
-  copper: '#FF6A2B',
+export const TAN_PALETTE = {
+  naturalTan: '#DED2C4',
+  hickoryChips: '#68452B',
+  crushedNutmeg: '#D7B793',
+  bakedCookie: '#866549',
+  riverRoad: '#AD8D6C',
+  blackSlug: '#392112',
+  kanafeh: '#D08735',
 } as const
 
-/**
- * Claro — amostrado das fichas Pantone:
- * Gold Leaf #C6A17E · Terracotta #B87252 · Tortilla #CABAAA
- */
-export const GUIDE_LIGHT = {
-  goldLeaf: '#C6A17E',
-  terracotta: '#B87252',
-  tortilla: '#CABAAA',
-  cream: '#F5F1EC',
-  sand: '#C6A17E',
-  slate: '#5C534C',
-  ink: '#0C1519',
-  semanticWarm: '#E8D5C8',
-  semanticRose: '#E5B8B8',
-  semanticMint: '#B8D4C8',
-  semanticSky: '#B8C8D4',
-  semanticButter: '#F0E4D0',
+export const DARK_ONYX = {
+  canvas: '#373539',
+  surface: '#403C40',
+  elevated: '#4A454A',
+  hairline: '#504B4F',
+  textPrimary: '#F5F1EC',
+  textMuted: '#B0A9A6',
+  accent: '#E8734A',
+  accentPressed: '#C45A32',
 } as const
 
 export type ColorTokens = {
@@ -82,67 +50,62 @@ export type ColorTokens = {
   widgetMuted: string
 }
 
-/** Dark — P2P: preto profundo, cards charcoal, acento laranja */
 export const COLOR_DARK: ColorTokens = {
-  canvas: GUIDE_DARK.inkBlack,
-  chrome: GUIDE_DARK.charcoal,
-  surface: GUIDE_DARK.charcoal,
-  elevated: GUIDE_DARK.elevated,
-  ink: '#F5F5F7',
-  inkMuted: GUIDE_DARK.ash,
-  inkFaint: '#6E6E78',
-  hairline: 'rgba(245, 245, 247, 0.10)',
-  hairlineStrong: 'rgba(255, 106, 43, 0.35)',
-  axel: GUIDE_DARK.ember,
-  axelHover: GUIDE_DARK.emberSoft,
-  axelMuted: 'rgba(255, 106, 43, 0.18)',
-  axelOnFill: '#0A0A0C',
-  health: '#5FD39A',
-  healthMuted: 'rgba(95, 211, 154, 0.16)',
-  finance: '#F0B45A',
-  financeMuted: 'rgba(240, 180, 90, 0.16)',
-  tasks: '#8BA4C7',
-  tasksMuted: 'rgba(139, 164, 199, 0.16)',
-  danger: '#FF6B7A',
-  attention: '#F0B45A',
-  done: '#5FD39A',
-  overlay: 'rgba(0, 0, 0, 0.72)',
-  widget: GUIDE_DARK.elevated,
-  widgetInk: '#F5F5F7',
-  widgetMuted: GUIDE_DARK.ash,
+  canvas: DARK_ONYX.canvas,
+  chrome: DARK_ONYX.surface,
+  surface: DARK_ONYX.surface,
+  elevated: DARK_ONYX.elevated,
+  ink: DARK_ONYX.textPrimary,
+  inkMuted: DARK_ONYX.textMuted,
+  inkFaint: 'rgba(176, 169, 166, 0.72)',
+  hairline: DARK_ONYX.hairline,
+  hairlineStrong: 'rgba(232, 115, 74, 0.55)',
+  axel: DARK_ONYX.accent,
+  axelHover: DARK_ONYX.accentPressed,
+  axelMuted: 'rgba(232, 115, 74, 0.22)',
+  axelOnFill: DARK_ONYX.canvas,
+  health: '#7BC9A0',
+  healthMuted: 'rgba(123, 201, 160, 0.16)',
+  finance: '#D4B896',
+  financeMuted: 'rgba(212, 184, 150, 0.16)',
+  tasks: '#9AA8B5',
+  tasksMuted: 'rgba(154, 168, 181, 0.14)',
+  danger: '#E07A6A',
+  attention: DARK_ONYX.accent,
+  done: '#7BC9A0',
+  overlay: 'rgba(55, 53, 57, 0.84)',
+  widget: DARK_ONYX.elevated,
+  widgetInk: DARK_ONYX.textPrimary,
+  widgetMuted: DARK_ONYX.textMuted,
 }
 
-/**
- * Light — Tortilla / Gold Leaf / Terracotta.
- * Acento AXEL: terracotta escurecido para AA no cream.
- */
 export const COLOR_LIGHT: ColorTokens = {
-  canvas: GUIDE_LIGHT.cream,
-  chrome: '#FFFCFA',
-  surface: '#FFFCFA',
-  elevated: '#EDE4D8',
-  ink: GUIDE_LIGHT.ink,
-  inkMuted: GUIDE_LIGHT.slate,
-  inkFaint: '#8A7E74',
-  hairline: 'rgba(12, 21, 25, 0.10)',
-  hairlineStrong: 'rgba(198, 161, 126, 0.55)',
-  axel: '#A05C3D',
-  axelHover: '#8B4E34',
-  axelMuted: 'rgba(184, 114, 82, 0.16)',
-  axelOnFill: GUIDE_LIGHT.cream,
-  health: '#3F6B5A',
-  healthMuted: 'rgba(184, 212, 200, 0.45)',
-  finance: '#7A6540',
-  financeMuted: 'rgba(198, 161, 126, 0.35)',
+  canvas: '#F6EEE3',
+  chrome: '#FDF9F3',
+  surface: '#FDF9F3',
+  elevated: '#FFFFFF',
+  ink: '#2A2622',
+  inkMuted: '#8C8275',
+  inkFaint: 'rgba(140, 130, 117, 0.72)',
+  hairline: '#E8DDC9',
+  hairlineStrong: 'rgba(232, 115, 74, 0.45)',
+  axel: DARK_ONYX.accent,
+  axelHover: DARK_ONYX.accentPressed,
+  axelMuted: 'rgba(232, 115, 74, 0.14)',
+  axelOnFill: '#FFFFFF',
+  health: '#3D8F6A',
+  healthMuted: 'rgba(61, 143, 106, 0.12)',
+  finance: '#B8956B',
+  financeMuted: 'rgba(184, 149, 107, 0.14)',
   tasks: '#4A5560',
-  tasksMuted: 'rgba(184, 200, 212, 0.45)',
-  danger: '#9A4545',
-  attention: '#9A7A3A',
-  done: '#4A6B58',
-  overlay: 'rgba(12, 21, 25, 0.40)',
-  widget: GUIDE_LIGHT.ink,
-  widgetInk: GUIDE_LIGHT.cream,
-  widgetMuted: GUIDE_LIGHT.goldLeaf,
+  tasksMuted: 'rgba(74, 85, 96, 0.12)',
+  danger: '#C44B4B',
+  attention: DARK_ONYX.accent,
+  done: '#3D8F6A',
+  overlay: 'rgba(42, 38, 34, 0.40)',
+  widget: '#2A2622',
+  widgetInk: '#F5F1EC',
+  widgetMuted: '#8C8275',
 }
 
 export type ThemeMode = 'light' | 'dark'
@@ -153,11 +116,11 @@ export function colorsFor(mode: ThemeMode): ColorTokens
 }
 
 export const MOOD_COLORS: Record<number, string> = {
-  1: '#FF6B7A',
-  2: '#F0B45A',
-  3: '#9A9AA6',
-  4: '#5FD39A',
-  5: '#3DB87A',
+  1: '#E07A6A',
+  2: DARK_ONYX.accent,
+  3: DARK_ONYX.textMuted,
+  4: '#7BC9A0',
+  5: '#3D8F6A',
 }
 
 export const MOOD_LABELS: Record<number, string> = {
@@ -168,7 +131,6 @@ export const MOOD_LABELS: Record<number, string> = {
   5: 'Ótimo',
 }
 
-/** @deprecated UI mobile usa MoodFace Ionicons — mantido só por compat */
 export const MOOD_EMOJI: Record<number, string> = {
   1: '😫',
   2: '😕',

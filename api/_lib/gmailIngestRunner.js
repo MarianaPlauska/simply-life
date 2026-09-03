@@ -1,4 +1,4 @@
-// Processa lote de e-mails — Groq + insert + log AXEL
+// Processa lote de e-mails - Groq + insert + log AXEL
 
 import { parseEmailWithAI, heuristicEmailParse } from './emailGroqParser.js'
 import { insertTriagedTask } from './insertTriagedTask.js'

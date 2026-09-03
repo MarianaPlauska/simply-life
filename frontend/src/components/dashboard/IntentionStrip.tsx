@@ -4,7 +4,6 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { bucketByDueDate } from '../../lib/dueBucket'
 import { AXEL_LINK, AXEL_TEXT_PRIMARY } from '../../constants/axelSurfaces'
 
-/** Sem hora — só no Mais. Na Home isso vira ruído (despejo, não o dia). */
 export function IntentionStrip()
 {
   const tarefas = useTaskStore((s) => s.tarefas)

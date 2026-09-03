@@ -31,9 +31,38 @@ export interface MoodCalendarCell
   inMonth: boolean
 }
 
+/** Revisão da última semana de humor */
+export function weeklyMoodReview(rows: HumorRegistro[], ref = new Date()): {
+  avg: number
+  daysLogged: number
+  best: number
+  worst: number
+  count: number
+}
+{
+  const start = new Date(ref)
+  start.setDate(start.getDate() - 6)
+  start.setHours(0, 0, 0, 0)
+  const startIso = start.toISOString().slice(0, 10)
+  const week = rows.filter((r) => (r.data || '').slice(0, 10) >= startIso)
+  if (week.length === 0)
+  {
+    return { avg: 0, daysLogged: 0, best: 0, worst: 0, count: 0 }
+  }
+  const values = week.map((r) => r.humor)
+  const days = new Set(week.map((r) => r.data.slice(0, 10)))
+  return {
+    avg: values.reduce((a, b) => a + b, 0) / values.length,
+    daysLogged: days.size,
+    best: Math.max(...values),
+    worst: Math.min(...values),
+    count: week.length,
+  }
+}
+
 export function moodLabel(value: number): string
 {
-  return MOOD_LABELS[Math.round(value)] ?? '—'
+  return MOOD_LABELS[Math.round(value)] ?? '-'
 }
 
 export function moodColor(value: number): string

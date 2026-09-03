@@ -1,7 +1,7 @@
 import type { Transaction, VirtualCard } from '../store/storeTypes'
 import { transactionDayKey } from './financeLedger'
 
-// Ciclo de fatura do cartão — fechamento, vencimento, compras na fatura aberta
+// Ciclo de fatura do cartão - fechamento, vencimento, compras na fatura aberta
 
 export interface BillingCycle
 {
@@ -42,7 +42,7 @@ export function resolveClosingDay(card: VirtualCard): number
   return 1
 }
 
-/** Dia de vencimento cadastrado pelo usuário — sem inferência */
+/** Dia de vencimento cadastrado pelo usuário - sem inferência */
 export function resolveDueDay(card: VirtualCard): number | null
 {
   if (card.dia_vencimento == null) return null
@@ -180,7 +180,7 @@ export function getInvoiceTransactions(
     if (t.card_id !== cardId || t.tipo !== 'despesa') return false
     const key = transactionDayKey(t.data)
     if (key < cycle.start || key > cycle.end) return false
-    // Linha de quitação manual no cartão — não compõe fatura aberta
+    // Linha de quitação manual no cartão - não compõe fatura aberta
     if (/^fatura\b/i.test(t.descricao.trim()) && (t.status_pagamento ?? 'pendente') === 'pago')
     {
       return false

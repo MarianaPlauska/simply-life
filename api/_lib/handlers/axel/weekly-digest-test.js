@@ -1,4 +1,4 @@
-// POST autenticado — dispara o resumo da semana para o usuário logado
+// POST autenticado - dispara o resumo da semana para o usuário logado
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js'

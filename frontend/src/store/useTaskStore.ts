@@ -1,4 +1,4 @@
-// store principal — combina todos os slices
+// store principal - combina todos os slices
 // cada slice fica em store/slices/*.ts com ~100-150 linhas
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -163,7 +163,7 @@ export const useTaskStore = create<TaskStore>()(
       {
         if (!state) return
 
-        // Dados sensíveis vêm só do servidor — ignora legado no disco
+        // Dados sensíveis vêm só do servidor - ignora legado no disco
         state.transactions = []
         state.contasFixas = []
         state.habitos = []

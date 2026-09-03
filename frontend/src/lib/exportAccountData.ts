@@ -1,6 +1,6 @@
 import { useTaskStore } from '../store/useTaskStore'
 
-/** Pacote LGPD — o que o app guarda desta conta, para download */
+/** Pacote LGPD - o que o app guarda desta conta, para download */
 export function buildAccountExportPayload()
 {
   const s = useTaskStore.getState()

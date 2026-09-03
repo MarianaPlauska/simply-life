@@ -1,4 +1,4 @@
-/** Medicamentos — tipos compartilhados web/mobile */
+/** Medicamentos - tipos compartilhados web/mobile */
 
 export interface Medicamento
 {
@@ -20,4 +20,19 @@ export function demoMedicamentos(): Medicamento[]
 export function medsTakenCount(meds: Medicamento[]): number
 {
   return meds.filter((m) => m.tomado).length
+}
+
+export function medsWeekAdherencePct(
+  medCount: number,
+  takenDayKeys: string[],
+  days = 7,
+): number
+{
+  if (medCount <= 0)
+  {
+    return 0
+  }
+  const expected = medCount * days
+  const unique = new Set(takenDayKeys)
+  return Math.min(100, Math.round((unique.size / expected) * 100))
 }

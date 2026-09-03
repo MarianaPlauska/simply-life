@@ -1,4 +1,4 @@
-/** Feedback tátil discreto — no-op se a Vibration API não existir */
+/** Feedback tátil discreto - no-op se a Vibration API não existir */
 export function hapticTap(ms = 12): void
 {
   if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function')

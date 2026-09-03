@@ -9,7 +9,7 @@ const REFEICOES = [
   { id: 'jantar', label: 'Jantar', icon: 'jantar' },
 ] as const
 
-// MVP refeições — registro rápido na aba Alimentação
+// MVP refeições - registro rápido na aba Alimentação
 
 export function HealthMealsQuickLog()
 {

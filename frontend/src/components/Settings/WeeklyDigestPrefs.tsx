@@ -92,7 +92,7 @@ export function WeeklyDigestPrefs()
       })
       const data = await res.json().catch(() => ({})) as { error?: string }
       if (!res.ok) throw new Error(data.error || 'Falha no disparo')
-      toast.success('Resumo enviado — veja o e-mail e/ou a notificação')
+      toast.success('Resumo enviado - veja o e-mail e/ou a notificação')
     }
     catch (err)
     {

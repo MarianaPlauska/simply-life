@@ -6,7 +6,7 @@ import { showHealthNotification } from '../lib/healthNotifications'
 
 const REMINDER_INTERVAL_MS = 5 * 60 * 1000
 
-/** Lembretes de medicamento — toast in-app + notificação SW quando permitido */
+/** Lembretes de medicamento - toast in-app + notificação SW quando permitido */
 export function useMedicationReminders(enabled = true): void
 {
   const medicamentos = useTaskStore((s) => s.medicamentos)

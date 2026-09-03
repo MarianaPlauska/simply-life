@@ -12,6 +12,8 @@ import {
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCaptureStore } from '../../store/captureStore'
 import { useDataStore } from '../../store/dataStore'
+import { FinanceSpreadsheetPane } from './FinanceSpreadsheetPane'
+import { FinanceCsvPanel } from './FinanceCsvPanel'
 import { MOVIMENTOS_SUB_TABS, type MovimentosSubTab } from './financeNav'
 
 type Props = {
@@ -36,7 +38,9 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
       />
 
       <SectionHeader
-        title={subTab === 'diario' ? 'Diário' : 'Lista'}
+        title={
+          subTab === 'diario' ? 'Diário' : subTab === 'planilha' ? 'Planilha' : 'Lista'
+        }
         action={
           <PrimaryButton
             label="Novo"
@@ -47,11 +51,17 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
         }
       />
 
+      {subTab === 'planilha' ? (
+        <>
+          <FinanceSpreadsheetPane />
+          <FinanceCsvPanel />
+        </>
+      ) : (
       <Card tone="elevated" style={{ paddingVertical: space.sm }}>
         {rows.length === 0 ? (
           <EmptyState
             title="Nenhum lançamento"
-            body="Ex.: café 12,50 — o valor entra na sua conta."
+            body="Ex.: café 12,50. O valor entra na sua conta."
           />
         ) : subTab === 'diario' ? (
           rows.map((t, i, arr) => (
@@ -75,6 +85,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
           ))
         )}
       </Card>
+      )}
     </View>
   )
 }

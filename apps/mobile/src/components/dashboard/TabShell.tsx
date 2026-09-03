@@ -3,11 +3,15 @@ import { View } from 'react-native'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useTheme } from '../../theme/ThemeProvider'
 
-const SHELL_MAX = 480
+const SHELL_MAX_MOBILE = 480
+/** Conteúdo desktop: ~1440px centralizado */
+export const DESKTOP_CONTENT_MAX = 1440
+export const DESKTOP_GUTTER = 24
+export const DESKTOP_PAD_H = 36
 
 /**
  * Container responsivo.
- * Desktop: painel SoftTech — ocupa a largura ao lado da rail, padding generoso, gap de sections.
+ * Desktop: max 1440px, gutter 24, padding lateral 36.
  */
 export function TabShell({ children }: { children: ReactNode })
 {
@@ -17,12 +21,12 @@ export function TabShell({ children }: { children: ReactNode })
   return (
     <View
       style={{
-        gap: showRail ? space.xl : space.md + 4,
-        paddingTop: showRail ? space.xl : space.sm,
-        paddingBottom: showRail ? space.xl : undefined,
-        paddingHorizontal: showRail ? space.xl + 8 : 2,
-        maxWidth: showRail ? undefined : (contentMaxWidth ?? SHELL_MAX),
-        alignSelf: showRail ? 'stretch' : 'center',
+        gap: showRail ? DESKTOP_GUTTER : space.xl,
+        paddingTop: showRail ? space.lg : space.lg,
+        paddingBottom: showRail ? space.xl : space.md,
+        paddingHorizontal: showRail ? DESKTOP_PAD_H : space.sm,
+        maxWidth: showRail ? DESKTOP_CONTENT_MAX : (contentMaxWidth ?? SHELL_MAX_MOBILE),
+        alignSelf: 'center',
         width: '100%',
         flex: showRail ? 1 : undefined,
       }}

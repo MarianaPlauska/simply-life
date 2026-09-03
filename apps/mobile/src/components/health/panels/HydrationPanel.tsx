@@ -7,6 +7,8 @@ import {
   SectionHeader,
   PrimaryButton,
   PressableScale,
+  IconBadge,
+  StatusPill,
 } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useDataStore } from '../../../store/dataStore'
@@ -21,9 +23,17 @@ export function HydrationPanel()
   const agua = findHabit(habits, 'agua')
   const pillBtn = { borderRadius: 999 as const }
 
+  const pct = habitPct(agua)
+
   return (
-    <Card tone="elevated" style={{ gap: space.md }}>
-      <SectionHeader title="Hidratação" subtitle={`${habitPct(agua)}% da meta`} />
+    <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+        <IconBadge name="water" color={colors.health} size={44} iconSize={22} />
+        <View style={{ flex: 1, gap: 6 }}>
+          <SectionHeader title="Hidratação" subtitle={`${agua?.progressoAtual ?? 0}/${agua?.metaDiaria ?? 10} copos`} />
+          <StatusPill label={`${pct}% da meta`} color={colors.health} />
+        </View>
+      </View>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {Array.from({ length: agua?.metaDiaria ?? 10 }).map((_, i) =>
         {
@@ -38,7 +48,7 @@ export function HydrationPanel()
               style={{
                 width: 44,
                 height: 48,
-                borderRadius: 10,
+                borderRadius: 14,
                 backgroundColor: filled ? colors.healthMuted : colors.surface,
                 borderWidth: 1,
                 borderColor: filled ? colors.health : colors.hairline,

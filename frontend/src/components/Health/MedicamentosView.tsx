@@ -58,7 +58,7 @@ export function MedicamentosView()
   return (
     <div className="space-y-4">
       <p className={`text-[12px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-        Lembretes gentis, no seu ritmo — foco na próxima dose.
+        Lembretes gentis, no seu ritmo - foco na próxima dose.
       </p>
 
       <MedicamentosTodayTab onGoCadastrar={() => selectSub('cadastrar')} />

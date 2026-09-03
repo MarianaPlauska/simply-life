@@ -26,7 +26,7 @@ import {
 import { BentoGridSkeleton } from '../ui/Skeleton'
 import { useHealthRitualSnapshot } from '../../hooks/useHealthRitualSnapshot'
 
-// HealthView — Hoje (cuidados fundidos) + Diário
+// HealthView - Hoje (cuidados fundidos) + Diário
 
 const SECTIONS: {
   id: HealthSection
@@ -128,11 +128,11 @@ export function HealthView()
       ? 'Ritual de hoje completo'
       : ritualSnapshot.percent > 0
         ? `${ritualSnapshot.doneCount} cuidado${ritualSnapshot.doneCount !== 1 ? 's' : ''} registrado${ritualSnapshot.doneCount !== 1 ? 's' : ''}`
-        : 'Sem pressa — o dia é seu'
+        : 'Sem pressa - o dia é seu'
     : undefined
 
   const headerLede = section === 'diario'
-    ? 'Humor e notas — cuidados do dia ficam em Hoje'
+    ? 'Humor e notas - cuidados do dia ficam em Hoje'
     : section === 'hoje'
       ? healthHeaderSubtitle('hoje', cuidadosTab, ritualSnapshot)
       : undefined

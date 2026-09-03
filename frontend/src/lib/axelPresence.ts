@@ -2,7 +2,7 @@ import type { CapacityMode } from './dayCapacity'
 
 export type AxelPresence = 'calmo' | 'atento' | 'positivo'
 
-/** Presença visual do AXEL na Home — nunca o cinza triste padrão */
+/** Presença visual do AXEL na Home - nunca o cinza triste padrão */
 export function resolveAxelPresence(input: {
   hasMoodToday: boolean
   moodLevel: number

@@ -53,7 +53,7 @@ export function AcademyConfigTab()
       <div className="space-y-2">
         <h3 className="text-[12px] font-medium text-ink">Montar treino</h3>
         <p className={`text-[11px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-          Escolha o tipo de plano, selecione o dia e monte como uma lista — nome, duração e exercícios salvam automaticamente.
+          Escolha o tipo de plano, selecione o dia e monte como uma lista - nome, duração e exercícios salvam automaticamente.
         </p>
       </div>
 

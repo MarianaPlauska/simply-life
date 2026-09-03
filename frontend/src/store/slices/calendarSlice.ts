@@ -1,4 +1,4 @@
-// slice de calendário — OAuth Google (Calendar + Gmail) via API Vercel
+// slice de calendário - OAuth Google (Calendar + Gmail) via API Vercel
 import type { StateCreator } from 'zustand'
 import type { CalendarEvent } from '../storeTypes'
 import {

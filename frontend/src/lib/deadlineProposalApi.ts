@@ -68,7 +68,7 @@ export async function upsertDeadlineProposals(proposals: DeadlineProposal[]): Pr
 
   if (error)
   {
-    // Tabela pode não existir ainda — fallback local silencioso
+    // Tabela pode não existir ainda - fallback local silencioso
     console.warn('[deadlineProposalApi] upsert:', error.message)
   }
 }

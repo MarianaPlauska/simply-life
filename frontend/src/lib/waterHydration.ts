@@ -31,7 +31,7 @@ export function coposParaDoisLitros(ml: number): number
   return Math.max(1, Math.round(META_AGUA_ML / unit))
 }
 
-/** 8 × 200 ml era 1,6 L — legado a promover para 2 L */
+/** 8 × 200 ml era 1,6 L - legado a promover para 2 L */
 export function isLegacyAgua16L(metaCopos: number, ml: number): boolean
 {
   return metaCopos === 8 && ml === DEFAULT_ML_POR_COPO
@@ -79,7 +79,7 @@ export function hiddenMlPresets(h: HabitoDiario | undefined): number[]
   return normalizeMlPresets([...remote, ...local])
 }
 
-/** Atalhos visíveis — padrões do app (menos ocultos) + personalizados + ml padrão atual */
+/** Atalhos visíveis - padrões do app (menos ocultos) + personalizados + ml padrão atual */
 export function resolveMlPresets(h: HabitoDiario | undefined): number[]
 {
   const hidden = new Set(hiddenMlPresets(h))

@@ -103,7 +103,7 @@ export function FinanceReservedBillsTab({
     [reservedBills],
   )
 
-  // Reservas ficam recolhidas por padrão — usuário expande quando precisar
+  // Reservas ficam recolhidas por padrão - usuário expande quando precisar
   const toggleExpanded = (id: number) =>
   {
     setExpandedIds((prev) =>
@@ -136,7 +136,7 @@ export function FinanceReservedBillsTab({
     setVencimento(todayIso())
     setPayment('cash')
     setShowForm(false)
-    toast.success('Fatura reservada — valor bloqueado do disponível')
+    toast.success('Fatura reservada - valor bloqueado do disponível')
   }
 
   return (
@@ -146,7 +146,7 @@ export function FinanceReservedBillsTab({
           Contas a pagar
         </p>
         <p className={`text-[12px] leading-snug ${AXEL_TEXT_SECONDARY}`}>
-          Faturas de cartão, PIX, boletos e outras contas avulsas — com lembrete antes do vencimento.
+          Faturas de cartão, PIX, boletos e outras contas avulsas - com lembrete antes do vencimento.
           Recorrentes mensais ficam em <strong className="text-ink">Fixas</strong>.
         </p>
       </header>
@@ -162,7 +162,7 @@ export function FinanceReservedBillsTab({
                 Reservas com valor separado
               </p>
               <p className={`text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-                Bloqueia do disponível — ideal para fatura grande ou parcelas
+                Bloqueia do disponível - ideal para fatura grande ou parcelas
               </p>
             </div>
           </div>
@@ -171,7 +171,7 @@ export function FinanceReservedBillsTab({
 
         {isDemoData && (
           <p className={`mb-3 rounded-sl border border-accent/25 bg-accent-muted/40 px-3 py-2 text-[11px] ${AXEL_TEXT_SECONDARY}`}>
-            Dados de demonstração — some quando você criar faturas reais no Supabase.
+            Dados de demonstração - some quando você criar faturas reais no Supabase.
           </p>
         )}
 
@@ -200,7 +200,7 @@ export function FinanceReservedBillsTab({
             <input
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
-              placeholder="Nome — ex: Aluguel, Internet, IPVA..."
+              placeholder="Nome - ex: Aluguel, Internet, IPVA..."
               className="w-full border border-line rounded-sl bg-card px-3 py-2 text-sm"
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -234,7 +234,7 @@ export function FinanceReservedBillsTab({
 
         {abertas.length === 0 ? (
           <p className={`py-8 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-            Nenhuma fatura reservada — crie uma para separar o dinheiro
+            Nenhuma fatura reservada - crie uma para separar o dinheiro
           </p>
         ) : !summaryExpanded ? (
           <p className={`pb-2 text-center text-[11px] ${AXEL_TEXT_SECONDARY}`}>
@@ -242,7 +242,7 @@ export function FinanceReservedBillsTab({
           </p>
         ) : visibleBills.length === 0 ? (
           <p className={`py-6 text-center text-[12px] ${AXEL_TEXT_SECONDARY}`}>
-            Nenhuma fatura neste filtro — tente outra aba
+            Nenhuma fatura neste filtro - tente outra aba
           </p>
         ) : (
           <ul className="space-y-2">
@@ -269,7 +269,7 @@ export function FinanceReservedBillsTab({
 
       <DashboardCollapsible
         title="Já pagos"
-        subtitle="Quitados neste mês — toque para abrir o registro"
+        subtitle="Quitados neste mês - toque para abrir o registro"
         borderless
         defaultOpen={false}
       >

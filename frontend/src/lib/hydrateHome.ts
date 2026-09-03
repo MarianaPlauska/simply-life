@@ -26,7 +26,7 @@ export async function hydrateHomeEssential(): Promise<void>
   recordHomeDayCheckin()
 }
 
-/** Inbox, prefs, checks — depois do primeiro paint */
+/** Inbox, prefs, checks - depois do primeiro paint */
 export async function hydrateHomeSecondary(): Promise<void>
 {
   const s = useTaskStore.getState()

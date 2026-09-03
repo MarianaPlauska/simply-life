@@ -29,9 +29,9 @@ interface UseDraftActivityLogOptions
 
 function formatDateShort(iso: string | null): string
 {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return '—'
+  if (Number.isNaN(d.getTime())) return '-'
   return d.toLocaleString('pt-BR', {
     day: '2-digit',
     month: 'short',

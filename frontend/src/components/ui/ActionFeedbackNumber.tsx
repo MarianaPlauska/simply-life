@@ -8,7 +8,7 @@ interface ActionFeedbackNumberProps
   children: ReactNode
 }
 
-/** Número com fade/escala curta — só quando pulseToken muda por ação do usuário */
+/** Número com fade/escala curta - só quando pulseToken muda por ação do usuário */
 export function ActionFeedbackNumber({
   pulseToken = 0,
   className = '',

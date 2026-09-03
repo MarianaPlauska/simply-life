@@ -1,4 +1,4 @@
-// Mapa de influência — remetente → peso (0 a 1.0)
+// Mapa de influência - remetente → peso (0 a 1.0)
 
 export const DEFAULT_INFLUENCE_MAP: Record<string, number> = {
   'chefe@empresa.com': 1.0,

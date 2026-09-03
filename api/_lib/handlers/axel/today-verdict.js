@@ -1,5 +1,5 @@
 // POST /api/axel/today-verdict
-// AXEL — "posso fazer isso hoje?" com IA opcional (Groq/Gemini)
+// AXEL - "posso fazer isso hoje?" com IA opcional (Groq/Gemini)
 
 function parseJsonFromText(text)
 {
@@ -60,12 +60,12 @@ O usuário pergunta se pode fazer algo HOJE. Responda em JSON:
 {
   "tone": "ok|caution|wait",
   "headline": "até 6 palavras",
-  "summary": "2 frases em PT-BR, tom de amigo — cite dinheiro/energia/prazo do contexto",
+  "summary": "2 frases em PT-BR, tom de amigo - cite dinheiro/energia/prazo do contexto",
   "suggestedAction": "1 frase prática"
 }
 
 Regras:
-- Use o veredito local como base — refine tom e frases, não contradiga folga negativa
+- Use o veredito local como base - refine tom e frases, não contradiga folga negativa
 - Cite valores R$ quando relevante
 - Se notas recentes (diário/anotações) pedem cautela, mencione
 - Tom humano Finch, não robô`

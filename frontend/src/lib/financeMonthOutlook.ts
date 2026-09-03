@@ -65,7 +65,7 @@ export interface MonthOutlook
   tone: 'ok' | 'caution' | 'urgent'
   headline: string
   detail: string
-  /** Previsto vs real — mês atual ou passado */
+  /** Previsto vs real - mês atual ou passado */
   comparison?: ForecastComparison
 }
 
@@ -397,7 +397,7 @@ export function monthHasLedgerData(
   return transactions.some((t) => isInMonth(t.data, d.getFullYear(), d.getMonth()))
 }
 
-/** Previsão de um mês — real (passado/atual) ou futuro (compromissos + recorrentes) */
+/** Previsão de um mês - real (passado/atual) ou futuro (compromissos + recorrentes) */
 export function buildMonthOutlook(
   input: MonthOutlookInput,
   ref = new Date(),
@@ -511,7 +511,7 @@ export function buildMonthOutlook(
       detail = receitasItens.length === 0
         ? 'Cadastre receitas recorrentes na Análise para afinar a previsão.'
         : input.monthOffset > 1
-          ? 'Estimativa encadeada a partir dos meses anteriores — revise se algo mudar.'
+          ? 'Estimativa encadeada a partir dos meses anteriores - revise se algo mudar.'
           : 'Valor livre estimado após entradas e compromissos já conhecidos.'
     }
   }
@@ -531,7 +531,7 @@ export function buildMonthOutlook(
     else if (comparison.deltaCompromissos > 100)
     {
       tone = 'caution'
-      detail = 'Despesas reais acima dos compromissos cadastrados — cadastre lançamentos ou ajuste fixas.'
+      detail = 'Despesas reais acima dos compromissos cadastrados - cadastre lançamentos ou ajuste fixas.'
     }
     else
     {
@@ -566,7 +566,7 @@ function fmtCurrency(v: number): string
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-/** Atalho — visão do mês seguinte em relação ao mês de referência */
+/** Atalho - visão do mês seguinte em relação ao mês de referência */
 export function buildNextMonthOutlook(
   input: Omit<MonthOutlookInput, 'monthOffset' | 'saldoPartidaOverride'>,
   baseOffset = 0,

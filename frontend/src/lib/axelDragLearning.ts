@@ -1,4 +1,4 @@
-// Preferências aprendidas com drags manuais — Axel sugere, usuário ajusta
+// Preferências aprendidas com drags manuais - Axel sugere, usuário ajusta
 
 const STORAGE_KEY = 'axel-drag-prefs-v1'
 const MAX_SAMPLES = 40
@@ -39,7 +39,7 @@ function extractTag(titulo: string): string
   return 'geral'
 }
 
-/** Registra quando o usuário move manualmente — padrão para futuras sugestões */
+/** Registra quando o usuário move manualmente - padrão para futuras sugestões */
 export function recordDragPreference(titulo: string, horizon: DragSample['horizon']): void
 {
   const samples = loadSamples()
@@ -75,7 +75,7 @@ export function getDragLearningHint(titulo: string): string | null
   const ratio = hojeCount / samples.length
   if (ratio >= 0.6)
   {
-    return `Você costuma colocar demandas [${tag}] em Hoje — AXEL considerou isso.`
+    return `Você costuma colocar demandas [${tag}] em Hoje - AXEL considerou isso.`
   }
   return null
 }

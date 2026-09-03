@@ -1,4 +1,4 @@
-// Motor de urgência AXEL — triagem antes de persistir (Motor de Relevância)
+// Motor de urgência AXEL - triagem antes de persistir (Motor de Relevância)
 
 import { calculateUrgency } from './relevanceEngine.js';
 import { parseEmailWithAI, heuristicEmailParse } from './emailGroqParser.js';
@@ -24,7 +24,7 @@ export function detectProjectTag(title, content)
 }
 
 /**
- * Score heurístico 0–100 para payload de ingestão (fallback + base para IA).
+ * Score heurístico 0-100 para payload de ingestão (fallback + base para IA).
  * @param {{ source?: string, title: string, content?: string, priority?: string }} payload
  */
 export function scoreIngestPayload(payload)
@@ -62,7 +62,7 @@ export function scoreIngestPayload(payload)
 }
 
 /**
- * Orquestra payload — tenta IA se houver chave; senão heurística mock.
+ * Orquestra payload - tenta IA se houver chave; senão heurística mock.
  * @param {{ source?: string, title: string, content?: string, priority?: string }} payload
  */
 export async function orchestrateIngestPayload(payload)
@@ -212,13 +212,13 @@ function parseIngestAI(raw, projectTag)
   };
 }
 
-const BATCH_SYSTEM_PROMPT = `Você é o AXEL — assistente pessoal de execução. Tom: direto, empático, como um melhor amigo que organiza a vida do usuário.
+const BATCH_SYSTEM_PROMPT = `Você é o AXEL - assistente pessoal de execução. Tom: direto, empático, como um melhor amigo que organiza a vida do usuário.
 
 Priorize com critério humano:
-- URGENTE ALTO (80–100): bloqueios de cliente, SST/compliance legal, prazo hoje, palavras [URGENTE], remetentes críticos
+- URGENTE ALTO (80-100): bloqueios de cliente, SST/compliance legal, prazo hoje, palavras [URGENTE], remetentes críticos
 - PROJETOS: tags [SST], [FINALLY], [HUB], [CORE] elevam relevância se houver impacto real
-- BAIXO (0–35): FYI, "para conhecimento", alinhamento, newsletter, CC sem ação — mesmo com prazo distante
-- MÉDIO (40–70): rotina, planejamento, tarefas sem bloqueio imediato
+- BAIXO (0-35): FYI, "para conhecimento", alinhamento, newsletter, CC sem ação - mesmo com prazo distante
+- MÉDIO (40-70): rotina, planejamento, tarefas sem bloqueio imediato
 - E-mail/webhook com tom de cobrança ou cliente → subir score
 - Manual sem contexto → score moderado até haver sinal
 
@@ -227,8 +227,8 @@ Responda como assistente que EXPLICA a decisão ao usuário (ele pode discordar 
 Saída APENAS JSON válido:
 {"scores":[{"task_id":number,"score":number,"rationale":string}, ...]}
 - Um objeto por task_id recebido
-- score inteiro 0–100 (100 = executar agora)
-- rationale em português, 1–2 frases — POR QUE, tom de parceiro`;
+- score inteiro 0-100 (100 = executar agora)
+- rationale em português, 1-2 frases - POR QUE, tom de parceiro`;
 
 function mockBatchScore(task)
 {
@@ -319,7 +319,7 @@ async function fetchBatchUrgencyFromAI(tasks, keys)
 }
 
 /**
- * Prioriza lote de tarefas — IA no servidor ou motor de relevância local.
+ * Prioriza lote de tarefas - IA no servidor ou motor de relevância local.
  * @param {Array<{ task_id: number, titulo: string, prioridade?: string, origem?: string, tags?: string[], data_vencimento?: string|null, status?: string, descricao?: string|null, remetente?: string|null }>} tasks
  */
 export async function orchestrateTasksBatch(tasks)

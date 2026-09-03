@@ -1,4 +1,4 @@
-/** Sentry só sobe se houver DSN — Hobby sem chave não quebra o boot */
+/** Sentry só sobe se houver DSN - Hobby sem chave não quebra o boot */
 
 export function initSentry(): void
 {

@@ -11,7 +11,7 @@ export type PillTab<T extends string> = {
 }
 
 /**
- * Abas em cápsula — View (não ScrollView) para evitar overlay
+ * Abas em cápsula - View (não ScrollView) para evitar overlay
  * quebrado no Expo web com poucas tabs.
  */
 export function PillTabs<T extends string>({

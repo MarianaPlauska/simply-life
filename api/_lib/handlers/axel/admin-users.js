@@ -1,4 +1,4 @@
-// POST /api/axel/admin-users — exclusão de conta (somente admin)
+// POST /api/axel/admin-users - exclusão de conta (somente admin)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js';

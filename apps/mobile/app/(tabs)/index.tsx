@@ -1,38 +1,40 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { View, Modal, Pressable, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
-  buildDashboardGlances,
   partitionTodayTimeline,
-  minutesToLabel,
   formatBRL,
   monthExpenseTotal,
-  computeSaldoDisponivel,
+  findHabit,
+  habitPct,
+  priorityTodayTasks,
+  AGUA_META_COPOS,
 } from '@simply-life/shared'
 import {
   Screen,
   Text,
   Card,
-  SectionHeader,
   PrimaryButton,
-  EmptyState,
-  CheckRow,
-  PillTabs,
 } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
-import { useCaptureStore } from '../../src/store/captureStore'
 import { useDataStore } from '../../src/store/dataStore'
-import { HomeWelcomeHero } from '../../src/components/dashboard/HomeWelcomeHero'
-import { HomeQuickActions } from '../../src/components/dashboard/HomeQuickActions'
-import { GlanceGrid } from '../../src/components/dashboard/GlanceGrid'
+import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
+import { HomeWeatherChip } from '../../src/components/dashboard/HomeWeatherChip'
+import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
+import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
+import { HomeActivityHeatmap } from '../../src/components/dashboard/HomeActivityHeatmap'
+import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
+import { AxelDayBrief, HomeDriveAside } from '../../src/components/dashboard/HomeDriveAside'
+import { HomePanorama } from '../../src/components/dashboard/HomePanorama'
 import { DashboardQuickWidgets } from '../../src/components/dashboard/DashboardQuickWidgets'
-import { HomeDriveAside } from '../../src/components/dashboard/HomeDriveAside'
+import { HomeHealthStudio } from '../../src/components/dashboard/HomeHealthStudio'
+import { HomeAgendaStudio } from '../../src/components/dashboard/HomeAgendaStudio'
+import { HomeMentalStudio } from '../../src/components/dashboard/HomeMentalStudio'
+import { HomeMedsStudio } from '../../src/components/dashboard/HomeMedsStudio'
 import { TabShell } from '../../src/components/dashboard/TabShell'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { usePrefsStore } from '../../src/store/prefsStore'
-
-type ModuleFilter = 'tudo' | 'tarefas' | 'saude' | 'financas'
 
 function greetingForHour(h: number): string
 {
@@ -49,63 +51,48 @@ export default function DashboardScreen()
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
   const signOut = useAuthStore((s) => s.signOut)
-  const openCapture = useCaptureStore((s) => s.openCapture)
-  const tasks = useDataStore((s) => s.tasks)
-  const humor = useDataStore((s) => s.humor)
-  const finance = useDataStore((s) => s.finance)
-  const habits = useDataStore((s) => s.habits)
-  const cash = useDataStore((s) => s.cashAccount)
-  const fixas = useDataStore((s) => s.contasFixas)
+  const tasks = useDataStore((s) => s.tasks) ?? []
+  const finance = useDataStore((s) => s.finance) ?? []
+  const habits = useDataStore((s) => s.habits) ?? []
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
-  const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
-  const glances = useMemo(
-    () => buildDashboardGlances({ humor, tasks, finance, habits }),
-    [humor, tasks, finance, habits],
-  )
+  const prefs = usePrefsStore((s) => s.prefs)
+  const prefsLoaded = usePrefsStore((s) => s.loaded)
+  const hydratePrefs = usePrefsStore((s) => s.hydrate)
+  const patchPrefs = usePrefsStore((s) => s.patch)
+
   const today = useMemo(() => partitionTodayTimeline(tasks), [tasks])
+  const todayIso = new Date().toISOString().slice(0, 10)
   const openTasks = useMemo(() => tasks.filter((t) => t.status !== 'done'), [tasks])
   const doneToday = useMemo(
-    () => today.filter((t) => t.status === 'done').length,
-    [today],
+    () =>
+      tasks.filter(
+        (t) => t.status === 'done' && t.dataVencimento?.slice(0, 10) === todayIso,
+      ).length,
+    [tasks, todayIso],
   )
-  const hero = today.find((t) => t.status !== 'done') ?? openTasks[0]
-  const gastosMes = monthExpenseTotal(finance)
-  const saldoDisp = useMemo(
-    () => computeSaldoDisponivel(cash, finance, fixas).disponivel,
-    [cash, finance, fixas],
+  const gastosMes = monthExpenseTotal(finance) ?? 0
+  const focusTask = useMemo(
+    () => priorityTodayTasks(tasks, new Date(), 1)[0]?.task ?? null,
+    [tasks],
   )
-  const [filter, setFilter] = useState<ModuleFilter>('tudo')
+  const agua = findHabit(habits, 'agua')
+  const waterPct = habitPct(agua)
+  const waterLabel = agua
+    ? `${agua.progressoAtual}/${agua.metaDiaria ?? AGUA_META_COPOS}`
+    : '-'
+
   const [menuOpen, setMenuOpen] = useState(false)
+  const [inviteDismissed, setInviteDismissed] = useState(false)
   const name = email?.split('@')[0] ?? 'Você'
   const greet = greetingForHour(new Date().getHours())
+  const needsPersonalize =
+    prefsLoaded && !prefs.home_metrics_configured_at && !inviteDismissed
 
-  const toneColor = (tone: string) =>
+  useEffect(() =>
   {
-    if (tone === 'health') return colors.health
-    if (tone === 'finance') return colors.finance
-    if (tone === 'tasks') return colors.tasks
-    return colors.axel
-  }
-
-  const filteredGlances = useMemo(() =>
-  {
-    if (filter === 'tudo') return glances
-    if (filter === 'tarefas') return glances.filter((g) => g.tone === 'tasks')
-    if (filter === 'saude') return glances.filter((g) => g.tone === 'health' || g.tone === 'axel')
-    return glances.filter((g) => g.tone === 'finance')
-  }, [filter, glances])
-
-  const onGlancePress = (id: string) =>
-  {
-    if (id.startsWith('g-humor') || id.startsWith('g-agua') || id.startsWith('g-proteina'))
-    {
-      router.push('/(tabs)/saude')
-      return
-    }
-    if (id === 'g-tasks') router.push('/(tabs)/kanban')
-    if (id === 'g-finance') router.push('/(tabs)/financeiro')
-  }
+    void hydratePrefs()
+  }, [hydratePrefs])
 
   return (
     <Screen
@@ -114,218 +101,147 @@ export default function DashboardScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <HomeWelcomeHero
+        <HomeFitnessHero
           greet={greet}
           name={name}
-          saldoLabel={formatBRL(saldoDisp)}
-          openTasks={openTasks.length}
-          doneToday={doneToday}
+          focusTitle={focusTask?.titulo ?? null}
           onMenu={() => setMenuOpen(true)}
         />
 
-        {/* Drive desktop: coluna principal + aside; mobile empilha tudo */}
+        {!showRail ? <HomeWeatherChip /> : null}
+
+        <HomeMetricShortcuts />
+
+        <HomeKpiSquares
+          items={[
+            {
+              id: 'tasks',
+              label: 'tarefas',
+              value: String(openTasks.length),
+              hint: doneToday > 0 ? `+${doneToday}` : undefined,
+              icon: 'checkbox-outline',
+              color: colors.tasks,
+              onPress: () => router.push('/(tabs)/kanban'),
+            },
+            {
+              id: 'water',
+              label: 'água',
+              value: waterLabel,
+              hint: waterPct > 0 ? `${waterPct}%` : undefined,
+              icon: 'water-outline',
+              color: colors.health,
+              onPress: () => router.push('/(tabs)/saude'),
+            },
+            {
+              id: 'finance',
+              label: 'gastos/mês',
+              value:
+                gastosMes >= 1000
+                  ? `${(gastosMes / 1000).toFixed(1).replace('.', ',')}k`
+                  : formatBRL(gastosMes),
+              icon: 'wallet-outline',
+              color: colors.finance,
+              onPress: () => router.push('/(tabs)/financeiro'),
+            },
+          ]}
+        />
+
+        <HomeActivityHeatmap tasks={tasks} />
+
+        {prefsLoaded && !prefs.home_metrics_configured_at ? (
+          <Pressable
+            onPress={() => router.push('/personalizar-inicio')}
+            style={{ paddingVertical: 4 }}
+          >
+            <Text variant="caption" muted>
+              Quando quiser, personalize seu Início
+            </Text>
+          </Pressable>
+        ) : null}
+
+        {!showRail ? <AxelDayBrief /> : null}
+
         <View
           style={{
             flexDirection: showRail ? 'row' : 'column',
-            alignItems: showRail ? 'flex-start' : undefined,
-            gap: showRail ? space.xl : space.md + 4,
+            alignItems: showRail ? 'stretch' : undefined,
+            gap: showRail ? 24 : space.xl,
           }}
         >
-          <View style={{ flex: 1, minWidth: 0, gap: showRail ? space.xl : space.md + 4 }}>
-            {!showRail ? (
-              <HomeQuickActions
-                actions={[
-                  {
-                    id: 'expense',
-                    label: 'Gasto',
-                    icon: 'arrow-up-outline',
-                    onPress: () => openCapture('expense'),
-                  },
-                  {
-                    id: 'task',
-                    label: 'Tarefa',
-                    icon: 'checkbox-outline',
-                    onPress: () => openCapture('dump'),
-                  },
-                  {
-                    id: 'water',
-                    label: 'Água',
-                    icon: 'water-outline',
-                    onPress: () => router.push('/(tabs)/saude'),
-                  },
-                  {
-                    id: 'finance',
-                    label: 'Contas',
-                    icon: 'wallet-outline',
-                    onPress: () => router.push('/(tabs)/financeiro'),
-                  },
-                ]}
-              />
-            ) : null}
+          <View style={{ flex: showRail ? 8 : undefined, minWidth: 0, gap: space.xl }}>
+            <HomeAgendaStudio tasks={tasks} />
+            <HomeHealthStudio />
+            <HomeMentalStudio />
+            <HomeMedsStudio />
 
-            {filter === 'tudo' && !showRail ? <DashboardQuickWidgets /> : null}
+            <HomeCollapsible
+              title="Atalhos"
+              subtitle="Humor, água e tarefas críticas"
+              pill="extra"
+              defaultOpen={false}
+            >
+              <DashboardQuickWidgets />
+            </HomeCollapsible>
 
-            <PillTabs
-              tabs={[
-                { id: 'tudo', label: 'Tudo', count: glances.length },
-                { id: 'tarefas', label: 'Tarefas', count: openTasks.length },
-                { id: 'saude', label: 'Saúde' },
-                { id: 'financas', label: 'Finanças' },
-              ]}
-              value={filter}
-              onChange={setFilter}
-            />
-
-            {(filter === 'tudo' || filter === 'financas' || filter === 'tarefas') && (
-              <View
-                style={{
-                  flexDirection: showRail ? 'row' : 'column',
-                  flexWrap: 'wrap',
-                  gap: space.md,
-                }}
-              >
-                {(filter === 'tudo' || filter === 'financas') && (
-                  <Card
-                    tone="elevated"
-                    style={{
-                      gap: space.sm,
-                      minHeight: showRail ? 120 : 88,
-                      justifyContent: 'center',
-                      flexGrow: 1,
-                      flexBasis: showRail ? 200 : undefined,
-                      borderRadius: 18,
-                    }}
-                  >
-                    <Text variant="caption" color={colors.finance}>
-                      Gastos do mês
-                    </Text>
-                    <Text
-                      variant="title"
-                      color={colors.finance}
-                      style={{ letterSpacing: -0.3, fontSize: showRail ? 26 : 22 }}
-                    >
-                      {formatBRL(gastosMes)}
-                    </Text>
-                  </Card>
-                )}
-
-                {(filter === 'tudo' || filter === 'tarefas') && (
-                  hero ? (
-                    <Card
-                      tone="elevated"
-                      style={{
-                        gap: space.sm,
-                        minHeight: showRail ? 120 : 100,
-                        backgroundColor: colors.widget,
-                        flexGrow: 2,
-                        flexBasis: showRail ? 280 : undefined,
-                        borderRadius: 18,
-                      }}
-                    >
-                      <Text variant="caption" style={{ color: colors.widgetMuted }}>
-                        Prioridade de hoje
-                      </Text>
-                      <Text
-                        variant="title"
-                        style={{ fontSize: showRail ? 20 : 20, color: colors.widgetInk }}
-                      >
-                        {hero.titulo}
-                      </Text>
-                      <Text variant="caption" style={{ color: colors.widgetMuted }}>
-                        {hero.horaMinutos != null
-                          ? `Às ${minutesToLabel(hero.horaMinutos)} · ${hero.estimativaMinutos} min`
-                          : `${hero.estimativaMinutos} min`}
-                      </Text>
-                      <PrimaryButton
-                        label="Abrir tarefa"
-                        onPress={() => router.push(`/task/${hero.id}`)}
-                        style={{ borderRadius: 999, alignSelf: 'flex-start', paddingHorizontal: 24 }}
-                      />
-                    </Card>
-                  ) : (
-                    <Card
-                      tone="elevated"
-                      style={{
-                        flexGrow: 2,
-                        flexBasis: showRail ? 280 : undefined,
-                        borderRadius: 18,
-                      }}
-                    >
-                      <EmptyState title="Nada na fila" body="Capture uma tarefa para começar." />
-                      <PrimaryButton
-                        label="Capturar"
-                        onPress={() => openCapture('dump')}
-                        style={{ borderRadius: 999 }}
-                      />
-                    </Card>
-                  )
-                )}
-              </View>
-            )}
-
-            <View>
-              <SectionHeader
-                title={showRail ? 'Áreas' : 'Áreas da vida'}
-                subtitle={showRail ? 'Atalhos do dia' : 'Atalhos do dia'}
-                action={
-                  filter !== 'tudo' ? (
-                    <PrimaryButton
-                      label="Ver tudo"
-                      variant="link"
-                      size="sm"
-                      onPress={() => setFilter('tudo')}
-                    />
-                  ) : null
-                }
-              />
-              <GlanceGrid
-                glances={filteredGlances}
-                toneColor={toneColor}
-                onPressGlance={onGlancePress}
-              />
-            </View>
-
-            {filter === 'tudo' && showRail ? <DashboardQuickWidgets /> : null}
-
-            {(filter === 'tudo' || filter === 'tarefas') && (
-              <View>
-                <SectionHeader
-                  title={showRail ? 'Recentes' : 'Planos de hoje'}
-                  action={
-                    <PrimaryButton
-                      label="Ver tudo"
-                      variant="link"
-                      size="sm"
-                      onPress={() => router.push('/(tabs)/kanban')}
-                    />
-                  }
-                />
-                <Card tone="elevated" style={{ paddingVertical: space.sm, gap: 0, borderRadius: 18 }}>
-                  {today.slice(0, 5).length === 0 ? (
-                    <EmptyState title="Sem prazos hoje" body="Itens aparecem na lista de tarefas." />
-                  ) : (
-                    today.slice(0, 5).map((t, i, arr) => (
-                      <CheckRow
-                        key={t.id}
-                        title={t.titulo}
-                        subtitle={
-                          t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : 'Sem horário'
-                        }
-                        done={t.status === 'done'}
-                        onPress={() => router.push(`/task/${t.id}`)}
-                        onToggle={() => void toggleTaskDone(t.id, isGuest)}
-                        showSeparator={i < arr.length - 1}
-                      />
-                    ))
-                  )}
-                </Card>
-              </View>
-            )}
+            <HomeCollapsible
+              title="Panorama"
+              subtitle="Gráficos e ranking do mês"
+              pill="finanças"
+              pillColor={colors.finance}
+              defaultOpen={false}
+            >
+              <HomePanorama />
+            </HomeCollapsible>
           </View>
-
-          {showRail ? <HomeDriveAside todayTasks={today} /> : null}
+          {showRail ? (
+            <View style={{ flex: 4, minWidth: 260, maxWidth: 360 }}>
+              <HomeDriveAside todayTasks={today} />
+            </View>
+          ) : null}
         </View>
       </TabShell>
+
+      <Modal
+        visible={needsPersonalize}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setInviteDismissed(true)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: colors.overlay,
+            justifyContent: 'center',
+            padding: space.lg,
+          }}
+        >
+          <Card tone="elevated" style={{ gap: space.md, borderRadius: 20, maxWidth: 420, alignSelf: 'center', width: '100%' }}>
+            <Text variant="section">Personalize seu Início</Text>
+            <Text variant="body" muted>
+              Escolha Humor, Água, Tarefas e o que mais importa. Sem cobrança, no seu ritmo.
+            </Text>
+            <PrimaryButton
+              label="Escolher atalhos"
+              onPress={() =>
+              {
+                setInviteDismissed(true)
+                router.push('/personalizar-inicio')
+              }}
+            />
+            <PrimaryButton
+              label="Agora não"
+              variant="ghost"
+              onPress={() =>
+              {
+                setInviteDismissed(true)
+                void usePrefsStore.getState().patch({
+                  home_metrics_configured_at: new Date().toISOString(),
+                })
+              }}
+            />
+          </Card>
+        </View>
+      </Modal>
 
       <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
         <View style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}>
@@ -349,8 +265,11 @@ export default function DashboardScreen()
             <Text variant="section">Mais</Text>
             {(
               [
+                { label: 'Perfil', href: '/perfil' },
+                { label: 'Configurações', href: '/configuracoes' },
+                { label: 'Histórico AXEL', href: '/axel/historico' },
+                { label: 'Personalizar Início', href: '/personalizar-inicio' },
                 { label: 'Preferências', href: '/preferencias' },
-                { label: 'Inteligência', href: '/inteligencia' },
                 { label: 'Relatórios', href: '/relatorios' },
                 { label: 'Calendário', href: '/calendario' },
                 { label: 'Anotações', href: '/anotacoes' },
@@ -360,22 +279,22 @@ export default function DashboardScreen()
               <PrimaryButton
                 key={item.href}
                 label={item.label}
-                variant="secondary"
+                variant="ghost"
                 onPress={() =>
                 {
                   setMenuOpen(false)
-                  router.push(item.href as never)
+                  router.push(item.href)
                 }}
               />
             ))}
             <PrimaryButton
               label={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-              variant="ghost"
+              variant="secondary"
               onPress={() =>
               {
                 const next = mode === 'dark' ? 'light' : 'dark'
                 setMode(next)
-                void usePrefsStore.getState().patch({ color_scheme: next })
+                void patchPrefs({ color_scheme: next })
               }}
             />
             <PrimaryButton
@@ -385,9 +304,10 @@ export default function DashboardScreen()
               {
                 setMenuOpen(false)
                 void signOut()
+                router.replace('/login')
               }}
             />
-            <PrimaryButton label="Fechar" variant="link" onPress={() => setMenuOpen(false)} />
+            <PrimaryButton label="Fechar" onPress={() => setMenuOpen(false)} />
           </ScrollView>
         </View>
       </Modal>

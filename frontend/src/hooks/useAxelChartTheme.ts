@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
 
-// Paleta Recharts — tons Meridian (ardósia + teal)
+// Paleta Recharts - tons Meridian (ardósia + teal)
 
 export function useAxelChartTheme()
 {

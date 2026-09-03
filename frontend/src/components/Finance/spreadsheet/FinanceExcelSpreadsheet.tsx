@@ -75,11 +75,11 @@ export function FinanceExcelSpreadsheet({
         Lista · {rows.length} linha{rows.length !== 1 ? 's' : ''}
       </p>
 
-      {/* Mobile — cards empilhados */}
+      {/* Mobile - cards empilhados */}
       <ul className="md:hidden divide-y divide-[#d4d4d4] max-h-[min(55vh,480px)] overflow-y-auto bg-white">
         {rows.length === 0 && (
           <li className="px-4 py-10 text-center text-ink-muted text-[12px]">
-            Planilha vazia — use Novo lançamento.
+            Planilha vazia - use Novo lançamento.
           </li>
         )}
         {rows.map((row, i) =>
@@ -118,7 +118,7 @@ export function FinanceExcelSpreadsheet({
         })}
       </ul>
 
-      {/* Desktop — grade Excel com scroll horizontal */}
+      {/* Desktop - grade Excel com scroll horizontal */}
       <div className="hidden md:block overflow-x-auto max-h-[min(60vh,520px)] overflow-y-auto">
         <p className="sticky left-0 px-2 py-1 font-mono text-[9px] text-ink-muted bg-[#f3f3f3] border-b border-[#d4d4d4]">
           Deslize horizontalmente para ver todas as colunas →
@@ -151,7 +151,7 @@ export function FinanceExcelSpreadsheet({
             {rows.length === 0 && (
               <tr>
                 <td colSpan={9} className="border border-[#d4d4d4] bg-white px-4 py-10 text-center text-ink-muted text-[12px]">
-                  Planilha vazia — use Novo lançamento para adicionar linhas.
+                  Planilha vazia - use Novo lançamento para adicionar linhas.
                 </td>
               </tr>
             )}

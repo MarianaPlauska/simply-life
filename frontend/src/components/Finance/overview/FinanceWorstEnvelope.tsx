@@ -23,7 +23,7 @@ interface FinanceWorstEnvelopeProps
   onConfigure?: () => void
 }
 
-/** Pior teto do mês — valor restante em destaque */
+/** Pior teto do mês - valor restante em destaque */
 export function FinanceWorstEnvelope({
   categories,
   budgetLimits,

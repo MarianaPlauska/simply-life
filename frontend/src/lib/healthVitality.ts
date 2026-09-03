@@ -11,7 +11,7 @@ interface VitalityDayState
 type CareListener = () => void
 const careListeners = new Set<CareListener>()
 
-/** Dispara feedback visual imediato (pulso) — não altera o percentual sozinho */
+/** Dispara feedback visual imediato (pulso) - não altera o percentual sozinho */
 export function emitCareRegistered(): void
 {
   for (const listener of careListeners)
@@ -56,7 +56,7 @@ function writeState(state: VitalityDayState): void
   sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 }
 
-/** Percentual exibido — só sobe no dia; nunca desce por desfazer ou ausência */
+/** Percentual exibido - só sobe no dia; nunca desce por desfazer ou ausência */
 export function mergeVitalityDisplay(livePercent: number): number
 {
   const today = localTodayIso()
@@ -74,7 +74,7 @@ export function vitalityCompanionLine(displayPercent: number, allDone: boolean):
 {
   if (allDone)
   {
-    return 'Seu cuidado de hoje está registrado — descanse se puder.'
+    return 'Seu cuidado de hoje está registrado - descanse se puder.'
   }
   if (displayPercent <= 0)
   {
@@ -82,11 +82,11 @@ export function vitalityCompanionLine(displayPercent: number, allDone: boolean):
   }
   if (displayPercent < 40)
   {
-    return 'Cada registro conta — sem pressa.'
+    return 'Cada registro conta - sem pressa.'
   }
   if (displayPercent < 80)
   {
     return 'Você está cuidando de si hoje.'
   }
-  return 'Quase lá — no seu ritmo.'
+  return 'Quase lá - no seu ritmo.'
 }

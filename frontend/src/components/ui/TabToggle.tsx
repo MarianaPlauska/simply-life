@@ -1,5 +1,5 @@
 /**
- * ui/TabToggle.tsx — Alternador de abas (login/register) sem lógica de negócio
+ * ui/TabToggle.tsx - Alternador de abas (login/register) sem lógica de negócio
  */
 interface Tab<T extends string> {
   value: T;

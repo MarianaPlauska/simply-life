@@ -3,7 +3,7 @@ import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { SyncHint } from '../SyncHint'
 
-/** Título de tela — padrão mockup (tipografia, sem bloco colorido) */
+/** Título de tela - padrão mockup (tipografia, sem bloco colorido) */
 export function ScreenIntro({
   title,
   subtitle,

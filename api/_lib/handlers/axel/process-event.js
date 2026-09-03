@@ -1,4 +1,4 @@
-// POST /api/process-event — triagem de evento via IA (servidor)
+// POST /api/process-event - triagem de evento via IA (servidor)
 // Exige JWT Supabase
 
 import { applyCors } from '../../cors.js';
@@ -24,7 +24,7 @@ export default async function handler(req, res)
   const user = await getUserFromBearer(req);
   if (!user)
   {
-    return res.status(401).json({ error: 'Não autenticado — envie Authorization: Bearer <jwt>' });
+    return res.status(401).json({ error: 'Não autenticado - envie Authorization: Bearer <jwt>' });
   }
 
   const { sender, subject, body, userKeywords } = req.body;

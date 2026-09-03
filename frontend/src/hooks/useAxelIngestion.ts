@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useTaskStore } from '../store/useTaskStore'
 
-// Pipeline de ingestão — polling + highlight reativo no Kanban
+// Pipeline de ingestão - polling + highlight reativo no Kanban
 
 const POLL_MS = 8_000
 const HIGHLIGHT_MS = 4_200
