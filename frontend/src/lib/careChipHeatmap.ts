@@ -4,8 +4,7 @@ import {
   type ConsistencyDay,
   localIsoDate,
 } from './consistencyHeatmap'
-import type { MedicamentoTomada, SessaoTreino } from '../store/storeTypes'
-import type { Habito } from '../types'
+import type { HabitoDiario, MedicamentoTomada, SessaoTreino } from '../store/storeTypes'
 
 const CHIP_LABEL: Record<CuidadosTab, string> = {
   hidratacao: 'Água',
@@ -68,8 +67,8 @@ export function buildTrainingDayMap(
 
 export function habitForCareTab(
   tab: CuidadosTab,
-  habitos: Habito[],
-): Habito | undefined
+  habitos: HabitoDiario[],
+): HabitoDiario | undefined
 {
   if (tab === 'hidratacao')
   {
@@ -83,7 +82,7 @@ export function habitForCareTab(
 }
 
 export function buildCareChipCells(
-  tab: CuidadosTab,
+  _tab: CuidadosTab,
   byDate: Record<string, ConsistencyDay>,
   weeks = 12,
 ): ConsistencyDay[]

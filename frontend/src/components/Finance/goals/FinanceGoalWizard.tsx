@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { useTaskStore } from '../../store/useTaskStore'
+import { useTaskStore } from '../../../store/useTaskStore'
 import {
   estimateMonthlySavings,
   projectFinancialGoal,
-} from '../../lib/financeGoalProjection'
-import { parseMoneyInputToNumber } from '../../lib/currencyInput'
+} from '../../../lib/financeGoalProjection'
+import { parseMoneyInputToNumber } from '../../../lib/currencyInput'
 import {
   AXEL_BTN_PRIMARY,
   AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
-} from '../../constants/axelSurfaces'
-import { MoneyInput } from '../ui/MoneyInput'
-import { CategoryIconCircle } from './categories/CategoryIconCircle'
-import type { FinancialGoal } from '../../store/storeTypes'
+} from '../../../constants/axelSurfaces'
+import { MoneyInput } from '../../ui/MoneyInput'
+import { CategoryIconCircle } from '../categories/CategoryIconCircle'
+import type { FinancialGoal } from '../../../store/storeTypes'
 
 interface FinanceGoalWizardProps
 {

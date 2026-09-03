@@ -5,8 +5,6 @@ import { useTaskStore } from '../../store/useTaskStore'
 import { FinanceWorstEnvelope } from '../Finance/overview/FinanceWorstEnvelope'
 import {
   AXEL_LINK,
-  AXEL_METRIC_HAIRLINE,
-  AXEL_TEXT_SECONDARY,
   MODULE_HERO,
   MODULE_WASH,
 } from '../../constants/axelSurfaces'

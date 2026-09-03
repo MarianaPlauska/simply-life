@@ -47,15 +47,21 @@ export async function showHealthNotification(payload: HealthNotificationPayload)
     const reg = await navigator.serviceWorker?.ready
     if (reg?.showNotification)
     {
-      await reg.showNotification(payload.title, {
+      const options: NotificationOptions & {
+        actions?: Array<{ action: string; title: string }>
+      } = {
         body: payload.body,
         icon: '/pwa-192x192.png',
         badge: '/pwa-192x192.png',
         tag: payload.tag,
         data,
-        actions: payload.interactive !== false ? [...PUSH_INLINE_ACTIONS] : undefined,
         requireInteraction: payload.interactive !== false,
-      })
+      }
+      if (payload.interactive !== false)
+      {
+        options.actions = [...PUSH_INLINE_ACTIONS]
+      }
+      await reg.showNotification(payload.title, options)
       return true
     }
 

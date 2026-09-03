@@ -134,7 +134,7 @@ export function HealthView()
   const headerLede = section === 'diario'
     ? 'Humor e notas - cuidados do dia ficam em Hoje'
     : section === 'hoje'
-      ? healthHeaderSubtitle('hoje', cuidadosTab, ritualSnapshot)
+      ? healthHeaderSubtitle('hoje', cuidadosTab)
       : undefined
 
   const showHealthSkeleton = !sessionBooted && !userSessionReady

@@ -1,5 +1,5 @@
 import { useTaskStore } from '../../store/useTaskStore'
-import type { Habito } from '../../types'
+import type { HabitoDiario } from '../../store/storeTypes'
 import { useHabitHeatmap } from '../../hooks/useHabitHeatmap'
 import { HabitHeatmap } from './HabitHeatmap'
 import { AXEL_METRIC_HAIRLINE, AXEL_TEXT_PRIMARY, AXEL_TEXT_SECONDARY, AXEL_TOUCH_PRESS } from '../../constants/axelSurfaces'
@@ -8,7 +8,7 @@ const SKIP = new Set(['agua', 'proteina'])
 
 interface HabitRowProps
 {
-  habito: Habito
+  habito: HabitoDiario
   onIncrement: (id: number) => void
 }
 

@@ -3,7 +3,6 @@ import type { HealthSection, CuidadosTab } from '../../lib/healthRoute'
 export function healthHeaderSubtitle(
   section: HealthSection,
   cuidados: CuidadosTab,
-  stats: { ritualPct: number; ritualDone: number; ritualTotal: number },
   nut?: { gramas: number; kcal: number },
 ): string
 {

@@ -1,7 +1,6 @@
 import { maskFinanceValue } from '../../../lib/financeHideValues'
 import type { BalanceTone } from '../../../lib/financeBalanceTone'
 import {
-  AXEL_TEXT_PRIMARY,
   AXEL_TEXT_SECONDARY,
   AXEL_METRIC_HAIRLINE,
   MODULE_HERO,

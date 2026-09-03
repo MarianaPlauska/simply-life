@@ -5,7 +5,7 @@ import { bucketByDueDate } from '../../lib/dueBucket'
 import { FinanceRecentTransactions } from '../Finance/FinanceRecentTransactions'
 import { AtividadeRecenteCard } from './AtividadeRecenteCard'
 import { AxelListRow } from '../ui/AxelListRow'
-import { AXEL_LINK, AXEL_METRIC_HAIRLINE, AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces'
+import { AXEL_LINK, AXEL_METRIC_HAIRLINE } from '../../constants/axelSurfaces'
 import { ModuleSection } from '../ui/ModuleSection'
 
 export function DashboardDesktopMainFeed()
