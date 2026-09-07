@@ -8,42 +8,42 @@
  * Princípio: o laranja é a voz do AXEL. Módulos de dados têm cor própria.
  */
 
-export const IDENTITY_VERSION = '2026.09-bloco-h-cream-onyx'
+export const IDENTITY_VERSION = '2026.09-bloco-i-true-black'
 export const PREMIUM_TOKENS_PATH = '@simply-life/ui-tokens'
 
-/* ── Superfícies escuro (Dark Onyx Bloco H) ─ */
+/* ── Superfícies escuro (preto profundo tipo Cryptora) ─ */
 
 export const COLOR = {
-  canvas: '#373539',
-  chrome: '#403C40',
-  surface: '#403C40',
-  voice: '#4A454A',
-  elevated: '#4A454A',
+  canvas: '#000000',
+  chrome: '#141414',
+  surface: '#141414',
+  voice: '#1C1C1E',
+  elevated: '#1C1C1E',
 
   ink: '#F5F1EC',
-  inkMuted: '#B0A9A6',
-  inkFaint: 'rgba(176, 169, 166, 0.72)',
+  inkMuted: '#A8A29E',
+  inkFaint: 'rgba(168, 162, 158, 0.72)',
 
-  hairline: '#504B4F',
+  hairline: '#2A2A2C',
   hairlineStrong: 'rgba(232, 115, 74, 0.55)',
 
-  /** Voz do AXEL - accent Bloco H */
+  /** Voz do AXEL */
   axel: '#E8734A',
   axelHover: '#C45A32',
   axelMuted: 'rgba(232, 115, 74, 0.22)',
-  axelOnFill: '#373539',
+  axelOnFill: '#FFFFFF',
 
   health: '#7BC9A0',
   healthMuted: 'rgba(123, 201, 160, 0.16)',
-  healthOnFill: '#373539',
+  healthOnFill: '#0B0B0B',
 
   finance: '#F5F1EC',
   financeMuted: 'rgba(245, 241, 236, 0.12)',
-  financeOnFill: '#373539',
+  financeOnFill: '#0B0B0B',
 
   tasks: '#F5F1EC',
   tasksMuted: 'rgba(245, 241, 236, 0.10)',
-  tasksOnFill: '#373539',
+  tasksOnFill: '#0B0B0B',
 
   danger: '#E07A6A',
   dangerMuted: 'rgba(224, 122, 106, 0.14)',
@@ -162,11 +162,11 @@ export const SPACE = {
 
 export const RADIUS = {
   /** Botões, chips, inputs */
-  control: 12,
-  /** Card de dado - discreto, não “app genérico 20px” */
-  data: 16,
-  /** Fala do AXEL - mais aberto, quase envelope */
-  voice: 24,
+  control: 16,
+  /** Card de dado */
+  data: 24,
+  /** Fala do AXEL */
+  voice: 28,
   pill: 9999,
 } as const
 

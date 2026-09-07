@@ -40,14 +40,19 @@ type AuthState = {
   refreshAdminFlag: () => Promise<void>
 }
 
+const FOUNDER_ADMIN_EMAILS = new Set([
+  'marianaplauska.c@gmail.com',
+  'marianaplauska.cf@gmail.com',
+])
+
 async function loadIsAdmin(userId: string): Promise<boolean>
 {
   try
   {
     const { data: rpcAdmin, error: rpcError } = await supabase.rpc('is_admin_user')
-    if (!rpcError && typeof rpcAdmin === 'boolean')
+    if (!rpcError && rpcAdmin === true)
     {
-      return rpcAdmin
+      return true
     }
   }
   catch
@@ -62,12 +67,30 @@ async function loadIsAdmin(userId: string): Promise<boolean>
       .select('is_admin')
       .eq('user_id', userId)
       .maybeSingle()
-    return Boolean(data?.is_admin)
+    if (data?.is_admin)
+    {
+      return true
+    }
   }
   catch
   {
-    return false
+    /* cartão público indisponível */
   }
+
+  try
+  {
+    const email = (await supabase.auth.getUser()).data.user?.email?.toLowerCase()
+    if (email && FOUNDER_ADMIN_EMAILS.has(email))
+    {
+      return true
+    }
+  }
+  catch
+  {
+    /* sessão ausente */
+  }
+
+  return false
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -209,16 +232,52 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   {
     if (!supabaseConfigured) return { error: 'Google indisponível offline' }
     const redirectTo = buildAuthCallbackUrl(appOrigin(), '/auth/callback')
+    // skipBrowserRedirect: controlamos a navegação e podemos explicar 400 de redirect
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo,
-        skipBrowserRedirect: Platform.OS !== 'web',
-        queryParams: { access_type: 'offline', prompt: 'consent' },
+        skipBrowserRedirect: true,
       },
     })
-    if (error) return { error: error.message }
-    if (Platform.OS !== 'web' && data?.url)
+    if (error)
+    {
+      const hint =
+        /redirect|allowlist|not allowed|invalid request/i.test(error.message)
+          ? ` Cadastre esta URL em Authentication → URL Configuration → Redirect URLs: ${redirectTo}`
+          : ''
+      return { error: `${error.message}.${hint}` }
+    }
+    if (!data?.url)
+    {
+      return {
+        error:
+          `URL do Google indisponível. Confira se o provider Google está ativo e se ${redirectTo} está nas Redirect URLs do Supabase.`,
+      }
+    }
+
+    // Preflight: authorize 400 = redirect fora da allowlist ou Google desligado
+    try
+    {
+      const probe = await fetch(data.url, { method: 'GET', redirect: 'manual' })
+      if (probe.status === 400 || probe.status === 401 || probe.status === 403)
+      {
+        return {
+          error:
+            `Google OAuth recusado (${probe.status}). No Supabase → Authentication → URL Configuration, adicione: ${redirectTo} (e o Site URL). Ative o provider Google.`,
+        }
+      }
+    }
+    catch
+    {
+      // CORS em alguns ambientes — segue para o redirect normal
+    }
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined')
+    {
+      window.location.assign(data.url)
+    }
+    else
     {
       await Linking.openURL(data.url)
     }

@@ -87,6 +87,7 @@ async function persistCashAccountRemote(next: CashAccountSettings): Promise<void
 interface DatabaseDespesa
 {
   id: number;
+  user_id?: string;
   descricao: string;
   categoria: string;
   categoria_id?: number;
@@ -98,6 +99,9 @@ interface DatabaseDespesa
   card_id?: string;
   forma_pagamento?: string;
   observacao?: string | null;
+  compartilhada?: boolean;
+  partner_workspace_id?: string | null;
+  pago_conta_casal?: boolean;
 }
 
 interface DatabaseOrcamento
@@ -302,6 +306,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             .trim()
           return {
             ...d,
+            user_id: d.user_id,
             descricao: cleanDesc,
             observacao: mergeTxObservacao(d.id, d.observacao),
             data: d.data_gasto,
@@ -309,6 +314,9 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
             card_id,
             fatura_reserva_id: d.fatura_reserva_id,
             forma_pagamento: d.forma_pagamento as FinancePaymentMethod | undefined,
+            compartilhada: Boolean(d.compartilhada),
+            partner_workspace_id: d.partner_workspace_id ?? null,
+            pago_conta_casal: Boolean(d.pago_conta_casal),
           }
         }),
       })
@@ -363,6 +371,22 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       if (t.card_id) insertPayload.card_id = t.card_id
       if (t.forma_pagamento) insertPayload.forma_pagamento = t.forma_pagamento
       if (observacao) insertPayload.observacao = observacao
+      if (t.compartilhada)
+      {
+        insertPayload.compartilhada = true
+        if (t.partner_workspace_id)
+        {
+          insertPayload.partner_workspace_id = t.partner_workspace_id
+        }
+      }
+      if (t.pago_conta_casal && !t.compartilhada)
+      {
+        insertPayload.pago_conta_casal = true
+        if (t.partner_workspace_id)
+        {
+          insertPayload.partner_workspace_id = t.partner_workspace_id
+        }
+      }
 
       const { data, error } = await insertDespesaResilient(supabase, insertPayload)
 
@@ -390,6 +414,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
           const newTransactions = [
             {
               ...data,
+              user_id: data.user_id ?? uid,
               descricao: t.descricao,
               observacao: mergeTxObservacao(data.id, data.observacao ?? observacao),
               data: data.data_gasto,
@@ -397,6 +422,9 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
               card_id: t.card_id,
               fatura_reserva_id: t.fatura_reserva_id,
               forma_pagamento: t.forma_pagamento,
+              compartilhada: Boolean(t.compartilhada || data.compartilhada),
+              partner_workspace_id: t.partner_workspace_id ?? data.partner_workspace_id ?? null,
+              pago_conta_casal: Boolean(t.pago_conta_casal || data.pago_conta_casal),
             },
             ...s.transactions,
           ]

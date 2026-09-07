@@ -38,14 +38,10 @@ export function ExpandableSection({
     <Card
       tone="elevated"
       style={{
-        gap: expanded ? space.md : space.sm,
+        gap: expanded ? space.sm : space.xs,
         borderRadius: 24,
-        borderWidth: 1,
-        borderColor: colors.hairline,
-        borderLeftWidth: 3,
-        borderLeftColor: accent,
         overflow: 'hidden',
-        padding: space.lg,
+        padding: 16,
       }}
     >
       <Pressable
@@ -56,16 +52,25 @@ export function ExpandableSection({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 12,
-          minHeight: 48,
+          gap: 8,
+          minHeight: 40,
         }}
       >
-        <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
-          <Text variant="section" style={{ fontSize: 17 }}>
+        <View
+          style={{
+            width: 3,
+            alignSelf: 'stretch',
+            borderRadius: 999,
+            backgroundColor: accent,
+            minHeight: 28,
+          }}
+        />
+        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+          <Text variant="section" style={{ fontSize: 15 }}>
             {title}
           </Text>
           {subtitle ? (
-            <Text variant="caption" muted numberOfLines={1}>
+            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 11 }}>
               {subtitle}
             </Text>
           ) : null}
@@ -73,9 +78,9 @@ export function ExpandableSection({
         {pill ? <StatusPill label={pill} color={pillColor ?? accent} /> : null}
         <View
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
+            width: 28,
+            height: 28,
+            borderRadius: 8,
             backgroundColor: colors.surface,
             alignItems: 'center',
             justifyContent: 'center',
@@ -83,7 +88,7 @@ export function ExpandableSection({
         >
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
-            size={18}
+            size={16}
             color={colors.inkMuted}
           />
         </View>

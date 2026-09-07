@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal, Pressable, View } from 'react-native'
-import { formatBRL, type FinanceCard } from '@simply-life/shared'
+import { cardFaturaAbertaDisplay, formatBRL, type FinanceCard } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, Field } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
@@ -14,16 +14,21 @@ type Props = {
 
 export function CardInvoiceSpendSheet({ card, mode, onClose }: Props)
 {
-  const { space } = useTheme()
+  const { space, colors } = useTheme()
   const addCardSpend = useDataStore((s) => s.addCardSpend)
+  const payCardInvoice = useDataStore((s) => s.payCardInvoice)
+  const txs = useDataStore((s) => s.finance)
   const isGuest = useAuthStore((s) => s.isGuest)
   const [valor, setValor] = useState('')
   const [titulo, setTitulo] = useState('Compra no cartão')
   const [msg, setMsg] = useState('')
+  const [paying, setPaying] = useState(false)
 
   if (!card || !mode) return null
 
-  const submit = async () =>
+  const fatura = cardFaturaAbertaDisplay(card, txs)
+
+  const submitSpend = async () =>
   {
     const v = Number(valor.replace(',', '.'))
     if (!Number.isFinite(v) || v <= 0)
@@ -38,6 +43,19 @@ export function CardInvoiceSpendSheet({ card, mode, onClose }: Props)
       return
     }
     setValor('')
+    onClose()
+  }
+
+  const pagar = async () =>
+  {
+    setPaying(true)
+    const res = await payCardInvoice(card.id, isGuest)
+    setPaying(false)
+    if (!res.ok)
+    {
+      setMsg(res.error || 'Não foi possível pagar')
+      return
+    }
     onClose()
   }
 
@@ -64,31 +82,51 @@ export function CardInvoiceSpendSheet({ card, mode, onClose }: Props)
               {mode === 'invoice' ? `Fatura · ${card.nome}` : `Quick spend · ${card.nome}`}
             </Text>
             {mode === 'invoice' ? (
-              <View style={{ gap: 6 }}>
-                <Text variant="hero">{formatBRL(card.faturaAberta ?? 0)}</Text>
+              <View style={{ gap: space.sm }}>
+                <Text variant="hero">{formatBRL(fatura)}</Text>
                 <Text variant="caption" muted>
                   Vence dia {card.diaVencimento}. Limite {formatBRL(card.limite)}.
+                  Pagar agora tira o valor do saldo da conta.
                 </Text>
+                {msg ? (
+                  <Text variant="caption" color={colors.danger}>
+                    {msg}
+                  </Text>
+                ) : null}
+                {fatura > 0 ? (
+                  <PrimaryButton
+                    label="Pagar fatura agora"
+                    loading={paying}
+                    onPress={() => void pagar()}
+                  />
+                ) : (
+                  <Text variant="caption" muted>
+                    Nada em aberto neste ciclo.
+                  </Text>
+                )}
               </View>
-            ) : null}
-            <Field
-              label="Descrição"
-              value={titulo}
-              onChangeText={setTitulo}
-            />
-            <Field
-              label="Valor"
-              keyboardType="decimal-pad"
-              value={valor}
-              onChangeText={setValor}
-              placeholder="89,90"
-            />
-            {msg ? <Text variant="caption">{msg}</Text> : null}
-            <PrimaryButton
-              label={mode === 'invoice' ? 'Lançar na fatura' : 'Registrar gasto'}
-              onPress={() => void submit()}
-            />
-            <PrimaryButton label="Fechar" variant="ghost" onPress={onClose} />
+            ) : (
+              <>
+                <Field
+                  label="Descrição"
+                  value={titulo}
+                  onChangeText={setTitulo}
+                />
+                <Field
+                  label="Valor"
+                  keyboardType="decimal-pad"
+                  value={valor}
+                  onChangeText={setValor}
+                  placeholder="89,90"
+                />
+                {msg ? <Text variant="caption">{msg}</Text> : null}
+                <PrimaryButton
+                  label="Registrar gasto"
+                  onPress={() => void submitSpend()}
+                />
+              </>
+            )}
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={onClose} />
           </Card>
         </Pressable>
       </Pressable>

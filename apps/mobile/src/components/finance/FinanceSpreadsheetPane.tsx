@@ -3,11 +3,13 @@ import { View } from 'react-native'
 import {
   formatBRL,
   FINANCE_CATEGORY_LABELS,
+  type FinanceCategory,
 } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, Field } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
+import { ExpenseCategoryChips } from './ExpenseCategoryChips'
 
 /** Planilha tabular simplificada (native) / edição linha a linha */
 export function FinanceSpreadsheetPane()
@@ -20,6 +22,7 @@ export function FinanceSpreadsheetPane()
   const [valor, setValor] = useState('')
   const [data, setData] = useState(() => new Date().toISOString().slice(0, 10))
   const [tipo, setTipo] = useState<'despesa' | 'receita'>('despesa')
+  const [categoria, setCategoria] = useState<FinanceCategory>('outros')
   const [msg, setMsg] = useState('')
 
   const addRow = async () =>
@@ -31,11 +34,12 @@ export function FinanceSpreadsheetPane()
       return
     }
     await importFinanceRows(
-      [{ descricao: desc.trim(), valor: v, tipo, data, categoria: 'outros' }],
+      [{ descricao: desc.trim(), valor: v, tipo, data, categoria }],
       isGuest,
     )
     setDesc('')
     setValor('')
+    setCategoria('outros')
     setMsg('Linha adicionada')
   }
 
@@ -67,6 +71,9 @@ export function FinanceSpreadsheetPane()
             style={{ flex: 1 }}
           />
         </View>
+        {tipo === 'despesa' ? (
+          <ExpenseCategoryChips value={categoria} onChange={setCategoria} />
+        ) : null}
         <PrimaryButton label="Incluir na planilha" onPress={() => void addRow()} />
         {msg ? (
           <Text variant="caption" color={colors.axel}>

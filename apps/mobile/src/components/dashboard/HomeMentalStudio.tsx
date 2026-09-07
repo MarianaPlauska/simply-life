@@ -94,8 +94,8 @@ export function HomeMentalStudio()
         onChange={(m) => void addHumor(m, undefined, isGuest)}
       />
       <PrimaryButton
-        label="Abrir diário"
-        variant="link"
+        label="Abrir diário e notas"
+        variant="ghost"
         size="sm"
         onPress={() => router.push('/(tabs)/saude')}
       />

@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { View, Switch, Modal, Pressable } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { ShieldCheck } from 'lucide-react-native'
 import { createFriendInvite } from '@simply-life/shared'
 import { Screen, Text, Card, PrimaryButton, Field } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { MfaEnrollPanel } from '../src/components/auth/MfaEnrollPanel'
 import { AdminUsersPanel } from '../src/components/auth/AdminUsersPanel'
 import { GamificationPanel } from '../src/components/dashboard/GamificationPanel'
+import { PersonalSummaryGrid } from '../src/components/dashboard/PersonalSummaryGrid'
 import {
   ProfileSection,
   ProfileSettingsRow,
@@ -18,6 +20,7 @@ import { usePrefsStore } from '../src/store/prefsStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { supabase } from '../src/lib/supabase'
 import { appOrigin } from '../src/lib/appOrigin'
+import { resolveAxelName } from '../src/lib/axelName'
 
 type Sheet = 'nome' | 'a11y' | 'seguranca' | 'circulo' | 'xp' | 'admin' | null
 
@@ -59,8 +62,12 @@ export default function PerfilScreen()
 
   if (!userId) return <Redirect href="/login" />
 
-  const displayName =
-    prefs.axel_calls_you || prefs.display_name || email?.split('@')[0] || 'Você'
+  const displayName = resolveAxelName({
+    isGuest,
+    callsYou: prefs.axel_calls_you,
+    displayName: prefs.display_name,
+    email,
+  })
   const initial = displayName.slice(0, 1).toUpperCase()
   const avatarTint = prefs.profile_avatar_tint || colors.axel
   const recent = history.slice(0, 4)
@@ -139,8 +146,18 @@ export default function PerfilScreen()
             <Text variant="caption" muted>
               {email ?? (isGuest ? 'Modo convidado' : 'sem e-mail')}
             </Text>
+            {isAdmin ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                <ShieldCheck size={16} color={colors.axel} />
+                <Text variant="caption" style={{ color: colors.axel, fontWeight: '700' }}>
+                  Administradora
+                </Text>
+              </View>
+            ) : null}
           </View>
         </View>
+
+        <PersonalSummaryGrid />
 
         {/* Dados - prontos para sync nuvem */}
         <ProfileSection title="Dados">
@@ -226,7 +243,6 @@ export default function PerfilScreen()
             {
               const next = mode === 'dark' ? 'light' : 'dark'
               setMode(next)
-              void patch({ color_scheme: next })
             }}
           />
           <ProfileSettingsRow
@@ -251,8 +267,10 @@ export default function PerfilScreen()
           />
           {isAdmin ? (
             <ProfileSettingsRow
-              icon="construct-outline"
+              icon="shield-checkmark-outline"
+              iconNode={<ShieldCheck size={18} color={colors.axel} />}
               label="Admin"
+              value="Usuários"
               onPress={() => setSheet('admin')}
             />
           ) : null}
@@ -409,7 +427,7 @@ export default function PerfilScreen()
                 />
               </View>
             ))}
-            <PrimaryButton label="Fechar" variant="secondary" onPress={() => setSheet(null)} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} />
           </Card>
         </View>
       </Modal>
@@ -430,7 +448,7 @@ export default function PerfilScreen()
               Segurança
             </Text>
             <MfaEnrollPanel />
-            <PrimaryButton label="Fechar" variant="ghost" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
           </View>
         </View>
       </Modal>
@@ -467,7 +485,7 @@ export default function PerfilScreen()
                 })()
               }}
             />
-            <PrimaryButton label="Fechar" variant="ghost" onPress={() => setSheet(null)} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} />
           </Card>
         </View>
       </Modal>
@@ -485,7 +503,7 @@ export default function PerfilScreen()
             }}
           >
             <GamificationPanel />
-            <PrimaryButton label="Fechar" variant="secondary" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
           </View>
         </View>
       </Modal>
@@ -503,7 +521,7 @@ export default function PerfilScreen()
             }}
           >
             <AdminUsersPanel />
-            <PrimaryButton label="Fechar" variant="ghost" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
           </View>
         </View>
       </Modal>

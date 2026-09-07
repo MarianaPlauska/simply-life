@@ -101,6 +101,20 @@ export function pickMoodCareMessage(level: MoodLevel | number): string
   return pickRotatingFromPool(pool, `mood-${lv}`)
 }
 
+/** Frase estável do banco do humor para o dia (não gira a cada render). */
+export function moodCarePhraseForDay(level: MoodLevel | number, isoDate: string): string
+{
+  const lv = Math.min(5, Math.max(1, Math.round(level))) as MoodLevel
+  const pool = MOOD_CARE_BY_LEVEL[lv] ?? MOOD_CARE_BY_LEVEL[3]
+  const key = `${isoDate}:${lv}`
+  let hash = 0
+  for (let i = 0; i < key.length; i++)
+  {
+    hash = (hash * 31 + key.charCodeAt(i)) >>> 0
+  }
+  return sanitizeAxelCopy(pool[hash % pool.length])
+}
+
 export function pickStreakCareMessage(): string
 {
   return pickRotatingFromPool(STREAK_CARE_MESSAGES, 'streak')

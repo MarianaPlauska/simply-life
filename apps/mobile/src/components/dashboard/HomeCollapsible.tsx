@@ -28,16 +28,15 @@ export function HomeCollapsible({
 {
   const { colors, space } = useTheme()
   const [open, setOpen] = useState(defaultOpen)
+  const leftAccent = pillColor ?? colors.axel
 
   return (
     <Card
       tone="elevated"
       style={{
         borderRadius: 24,
-        gap: open ? space.md : space.sm,
-        borderWidth: 1,
-        borderColor: colors.hairline,
-        padding: space.lg,
+        gap: open ? space.sm : space.xs,
+        padding: 16,
       }}
     >
       <Pressable
@@ -48,16 +47,25 @@ export function HomeCollapsible({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 12,
-          minHeight: 48,
+          gap: 8,
+          minHeight: 40,
         }}
       >
-        <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
-          <Text variant="section" style={{ fontSize: 17 }}>
+        <View
+          style={{
+            width: 3,
+            alignSelf: 'stretch',
+            borderRadius: 999,
+            backgroundColor: leftAccent,
+            minHeight: 28,
+          }}
+        />
+        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+          <Text variant="section" style={{ fontSize: 15 }}>
             {title}
           </Text>
           {subtitle ? (
-            <Text variant="caption" muted numberOfLines={2}>
+            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 11 }}>
               {subtitle}
             </Text>
           ) : null}
@@ -65,9 +73,9 @@ export function HomeCollapsible({
         {pill ? <StatusPill label={pill} color={pillColor ?? colors.axel} /> : null}
         <View
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 12,
+            width: 28,
+            height: 28,
+            borderRadius: 8,
             backgroundColor: colors.surface,
             alignItems: 'center',
             justifyContent: 'center',
@@ -75,13 +83,13 @@ export function HomeCollapsible({
         >
           <Ionicons
             name={open ? 'chevron-up' : 'chevron-down'}
-            size={18}
+            size={16}
             color={colors.inkMuted}
           />
         </View>
       </Pressable>
 
-      {open ? <View style={{ gap: space.md }}>{children}</View> : null}
+      {open ? <View style={{ gap: space.sm }}>{children}</View> : null}
     </Card>
   )
 }

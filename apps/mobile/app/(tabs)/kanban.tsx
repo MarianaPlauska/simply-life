@@ -5,6 +5,7 @@ import {
   Screen,
   PillTabs,
   PrimaryButton,
+  SubNavTabs,
 } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useDataStore } from '../../src/store/dataStore'
@@ -16,18 +17,25 @@ import { DueBucketColumns } from '../../src/components/kanban/DueBucketColumns'
 import { KanbanCalendarPane } from '../../src/components/kanban/KanbanCalendarPane'
 import { KanbanGanttPane } from '../../src/components/kanban/KanbanGanttPane'
 import { KanbanListPane } from '../../src/components/kanban/KanbanListPane'
+import { KanbanDonePane } from '../../src/components/kanban/KanbanDonePane'
 import { KanbanTimelinePane } from '../../src/components/kanban/KanbanTimelinePane'
-import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
 import { KanbanOrchestratorBar } from '../../src/components/kanban/KanbanOrchestratorBar'
 import { KanbanDecisionLogSheet } from '../../src/components/kanban/KanbanDecisionLogSheet'
+import { KanbanActivityComplex } from '../../src/components/kanban/KanbanActivityComplex'
+import { KanbanFoldersPane } from '../../src/components/kanban/KanbanFoldersPane'
+import { KanbanReportsPane } from '../../src/components/kanban/KanbanReportsPane'
+import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
+import { KanbanRoutinePane } from '../../src/components/kanban/KanbanRoutinePane'
 import { authedApi } from '../../src/lib/integrationsApi'
 
-type ViewMode = 'overview' | 'colunas' | 'lista' | 'timeline' | 'calendario' | 'gantt'
+type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'gantt' | 'relatorios'
+type ReportMode = 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
 
 export default function KanbanScreen()
 {
   const { space } = useTheme()
-  const [mode, setMode] = useState<ViewMode>('overview')
+  const [hub, setHub] = useState<Hub>('lista')
+  const [report, setReport] = useState<ReportMode>('desempenho')
   const [logOpen, setLogOpen] = useState(false)
   const [syncMsg, setSyncMsg] = useState('')
   const tasks = useDataStore((s) => s.tasks) ?? []
@@ -38,6 +46,10 @@ export default function KanbanScreen()
   const logEvent = useGamificationStore((s) => s.logEvent)
   const openCount = useMemo(
     () => tasks.filter((t) => t.status !== 'done').length,
+    [tasks],
+  )
+  const doneCount = useMemo(
+    () => tasks.filter((t) => t.status === 'done').length,
     [tasks],
   )
 
@@ -61,75 +73,96 @@ export default function KanbanScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro
-          title="Tarefas"
-          subtitle="Overview, colunas e análise - mesma fonte."
+        <ScreenIntro title="Tarefas" subtitle="Lista, rotina, pastas e Gantt — mesmo escopo, várias lentes." />
+
+        {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
+          <KanbanOrchestratorBar tasks={tasks} />
+        ) : null}
+
+        <SubNavTabs
+          accent="axel"
+          tabs={[
+            { id: 'lista', label: 'Lista' },
+            { id: 'feitas', label: 'Feitas', count: doneCount },
+            { id: 'rotina', label: 'Rotina' },
+            { id: 'pastas', label: 'Pastas' },
+            { id: 'board', label: 'Board', count: openCount },
+            { id: 'gantt', label: 'Gantt' },
+            { id: 'relatorios', label: 'Relatórios' },
+          ]}
+          value={hub}
+          onChange={setHub}
         />
 
-        {mode !== 'overview' ? <KanbanOrchestratorBar tasks={tasks} /> : null}
-
-        {mode !== 'overview' ? (
-          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-            <PrimaryButton
-              label="Decision log"
-              variant="secondary"
-              size="sm"
-              onPress={() => setLogOpen(true)}
+        {hub === 'relatorios' ? (
+          <View style={{ marginTop: space.sm, gap: space.sm }}>
+            <PillTabs
+              tabs={[
+                { id: 'desempenho', label: 'Desempenho' },
+                { id: 'overview', label: 'Overview' },
+                { id: 'calendario', label: 'Calendário' },
+                { id: 'timeline', label: 'Timeline' },
+                { id: 'ritmo', label: 'Ritmo' },
+              ]}
+              value={report}
+              onChange={setReport}
             />
-            <PrimaryButton
-              label="Sincronizar Gmail"
-              variant="ghost"
-              size="sm"
-              disabled={isGuest}
-              onPress={() =>
-              {
-                void (async () =>
+            <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+              <PrimaryButton
+                label="Decision log"
+                variant="ghost"
+                size="sm"
+                onPress={() => setLogOpen(true)}
+              />
+              <PrimaryButton
+                label="Sincronizar Gmail"
+                variant="ghost"
+                size="sm"
+                disabled={isGuest}
+                onPress={() =>
                 {
-                  try
+                  void (async () =>
                   {
-                    const api = await authedApi()
-                    const r = await syncGmailNow(api)
-                    setSyncMsg(`${r.tarefas_geradas} tarefa(s) de ${r.emails_lidos} e-mail(s)`)
-                    logEvent(
-                      'system',
-                      'Sync Gmail',
-                      `${r.tarefas_geradas} tarefas de ${r.emails_lidos} emails`,
-                    )
-                    await refreshAll({ isGuest })
-                  }
-                  catch (e)
-                  {
-                    setSyncMsg(e instanceof Error ? e.message : 'Sync indisponível')
-                  }
-                })()
-              }}
-            />
+                    try
+                    {
+                      const api = await authedApi()
+                      const r = await syncGmailNow(api)
+                      setSyncMsg(`${r.tarefas_geradas} tarefa(s) de ${r.emails_lidos} e-mail(s)`)
+                      logEvent(
+                        'system',
+                        'Sync Gmail',
+                        `${r.tarefas_geradas} tarefas de ${r.emails_lidos} emails`,
+                      )
+                      await refreshAll({ isGuest })
+                    }
+                    catch (e)
+                    {
+                      setSyncMsg(e instanceof Error ? e.message : 'Sync indisponível')
+                    }
+                  })()
+                }}
+              />
+            </View>
+            {syncMsg ? (
+              <PrimaryButton label={syncMsg} variant="link" onPress={() => setSyncMsg('')} />
+            ) : null}
           </View>
         ) : null}
-        {syncMsg ? (
-          <PrimaryButton label={syncMsg} variant="link" onPress={() => setSyncMsg('')} />
-        ) : null}
-
-        <PillTabs
-          tabs={[
-            { id: 'overview', label: 'Overview', count: openCount },
-            { id: 'colunas', label: 'Colunas' },
-            { id: 'lista', label: 'Lista' },
-            { id: 'timeline', label: 'Timeline' },
-            { id: 'calendario', label: 'Calendário' },
-            { id: 'gantt', label: 'Gantt' },
-          ]}
-          value={mode}
-          onChange={setMode}
-        />
 
         <View style={{ marginTop: space.sm }}>
-          {mode === 'overview' ? <KanbanOverviewPane tasks={tasks} /> : null}
-          {mode === 'colunas' ? <DueBucketColumns tasks={tasks} /> : null}
-          {mode === 'lista' ? <KanbanListPane tasks={tasks} /> : null}
-          {mode === 'timeline' ? <KanbanTimelinePane tasks={tasks} /> : null}
-          {mode === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
-          {mode === 'gantt' ? <KanbanGanttPane tasks={tasks} /> : null}
+          {hub === 'lista' ? (
+            <KanbanListPane tasks={tasks} onSeeDone={() => setHub('feitas')} />
+          ) : null}
+          {hub === 'feitas' ? <KanbanDonePane tasks={tasks} /> : null}
+          {hub === 'rotina' ? <KanbanRoutinePane /> : null}
+          {hub === 'pastas' ? <KanbanFoldersPane tasks={tasks} /> : null}
+          {hub === 'board' ? <DueBucketColumns tasks={tasks} /> : null}
+          {hub === 'gantt' ? <KanbanGanttPane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'desempenho' ? <KanbanReportsPane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'overview' ? <KanbanOverviewPane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'timeline' ? <KanbanTimelinePane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'ritmo' ? <KanbanActivityComplex tasks={tasks} /> : null}
         </View>
       </TabShell>
       <KanbanDecisionLogSheet

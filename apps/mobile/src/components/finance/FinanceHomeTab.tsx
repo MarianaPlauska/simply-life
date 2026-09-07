@@ -1,13 +1,12 @@
-import { useMemo, useState } from 'react'
-import { View, Pressable } from 'react-native'
+import { useEffect, useMemo, useState } from 'react'
+import { View, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import {
-  rankCategoriesBySpend,
+  cardFaturaAbertaDisplay,
   formatBRL,
-  monthExpenseTotal,
-  monthIncomeTotal,
   currentMonthLabel,
   computeSaldoDisponivel,
+  rankCategoriesBySpend,
 } from '@simply-life/shared'
 import {
   Card,
@@ -15,55 +14,51 @@ import {
   SectionHeader,
   PrimaryButton,
   EmptyState,
-  FinanceDonut,
   ListRow,
+  PressableScale,
 } from '../../ui'
-import { ChipGrid } from '../dashboard/ChipGrid'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useCaptureStore } from '../../store/captureStore'
 import { useDataStore } from '../../store/dataStore'
+import { useAuthStore } from '../../store/authStore'
+import { useCategoryMetaStore } from '../../store/categoryMetaStore'
+import { usePrefsStore } from '../../store/prefsStore'
+import { resolveAxelName } from '../../lib/axelName'
+import { colorMapFromMeta } from '../../lib/categoryMeta'
 import { tabBarScreenPadding } from '../../ui/chrome'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { financeTxSubtitle } from '../../lib/financeTxLabel'
 import { CardCarousel } from './CardCarousel'
 import { FinanceCardDetailSheet } from './FinanceCardDetailSheet'
 import { CardInvoiceSpendSheet } from './CardInvoiceSpendSheet'
 import { FinanceCardEditSheet } from './FinanceCardEditSheet'
 import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
-import { FinanceHealthMetrics } from './FinanceHealthMetrics'
+import { saldoToneForMonth } from './saldoTone'
 
 type Props = {
   onGoMovimentos: () => void
   onGoCartoes?: () => void
+  onGoAnalise?: () => void
   cardsFocus: boolean
   onCardsFocusChange: (focus: boolean) => void
 }
 
-const QUICK = [
-  { id: 'expense', label: 'Gasto', icon: 'arrow-up-outline' as const },
-  { id: 'mov', label: 'Extrato', icon: 'list-outline' as const },
-  { id: 'cards', label: 'Cartões', icon: 'card-outline' as const },
-  { id: 'more', label: 'Mais', icon: 'grid-outline' as const },
-]
-
 /**
- * Finanças Início - hierarquia:
- * N1: Saldo disponível (1 hero, número 32px cobre)
- * N2: atalhos / cartões / saúde financeira / donut
- * N3: movimentos recentes (lista)
- * Acento cobre: número do saldo + botão + Gasto (máx. 2).
+ * Início = layout valores (ref. 3) + destaques (ref. 2).
+ * Cartões = só ao tocar em “Cartões” (ref. 1 no detalhe).
  */
 export function FinanceHomeTab({
   onGoMovimentos,
   onGoCartoes,
+  onGoAnalise,
   cardsFocus,
   onCardsFocusChange,
 }: Props)
 {
-  const { colors, space, radius } = useTheme()
-  const { isDesktop, showRail } = useWorkspace()
+  const { colors, space } = useTheme()
+  const { showRail } = useWorkspace()
   const insets = useSafeAreaInsets()
-  const [catFilter, setCatFilter] = useState<string | null>(null)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [visibleCardId, setVisibleCardId] = useState<string | null>(null)
   const [sheetMode, setSheetMode] = useState<'invoice' | 'spend' | null>(null)
@@ -71,455 +66,100 @@ export function FinanceHomeTab({
   const [createOpen, setCreateOpen] = useState(false)
   const [ledgerOpen, setLedgerOpen] = useState(false)
   const openCapture = useCaptureStore((s) => s.openCapture)
+  const email = useAuthStore((s) => s.sessionEmail)
+  const isGuest = useAuthStore((s) => s.isGuest)
+  const callsYou = usePrefsStore((s) => s.prefs.axel_calls_you)
+  const displayNamePref = usePrefsStore((s) => s.prefs.display_name)
   const txs = useDataStore((s) => s.finance)
   const cash = useDataStore((s) => s.cashAccount)
   const cards = useDataStore((s) => s.financeCards)
   const fixas = useDataStore((s) => s.contasFixas)
-  const ranking = useMemo(() => rankCategoriesBySpend(txs), [txs])
-  const despesas = monthExpenseTotal(txs)
-  const receitas = monthIncomeTotal(txs)
-  const saldo = receitas - despesas
+  const catMap = useCategoryMetaStore((s) => s.map)
+  const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
   const pos = computeSaldoDisponivel(cash, txs, fixas)
-  const max = ranking[0]?.total ?? 1
-  const pctReceita = receitas > 0 ? Math.round((despesas / receitas) * 100) : 0
+  const saldoCaixa = pos.receitas - pos.despesas
+  const tone = saldoToneForMonth(saldoCaixa)
   const fabClearance = showRail ? space.md : tabBarScreenPadding(insets.bottom) + space.md
   const primaryCard = cards.find((c) => c.id === visibleCardId) ?? cards[0]
   const detailCard = cards.find((c) => c.id === detailId) ?? null
-  const cardUsage =
-    primaryCard && primaryCard.limite > 0
-      ? ((primaryCard.faturaAberta ?? 0) / primaryCard.limite) * 100
-      : 0
+  const displayName = resolveAxelName({
+    isGuest,
+    callsYou,
+    displayName: displayNamePref,
+    email,
+  })
 
   const recent = useMemo(
-    () => [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 5),
+    () => [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 6),
     [txs],
   )
+  const ranking = useMemo(
+    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap)).slice(0, 4),
+    [txs, catMap],
+  )
+  const budgets = ranking.slice(0, 2)
 
-  const catChips = [
-    { id: '__all', label: 'Todas' },
-    ...ranking.map((r) => ({
-      id: r.categoria,
-      label: r.label,
-      dotColor: r.color,
-    })),
+  useEffect(() =>
+  {
+    void hydrateCats()
+  }, [hydrateCats])
+
+  const CAT_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+    alimentacao: 'restaurant-outline',
+    transporte: 'car-outline',
+    habitacao: 'home-outline',
+    compras: 'cart-outline',
+    lazer: 'game-controller-outline',
+    saude: 'medkit-outline',
+    educacao: 'school-outline',
+    outros: 'ellipse-outline',
+  }
+
+  const last4 = (primaryCard?.numeroMascarado || '').replace(/\D/g, '').slice(-4) || '0000'
+  const expLabel =
+    primaryCard?.validadeMesAno
+    || (primaryCard
+      ? `${String(primaryCard.diaVencimento).padStart(2, '0')}/${String(new Date().getFullYear() + 3).slice(-2)}`
+      : '--/--')
+  const deltaPct =
+    pos.receitas > 0 ? Math.round((saldoCaixa / pos.receitas) * 1000) / 10 : 0
+  const deltaPositive = saldoCaixa >= 0
+
+  const quickIcons: {
+    id: string
+    label: string
+    icon: keyof typeof Ionicons.glyphMap
+    onPress: () => void
+  }[] = [
+    { id: 'send', label: 'Gasto', icon: 'swap-vertical-outline', onPress: () => openCapture('expense', null, { studio: true }) },
+    {
+      id: 'recv',
+      label: 'Receita',
+      icon: 'download-outline',
+      onPress: () => openCapture('expense', null, { studio: true, lancamento: 'receita' }),
+    },
+    { id: 'cards', label: 'Cartões', icon: 'wallet-outline', onPress: () => onCardsFocusChange(true) },
+    {
+      id: 'more',
+      label: 'Mais',
+      icon: 'grid-outline',
+      onPress: () => (onGoAnalise ? onGoAnalise() : onGoMovimentos()),
+    },
   ]
-  const donutSegments = ranking.map((r) => ({
-    color: r.color,
-    value: r.total,
-    label: r.label,
-  }))
 
-  const onQuick = (id: string) =>
+  const openEditPrimary = () =>
   {
-    if (id === 'expense') openCapture('expense')
-    else if (id === 'mov') onGoMovimentos()
-    else if (id === 'cards') onCardsFocusChange(true)
-    else openCapture('dump')
+    if (!primaryCard)
+    {
+      setCreateOpen(true)
+      return
+    }
+    setVisibleCardId(primaryCard.id)
+    setEditOpen(true)
   }
 
-  // ── Nível 1 (único hero) ─────────────────────────────────
-  const balanceHero = (
-    <Card
-      tone="elevated"
-      style={{
-        gap: space.md,
-        paddingVertical: space.lg,
-        minHeight: 128,
-      }}
-    >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View style={{ gap: 4, flex: 1 }}>
-          <Text variant="caption" muted>
-            Saldo disponível · {currentMonthLabel()}
-          </Text>
-          <Text
-            variant="hero"
-            color={colors.axel}
-            style={{ fontSize: 32, letterSpacing: -0.6 }}
-          >
-            {formatBRL(pos.disponivel)}
-          </Text>
-          <Text variant="caption" muted>
-            {saldo >= 0 ? '+' : ''}
-            {formatBRL(saldo)} no mês
-          </Text>
-        </View>
-        <PrimaryButton
-          label="+ Gasto"
-          size="sm"
-          onPress={() => openCapture('expense')}
-          style={{ borderRadius: 999, paddingHorizontal: 16 }}
-        />
-      </View>
-    </Card>
-  )
-
-  // ── Nível 2 ──────────────────────────────────────────────
-  const quickRow = (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: space.sm }}>
-      {QUICK.map((q) => (
-        <Pressable
-          key={q.id}
-          onPress={() => onQuick(q.id)}
-          accessibilityRole="button"
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            gap: 8,
-            minHeight: 72,
-            paddingVertical: 10,
-          }}
-        >
-          <View
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 16,
-              backgroundColor: colors.elevated,
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderWidth: 1,
-              borderColor: colors.hairline,
-            }}
-          >
-            <Ionicons name={q.icon} size={20} color={colors.inkMuted} />
-          </View>
-          <Text variant="caption" muted>
-            {q.label}
-          </Text>
-        </Pressable>
-      ))}
-    </View>
-  )
-
-  const cardsFocusView = (
-    <View style={{ gap: space.lg }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm }}>
-        <PrimaryButton
-          label="Voltar"
-          variant="ghost"
-          size="sm"
-          onPress={() => onCardsFocusChange(false)}
-        />
-        {onGoCartoes ? (
-          <PrimaryButton
-            label="Gerenciar"
-            variant="link"
-            size="sm"
-            onPress={() =>
-            {
-              onCardsFocusChange(false)
-              onGoCartoes()
-            }}
-          />
-        ) : null}
-      </View>
-      <SectionHeader
-        title="Seus cartões"
-        subtitle={cards.length > 1 ? 'Use as setas ou as bolinhas' : undefined}
-        action={
-          <PrimaryButton
-            label="+ Novo"
-            size="sm"
-            variant="secondary"
-            onPress={() => setCreateOpen(true)}
-          />
-        }
-      />
-      {cards.length === 0 ? (
-        <Card tone="elevated" style={{ gap: space.md }}>
-          <EmptyState title="Nenhum cartão" body="Crie o primeiro cartão aqui." />
-          <PrimaryButton label="Novo cartão" onPress={() => setCreateOpen(true)} />
-        </Card>
-      ) : (
-        <>
-          <CardCarousel
-            cards={cards}
-            selectedId={visibleCardId}
-            onSelect={(id) =>
-            {
-              setVisibleCardId(id)
-              setDetailId(id)
-            }}
-            onVisibleChange={setVisibleCardId}
-          />
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            <PrimaryButton
-              label="Gasto"
-              size="sm"
-              onPress={() => setSheetMode('spend')}
-              style={{ flexGrow: 1 }}
-            />
-            <PrimaryButton
-              label="Lançamentos"
-              size="sm"
-              variant="secondary"
-              onPress={() => setLedgerOpen(true)}
-              style={{ flexGrow: 1 }}
-            />
-            <PrimaryButton
-              label="Editar"
-              size="sm"
-              variant="ghost"
-              onPress={() => setEditOpen(true)}
-              style={{ flexGrow: 1 }}
-            />
-            <PrimaryButton
-              label="Fatura"
-              size="sm"
-              variant="ghost"
-              onPress={() => setSheetMode('invoice')}
-              style={{ flexGrow: 1 }}
-            />
-          </View>
-          {primaryCard ? (
-            <Card tone="elevated" style={{ gap: 6 }}>
-              <Text variant="caption" muted>
-                {primaryCard.nome} · uso {Math.round(cardUsage)}%
-              </Text>
-              <Text variant="bodyStrong" color={colors.finance}>
-                Fatura {formatBRL(primaryCard.faturaAberta ?? 0)} · limite {formatBRL(primaryCard.limite)}
-              </Text>
-            </Card>
-          ) : null}
-          <FinanceCardDetailSheet
-            card={detailCard}
-            visible={detailId != null}
-            onClose={() => setDetailId(null)}
-            onEdit={() =>
-            {
-              setDetailId(null)
-              setEditOpen(true)
-            }}
-            onSpend={() =>
-            {
-              setDetailId(null)
-              setSheetMode('spend')
-            }}
-            onLedger={() =>
-            {
-              setDetailId(null)
-              setLedgerOpen(true)
-            }}
-          />
-          <CardInvoiceSpendSheet
-            card={primaryCard ?? null}
-            mode={sheetMode}
-            onClose={() => setSheetMode(null)}
-          />
-          <FinanceCardEditSheet
-            card={primaryCard ?? null}
-            mode="edit"
-            visible={editOpen}
-            onClose={() => setEditOpen(false)}
-          />
-          <FinanceCardEditSheet
-            card={null}
-            mode="create"
-            visible={createOpen}
-            onClose={() => setCreateOpen(false)}
-            onCreated={(id) => setVisibleCardId(id)}
-          />
-          <FinanceCardLedgerSheet
-            card={primaryCard ?? null}
-            visible={ledgerOpen}
-            onClose={() => setLedgerOpen(false)}
-            onSpend={() => setSheetMode('spend')}
-          />
-        </>
-      )}
-      {cards.length === 0 ? (
-        <FinanceCardEditSheet
-          card={null}
-          mode="create"
-          visible={createOpen}
-          onClose={() => setCreateOpen(false)}
-          onCreated={(id) => setVisibleCardId(id)}
-        />
-      ) : null}
-    </View>
-  )
-
-  // ── Nível 3 ──────────────────────────────────────────────
-  const recentBlock = (
-    <View style={{ gap: space.sm }}>
-      <SectionHeader
-        title="Movimentos recentes"
-        action={
-          <PrimaryButton label="Ver tudo" variant="link" size="sm" onPress={onGoMovimentos} />
-        }
-      />
-      <Card tone="elevated" style={{ paddingVertical: space.sm }}>
-        {recent.length === 0 ? (
-          <EmptyState title="Sem movimentos" body="Capture um gasto para começar." />
-        ) : (
-          recent.map((t, i) => (
-            <ListRow
-              key={t.id}
-              title={t.titulo}
-              subtitle={t.data}
-              right={`${t.tipo === 'despesa' ? '−' : '+'}${formatBRL(t.valor)}`}
-              showSeparator={i < recent.length - 1}
-            />
-          ))
-        )}
-      </Card>
-    </View>
-  )
-
-  const donutCard = (
-    <Card tone="elevated" style={{ alignItems: 'center', gap: space.md, minHeight: 280 }}>
-      <Text variant="caption" muted style={{ textTransform: 'capitalize' }}>
-        Gastos por categoria
-      </Text>
-      {ranking.length === 0 ? (
-        <EmptyState title="Sem gastos no mês" body="Capture um gasto para ver o donut." />
-      ) : (
-        <>
-          <FinanceDonut
-            segments={donutSegments}
-            centerLabel="Gasto total"
-            centerValue={formatBRL(despesas)}
-            size={isDesktop ? 200 : 180}
-            strokeWidth={20}
-          />
-          <Text variant="body" muted style={{ textAlign: 'center' }}>
-            {receitas > 0
-              ? `${pctReceita}% da receita do mês em gastos`
-              : 'Sem receitas registradas neste mês'}
-          </Text>
-        </>
-      )}
-    </Card>
-  )
-
-  const categoryPanel = ranking.length > 0 ? (
-    <View style={{ gap: space.md, flex: isDesktop ? 1 : undefined }}>
-      <ChipGrid
-        items={catChips}
-        value={catFilter ?? '__all'}
-        onChange={(id) => setCatFilter(id === '__all' ? null : id)}
-      />
-      <Card tone="elevated" style={{ gap: space.md }}>
-        {ranking
-          .filter((row) => !catFilter || row.categoria === catFilter)
-          .map((row) => (
-            <View key={row.categoria} style={{ gap: 6 }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 8,
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 999,
-                      backgroundColor: row.color,
-                    }}
-                  />
-                  <Text variant="bodyStrong">{row.label}</Text>
-                </View>
-                <Text variant="caption" muted>
-                  {formatBRL(row.total)} · {row.pct}%
-                </Text>
-              </View>
-              <View
-                style={{
-                  height: 6,
-                  borderRadius: radius.pill,
-                  backgroundColor: colors.hairline,
-                  overflow: 'hidden',
-                }}
-              >
-                <View
-                  style={{
-                    width: `${Math.round((row.total / max) * 100)}%`,
-                    height: '100%',
-                    backgroundColor: row.color,
-                    borderRadius: radius.pill,
-                  }}
-                />
-              </View>
-            </View>
-          ))}
-      </Card>
-    </View>
-  ) : null
-
-  // Nível 2 - KPIs de suporte (abaixo do hero, números 22px)
-  const kpiRow = (
-    <View style={{ flexDirection: 'row', gap: space.md }}>
-      <Card tone="elevated" style={{ flex: 1, gap: 4, minHeight: 88, justifyContent: 'center' }}>
-        <Text variant="caption" muted>
-          Gastos do mês
-        </Text>
-        <Text
-          variant="title"
-          color={colors.finance}
-          style={{ fontSize: 22, letterSpacing: -0.3 }}
-        >
-          {formatBRL(despesas)}
-        </Text>
-      </Card>
-      <Card tone="elevated" style={{ flex: 1, gap: 4, minHeight: 88, justifyContent: 'center' }}>
-        <Text variant="caption" muted>
-          Saldo do mês
-        </Text>
-        <Text
-          variant="title"
-          color={saldo >= 0 ? colors.health : colors.finance}
-          style={{ fontSize: 22, letterSpacing: -0.3 }}
-        >
-          {formatBRL(saldo)}
-        </Text>
-      </Card>
-    </View>
-  )
-
-  if (cardsFocus)
-  {
-    return (
-      <View style={{ gap: space.lg }}>
-        {cardsFocusView}
-        <View style={{ marginBottom: fabClearance }} />
-      </View>
-    )
-  }
-
-  return (
-    <View style={{ gap: space.lg }}>
-      {balanceHero}
-      {kpiRow}
-      {quickRow}
-
-      <FinanceHealthMetrics
-        receitas={receitas}
-        despesas={despesas}
-        saldo={saldo}
-        disponivel={pos.disponivel}
-        fixasMes={pos.fixasMes}
-        cardUsagePct={cardUsage}
-      />
-
-      {isDesktop && ranking.length > 0 ? (
-        <View style={{ flexDirection: 'row', gap: space.lg, alignItems: 'flex-start' }}>
-          <View style={{ flex: 1, minWidth: 0 }}>{donutCard}</View>
-          <View style={{ flex: 1, minWidth: 0 }}>{categoryPanel}</View>
-        </View>
-      ) : (
-        <>
-          {donutCard}
-          {categoryPanel}
-        </>
-      )}
-
-      {recentBlock}
-
+  const sheets = (
+    <>
       <FinanceCardDetailSheet
         card={detailCard}
         visible={detailId != null}
@@ -556,7 +196,11 @@ export function FinanceHomeTab({
         mode="create"
         visible={createOpen}
         onClose={() => setCreateOpen(false)}
-        onCreated={(id) => setVisibleCardId(id)}
+        onCreated={(id) =>
+        {
+          setVisibleCardId(id)
+          setDetailId(id)
+        }}
       />
       <FinanceCardLedgerSheet
         card={primaryCard ?? null}
@@ -564,7 +208,409 @@ export function FinanceHomeTab({
         onClose={() => setLedgerOpen(false)}
         onSpend={() => setSheetMode('spend')}
       />
+    </>
+  )
 
+  // ── Só aparece ao tocar em “Cartões” ─────────────────────
+  if (cardsFocus)
+  {
+    return (
+      <View style={{ gap: space.md }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <PrimaryButton
+            label="Voltar"
+            variant="ghost"
+            size="sm"
+            icon="chevron-back"
+            onPress={() => onCardsFocusChange(false)}
+          />
+          <Text variant="section">Cartões</Text>
+          <View style={{ flexDirection: 'row', gap: 4 }}>
+            <PressableScale
+              accessibilityLabel="Personalizar cartão"
+              onPress={openEditPrimary}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.elevated,
+              }}
+            >
+              <Ionicons name="settings-outline" size={20} color={colors.ink} />
+            </PressableScale>
+            <PressableScale
+              accessibilityLabel="Novo cartão"
+              onPress={() => setCreateOpen(true)}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.elevated,
+              }}
+            >
+              <Ionicons name="add" size={22} color={colors.ink} />
+            </PressableScale>
+          </View>
+        </View>
+
+        {cards.length === 0 ? (
+          <Card tone="elevated" style={{ gap: space.md }}>
+            <EmptyState title="Nenhum cartão" body="Crie um cartão e personalize o visual." />
+            <PrimaryButton label="Novo cartão" icon="card-outline" onPress={() => setCreateOpen(true)} />
+          </Card>
+        ) : (
+          <>
+            <CardCarousel
+              cards={cards}
+              selectedId={visibleCardId}
+              onSelect={(id) =>
+              {
+                setVisibleCardId(id)
+                setDetailId(id)
+              }}
+              onVisibleChange={setVisibleCardId}
+            />
+            <Text variant="caption" muted style={{ textAlign: 'center' }}>
+              Toque no cartão para ver os detalhes
+            </Text>
+            {onGoCartoes ? (
+              <PrimaryButton
+                label="Gerenciar em Contas"
+                variant="link"
+                size="sm"
+                onPress={() =>
+                {
+                  onCardsFocusChange(false)
+                  onGoCartoes()
+                }}
+              />
+            ) : null}
+          </>
+        )}
+        {sheets}
+        <View style={{ marginBottom: fabClearance }} />
+      </View>
+    )
+  }
+
+  // ── Início: card sólido na cor da faixa + ações abaixo (ref. wallet) ───
+  const deltaColor =
+    tone.bg === '#E0A800'
+      ? (deltaPositive ? '#145A32' : '#8B1E1E')
+      : (deltaPositive ? '#7CFFB2' : '#FFB4B4')
+
+  return (
+    <View style={{ gap: space.sm + 2 }}>
+      <View style={{ gap: 1 }}>
+        <Text variant="section" style={{ fontSize: 16 }}>
+          Olá, {displayName}
+        </Text>
+        <Text variant="caption" muted style={{ fontSize: 12 }}>
+          {currentMonthLabel()}
+        </Text>
+      </View>
+
+      {/* Card de saldo — compacto */}
+      <Card
+        tone="elevated"
+        style={{
+          backgroundColor: tone.bg,
+          borderRadius: 16,
+          padding: 14,
+          gap: 10,
+          minHeight: 132,
+          justifyContent: 'space-between',
+        }}
+      >
+        <View style={{ gap: 4 }}>
+          <Text
+            variant="hero"
+            style={{ color: tone.fg, fontSize: 28, letterSpacing: -0.8, lineHeight: 32 }}
+          >
+            {formatBRL(pos.disponivel)}
+          </Text>
+          <Text variant="caption" style={{ color: deltaColor, fontWeight: '700', fontSize: 12 }}>
+            {deltaPositive ? '+' : ''}
+            {deltaPct}% no mês · {tone.label}
+          </Text>
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+          <View style={{ flexDirection: 'row', gap: 14 }}>
+            <View style={{ gap: 1 }}>
+              <Text variant="micro" style={{ color: tone.muted, fontSize: 10 }}>
+                Número
+              </Text>
+              <Text variant="bodyStrong" style={{ color: tone.fg, fontSize: 13, letterSpacing: 0.4 }}>
+                **** {last4}
+              </Text>
+            </View>
+            <View style={{ gap: 1 }}>
+              <Text variant="micro" style={{ color: tone.muted, fontSize: 10 }}>
+                Exp
+              </Text>
+              <Text variant="bodyStrong" style={{ color: tone.fg, fontSize: 13 }}>
+                {expLabel}
+              </Text>
+            </View>
+          </View>
+
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel="Registrar gasto"
+            onPress={() => openCapture('expense')}
+            style={{
+              backgroundColor: tone.fg,
+              borderRadius: 999,
+              minHeight: 34,
+              paddingHorizontal: 12,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text variant="label" style={{ color: tone.bg, fontWeight: '700', fontSize: 12 }}>
+              + Gasto
+            </Text>
+          </PressableScale>
+        </View>
+      </Card>
+
+      {/* Ações leves */}
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        {quickIcons.map((a) => (
+          <PressableScale
+            key={a.id}
+            onPress={a.onPress}
+            accessibilityRole="button"
+            accessibilityLabel={a.label}
+            style={{ flex: 1, alignItems: 'center', gap: 4 }}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor: colors.elevated,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Ionicons name={a.icon} size={16} color={colors.ink} />
+            </View>
+            <Text variant="micro" muted style={{ fontWeight: '600', fontSize: 10 }}>
+              {a.label}
+            </Text>
+          </PressableScale>
+        ))}
+      </View>
+
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 16 }}>
+          <Text variant="micro" muted>
+            Receita
+          </Text>
+          <Text variant="bodyStrong" color={colors.health} style={{ fontSize: 13 }}>
+            {formatBRL(pos.receitas)}
+          </Text>
+        </Card>
+        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 16 }}>
+          <Text variant="micro" muted>
+            Saiu da conta
+          </Text>
+          <Text variant="bodyStrong" color={colors.finance} style={{ fontSize: 13 }}>
+            {formatBRL(pos.despesas)}
+          </Text>
+        </Card>
+        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 16 }}>
+          <Text variant="micro" muted>
+            No cartão
+          </Text>
+          <Text variant="bodyStrong" style={{ fontSize: 13 }}>
+            {formatBRL(cards.reduce((a, c) => a + cardFaturaAbertaDisplay(c, txs), 0))}
+          </Text>
+        </Card>
+      </View>
+
+      {/* Categorias — tiles leves (ref. imagem) */}
+      <View style={{ gap: space.sm }}>
+        <SectionHeader
+          title="Categorias"
+          action={
+            <PrimaryButton
+              label="Ver mais"
+              variant="link"
+              size="sm"
+              onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
+            />
+          }
+        />
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {(ranking.length
+            ? ranking
+            : [
+                { categoria: 'alimentacao', label: 'Alimentação', total: 0, pct: 0, color: colors.axel },
+                { categoria: 'transporte', label: 'Transporte', total: 0, pct: 0, color: colors.tasks },
+                { categoria: 'saude', label: 'Saúde', total: 0, pct: 0, color: colors.health },
+                { categoria: 'outros', label: 'Outros', total: 0, pct: 0, color: colors.finance },
+              ]
+          ).map((row) => (
+            <PressableScale
+              key={row.categoria}
+              onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
+              style={{
+                width: '48%' as `${number}%`,
+                flexGrow: 1,
+                flexBasis: '46%',
+                minHeight: 68,
+                borderRadius: 16,
+                backgroundColor: colors.surface,
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: colors.hairline,
+                padding: 10,
+                gap: 4,
+              }}
+            >
+              <View
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 999,
+                  backgroundColor: `${row.color}22`,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Ionicons
+                  name={CAT_ICONS[row.categoria] ?? 'ellipse-outline'}
+                  size={13}
+                  color={row.color}
+                />
+              </View>
+              <Text variant="caption" muted style={{ fontSize: 10 }} numberOfLines={1}>
+                {row.label}
+              </Text>
+              <Text variant="bodyStrong" style={{ fontSize: 12 }}>
+                {formatBRL(row.total)}
+              </Text>
+            </PressableScale>
+          ))}
+        </View>
+      </View>
+
+      {/* Orçamentos slim */}
+      {budgets.length > 0 ? (
+        <View style={{ gap: space.sm }}>
+          <SectionHeader
+            title="Orçamentos"
+            action={
+              <PrimaryButton
+                label="Ver tudo"
+                variant="link"
+                size="sm"
+                onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
+              />
+            }
+          />
+          <View style={{ gap: 8 }}>
+            {budgets.map((b) =>
+            {
+              const meta = Math.max(b.total * 1.25, 1)
+              const pct = Math.min(100, Math.round((b.total / meta) * 100))
+              return (
+                <Card
+                  key={b.categoria}
+                  tone="elevated"
+                  style={{
+                    padding: 10,
+                    borderRadius: 16,
+                    gap: 6,
+                    backgroundColor: `${b.color}14`,
+                    borderWidth: 0,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <View
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 999,
+                        backgroundColor: colors.surface,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Ionicons
+                        name={CAT_ICONS[b.categoria] ?? 'ellipse-outline'}
+                        size={14}
+                        color={b.color}
+                      />
+                    </View>
+                    <View style={{ flex: 1, gap: 1 }}>
+                      <Text variant="bodyStrong" style={{ fontSize: 12 }}>
+                        {b.label}
+                      </Text>
+                      <Text variant="micro" muted style={{ fontSize: 10 }}>
+                        {formatBRL(b.total)} / {formatBRL(meta)}
+                      </Text>
+                    </View>
+                    <Text variant="caption" muted style={{ fontWeight: '700', fontSize: 11 }}>
+                      {pct}%
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      height: 3,
+                      borderRadius: 999,
+                      backgroundColor: colors.hairline,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: `${pct}%`,
+                        height: '100%',
+                        backgroundColor: b.color,
+                        borderRadius: 999,
+                      }}
+                    />
+                  </View>
+                </Card>
+              )
+            })}
+          </View>
+        </View>
+      ) : null}
+
+      {/* Transações compactas */}
+      <View style={{ gap: space.sm }}>
+        <SectionHeader
+          title="Transações"
+          action={
+            <PrimaryButton label="Ver tudo" variant="link" size="sm" onPress={onGoMovimentos} />
+          }
+        />
+        <Card tone="elevated" style={{ paddingVertical: 4, paddingHorizontal: 4 }}>
+          {recent.length === 0 ? (
+            <EmptyState title="Nada por aqui" body="Seu próximo gasto aparece nesta lista." />
+          ) : (
+            recent.map((t, i) => (
+              <ListRow
+                key={t.id}
+                title={t.titulo}
+                subtitle={financeTxSubtitle(t)}
+                right={`${t.tipo === 'despesa' ? '−' : '+'}${formatBRL(t.valor)}`}
+                showSeparator={i < recent.length - 1}
+              />
+            ))
+          )}
+        </Card>
+      </View>
+
+      {sheets}
       <View style={{ marginBottom: fabClearance }} />
     </View>
   )

@@ -3,7 +3,8 @@ import { medsTakenCount, type Medicamento } from './medicamentos'
 import { priorityTodayTasks, type MobileTask } from './tasks'
 import { monthExpenseTotal, type FinanceTx } from './finance'
 import { computeSaldoDisponivel, type CashAccount, type ContaFixa } from './financeAccounts'
-import { sanitizeAxelCopy, type MoodLevel } from './axelCare'
+import { todayIso } from './dates'
+import { moodCarePhraseForDay, sanitizeAxelCopy, type MoodLevel } from './axelCare'
 
 export type AxelDayBriefInput = {
   tasks: MobileTask[]
@@ -48,10 +49,10 @@ function moodToneOf(level: MoodLevel | null): AxelMoodTone
 /** Abertura curta - evita parede de texto em dias pesados */
 function moodOpener(tone: AxelMoodTone): string | null
 {
-  if (tone === 'heavy') return 'Sem pressa. Um passo já conta.'
-  if (tone === 'soft') return 'Ritmo suave hoje.'
-  if (tone === 'bright') return 'Bom tom no dia.'
-  return null
+  if (tone === 'heavy') return 'Sem pressa. Um passo já é suficiente hoje.'
+  if (tone === 'soft') return 'Ritmo reduzido. O essencial vem primeiro.'
+  if (tone === 'bright') return 'Energia disponível. Mantemos o foco sem sobrecarga.'
+  return 'Prioridade clara, sem excesso de informação.'
 }
 
 function moodFocusLine(
@@ -191,10 +192,12 @@ export function buildAxelDayBrief(input: AxelDayBriefInput): AxelDayBriefResult
   if (agua) chips.push(`Água ${agua.progressoAtual}/${agua.metaDiaria}`)
   if (medsTotal > 0) chips.push(`${medsDone}/${medsTotal} doses`)
 
-  const care = input.lastAxelCare?.trim()
-  const careShort =
-    care && care.length > 90 ? `${care.slice(0, 87).trim()}…` : care || null
-  const opener = careShort || moodOpener(moodTone)
+  const day = todayIso(now)
+  const poolPhrase = moodLevel != null ? moodCarePhraseForDay(moodLevel, day) : null
+  const sessionCare = input.lastAxelCare?.trim() || null
+  const opener =
+    (moodLevel != null ? sessionCare || poolPhrase : null)
+    || moodOpener(moodTone)
   const focusLine = moodFocusLine(moodTone, topTask?.titulo ?? null)
   // Voz curta: no máx. abertura + foco (sem listas embutidas)
   const voice = sanitizeAxelCopy(

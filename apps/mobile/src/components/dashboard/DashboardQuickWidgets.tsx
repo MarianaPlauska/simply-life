@@ -215,7 +215,11 @@ export function DashboardQuickWidgets()
   const { space } = useTheme()
   const { showRail } = useWorkspace()
   const prefs = usePrefsStore((s) => s.prefs)
-  const ids = resolveDashboardWidgets(prefs.dashboard_quick_widgets, prefs.dashboard_priority)
+  const ids = resolveDashboardWidgets(
+    prefs.dashboard_quick_widgets,
+    prefs.dashboard_priority,
+    prefs.home_module_order,
+  )
 
   if (ids.length === 0) return null
 

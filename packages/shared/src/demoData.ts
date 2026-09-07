@@ -13,7 +13,7 @@ export function demoHumor(): HumorRegistro[]
   const moods = [5, 4, 3, 2, 1, 4, 5, 3, 2, 4, 5, 3, 4, 2, 5]
   return moods.map((humor, i) =>
   {
-    const data = isoDaysAgo(i)
+    const data = isoDaysAgo(i + 1)
     return {
       id: i + 1,
       data,

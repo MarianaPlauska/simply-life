@@ -168,6 +168,8 @@ export type FinancePaymentMethod =
 export interface Transaction
 {
   id: number;
+  /** Dono do lançamento - útil quando o parceiro vê item compartilhado */
+  user_id?: string;
   descricao: string;
   /** Nota explicativa - o que é aquele dinheiro (tooltip na lista) */
   observacao?: string | null;
@@ -180,6 +182,11 @@ export interface Transaction
   forma_pagamento?: FinancePaymentMethod;
   card_id?: string;
   fatura_reserva_id?: number;
+  /** Visível para o parceiro do workspace de casal */
+  compartilhada?: boolean;
+  partner_workspace_id?: string | null;
+  /** Gasto pessoal que saiu da conta compartilhada do casal */
+  pago_conta_casal?: boolean;
 }
 
 export interface CashBalanceOverrides

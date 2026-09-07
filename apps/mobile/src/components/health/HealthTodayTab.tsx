@@ -4,14 +4,18 @@ import {
   findHabit,
   habitPct,
   medsTakenCount,
+  formatSleepHours,
 } from '@simply-life/shared'
 import { Card, Text, SectionHeader, PressableScale, IconBadge, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import type { CuidadosTab } from './healthNav'
 
+import { CrisisSupportCard } from './CrisisSupportCard'
+
 type Props = {
   onGoCuidados: (tab: CuidadosTab) => void
+  onGoApoio: () => void
 }
 
 
@@ -22,11 +26,12 @@ const TILES: {
 }[] = [
   { id: 'hidratacao', label: 'Água', icon: 'water' },
   { id: 'alimentacao', label: 'Comida', icon: 'restaurant' },
+  { id: 'sono', label: 'Sono', icon: 'moon' },
   { id: 'academia', label: 'Academia', icon: 'barbell' },
   { id: 'medicamentos', label: 'Medicamentos', icon: 'medical' },
 ]
 
-export function HealthTodayTab({ onGoCuidados }: Props)
+export function HealthTodayTab({ onGoCuidados, onGoApoio }: Props)
 {
   const { colors, space, radius } = useTheme()
   const habits = useDataStore((s) => s.habits)
@@ -37,17 +42,46 @@ export function HealthTodayTab({ onGoCuidados }: Props)
   const agua = findHabit(habits, 'agua')
   const proteina = findHabit(habits, 'proteina')
   const treino = findHabit(habits, 'treino')
+  const sono = findHabit(habits, 'sono')
   const medsDone = medsTakenCount(medicamentos)
-  const ritualTotal = 4
+  const ritualTotal = 5
   const ritualDone =
     (agua && agua.progressoAtual >= agua.metaDiaria ? 1 : 0) +
     (proteina && proteina.progressoAtual >= proteina.metaDiaria * 0.5 ? 1 : 0) +
+    (sono && sono.progressoAtual >= 6 ? 1 : 0) +
     (treino && treino.progressoAtual > 0 ? 1 : 0) +
     (humor.length > 0 ? 1 : 0)
   const ritualPct = Math.round((ritualDone / ritualTotal) * 100)
 
   return (
-    <View style={{ gap: space.lg }}>
+    <View style={{ gap: space.md }}>
+      <CrisisSupportCard compact />
+
+      <PressableScale
+        onPress={onGoApoio}
+        accessibilityRole="button"
+        style={{
+          minHeight: 56,
+          padding: space.md,
+          borderRadius: radius.lg,
+          gap: 4,
+          backgroundColor: colors.elevated,
+          borderWidth: 1,
+          borderColor: colors.hairline,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <IconBadge name="heart" color={colors.health} size={44} iconSize={22} />
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text variant="bodyStrong">Apoio · foco e TCC</Text>
+          <Text variant="caption" muted>
+            TDAH, modo aventura e exercícios de pensamento
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
+      </PressableScale>
+
       {/* Acento AXEL - cobre (1-2× por tela) */}
       <Card
         tone="elevated"
@@ -116,6 +150,12 @@ export function HealthTodayTab({ onGoCuidados }: Props)
             value = proteina ? `${proteina.progressoAtual}g · ${habitPct(proteina)}%` : '-'
             done = Boolean(proteina && proteina.progressoAtual >= proteina.metaDiaria)
             pillLabel = done ? 'Meta ok' : value
+          }
+          else if (tile.id === 'sono')
+          {
+            value = sono && sono.progressoAtual > 0 ? formatSleepHours(sono.progressoAtual) : 'Sem registro'
+            done = Boolean(sono && sono.progressoAtual >= 6)
+            pillLabel = done ? 'Noite ok' : value
           }
           else if (tile.id === 'academia')
           {

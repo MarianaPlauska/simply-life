@@ -8,6 +8,7 @@ import {
   REWARD_SHOP,
   appendHistory,
   nextMilestone,
+  localTodayIso,
   type AxelHistoryEvent,
   type Achievement,
 } from '@simply-life/shared'
@@ -18,6 +19,7 @@ const UNLOCK_KEY = 'simply-life-achievements'
 const OWNED_KEY = 'simply-life-shop-owned'
 const HIST_KEY = 'simply-life-axel-history'
 const STREAK_KEY = 'simply-life-streak'
+const STREAK_DAY_KEY = 'simply-life-streak-day'
 
 type MemoryStorage = {
   getItem: (key: string) => string | null
@@ -133,7 +135,6 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       totalXp,
       gold,
       history,
-      celebration: { title, body: `+${granted} XP` },
     })
     return granted
   },
@@ -168,8 +169,11 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   bumpStreak: () =>
   {
+    const today = localTodayIso()
+    if (storage.getItem(STREAK_DAY_KEY) === today) return
     const streak = get().streak + 1
     storage.setItem(STREAK_KEY, String(streak))
+    storage.setItem(STREAK_DAY_KEY, today)
     set({ streak })
     if (streak >= 3) get().unlockIf('streak_3')
   },

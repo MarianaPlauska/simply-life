@@ -20,7 +20,7 @@ export function GamificationPanel()
   const { level, pct, xpInLevel, xpToNext, next } = gamificationLevel(totalXp)
 
   return (
-    <View style={{ gap: space.lg }}>
+    <View style={{ gap: space.md }}>
       <Card tone="hero" style={{ gap: space.sm }}>
         <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
           Trilha AXEL

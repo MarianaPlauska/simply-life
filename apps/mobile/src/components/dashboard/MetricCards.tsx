@@ -16,8 +16,8 @@ export function MetricCards({ items }: { items: MetricItem[] })
 {
   const { colors, space } = useTheme()
   const { showRail } = useWorkspace()
-  const minH = showRail ? 112 : 100
-  const valueSize = showRail ? 28 : 22
+  const minH = showRail ? 88 : 76
+  const valueSize = showRail ? 24 : 18
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: showRail ? space.md : space.sm }}>
@@ -29,10 +29,11 @@ export function MetricCards({ items }: { items: MetricItem[] })
             flexGrow: 1,
             flexBasis: showRail ? 200 : 0,
             flex: showRail ? undefined : 1,
-            gap: 6,
+            gap: 4,
             minHeight: minH,
             justifyContent: 'center',
-            borderRadius: 18,
+            borderRadius: 14,
+            padding: 10,
           }}
         >
           <Text variant="caption" muted>

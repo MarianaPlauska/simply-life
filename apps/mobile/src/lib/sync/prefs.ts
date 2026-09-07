@@ -1,4 +1,6 @@
 import { Platform } from 'react-native'
+import * as SecureStore from 'expo-secure-store'
+import { parseNotifyCadence, type NotifyCadence } from '@simply-life/shared'
 import { supabase, supabaseConfigured } from '../supabase'
 import {
   defaultWidgetsForPriority,
@@ -14,6 +16,8 @@ import {
 export type WorkspacePrefs = {
   display_name: string
   axel_calls_you: string
+  /** Card AXEL da Home recolhido — sincroniza na conta */
+  axel_home_collapsed?: boolean
   /** Telefone / cidade - sync nuvem futuro */
   profile_phone?: string
   profile_city?: string
@@ -39,6 +43,20 @@ export type WorkspacePrefs = {
   pinned_modules: string[]
   /** Sidebar desktop colapsada (só ícones) */
   sidebar_collapsed?: boolean
+  /** Ritmo das mensagens do AXEL (onboarding) */
+  care_pace?: 'calm' | 'balanced' | 'direct'
+  /** Teto de push. off = sem alerta no celular. */
+  notify_cadence?: NotifyCadence
+  /** Opt-in: apoio a foco / TDAH (não é diagnóstico). */
+  adhd_support?: boolean
+  /** calm = gamificação discreta; rpg = trilha visível na Home. */
+  gamification_mode?: 'calm' | 'rpg'
+  /** Ordem dos módulos na Home (onboarding). */
+  home_module_order?: DashboardPriority[]
+  /** Meta semanal ou mensal escolhida pelo usuário. */
+  life_goal?: import('@simply-life/shared').LifeGoal | null
+  /** Semana (domingo ISO) em que o relatório de humor foi dispensado. */
+  mood_report_dismissed_week?: string | null
   /** Wizard Montar seu AXEL concluído */
   setup_completed_at?: string | null
 }
@@ -46,6 +64,7 @@ export type WorkspacePrefs = {
 export const DEFAULT_WORKSPACE_PREFS: WorkspacePrefs = {
   display_name: '',
   axel_calls_you: '',
+  axel_home_collapsed: false,
   profile_phone: '',
   profile_city: '',
   profile_avatar_tint: '#E8734A',
@@ -65,13 +84,71 @@ export const DEFAULT_WORKSPACE_PREFS: WorkspacePrefs = {
   pomodoro_long: 15,
   pinned_modules: ['dashboard', 'kanban'],
   sidebar_collapsed: false,
+  care_pace: 'balanced',
+  notify_cadence: 'off',
+  adhd_support: false,
+  gamification_mode: 'calm',
   setup_completed_at: null,
 }
 
 const LOCAL_KEY = 'simply-life-mobile-workspace-prefs'
+/** Chave curta - lida no primeiro paint, sem esperar o JSON completo. */
+export const COLOR_SCHEME_STORAGE_KEY = 'simply-life-color-scheme'
 
-function readLocal(): Partial<WorkspacePrefs> | null
+let memoryPrefs: WorkspacePrefs | null = null
+
+function parseColorScheme(value: unknown): 'light' | 'dark' | null
 {
+  return value === 'light' || value === 'dark' ? value : null
+}
+
+/** Leitura síncrona (web + cache). Native espera o hydrate. */
+export function readColorSchemeSync(): 'light' | 'dark' | null
+{
+  const fromMemory = parseColorScheme(memoryPrefs?.color_scheme)
+  if (fromMemory) return fromMemory
+  try
+  {
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
+    {
+      const dedicated = parseColorScheme(localStorage.getItem(COLOR_SCHEME_STORAGE_KEY))
+      if (dedicated) return dedicated
+      const raw = localStorage.getItem(LOCAL_KEY)
+      if (raw)
+      {
+        return parseColorScheme((JSON.parse(raw) as Partial<WorkspacePrefs>).color_scheme)
+      }
+    }
+  }
+  catch
+  {
+    /* Safari privado / quota */
+  }
+  return null
+}
+
+function persistColorSchemeNow(scheme: 'light' | 'dark'): void
+{
+  try
+  {
+    if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
+    {
+      localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, scheme)
+    }
+  }
+  catch
+  {
+    /* ignore */
+  }
+  if (Platform.OS !== 'web')
+  {
+    void SecureStore.setItemAsync(COLOR_SCHEME_STORAGE_KEY, scheme)
+  }
+}
+
+function readLocalSync(): Partial<WorkspacePrefs> | null
+{
+  if (memoryPrefs) return memoryPrefs
   try
   {
     if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
@@ -87,14 +164,43 @@ function readLocal(): Partial<WorkspacePrefs> | null
   return null
 }
 
+async function readLocal(): Promise<Partial<WorkspacePrefs> | null>
+{
+  const sync = readLocalSync()
+  if (sync) return sync
+  if (Platform.OS === 'web') return null
+  try
+  {
+    const [prefsRaw, schemeRaw] = await Promise.all([
+      SecureStore.getItemAsync(LOCAL_KEY),
+      SecureStore.getItemAsync(COLOR_SCHEME_STORAGE_KEY),
+    ])
+    const parsed = prefsRaw
+      ? (JSON.parse(prefsRaw) as Partial<WorkspacePrefs>)
+      : {}
+    const scheme = parseColorScheme(schemeRaw)
+    if (scheme) parsed.color_scheme = scheme
+    return Object.keys(parsed).length > 0 || scheme ? parsed : null
+  }
+  catch
+  {
+    return null
+  }
+}
+
 function writeLocal(prefs: WorkspacePrefs): void
 {
+  memoryPrefs = prefs
+  persistColorSchemeNow(prefs.color_scheme === 'dark' ? 'dark' : 'light')
+  const payload = JSON.stringify(prefs)
   try
   {
     if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
     {
-      localStorage.setItem(LOCAL_KEY, JSON.stringify(prefs))
+      localStorage.setItem(LOCAL_KEY, payload)
+      return
     }
+    void SecureStore.setItemAsync(LOCAL_KEY, payload)
   }
   catch
   {
@@ -104,6 +210,10 @@ function writeLocal(prefs: WorkspacePrefs): void
 
 function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspacePrefs
 {
+  const scheme =
+    parseColorScheme(raw?.color_scheme)
+    ?? readColorSchemeSync()
+    ?? DEFAULT_WORKSPACE_PREFS.color_scheme
   return {
     ...DEFAULT_WORKSPACE_PREFS,
     ...raw,
@@ -118,21 +228,51 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
         ? raw.pinned_modules
         : DEFAULT_WORKSPACE_PREFS.pinned_modules,
     setup_completed_at: raw?.setup_completed_at ?? null,
+    care_pace:
+      raw?.care_pace === 'calm' || raw?.care_pace === 'direct' || raw?.care_pace === 'balanced'
+        ? raw.care_pace
+        : 'balanced',
+    notify_cadence:
+      parseNotifyCadence(raw?.notify_cadence)
+      ?? (raw?.setup_completed_at ? 'once' : DEFAULT_WORKSPACE_PREFS.notify_cadence),
+    adhd_support: Boolean(raw?.adhd_support),
+    gamification_mode:
+      raw?.gamification_mode === 'rpg' ? 'rpg' : 'calm',
+    home_module_order:
+      raw?.home_module_order?.length
+        ? raw.home_module_order
+        : undefined,
+    life_goal: raw?.life_goal ?? null,
+    mood_report_dismissed_week: raw?.mood_report_dismissed_week ?? null,
+    color_scheme: scheme,
   }
+}
+
+/** Primeiro paint: localStorage no web, default no native até o hydrate. */
+export function initialWorkspacePrefs(): WorkspacePrefs
+{
+  return mergePrefs(readLocalSync())
 }
 
 export async function loadWorkspacePrefs(): Promise<WorkspacePrefs>
 {
-  const local = readLocal()
+  const local = await readLocal()
   if (!supabaseConfigured)
   {
-    return mergePrefs(local)
+    const merged = mergePrefs(local)
+    writeLocal(merged)
+    return merged
   }
 
   try
   {
     const uid = (await supabase.auth.getUser()).data.user?.id
-    if (!uid) return mergePrefs(local)
+    if (!uid)
+    {
+      const merged = mergePrefs(local)
+      writeLocal(merged)
+      return merged
+    }
 
     const { data, error } = await supabase
       .from('user_workspace_prefs')
@@ -150,13 +290,15 @@ export async function loadWorkspacePrefs(): Promise<WorkspacePrefs>
   }
   catch
   {
-    return mergePrefs(local)
+    const merged = mergePrefs(local)
+    writeLocal(merged)
+    return merged
   }
 }
 
 export async function saveWorkspacePrefs(patch: Partial<WorkspacePrefs>): Promise<WorkspacePrefs>
 {
-  const current = mergePrefs(readLocal())
+  const current = mergePrefs(await readLocal())
   const merged = mergePrefs({ ...current, ...patch })
   writeLocal(merged)
 
@@ -171,6 +313,20 @@ export async function saveWorkspacePrefs(patch: Partial<WorkspacePrefs>): Promis
       prefs: merged,
       updated_at: new Date().toISOString(),
     })
+    const nome =
+      merged.axel_calls_you.trim()
+      || merged.display_name.trim()
+    if (nome)
+    {
+      await supabase
+        .from('user_public_cards')
+        .update({
+          display_name: merged.display_name.trim() || nome,
+          axel_calls_you: merged.axel_calls_you.trim() || nome,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', uid)
+    }
   }
   catch
   {

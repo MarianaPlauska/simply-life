@@ -12,10 +12,11 @@ type Props = {
   danger?: boolean
   /** Cor do ícone/badge (pastéis da ref) */
   accent?: string
+  iconNode?: ReactNode
 }
 
 /** Linha de settings estilo perfil (ref: Dados / Настройки) */
-export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent }: Props)
+export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent, iconNode }: Props)
 {
   const { colors } = useTheme()
   const tint = danger ? colors.danger : (accent ?? colors.axel)
@@ -50,7 +51,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
           justifyContent: 'center',
         }}
       >
-        <Ionicons name={icon} size={18} color={tint} />
+        {iconNode ?? <Ionicons name={icon} size={18} color={tint} />}
       </View>
       <Text
         variant="bodyStrong"

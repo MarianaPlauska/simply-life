@@ -10,6 +10,8 @@ type Props = {
   color: string
   showLabel?: boolean
   centerLabel?: string
+  trackColor?: string
+  labelColor?: string
 }
 
 export function ProgressRing({
@@ -19,6 +21,8 @@ export function ProgressRing({
   color,
   showLabel = true,
   centerLabel,
+  trackColor,
+  labelColor,
 }: Props)
 {
   const { colors } = useTheme()
@@ -26,6 +30,7 @@ export function ProgressRing({
   const r = (size - strokeWidth) / 2
   const c = 2 * Math.PI * r
   const filled = (pct / 100) * c
+  const ink = labelColor ?? color
 
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0 }}>
@@ -34,7 +39,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={colors.hairline}
+          stroke={trackColor ?? colors.hairline}
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -58,7 +63,7 @@ export function ProgressRing({
             position: 'absolute',
             fontSize: centerLabel ? (size >= 72 ? 22 : 14) : 9,
             fontWeight: '700',
-            color,
+            color: ink,
             letterSpacing: centerLabel ? -0.4 : 0,
           }}
         >

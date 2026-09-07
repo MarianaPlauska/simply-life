@@ -14,8 +14,9 @@ import {
   type GoogleConnectionStatus,
 } from '@simply-life/shared'
 import { Screen, Text, Card, PillTabs, PrimaryButton, Field } from '../src/ui'
-import { StackHeader } from '../src/components/layout/StackHeader'
 import { GamificationPanel } from '../src/components/dashboard/GamificationPanel'
+import { SettingsHero } from '../src/components/settings/SettingsHero'
+import { SettingsToggleRow } from '../src/components/settings/SettingsToggleRow'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -87,7 +88,7 @@ export default function ConfiguracoesScreen()
 
   return (
     <Screen scroll tabBarInset={false}>
-      <StackHeader title="Configurações" subtitle="Integrações, webhooks e sistema" />
+      <SettingsHero title="Configurações" />
       <View style={{ gap: space.lg }}>
         <PillTabs
           tabs={[
@@ -108,7 +109,7 @@ export default function ConfiguracoesScreen()
 
         {tab === 'integracoes' ? (
           <View style={{ gap: space.md }}>
-            <Card tone="elevated" style={{ gap: space.md }}>
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
               <Text variant="section">Gmail com senha de app</Text>
               <Text variant="caption" muted>
                 {imap?.configured
@@ -198,7 +199,7 @@ export default function ConfiguracoesScreen()
               </View>
             </Card>
 
-            <Card tone="elevated" style={{ gap: space.md }}>
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
               <Text variant="section">Google OAuth (opcional)</Text>
               <Text variant="caption" muted>
                 {google?.connected
@@ -272,7 +273,7 @@ export default function ConfiguracoesScreen()
         ) : null}
 
         {tab === 'webhooks' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
+          <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
             <Text variant="section">Webhooks AXEL</Text>
             <Text variant="caption" muted>
               Endpoint: {endpoint}
@@ -307,15 +308,14 @@ export default function ConfiguracoesScreen()
 
         {tab === 'sistema' ? (
           <View style={{ gap: space.md }}>
-            <Card tone="elevated" style={{ gap: space.md }}>
-              <Text variant="section">Coach de IA</Text>
-              <PrimaryButton
-                label={prefs.ai_coach_enabled ? 'Coach ligado' : 'Coach desligado'}
-                variant={prefs.ai_coach_enabled ? 'primary' : 'secondary'}
-                onPress={() => void patch({ ai_coach_enabled: !prefs.ai_coach_enabled })}
-              />
-            </Card>
-            <Card tone="elevated" style={{ gap: space.md }}>
+            <SettingsToggleRow
+              icon="sparkles-outline"
+              title="Coach de IA"
+              subtitle="Sugestões do AXEL no dia a dia"
+              value={prefs.ai_coach_enabled}
+              onValueChange={(next) => void patch({ ai_coach_enabled: next })}
+            />
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
               <Text variant="section">Palavras-chave de email</Text>
               <Field
                 label="Nova palavra"

@@ -49,7 +49,7 @@ export default function PersonalizarInicioScreen()
     <Screen scroll tabBarInset={false}>
       <StackHeader
         title="Personalize seu Início"
-        subtitle="Escolha o que aparece na linha de atalhos"
+        subtitle="O que aparece acima da dobra — o resto fica no resumo"
       />
       <View style={{ gap: space.lg, paddingBottom: space.xl }}>
         <Text variant="body" muted>

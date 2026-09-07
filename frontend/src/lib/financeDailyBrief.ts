@@ -20,6 +20,9 @@ export interface FinanceDailyBrief
   proximasValor: number
   categoriasEmAlerta: string[]
   diasRestantes: number
+  /** Contas com vencimento hoje + categorias em alerta (≥80%) */
+  hojeLines: string[]
+  contasHoje: number
 }
 
 export function buildFinanceDailyBrief(input: {
@@ -49,6 +52,8 @@ export function buildFinanceDailyBrief(input: {
     reference: ref,
   }).filter((b) => b.daysUntil <= 3)
 
+  const dueToday = upcoming.filter((b) => b.daysUntil === 0)
+
   const monthKey = `${ref.getFullYear()}-${String(ref.getMonth() + 1).padStart(2, '0')}`
   const monthTx = input.transactions.filter((t) => t.data.startsWith(monthKey))
 
@@ -58,10 +63,25 @@ export function buildFinanceDailyBrief(input: {
     monthTx,
   )
 
-  const categoriasEmAlerta = budgetRows
+  const alertRows = budgetRows
     .filter((r) => r.limite > 0 && r.pct >= 80)
-    .map((r) => r.nome)
     .slice(0, 3)
+
+  const categoriasEmAlerta = alertRows.map((r) => r.nome)
+
+  const hojeLines: string[] = []
+  for (const b of dueToday.slice(0, 3))
+  {
+    hojeLines.push(`Vence hoje: ${b.label} (${fmt(b.valor)})`)
+  }
+  for (const r of alertRows)
+  {
+    hojeLines.push(
+      r.pct >= 100
+        ? `${r.nome} estourou o orçamento (${r.pct.toFixed(0)}%)`
+        : `${r.nome} em ${r.pct.toFixed(0)}% do limite`,
+    )
+  }
 
   const diasRestantes = daysUntilMonthEnd(ref)
   const proximasValor = upcoming.reduce((s, b) => s + b.valor, 0)
@@ -69,7 +89,11 @@ export function buildFinanceDailyBrief(input: {
   let headline = `Livre: ${fmt(position.saldoDisponivel)}`
   const parts: string[] = []
 
-  if (upcoming.length > 0)
+  if (dueToday.length > 0)
+  {
+    parts.push(`${dueToday.length} conta(s) vencem hoje`)
+  }
+  else if (upcoming.length > 0)
   {
     parts.push(`${upcoming.length} conta(s) em até 3 dias (${fmt(proximasValor)})`)
   }
@@ -82,6 +106,10 @@ export function buildFinanceDailyBrief(input: {
   if (position.saldoDisponivel < 0)
   {
     headline = 'Caixa negativo - priorize essenciais'
+  }
+  else if (dueToday.length > 0)
+  {
+    headline = 'Hoje: contas e limites pedem atenção'
   }
   else if (diasRestantes <= 5 && position.saldoProjetadoDisponivel < position.saldoDisponivel * 0.4)
   {
@@ -100,6 +128,8 @@ export function buildFinanceDailyBrief(input: {
     proximasValor,
     categoriasEmAlerta,
     diasRestantes,
+    hojeLines,
+    contasHoje: dueToday.length,
   }
 }
 

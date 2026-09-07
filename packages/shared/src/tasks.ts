@@ -1,4 +1,4 @@
-import { startOfDay } from './dates'
+import { isoDaysAgo, startOfDay } from './dates'
 
 export type TaskStatus = 'todo' | 'doing' | 'done'
 
@@ -169,4 +169,56 @@ export function dueDateForBucket(bucket: DueBucket, ref = new Date()): string | 
   }
   d.setDate(d.getDate() + 10)
   return d.toISOString().slice(0, 10)
+}
+
+/** Contagem de tarefas com prazo em cada dia (constância tipo GitHub). */
+export function taskActivityByDay(
+  tasks: MobileTask[] | null | undefined,
+  days: number,
+  ref = new Date(),
+): { iso: string; count: number }[]
+{
+  const map = new Map<string, number>()
+  for (const t of tasks ?? [])
+  {
+    const iso = t.dataVencimento?.slice(0, 10)
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) continue
+    map.set(iso, (map.get(iso) ?? 0) + 1)
+  }
+  const out: { iso: string; count: number }[] = []
+  for (let i = days - 1; i >= 0; i -= 1)
+  {
+    const iso = isoDaysAgo(i, ref)
+    out.push({ iso, count: map.get(iso) ?? 0 })
+  }
+  return out
+}
+
+/** Grade alinhada ao domingo (colunas = semanas), para heatmap tipo GitHub. */
+export function taskActivityGrid(
+  tasks: MobileTask[] | null | undefined,
+  weeks: number,
+  ref = new Date(),
+): { iso: string; count: number }[]
+{
+  const map = new Map<string, number>()
+  for (const t of tasks ?? [])
+  {
+    const iso = t.dataVencimento?.slice(0, 10)
+    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) continue
+    map.set(iso, (map.get(iso) ?? 0) + 1)
+  }
+  const start = new Date(ref)
+  start.setHours(12, 0, 0, 0)
+  start.setDate(start.getDate() - start.getDay() - (weeks - 1) * 7)
+  const days = weeks * 7
+  const out: { iso: string; count: number }[] = []
+  for (let i = 0; i < days; i += 1)
+  {
+    const d = new Date(start)
+    d.setDate(start.getDate() + i)
+    const iso = d.toISOString().slice(0, 10)
+    out.push({ iso, count: map.get(iso) ?? 0 })
+  }
+  return out
 }

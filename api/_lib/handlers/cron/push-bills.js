@@ -10,6 +10,7 @@ import {
 import { sendPushToSubscriptions } from '../../sendPushFanout.js';
 import { enrichPushPayload } from '../../pushActionPayload.js';
 import { isPushSnoozed } from '../../pushSnooze.js';
+import { prefsNotifyCadence, canPushFinance } from '../../notifyCadence.js';
 
 export default async function handler(req, res)
 {
@@ -57,6 +58,24 @@ export default async function handler(req, res)
   {
     try
     {
+      const { data: prefsRow } = await supabase
+        .from('user_workspace_prefs')
+        .select('prefs')
+        .eq('user_id', userId)
+        .maybeSingle();
+      const cadence = prefsNotifyCadence(prefsRow?.prefs);
+      if (cadence === 'off' || !canPushFinance(prefsRow?.prefs, reference))
+      {
+        summary.push({
+          user_id: userId,
+          sent: 0,
+          skipped: 0,
+          bills: 0,
+          reason: cadence === 'off' ? 'off' : 'outside_window',
+        });
+        continue;
+      }
+
       const [{ data: contasFixas }, { data: despesas }, { data: delivered }] = await Promise.all([
         supabase.from('fin_contas_fixas').select('*').eq('user_id', userId),
         supabase.from('despesas').select('id, descricao, valor, data_gasto, tipo, status_pagamento').eq('user_id', userId),
@@ -104,6 +123,10 @@ export default async function handler(req, res)
             sent_at: new Date().toISOString(),
           });
           sent += 1;
+          if (cadence === 'once')
+          {
+            break;
+          }
         }
       }
 

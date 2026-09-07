@@ -3,6 +3,7 @@
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { enrichPushPayload } from '../../pushActionPayload.js';
 import { isPushSnoozed } from '../../pushSnooze.js';
+import { canPushWellbeing } from '../../notifyCadence.js';
 import { sendPushToSubscriptions } from '../../sendPushFanout.js';
 import {
   buildDosesHoje,
@@ -160,7 +161,13 @@ export default async function handler(req, res)
       }
 
       const hour = now.getHours();
-      if (hour >= 9 && hour <= 20)
+      const prefsEarly = (await supabase
+        .from('user_workspace_prefs')
+        .select('prefs')
+        .eq('user_id', userId)
+        .maybeSingle()).data?.prefs ?? {};
+
+      if (canPushWellbeing(prefsEarly, now))
       {
         const [{ data: humorHoje }, { data: prefsRow }, { data: wbDelivered }] = await Promise.all([
           supabase.from('diario_humor').select('id').eq('user_id', userId).gte('criado_em', `${today}T00:00:00`),
@@ -179,7 +186,7 @@ export default async function handler(req, res)
         {
           const payload = enrichPushPayload({
             title: 'AXEL · Bem-estar',
-            body: 'Como você está hoje? Um toque no humor já ajuda.',
+            body: 'Quando quiser, o humor do dia cabe em um toque.',
             url: '/saude#diario',
             tag: nudgeKey,
           }, {

@@ -6,13 +6,16 @@ import { useTheme } from '../theme/ThemeProvider'
 type Props = TextInputProps & {
   label: string
   error?: string
+  /** sand = campo no papel do studio (não branco) */
+  tone?: 'default' | 'sand'
 }
 
 /** Campo com label - focus ring AXEL */
-export function Field({ label, error, style, onFocus, onBlur, ...rest }: Props)
+export function Field({ label, error, tone = 'default', style, onFocus, onBlur, ...rest }: Props)
 {
   const { colors, radius } = useTheme()
   const [focused, setFocused] = useState(false)
+  const fill = tone === 'sand' ? colors.hairline : colors.elevated
 
   return (
     <View style={{ gap: 6 }}>
@@ -39,8 +42,8 @@ export function Field({ label, error, style, onFocus, onBlur, ...rest }: Props)
             fontSize: 16,
             fontFamily: 'Manrope_400Regular',
             color: colors.ink,
-            backgroundColor: colors.elevated,
-            borderWidth: 1.5,
+            backgroundColor: fill,
+            borderWidth: 0,
             borderColor: error
               ? colors.danger
               : focused

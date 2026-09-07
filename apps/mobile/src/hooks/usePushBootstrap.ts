@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react'
 import { Platform } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useAuthStore } from '../store/authStore'
+import { usePrefsStore } from '../store/prefsStore'
 import {
   handlePushActionAsync,
   registerExpoPushAsync,
+  unregisterExpoPushAsync,
 } from '../lib/pushRegister'
 import { mapPushUrlToRoute } from '../lib/pushDeepLink'
 import {
@@ -27,16 +29,27 @@ export function usePushBootstrap(): void
 {
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const prefsLoaded = usePrefsStore((s) => s.loaded)
+  const notifyCadence = usePrefsStore((s) => s.prefs.notify_cadence)
   const router = useRouter()
   const registeredFor = useRef<string | null>(null)
 
   useEffect(() =>
   {
     if (!userId || isGuest || Platform.OS === 'web') return
+    if (!prefsLoaded) return
+
+    if (notifyCadence === 'off')
+    {
+      registeredFor.current = null
+      void unregisterExpoPushAsync()
+      return
+    }
+
     if (registeredFor.current === userId) return
     registeredFor.current = userId
     void registerExpoPushAsync()
-  }, [userId, isGuest])
+  }, [userId, isGuest, prefsLoaded, notifyCadence])
 
   useEffect(() =>
   {

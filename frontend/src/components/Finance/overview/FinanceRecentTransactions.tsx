@@ -76,7 +76,13 @@ export function FinanceRecentTransactions({
               )}
               <div className="flex-1 min-w-0">
                 <FinanceTxLabel label={t.descricao} observacao={t.observacao} />
-                <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>{fmtDate(t.data)}</p>
+                <p className={`text-[10px] ${AXEL_TEXT_SECONDARY}`}>
+                  {fmtDate(t.data)}
+                  {t.compartilhada ? ' · Casal' : ''}
+                  {t.pago_conta_casal && !t.compartilhada
+                    ? ` · Pessoal · ${fmt(t.valor)} na conta do casal`
+                    : ''}
+                </p>
               </div>
               <span className={`text-[12px] font-mono tabular-nums shrink-0 ${
                 isRec ? 'text-concluido' : AXEL_TEXT_PRIMARY

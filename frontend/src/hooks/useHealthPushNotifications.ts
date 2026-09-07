@@ -44,6 +44,7 @@ export function useHealthPushNotifications(enabled = true): void
   useEffect(() =>
   {
     if (!enabled || !isLoggedIn) return
+    if (workspacePrefs.notify_cadence === 'off') return
     if (typeof window === 'undefined' || !('Notification' in window)) return
     if (Notification.permission !== 'granted') return
 
@@ -62,7 +63,7 @@ export function useHealthPushNotifications(enabled = true): void
           {
             void showHealthNotification({
               title: 'AXEL · Bem-estar',
-              body: 'Como você está hoje? Registre seu humor em um toque.',
+              body: 'Quando quiser, o humor do dia cabe em um toque.',
               url: '/#dashboard-wellbeing',
               tag: key,
             }).then((ok) =>
@@ -82,5 +83,6 @@ export function useHealthPushNotifications(enabled = true): void
     isLoggedIn,
     humorHojeLista.length,
     workspacePrefs.wellbeing_dashboard_hidden_until,
+    workspacePrefs.notify_cadence,
   ])
 }

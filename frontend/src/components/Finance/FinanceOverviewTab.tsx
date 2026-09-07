@@ -28,7 +28,7 @@ interface FinanceOverviewTabProps
   editVal: string
   setEditVal: (v: string) => void
   handleSaveBudget: (catId: number, name: string) => void
-  setTab: (tab: 'visao-geral' | 'tabela' | 'metas') => void
+  setTab: (tab: 'visao-geral' | 'tabela' | 'metas' | 'orcamentos') => void
 }
 
 export function FinanceOverviewTab({
@@ -71,10 +71,23 @@ export function FinanceOverviewTab({
         onViewGoals={() => setTab('metas')}
       />
 
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[12px] text-ink-muted">
+          Planejamento completo com alerta Hoje
+        </p>
+        <button
+          type="button"
+          onClick={() => setTab('orcamentos')}
+          className="text-[12px] font-medium text-finance hover:underline min-h-11 px-2"
+        >
+          Abrir Orçamentos
+        </button>
+      </div>
+
       <DashboardCollapsible
         title="Orçamento por categoria"
         subtitle="Limites e uso do mês"
-        defaultOpen={false}
+        defaultOpen
         borderless
       >
         <FinanceBudgetPanel

@@ -58,12 +58,12 @@ body {
   --sl-attention: var(--accent);
   --sl-success: #3D8F6A;
   --sl-sand: #C6A17E;
-  --sl-radius-sm: 12px;
-  --sl-radius: 16px;
-  --sl-radius-control: 7px;
-  --sl-radius-lg: 24px;
+  --sl-radius-sm: 16px;
+  --sl-radius: 24px;
+  --sl-radius-control: 16px;
+  --sl-radius-lg: 28px;
   --sl-radius-pill: 9999px;
-  --sl-shadow: none;
+  --sl-shadow: 0 10px 28px rgba(42, 38, 34, 0.06);
   --sl-shadow-lg: 0 16px 48px rgba(12, 21, 25, 0.08);
   --sl-shadow-voice: 0 0 0 1px rgba(160, 92, 61, 0.22), 0 12px 40px rgba(160, 92, 61, 0.08);
   --sl-chart-meta: #FFFCFA;
@@ -76,13 +76,13 @@ body {
 }
 
 .dark {
-  /* Dark Onyx - Bloco H (substitui preto puro) */
-  --bg-canvas: #373539;
-  --bg-surface: #403C40;
-  --bg-elevated: #4A454A;
-  --border-hairline: #504B4F;
+  /* Preto profundo tipo Cryptora / Card Balance */
+    --bg-canvas: #000000;
+  --bg-surface: #141414;
+  --bg-elevated: #1C1C1E;
+  --border-hairline: #2A2A2C;
   --text-primary: #F5F1EC;
-  --text-muted: #B0A9A6;
+  --text-muted: #A8A29E;
   --accent: #E8734A;
   --accent-pressed: #C45A32;
 
@@ -93,7 +93,7 @@ body {
   --sl-elevated: var(--bg-elevated);
   --sl-text: var(--text-primary);
   --sl-text-muted: var(--text-muted);
-  --sl-text-faint: rgba(176, 169, 166, 0.72);
+  --sl-text-faint: rgba(168, 162, 158, 0.72);
   --sl-border: var(--border-hairline);
   --sl-border-subtle: rgba(232, 115, 74, 0.55);
   --sl-accent: var(--accent);
@@ -102,7 +102,7 @@ body {
   --sl-axel: var(--accent);
   --sl-axel-hover: var(--accent-pressed);
   --sl-axel-muted: rgba(232, 115, 74, 0.22);
-  --sl-axel-on-fill: var(--bg-canvas);
+  --sl-axel-on-fill: #FFFFFF;
   --sl-health: #7BC9A0;
   --sl-health-muted: rgba(123, 201, 160, 0.16);
   --sl-finance: #D4B896;
@@ -112,7 +112,7 @@ body {
   --sl-urgent: #E07A6A;
   --sl-attention: var(--accent);
   --sl-success: #7BC9A0;
-  --sl-shadow: none;
+  --sl-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   --sl-shadow-lg: 0 16px 48px rgba(55, 53, 57, 0.72);
   --sl-shadow-voice: 0 0 0 1px rgba(232, 115, 74, 0.36), 0 12px 40px rgba(232, 115, 74, 0.16);
   --sl-chart-meta: var(--bg-surface);
@@ -478,10 +478,10 @@ body {
   }
 
   .sl-panel {
-    background-color: var(--sl-surface);
-    border: 0.5px solid var(--sl-border-subtle);
-    border-radius: var(--sl-radius-control);
-    box-shadow: none;
+    background-color: var(--sl-elevated);
+    border: none;
+    border-radius: var(--sl-radius);
+    box-shadow: var(--sl-shadow);
     color: var(--sl-text);
   }
 

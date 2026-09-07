@@ -36,6 +36,10 @@ function iconFor(id: HomeMetricId): HomeShortcut['icon']
   {
     return 'wallet-outline'
   }
+  if (id === 'stats')
+  {
+    return 'stats-chart-outline'
+  }
   return 'flag-outline'
 }
 
@@ -97,6 +101,10 @@ export function HomeMetricShortcuts()
           ? `${(gastosMes / 1000).toFixed(1).replace('.', ',')}k`
           : formatBRL(gastosMes)
       }
+      if (id === 'stats')
+      {
+        return String(doneToday)
+      }
       const total = doneToday + todayOpen
       if (habits.length > 0)
       {
@@ -126,6 +134,10 @@ export function HomeMetricShortcuts()
       if (id === 'finance')
       {
         return () => openCapture('expense')
+      }
+      if (id === 'stats')
+      {
+        return () => router.push('/(tabs)/kanban')
       }
       return () => router.push('/(tabs)/financeiro')
     }

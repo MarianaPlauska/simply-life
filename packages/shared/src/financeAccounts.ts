@@ -1,4 +1,5 @@
-import { formatBRL, monthExpenseTotal, monthIncomeTotal, type FinanceTx } from './finance'
+import { formatBRL, monthIncomeTotal, type FinanceTx } from './finance'
+import { cashExpenseTotal, creditExpenseTotal } from './financeCash'
 
 export interface CashAccount
 {
@@ -19,6 +20,11 @@ export interface FinanceCard
   numeroMascarado?: string
   titular?: string
   faturaAberta?: number
+  /** Metadados de “cartão real” (edição local) */
+  banco?: string
+  enderecoCobranca?: string
+  cep?: string
+  validadeMesAno?: string
 }
 
 export interface ContaFixa
@@ -51,6 +57,11 @@ export interface FinanceGoal
 export function demoCashAccount(): CashAccount
 {
   return { saldoInicial: 4200 }
+}
+
+export function emptyCashAccount(): CashAccount
+{
+  return { saldoInicial: 0 }
 }
 
 export function demoFinanceCards(): FinanceCard[]
@@ -113,13 +124,21 @@ export function computeSaldoDisponivel(
   cash: CashAccount,
   txs: FinanceTx[],
   fixas: ContaFixa[],
-): { disponivel: number; receitas: number; despesas: number; fixasMes: number }
+): {
+  disponivel: number
+  receitas: number
+  despesas: number
+  fixasMes: number
+  creditoAberto: number
+}
 {
   const receitas = monthIncomeTotal(txs)
-  const despesas = monthExpenseTotal(txs)
+  // Débito sai na hora; crédito só depois de pagar a fatura (lançamento “Fatura …”).
+  const despesas = cashExpenseTotal(txs)
+  const creditoAberto = creditExpenseTotal(txs)
   const fixasMes = fixas.filter((c) => c.ativa).reduce((acc, c) => acc + c.valor, 0)
   const disponivel = cash.saldoInicial + receitas - despesas
-  return { disponivel, receitas, despesas, fixasMes }
+  return { disponivel, receitas, despesas, fixasMes, creditoAberto }
 }
 
 export function formatSaldo(value: number): string

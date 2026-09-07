@@ -31,8 +31,7 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
         flexShrink: 0,
         gap: 6,
         backgroundColor: active ? colors.surface : colors.elevated,
-        borderWidth: 1,
-        borderColor: active ? colors.hairlineStrong : colors.hairline,
+        borderWidth: 0,
       }}
     >
       {dotColor ? (
@@ -45,7 +44,12 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
           }}
         />
       ) : null}
-      <Text variant="micro" color={active ? colors.ink : colors.inkMuted}>
+      <Text
+        variant="micro"
+        color={active ? colors.ink : colors.inkMuted}
+        numberOfLines={1}
+        style={{ lineHeight: 16 }}
+      >
         {text}
       </Text>
     </PressableScale>

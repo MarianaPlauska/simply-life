@@ -71,6 +71,20 @@ export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCard
               <p className={`text-[11px] mt-1 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
                 {brief.detail}
               </p>
+              {brief.hojeLines.length > 0 && (
+                <div className="mt-2 rounded-sl border border-accent/30 bg-accent/8 px-2.5 py-2">
+                  <p className="font-mono text-[9px] uppercase tracking-wide text-accent">
+                    Alerta Hoje
+                  </p>
+                  <ul className="mt-1 space-y-0.5">
+                    {brief.hojeLines.slice(0, 3).map((line) => (
+                      <li key={line} className={`text-[11px] ${AXEL_TEXT_PRIMARY}`}>
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
         </button>
@@ -86,10 +100,10 @@ export function FinanceDailyBriefCard({ compact = false }: FinanceDailyBriefCard
           </button>
           <button
             type="button"
-            onClick={() => navigate('/financeiro')}
+            onClick={() => navigate('/financeiro?aba=orcamentos')}
             className="shrink-0 min-h-[40px] px-3 rounded-sl border border-line font-mono text-[10px] uppercase text-ink-muted hover:bg-chrome"
           >
-            Ver tudo
+            Orçamentos
           </button>
         </div>
       </section>

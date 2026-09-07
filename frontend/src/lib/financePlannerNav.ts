@@ -16,6 +16,7 @@ export type PlannerLeafTab =
   | 'contas-fixas'
   | 'pagos'
   | 'visao-geral'
+  | 'orcamentos'
   | 'metas'
 
 export interface FinanceNavTab
@@ -52,6 +53,7 @@ export const FINANCE_SUB_TABS: Record<Exclude<PlannerGroup, 'inicio'>, FinanceSu
   ],
   analise: [
     { id: 'visao-geral', label: 'Visão' },
+    { id: 'orcamentos', label: 'Orçamentos' },
     { id: 'metas', label: 'Metas' },
   ],
 }
@@ -75,6 +77,7 @@ const LEAF_TO_GROUP: Record<PlannerLeafTab, PlannerGroup> = {
   pagos: 'contas',
   'contas-fixas': 'contas',
   'visao-geral': 'analise',
+  orcamentos: 'analise',
   metas: 'analise',
 }
 

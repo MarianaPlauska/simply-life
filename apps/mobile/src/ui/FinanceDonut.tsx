@@ -17,13 +17,13 @@ type Props = {
   strokeWidth?: number
 }
 
-/** Donut de gastos - visual de app financeiro nativo */
+/** Donut de gastos - traço fino, gaps leves entre fatias */
 export function FinanceDonut({
   segments,
   centerLabel,
   centerValue,
   size = 200,
-  strokeWidth = 22,
+  strokeWidth = 14,
 }: Props)
 {
   const { colors } = useTheme()
@@ -31,6 +31,7 @@ export function FinanceDonut({
   const r = (size - stroke) / 2
   const c = 2 * Math.PI * r
   const total = segments.reduce((acc, s) => acc + s.value, 0) || 1
+  const gap = segments.length > 1 ? Math.min(10, c * 0.012) : 0
   let cursor = 0
   const inner = size - stroke * 2 - 8
   const valueSize =
@@ -43,17 +44,19 @@ export function FinanceDonut({
           cx={size / 2}
           cy={size / 2}
           r={r}
-          stroke={colors.elevated}
+          stroke={colors.hairline}
           strokeWidth={stroke}
           fill="none"
+          opacity={0.55}
         />
         <G rotation={-90} origin={`${size / 2}, ${size / 2}`}>
           {segments.map((seg, i) =>
           {
-            const len = (seg.value / total) * c
+            const raw = (seg.value / total) * c
+            const len = Math.max(0, raw - gap)
             const dash = `${len} ${c - len}`
             const offset = -cursor
-            cursor += len
+            cursor += raw
             return (
               <Circle
                 key={`${seg.label ?? i}-${seg.color}`}
@@ -64,7 +67,7 @@ export function FinanceDonut({
                 strokeWidth={stroke}
                 strokeDasharray={dash}
                 strokeDashoffset={offset}
-                strokeLinecap="butt"
+                strokeLinecap="round"
                 fill="none"
               />
             )

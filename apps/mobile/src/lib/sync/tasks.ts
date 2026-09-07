@@ -1,6 +1,6 @@
 import { supabase } from '../supabase'
 import type { MobileTask, TaskStatus } from '@simply-life/shared'
-import { todayIso } from '@simply-life/shared'
+import { parseEvoPct, todayIso } from '@simply-life/shared'
 
 function mapStatus(raw: string | null | undefined): TaskStatus
 {
@@ -31,13 +31,17 @@ function mapTask(row: Record<string, unknown>): MobileTask
     feito: Boolean(s.concluida ?? s.feito),
   }))
   const doneCount = checks.filter((c) => c.feito).length
+  const anotacao = String(row.notas_locais || row.descricao || '')
+  const evo = parseEvoPct(anotacao)
   const progresso = status === 'done'
     ? 1
-    : checks.length > 0
-      ? doneCount / checks.length
-      : status === 'doing'
-        ? 0.4
-        : 0
+    : evo != null
+      ? evo / 100
+      : checks.length > 0
+        ? doneCount / checks.length
+        : status === 'doing'
+          ? 0.4
+          : 0
 
   return {
     id: String(row.id),
@@ -48,7 +52,7 @@ function mapTask(row: Record<string, unknown>): MobileTask
     estimativaMinutos: Number(row.estimativa_minutos) || 30,
     progresso,
     checklist: checks,
-    anotacao: String(row.notas_locais || row.descricao || ''),
+    anotacao,
     prioridade: (Number(row.prioridade) || 2) as 1 | 2 | 3,
   }
 }
@@ -71,11 +75,35 @@ export async function fetchTarefas(): Promise<MobileTask[]>
   return (data || []).map((r) => mapTask(r as Record<string, unknown>))
 }
 
-export async function createTarefa(titulo: string, notas?: string): Promise<MobileTask>
+export async function createTarefa(
+  titulo: string,
+  notas?: string,
+  extra?: {
+    dataVencimento?: string | null
+    horaMinutos?: number | null
+    estimativaMinutos?: number
+    prioridade?: 1 | 2 | 3
+    status?: TaskStatus
+  },
+): Promise<MobileTask>
 {
   const { data: auth } = await supabase.auth.getUser()
   const uid = auth.user?.id
   if (!uid) throw new Error('Não autenticado')
+
+  const dueDate = extra && Object.prototype.hasOwnProperty.call(extra, 'dataVencimento')
+    ? extra.dataVencimento ?? null
+    : todayIso()
+  let due = dueDate
+  if (due && extra?.horaMinutos != null)
+  {
+    const h = Math.floor(extra.horaMinutos / 60)
+    const m = extra.horaMinutos % 60
+    due = `${due}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`
+  }
+  const status = extra?.status ?? 'todo'
+  const dbStatus =
+    status === 'done' ? 'concluido' : status === 'doing' ? 'em_andamento' : 'pendente'
 
   const { data, error } = await supabase
     .from('tarefas_unificadas')
@@ -83,10 +111,12 @@ export async function createTarefa(titulo: string, notas?: string): Promise<Mobi
       user_id: uid,
       titulo: titulo.trim(),
       notas_locais: notas?.trim() || null,
-      status: 'pendente',
+      status: dbStatus,
       origem: 'mobile',
-      score_urgencia: 50,
-      data_vencimento: todayIso(),
+      score_urgencia: extra?.prioridade === 1 ? 80 : extra?.prioridade === 3 ? 30 : 50,
+      data_vencimento: due,
+      prioridade: extra?.prioridade ?? 2,
+      estimativa_minutos: extra?.estimativaMinutos ?? 30,
     })
     .select('*, subtarefas(*)')
     .single()
@@ -97,9 +127,16 @@ export async function createTarefa(titulo: string, notas?: string): Promise<Mobi
 
 export async function updateTarefaStatus(taskId: string, done: boolean): Promise<void>
 {
+  await persistTaskStatus(taskId, done ? 'done' : 'todo')
+}
+
+export async function persistTaskStatus(taskId: string, status: TaskStatus): Promise<void>
+{
+  const db =
+    status === 'done' ? 'concluido' : status === 'doing' ? 'em_andamento' : 'pendente'
   const { error } = await supabase
     .from('tarefas_unificadas')
-    .update({ status: done ? 'concluido' : 'pendente' })
+    .update({ status: db })
     .eq('id', Number(taskId))
 
   if (error) throw new Error(error.message)
@@ -113,6 +150,51 @@ export async function updateTarefaDue(taskId: string, due: string | null): Promi
     .eq('id', Number(taskId))
 
   if (error) throw new Error(error.message)
+}
+
+export async function archiveTarefa(taskId: string): Promise<void>
+{
+  const { error } = await supabase
+    .from('tarefas_unificadas')
+    .update({ deletado_em: new Date().toISOString() })
+    .eq('id', Number(taskId))
+
+  if (error) throw new Error(error.message)
+}
+
+export async function patchTarefa(
+  taskId: string,
+  fields: {
+    titulo?: string
+    notas_locais?: string | null
+    prioridade?: number
+    estimativa_minutos?: number
+    data_vencimento?: string | null
+  },
+): Promise<void>
+{
+  const { error } = await supabase
+    .from('tarefas_unificadas')
+    .update(fields)
+    .eq('id', Number(taskId))
+
+  if (error) throw new Error(error.message)
+}
+
+export async function insertSubtarefa(taskId: string, titulo: string): Promise<{ id: string; texto: string; feito: boolean }>
+{
+  const { data, error } = await supabase
+    .from('subtarefas')
+    .insert({ tarefa_id: Number(taskId), titulo: titulo.trim(), ordem: 99 })
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return {
+    id: String((data as { id: number }).id),
+    texto: titulo.trim(),
+    feito: false,
+  }
 }
 
 export async function toggleSubtarefa(taskId: string, subId: string, feito: boolean): Promise<void>

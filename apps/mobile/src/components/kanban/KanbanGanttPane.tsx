@@ -1,9 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { View, ScrollView, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import type { MobileTask } from '@simply-life/shared'
+import {
+  inferLifeCategory,
+  LIFE_CATEGORIES,
+  taskListId,
+  type MobileTask,
+} from '@simply-life/shared'
 import { Card, Text, EmptyState, PillTabs } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useKanbanListsStore } from '../../store/kanbanListsStore'
 
 type Zoom = 7 | 14 | 30
 
@@ -44,6 +50,13 @@ export function KanbanGanttPane({ tasks }: Props)
   const router = useRouter()
   const [zoom, setZoom] = useState<Zoom>(14)
   const today = useMemo(() => startOfDay(new Date()), [])
+  const lists = useKanbanListsStore((s) => s.lists)
+  const hydrateLists = useKanbanListsStore((s) => s.hydrate)
+
+  useEffect(() =>
+  {
+    hydrateLists()
+  }, [hydrateLists])
 
   const withDue = useMemo(
     () =>
@@ -54,6 +67,25 @@ export function KanbanGanttPane({ tasks }: Props)
         ),
     [tasks],
   )
+
+  const groups = useMemo(() =>
+  {
+    const map = new Map<string, { label: string; tasks: MobileTask[] }>()
+    for (const t of withDue)
+    {
+      const lid = taskListId(t)
+      const list = lid ? lists.find((l) => l.id === lid) : null
+      const key = list?.id ?? `life-${inferLifeCategory(t)}`
+      const label =
+        list?.name ??
+        LIFE_CATEGORIES.find((c) => c.id === inferLifeCategory(t))?.label ??
+        'Outras'
+      const bucket = map.get(key)
+      if (bucket) bucket.tasks.push(t)
+      else map.set(key, { label, tasks: [t] })
+    }
+    return [...map.entries()].map(([id, value]) => ({ id, ...value }))
+  }, [withDue, lists])
 
   const { rangeStart, dayCount } = useMemo(() =>
   {
@@ -102,7 +134,7 @@ export function KanbanGanttPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={{ gap: 8 }}>
         <Text variant="caption" muted>
           {withDue.length} com prazo
         </Text>
@@ -118,7 +150,16 @@ export function KanbanGanttPane({ tasks }: Props)
       </View>
 
       <Card tone="elevated" style={{ borderRadius: 16, padding: 0, overflow: 'hidden' }}>
-        <ScrollView horizontal showsHorizontalScrollIndicator>
+        <ScrollView
+          style={{ maxHeight: 480 }}
+          nestedScrollEnabled
+          showsVerticalScrollIndicator
+        >
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator
+          >
           <View style={{ minWidth: LABEL_W + timelineW }}>
             <View
               style={{
@@ -177,54 +218,71 @@ export function KanbanGanttPane({ tasks }: Props)
               </View>
             </View>
 
-            {withDue.map((t) =>
-            {
-              const end = startOfDay(new Date(`${t.dataVencimento!.slice(0, 10)}T12:00:00`))
-              const start = addDays(end, -Math.max(1, Math.min(4, dayDiff(rangeStart, end))))
-              const left = Math.max(0, dayDiff(rangeStart, start)) * PX_PER_DAY
-              const width = Math.max(PX_PER_DAY, (dayDiff(start, end) + 1) * PX_PER_DAY)
-              const overdue = dayDiff(today, end) < 0
-              const soon = !overdue && dayDiff(today, end) <= 2
-              const barColor = overdue
-                ? colors.danger
-                : soon
-                  ? colors.attention
-                  : colors.axel
-
-              return (
-                <Pressable
-                  key={t.id}
-                  onPress={() => router.push(`/task/${t.id}`)}
+            {groups.map((group) => (
+              <View key={group.id}>
+                <View
                   style={{
-                    flexDirection: 'row',
-                    height: ROW_H,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.hairline,
-                    alignItems: 'center',
+                    width: LABEL_W + timelineW,
+                    paddingHorizontal: 10,
+                    paddingVertical: 8,
+                    backgroundColor: colors.surface,
                   }}
                 >
-                  <View style={{ width: LABEL_W, paddingHorizontal: 10 }}>
-                    <Text variant="label" numberOfLines={1} style={{ fontSize: 13 }}>
-                      {t.titulo}
-                    </Text>
-                  </View>
-                  <View style={{ width: timelineW, height: ROW_H, justifyContent: 'center' }}>
-                    <View
+                  <Text variant="micro" style={{ fontFamily: 'Manrope_700Bold' }}>
+                    {group.label}
+                  </Text>
+                </View>
+                {group.tasks.map((t) =>
+                {
+                  const end = startOfDay(new Date(`${t.dataVencimento!.slice(0, 10)}T12:00:00`))
+                  const start = addDays(end, -Math.max(1, Math.min(4, dayDiff(rangeStart, end))))
+                  const left = Math.max(0, dayDiff(rangeStart, start)) * PX_PER_DAY
+                  const width = Math.max(PX_PER_DAY, (dayDiff(start, end) + 1) * PX_PER_DAY)
+                  const overdue = dayDiff(today, end) < 0
+                  const soon = !overdue && dayDiff(today, end) <= 2
+                  const barColor = overdue
+                    ? colors.danger
+                    : soon
+                      ? colors.attention
+                      : colors.axel
+
+                  return (
+                    <Pressable
+                      key={t.id}
+                      onPress={() => router.push(`/task/${t.id}`)}
                       style={{
-                        position: 'absolute',
-                        left,
-                        width,
-                        height: 22,
-                        borderRadius: 8,
-                        backgroundColor: barColor,
-                        opacity: 0.9,
+                        flexDirection: 'row',
+                        height: ROW_H,
+                        borderBottomWidth: 1,
+                        borderBottomColor: colors.hairline,
+                        alignItems: 'center',
                       }}
-                    />
-                  </View>
-                </Pressable>
-              )
-            })}
+                    >
+                      <View style={{ width: LABEL_W, paddingHorizontal: 10 }}>
+                        <Text variant="label" numberOfLines={1} style={{ fontSize: 13 }}>
+                          {t.titulo}
+                        </Text>
+                      </View>
+                      <View style={{ width: timelineW, height: ROW_H, justifyContent: 'center' }}>
+                        <View
+                          style={{
+                            position: 'absolute',
+                            left,
+                            width,
+                            height: 22,
+                            borderRadius: 8,
+                            backgroundColor: barColor,
+                            opacity: 0.9,
+                          }}
+                        />
+                      </View>
+                    </Pressable>
+                  )
+                })}
+              </View>
+            ))}
           </View>
+          </ScrollView>
         </ScrollView>
       </Card>
     </View>

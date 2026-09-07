@@ -6,6 +6,7 @@ import {
 } from '../lib/dashboardWidgets'
 import {
   DEFAULT_WORKSPACE_PREFS,
+  initialWorkspacePrefs,
   loadEmailKeywords,
   loadRadarKeywords,
   loadWorkspacePrefs,
@@ -38,7 +39,7 @@ type PrefsState = {
 
 export const usePrefsStore = create<PrefsState>((set, get) => ({
   loaded: false,
-  prefs: DEFAULT_WORKSPACE_PREFS,
+  prefs: initialWorkspacePrefs(),
   keywords: [],
   radar: [],
 
@@ -65,7 +66,9 @@ export const usePrefsStore = create<PrefsState>((set, get) => ({
 
   patch: async (next) =>
   {
-    const prefs = await saveWorkspacePrefs({ ...get().prefs, ...next })
+    const optimistic = { ...get().prefs, ...next }
+    set({ prefs: optimistic })
+    const prefs = await saveWorkspacePrefs(optimistic)
     set({ prefs })
   },
 
@@ -79,6 +82,7 @@ export const usePrefsStore = create<PrefsState>((set, get) => ({
     const current = resolveDashboardWidgets(
       get().prefs.dashboard_quick_widgets,
       get().prefs.dashboard_priority,
+      get().prefs.home_module_order,
     )
     await get().patch({ dashboard_quick_widgets: toggleWidgetSelection(current, id) })
   },

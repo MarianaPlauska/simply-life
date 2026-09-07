@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { View } from 'react-native'
-import { formatBRL, monthExpenseTotal, monthIncomeTotal } from '@simply-life/shared'
-import { Screen, PillTabs } from '../../src/ui'
+import { useFocusEffect } from 'expo-router'
+import { formatBRL, cashExpenseTotal, monthIncomeTotal } from '@simply-life/shared'
+import { Screen, SubNavTabs } from '../../src/ui'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
 import { ScreenIntro } from '../../src/components/dashboard/ScreenIntro'
@@ -19,6 +20,7 @@ import {
   type ContasSubTab,
   type AnaliseSubTab,
 } from '../../src/components/finance/financeNav'
+import { useFinanceFocusStore } from '../../src/store/financeFocusStore'
 
 export default function FinanceiroScreen()
 {
@@ -33,7 +35,18 @@ export default function FinanceiroScreen()
   const refreshAll = useDataStore((s) => s.refreshAll)
   const isGuest = useAuthStore((s) => s.isGuest)
 
-  const despesas = monthExpenseTotal(txs)
+  useFocusEffect(
+    useCallback(() =>
+    {
+      const hit = useFinanceFocusStore.getState().consume()
+      if (!hit) return
+      setCardsFocus(false)
+      setTab(hit.tab)
+      setContasSub(hit.contasSub)
+    }, []),
+  )
+
+  const despesas = cashExpenseTotal(txs)
   const receitas = monthIncomeTotal(txs)
   const saldo = receitas - despesas
   const movCount = txs.filter((t) => t.tipo === 'despesa' || t.tipo === 'receita').length
@@ -46,31 +59,31 @@ export default function FinanceiroScreen()
     >
       <TabShell>
         {!(tab === 'inicio' && cardsFocus) && (
-          <ScreenIntro title="Finanças" subtitle="Início, movimentos, contas e análise." />
+          <ScreenIntro title="Carteira" subtitle="Saldo, cartões, extrato e relatórios." />
         )}
 
-        {/* Na Início o Nível 1 (Saldo) vem primeiro dentro de FinanceHomeTab.
-            KPIs L2 só nas outras abas para não competir com o hero. */}
+        {/* Na Início o saldo tipográfico vive no FinanceHomeTab — KPIs só nas outras abas. */}
         {tab !== 'inicio' && (
           <MetricCards
             items={[
               {
-                label: 'Gastos do mês',
+                label: 'Saiu da conta',
                 value: formatBRL(despesas),
                 color: colors.finance,
               },
               {
-                label: 'Saldo',
+                label: 'Saldo do mês',
                 value: formatBRL(saldo),
                 color: saldo >= 0 ? colors.health : colors.finance,
-                hint: `Receitas ${formatBRL(receitas)}`,
+                hint: `Entradas ${formatBRL(receitas)}`,
               },
             ]}
           />
         )}
 
         {!(tab === 'inicio' && cardsFocus) && (
-          <PillTabs
+          <SubNavTabs
+            accent="finance"
             tabs={FINANCE_MAIN_TABS.map((t) => ({
               ...t,
               count: t.id === 'movimentos' ? movCount : undefined,
@@ -99,6 +112,11 @@ export default function FinanceiroScreen()
                 setCardsFocus(false)
                 setTab('contas')
                 setContasSub('cartoes')
+              }}
+              onGoAnalise={() =>
+              {
+                setCardsFocus(false)
+                setTab('analise')
               }}
             />
           )}

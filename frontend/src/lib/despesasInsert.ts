@@ -9,6 +9,9 @@ const OPTIONAL_DESPESA_KEYS = [
   'fatura_reserva_id',
   'status_pagamento',
   'categoria_id',
+  'compartilhada',
+  'partner_workspace_id',
+  'pago_conta_casal',
 ] as const
 
 function missingColumnFromError(message?: string | null): string | null

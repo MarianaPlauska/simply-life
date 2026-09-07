@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Platform, View } from 'react-native'
-import { buildTransactionsCsv, parseTransactionsCsv } from '@simply-life/shared'
+import { View } from 'react-native'
+import { parseTransactionsCsv } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, Field } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
+import { FinanceExportBar } from './FinanceExportBar'
 
 export function FinanceCsvPanel()
 {
@@ -14,33 +15,6 @@ export function FinanceCsvPanel()
   const isGuest = useAuthStore((s) => s.isGuest)
   const [paste, setPaste] = useState('')
   const [msg, setMsg] = useState('')
-
-  const exportCsv = () =>
-  {
-    const csv = buildTransactionsCsv(
-      txs.map((t) => ({
-        data: t.data,
-        descricao: t.titulo,
-        tipo: t.tipo,
-        valor: t.valor,
-        categoria: t.categoria,
-      })),
-    )
-    if (Platform.OS === 'web' && typeof document !== 'undefined')
-    {
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'simply-life-financas.csv'
-      a.click()
-      URL.revokeObjectURL(url)
-      setMsg('CSV baixado')
-      return
-    }
-    setPaste(csv)
-    setMsg('CSV gerado abaixo. Copie o texto.')
-  }
 
   const importCsv = async () =>
   {
@@ -55,25 +29,27 @@ export function FinanceCsvPanel()
   }
 
   return (
-    <Card tone="elevated" style={{ gap: space.md }}>
-      <Text variant="section">Importar / exportar CSV</Text>
-      <Text variant="caption" muted>
-        Separador ponto e vírgula. Cole o arquivo ou baixe o extrato.
-      </Text>
-      <PrimaryButton label="Exportar CSV" variant="secondary" onPress={exportCsv} />
-      <Field
-        label="Colar CSV"
-        value={paste}
-        onChangeText={setPaste}
-        multiline
-        placeholder="data;descricao;tipo;valor"
-      />
-      <PrimaryButton label="Importar CSV" onPress={() => void importCsv()} />
-      {msg ? (
-        <Text variant="caption" color={colors.axel}>
-          {msg}
+    <View style={{ gap: space.md }}>
+      <FinanceExportBar txs={txs} title="Levar para uma planilha" />
+      <Card tone="elevated" style={{ gap: space.md }}>
+        <Text variant="section">Importar CSV</Text>
+        <Text variant="caption" muted>
+          Cole um extrato com ponto e vírgula para entrar nos lançamentos.
         </Text>
-      ) : null}
-    </Card>
+        <Field
+          label="Colar CSV"
+          value={paste}
+          onChangeText={setPaste}
+          multiline
+          placeholder="data;descricao;tipo;valor"
+        />
+        <PrimaryButton label="Importar CSV" onPress={() => void importCsv()} />
+        {msg ? (
+          <Text variant="caption" color={colors.axel}>
+            {msg}
+          </Text>
+        ) : null}
+      </Card>
+    </View>
   )
 }

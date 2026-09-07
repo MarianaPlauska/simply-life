@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
-import { formatBRL, type FinanceCard } from '@simply-life/shared'
+import { Modal, Pressable, ScrollView } from 'react-native'
+import { formatBRL, cardFaturaAbertaDisplay, parseParcela, type FinanceCard } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, ListRow, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
@@ -35,6 +35,7 @@ export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Prop
   if (!card || !visible) return null
 
   const total = rows.reduce((acc, t) => acc + t.valor, 0)
+  const fatura = cardFaturaAbertaDisplay(card, txs)
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -58,7 +59,7 @@ export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Prop
           >
             <Text variant="section">Lançamentos · {card.nome}</Text>
             <Text variant="caption" muted>
-              Fatura aberta {formatBRL(card.faturaAberta ?? 0)} · listados {formatBRL(total)}
+              Fatura aberta {formatBRL(fatura)} · listados {formatBRL(total)}
             </Text>
             <ScrollView style={{ maxHeight: 360 }} contentContainerStyle={{ gap: 0 }}>
               {rows.length === 0 ? (
@@ -67,15 +68,23 @@ export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Prop
                   body="Use Gasto para registrar uma compra na fatura."
                 />
               ) : (
-                rows.map((t, i) => (
+                rows.map((t, i) =>
+                {
+                  const parcela = parseParcela(t.titulo)
+                  return (
                   <ListRow
                     key={t.id}
                     title={t.titulo}
-                    subtitle={t.data}
+                    subtitle={
+                      parcela
+                        ? `${t.data} · ${parcela.atual} de ${parcela.total}`
+                        : t.data
+                    }
                     right={`−${formatBRL(t.valor)}`}
                     showSeparator={i < rows.length - 1}
                   />
-                ))
+                  )
+                })
               )}
             </ScrollView>
             <PrimaryButton
@@ -86,7 +95,7 @@ export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Prop
                 onSpend()
               }}
             />
-            <PrimaryButton label="Fechar" variant="ghost" onPress={onClose} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={onClose} />
           </Card>
         </Pressable>
       </Pressable>

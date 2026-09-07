@@ -263,7 +263,15 @@ export function FinanceTransactionsTab({
                     key={t.id}
                     icon={CatIcon}
                     title={t.descricao}
-                    subtitle={`${fmtDate(t.data)} · ${paymentMethodLabel(t)} · ${status.label}`}
+                    subtitle={[
+                      fmtDate(t.data),
+                      paymentMethodLabel(t),
+                      status.label,
+                      t.compartilhada ? 'Casal' : null,
+                      t.pago_conta_casal && !t.compartilhada
+                        ? `${fmt(t.valor)} na conta do casal`
+                        : null,
+                    ].filter(Boolean).join(' · ')}
                     trailing={(
                       <span className="inline-flex items-center gap-1">
                         {isRec ? '+' : '−'}{fmt(t.valor)}

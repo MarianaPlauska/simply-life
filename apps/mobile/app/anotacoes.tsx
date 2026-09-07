@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react'
 import { View, TextInput } from 'react-native'
 import { Redirect } from 'expo-router'
+import { moodLabel, todayIso } from '@simply-life/shared'
 import { Screen, Text, Card, PrimaryButton, EmptyState, ListRow } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
+import { MoodFaceRow } from '../src/components/MoodFace'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
+import { useDataStore } from '../src/store/dataStore'
 import { useNotesStore } from '../src/store/notesStore'
 
 export default function AnotacoesScreen()
 {
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const humor = useDataStore((s) => s.humor)
+  const addHumor = useDataStore((s) => s.addHumor)
   const { colors, space, radius } = useTheme()
+  const hoje = todayIso()
+  const humorHoje = humor.find((h) => (h.data || '').slice(0, 10) === hoje)?.humor ?? null
   const items = useNotesStore((s) => s.items)
   const loading = useNotesStore((s) => s.loading)
   const refresh = useNotesStore((s) => s.refresh)
@@ -32,6 +39,16 @@ export default function AnotacoesScreen()
     <Screen scroll tabBarInset={false} refreshing={loading} onRefresh={() => void refresh()}>
       <StackHeader title="Anotações" subtitle="Diário, lembretes e listas" />
       <View style={{ gap: space.lg }}>
+        <Card tone="elevated" style={{ gap: space.sm }}>
+          <Text variant="section">Humor de hoje</Text>
+          <Text variant="caption" muted>
+            {humorHoje ? `Registrado: ${moodLabel(humorHoje)}` : 'Como você está agora?'}
+          </Text>
+          <MoodFaceRow
+            value={humorHoje}
+            onChange={(m) => void addHumor(m, undefined, isGuest)}
+          />
+        </Card>
         <View style={{ flexDirection: 'row', gap: space.sm }}>
           <View style={{ flex: 1 }}>
             <PrimaryButton label="+ Diário" size="sm" onPress={() => void create('diario').then((n) => n && setSelectedId(n.id))} />
@@ -97,7 +114,7 @@ export default function AnotacoesScreen()
             />
             <PrimaryButton
               label="Excluir"
-              variant="ghost"
+              variant="danger"
               onPress={() =>
               {
                 void remove(selected.id)

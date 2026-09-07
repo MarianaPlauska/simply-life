@@ -40,7 +40,7 @@ export function ProfileAdminUsersPanel()
             Usuários do sistema
           </h2>
           <p className={`text-[12px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
-            Toque em um usuário para editar avatar, dashboard ou excluir a conta
+            Contas criadas e quem está com o app aberto agora
           </p>
         </div>
       </div>

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { View, Switch, TextInput, Platform } from 'react-native'
+import { View, TextInput, Platform } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import { Screen, Text, Card, PillTabs, PrimaryButton, Field, Chip } from '../src/ui'
-import { StackHeader } from '../src/components/layout/StackHeader'
+import { SettingsHero } from '../src/components/settings/SettingsHero'
+import { SettingsToggleRow } from '../src/components/settings/SettingsToggleRow'
+import { PomodoroDurationTiles } from '../src/components/settings/PomodoroDurationTiles'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -10,7 +12,8 @@ import {
   DASHBOARD_WIDGET_CATALOG,
   resolveDashboardWidgets,
 } from '../src/lib/dashboardWidgets'
-import { registerExpoPushAsync } from '../src/lib/pushRegister'
+import { registerExpoPushAsync, unregisterExpoPushAsync } from '../src/lib/pushRegister'
+import { NOTIFY_CADENCE_OPTIONS, type NotifyCadence } from '@simply-life/shared'
 
 type Tab = 'geral' | 'ia' | 'aparencia' | 'notificacoes' | 'seguranca'
 
@@ -21,9 +24,6 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'notificacoes', label: 'Alertas' },
   { id: 'seguranca', label: 'Segurança' },
 ]
-
-const FOCUS_OPTS = [15, 25, 30, 45, 50, 60]
-const BREAK_OPTS = [3, 5, 10, 15]
 
 export default function PreferenciasScreen()
 {
@@ -57,16 +57,26 @@ export default function PreferenciasScreen()
 
   if (!userId) return <Redirect href="/login" />
 
-  const widgets = resolveDashboardWidgets(prefs.dashboard_quick_widgets, prefs.dashboard_priority)
+  const widgets = resolveDashboardWidgets(
+    prefs.dashboard_quick_widgets,
+    prefs.dashboard_priority,
+    prefs.home_module_order,
+  )
 
   return (
     <Screen scroll tabBarInset={false}>
-      <StackHeader title="Preferências" subtitle="Atalhos, IA, tema e alertas" />
+      <SettingsHero title="Preferências" />
       <View style={{ gap: space.lg }}>
         <PillTabs tabs={TABS} value={tab} onChange={setTab} />
 
         {tab === 'geral' && (
           <View style={{ gap: space.md }}>
+            <PomodoroDurationTiles
+              focus={prefs.pomodoro_focus}
+              shortBreak={prefs.pomodoro_short}
+              longBreak={prefs.pomodoro_long}
+              onChange={(next) => void patch(next)}
+            />
             <Field
               label="Como o AXEL te chama"
               value={name}
@@ -74,18 +84,19 @@ export default function PreferenciasScreen()
               onBlur={() => void patch({ axel_calls_you: name.trim(), display_name: name.trim() })}
               placeholder="Seu nome"
             />
-            <Card tone="elevated" style={{ gap: space.sm }}>
-              <Text variant="section">Personalize seu Início</Text>
-              <Text variant="caption" muted>
-                Humor, Água, Proteína, Tarefas, Gastos e Metas - na linha de cards da Home.
-              </Text>
-              <PrimaryButton
-                label="Abrir personalização"
-                variant="secondary"
-                onPress={() => router.push('/personalizar-inicio')}
-              />
-            </Card>
-            <Card tone="elevated" style={{ gap: space.sm }}>
+            <SettingsToggleRow
+              icon="grid-outline"
+              title="Personalize seu Início"
+              subtitle="Humor, água, proteína, tarefas, gastos e metas"
+              onPress={() => router.push('/personalizar-inicio')}
+            />
+            <SettingsToggleRow
+              icon="heart-outline"
+              title="Foco, TDAH e TCC"
+              subtitle="Apoio emocional, neurodivergência e exercícios — em Saúde → Apoio"
+              onPress={() => router.push('/(tabs)/saude?section=apoio')}
+            />
+            <Card tone="elevated" style={{ gap: space.sm, borderRadius: 22 }}>
               <Text variant="section">Widgets extras</Text>
               <Text variant="caption" muted>
                 Até 3 widgets legados do setup.
@@ -97,34 +108,6 @@ export default function PreferenciasScreen()
                     label={w.label}
                     active={widgets.includes(w.id)}
                     onPress={() => void toggleWidget(w.id)}
-                  />
-                ))}
-              </View>
-            </Card>
-            <Card tone="elevated" style={{ gap: space.sm }}>
-              <Text variant="section">Pomodoro</Text>
-              <Text variant="caption" muted>
-                Usado no Modo foco - ligado ao mesmo store.
-              </Text>
-              <Text variant="label">Foco</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {FOCUS_OPTS.map((n) => (
-                  <Chip
-                    key={n}
-                    label={`${n} min`}
-                    active={prefs.pomodoro_focus === n}
-                    onPress={() => void patch({ pomodoro_focus: n })}
-                  />
-                ))}
-              </View>
-              <Text variant="label">Pausa curta</Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                {BREAK_OPTS.map((n) => (
-                  <Chip
-                    key={n}
-                    label={`${n} min`}
-                    active={prefs.pomodoro_short === n}
-                    onPress={() => void patch({ pomodoro_short: n })}
                   />
                 ))}
               </View>
@@ -184,52 +167,65 @@ export default function PreferenciasScreen()
         )}
 
         {tab === 'aparencia' && (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="section">Tema</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Text variant="body">Modo escuro</Text>
-              <Switch
-                value={mode === 'dark'}
-                onValueChange={(v) =>
-                {
-                  const next = v ? 'dark' : 'light'
-                  setMode(next)
-                  void patch({ color_scheme: next })
-                }}
-                trackColor={{ true: colors.axel, false: colors.hairlineStrong }}
-              />
-            </View>
-            <Text variant="caption" muted>
-              Paleta e navbar não mudam aqui - só claro/escuro da conta.
-            </Text>
-          </Card>
+          <View style={{ gap: space.sm }}>
+            <SettingsToggleRow
+              icon="moon-outline"
+              title="Modo escuro"
+              subtitle="Só claro ou escuro da conta — a paleta AXEL permanece"
+              value={mode === 'dark'}
+              onValueChange={(v) => setMode(v ? 'dark' : 'light')}
+            />
+          </View>
         )}
 
         {tab === 'notificacoes' && (
           <View style={{ gap: space.md }}>
             <Card tone="elevated" style={{ gap: space.sm }}>
-              <Text variant="section">Push no celular</Text>
+              <Text variant="section">Ritmo dos alertas</Text>
               <Text variant="caption" muted>
-                Com o app instalado (Expo), o token vai para a API e as notificações chegam no aparelho.
+                Avisos demais aumentam tensão. O padrão mais calmo é ficar só no aplicativo.
+                Horário silencioso: 22h às 8h. Três leituras: 9h, 15h e 21h (estudo Duke, 2019).
+                Medicamentos podem lembrar se você cadastrar horários.
               </Text>
-              {Platform.OS === 'web' ? (
-                <Text variant="body" muted>
-                  Preview web não registra token nativo. Abra o app no Android/iOS.
-                </Text>
-              ) : (
-                <PrimaryButton
-                  label="Ativar notificações"
-                  onPress={() =>
-                  {
-                    void registerExpoPushAsync().then((res) =>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {NOTIFY_CADENCE_OPTIONS.map((opt) =>
+              {
+                const active = (prefs.notify_cadence || 'off') === opt.id
+                return (
+                  <Chip
+                    key={opt.id}
+                    label={opt.label}
+                    active={active}
+                    onPress={() =>
                     {
-                      setPushMsg(res.ok
-                        ? 'Token registrado.'
-                        : (res.error || 'Não foi possível registrar. Autorize nas configurações do sistema.'))
-                    })
-                  }}
-                />
-              )}
+                      const next = opt.id as NotifyCadence
+                      void patch({ notify_cadence: next }).then(() =>
+                      {
+                        if (Platform.OS === 'web')
+                        {
+                          setPushMsg('No celular, o ritmo passa a valer depois de abrir o app instalado.')
+                          return
+                        }
+                        if (next === 'off')
+                        {
+                          void unregisterExpoPushAsync().then(() => setPushMsg('Alertas no celular desligados.'))
+                          return
+                        }
+                        void registerExpoPushAsync().then((res) =>
+                        {
+                          setPushMsg(res.ok
+                            ? 'Ritmo salvo. O sistema pode pedir permissão uma vez.'
+                            : (res.error || 'Autorize as notificações nas configurações do sistema.'))
+                        })
+                      })
+                    }}
+                  />
+                )
+              })}
+              </View>
+              <Text variant="caption" muted>
+                {NOTIFY_CADENCE_OPTIONS.find((o) => o.id === (prefs.notify_cadence || 'off'))?.hint}
+              </Text>
               {pushMsg ? <Text variant="caption">{pushMsg}</Text> : null}
             </Card>
             <Card tone="elevated" style={{ gap: space.sm }}>

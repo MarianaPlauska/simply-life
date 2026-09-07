@@ -1,6 +1,6 @@
 import { supabase } from '../supabase'
 import type { HumorRegistro } from '@simply-life/shared'
-import { todayIso, isoDaysAgo } from '@simply-life/shared'
+import { localTodayIso, isoDaysAgo } from '@simply-life/shared'
 
 function mapRow(row: Record<string, unknown>): HumorRegistro
 {
@@ -35,7 +35,7 @@ export async function registrarHumor(input: {
   const uid = auth.user?.id
   if (!uid) throw new Error('Não autenticado')
 
-  const dia = todayIso()
+  const dia = localTodayIso()
   const row = {
     user_id: uid,
     data: dia,
@@ -44,22 +44,30 @@ export async function registrarHumor(input: {
     nota: input.nota?.trim() || null,
   }
 
-  const inserted = await supabase.from('diario_humor').insert(row).select().single()
-  if (inserted.error)
+  const existing = await supabase
+    .from('diario_humor')
+    .select('id')
+    .eq('user_id', uid)
+    .eq('data', dia)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (existing.error) throw new Error(existing.error.message)
+
+  if (existing.data)
   {
-    if (inserted.error.code === '23505')
-    {
-      const updated = await supabase
-        .from('diario_humor')
-        .update({ humor: input.humor, nota: row.nota })
-        .eq('user_id', uid)
-        .eq('data', dia)
-        .select()
-        .single()
-      if (updated.error) throw new Error(updated.error.message)
-      return mapRow(updated.data as Record<string, unknown>)
-    }
-    throw new Error(inserted.error.message)
+    const updated = await supabase
+      .from('diario_humor')
+      .update({ humor: input.humor, nota: row.nota })
+      .eq('id', existing.data.id)
+      .select()
+      .single()
+    if (updated.error) throw new Error(updated.error.message)
+    return mapRow(updated.data as Record<string, unknown>)
   }
+
+  const inserted = await supabase.from('diario_humor').insert(row).select().single()
+  if (inserted.error) throw new Error(inserted.error.message)
   return mapRow(inserted.data as Record<string, unknown>)
 }

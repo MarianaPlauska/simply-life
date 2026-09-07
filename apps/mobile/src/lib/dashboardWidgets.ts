@@ -43,15 +43,43 @@ export function defaultWidgetsForPriority(priority: DashboardPriority): Dashboar
   return ['critical_tasks', 'wellbeing', 'water']
 }
 
+/** Widgets na ordem dos módulos escolhidos no onboarding. */
+export function widgetsForModuleOrder(order: DashboardPriority[]): DashboardWidgetId[]
+{
+  const out: DashboardWidgetId[] = []
+  for (const mod of order)
+  {
+    if (mod === 'health')
+    {
+      out.push('wellbeing', 'water', 'medicamentos')
+    }
+    else if (mod === 'finance')
+    {
+      out.push('finance_brief')
+    }
+    else
+    {
+      out.push('critical_tasks')
+    }
+  }
+  return normalizeWidgetIds(out).slice(0, MAX_DASHBOARD_WIDGETS)
+}
+
 export function resolveDashboardWidgets(
   quick: DashboardWidgetId[] | undefined,
   priority: DashboardPriority,
+  moduleOrder?: DashboardPriority[],
 ): DashboardWidgetId[]
 {
-  const raw = quick && quick.length > 0
-    ? normalizeWidgetIds(quick.slice(0, MAX_DASHBOARD_WIDGETS))
-    : defaultWidgetsForPriority(priority)
-  return raw.slice(0, MAX_DASHBOARD_WIDGETS)
+  if (quick && quick.length > 0)
+  {
+    return normalizeWidgetIds(quick.slice(0, MAX_DASHBOARD_WIDGETS))
+  }
+  if (moduleOrder?.length)
+  {
+    return widgetsForModuleOrder(moduleOrder)
+  }
+  return defaultWidgetsForPriority(priority).slice(0, MAX_DASHBOARD_WIDGETS)
 }
 
 export function toggleWidgetSelection(

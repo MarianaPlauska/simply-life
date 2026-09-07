@@ -113,7 +113,7 @@ export function ForgotPasswordSheet({ visible, initialEmail, onClose }: Props)
                 </View>
               </>
             ) : (
-              <PrimaryButton label="Fechar" onPress={onClose} />
+              <PrimaryButton label="Fechar" variant="dismiss" onPress={onClose} />
             )}
           </Card>
         </Pressable>

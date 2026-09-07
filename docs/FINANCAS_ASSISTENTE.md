@@ -12,6 +12,8 @@ Visão: um **melhor amigo financeiro** — painel visual, categorias suas, caixa
 | E2 | Conta corrente + débito | Saldo inicial configurável, disponível vs reservado, débito em tempo real | **Concluído** |
 | E3 | Faturas e reservas | Faturas com valor alocado, abatimento automático/manual, barra alocado vs gasto | **Concluído** |
 | E4 | Orçamento por categoria | Limites mensais, progresso, alertas 80%/100% ao lançar | **Concluído** |
+| E4b | Hub Planejamento mensal | Aba Orçamentos + alerta Hoje (web/Expo) | **Concluído** |
+| E4c | Parceiro financeiro | Workspace casal, convite `/parceiro/:code`, flag compartilhada (sem Open Finance) | **Concluído** |
 | E5 | Receitas e recorrências | Salário, freelance, `fin_receitas_recorrentes`, projeção de caixa | **Concluído** |
 | E6 | Tabela por período | Filtro semanal/quinzenal/custom, grupos Casa/Contas/Futuro na tabela | **Concluído** |
 | E7 | Metas e alertas | Metas com projeção, avisos de contas e limite de orçamento | **Concluído** |

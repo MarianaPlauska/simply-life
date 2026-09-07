@@ -2,13 +2,15 @@ import { useState } from 'react'
 import { View, Pressable, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
+import { ShieldCheck } from 'lucide-react-native'
 import { Text } from '../../ui'
 import { BrandMark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
-import { useCaptureStore } from '../../store/captureStore'
+import { useCaptureStore, captureForTab, captureFabLabel } from '../../store/captureStore'
 import { useAuthStore } from '../../store/authStore'
 import { usePrefsStore } from '../../store/prefsStore'
+import { resolveAxelName } from '../../lib/axelName'
 
 const NAV = [
   { href: '/(tabs)', match: '/(tabs)', exact: true, label: 'Início', icon: 'home-outline' as const },
@@ -33,7 +35,15 @@ export function DesktopSidebar()
   const pathname = usePathname()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const email = useAuthStore((s) => s.sessionEmail)
-  const name = email?.split('@')[0] ?? 'Você'
+  const isAdmin = useAuthStore((s) => s.isAdmin)
+  const isGuest = useAuthStore((s) => s.isGuest)
+  const prefs = usePrefsStore((s) => s.prefs)
+  const name = resolveAxelName({
+    isGuest,
+    callsYou: prefs.axel_calls_you,
+    displayName: prefs.display_name,
+    email,
+  })
   const prefsCollapsed = Boolean(usePrefsStore((s) => s.prefs.sidebar_collapsed))
   const patchPrefs = usePrefsStore((s) => s.patch)
   /** Tablet: começa colapsada; expansível só nesta sessão */
@@ -262,9 +272,13 @@ export function DesktopSidebar()
         </View>
 
         <Pressable
-          onPress={() => openCapture('dump')}
+          onPress={() =>
+          {
+            const spec = captureForTab(pathname)
+            openCapture(spec.kind, null, { studio: spec.studio })
+          }}
           accessibilityRole="button"
-          accessibilityLabel="Capturar"
+          accessibilityLabel={captureFabLabel(captureForTab(pathname).kind)}
           {...(Platform.OS === 'web' ? { title: 'Capturar' } : null)}
           style={({ pressed }) => ({
             marginTop: space.sm,
@@ -321,6 +335,23 @@ export function DesktopSidebar()
           <Text variant="label" style={{ color: CREAM, fontSize: 12 }}>
             {name.slice(0, 1).toUpperCase()}
           </Text>
+          {isAdmin ? (
+            <View
+              style={{
+                position: 'absolute',
+                right: -4,
+                bottom: -4,
+                width: 16,
+                height: 16,
+                borderRadius: 999,
+                backgroundColor: sidebarBg,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ShieldCheck size={12} color={ORANGE} />
+            </View>
+          ) : null}
         </View>
         {!collapsed ? (
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -328,7 +359,7 @@ export function DesktopSidebar()
               {name}
             </Text>
             <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 10 }}>
-              Perfil
+              {isAdmin ? 'Admin' : 'Perfil'}
             </Text>
           </View>
         ) : null}

@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { useActivityStore } from './activityStore'
 
 type FocusPhase = 'idle' | 'focus' | 'short' | 'long'
 
@@ -54,6 +55,10 @@ export const useFocusStore = create<FocusState>((set, get) => ({
     if (remainingSec <= 1)
     {
       const focusDone = phase === 'focus'
+      if (focusDone)
+      {
+        useActivityStore.getState().markAction('focus')
+      }
       set({
         remainingSec: 0,
         running: false,

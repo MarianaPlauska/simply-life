@@ -1,6 +1,7 @@
 // Acesso administrativo - lista de usuários (cartões públicos) para contas admin
 import { supabase } from './supabase'
 import { supabaseAuthHeaders } from './supabaseAuthHeaders'
+import { isUserConnected } from '@simply-life/shared'
 import {
   DEFAULT_WORKSPACE_PREFS,
   type DashboardPriority,
@@ -12,6 +13,7 @@ import type { DashboardWidgetId } from './dashboardWidgets'
 export interface AdminUserCard
 {
   user_id: string
+  email?: string | null
   display_name: string
   axel_calls_you: string
   accent: string
@@ -20,6 +22,10 @@ export interface AdminUserCard
   streak_count: number
   is_admin: boolean
   updated_at: string
+  last_seen_at?: string | null
+  last_sign_in_at?: string | null
+  created_at?: string | null
+  connected?: boolean
 }
 
 /** Verdadeiro quando a conta logada está marcada como admin no cartão público */
@@ -65,12 +71,26 @@ export async function fetchAllUserCards(): Promise<AdminUserCard[]>
 {
   try
   {
+    const rpc = await supabase.rpc('admin_list_directory')
+    if (!rpc.error && Array.isArray(rpc.data))
+    {
+      return (rpc.data as AdminUserCard[]).map((row) => ({
+        ...row,
+        accent: row.accent ?? 'copper',
+        avatar_style: row.avatar_style ?? 'axel',
+        updated_at: row.updated_at ?? row.last_seen_at ?? row.created_at ?? '',
+        connected: isUserConnected(row.last_seen_at),
+      }))
+    }
     const { data, error } = await supabase
       .from('user_public_cards')
-      .select('user_id, display_name, axel_calls_you, accent, avatar_style, level, streak_count, is_admin, updated_at')
+      .select('user_id, display_name, axel_calls_you, accent, avatar_style, level, streak_count, is_admin, updated_at, last_seen_at')
       .order('updated_at', { ascending: false })
     if (error) throw error
-    return (data ?? []) as AdminUserCard[]
+    return ((data ?? []) as AdminUserCard[]).map((row) => ({
+      ...row,
+      connected: isUserConnected(row.last_seen_at),
+    }))
   }
   catch (e)
   {

@@ -10,6 +10,7 @@ import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { useTheme } from '../theme/ThemeProvider'
 import { useWorkspace } from '../layout/useWorkspace'
 import { tabBarScreenPadding } from './chrome'
+import { AtmosphereWash } from './AtmosphereWash'
 
 type ScreenProps = ViewProps & {
   scroll?: boolean
@@ -60,29 +61,37 @@ export function Screen({
       />
     ) : undefined
 
+  const frame = [styles.flex, { backgroundColor: colors.canvas }] as const
+
   if (scroll)
   {
     return (
-      <SafeAreaView style={[styles.flex, { backgroundColor: colors.canvas }]} edges={['top']}>
-        <ScrollView
-          contentContainerStyle={[pad, style]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          refreshControl={refresh}
-          {...rest}
-        >
-          {children}
-        </ScrollView>
-      </SafeAreaView>
+      <View style={frame}>
+        <AtmosphereWash />
+        <SafeAreaView style={[styles.flex, { backgroundColor: 'transparent' }]} edges={['top']}>
+          <ScrollView
+            contentContainerStyle={[pad, style]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            refreshControl={refresh}
+            {...rest}
+          >
+            {children}
+          </ScrollView>
+        </SafeAreaView>
+      </View>
     )
   }
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: colors.canvas }]} edges={['top']}>
-      <View style={[styles.flex, pad, style]} {...rest}>
-        {children}
-      </View>
-    </SafeAreaView>
+    <View style={frame}>
+      <AtmosphereWash />
+      <SafeAreaView style={[styles.flex, { backgroundColor: 'transparent' }]} edges={['top']}>
+        <View style={[styles.flex, pad, style]} {...rest}>
+          {children}
+        </View>
+      </SafeAreaView>
+    </View>
   )
 }
 

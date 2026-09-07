@@ -15,7 +15,6 @@ export function SyncHint({ color }: { color?: string })
   if (loading && source === 'idle') label = 'Sincronizando…'
   else if (error) label = error
   else if (isGuest || source === 'demo') label = 'Modo demonstração'
-  else if (source === 'remote') label = 'Sincronizado com a sua conta'
 
   if (!label) return null
 

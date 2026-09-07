@@ -7,29 +7,15 @@ import { useTheme } from '../../src/theme/ThemeProvider'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { useDataSync } from '../../src/hooks/useDataSync'
 import { useAuthStore } from '../../src/store/authStore'
-import { usePrefsStore } from '../../src/store/prefsStore'
 import { SetupGuard } from '../../src/components/auth/SetupGuard'
-import { useEffect } from 'react'
 
 export default function TabsLayout()
 {
-  const { colors, mode, setMode } = useTheme()
+  const { colors } = useTheme()
   const { showRail } = useWorkspace()
   const userId = useAuthStore((s) => s.userId)
   const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
-  const scheme = usePrefsStore((s) => s.prefs.color_scheme)
-  const prefsLoaded = usePrefsStore((s) => s.loaded)
   useDataSync()
-
-  useEffect(() =>
-  {
-    // Sem preferência salva → claro (paleta Natural Tan)
-    const next = scheme ?? 'light'
-    if (prefsLoaded && next !== mode)
-    {
-      setMode(next)
-    }
-  }, [prefsLoaded, scheme, mode, setMode])
 
   if (!userId || mfaPending)
   {

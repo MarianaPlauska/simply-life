@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
@@ -12,6 +12,8 @@ import { ExpenseSparkline } from '../../ui/ExpenseSparkline'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useWorkspace } from '../../layout/useWorkspace'
+import { useCategoryMetaStore } from '../../store/categoryMetaStore'
+import { colorMapFromMeta } from '../../lib/categoryMeta'
 
 /** Gráficos e panorama abaixo da dobra - Início não fica “vazio”. */
 export function HomePanorama()
@@ -20,9 +22,19 @@ export function HomePanorama()
   const { isDesktop } = useWorkspace()
   const router = useRouter()
   const finance = useDataStore((s) => s.finance) ?? []
+  const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
+  const catMap = useCategoryMetaStore((s) => s.map)
   const gastos = monthExpenseTotal(finance)
   const series = useMemo(() => monthDailyExpenseSeries(finance), [finance])
-  const ranking = useMemo(() => rankCategoriesBySpend(finance).slice(0, 5), [finance])
+  const ranking = useMemo(
+    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap)).slice(0, 5),
+    [finance, catMap],
+  )
+
+  useEffect(() =>
+  {
+    void hydrateCats()
+  }, [hydrateCats])
   const max = ranking[0]?.total ?? 1
   const donutSegments = ranking.map((r) => ({
     color: r.color,
@@ -40,7 +52,7 @@ export function HomePanorama()
         style={{ alignSelf: 'flex-start', borderRadius: 999 }}
       />
 
-      <Card tone="elevated" style={{ gap: space.sm, borderRadius: 16 }}>
+      <Card tone="elevated" style={{ gap: space.xs, borderRadius: 14, padding: 10 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <Text variant="caption" muted>
             Evolução de gastos
@@ -49,7 +61,7 @@ export function HomePanorama()
             {formatBRL(gastos)}
           </Text>
         </View>
-        <ExpenseSparkline series={series} height={72} color={colors.finance} />
+        <ExpenseSparkline series={series} height={56} color={colors.finance} />
       </Card>
 
       <View
@@ -64,9 +76,10 @@ export function HomePanorama()
           style={{
             flex: isDesktop ? 1 : undefined,
             alignItems: 'center',
-            gap: space.sm,
-            borderRadius: 16,
-            minHeight: 220,
+            gap: space.xs,
+            borderRadius: 14,
+            minHeight: 180,
+            padding: 10,
           }}
         >
           <Text variant="caption" muted>
@@ -81,13 +94,13 @@ export function HomePanorama()
               segments={donutSegments}
               centerLabel="Gasto"
               centerValue={formatBRL(gastos)}
-              size={isDesktop ? 168 : 156}
-              strokeWidth={18}
+              size={isDesktop ? 148 : 132}
+              strokeWidth={14}
             />
           )}
         </Card>
 
-        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.md, borderRadius: 16 }}>
+        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.sm, borderRadius: 14, padding: 10 }}>
           <Text variant="caption" muted>
             Ranking do mês
           </Text>

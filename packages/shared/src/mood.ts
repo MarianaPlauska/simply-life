@@ -1,4 +1,5 @@
 import { MOOD_COLORS, MOOD_LABELS, MOOD_EMOJI } from '@simply-life/ui-tokens'
+import { localTodayIso } from './dates'
 
 export interface HumorRegistro
 {
@@ -73,6 +74,27 @@ export function moodColor(value: number): string
 export function moodEmoji(value: number): string
 {
   return MOOD_EMOJI[Math.round(value)] ?? '😐'
+}
+
+/** Seed local de demonstração - não conta como check-in real. */
+export function isDemoHumorRow(h: { id: number; nota?: string | null }): boolean
+{
+  return h.nota === 'Registro de demo'
+}
+
+/** Último humor real do dia (conta / aparelho), ignorando seed de demo. */
+export function humorDoDia(
+  rows: HumorRegistro[],
+  iso = localTodayIso(),
+): HumorRegistro | undefined
+{
+  const day = rows.filter(
+    (h) => (h.data || '').slice(0, 10) === iso && !isDemoHumorRow(h),
+  )
+  if (day.length === 0) return undefined
+  return [...day].sort((a, b) =>
+    String(b.created_at || b.data).localeCompare(String(a.created_at || a.data)),
+  )[0]
 }
 
 export function aggregateHumorByDay(rows: HumorRegistro[]): DiaHumorAgregado[]

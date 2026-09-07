@@ -21,9 +21,9 @@ export function TabShell({ children }: { children: ReactNode })
   return (
     <View
       style={{
-        gap: showRail ? DESKTOP_GUTTER : space.xl,
-        paddingTop: showRail ? space.lg : space.lg,
-        paddingBottom: showRail ? space.xl : space.md,
+        gap: showRail ? DESKTOP_GUTTER : space.md,
+        paddingTop: showRail ? space.md : space.sm,
+        paddingBottom: showRail ? space.lg : space.sm,
         paddingHorizontal: showRail ? DESKTOP_PAD_H : space.sm,
         maxWidth: showRail ? DESKTOP_CONTENT_MAX : (contentMaxWidth ?? SHELL_MAX_MOBILE),
         alignSelf: 'center',

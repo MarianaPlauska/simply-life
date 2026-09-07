@@ -37,8 +37,15 @@ import { ContasFixasTab } from './ContasFixasTab';
 import { FinanceDailyLedgerTab } from './FinanceDailyLedgerTab';
 import { FinanceSpreadsheetTab } from './FinanceSpreadsheetTab';
 import { FinanceHomeTab } from './FinanceHomeTab';
+import { FinancePlanningHub } from './overview/FinancePlanningHub';
+import { InvitePartnerPanel } from './partner/InvitePartnerPanel';
 import { AXEL_TEXT_SECONDARY } from '../../constants/axelSurfaces';
-import { clampFinanceMonthOffset, getFinanceMonthNavBounds } from '../../lib/financeMonthOutlook';
+import {
+  clampFinanceMonthOffset,
+  getFinanceMonthNavBounds,
+  canShiftFinanceMonth,
+} from '../../lib/financeMonthOutlook';
+import { buildFinanceDailyBrief } from '../../lib/financeDailyBrief';
 import { FinanceReservedBillsTab } from './FinanceReservedBillsTab';
 import { FinanceCashTab } from './FinanceCashTab';
 import { dedupeTransactionsForLedger } from '../../lib/financeTransactionDedup';
@@ -66,6 +73,10 @@ export function FinancePlannerView() {
   const categories = useTaskStore((s) => s.categories);
   const financialGoals = useTaskStore((s) => s.financialGoals);
   const updateGoalProgress = useTaskStore((s) => s.updateGoalProgress);
+  const cashAccount = useTaskStore((s) => s.cashAccount);
+  const reservedBills = useTaskStore((s) => s.reservedBills);
+  const contasFixas = useTaskStore((s) => s.contasFixas);
+  const cards = useTaskStore((s) => s.cards);
   const { computed: computedCashPosition, display: cashPosition } = useCashPosition();
 
   const { loading: financeLoading } = useFinancePlannerInit();
@@ -129,9 +140,11 @@ export function FinancePlannerView() {
       }, { replace: true });
       return;
     }
-    if (aba === 'faturas' || aba === 'pagos')
+    if (aba === 'faturas' || aba === 'pagos' || aba === 'orcamentos')
     {
-      const target = navigateToLeaf(aba === 'pagos' ? 'pagos' : 'faturas');
+      const target = navigateToLeaf(
+        aba === 'pagos' ? 'pagos' : aba === 'orcamentos' ? 'orcamentos' : 'faturas',
+      );
       setNavGroup(target.group);
       setLeafTab(target.sub);
       setSearchParams((prev) =>
@@ -223,6 +236,29 @@ export function FinancePlannerView() {
     [budgetRowsTracked],
   );
   const budgetUsedPct = totalBudget > 0 ? (totalBudgetSpend / totalBudget) * 100 : 0;
+
+  const planningHojeLines = useMemo(() =>
+  {
+    if (monthOffset !== 0) return [] as string[]
+    return buildFinanceDailyBrief({
+      transactions,
+      saldoInicial: cashAccount.saldo_inicial,
+      reservedBills,
+      contasFixas,
+      cards,
+      categories: activeCategories,
+      budgetLimits,
+    }).hojeLines
+  }, [
+    monthOffset,
+    transactions,
+    cashAccount.saldo_inicial,
+    reservedBills,
+    contasFixas,
+    cards,
+    activeCategories,
+    budgetLimits,
+  ])
 
   // Maiores categorias (Resumo)
   const categoryTotals = useMemo(() => {
@@ -413,6 +449,24 @@ export function FinancePlannerView() {
         />
       )}
 
+      {activeLeaf === 'orcamentos' && (
+        <FinancePlanningHub
+          monthLabel={monthLabel}
+          monthOffset={monthOffset}
+          onMonthOffset={(offset) => applyMonthOffset(offset)}
+          canGoPrev={canShiftFinanceMonth(monthOffset, -1, monthBounds)}
+          canGoNext={canShiftFinanceMonth(monthOffset, 1, monthBounds)}
+          budgetUsedPct={budgetUsedPct}
+          budgetRows={budgetRows}
+          editingBudget={editingBudget}
+          setEditingBudget={setEditingBudget}
+          editVal={editVal}
+          setEditVal={setEditVal}
+          handleSaveBudget={handleSaveBudget}
+          hojeLines={planningHojeLines}
+        />
+      )}
+
       {activeLeaf === 'diario' && (
         <FinanceDailyLedgerTab
           transactions={transactions}
@@ -468,19 +522,22 @@ export function FinancePlannerView() {
 
       {/* ═══════ CARTÕES & CAIXA ═══════ */}
       {activeLeaf === 'conta' && (
-        <FinanceCashTab
-          saldoDisponivel={cashPosition.saldoDisponivel}
-          reservaRestante={cashPosition.reservaRestante}
-          saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
-          saldoInicial={cashPosition.saldoInicial}
-          receitasPagas={cashPosition.receitasPagas}
-          despesasPagas={cashPosition.despesasPagas}
-          compromissosFixas={cashPosition.compromissosFixas}
-          computedDisponivel={computedCashPosition.saldoDisponivel}
-          computedReservado={computedCashPosition.reservaRestante}
-          computedProjetado={computedCashPosition.saldoProjetadoDisponivel}
-          onNewExtraIncome={() => setNewTransactionOpen(true, 'receita')}
-        />
+        <div className="space-y-3">
+          <FinanceCashTab
+            saldoDisponivel={cashPosition.saldoDisponivel}
+            reservaRestante={cashPosition.reservaRestante}
+            saldoProjetadoDisponivel={cashPosition.saldoProjetadoDisponivel}
+            saldoInicial={cashPosition.saldoInicial}
+            receitasPagas={cashPosition.receitasPagas}
+            despesasPagas={cashPosition.despesasPagas}
+            compromissosFixas={cashPosition.compromissosFixas}
+            computedDisponivel={computedCashPosition.saldoDisponivel}
+            computedReservado={computedCashPosition.reservaRestante}
+            computedProjetado={computedCashPosition.saldoProjetadoDisponivel}
+            onNewExtraIncome={() => setNewTransactionOpen(true, 'receita')}
+          />
+          <InvitePartnerPanel />
+        </div>
       )}
 
       {activeLeaf === 'cartoes' && (

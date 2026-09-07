@@ -16,7 +16,6 @@ import { LoginBrandPanel } from '../src/components/auth/LoginBrandPanel'
 import { LoginForm, type AuthMode } from '../src/components/auth/LoginForm'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
-import { usePrefsStore } from '../src/store/prefsStore'
 
 const PAD_X = 22
 
@@ -24,7 +23,6 @@ const PAD_X = 22
 export default function LoginScreen()
 {
   const { colors, space, mode, setMode } = useTheme()
-  const patchPrefs = usePrefsStore((s) => s.patch)
   const insets = useSafeAreaInsets()
   const { width: vw, height: winH } = useWindowDimensions()
   const isDesktop = vw >= BREAKPOINT.desktop
@@ -40,7 +38,6 @@ export default function LoginScreen()
   {
     const next = mode === 'dark' ? 'light' : 'dark'
     setMode(next)
-    void patchPrefs({ color_scheme: next })
   }
 
   if (isDesktop)
@@ -62,18 +59,44 @@ export default function LoginScreen()
             backgroundColor: colors.canvas,
           }}
         >
-          <View
-            style={{
-              width: '100%',
-              maxWidth: 420,
-              backgroundColor: colors.surface,
-              borderRadius: 20,
-              padding: space.xl,
-              borderWidth: 1,
-              borderColor: colors.hairline,
-            }}
-          >
-            <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading />
+          <View style={{ width: '100%', maxWidth: 420, gap: space.md }}>
+            <Pressable
+              onPress={toggleTheme}
+              accessibilityLabel={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+              style={{
+                alignSelf: 'flex-end',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 8,
+                minHeight: 44,
+                paddingHorizontal: 12,
+                borderRadius: 999,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.hairline,
+              }}
+            >
+              <Ionicons
+                name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
+                size={18}
+                color={colors.axel}
+              />
+              <Text variant="caption" style={{ fontWeight: '700' }}>
+                {mode === 'dark' ? 'Escuro' : 'Claro'}
+              </Text>
+            </Pressable>
+            <View
+              style={{
+                width: '100%',
+                backgroundColor: colors.surface,
+                borderRadius: 20,
+                padding: space.xl,
+                borderWidth: 1,
+                borderColor: colors.hairline,
+              }}
+            >
+              <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading />
+            </View>
           </View>
         </KeyboardAvoidingView>
       </View>

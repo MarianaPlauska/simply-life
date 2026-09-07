@@ -26,7 +26,9 @@ export async function syncFinanceDailyBrief(input: {
 
   const precisaAvisar = brief.saldoDisponivel < 0
     || brief.contasProximas > 0
+    || brief.contasHoje > 0
     || brief.categoriasEmAlerta.length > 0
+    || brief.hojeLines.length > 0
 
   if (!precisaAvisar)
   {

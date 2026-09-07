@@ -1,5 +1,6 @@
 import { FinanceCashAccountCard } from './FinanceCashAccountCard'
 import { FinanceExtrasTab } from './FinanceExtrasTab'
+import { InvitePartnerPanel } from './partner/InvitePartnerPanel'
 
 interface FinanceCashTabProps
 {
@@ -44,6 +45,7 @@ export function FinanceCashTab({
         computedReservado={computedReservado}
         computedProjetado={computedProjetado}
       />
+      <InvitePartnerPanel />
       {onNewExtraIncome && (
         <FinanceExtrasTab onNewTransaction={onNewExtraIncome} embedded />
       )}

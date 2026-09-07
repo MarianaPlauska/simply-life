@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
 import { PressableScale } from './PressableScale'
@@ -10,10 +10,7 @@ export type PillTab<T extends string> = {
   count?: number
 }
 
-/**
- * Abas em cápsula - View (não ScrollView) para evitar overlay
- * quebrado no Expo web com poucas tabs.
- */
+/** Abas em cápsula — uma linha, rolagem horizontal. */
 export function PillTabs<T extends string>({
   tabs,
   value,
@@ -28,15 +25,22 @@ export function PillTabs<T extends string>({
   const spec = COMPONENT_SPEC.PillTabs
 
   return (
-    <View
-      style={{
+    <ScrollView
+      horizontal
+      nestedScrollEnabled
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        alignSelf: 'flex-start',
+        alignItems: 'center',
         gap: spec.gap,
         padding: 4,
+        minHeight: spec.height + 8,
+      }}
+      style={{
+        alignSelf: 'stretch',
         borderRadius: radius.pill,
         backgroundColor: colors.elevated,
+        maxHeight: spec.height + 8,
       }}
     >
       {tabs.map((tab) =>
@@ -56,6 +60,7 @@ export function PillTabs<T extends string>({
               borderRadius: radius.pill,
               alignItems: 'center',
               justifyContent: 'center',
+              flexShrink: 0,
               backgroundColor: active ? colors.surface : 'transparent',
             }}
           >
@@ -68,6 +73,6 @@ export function PillTabs<T extends string>({
           </PressableScale>
         )
       })}
-    </View>
+    </ScrollView>
   )
 }

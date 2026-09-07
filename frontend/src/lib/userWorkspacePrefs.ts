@@ -46,6 +46,8 @@ export interface UserWorkspacePrefs
   axel_care_rotation?: Record<string, number>
   /** Oculta card de humor no dashboard até este instante (ISO) - regra: +12h após 1º registro do dia */
   wellbeing_dashboard_hidden_until?: string | null
+  /** Teto de push: off | once | batch3 */
+  notify_cadence?: 'off' | 'once' | 'batch3'
 }
 
 export const ACCENT_PALETTES: Record<AccentId, { label: string; light: string; dark: string; hover: string }> = {
@@ -157,6 +159,12 @@ function mergePrefs(raw: Partial<UserWorkspacePrefs> | null | undefined): UserWo
     axel_care_rotation: raw?.axel_care_rotation ?? DEFAULT_WORKSPACE_PREFS.axel_care_rotation,
     wellbeing_dashboard_hidden_until:
       raw?.wellbeing_dashboard_hidden_until ?? DEFAULT_WORKSPACE_PREFS.wellbeing_dashboard_hidden_until,
+    notify_cadence:
+      raw?.notify_cadence === 'off' || raw?.notify_cadence === 'once' || raw?.notify_cadence === 'batch3'
+        ? raw.notify_cadence
+        : raw?.setup_completed_at
+          ? 'once'
+          : 'off',
     dashboard_quick_widgets: raw?.dashboard_quick_widgets,
     ...(raw?.color_scheme === 'light' || raw?.color_scheme === 'dark'
       ? { color_scheme: raw.color_scheme }

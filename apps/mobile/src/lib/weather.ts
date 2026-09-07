@@ -18,6 +18,13 @@ export type WeatherSnapshot = {
   lat: number
   lon: number
   fetchedAt: string
+  feelsLikeC?: number
+  humidity?: number
+  windKmh?: number
+  precipMm?: number
+  maxC?: number
+  minC?: number
+  hourly?: { hour: string; tempC: number }[]
 }
 
 type CacheBlob = {
@@ -153,19 +160,71 @@ export function interpretWeatherCode(code: number): {
   return { label: 'Clima', hint: 'Tempo estável', icon: 'partly-sunny-outline', severe: false }
 }
 
+/**
+ * Open-Meteo não tem reverse geocoding (o /v1/reverse devolve 404 sem CORS).
+ * BigDataCloud é o endpoint de cliente, pensado para o browser.
+ */
+export async function reverseGeocodeCity(lat: number, lon: number): Promise<string | undefined>
+{
+  try
+  {
+    const url =
+      `https://api.bigdatacloud.net/data/reverse-geocode-client` +
+      `?latitude=${lat}&longitude=${lon}&localityLanguage=pt`
+    const res = await fetch(url)
+    if (!res.ok) return undefined
+    const data = (await res.json()) as {
+      city?: string
+      locality?: string
+    }
+    const name = (data.city || data.locality || '').trim()
+    return name || undefined
+  }
+  catch
+  {
+    return undefined
+  }
+}
+
 export async function fetchWeather(lat: number, lon: number, city?: string): Promise<WeatherSnapshot>
 {
   const url =
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,weather_code&timezone=auto`
+    `&current=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,wind_speed_10m,precipitation` +
+    `&hourly=temperature_2m` +
+    `&daily=temperature_2m_max,temperature_2m_min` +
+    `&forecast_days=1&timezone=auto`
   const res = await fetch(url)
   if (!res.ok) throw new Error('Clima indisponível agora')
   const data = (await res.json()) as {
-    current?: { temperature_2m?: number; weather_code?: number }
+    current?: {
+      temperature_2m?: number
+      weather_code?: number
+      relative_humidity_2m?: number
+      apparent_temperature?: number
+      wind_speed_10m?: number
+      precipitation?: number
+    }
+    hourly?: { time?: string[]; temperature_2m?: number[] }
+    daily?: { temperature_2m_max?: number[]; temperature_2m_min?: number[] }
   }
   const tempC = Math.round(data.current?.temperature_2m ?? 0)
   const weatherCode = data.current?.weather_code ?? 0
   const meta = interpretWeatherCode(weatherCode)
+  const now = Date.now()
+  const hourly: { hour: string; tempC: number }[] = []
+  const times = data.hourly?.time ?? []
+  const temps = data.hourly?.temperature_2m ?? []
+  for (let i = 0; i < times.length && hourly.length < 8; i++)
+  {
+    const t = Date.parse(times[i])
+    if (Number.isNaN(t) || t < now - 30 * 60 * 1000) continue
+    hourly.push({
+      hour: times[i].slice(11, 13) + 'h',
+      tempC: Math.round(temps[i] ?? tempC),
+    })
+  }
+  const resolvedCity = city ?? (await reverseGeocodeCity(lat, lon))
   const snapshot: WeatherSnapshot = {
     tempC,
     weatherCode,
@@ -173,10 +232,17 @@ export async function fetchWeather(lat: number, lon: number, city?: string): Pro
     hint: meta.hint,
     icon: meta.icon,
     severe: meta.severe,
-    city,
+    city: resolvedCity,
     lat,
     lon,
     fetchedAt: new Date().toISOString(),
+    feelsLikeC: Math.round(data.current?.apparent_temperature ?? tempC),
+    humidity: Math.round(data.current?.relative_humidity_2m ?? 0),
+    windKmh: Math.round(data.current?.wind_speed_10m ?? 0),
+    precipMm: Math.round((data.current?.precipitation ?? 0) * 10) / 10,
+    maxC: Math.round(data.daily?.temperature_2m_max?.[0] ?? tempC),
+    minC: Math.round(data.daily?.temperature_2m_min?.[0] ?? tempC),
+    hourly,
   }
   saveWeatherCache(snapshot)
   return snapshot

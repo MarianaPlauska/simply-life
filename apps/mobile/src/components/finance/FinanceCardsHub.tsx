@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { formatBRL, type FinanceCard } from '@simply-life/shared'
+import { formatBRL, cardFaturaAbertaDisplay, type FinanceCard } from '@simply-life/shared'
 import {
   Card,
   Text,
@@ -12,6 +12,8 @@ import {
   PrimaryButton,
 } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useDataStore } from '../../store/dataStore'
+import { useAuthStore } from '../../store/authStore'
 import { CardCarousel } from './CardCarousel'
 import { FinanceCardDetailSheet } from './FinanceCardDetailSheet'
 import { CardInvoiceSpendSheet } from './CardInvoiceSpendSheet'
@@ -40,6 +42,9 @@ export function FinanceCardsHub({
 }: Props)
 {
   const { colors, space, radius } = useTheme()
+  const txs = useDataStore((s) => s.finance)
+  const payCardInvoice = useDataStore((s) => s.payCardInvoice)
+  const isGuest = useAuthStore((s) => s.isGuest)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [visibleId, setVisibleId] = useState<string | null>(cards[0]?.id ?? null)
   const [sheetMode, setSheetMode] = useState<'invoice' | 'spend' | null>(null)
@@ -49,6 +54,11 @@ export function FinanceCardsHub({
   const primary = cards.find((c) => c.id === visibleId) ?? cards[0]
   const detailCard = cards.find((c) => c.id === detailId) ?? null
   const sheetCard = primary
+  const faturaPrimary = primary ? cardFaturaAbertaDisplay(primary, txs) : 0
+  const usadoPct =
+    primary && primary.limite > 0
+      ? Math.min(100, Math.round((faturaPrimary / primary.limite) * 100))
+      : 0
 
   useEffect(() =>
   {
@@ -162,7 +172,7 @@ export function FinanceCardsHub({
                 Disponível
               </Text>
               <Text variant="title" color={colors.health} style={{ fontSize: 20 }}>
-                {formatBRL(Math.max(0, primary.limite - (primary.faturaAberta ?? 0)))}
+                {formatBRL(Math.max(0, primary.limite - faturaPrimary))}
               </Text>
             </View>
             <View style={{ flex: 1, gap: 4 }}>
@@ -170,10 +180,36 @@ export function FinanceCardsHub({
                 Fatura aberta
               </Text>
               <Text variant="title" color={colors.finance} style={{ fontSize: 20 }}>
-                {formatBRL(primary.faturaAberta ?? 0)}
+                {formatBRL(faturaPrimary)}
               </Text>
             </View>
           </View>
+          <View
+            style={{
+              height: 8,
+              borderRadius: 999,
+              backgroundColor: colors.axelMuted,
+              overflow: 'hidden',
+            }}
+          >
+            <View
+              style={{
+                width: `${usadoPct}%`,
+                height: '100%',
+                backgroundColor: colors.axel,
+              }}
+            />
+          </View>
+          <Text variant="caption" muted>
+            {formatBRL(faturaPrimary)} / {formatBRL(primary.limite)} · crédito não sai do saldo até pagar
+          </Text>
+          {faturaPrimary > 0 ? (
+            <PrimaryButton
+              label="Pagar fatura"
+              size="sm"
+              onPress={() => void payCardInvoice(primary.id, isGuest)}
+            />
+          ) : null}
         </Card>
       ) : null}
 

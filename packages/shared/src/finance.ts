@@ -7,6 +7,7 @@ export type FinanceCategory =
   | 'educacao'
   | 'compras'
   | 'outros'
+  | (string & {})
 
 export const FINANCE_CATEGORY_LABELS: Record<FinanceCategory, string> = {
   habitacao: 'Moradia',
@@ -19,6 +20,8 @@ export const FINANCE_CATEGORY_LABELS: Record<FinanceCategory, string> = {
   outros: 'Outros',
 }
 
+export type FinanceEscopo = 'pessoal' | 'casal'
+
 export interface FinanceTx
 {
   id: string
@@ -29,6 +32,14 @@ export interface FinanceTx
   tipo: 'despesa' | 'receita'
   /** Cartão vinculado (fatura / quick spend) */
   cardId?: string
+  /** pix | debito | dinheiro | boleto | cartao | ted | outro */
+  formaPagamento?: string
+  /** Pasta do Kanban — agrupa gastos relacionados */
+  folderId?: string
+  /** Casal = visível ao parceiro; pessoal = só o autor */
+  escopo?: FinanceEscopo
+  /** Gasto pessoal que saiu da conta compartilhada do casal */
+  pagoContaCasal?: boolean
 }
 
 export interface CategorySpend
@@ -40,7 +51,7 @@ export interface CategorySpend
   color: string
 }
 
-const CATEGORY_COLORS: Record<FinanceCategory, string> = {
+export const FINANCE_CATEGORY_COLORS: Record<FinanceCategory, string> = {
   habitacao: '#8B9BA8',
   alimentacao: '#E8734A',
   transporte: '#C9A15C',
@@ -51,7 +62,10 @@ const CATEGORY_COLORS: Record<FinanceCategory, string> = {
   outros: '#B0A89C',
 }
 
-export function rankCategoriesBySpend(txs: FinanceTx[]): CategorySpend[]
+export function rankCategoriesBySpend(
+  txs: FinanceTx[],
+  colors?: Partial<Record<FinanceCategory, string>>,
+): CategorySpend[]
 {
   const despesas = txs.filter((t) => t.tipo === 'despesa')
   const totals = new Map<FinanceCategory, number>()
@@ -65,10 +79,10 @@ export function rankCategoriesBySpend(txs: FinanceTx[]): CategorySpend[]
   return [...totals.entries()]
     .map(([categoria, total]) => ({
       categoria,
-      label: FINANCE_CATEGORY_LABELS[categoria],
+      label: FINANCE_CATEGORY_LABELS[categoria as keyof typeof FINANCE_CATEGORY_LABELS] ?? categoria,
       total,
       pct: sum > 0 ? Math.round((total / sum) * 100) : 0,
-      color: CATEGORY_COLORS[categoria],
+      color: colors?.[categoria] || FINANCE_CATEGORY_COLORS[categoria as keyof typeof FINANCE_CATEGORY_COLORS] || '#B0A89C',
     }))
     .sort((a, b) => b.total - a.total)
 }

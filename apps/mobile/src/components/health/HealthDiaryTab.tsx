@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { View, StyleSheet, useWindowDimensions } from 'react-native'
+import { useRouter } from 'expo-router'
 import {
   aggregateHumorByDay,
   buildMoodDistribution,
@@ -10,36 +11,40 @@ import {
   currentMonthLabel,
   weeklyMoodReview,
 } from '@simply-life/shared'
-import { Card, Text, SectionHeader, EmptyState, IconBadge, StatusPill, PrimaryButton } from '../../ui'
+import { Card, Text, SectionHeader, EmptyState, IconBadge, StatusPill, PrimaryButton, Field } from '../../ui'
 import { MoodFaceRow } from '../MoodFace'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
-import { useCaptureStore } from '../../store/captureStore'
 
 export function HealthDiaryTab()
 {
   const { colors, space, radius } = useTheme()
   const { width } = useWindowDimensions()
+  const router = useRouter()
   const humor = useDataStore((s) => s.humor)
   const addHumor = useDataStore((s) => s.addHumor)
   const isGuest = useAuthStore((s) => s.isGuest)
-  const openCapture = useCaptureStore((s) => s.openCapture)
+  const [nota, setNota] = useState('')
 
   const slices = useMemo(() => buildMoodDistribution(humor), [humor])
   const agregados = useMemo(() => aggregateHumorByDay(humor), [humor])
   const cells = useMemo(() => buildCurrentMonthCalendar(agregados), [agregados])
   const total = humor.length
+  const dia = new Date().toISOString().slice(0, 10)
   const last = useMemo(
-    () => [...humor].sort((a, b) => (b.created_at || b.data).localeCompare(a.created_at || a.data))[0],
-    [humor],
+    () => humor.find((h) => (h.data || '').slice(0, 10) === dia) ?? null,
+    [humor, dia],
   )
   const week = useMemo(() => weeklyMoodReview(humor), [humor])
   const cellSize = Math.min(36, Math.floor((width - 64) / 7) - 4)
-  const pillBtn = { borderRadius: 999 as const }
+  const comNota = useMemo(
+    () => [...humor].filter((h) => (h.nota || '').trim()).slice(0, 12),
+    [humor],
+  )
 
   return (
-    <View style={{ gap: space.lg }}>
+    <View style={{ gap: space.md }}>
       <Card tone="hero" style={{ gap: space.md, borderRadius: 18 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <IconBadge name="happy" color={colors.axel} size={44} iconSize={22} />
@@ -55,13 +60,29 @@ export function HealthDiaryTab()
         </View>
         <MoodFaceRow
           value={last?.humor}
-          onChange={(m) => void addHumor(m, undefined, isGuest)}
+          onChange={(m) => void addHumor(m, nota.trim() || undefined, isGuest)}
+        />
+        <Field
+          label="Como foi o dia (opcional)"
+          value={nota}
+          onChangeText={setNota}
+          placeholder="Uma frase já vira histórico"
+          multiline
         />
         <PrimaryButton
-          label="Escrever nota"
+          label="Salvar nota no humor"
+          disabled={!last}
+          onPress={() =>
+          {
+            if (!last) return
+            void addHumor(last.humor, nota.trim() || undefined, isGuest)
+            setNota('')
+          }}
+        />
+        <PrimaryButton
+          label="Abrir anotações"
           variant="ghost"
-          onPress={() => openCapture('note')}
-          style={pillBtn}
+          onPress={() => router.push('/anotacoes')}
         />
       </Card>
 
@@ -132,6 +153,24 @@ export function HealthDiaryTab()
               Melhor {moodLabel(week.best)} · mais baixo {moodLabel(week.worst)}
             </Text>
           </>
+        )}
+      </Card>
+
+      <Card tone="elevated" style={{ gap: space.sm }}>
+        <SectionHeader title="Histórico com texto" subtitle="Evolução do que você escreveu" />
+        {comNota.length === 0 ? (
+          <Text variant="caption" muted>
+            Notas do check-in aparecem aqui e também em Anotações.
+          </Text>
+        ) : (
+          comNota.map((h) => (
+            <View key={h.id} style={{ gap: 4, paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.hairline }}>
+              <Text variant="caption" muted>
+                {h.data.slice(0, 10)} · {moodLabel(h.humor)}
+              </Text>
+              <Text variant="body">{h.nota}</Text>
+            </View>
+          ))
         )}
       </Card>
 

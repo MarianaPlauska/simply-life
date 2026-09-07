@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { useColorScheme, useWindowDimensions } from 'react-native'
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
+import { useWindowDimensions } from 'react-native'
 import {
   colorsFor,
   type ColorTokens,
@@ -13,6 +13,7 @@ import {
   ELEVATION,
 } from '@simply-life/ui-tokens'
 import { usePrefsStore } from '../store/prefsStore'
+import { readColorSchemeSync } from '../lib/sync/prefs'
 
 type ThemeContextValue = {
   mode: ThemeMode
@@ -27,32 +28,33 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-export function ThemeProvider({ children }: { children: ReactNode })
+function persistMode(next: ThemeMode): void
 {
-  const system = useColorScheme()
-  // Natural Tan: padrão claro. Override só se o usuário trocar.
-  const [override, setOverride] = useState<ThemeMode | null>(null)
+  void usePrefsStore.getState().patch({ color_scheme: next })
+}
+
+export function ThemeProvider({
+  children,
+  forceMode,
+}: {
+  children: ReactNode
+  forceMode?: ThemeMode
+})
+{
   const scheme = usePrefsStore((s) => s.prefs.color_scheme)
   const prefsLoaded = usePrefsStore((s) => s.loaded)
   const hydrate = usePrefsStore((s) => s.hydrate)
-  const mode: ThemeMode = override ?? scheme ?? 'light'
+  const boot = useMemo(() => readColorSchemeSync(), [])
+  const mode: ThemeMode = forceMode ?? (prefsLoaded ? scheme : boot ?? scheme) ?? 'light'
   const { width } = useWindowDimensions()
   const largeText = usePrefsStore((s) => s.prefs.a11y_large_text)
   const highContrast = usePrefsStore((s) => s.prefs.a11y_high_contrast)
 
   useEffect(() =>
   {
+    if (forceMode) return
     void hydrate()
-  }, [hydrate])
-
-  useEffect(() =>
-  {
-    // Sync prefs → tema (login e tabs) sem sobrescrever toggle em voo
-    if (prefsLoaded && scheme && override == null)
-    {
-      setOverride(scheme)
-    }
-  }, [prefsLoaded, scheme, override])
+  }, [hydrate, forceMode])
 
   const value = useMemo<ThemeContextValue>(() =>
   {
@@ -83,14 +85,10 @@ export function ThemeProvider({ children }: { children: ReactNode })
       space: SPACE,
       type,
       elevation: mode === 'light' ? ELEVATION.light : ELEVATION.dark,
-      toggleMode: () => setOverride((prev) =>
-      {
-        const current = prev ?? 'light'
-        return current === 'light' ? 'dark' : 'light'
-      }),
-      setMode: setOverride,
+      toggleMode: () => persistMode(mode === 'dark' ? 'light' : 'dark'),
+      setMode: persistMode,
     }
-  }, [mode, system, largeText, highContrast, width])
+  }, [mode, largeText, highContrast, width, forceMode])
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

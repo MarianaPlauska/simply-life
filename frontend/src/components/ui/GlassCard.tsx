@@ -29,8 +29,8 @@ export function GlassCard({
   const classes = [
     'relative sl-panel',
     'transition-colors duration-200',
-    hover ? 'hover:border-ink-muted/50' : '',
-    noPadding ? '' : 'p-6',
+    hover ? '' : '',
+            noPadding ? '' : 'p-5',
     className,
   ].filter(Boolean).join(' ');
 

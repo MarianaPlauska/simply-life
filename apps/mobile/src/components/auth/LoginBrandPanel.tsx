@@ -69,10 +69,10 @@ export function LoginBrandPanel()
             maxWidth: 420,
           }}
         >
-          Humor, água, tarefas e finanças. Com o AXEL ao seu lado.
+          Humor, água, tarefas e finanças em um só lugar. O AXEL prioriza o essencial e reduz o ruído do dia.
         </Text>
         <Text variant="body" style={{ color: 'rgba(255,255,255,0.65)', maxWidth: 380 }}>
-          O essencial, no seu ritmo.
+          Um organizador pessoal. Sem pressão, sem diagnóstico.
         </Text>
       </View>
     </View>

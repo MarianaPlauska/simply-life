@@ -9,7 +9,8 @@
     "android": "node ./scripts/patch-expo-router-ctx.js && expo start --android",
     "ios": "node ./scripts/patch-expo-router-ctx.js && expo start --ios",
     "web": "node ./scripts/patch-expo-router-ctx.js && expo start --web --port 8082",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "eas-build-pre-install": "cd ../.. && npm install"
   },
   "dependencies": {
     "@expo-google-fonts/fraunces": "^0.4.1",
@@ -32,10 +33,13 @@
     "expo-linking": "~7.0.0",
     "expo-location": "~18.0.10",
     "expo-notifications": "~0.29.14",
+    "expo-print": "~14.0.3",
     "expo-router": "~4.0.0",
     "expo-secure-store": "~14.0.0",
+    "expo-sharing": "~13.0.1",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~4.0.0",
+    "lucide-react-native": "^1.41.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-native": "0.76.9",

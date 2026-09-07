@@ -145,7 +145,9 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
 
   const title = mode === 'login' ? 'Entrar' : 'Criar conta'
   const subtitle =
-    mode === 'login' ? 'Use seu email e senha.' : 'Crie sua conta para sincronizar.'
+    mode === 'login'
+      ? 'Email e senha para acessar seu Simply-Life.'
+      : 'Crie sua conta para sincronizar entre aparelhos.'
 
   const fields = (
     <View style={{ gap: space.md }}>

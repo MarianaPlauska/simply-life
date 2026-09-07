@@ -30,6 +30,8 @@ export type OfflineBundle = {
   updatedAt: string
   humorJson: string
   tasksJson: string
+  /** Hábitos (água ml/meta) — convidado neste aparelho */
+  habitsJson?: string
 }
 
 export async function loadOfflineBundle(): Promise<OfflineBundle | null>

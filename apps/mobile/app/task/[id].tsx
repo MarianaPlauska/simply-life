@@ -1,17 +1,24 @@
 import { useMemo, useState, useEffect } from 'react'
-import { View, Pressable } from 'react-native'
+import { View, Pressable, Alert, Platform } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import Svg, { Circle } from 'react-native-svg'
 import {
   minutesToLabel,
   classifyDueBucket,
+  applyTaskList,
+  mergeEvoTags,
+  stripTaskDisplayNotes,
+  taskListId,
+  taskProgressPct,
   type DueBucket,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PillTabs, PrimaryButton, ListRow, Field } from '../../src/ui'
+import { Screen, Text, Card, PillTabs, PrimaryButton, Field } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
 import { MoveTaskSheet } from '../../src/components/kanban/MoveTaskSheet'
+import { TaskDetailEditor } from '../../src/components/kanban/TaskDetailEditor'
+import { TaskTimerPanel } from '../../src/components/kanban/TaskTimerPanel'
 
 type DetailTab = 'analise' | 'status' | 'detalhes' | 'anotacoes'
 
@@ -81,53 +88,37 @@ export default function TaskDetailScreen()
   const router = useRouter()
   const { colors, space } = useTheme()
   const tasks = useDataStore((s) => s.tasks)
-  const toggleTaskCheck = useDataStore((s) => s.toggleTaskCheck)
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
   const moveTaskBucket = useDataStore((s) => s.moveTaskBucket)
   const patchTaskNotes = useDataStore((s) => s.patchTaskNotes)
+  const removeTask = useDataStore((s) => s.removeTask)
   const isGuest = useAuthStore((s) => s.isGuest)
   const task = useMemo(() => tasks.find((t) => t.id === id), [tasks, id])
-  const [tab, setTab] = useState<DetailTab>('analise')
-  const [seconds, setSeconds] = useState(0)
-  const [running, setRunning] = useState(false)
+  const [tab, setTab] = useState<DetailTab>('detalhes')
   const [notes, setNotes] = useState('')
   const [moveOpen, setMoveOpen] = useState(false)
 
   useEffect(() =>
   {
-    if (task) setNotes(task.anotacao || '')
+    if (task) setNotes(stripTaskDisplayNotes(task.anotacao || ''))
   }, [task])
-
-  useEffect(() =>
-  {
-    if (!running) return
-    const t = setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => clearInterval(t)
-  }, [running])
 
   if (!task)
   {
     return (
       <Screen>
         <Text variant="section">Tarefa não encontrada</Text>
-        <PrimaryButton label="Voltar" onPress={() => router.back()} />
+        <PrimaryButton label="Voltar" variant="ghost" onPress={() => router.back()} />
       </Screen>
     )
   }
 
   const checklistDone = task.checklist.filter((c) => c.feito).length
   const checklistTotal = task.checklist.length
-  const progress =
-    task.status === 'done'
-      ? 100
-      : checklistTotal > 0
-        ? Math.round((checklistDone / checklistTotal) * 100)
-        : Math.min(90, Math.max(8, task.progresso || (task.status === 'doing' ? 40 : 15)))
+  const progress = taskProgressPct(task)
 
   const remaining = daysUntil(task.dataVencimento)
   const bucket = classifyDueBucket(task.dataVencimento, task.status)
-  const mm = String(Math.floor(seconds / 60)).padStart(2, '0')
-  const ss = String(seconds % 60).padStart(2, '0')
 
   return (
     <Screen scroll>
@@ -171,10 +162,10 @@ export default function TaskDetailScreen()
 
         <PillTabs
           tabs={[
-            { id: 'analise', label: 'Análise' },
-            { id: 'status', label: 'Timer' },
             { id: 'detalhes', label: 'Detalhes' },
             { id: 'anotacoes', label: 'Notas' },
+            { id: 'analise', label: 'Análise' },
+            { id: 'status', label: 'Tempo' },
           ]}
           value={tab}
           onChange={setTab}
@@ -300,7 +291,7 @@ export default function TaskDetailScreen()
               </View>
             </View>
             <PrimaryButton
-              label="Abrir modo foco"
+              label="Executar agora"
               variant="ghost"
               onPress={() => router.push('/foco')}
               style={{ width: '100%' }}
@@ -308,61 +299,10 @@ export default function TaskDetailScreen()
           </View>
         ) : null}
 
-        {tab === 'status' ? (
-          <Card style={{ alignItems: 'center', gap: space.md, paddingVertical: space.xl }}>
-            <Text variant="caption" muted>
-              Temporizador
-            </Text>
-            <Text variant="hero" style={{ fontVariant: ['tabular-nums'] }}>
-              {mm}:{ss}
-            </Text>
-            <View style={{ flexDirection: 'row', gap: space.sm, width: '100%' }}>
-              <View style={{ flex: 1 }}>
-                <PrimaryButton
-                  label={running ? 'Pausar' : 'Iniciar'}
-                  onPress={() => setRunning((r) => !r)}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <PrimaryButton
-                  label="Zerar"
-                  variant="ghost"
-                  onPress={() =>
-                  {
-                    setRunning(false)
-                    setSeconds(0)
-                  }}
-                />
-              </View>
-            </View>
-          </Card>
-        ) : null}
+        {tab === 'status' ? <TaskTimerPanel /> : null}
 
         {tab === 'detalhes' ? (
-          <Card style={{ gap: space.sm, paddingVertical: space.sm }}>
-            <Text variant="section" style={{ paddingHorizontal: space.md, paddingTop: space.sm }}>
-              Checklist
-            </Text>
-            {task.checklist.length === 0 ? (
-              <Text variant="body" muted style={{ padding: space.md }}>
-                Sem itens ainda.
-              </Text>
-            ) : (
-              task.checklist.map((c) => (
-                <ListRow
-                  key={c.id}
-                  title={c.texto}
-                  subtitle={c.feito ? 'Feito' : 'Pendente'}
-                  onPress={() => void toggleTaskCheck(task.id, c.id, !c.feito, isGuest)}
-                />
-              ))
-            )}
-            <View style={{ padding: space.md }}>
-              <Text variant="caption" muted>
-                Estimativa: {task.estimativaMinutos} min · Prioridade {task.prioridade}
-              </Text>
-            </View>
-          </Card>
+          <TaskDetailEditor task={task} isGuest={isGuest} />
         ) : null}
 
         {tab === 'anotacoes' ? (
@@ -372,15 +312,56 @@ export default function TaskDetailScreen()
               label="Notas"
               value={notes}
               onChangeText={setNotes}
-              onBlur={() => patchTaskNotes(task.id, notes)}
+              onBlur={() =>
+                patchTaskNotes(
+                  task.id,
+                  applyTaskList(mergeEvoTags(notes, task.anotacao), taskListId(task)),
+                )
+              }
               multiline
-              placeholder="Contexto, links, próximos passos"
+              placeholder="Contexto e decisões — não é lista de to-dos"
             />
             <PrimaryButton
               label="Salvar notas"
-              onPress={() => patchTaskNotes(task.id, notes)}
+              onPress={() =>
+                patchTaskNotes(
+                  task.id,
+                  applyTaskList(mergeEvoTags(notes, task.anotacao), taskListId(task)),
+                )
+              }
             />
           </Card>
+        ) : null}
+
+        {tab === 'detalhes' && task.status !== 'done' ? (
+          <PrimaryButton
+            label="Excluir tarefa"
+            variant="danger"
+            onPress={() =>
+            {
+              const go = () =>
+              {
+                void removeTask(task.id, isGuest)
+                router.back()
+              }
+              if (Platform.OS === 'web')
+              {
+                if (typeof window !== 'undefined' && window.confirm('Sai da lista. O histórico de feitas permanece.'))
+                {
+                  go()
+                }
+                return
+              }
+              Alert.alert(
+                'Excluir tarefa',
+                'Sai da lista. O histórico de feitas permanece.',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Excluir', style: 'destructive', onPress: go },
+                ],
+              )
+            }}
+          />
         ) : null}
       </View>
       <MoveTaskSheet

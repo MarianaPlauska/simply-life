@@ -1,16 +1,16 @@
-import { View, StyleSheet } from 'react-native'
+import { View, StyleSheet, useWindowDimensions } from 'react-native'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TOUCH } from '@simply-life/ui-tokens'
-import { PressableScale } from '../ui'
+import { PressableScale, Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
-import { useCaptureStore } from '../store/captureStore'
+import { useCaptureStore, captureForTab, captureFabLabel } from '../store/captureStore'
 import { hapticLight } from '../lib/haptics'
 
 const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   index: 'home-outline',
-  kanban: 'list-outline',
+  kanban: 'checkbox-outline',
   saude: 'heart-outline',
   financeiro: 'wallet-outline',
 }
@@ -19,52 +19,80 @@ const LABELS: Record<string, string> = {
   index: 'Início',
   kanban: 'Tarefas',
   saude: 'Saúde',
-  financeiro: 'Finanças',
+  financeiro: 'Carteira',
 }
 
-const COPPER = '#E8734A'
-const FAB = 58
-const PILL_H = 56
-const GLOW = 72
+/** Barra compacta + Captura sempre elevada (FAB) */
+const BAR_H = 52
+const FAB = 54
+const GLOW = 66
 
 export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
 {
-  const { colors, elevation } = useTheme()
+  const { colors, elevation, mode } = useTheme()
   const insets = useSafeAreaInsets()
+  const { width: vw } = useWindowDimensions()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const routes = state.routes
   const activeIndex = Math.max(0, state.index)
+  const activeName = routes[activeIndex]?.name ?? 'index'
+  const capture = captureForTab(activeName)
   const left = routes.slice(0, 2)
   const right = routes.slice(2)
+
+  const barBg = colors.axel
+  const idleFg = 'rgba(255,255,255,0.82)'
+  const activeBg = mode === 'dark' ? '#F5F1EC' : '#FFFFFF'
+  const activeFg = colors.axel
+  const barW = Math.min(vw - 24, 420)
 
   const renderTab = (route: (typeof routes)[number], i: number) =>
   {
     const focused = i === activeIndex
     const outline = ICONS[route.name] ?? 'ellipse-outline'
     const filled = outline.replace('-outline', '') as keyof typeof Ionicons.glyphMap
+    const label = LABELS[route.name] ?? route.name
+
     return (
       <PressableScale
         key={route.key}
         accessibilityRole="button"
-        accessibilityLabel={LABELS[route.name] ?? route.name}
+        accessibilityLabel={label}
         accessibilityState={{ selected: focused }}
         onPress={() => navigation.navigate(route.name)}
-        style={styles.tab}
+        style={styles.slot}
       >
-        <Ionicons
-          name={focused ? filled : outline}
-          size={22}
-          color={focused ? colors.ink : colors.inkMuted}
-        />
         <View
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: 999,
-            marginTop: 4,
-            backgroundColor: focused ? COPPER : 'transparent',
-          }}
-        />
+          style={[
+            styles.tabInner,
+            focused
+              ? {
+                  backgroundColor: activeBg,
+                  borderRadius: 14,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                }
+              : null,
+          ]}
+        >
+          <Ionicons
+            name={focused ? filled : outline}
+            size={20}
+            color={focused ? activeFg : idleFg}
+          />
+          <Text
+            variant="micro"
+            style={{
+              color: focused ? activeFg : idleFg,
+              fontWeight: focused ? '700' : '600',
+              fontSize: 9,
+              lineHeight: 11,
+              marginTop: 1,
+            }}
+          >
+            {label}
+          </Text>
+        </View>
       </PressableScale>
     )
   }
@@ -72,14 +100,15 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 10) }]}
+      style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}
     >
-      <View style={styles.stage}>
+      <View style={[styles.stage, { width: barW, alignSelf: 'center' }]}>
         <View
           style={[
-            styles.pill,
+            styles.bar,
             {
-              backgroundColor: colors.elevated,
+              height: BAR_H,
+              backgroundColor: barBg,
               ...elevation.bar,
             },
           ]}
@@ -89,27 +118,38 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
           {right.map((route, i) => renderTab(route, i + left.length))}
         </View>
 
+        {/* Captura sempre elevada */}
         <PressableScale
           accessibilityRole="button"
-          accessibilityLabel="Capturar"
+          accessibilityLabel={captureFabLabel(capture.kind)}
           onPress={() =>
           {
             hapticLight()
-            openCapture('dump')
+            openCapture(capture.kind, null, { studio: capture.studio })
           }}
           style={styles.fabHit}
         >
-          <View style={styles.glow}>
+          <View
+            style={[
+              styles.glow,
+              {
+                backgroundColor:
+                  mode === 'dark' ? 'rgba(232,115,74,0.35)' : 'rgba(232,115,74,0.22)',
+              },
+            ]}
+          >
             <View
               style={[
                 styles.fab,
                 {
-                  backgroundColor: COPPER,
+                  backgroundColor: activeBg,
+                  borderWidth: 2,
+                  borderColor: colors.axel,
                   ...elevation.fab,
                 },
               ]}
             >
-              <Ionicons name="add" size={TOUCH.icon + 4} color="#FFFFFF" />
+              <Ionicons name="add" size={TOUCH.icon + 2} color={activeFg} />
             </View>
           </View>
         </PressableScale>
@@ -124,26 +164,30 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     backgroundColor: 'transparent',
   },
   stage: {
-    height: PILL_H + 18,
+    height: BAR_H + 22,
     justifyContent: 'flex-end',
+    overflow: 'visible',
   },
-  pill: {
-    height: PILL_H,
+  bar: {
     borderRadius: 999,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
   },
-  tab: {
+  slot: {
     flex: 1,
     minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 6,
+  },
+  tabInner: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 40,
   },
   fabGap: {
     width: GLOW,
@@ -161,7 +205,6 @@ const styles = StyleSheet.create({
     width: GLOW,
     height: GLOW,
     borderRadius: GLOW / 2,
-    backgroundColor: 'rgba(232, 115, 74, 0.28)',
     alignItems: 'center',
     justifyContent: 'center',
   },

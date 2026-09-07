@@ -121,7 +121,7 @@ export function KanbanOverviewPane({ tasks }: Props)
   }, [open])
 
   return (
-    <View style={{ gap: space.lg }}>
+    <View style={{ gap: space.md }}>
       {/* Header Welcome - ref Overview */}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <View

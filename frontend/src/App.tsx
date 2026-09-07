@@ -8,6 +8,7 @@ import { TermsView } from './components/legal/TermsView'
 import { ProtectedRoute } from './components/Auth/ProtectedRoute'
 import { SetupGuard } from './components/Auth/SetupGuard'
 import { JoinFriendView } from './components/Auth/JoinFriendView'
+import { JoinPartnerView } from './components/Auth/JoinPartnerView'
 import { GoogleCallbackView } from './components/Auth/GoogleCallbackView'
 import { AuthCallbackView } from './components/Auth/AuthCallbackView'
 import { ResetPasswordView } from './components/Auth/ResetPasswordView'
@@ -198,6 +199,7 @@ function App()
         <Route path="/auth/callback" element={<AuthCallbackView />} />
         <Route path="/google-callback" element={<GoogleCallbackView />} />
         <Route path="/join/:code" element={<JoinFriendView />} />
+        <Route path="/parceiro/:code" element={<JoinPartnerView />} />
         {import.meta.env.DEV && HealthDiaryChartsPreview && (
           <Route
             path="/__dev/health-diary-charts"

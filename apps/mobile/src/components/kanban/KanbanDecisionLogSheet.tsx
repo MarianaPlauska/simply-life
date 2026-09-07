@@ -52,7 +52,7 @@ export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
                 </View>
               ))
             )}
-            <PrimaryButton label="Fechar" onPress={onClose} />
+            <PrimaryButton label="Fechar" variant="dismiss" onPress={onClose} />
           </Card>
         </Pressable>
       </Pressable>

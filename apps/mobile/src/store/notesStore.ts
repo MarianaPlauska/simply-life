@@ -7,6 +7,7 @@ import {
   type Anotacao,
   type AnotacaoTipo,
 } from '../lib/sync/notes'
+import { useActivityStore } from './activityStore'
 
 type NotesState = {
   items: Anotacao[]
@@ -38,7 +39,11 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   create: async (tipo = 'diario') =>
   {
     const row = await insertAnotacao(tipo)
-    if (row) set({ items: [row, ...get().items] })
+    if (row)
+    {
+      set({ items: [row, ...get().items] })
+      useActivityStore.getState().markAction('note')
+    }
     return row
   },
 
@@ -48,6 +53,10 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     set({
       items: get().items.map((n) => (n.id === id ? { ...n, ...patch } : n)),
     })
+    if (patch.conteudo && patch.conteudo.trim())
+    {
+      useActivityStore.getState().markAction('note')
+    }
   },
 
   remove: async (id) =>

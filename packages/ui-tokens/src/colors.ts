@@ -1,4 +1,4 @@
-export const AXEL_PREMIUM_VERSION = '2026.09-bloco-h-cream-onyx'
+export const AXEL_PREMIUM_VERSION = '2026.09-bloco-i-true-black'
 
 export const TAN_PALETTE = {
   naturalTan: '#DED2C4',
@@ -10,13 +10,14 @@ export const TAN_PALETTE = {
   kanafeh: '#D08735',
 } as const
 
+/** Preto profundo das referências (Cryptora / Card Balance) — não o onyx arroxeado */
 export const DARK_ONYX = {
-  canvas: '#373539',
-  surface: '#403C40',
-  elevated: '#4A454A',
-  hairline: '#504B4F',
+  canvas: '#000000',
+  surface: '#141414',
+  elevated: '#1C1C1E',
+  hairline: '#2A2A2C',
   textPrimary: '#F5F1EC',
-  textMuted: '#B0A9A6',
+  textMuted: '#A8A29E',
   accent: '#E8734A',
   accentPressed: '#C45A32',
 } as const
@@ -57,13 +58,13 @@ export const COLOR_DARK: ColorTokens = {
   elevated: DARK_ONYX.elevated,
   ink: DARK_ONYX.textPrimary,
   inkMuted: DARK_ONYX.textMuted,
-  inkFaint: 'rgba(176, 169, 166, 0.72)',
+  inkFaint: 'rgba(168, 162, 158, 0.72)',
   hairline: DARK_ONYX.hairline,
   hairlineStrong: 'rgba(232, 115, 74, 0.55)',
   axel: DARK_ONYX.accent,
   axelHover: DARK_ONYX.accentPressed,
   axelMuted: 'rgba(232, 115, 74, 0.22)',
-  axelOnFill: DARK_ONYX.canvas,
+  axelOnFill: '#FFFFFF',
   health: '#7BC9A0',
   healthMuted: 'rgba(123, 201, 160, 0.16)',
   finance: '#D4B896',
@@ -73,7 +74,7 @@ export const COLOR_DARK: ColorTokens = {
   danger: '#E07A6A',
   attention: DARK_ONYX.accent,
   done: '#7BC9A0',
-  overlay: 'rgba(55, 53, 57, 0.84)',
+  overlay: 'rgba(0, 0, 0, 0.72)',
   widget: DARK_ONYX.elevated,
   widgetInk: DARK_ONYX.textPrimary,
   widgetMuted: DARK_ONYX.textMuted,
@@ -103,9 +104,9 @@ export const COLOR_LIGHT: ColorTokens = {
   attention: DARK_ONYX.accent,
   done: '#3D8F6A',
   overlay: 'rgba(42, 38, 34, 0.40)',
-  widget: '#2A2622',
+  widget: '#0B0B0B',
   widgetInk: '#F5F1EC',
-  widgetMuted: '#8C8275',
+  widgetMuted: '#A8A29E',
 }
 
 export type ThemeMode = 'light' | 'dark'

@@ -1,4 +1,4 @@
-import { View, type ViewProps, StyleSheet } from 'react-native'
+import { View, type ViewProps } from 'react-native'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { useTheme } from '../theme/ThemeProvider'
 
@@ -8,7 +8,7 @@ type Props = ViewProps & {
 
 export function Card({ children, style, tone = 'default', ...rest }: Props)
 {
-  const { colors, radius, elevation, mode } = useTheme()
+  const { colors, radius, elevation } = useTheme()
   const widget = tone === 'widget'
   const elevated = tone === 'elevated'
   const hero = tone === 'hero'
@@ -22,20 +22,7 @@ export function Card({ children, style, tone = 'default', ...rest }: Props)
         ? colors.elevated
         : colors.surface
 
-  const useLuminanceOnly = mode === 'dark'
-  const shadowStyle = widget || inset
-    ? {}
-    : hero
-      ? useLuminanceOnly
-        ? {}
-        : elevation.hero
-      : elevated
-        ? useLuminanceOnly
-          ? {}
-          : elevation.card
-        : useLuminanceOnly
-          ? {}
-          : elevation.card
+  const shadowStyle = widget || inset ? {} : hero ? elevation.hero : elevation.card
 
   return (
     <View
@@ -44,9 +31,7 @@ export function Card({ children, style, tone = 'default', ...rest }: Props)
           backgroundColor: bg,
           borderRadius: radius.card,
           padding: COMPONENT_SPEC.Card.padding,
-          // Wireframe limpo: cards elevated sem borda dura; hairline só no default/inset
-          borderWidth: elevated || hero || widget ? 0 : StyleSheet.hairlineWidth,
-          borderColor: inset ? colors.hairline : colors.hairline,
+          borderWidth: 0,
           ...shadowStyle,
         },
         style,

@@ -65,7 +65,7 @@ export function MedicamentosPanel()
               />
               <PrimaryButton
                 label="Remover"
-                variant="link"
+                variant="danger"
                 size="sm"
                 onPress={() => void removeMedicamento(med.id, isGuest)}
               />

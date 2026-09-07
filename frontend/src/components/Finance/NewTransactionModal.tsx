@@ -32,6 +32,10 @@ import { FinanceExtraIncomeSection, type ReceitaCreditoQuando } from './FinanceE
 import { MoneyInput } from '../ui/MoneyInput'
 import { parseMoneyInputToNumber } from '../../lib/currencyInput'
 import { FormFieldLabel } from '../ui/FormFieldLabel'
+import {
+  fetchPartnerWorkspace,
+  type PartnerWorkspaceState,
+} from '../../lib/partnerWorkspace'
 
 type LancamentoModo = 'imediato' | 'futuro'
 type LancamentoTipo = 'despesa' | 'receita' | 'investimento'
@@ -91,6 +95,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     payment: DEFAULT_EXPENSE_PAYMENT as string,
     fatura_reserva_id: '' as number | '',
   })
+  const [partnerWs, setPartnerWs] = useState<PartnerWorkspaceState | null>(null)
+  /** pessoal = só você; casal = compartilhado com o parceiro */
+  const [escopoGasto, setEscopoGasto] = useState<'pessoal' | 'casal'>('pessoal')
+  const [pagoContaCasal, setPagoContaCasal] = useState(false)
 
   const investCatId = useMemo(() =>
   {
@@ -111,6 +119,9 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
   useEffect(() =>
   {
     if (!isOpen) return
+    void fetchPartnerWorkspace().then(setPartnerWs)
+    setEscopoGasto('pessoal')
+    setPagoContaCasal(false)
 
     if (mode === 'receita' || mode === 'conta')
     {
@@ -151,6 +162,8 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
     setSaldoValor('')
     setPhase('form')
     setShowInvestimento(false)
+    setEscopoGasto('pessoal')
+    setPagoContaCasal(false)
     resetCheck()
     onClose()
   }
@@ -289,6 +302,11 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
       ? findCategory(categories, form.categoria_id)
       : undefined
 
+    const partnerReady = Boolean(partnerWs?.partnerUserId && partnerWs.workspaceId)
+    const shareWithPartner = partnerReady && escopoGasto === 'casal'
+    const pessoalNaContaCasal =
+      partnerReady && escopoGasto === 'pessoal' && pagoContaCasal
+
     await addTransaction({
       descricao: form.descricao.trim(),
       observacao: form.observacao.trim() || undefined,
@@ -307,6 +325,10 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
       forma_pagamento: formaPagamento,
       card_id: cardId,
       fatura_reserva_id: form.fatura_reserva_id !== '' ? form.fatura_reserva_id : undefined,
+      compartilhada: shareWithPartner,
+      partner_workspace_id:
+        shareWithPartner || pessoalNaContaCasal ? partnerWs!.workspaceId : null,
+      pago_conta_casal: pessoalNaContaCasal,
     })
 
     registerInteraction('financeiro')
@@ -581,6 +603,70 @@ export function NewTransactionModal({ isOpen, onClose }: NewTransactionModalProp
               className="w-full border border-line rounded-sl bg-chrome px-3 py-2.5 text-sm outline-none focus:border-accent/50"
             />
           </div>
+
+          {partnerWs?.partnerUserId && form.tipo === 'despesa' && (
+            <div className="space-y-2">
+              <p className={`font-mono text-[9px] uppercase ${AXEL_TEXT_SECONDARY}`}>
+                Escopo do gasto
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                  {
+                    setEscopoGasto('pessoal')
+                  }}
+                  className={`min-h-11 rounded-sl border px-3 py-2 text-left text-[13px] font-medium ${
+                    escopoGasto === 'pessoal'
+                      ? 'border-accent bg-accent/10 text-ink'
+                      : 'border-line bg-chrome text-ink-muted'
+                  }`}
+                >
+                  Pessoal
+                  <span className={`block text-[10px] font-normal mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                    Só você vê
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                  {
+                    setEscopoGasto('casal')
+                    setPagoContaCasal(false)
+                  }}
+                  className={`min-h-11 rounded-sl border px-3 py-2 text-left text-[13px] font-medium ${
+                    escopoGasto === 'casal'
+                      ? 'border-accent bg-accent/10 text-ink'
+                      : 'border-line bg-chrome text-ink-muted'
+                  }`}
+                >
+                  Casal
+                  <span className={`block text-[10px] font-normal mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                    Com {partnerWs.partnerDisplayName ?? 'parceiro'}
+                  </span>
+                </button>
+              </div>
+              {escopoGasto === 'pessoal' && (
+                <label className="flex items-start gap-3 min-h-11 rounded-sl border border-line px-3 py-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={pagoContaCasal}
+                    onChange={(e) => setPagoContaCasal(e.target.checked)}
+                    className="mt-1 accent-[var(--color-accent,#E8734A)]"
+                  />
+                  <span className="min-w-0">
+                    <span className={`block text-[13px] font-medium ${AXEL_TEXT_PRIMARY}`}>
+                      Pago na conta do casal
+                    </span>
+                    <span className={`block text-[11px] mt-0.5 ${AXEL_TEXT_SECONDARY}`}>
+                      Continua sendo gasto pessoal, mas marca que o valor saiu da conta
+                      compartilhada do casal.
+                    </span>
+                  </span>
+                </label>
+              )}
+            </div>
+          )}
 
           {(form.tipo === 'receita' || somenteReceita) && (
             <div className="space-y-1.5">

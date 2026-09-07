@@ -164,8 +164,16 @@ export function ProfileAdminUserEditor({ user, onUpdated, onDeleted }: ProfileAd
                 Admin
               </span>
             )}
+            {user.connected ? (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sl bg-emerald-500/15 text-emerald-700 text-[9px] font-mono uppercase">
+                Online
+              </span>
+            ) : null}
           </div>
-          <p className="text-[10px] text-ink-muted font-mono truncate">{user.user_id}</p>
+          <p className="text-[10px] text-ink-muted font-mono truncate">
+            {user.email || 'sem e-mail'}
+            {user.connected ? ' · conectada agora' : ''}
+          </p>
         </div>
         <span className="font-mono text-[11px] text-ink-muted shrink-0">Nv {user.level}</span>
         {open ? (

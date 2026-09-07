@@ -46,6 +46,7 @@
     { "source": "/api/today-verdict", "destination": "/api/axel/today-verdict" },
     { "source": "/api/weekly-digest-test", "destination": "/api/axel/weekly-digest-test" },
     { "source": "/api/account-delete", "destination": "/api/axel/account-delete" },
+    { "source": "/api/mood-week-report", "destination": "/api/axel/mood-week-report" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "crons": [

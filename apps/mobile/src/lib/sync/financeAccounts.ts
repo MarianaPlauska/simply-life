@@ -70,6 +70,69 @@ export async function fetchContasFixas(): Promise<ContaFixa[]>
   })
 }
 
+export async function insertContaFixa(input: {
+  nome: string
+  valor: number
+  diaVencimento?: number
+  categoria?: string
+}): Promise<ContaFixa>
+{
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) throw new Error('Não autenticado')
+
+  const dia = input.diaVencimento ?? new Date().getDate()
+  const { data, error } = await supabase
+    .from('fin_contas_fixas')
+    .insert({
+      user_id: uid,
+      nome: input.nome.trim(),
+      valor: input.valor,
+      dia_vencimento: dia,
+      categoria: input.categoria || 'outros',
+      ativa: true,
+    })
+    .select('*')
+    .single()
+
+  if (error) throw new Error(error.message)
+  const r = data as Record<string, unknown>
+  return {
+    id: Number(r.id),
+    nome: String(r.nome || input.nome),
+    valor: Number(r.valor) || input.valor,
+    diaVencimento: Number(r.dia_vencimento) || dia,
+    categoria: String(r.categoria || 'outros'),
+    ativa: true,
+  }
+}
+
+export async function updateContaFixa(
+  id: number,
+  patch: {
+    nome?: string
+    valor?: number
+    diaVencimento?: number
+    categoria?: string
+    ativa?: boolean
+  },
+): Promise<void>
+{
+  const payload: Record<string, unknown> = {}
+  if (patch.nome != null) payload.nome = patch.nome.trim()
+  if (patch.valor != null) payload.valor = patch.valor
+  if (patch.diaVencimento != null) payload.dia_vencimento = patch.diaVencimento
+  if (patch.categoria != null) payload.categoria = patch.categoria
+  if (patch.ativa != null) payload.ativa = patch.ativa
+
+  const { error } = await supabase
+    .from('fin_contas_fixas')
+    .update(payload)
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+}
+
 export async function fetchContasAPagar(): Promise<ContaAPagar[]>
 {
   const { data, error } = await supabase
@@ -93,7 +156,17 @@ export async function fetchContasAPagar(): Promise<ContaAPagar[]>
       titulo: String(r.titulo || 'Conta'),
       valor: Number(r.valor_alocado) || 0,
       vencimento: String(r.data_vencimento || '').slice(0, 10),
-      status: statusRaw === 'quitada' ? 'paga' : 'aberta',
+      status: statusRaw === 'quitada' || statusRaw === 'paga' ? 'paga' : 'aberta',
     }
   })
+}
+
+export async function updateContaAPagarStatus(id: number, paga: boolean): Promise<void>
+{
+  const { error } = await supabase
+    .from('fin_faturas_reservas')
+    .update({ status: paga ? 'quitada' : 'aberta' })
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
 }
