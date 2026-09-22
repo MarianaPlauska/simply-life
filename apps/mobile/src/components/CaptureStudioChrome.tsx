@@ -41,7 +41,7 @@ export function CaptureStudioChrome({
   const compactH = Math.round(Math.min(340, vh * 0.46))
   const fullH = Math.round(vh * 0.92)
   const span = Math.max(1, fullH - compactH)
-  const paper = colors.canvas
+  const paper = colors.surface
   const sheetRadius = 36
 
   useEffect(() =>
@@ -123,7 +123,7 @@ export function CaptureStudioChrome({
           pointerEvents="none"
           style={{
             ...absoluteFill,
-            backgroundColor: 'rgba(26, 22, 18, 0.38)',
+            backgroundColor: colors.overlay,
             opacity: fade,
           }}
         />

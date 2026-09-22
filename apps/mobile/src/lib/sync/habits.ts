@@ -1,6 +1,11 @@
 import { supabase } from '../supabase'
 import type { HabitoDiario } from '@simply-life/shared'
-import { AGUA_META_COPOS, PROTEINA_META_G, aguaMlPorCopo } from '@simply-life/shared'
+import {
+  AGUA_META_COPOS,
+  AGUA_ML_POR_COPO,
+  PROTEINA_META_G,
+  aguaMlPorCopo,
+} from '@simply-life/shared'
 
 function mapHabito(row: Record<string, unknown>): HabitoDiario
 {
@@ -68,6 +73,65 @@ export async function patchHabitoAgua(
   const { error } = await supabase
     .from('habitos_diarios')
     .update(payload)
+    .eq('id', Number(habitId))
+
+  if (error) throw new Error(error.message)
+}
+
+/** Garante hábito de água no Supabase para contas sem linha ainda. */
+export async function ensureAguaHabit(): Promise<HabitoDiario | null>
+{
+  const existing = await fetchHabitos().catch(() => [])
+  const agua = existing.find((h) => h.tipo === 'agua')
+  if (agua && !agua.id.startsWith('h-')) return agua
+
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) return agua ?? null
+
+  const { data, error } = await supabase
+    .from('habitos_diarios')
+    .insert({
+      user_id: uid,
+      tipo: 'agua',
+      nome_exibicao: 'Água',
+      meta_diaria: AGUA_META_COPOS,
+      progresso_atual: 0,
+      unidade: 'copos',
+      config: { incremento: 1, ml_por_copo: AGUA_ML_POR_COPO },
+    })
+    .select()
+    .single()
+
+  if (error) throw new Error(error.message)
+  return mapHabito(data as Record<string, unknown>)
+}
+
+export async function patchHabitoConfig(
+  habitId: string,
+  config: Record<string, unknown>,
+): Promise<void>
+{
+  const { error } = await supabase
+    .from('habitos_diarios')
+    .update({ config })
+    .eq('id', Number(habitId))
+
+  if (error) throw new Error(error.message)
+}
+
+export async function syncAguaProgress(
+  habitId: string,
+  progressoAtual: number,
+  config: Record<string, unknown>,
+): Promise<void>
+{
+  const { error } = await supabase
+    .from('habitos_diarios')
+    .update({
+      progresso_atual: progressoAtual,
+      config,
+    })
     .eq('id', Number(habitId))
 
   if (error) throw new Error(error.message)

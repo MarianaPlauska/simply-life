@@ -5,7 +5,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  useWindowDimensions,
 } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState, Fragment } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text, PrimaryButton, PillTabs, Field } from '../ui'
@@ -19,7 +21,14 @@ import {
   fetchPartnerWorkspace,
   type PartnerWorkspaceState,
 } from '../lib/partnerWorkspace'
-import { applyTaskMeta, todayIso, isoMonthsFrom, type FinanceCategory, type FinanceEscopo } from '@simply-life/shared'
+import {
+  applyTaskMeta,
+  todayIso,
+  isoMonthsFrom,
+  moodLabel,
+  type FinanceCategory,
+  type FinanceEscopo,
+} from '@simply-life/shared'
 import { parseExpenseQuick } from '../lib/sync/finance'
 import { FinanceCategoriesSheet } from './finance/FinanceCategoriesSheet'
 import { FinanceFixasSheet } from './finance/FinanceFixasSheet'
@@ -29,8 +38,11 @@ import {
   parseCaptureHora,
   type CaptureTaskDraft,
 } from './CaptureTaskForm'
+import { CaptureExpenseFields } from './CaptureExpenseFields'
+import { CaptureNoteFields } from './CaptureNoteFields'
 import { CaptureStudioChrome } from './CaptureStudioChrome'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
+import { useNotesStore } from '../store/notesStore'
 
 const TABS: { id: CaptureKind; label: string }[] = [
   { id: 'dump', label: 'Dump' },
@@ -43,7 +55,7 @@ const PLACEHOLDERS: Record<CaptureKind, string> = {
   dump: 'Uma linha por item - tarefas ou “café 12,50”',
   task: 'O que precisa ser feito?',
   expense: 'Ex: café 12,50',
-  note: 'Como foi o dia?',
+  note: 'Escreva o que ficou do dia',
 }
 
 type Pagamento = 'conta' | 'cartao'
@@ -67,7 +79,7 @@ function studioCopy(
   {
     return {
       title: 'Nova tarefa',
-      subtitle: 'Título, to-dos e contexto — no ritmo de um editor, não de um dump.',
+      subtitle: 'Título, to-dos e contexto. No ritmo de um editor, não de um dump.',
     }
   }
   if (kind === 'expense')
@@ -76,7 +88,7 @@ function studioCopy(
     {
       return {
         title: 'Nova receita',
-        subtitle: 'O que entrou na conta — salário, extra, transferência.',
+        subtitle: 'O que entrou na conta: salário, extra, transferência.',
       }
     }
     return {
@@ -87,8 +99,8 @@ function studioCopy(
   if (kind === 'note')
   {
     return {
-      title: 'Como você está',
-      subtitle: 'Humor e um recado para o diário.',
+      title: 'Diário do dia',
+      subtitle: 'Humor e uma entrada rápida. Texto opcional.',
     }
   }
   return { title: 'Captura', subtitle: 'Uma linha por item.' }
@@ -103,6 +115,8 @@ export function CaptureSheet()
 {
   const { colors, space, radius } = useTheme()
   const insets = useSafeAreaInsets()
+  const { height: windowH } = useWindowDimensions()
+  const sheetMaxH = Math.round(windowH * 0.88)
   const open = useCaptureStore((s) => s.open)
   const kind = useCaptureStore((s) => s.kind)
   const listId = useCaptureStore((s) => s.listId)
@@ -123,6 +137,8 @@ export function CaptureSheet()
   const folders = useKanbanListsStore((s) => s.lists)
   const hydrateFolders = useKanbanListsStore((s) => s.hydrate)
   const addFolder = useKanbanListsStore((s) => s.addList)
+  const createNote = useNotesStore((s) => s.create)
+  const updateNote = useNotesStore((s) => s.update)
 
   const [text, setText] = useState('')
   const [mood, setMood] = useState<number | null>(null)
@@ -198,11 +214,23 @@ export function CaptureSheet()
     closeCapture()
   }
 
+  const canSave = (): boolean =>
+  {
+    if (saving) return false
+    if (kind === 'task') return Boolean(taskDraft.titulo.trim())
+    if (kind === 'note') return mood != null
+    return Boolean(text.trim())
+  }
+
   const onSave = async () =>
   {
     if (kind === 'task')
     {
       if (!taskDraft.titulo.trim()) return
+    }
+    else if (kind === 'note')
+    {
+      if (mood == null) return
     }
     else if (!text.trim()) return
     if (kind === 'note' && mood == null)
@@ -328,7 +356,26 @@ export function CaptureSheet()
       }
       else if (kind === 'note')
       {
-        await addHumor(mood ?? 3, text.trim(), isGuest)
+        const body = text.trim()
+        await addHumor(mood ?? 3, body || undefined, isGuest)
+        if (body && !isGuest)
+        {
+          try
+          {
+            const row = await createNote('diario')
+            if (row)
+            {
+              await updateNote(row.id, {
+                titulo: `Humor: ${moodLabel(mood ?? 3)}`,
+                conteudo: body,
+              })
+            }
+          }
+          catch
+          {
+            /* humor já persistiu; nota extra é complementar */
+          }
+        }
       }
       else
       {
@@ -354,11 +401,29 @@ export function CaptureSheet()
     }
   }
 
+  const extraSheets = (
+    <Fragment>
+      <FinanceCategoriesSheet visible={catsOpen} onClose={() => setCatsOpen(false)} />
+      <FinanceFixasSheet visible={fixasOpen} onClose={() => setFixasOpen(false)} />
+    </Fragment>
+  )
+
+  // No web o Modal fechado ainda pinta o sheet; só monta quando aberto.
+  if (!open)
+  {
+    return extraSheets
+  }
+
   return (
     <Fragment>
-    <Modal visible={open} animationType={studio ? 'fade' : 'slide'} transparent onRequestClose={resetAndClose}>
+      <Modal
+        visible
+        animationType={studio ? 'fade' : 'slide'}
+        transparent
+        onRequestClose={resetAndClose}
+      >
       {studio ? (
-        <ThemeProvider forceMode="light">
+        <ThemeProvider forceMode="dark">
           <CaptureStudioChrome
             open={open}
             title={studioCopy(kind, lancamento).title}
@@ -378,13 +443,16 @@ export function CaptureSheet()
                     label="Salvar"
                     loading={saving}
                     onPress={() => void onSave()}
-                    disabled={(kind === 'task' ? !taskDraft.titulo.trim() : !text.trim()) || saving}
+                    disabled={!canSave()}
                   />
                 )}
               </>
             )}
           >
             {kind === 'note' ? <MoodFaceRow value={mood} onChange={setMood} /> : null}
+            {kind === 'note' ? (
+              <CaptureNoteFields text={text} onTextChange={setText} />
+            ) : null}
             {kind === 'task' ? (
               <CaptureTaskForm draft={taskDraft} onChange={setTaskDraft} />
             ) : null}
@@ -435,7 +503,7 @@ export function CaptureSheet()
                 onEditFixas={() => setFixasOpen(true)}
               />
             ) : null}
-            {kind !== 'task' && kind !== 'expense' ? (
+            {kind !== 'task' && kind !== 'expense' && kind !== 'note' ? (
               <Field
                 label="Conteúdo"
                 placeholder={PLACEHOLDERS[kind]}
@@ -469,19 +537,29 @@ export function CaptureSheet()
               padding: space.lg,
               paddingBottom: Math.max(insets.bottom, space.lg),
               gap: space.md,
-              minHeight: kind === 'task' ? 420 : 320,
+              height: sheetMaxH,
+              flexDirection: 'column',
             }}
           >
-            <View
-              style={{
-                alignSelf: 'center',
-                width: 40,
-                height: 4,
-                borderRadius: 999,
-                backgroundColor: colors.hairlineStrong,
-              }}
-            />
-            <Text variant="section">Captura rápida</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Text variant="section">Captura rápida</Text>
+              <Pressable
+                onPress={resetAndClose}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar captura"
+                hitSlop={10}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  backgroundColor: colors.elevated,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Ionicons name="close" size={20} color={colors.inkMuted} />
+              </Pressable>
+            </View>
             <PillTabs
               tabs={TABS}
               value={kind}
@@ -492,13 +570,15 @@ export function CaptureSheet()
                 setSaved(false)
               }}
             />
-            {kind === 'note' ? <MoodFaceRow value={mood} onChange={setMood} /> : null}
             <ScrollView
-              style={{ maxHeight: kind === 'expense' || kind === 'task' ? 440 : undefined }}
+              style={{ flex: 1, minHeight: 0 }}
+              contentContainerStyle={{ gap: space.md, paddingBottom: 4 }}
               nestedScrollEnabled
               keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator
             >
               <View style={{ gap: space.md }}>
+                {kind === 'note' ? <MoodFaceRow value={mood} onChange={setMood} /> : null}
                 {kind === 'task' ? (
                   <CaptureTaskForm draft={taskDraft} onChange={setTaskDraft} />
                 ) : null}
@@ -551,7 +631,11 @@ export function CaptureSheet()
                   />
                 ) : null}
 
-                {kind !== 'task' && kind !== 'expense' ? (
+                {kind === 'note' ? (
+                  <CaptureNoteFields text={text} onTextChange={setText} />
+                ) : null}
+
+                {kind !== 'task' && kind !== 'expense' && kind !== 'note' ? (
                 <Field
                   label="Conteúdo"
                   placeholder={PLACEHOLDERS[kind]}
@@ -591,16 +675,15 @@ export function CaptureSheet()
                 label="Salvar"
                 loading={saving}
                 onPress={() => void onSave()}
-                disabled={(kind === 'task' ? !taskDraft.titulo.trim() : !text.trim()) || saving}
+                disabled={!canSave()}
               />
             )}
           </Pressable>
         </Pressable>
       </KeyboardAvoidingView>
       )}
-    </Modal>
-    <FinanceCategoriesSheet visible={catsOpen} onClose={() => setCatsOpen(false)} />
-    <FinanceFixasSheet visible={fixasOpen} onClose={() => setFixasOpen(false)} />
+      </Modal>
+      {extraSheets}
     </Fragment>
   )
 }

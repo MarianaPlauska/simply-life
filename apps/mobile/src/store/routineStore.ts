@@ -16,6 +16,10 @@ type State = {
     isGroup?: boolean
   }) => RoutineHabit | null
   remove: (id: string) => void
+  update: (
+    id: string,
+    patch: Partial<Pick<RoutineHabit, 'title' | 'cadence' | 'dailyTarget' | 'weeklyTarget'>>,
+  ) => void
   tick: (id: string, iso?: string) => void
   untick: (id: string, iso?: string) => void
   completeGroup: (parentId: string, iso?: string) => void
@@ -56,11 +60,39 @@ export const useRoutineStore = create<State>((set, get) => ({
     return item
   },
 
+  update: (id, patch) =>
+  {
+    const items = get().items.map((h) =>
+    {
+      if (h.id !== id) return h
+      return {
+        ...h,
+        ...patch,
+        title: patch.title?.trim() ? patch.title.trim() : h.title,
+        dailyTarget: patch.dailyTarget != null ? Math.max(1, patch.dailyTarget) : h.dailyTarget,
+        weeklyTarget: patch.weeklyTarget != null ? Math.max(1, patch.weeklyTarget) : h.weeklyTarget,
+      }
+    })
+    set({ items })
+    void saveRoutineItems(items)
+  },
+
   remove: (id) =>
   {
+    const habit = get().items.find((h) => h.id === id)
+    const drop = new Set<string>([id])
+    if (habit?.isGroup)
+    {
+      get().items
+        .filter((h) => h.parentId === id)
+        .forEach((h) => drop.add(h.id))
+    }
     const items = get().items.filter((h) => h.id !== id && h.parentId !== id)
     const logs = { ...get().logs }
-    delete logs[id]
+    for (const rid of drop)
+    {
+      delete logs[rid]
+    }
     set({ items, logs })
     void saveRoutineItems(items)
     void saveRoutineLogs(logs)

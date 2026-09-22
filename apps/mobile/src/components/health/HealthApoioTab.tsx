@@ -5,6 +5,8 @@ import { TCC_JOURNEYS } from '@simply-life/shared'
 import { Card, Text, SectionHeader, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { CrisisSupportCard } from './CrisisSupportCard'
+import { HealthCalmSection } from './HealthCalmSection'
+import { HealthFocusSection } from './HealthFocusSection'
 import { HealthNeuroFocusPanel } from './HealthNeuroFocusPanel'
 import { loadRecentTccItems, type TccRecentItem } from '../../lib/tccPersist'
 
@@ -32,7 +34,7 @@ function recentKindLabel(item: TccRecentItem): string
 /** Saúde → Apoio: crise, foco/TDAH e exercícios de TCC. */
 export function HealthApoioTab()
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space } = useTheme()
   const router = useRouter()
   const [recent, setRecent] = useState<TccRecentItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -63,6 +65,10 @@ export function HealthApoioTab()
 
       <CrisisSupportCard />
 
+      <HealthCalmSection />
+
+      <HealthFocusSection />
+
       <HealthNeuroFocusPanel />
 
       <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
@@ -77,7 +83,7 @@ export function HealthApoioTab()
             style={{
               minHeight: 56,
               padding: space.md,
-              borderRadius: radius.lg,
+              borderRadius: 18,
               gap: 4,
               backgroundColor: colors.axelMuted,
               borderWidth: 1,

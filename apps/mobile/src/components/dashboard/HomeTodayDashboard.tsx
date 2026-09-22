@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react'
+import { useMemo, useState, type ComponentType, type ReactNode } from 'react'
 import { View, TextInput, Pressable, ScrollView } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { Search as LucideSearch } from 'lucide-react-native'
@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router'
 import {
   consecutiveActivity,
   findHabit,
-  lifeGoalNeedsRefresh,
   searchHomeItems,
   uniqueIsoDates,
   type FinanceTx,
@@ -16,9 +15,7 @@ import { Text, ProgressRing } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useGamificationStore } from '../../store/gamificationStore'
-import { usePrefsStore } from '../../store/prefsStore'
 import { LifeGoalMicroLine, LifeGoalSheet } from './LifeGoalSheet'
-import { MoodGoalAlertCard } from './MoodGoalAlertCard'
 
 const SearchIcon = LucideSearch as ComponentType<{
   size?: number
@@ -49,19 +46,9 @@ export function HomeTodayDashboard({
   const humor = useDataStore((s) => s.humor) ?? []
   const habits = useDataStore((s) => s.habits) ?? []
   const streak = useGamificationStore((s) => s.streak)
-  const lifeGoal = usePrefsStore((s) => s.prefs.life_goal)
-  const prefsLoaded = usePrefsStore((s) => s.loaded)
   const agua = findHabit(habits, 'agua')
   const [query, setQuery] = useState('')
   const [goalOpen, setGoalOpen] = useState(false)
-
-  useEffect(() =>
-  {
-    if (prefsLoaded && lifeGoalNeedsRefresh(lifeGoal))
-    {
-      setGoalOpen(true)
-    }
-  }, [prefsLoaded, lifeGoal])
 
   const todayTotal = pending + doneToday
   const pct = todayTotal > 0 ? Math.round((doneToday / todayTotal) * 100) : 0
@@ -208,7 +195,7 @@ export function HomeTodayDashboard({
                 </Text>
                 <Text variant="caption" style={{ color: colors.widgetMuted }}>
                   {todayTotal > 0
-                    ? `${pct}% do dia — um passo de cada vez`
+                    ? `${pct}% do dia, um passo de cada vez`
                     : 'As tarefas da sua conta aparecem aqui'}
                 </Text>
               </View>
@@ -222,18 +209,18 @@ export function HomeTodayDashboard({
                 labelColor={colors.widgetInk}
               />
             </View>
-            <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-              <Text variant="micro" style={{ color: colors.widgetMuted }}>
-                {streak}d sequência
-              </Text>
-              <Text variant="micro" style={{ color: colors.widgetMuted }}>
-                {weekLogged}/7 dias com registro
-              </Text>
+            <View style={{ gap: 10 }}>
+              <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Text variant="micro" style={{ color: colors.widgetMuted }}>
+                  {streak}d sequência
+                </Text>
+                <Text variant="micro" style={{ color: colors.widgetMuted }}>
+                  {weekLogged}/7 dias com registro
+                </Text>
+              </View>
               <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />
             </View>
           </View>
-
-          <MoodGoalAlertCard humor={humor} goal={lifeGoal} />
 
           <View style={{ flexDirection: 'row', gap: 10 }}>
             {(

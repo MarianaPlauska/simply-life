@@ -7,6 +7,7 @@ import {
   habitPct,
   AGUA_META_COPOS,
   aguaMlPorCopo,
+  currentWeekIsos,
 } from '@simply-life/shared'
 import { Text, ProgressRing, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -21,27 +22,18 @@ const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 
 function coachLine(pct: number, left: number): string
 {
-  if (pct >= 100) return 'Meta do dia fechada. Ótimo ritmo.'
+  if (pct >= 100) return 'Meta atingida hoje. Hidratação em dia.'
+  if (pct >= 70) return `Faltam ${left} copo${left === 1 ? '' : 's'}. Você está quase na meta.`
   if (pct >= 60) return `${left} copo${left === 1 ? '' : 's'} para a meta.`
-  if (pct >= 20) return 'Siga no ritmo — um copo agora ajuda.'
+  if (pct >= 20) return 'Siga no ritmo. Um copo agora ajuda.'
   return 'Comece com um copo agora.'
-}
-
-function last7Isos(): string[]
-{
-  return Array.from({ length: 7 }).map((_, i) =>
-  {
-    const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
-    return localTodayIso(d)
-  })
 }
 
 type Props = {
   compact?: boolean
 }
 
-/** Card de hidratação na Home — copo +, −, ml e meta em litros. */
+/** Card de hidratação na Home: copos, semana e ações rápidas. */
 export function HomeWaterProgressCard({ compact }: Props)
 {
   const { colors } = useTheme()
@@ -51,7 +43,7 @@ export function HomeWaterProgressCard({ compact }: Props)
   const removeWaterCup = useDataStore((s) => s.removeWaterCup)
   const streak = useGamificationStore((s) => s.streak)
   const lastSipAt = useWaterLogStore((s) => s.lastSipAt)
-  const days = useWaterLogStore((s) => s.days)
+  const waterWeekDays = useDataStore((s) => s.waterWeekDays)
   const hydrateLog = useWaterLogStore((s) => s.hydrate)
   const [edit, setEdit] = useState(false)
 
@@ -69,8 +61,8 @@ export function HomeWaterProgressCard({ compact }: Props)
   const mlMeta = meta * ml
   const left = Math.max(0, meta - atual)
   const mins = minutesSinceSip(lastSipAt)
-  const week = useMemo(() => last7Isos(), [])
-  const todayIso = week[6]
+  const week = useMemo(() => currentWeekIsos(), [])
+  const todayIso = localTodayIso()
   const maxBar = Math.max(meta, 1)
 
   return (
@@ -133,11 +125,12 @@ export function HomeWaterProgressCard({ compact }: Props)
 
       {!compact ? (
         <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 52 }}>
-          {week.map((iso, i) =>
+          {week.map((iso) =>
           {
-            const cups = iso === todayIso ? atual : (days[iso] ?? 0)
-            const h = Math.max(6, Math.round((cups / maxBar) * 44))
             const isToday = iso === todayIso
+            const isFuture = iso > todayIso
+            const cups = isFuture ? 0 : (isToday ? atual : (waterWeekDays[iso] ?? 0))
+            const h = isFuture ? 4 : Math.max(6, Math.round((cups / maxBar) * 44))
             return (
               <View key={iso} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
                 <View
@@ -155,6 +148,7 @@ export function HomeWaterProgressCard({ compact }: Props)
                       height: h,
                       borderRadius: 8,
                       backgroundColor: isToday ? colors.health : colors.healthMuted,
+                      opacity: isFuture ? 0.35 : 1,
                     }}
                   />
                 </View>

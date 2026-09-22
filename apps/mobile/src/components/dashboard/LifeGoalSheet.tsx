@@ -32,6 +32,8 @@ export function LifeGoalSheet({ visible, onClose }: Props)
 
   const template = LIFE_GOAL_TEMPLATES.find((t) => t.id === category)
 
+  if (!visible) return null
+
   const onSave = async () =>
   {
     const trimmed = title.trim() || template?.example || 'Minha meta'
@@ -115,13 +117,16 @@ export function LifeGoalSheet({ visible, onClose }: Props)
   )
 }
 
-/** Linha compacta na área de progresso — sem alterar layout. */
+/** Meta da semana/mês — destaque leve na área de progresso. */
 export function LifeGoalMicroLine({ onPress }: { onPress: () => void })
 {
   const { colors } = useTheme()
   const goal = usePrefsStore((s) => s.prefs.life_goal)
   const needs = lifeGoalNeedsRefresh(goal)
   const label = lifeGoalMicroLabel(goal)
+  const cadence = goal?.cadence === 'month' ? 'mês' : 'semana'
+  const title = goal?.title?.trim()
+  const hasGoal = Boolean(title) && !needs
 
   return (
     <Pressable
@@ -129,18 +134,35 @@ export function LifeGoalMicroLine({ onPress }: { onPress: () => void })
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint="Abre a definição da sua meta"
-      hitSlop={6}
+      style={{
+        alignSelf: 'flex-start',
+        maxWidth: '100%',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 10,
+        backgroundColor: hasGoal ? colors.axelMuted : colors.elevated,
+        borderWidth: 1,
+        borderColor: hasGoal ? `${colors.axel}33` : colors.hairline,
+      }}
     >
-      <Text
-        variant="micro"
-        style={{
-          color: needs ? colors.axel : colors.widgetMuted,
-          maxWidth: 220,
-        }}
-        numberOfLines={1}
-      >
-        {label}
-      </Text>
+      {hasGoal ? (
+        <Text variant="micro" numberOfLines={2}>
+          <Text style={{ color: colors.axel, fontWeight: '700' }}>
+            Meta {cadence}:{' '}
+          </Text>
+          <Text style={{ color: colors.widgetInk }}>
+            {title}
+          </Text>
+        </Text>
+      ) : (
+        <Text
+          variant="micro"
+          style={{ color: colors.axel, fontWeight: '600' }}
+          numberOfLines={1}
+        >
+          {label}
+        </Text>
+      )}
     </Pressable>
   )
 }

@@ -38,10 +38,10 @@ import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDash
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
-import { HomeCompanionStrip } from '../../src/components/dashboard/HomeCompanionStrip'
 import { HomeRpgStrip } from '../../src/components/dashboard/HomeRpgStrip'
 import { PersonalSummaryGrid } from '../../src/components/dashboard/PersonalSummaryGrid'
 import { LifeSummaryReport } from '../../src/components/metrics/LifeSummaryReport'
+import { HomeDesktopStage } from '../../src/components/dashboard/HomeDesktopStage'
 import { TabShell } from '../../src/components/dashboard/TabShell'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { usePrefsStore } from '../../src/store/prefsStore'
@@ -59,7 +59,7 @@ function greetingForHour(h: number): string
 export default function DashboardScreen()
 {
   const { colors, space, mode, setMode } = useTheme()
-  const { showRail, isDesktop, isTablet, width } = useWorkspace()
+  const { showRail, isDesktop, isTablet } = useWorkspace()
   const router = useRouter()
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -106,7 +106,6 @@ export default function DashboardScreen()
   const showSleepForm = sleepOnHome && isMorning && !sleepDone
   const humorHoje = humorDoDia(humor)?.humor
   const moodDone = humorHoje != null
-  const lowMood = humorHoje != null && humorHoje <= 2
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
   const [axelUntil, setAxelUntil] = useState(0)
@@ -229,70 +228,101 @@ export default function DashboardScreen()
           onAccount={() => setMenuOpen(true)}
         />
 
-        <HomeTodayDashboard
-          tasks={tasks}
-          finance={finance}
-          pending={openTasks.length}
-          doneToday={doneToday}
-          ritualSlot={
-            showMorningRitual ? (
-              <HomeMorningRitual
-                needSleep={showSleepForm}
-                needMood={showMoodForm}
-                onMoodRegistered={() => setAxelUntil(Date.now() + 60_000)}
-              />
-            ) : null
-          }
-        />
-
-        <MoodWeekReportGate humor={humor} />
-
-        {rpgMode ? <HomeRpgStrip /> : null}
-
-        <HomeDayTimeline tasks={today} />
-
-        {showAxel || waterOnHome ? (
-          (isDesktop || isTablet) && waterOnHome ? (
-            <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
-              <View style={{ flex: 1, minWidth: 0, gap: 12 }}>
+        {isDesktop ? (
+          <HomeDesktopStage
+            dashboard={(
+              <>
+                <HomeTodayDashboard
+                  tasks={tasks}
+                  finance={finance}
+                  pending={openTasks.length}
+                  doneToday={doneToday}
+                  ritualSlot={
+                    showMorningRitual ? (
+                      <HomeMorningRitual
+                        needSleep={showSleepForm}
+                        needMood={showMoodForm}
+                        onMoodRegistered={() => setAxelUntil(Date.now() + 60_000)}
+                      />
+                    ) : null
+                  }
+                />
+                {rpgMode ? <HomeRpgStrip /> : null}
+              </>
+            )}
+            side={(
+              <>
+                <HomeDayTimeline tasks={today} fill />
+                {waterOnHome ? <HomeWaterProgressCard compact /> : null}
                 {showAxel ? <AxelDayBrief /> : null}
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <HomeWaterProgressCard compact={Boolean(isDesktop && width >= 1280)} />
-              </View>
+                <MoodWeekReportGate humor={humor} />
+                <View style={{ gap: 10 }}>
+                  <Text variant="section" style={{ fontSize: 16 }}>
+                    Atalhos
+                  </Text>
+                  <HomeMetricShortcuts />
+                </View>
+              </>
+            )}
+            dayBody={<HomeKpiSquares items={kpiItems} />}
+          />
+        ) : (
+          <>
+            <HomeTodayDashboard
+              tasks={tasks}
+              finance={finance}
+              pending={openTasks.length}
+              doneToday={doneToday}
+              ritualSlot={
+                showMorningRitual ? (
+                  <HomeMorningRitual
+                    needSleep={showSleepForm}
+                    needMood={showMoodForm}
+                    onMoodRegistered={() => setAxelUntil(Date.now() + 60_000)}
+                  />
+                ) : null
+              }
+            />
+
+            <MoodWeekReportGate humor={humor} />
+
+            {rpgMode ? <HomeRpgStrip /> : null}
+
+            <HomeDayTimeline tasks={today} />
+
+            {showAxel || waterOnHome ? (
+              (isTablet) && waterOnHome ? (
+                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
+                  <View style={{ flex: 1, minWidth: 0, gap: 12 }}>
+                    {showAxel ? <AxelDayBrief /> : null}
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <HomeWaterProgressCard />
+                  </View>
+                </View>
+              ) : (
+                <>
+                  {showAxel ? <AxelDayBrief /> : null}
+                  {waterOnHome ? <HomeWaterProgressCard /> : null}
+                </>
+              )
+            ) : null}
+
+            <View style={{ gap: 12 }}>
+              <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
+                Seu dia
+              </Text>
+              <HomeKpiSquares items={kpiItems} />
             </View>
-          ) : (
-            <>
-              {showAxel ? <AxelDayBrief /> : null}
-              {waterOnHome ? <HomeWaterProgressCard /> : null}
-            </>
-          )
-        ) : null}
 
-        {lowMood && moodDone ? <HomeCompanionStrip lowMood /> : null}
-
-        {statsOnHome ? (
-          <View style={{ gap: 8 }}>
-            <Text variant="section">Desempenho</Text>
-            <LifeSummaryReport variant="compact" />
-          </View>
-        ) : null}
-
-        <View style={{ gap: 12 }}>
-          <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
-            Seu dia
-          </Text>
-          <HomeKpiSquares items={kpiItems} />
-        </View>
-
-        <View style={{ gap: 12 }}>
-          <Text variant="section" style={{ fontSize: 17 }}>
-            Atalhos
-          </Text>
-          <HomeMetricShortcuts />
-        </View>
-
-        <PersonalSummaryGrid />
+            <View style={{ gap: 12 }}>
+              <Text variant="section" style={{ fontSize: 17 }}>
+                Atalhos
+              </Text>
+              <HomeMetricShortcuts />
+            </View>
+          </>
+        )}
 
         {prefsLoaded && !prefs.home_metrics_configured_at ? (
           <Pressable
@@ -315,11 +345,12 @@ export default function DashboardScreen()
           <View style={{ flex: showRail ? 8 : undefined, minWidth: 0, gap: space.xl }}>
             <HomeCollapsible
               title="Resumo do dia"
-              subtitle={statsOnHome ? 'Agenda, saúde, remédios e panorama' : 'Desempenho, agenda e panorama'}
+              subtitle="Corpo, desempenho, agenda e panorama"
               pill="abrir"
               defaultOpen={false}
             >
               <View style={{ gap: space.sm, paddingTop: space.xs }}>
+                <PersonalSummaryGrid />
                 {!statsOnHome ? <LifeSummaryReport variant="compact" /> : null}
                 <View style={{ gap: 10 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>

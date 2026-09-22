@@ -21,6 +21,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
+import { openFocusForTask } from '../../lib/openFocus'
 
 /** Sheet arredondado: edição leve + evolução em marcos com nota para o eu do futuro. */
 export function TaskEvolveSheet()
@@ -181,6 +182,19 @@ export function TaskEvolveSheet()
                 )
               }}
             />
+            {task.status !== 'done' ? (
+              <PrimaryButton
+                label="Focar nesta tarefa"
+                variant="secondary"
+                icon="timer-outline"
+                onPress={() =>
+                {
+                  void persist(step, note, title)
+                  close()
+                  openFocusForTask(router, task.id)
+                }}
+              />
+            ) : null}
             <PrimaryButton
               label="Ficha completa"
               variant="ghost"

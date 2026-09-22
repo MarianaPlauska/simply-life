@@ -3,6 +3,7 @@ import {
   buildLocalMoodWeekReportAi,
   buildMoodWeekReportAiRequest,
   moodGoalPeriodStats,
+  withoutEmDash,
   type HumorRegistro,
   type LifeGoal,
   type MoodWeekReport,
@@ -105,11 +106,14 @@ export function useMoodWeekReportAi(
         {
           setState({
             ai: {
-              summary: String(json.summary || local.summary),
+              summary: withoutEmDash(String(json.summary || local.summary)),
               themes: Array.isArray(json.themes) && json.themes.length
-                ? json.themes
+                ? json.themes.map((t) => ({
+                  ...t,
+                  label: withoutEmDash(String(t.label || '')),
+                }))
                 : local.themes,
-              careNote: String(json.careNote || local.careNote),
+              careNote: withoutEmDash(String(json.careNote || local.careNote)),
               alertLevel: json.alertLevel || local.alertLevel,
               source: json.source || 'local',
               iaDisponivel: Boolean(json.iaDisponivel),

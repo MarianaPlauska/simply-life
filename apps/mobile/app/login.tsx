@@ -44,13 +44,13 @@ export default function LoginScreen()
   {
     return (
       <View style={{ flex: 1, flexDirection: 'row', minHeight: minH, backgroundColor: colors.canvas }}>
-        <View style={{ flex: 0.46, minWidth: 360 }}>
+        <View style={{ flex: 0.58, minWidth: 380 }}>
           <LoginBrandPanel />
         </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{
-            flex: 0.54,
+            flex: 0.42,
             justifyContent: 'center',
             alignItems: 'center',
             paddingHorizontal: space.xxl,
@@ -115,7 +115,7 @@ export default function LoginScreen()
       >
         <View style={{ position: 'relative' }}>
           <AuthHeader
-            welcomeLabel={authMode === 'login' ? 'Bem-vindo' : 'Olá'}
+            welcomeLabel={authMode === 'register' ? 'Comece.\nOrganize.\nSimply.' : 'Organize.\nPlaneje.\nSimply.'}
             compact={authMode === 'register'}
             width={vw}
           />

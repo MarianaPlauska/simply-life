@@ -34,6 +34,8 @@ export type WorkspacePrefs = {
   a11y_large_text?: boolean
   a11y_reduce_motion?: boolean
   a11y_high_contrast?: boolean
+  /** Vibração nas trocas de fase da respiração guiada. */
+  calm_haptics_enabled?: boolean
   /** Opt-in futuro: sincronizar perfil/prefs na nuvem */
   cloud_sync_opt_in?: boolean
   ai_coach_enabled: boolean
@@ -77,6 +79,7 @@ export const DEFAULT_WORKSPACE_PREFS: WorkspacePrefs = {
   a11y_large_text: false,
   a11y_reduce_motion: false,
   a11y_high_contrast: false,
+  calm_haptics_enabled: true,
   cloud_sync_opt_in: false,
   ai_coach_enabled: true,
   pomodoro_focus: 25,
@@ -236,6 +239,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
       parseNotifyCadence(raw?.notify_cadence)
       ?? (raw?.setup_completed_at ? 'once' : DEFAULT_WORKSPACE_PREFS.notify_cadence),
     adhd_support: Boolean(raw?.adhd_support),
+    calm_haptics_enabled: raw?.calm_haptics_enabled !== false,
     gamification_mode:
       raw?.gamification_mode === 'rpg' ? 'rpg' : 'calm',
     home_module_order:

@@ -1,6 +1,11 @@
 import { Platform } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
-import { defaultRoutines, type RoutineHabit, type RoutineLogs } from '@simply-life/shared'
+import {
+  defaultRoutines,
+  normalizeLegacyRoutines,
+  type RoutineHabit,
+  type RoutineLogs,
+} from '@simply-life/shared'
 
 const ITEMS_KEY = 'simply-life-routines-v1'
 const LOGS_KEY = 'simply-life-routine-logs-v1'
@@ -68,6 +73,15 @@ export async function loadRoutines(): Promise<{ items: RoutineHabit[]; logs: Rou
   {
     items = defaultRoutines()
     await saveRoutineItems(items)
+  }
+  else
+  {
+    const normalized = normalizeLegacyRoutines(items)
+    if (JSON.stringify(normalized) !== JSON.stringify(items))
+    {
+      items = normalized
+      await saveRoutineItems(items)
+    }
   }
   let logs: RoutineLogs = {}
   try

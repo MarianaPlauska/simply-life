@@ -98,7 +98,13 @@ function RootNavigator()
         <Stack.Screen name="calendario" />
         <Stack.Screen name="anotacoes" />
         <Stack.Screen name="foco" />
+        <Stack.Screen
+          name="academia/sessao"
+          options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
+        />
         <Stack.Screen name="ofensiva" />
+        <Stack.Screen name="calm/box-breathing" />
+        <Stack.Screen name="calm/grounding" />
         <Stack.Screen name="tcc/thought-record" />
         <Stack.Screen name="tcc/behavioral-activation" />
         <Stack.Screen name="tcc/gradual-exposure" />

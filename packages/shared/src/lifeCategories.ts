@@ -24,6 +24,11 @@ export const LIFE_CATEGORIES: LifeCategoryDef[] = [
   { id: 'carreira', label: 'Carreira', icon: 'briefcase-outline', accent: '#6B7280' },
 ]
 
+/** Filtros visíveis no Kanban (sem pilares genéricos de inferência). */
+export const KANBAN_LIFE_FILTERS = LIFE_CATEGORIES.filter(
+  (c) => c.id !== 'crescimento' && c.id !== 'carreira',
+)
+
 const SAUDE_RE = /sa[uú]de|agua|água|treino|academia|medic|sono|humor|prote[ií]na|caminh|yoga/i
 const CRESC_RE = /estud|curso|ler|leitura|curso|aprend|idioma|habito|hábito|crescimento|meta/i
 const CARREIRA_RE =

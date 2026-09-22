@@ -73,7 +73,7 @@ export default function KanbanScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title="Tarefas" subtitle="Lista, rotina, pastas e Gantt — mesmo escopo, várias lentes." />
+        <ScreenIntro title="Tarefas" subtitle="Lista, rotina, pastas e Gantt. O mesmo trabalho em visões diferentes." />
 
         {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
           <KanbanOrchestratorBar tasks={tasks} />
@@ -86,7 +86,7 @@ export default function KanbanScreen()
             { id: 'feitas', label: 'Feitas', count: doneCount },
             { id: 'rotina', label: 'Rotina' },
             { id: 'pastas', label: 'Pastas' },
-            { id: 'board', label: 'Board', count: openCount },
+            { id: 'board', label: 'Prazos', count: openCount },
             { id: 'gantt', label: 'Gantt' },
             { id: 'relatorios', label: 'Relatórios' },
           ]}

@@ -16,6 +16,8 @@ const SLOT_HEIGHT = 44
 
 type Props = {
   tasks: MobileTask[]
+  /** Estica o card para preencher a coluna no desktop. */
+  fill?: boolean
 }
 
 function todayLabel(): string
@@ -42,7 +44,7 @@ function blockStyle(
 /**
  * Faixa visual do dia (estilo Tiimo) — tarefas de hoje por horário.
  */
-export function HomeDayTimeline({ tasks }: Props)
+export function HomeDayTimeline({ tasks, fill = false }: Props)
 {
   const { colors, space, radius } = useTheme()
   const router = useRouter()
@@ -74,13 +76,16 @@ export function HomeDayTimeline({ tasks }: Props)
   const trackHeight = (DAY_END - DAY_START) * SLOT_HEIGHT + SLOT_HEIGHT
 
   return (
-    <Card tone="elevated" style={{ gap: space.sm }}>
+    <Card tone="elevated" style={{ gap: space.sm, ...(fill ? { flex: 1 } : {}) }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <View>
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             Linha do dia
           </Text>
           <Text variant="bodyStrong">{todayLabel()}</Text>
+          <Text variant="micro" muted style={{ marginTop: 2 }}>
+            Tarefas de hoje por horário, em uma faixa visual.
+          </Text>
         </View>
         <PressableScale
           accessibilityLabel="Abrir Kanban"
@@ -94,10 +99,12 @@ export function HomeDayTimeline({ tasks }: Props)
       </View>
 
       {withTime.length === 0 ? (
-        <EmptyState
-          title="Dia sem blocos"
-          body="Capture uma tarefa com horário ou abra o Kanban para planejar."
-        />
+        <View style={fill ? { flex: 1, justifyContent: 'center' } : undefined}>
+          <EmptyState
+            title="Dia sem blocos"
+            body="Defina horário nas tarefas para ver o ritmo do dia aqui, sem abrir o Kanban."
+          />
+        </View>
       ) : (
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={{ flexDirection: 'row', gap: space.md, minWidth: '100%' }}>
@@ -165,7 +172,7 @@ export function HomeDayTimeline({ tasks }: Props)
                     }}
                   >
                     <Text variant="caption" muted>
-                      {task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : '—'}
+                      {task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : 'Sem hora'}
                     </Text>
                     <Text variant="bodyStrong" numberOfLines={2}>
                       {task.titulo}

@@ -1,11 +1,13 @@
 import { StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../theme/ThemeProvider'
+import { useWorkspace } from '../layout/useWorkspace'
 
-/** Degradê de clima. Escuro: lavagem curta no preto. Claro: tan na tela. */
+/** Degradê de clima. Escuro: cobre a tela inteira para não “cortar” o fundo. */
 export function AtmosphereWash()
 {
   const { mode } = useTheme()
+  const { showRail } = useWorkspace()
 
   if (mode !== 'dark')
   {
@@ -35,22 +37,15 @@ export function AtmosphereWash()
     <LinearGradient
       pointerEvents="none"
       colors={['#1A1614', '#0C0B0B', '#000000']}
-      locations={[0, 0.42, 1]}
+      locations={showRail ? [0, 0.55, 1] : [0, 0.42, 1]}
       start={{ x: 0.85, y: 0 }}
       end={{ x: 0.25, y: 1 }}
-      style={styles.darkWash}
+      style={StyleSheet.absoluteFill}
     />
   )
 }
 
 const styles = StyleSheet.create({
-  darkWash: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 420,
-  },
   accent: {
     position: 'absolute',
     top: 0,

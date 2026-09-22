@@ -4,14 +4,16 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import {
   aguaMlPorCopo,
+  currentWeekIsos,
   findHabit,
   formatSleepHours,
   habitPct,
+  localTodayIso,
 } from '@simply-life/shared'
 import { Text, PressableScale, ProgressRing, MiniBarChart, MiniSparkline } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
-import { last7Iso, useBodyWeekStore } from '../../store/bodyWeekStore'
+import { useBodyWeekStore } from '../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../store/waterLogStore'
 import { useAuthStore } from '../../store/authStore'
 
@@ -26,7 +28,7 @@ function wash(color: string, alpha: number): string
 
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
-/** Grade 2×2 do corpo — proteína, água, sono, treino. */
+/** Seu resumo: corpo na semana (único bloco na Home). */
 export function PersonalSummaryGrid()
 {
   const { colors, mode } = useTheme()
@@ -44,14 +46,16 @@ export function PersonalSummaryGrid()
   const sono = findHabit(habits, 'sono')
   const treino = findHabit(habits, 'treino')
   const ml = aguaMlPorCopo(agua)
-  const week = last7Iso()
-  const todaySleep = sono?.progressoAtual || sleepHours[week[week.length - 1]] || 0
-  const sleepSeries = week.map((iso, i) =>
-    i === week.length - 1 ? todaySleep : (sleepHours[iso] ?? 0),
+  const week = currentWeekIsos()
+  const todayIso = localTodayIso()
+  const todayIndex = week.indexOf(todayIso)
+  const todaySleep = sono?.progressoAtual || sleepHours[todayIso] || 0
+  const sleepSeries = week.map((iso) =>
+    iso === todayIso ? todaySleep : (sleepHours[iso] ?? 0),
   )
-  const workoutSeries = week.map((iso, i) =>
+  const workoutSeries = week.map((iso) =>
   {
-    if (i === week.length - 1 && treino?.progressoAtual) return 1
+    if (iso === todayIso && treino?.progressoAtual) return 1
     return workout[iso] ?? 0
   })
 
@@ -80,7 +84,7 @@ export function PersonalSummaryGrid()
           Seu resumo
         </Text>
         <Text variant="caption" muted>
-          Corpo na semana — toque para registrar
+          Corpo na semana. Toque em um card para registrar.
         </Text>
       </View>
       <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -127,7 +131,7 @@ export function PersonalSummaryGrid()
         <MetricCard
           label="Sono"
           icon="moon"
-          value={todaySleep > 0 ? formatSleepHours(todaySleep) : '—'}
+          value={todaySleep > 0 ? formatSleepHours(todaySleep) : 'Sem'}
           unit="última noite"
           accent={sleepColor}
           ink={ink}
@@ -136,7 +140,7 @@ export function PersonalSummaryGrid()
           viz={
             <MiniBarChart
               values={sleepSeries.map((v) => v || 0.4)}
-              highlightIndex={6}
+              highlightIndex={todayIndex >= 0 ? todayIndex : 6}
               color={sleepColor}
             />
           }
@@ -144,7 +148,7 @@ export function PersonalSummaryGrid()
         <MetricCard
           label="Treino"
           icon="barbell"
-          value={treino?.progressoAtual ? 'Feito' : '—'}
+          value={treino?.progressoAtual ? 'Feito' : 'Sem'}
           unit="sessão"
           accent={trainColor}
           ink={ink}
@@ -153,6 +157,7 @@ export function PersonalSummaryGrid()
           viz={<MiniSparkline values={workoutSeries.map((v) => v * 3 + 1)} color={trainColor} />}
         />
       </View>
+
     </View>
   )
 }

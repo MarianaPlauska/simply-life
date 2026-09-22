@@ -67,7 +67,8 @@ export const TYPE_SCALE = TYPE_SCALE_RESPONSIVE.mobile
 
 export function typeScaleForWidth(width: number): Record<TypeRole, TypeSpec>
 {
-  if (width >= 1024) return TYPE_SCALE_RESPONSIVE.desktop
-  if (width >= 768) return TYPE_SCALE_RESPONSIVE.tablet
+  // App-first: no desktop a escala mobile evita “content dispersion” (NN/G).
+  // Tipo maior no widescreen só estica cards e força scroll.
+  void width
   return TYPE_SCALE_RESPONSIVE.mobile
 }

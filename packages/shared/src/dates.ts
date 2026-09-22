@@ -84,3 +84,26 @@ export function currentMonthLabel(reference = new Date()): string
 {
   return reference.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
 }
+
+/** Remove travessões de textos de interface. */
+export function withoutEmDash(text: string): string
+{
+  return text
+    .replace(/\s*—\s*/g, '. ')
+    .replace(/\s*–\s*/g, ' a ')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+/** Domingo a sábado da semana civil local (7 datas ISO). */
+export function currentWeekIsos(ref = new Date()): string[]
+{
+  const d = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate())
+  const start = new Date(d)
+  start.setDate(d.getDate() - d.getDay())
+  return Array.from({ length: 7 }).map((_, i) =>
+  {
+    const day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)
+    return localTodayIso(day)
+  })
+}

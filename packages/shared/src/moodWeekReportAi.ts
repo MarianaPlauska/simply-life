@@ -89,8 +89,11 @@ export function buildLocalMoodWeekReportAi(
 ): MoodWeekReportAiResponse
 {
   const top = report.topMoods.map((m) => `${m.label} (${m.pct}%)`).join(' e ')
+  const regLabel = report.totalEntries === 1
+    ? '1 registro'
+    : `${report.totalEntries} registros`
   const summary = top
-    ? `Na semana, ${top} foram os humores mais frequentes entre ${report.totalEntries} registros.`
+    ? `Na semana, ${top} foram os humores mais frequentes (${regLabel}).`
     : 'Semana com poucos registros de humor.'
 
   const themes: MoodWeekReportAiTheme[] = report.recurringThemes.map((t) => ({
@@ -99,14 +102,14 @@ export function buildLocalMoodWeekReportAi(
     examples: [t.theme],
   }))
 
-  let careNote = 'Registro pessoal — não é diagnóstico. Cuide-se no seu ritmo.'
+  let careNote = 'Registro pessoal. Não é diagnóstico. Cuide-se no seu ritmo.'
   if (report.alertLevel === 'concern')
   {
-    careNote = 'Vários dias difíceis apareceram. Se continuar pesado, vale conversar com alguém de confiança ou buscar apoio profissional (CVV 188).'
+    careNote = 'Vários dias difíceis apareceram. Se continuar pesado, converse com alguém de confiança ou busque apoio profissional (CVV 188).'
   }
   else if (report.alertLevel === 'watch')
   {
-    careNote = 'Alguns dias foram mais pesados. Observe o que ajuda e o que cansa — sem se cobrar.'
+    careNote = 'Alguns dias foram mais pesados. Observe o que ajuda e o que cansa, sem se cobrar.'
   }
 
   return {

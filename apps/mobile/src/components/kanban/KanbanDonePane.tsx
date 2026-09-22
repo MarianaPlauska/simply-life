@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { View, ScrollView } from 'react-native'
 import {
-  LIFE_CATEGORIES,
+  KANBAN_LIFE_FILTERS,
   filterByLifeCategory,
   filterByUserList,
   localTodayIso,
@@ -93,10 +93,10 @@ export function KanbanDonePane({ tasks }: Props)
           paddingRight: 8,
         }}
       >
-        {LIFE_CATEGORIES.map((c) => (
+        {KANBAN_LIFE_FILTERS.map((c) => (
           <Chip
             key={c.id}
-            label={c.id === 'crescimento' ? 'Crescimento' : c.label}
+            label={c.label}
             active={filter.kind === 'life' && filter.id === c.id}
             onPress={() => setFilter({ kind: 'life', id: c.id })}
             count={filterByLifeCategory(tasks, c.id).filter((t) => t.status === 'done').length}

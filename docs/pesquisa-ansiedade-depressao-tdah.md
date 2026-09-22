@@ -2,7 +2,7 @@
 
 Documento de referência para produto, UX e engenharia. **Não é parecer clínico.** O Simply Life organiza rotina; não diagnostica nem substitui psicoterapia, psiquiatria ou emergência.
 
-**Atualizado:** setembro de 2025  
+**Atualizado:** setembro de 2026  
 **Escopo:** apps de saúde mental e neurodivergência, lacunas do Simply Life, roadmap de features e módulos de TCC.
 
 ---
@@ -27,7 +27,7 @@ O Simply Life deve ser **institucional, acolhedor sem infantilizar**, com opt-in
 | Aspecto | O que a literatura e apps maduros sugerem | Implicação no Simply Life |
 |--------|-------------------------------------------|---------------------------|
 | Hipervigilância | Alertas frequentes aumentam tensão (Fitz et al., 2019 — batch vs. contínuo) | Cadência `off` / `once` / `batch3` (9h, 15h, 21h); silêncio 22h–8h |
-| Incerteza | Ferramentas de grounding e respiração reduzem pico agudo (Rootd, Wysa) | Botão de crise CVV 188; futuro: exercício de respiração curto |
+| Incerteza | Ferramentas de grounding e respiração reduzem pico agudo (Rootd, Wysa) | Botão de crise CVV 188; respiração box e grounding 5-4-3-2-1 em Apoio + FAB |
 | Evitação | Tarefas grandes disparam evitação | Quebra em passos (Goblin-like) no capturar e no Task Evolve |
 | Catastrofização | TCC ajuda a nomear pensamento → evidência → alternativa | Módulos TCC opt-in (ver §7) |
 
@@ -91,8 +91,10 @@ O Simply Life deve ser **institucional, acolhedor sem infantilizar**, com opt-in
 | Companhia / solidão | Woebot + parceiro | ✅ | `HomeMoodCareMessage`, `HomeCompanionStrip` |
 | Botão crise CVV 188 | Rootd / diretrizes BR | ✅ | `CrisisSupportCard` em Saúde |
 | Onboarding TDAH + RPG | Tiimo + gamificação | ✅ | Passo 4 do setup, prefs `adhd_support`, `gamification_mode` |
-| Módulos TCC | Sanvello / Woebot | 📋 Roadmap | §7 abaixo |
-| Respiração guiada | Rootd | 📋 Futuro | Saúde → Cuidados |
+| Módulos TCC | Sanvello / Woebot | ✅ | Saúde → Apoio; `app/tcc/` |
+| Respiração 4 tempos + cinco sentidos | Rootd, PTSD Coach | ✅ | Saúde → Apoio, FAB Acalmar, `/calm/` |
+| Timer de foco (Pomodoro) | Cofocus / Tiimo | ✅ | `/foco`, Apoio, Kanban “Focar nesta tarefa” |
+| Modo suave (humor ≤ 2) | UX low-energy | ✅ | Aba Hoje: check-in + Acalmar + CVV |
 | Correlação humor × hábitos | Bearable | Parcial | Relatórios existentes |
 
 ---
@@ -160,7 +162,7 @@ apps/mobile/src/components/tcc/
 | **Registro de pensamento** | Situação → pensamento automático → evidências a favor/contra → pensamento alternativo | Salva no diário; opcional export PDF |
 | **Ativação comportamental** | Escolher 1 ação de 5–15 min → agendar hoje | Cria tarefa com checklist de 1 item |
 | **Exposição gradual** (ansiedade leve) | Hierarquia de evitação → próximo passo menor | Lista Kanban “evitar” com passos |
-| **Defusão** | “Estou tendo o pensamento de que…” | Texto + respiração 4-7-8 (futuro) |
+| **Defusão** | “Estou tendo o pensamento de que…” | Texto + respiração box em Apoio |
 
 ### 7.4 Inspiração por app
 
@@ -198,12 +200,13 @@ apps/mobile/src/components/tcc/
 
 ## 9. Checklist de aceite (produto)
 
-- [ ] Usuário consegue subdividir tarefa no capturar sem sair do fluxo.
-- [ ] Timeline do dia visível na Home sem abrir Kanban.
-- [ ] Após humor ≤ 2, mensagem institucional + opção de conectar parceiro.
-- [ ] CVV 188 em Saúde com um toque (ligar / copiar número).
-- [ ] Onboarding pergunta apoio TDAH e modo RPG sem exigir diagnóstico.
-- [ ] Documento TCC lido pela equipe antes de implementar P1.
+- [x] Usuário consegue subdividir tarefa no capturar sem sair do fluxo.
+- [x] Timeline do dia visível na Home sem abrir Kanban.
+- [x] Após humor ≤ 2, aba Hoje entra em modo suave (check-in + Acalmar + CVV).
+- [x] CVV 188 em Saúde com um toque (ligar / copiar número).
+- [x] Onboarding pergunta apoio TDAH e modo RPG sem exigir diagnóstico.
+- [x] Respiração box e grounding 5-4-3-2-1 em Apoio, com FAB global.
+- [x] “Focar nesta tarefa” no Kanban abre o timer de 25 min.
 
 ---
 

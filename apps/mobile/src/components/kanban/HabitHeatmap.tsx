@@ -29,7 +29,7 @@ export function HabitHeatmap({ cells, color, rows = 4 }: Props)
               ? 'transparent'
               : cell.filled
                 ? color
-                : 'rgba(128,128,128,0.18)'
+                : 'rgba(168, 162, 158, 0.14)'
             return (
               <View
                 key={cell.iso}

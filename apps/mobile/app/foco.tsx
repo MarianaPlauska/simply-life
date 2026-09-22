@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { View, Pressable, ScrollView } from 'react-native'
-import { Redirect, useRouter } from 'expo-router'
+import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { priorityTodayTasks, XP_FOCUS_SESSION } from '@simply-life/shared'
@@ -21,6 +21,7 @@ export default function FocoScreen()
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const router = useRouter()
+  const params = useLocalSearchParams<{ taskId?: string | string[] }>()
   const prefs = usePrefsStore((s) => s.prefs)
   const tasks = useDataStore((s) => s.tasks) ?? []
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
@@ -71,6 +72,12 @@ export default function FocoScreen()
     lastAwarded.current = completedFocusSessions
     grantXp(XP_FOCUS_SESSION, 'Sessão de foco', currentTask?.titulo ?? 'Deep work')
   }, [completedFocusSessions, grantXp, currentTask?.titulo])
+
+  useEffect(() =>
+  {
+    const raw = Array.isArray(params.taskId) ? params.taskId[0] : params.taskId
+    if (raw) setTargetTask(raw)
+  }, [params.taskId, setTargetTask])
 
   useEffect(() =>
   {

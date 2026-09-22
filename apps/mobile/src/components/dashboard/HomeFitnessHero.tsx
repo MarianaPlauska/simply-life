@@ -33,6 +33,61 @@ export function HomeFitnessHero({
   const topPad = showRail ? 0 : Math.max(insets.top - 4, 0)
   const title = name ? `${greet}, ${name}` : greet
 
+  if (showRail)
+  {
+    return (
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: space.md,
+          marginBottom: space.xs,
+        }}
+      >
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Text variant="caption" muted numberOfLines={1}>
+              {dateLabel}
+            </Text>
+            <HomeWeatherChip compact />
+          </View>
+          <Text
+            variant="hero"
+            numberOfLines={1}
+            style={{ fontSize: 26, letterSpacing: -0.7, lineHeight: 30 }}
+          >
+            {title}
+          </Text>
+          {line ? (
+            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 13, lineHeight: 18 }}>
+              {line}
+            </Text>
+          ) : null}
+        </View>
+        <PressableScale
+          onPress={onAccount}
+          accessibilityLabel={isAdmin ? 'Conta, administradora' : 'Conta'}
+          style={{
+            width: SIDE,
+            height: SIDE,
+            borderRadius: 999,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
+            ...elevation.card,
+          }}
+        >
+          <Ionicons
+            name={isAdmin ? 'shield-checkmark' : 'person-outline'}
+            size={16}
+            color={isAdmin ? colors.axel : colors.ink}
+          />
+        </PressableScale>
+      </View>
+    )
+  }
+
   return (
     <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.xs }}>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>

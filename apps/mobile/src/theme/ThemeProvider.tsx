@@ -9,6 +9,8 @@ import {
   type TypeSpec,
   RADIUS,
   SPACE,
+  SPACE_COMPACT,
+  BREAKPOINT,
   typeScaleForWidth,
   ELEVATION,
 } from '@simply-life/ui-tokens'
@@ -19,7 +21,7 @@ type ThemeContextValue = {
   mode: ThemeMode
   colors: ColorTokens
   radius: typeof RADIUS
-  space: typeof SPACE
+  space: typeof SPACE | typeof SPACE_COMPACT
   type: Record<TypeRole, TypeSpec>
   elevation: ElevationSet
   toggleMode: () => void
@@ -82,7 +84,7 @@ export function ThemeProvider({
       mode,
       colors,
       radius: RADIUS,
-      space: SPACE,
+      space: width >= BREAKPOINT.desktop ? SPACE_COMPACT : SPACE,
       type,
       elevation: mode === 'light' ? ELEVATION.light : ELEVATION.dark,
       toggleMode: () => persistMode(mode === 'dark' ? 'light' : 'dark'),

@@ -1,4 +1,5 @@
 import { View, Pressable } from 'react-native'
+import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import {
   hasReviewLater,
@@ -15,6 +16,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
+import { openFocusForTask } from '../../lib/openFocus'
 
 type Props = {
   task: MobileTask
@@ -33,6 +35,7 @@ function timeRange(task: MobileTask): string
 export function KanbanDayTaskCard({ task, onToggle }: Props)
 {
   const { colors } = useTheme()
+  const router = useRouter()
   const openEvolve = useTaskEvolveStore((s) => s.open)
   const patchTask = useDataStore((s) => s.patchTask)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -92,6 +95,27 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
           </Text>
         ) : null}
       </View>
+      {!done ? (
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel="Focar nesta tarefa"
+          onPress={() => openFocusForTask(router, task.id)}
+          style={{
+            width: 28,
+            height: 28,
+            borderRadius: 8,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: accent ? 'rgba(255,255,255,0.18)' : colors.canvas,
+          }}
+        >
+          <Ionicons
+            name="timer-outline"
+            size={14}
+            color={accent ? colors.axelOnFill : colors.axel}
+          />
+        </PressableScale>
+      ) : null}
       <PressableScale
         accessibilityRole="button"
         accessibilityLabel={later ? 'Tirar ver depois' : 'Ver depois'}

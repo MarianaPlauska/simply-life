@@ -27,7 +27,7 @@ function buildLocalResponse(body)
     examples: [String(t.theme || '')],
   }));
 
-  let careNote = 'Registro pessoal — não é diagnóstico. Cuide-se no seu ritmo.';
+  let careNote = 'Registro pessoal. Não é diagnóstico. Cuide-se no seu ritmo.';
   const alertLevel = ['none', 'watch', 'concern'].includes(stats.alertLevel)
     ? stats.alertLevel
     : 'none';
@@ -38,7 +38,7 @@ function buildLocalResponse(body)
   }
   else if (alertLevel === 'watch')
   {
-    careNote = 'Alguns dias foram mais pesados. Observe o que ajuda — sem se cobrar.';
+    careNote = 'Alguns dias foram mais pesados. Observe o que ajuda, sem se cobrar.';
   }
 
   return {
@@ -235,7 +235,8 @@ Regras:
 - themes: máximo 3; count deve refletir repetições plausíveis
 - Se terriblePct >= 40 ou vários Péssimo: alertLevel concern e mencione apoio (CVV 188) em careNote, sem alarmismo
 - Se goalContext existir, pode citar em 1 frase (meta + humor difícil no mesmo período)
-- Tom de parceiro que convida, nunca cobra`;
+- Tom de parceiro que convida, nunca cobra
+- Nunca use travessão (—) nas frases; use ponto ou vírgula`;
 
   const userPrompt = `Dados da semana (${weekStart} a ${weekEnd}):
 ${JSON.stringify({

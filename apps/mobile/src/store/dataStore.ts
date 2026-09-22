@@ -31,6 +31,8 @@ import {
   type ContaAPagar,
   findHabit,
   ensureSonoHabit,
+  aguaMlPorCopo,
+  currentWeekIsos,
   isDemoHumorRow,
   localTodayIso,
   stampEvoPct,
@@ -39,7 +41,22 @@ import {
 import { fetchHumorMes, registrarHumor } from '../lib/sync/humor'
 import { createTarefa, fetchTarefas, insertSubtarefa, archiveTarefa, patchTarefa, persistTaskStatus, toggleSubtarefa, updateTarefaDue, updateTarefaStatus } from '../lib/sync/tasks'
 import { addDespesa, fetchDespesas, parseExpenseQuick } from '../lib/sync/finance'
-import { bumpHabitoProgress, fetchHabitos, patchHabitoAgua } from '../lib/sync/habits'
+import {
+  bumpHabitoProgress,
+  ensureAguaHabit,
+  fetchHabitos,
+  patchHabitoAgua,
+  patchHabitoConfig,
+  syncAguaProgress,
+} from '../lib/sync/habits'
+import {
+  aguaRegistrosHoje,
+  configAposResetDiario,
+  habitoPrecisaReset,
+  isLocalHabitId,
+  mergeHabitosAfterFetch,
+} from '../lib/sync/habitDayBoundary'
+import { fetchHabitHistoricoRows, upsertHabitHistoricoCups } from '../lib/sync/habitHistorico'
 import {
   deleteMedicamento,
   fetchMedicamentos,
@@ -77,6 +94,8 @@ type DataState = {
   tasks: MobileTask[]
   finance: FinanceTx[]
   habits: HabitoDiario[]
+  /** Copos por dia (historico_habitos) para gráfico semanal de água. */
+  waterWeekDays: Record<string, number>
   medicamentos: Medicamento[]
   cashAccount: CashAccount
   financeCards: FinanceCard[]
@@ -122,6 +141,7 @@ type DataState = {
   addWaterCup: (isGuest?: boolean) => Promise<void>
   removeWaterCup: (isGuest?: boolean) => Promise<void>
   patchAguaHabit: (patch: { metaDiaria?: number; mlPorCopo?: number }, isGuest?: boolean) => Promise<void>
+  patchTreinoConfig: (config: Record<string, unknown>, isGuest?: boolean) => Promise<void>
   addProteinGrams: (grams: number, isGuest?: boolean) => Promise<void>
   setSleepHours: (hours: number, isGuest?: boolean) => Promise<void>
   toggleTreinoDone: (isGuest?: boolean) => Promise<void>
@@ -203,6 +223,47 @@ function parseCachedHabits(raw: string | undefined): HabitoDiario[]
   }
 }
 
+async function loadWaterWeekDays(agua: HabitoDiario, today: string): Promise<Record<string, number>>
+{
+  const week = currentWeekIsos()
+  const map: Record<string, number> = {}
+  if (!isLocalHabitId(agua.id))
+  {
+    const rows = await fetchHabitHistoricoRows(agua.id, week[0]).catch(() => [])
+    for (const row of rows)
+    {
+      map[row.data] = row.concluido
+    }
+  }
+  map[today] = agua.progressoAtual
+  return map
+}
+
+function nextAguaState(agua: HabitoDiario, delta: number): HabitoDiario
+{
+  const today = localTodayIso()
+  const ml = aguaMlPorCopo(agua)
+  const registros = aguaRegistrosHoje(agua, today, ml)
+  if (delta > 0)
+  {
+    registros.push(ml)
+  }
+  else if (registros.length > 0)
+  {
+    registros.pop()
+  }
+  const next = Math.max(0, registros.length)
+  return {
+    ...agua,
+    progressoAtual: next,
+    config: {
+      ...(agua.config ?? {}),
+      ultima_data: today,
+      registros_ml: registros,
+    },
+  }
+}
+
 export const useDataStore = create<DataState>((set, get) => ({
   loading: false,
   error: null,
@@ -211,6 +272,7 @@ export const useDataStore = create<DataState>((set, get) => ({
   tasks: [],
   finance: [],
   habits: [],
+  waterWeekDays: {},
   medicamentos: [],
   cashAccount: emptyCashAccount(),
   financeCards: [],
@@ -333,6 +395,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         return
       }
 
+      const today = localTodayIso()
       const [humor, tasks, finance, habitsRaw, medicamentosRaw, cash, cards, fixas, bills] =
         await Promise.all([
           fetchHumorMes(90),
@@ -345,12 +408,42 @@ export const useDataStore = create<DataState>((set, get) => ({
           fetchContasFixas().catch(() => [] as ContaFixa[]),
           fetchContasAPagar().catch(() => [] as ContaAPagar[]),
         ])
-      const habits = ensureSonoHabit(habitsRaw.length ? habitsRaw : starterHabits())
+
+      await ensureAguaHabit().catch(() => null)
+      const remoteHabits = await fetchHabitos().catch(() => habitsRaw)
+      const localHabits = get().habits.length > 0
+        ? get().habits
+        : parseCachedHabits(cached?.habitsJson)
+      const merged = mergeHabitosAfterFetch(
+        localHabits,
+        remoteHabits.length ? remoteHabits : starterHabits(),
+        today,
+      )
+      let habits = ensureSonoHabit(merged)
+
+      for (const h of remoteHabits)
+      {
+        if (isLocalHabitId(h.id) || !habitoPrecisaReset(h, today)) continue
+        const live = habits.find((m) => m.id === h.id)
+        if (live?.config?.ultima_data === today) continue
+        const diaAnterior = h.config?.ultima_data
+        if (diaAnterior && diaAnterior !== today && h.progressoAtual > 0)
+        {
+          await upsertHabitHistoricoCups(h.id, h.progressoAtual, diaAnterior).catch(() => null)
+        }
+        const config = configAposResetDiario(h.config, today, h.tipo)
+        await syncAguaProgress(h.id, 0, config).catch(() => null)
+      }
+
+      const agua = findHabit(habits, 'agua')
+      const waterWeekDays = agua ? await loadWaterWeekDays(agua, today) : {}
+
       set({
         humor,
         tasks,
         finance,
         habits,
+        waterWeekDays,
         medicamentos: medicamentosRaw,
         cashAccount: cash,
         financeCards: cards,
@@ -620,23 +713,39 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   addWaterCup: async (isGuest) =>
   {
-    const agua = findHabit(get().habits, 'agua')
+    let agua = findHabit(get().habits, 'agua')
     if (!agua) return
-    const next = agua.progressoAtual + 1
+
+    if (!useLocal(isGuest) && isLocalHabitId(agua.id))
+    {
+      const ensured = await ensureAguaHabit().catch(() => null)
+      if (ensured)
+      {
+        agua = ensured
+        set({
+          habits: get().habits.map((h) => (h.tipo === 'agua' ? ensured : h)),
+        })
+      }
+    }
+
+    const updated = nextAguaState(agua, 1)
+    const today = localTodayIso()
     hapticLight()
     set({
-      habits: get().habits.map((h) =>
-        h.id === agua.id ? { ...h, progressoAtual: next } : h,
-      ),
+      habits: get().habits.map((h) => (h.id === agua!.id ? updated : h)),
+      waterWeekDays: { ...get().waterWeekDays, [today]: updated.progressoAtual },
     })
-    useWaterLogStore.getState().recordSip(next)
+    useWaterLogStore.getState().recordSip(updated.progressoAtual)
     useActivityStore.getState().markAction('water')
-    if (useLocal(isGuest) || agua.id.startsWith('h-'))
+
+    if (useLocal(isGuest) || isLocalHabitId(updated.id))
     {
       await writeOffline(get())
       return
     }
-    await bumpHabitoProgress(agua.id, next)
+
+    await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
+    await upsertHabitHistoricoCups(updated.id, updated.progressoAtual, today)
     await writeOffline(get())
   },
 
@@ -644,20 +753,23 @@ export const useDataStore = create<DataState>((set, get) => ({
   {
     const agua = findHabit(get().habits, 'agua')
     if (!agua || agua.progressoAtual <= 0) return
-    const next = agua.progressoAtual - 1
+    const updated = nextAguaState(agua, -1)
+    const today = localTodayIso()
     hapticLight()
     set({
-      habits: get().habits.map((h) =>
-        h.id === agua.id ? { ...h, progressoAtual: next } : h,
-      ),
+      habits: get().habits.map((h) => (h.id === agua.id ? updated : h)),
+      waterWeekDays: { ...get().waterWeekDays, [today]: updated.progressoAtual },
     })
-    useWaterLogStore.getState().recordSip(next)
-    if (useLocal(isGuest) || agua.id.startsWith('h-'))
+    useWaterLogStore.getState().recordSip(updated.progressoAtual)
+
+    if (useLocal(isGuest) || isLocalHabitId(updated.id))
     {
       await writeOffline(get())
       return
     }
-    await bumpHabitoProgress(agua.id, next)
+
+    await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
+    await upsertHabitHistoricoCups(updated.id, updated.progressoAtual, today)
     await writeOffline(get())
   },
 
@@ -690,6 +802,23 @@ export const useDataStore = create<DataState>((set, get) => ({
       },
       next.config,
     )
+    await writeOffline(get())
+  },
+
+  patchTreinoConfig: async (config, isGuest) =>
+  {
+    const treino = findHabit(get().habits, 'treino')
+    if (!treino) return
+    const next: HabitoDiario = { ...treino, config }
+    set({
+      habits: get().habits.map((h) => (h.id === treino.id ? next : h)),
+    })
+    if (useLocal(isGuest) || isLocalHabitId(treino.id))
+    {
+      await writeOffline(get())
+      return
+    }
+    await patchHabitoConfig(treino.id, config)
     await writeOffline(get())
   },
 

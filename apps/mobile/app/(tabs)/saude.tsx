@@ -1,14 +1,11 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
-import { findHabit, habitPct, formatSleepHours } from '@simply-life/shared'
 import { Screen, PillTabs } from '../../src/ui'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
 import { ScreenIntro } from '../../src/components/dashboard/ScreenIntro'
-import { MetricCards } from '../../src/components/dashboard/MetricCards'
 import { TabShell } from '../../src/components/dashboard/TabShell'
-import { useTheme } from '../../src/theme/ThemeProvider'
 import { HealthTodayTab } from '../../src/components/health/HealthTodayTab'
 import { HealthCuidadosTab } from '../../src/components/health/HealthCuidadosTab'
 import { HealthDiaryTab } from '../../src/components/health/HealthDiaryTab'
@@ -21,26 +18,13 @@ import {
 
 export default function SaudeScreen()
 {
-  const { colors } = useTheme()
   const params = useLocalSearchParams<{ section?: string; care?: string }>()
-  const [section, setSection] = useState<HealthSection>('hoje')
+  const [section, setSection] = useState<HealthSection>('diario')
   const [cuidadosTab, setCuidadosTab] = useState<CuidadosTab>('hidratacao')
   const humor = useDataStore((s) => s.humor)
-  const habits = useDataStore((s) => s.habits)
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const isGuest = useAuthStore((s) => s.isGuest)
-
-  const agua = findHabit(habits, 'agua')
-  const proteina = findHabit(habits, 'proteina')
-  const sono = findHabit(habits, 'sono')
-  const last7 = humor.slice(-7)
-  const moodAvg = last7.length
-    ? last7.reduce((acc, h) => acc + h.humor, 0) / last7.length / 5
-    : 0
-  const vitality = Math.round(
-    ((moodAvg + habitPct(agua) / 100 + habitPct(proteina) / 100 + habitPct(sono) / 100) / 4) * 100,
-  )
 
   useEffect(() =>
   {
@@ -68,6 +52,7 @@ export default function SaudeScreen()
   }
 
   const goApoio = () => setSection('apoio')
+  const goDiario = () => setSection('diario')
 
   return (
     <Screen
@@ -76,29 +61,9 @@ export default function SaudeScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title="Saúde" subtitle="Hoje, cuidados, diário e apoio — no seu ritmo." />
-
-        <MetricCards
-          items={[
-            {
-              label: 'Vitalidade',
-              value: `${vitality}%`,
-              color: colors.health,
-              hint: 'Humor · água · proteína · sono',
-            },
-            {
-              label: 'Água hoje',
-              value: agua ? `${agua.progressoAtual}` : '-',
-              color: colors.health,
-              hint: `de ${agua?.metaDiaria ?? 10} copos`,
-            },
-            {
-              label: 'Sono',
-              value: sono && sono.progressoAtual > 0 ? formatSleepHours(sono.progressoAtual) : '—',
-              color: '#C4A574',
-              hint: sono ? `meta ${sono.metaDiaria}h` : 'registre a noite',
-            },
-          ]}
+        <ScreenIntro
+          title="Saúde"
+          subtitle="Check-in, cuidados e apoio no seu ritmo."
         />
 
         <PillTabs
@@ -112,7 +77,11 @@ export default function SaudeScreen()
 
         <View>
           {section === 'hoje' && (
-            <HealthTodayTab onGoCuidados={goCuidados} onGoApoio={goApoio} />
+            <HealthTodayTab
+              onGoCuidados={goCuidados}
+              onGoApoio={goApoio}
+              onGoDiario={goDiario}
+            />
           )}
           {section === 'cuidados' && (
             <HealthCuidadosTab tab={cuidadosTab} onChange={setCuidadosTab} />

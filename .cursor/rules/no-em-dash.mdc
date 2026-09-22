@@ -1,0 +1,20 @@
+---
+description: Proíbe travessão (—) em textos de interface do Simply-Life
+globs: apps/mobile/**/*.{tsx,ts}, packages/shared/**/*.ts, api/**/*.js
+alwaysApply: false
+---
+
+# Sem travessão na interface
+
+Nunca usar o caractere **—** (travessão / em dash) em textos visíveis ao usuário (labels, títulos, mensagens, placeholders, toasts).
+
+## Substituir por
+
+- Duas ideias: ponto final ou vírgula. Ex.: `Registro pessoal. Não é diagnóstico.`
+- Intervalo de datas: `a`. Ex.: `31/08 a 06/09`
+- Progresso: vírgula ou `·`. Ex.: `42% do dia, um passo de cada vez`
+
+## Código
+
+- Usar `withoutEmDash()` de `@simply-life/shared` ao exibir texto vindo de IA ou templates.
+- Comentários de código podem usar travessão; UI não.

@@ -2,6 +2,7 @@ import { View } from 'react-native'
 import { Tabs, Redirect } from 'expo-router'
 import { TabBarWithFab } from '../../src/components/TabBarWithFab'
 import { CaptureSheet } from '../../src/components/CaptureSheet'
+import { CalmQuickFab } from '../../src/components/calm/CalmQuickFab'
 import { DesktopSidebar } from '../../src/components/layout/DesktopSidebar'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useWorkspace } from '../../src/layout/useWorkspace'
@@ -46,6 +47,7 @@ export default function TabsLayout()
           <Tabs.Screen name="saude" options={{ title: 'Saúde' }} />
           <Tabs.Screen name="financeiro" options={{ title: 'Finanças' }} />
         </Tabs>
+        {showRail ? null : <CalmQuickFab />}
       </View>
       <CaptureSheet />
     </View>

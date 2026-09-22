@@ -39,7 +39,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
             onPress={() => onSelect(cell.iso)}
             style={{
               flex: 1,
-              minHeight: 72,
+              minHeight: 84,
               borderRadius: 16,
               paddingVertical: 8,
               alignItems: 'center',
@@ -53,6 +53,9 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
               {cell.label}
             </Text>
             <Text variant="bodyStrong">{cell.dayNum}</Text>
+            <Text variant="micro" muted style={{ fontSize: 10, lineHeight: 12 }}>
+              {new Date(`${cell.iso}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}
+            </Text>
             <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
               {cell.done > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>

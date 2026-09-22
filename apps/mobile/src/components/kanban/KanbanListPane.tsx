@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View, TextInput, ScrollView } from 'react-native'
 import {
-  LIFE_CATEGORIES,
+  KANBAN_LIFE_FILTERS,
   billsDueOnIso,
   filterByLifeCategory,
   filterByUserList,
@@ -20,7 +20,7 @@ import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useDuePaidStore } from '../../store/duePaidStore'
 import { Ionicons } from '@expo/vector-icons'
 import { KanbanTaskRow } from './KanbanTaskRow'
-import { KanbanDateStrip, buildForwardDays } from './KanbanDateStrip'
+import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 import { KanbanDayTaskCard } from './KanbanDayTaskCard'
 import { DayBillCard } from './DayBillCard'
 
@@ -57,9 +57,9 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
   const [filter, setFilter] = useState<Filter>({ kind: 'life', id: 'todos' })
   const [draft, setDraft] = useState('')
   const [naming, setNaming] = useState(false)
-  const days = useMemo(() => buildForwardDays(7), [])
-  const [dayIso, setDayIso] = useState(days[0]?.iso ?? '')
+  const days = useMemo(() => buildDayRange(15, 15), [])
   const today = localTodayIso()
+  const [dayIso, setDayIso] = useState(today)
 
   useEffect(() =>
   {
@@ -93,9 +93,9 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
       {
         const due = t.dataVencimento?.slice(0, 10)
         if (due) return due === dayIso
-        return dayIso === days[0]?.iso
+        return dayIso === today
       }),
-    [scoped, dayIso, days],
+    [scoped, dayIso, today],
   )
 
   const restOpenDay = dayTasks
@@ -139,10 +139,10 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
           paddingRight: 8,
         }}
       >
-        {LIFE_CATEGORIES.map((c) => (
+        {KANBAN_LIFE_FILTERS.map((c) => (
           <Chip
             key={c.id}
-            label={c.id === 'crescimento' ? 'Crescimento' : c.label}
+            label={c.label}
             active={filter.kind === 'life' && filter.id === c.id}
             onPress={() => setFilter({ kind: 'life', id: c.id })}
             count={filterByLifeCategory(tasks, c.id).filter((t) => t.status !== 'done').length}

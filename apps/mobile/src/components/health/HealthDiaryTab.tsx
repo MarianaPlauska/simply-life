@@ -10,12 +10,15 @@ import {
   moodColor,
   currentMonthLabel,
   weeklyMoodReview,
+  isSoftMoodDay,
 } from '@simply-life/shared'
 import { Card, Text, SectionHeader, EmptyState, IconBadge, StatusPill, PrimaryButton, Field } from '../../ui'
 import { MoodFaceRow } from '../MoodFace'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
+import { usePrefsStore } from '../../store/prefsStore'
+import { MoodGoalAlertCard } from '../dashboard/MoodGoalAlertCard'
 
 export function HealthDiaryTab()
 {
@@ -25,6 +28,7 @@ export function HealthDiaryTab()
   const humor = useDataStore((s) => s.humor)
   const addHumor = useDataStore((s) => s.addHumor)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const lifeGoal = usePrefsStore((s) => s.prefs.life_goal)
   const [nota, setNota] = useState('')
 
   const slices = useMemo(() => buildMoodDistribution(humor), [humor])
@@ -45,6 +49,17 @@ export function HealthDiaryTab()
 
   return (
     <View style={{ gap: space.md }}>
+      <MoodGoalAlertCard humor={humor} goal={lifeGoal} />
+
+      {last && isSoftMoodDay(humor) ? (
+        <Card tone="elevated" style={{ gap: space.sm, borderRadius: 18 }}>
+          <Text variant="bodyStrong">Modo suave ativo na aba Hoje</Text>
+          <Text variant="caption" muted>
+            Menos metas, mais espaço. Cuidados e apoio continuam nas outras abas.
+          </Text>
+        </Card>
+      ) : null}
+
       <Card tone="hero" style={{ gap: space.md, borderRadius: 18 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <IconBadge name="happy" color={colors.axel} size={44} iconSize={22} />

@@ -3,9 +3,9 @@ export type HealthSection = 'hoje' | 'cuidados' | 'diario' | 'apoio'
 export type CuidadosTab = 'hidratacao' | 'alimentacao' | 'academia' | 'medicamentos' | 'sono'
 
 export const HEALTH_MAIN_TABS = [
+  { id: 'diario' as const, label: 'Diário' },
   { id: 'hoje' as const, label: 'Hoje' },
   { id: 'cuidados' as const, label: 'Cuidados' },
-  { id: 'diario' as const, label: 'Diário' },
   { id: 'apoio' as const, label: 'Apoio' },
 ]
 

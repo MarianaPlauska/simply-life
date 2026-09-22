@@ -1,13 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import type { RoutineCadence } from '@simply-life/shared'
+import type { RoutineCadence, RoutineHabit } from '@simply-life/shared'
 import { Text, Field, PrimaryButton, Chip } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = {
   visible: boolean
   mode: 'habit' | 'routine'
+  editing?: RoutineHabit | null
   onClose: () => void
   onSave: (payload: {
     title: string
@@ -17,8 +18,8 @@ type Props = {
   }) => void
 }
 
-/** Criar hábito avulso ou rotina-mãe. */
-export function RoutineEditorSheet({ visible, mode, onClose, onSave }: Props)
+/** Criar ou editar hábito avulso ou rotina-mãe. */
+export function RoutineEditorSheet({ visible, mode, editing, onClose, onSave }: Props)
 {
   const { colors, space, radius } = useTheme()
   const insets = useSafeAreaInsets()
@@ -26,6 +27,27 @@ export function RoutineEditorSheet({ visible, mode, onClose, onSave }: Props)
   const [cadence, setCadence] = useState<RoutineCadence>('daily')
   const [dailyTarget, setDailyTarget] = useState('1')
   const [weeklyTarget, setWeeklyTarget] = useState('3')
+  const isEdit = Boolean(editing)
+
+  useEffect(() =>
+  {
+    if (!visible)
+    {
+      return
+    }
+    if (editing)
+    {
+      setTitle(editing.title)
+      setCadence(editing.cadence)
+      setDailyTarget(String(editing.dailyTarget))
+      setWeeklyTarget(String(editing.weeklyTarget))
+      return
+    }
+    setTitle('')
+    setCadence('daily')
+    setDailyTarget('1')
+    setWeeklyTarget('3')
+  }, [visible, editing])
 
   const reset = () =>
   {
@@ -34,6 +56,10 @@ export function RoutineEditorSheet({ visible, mode, onClose, onSave }: Props)
     setDailyTarget('1')
     setWeeklyTarget('3')
   }
+
+  const heading = isEdit
+    ? (mode === 'routine' ? 'Editar rotina' : 'Editar hábito')
+    : (mode === 'routine' ? 'Nova rotina' : 'Novo hábito')
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -58,9 +84,7 @@ export function RoutineEditorSheet({ visible, mode, onClose, onSave }: Props)
               backgroundColor: colors.hairlineStrong,
             }}
           />
-          <Text variant="section">
-            {mode === 'routine' ? 'Nova rotina' : 'Novo hábito'}
-          </Text>
+          <Text variant="section">{heading}</Text>
           <ScrollView keyboardShouldPersistTaps="handled">
             <View style={{ gap: space.md }}>
               <Field
@@ -110,7 +134,7 @@ export function RoutineEditorSheet({ visible, mode, onClose, onSave }: Props)
                 </Text>
               )}
               <PrimaryButton
-                label="Salvar"
+                label={isEdit ? 'Salvar alterações' : 'Salvar'}
                 disabled={!title.trim()}
                 onPress={() =>
                 {

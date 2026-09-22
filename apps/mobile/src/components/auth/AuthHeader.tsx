@@ -1,12 +1,5 @@
 import { View, StyleSheet, useWindowDimensions } from 'react-native'
-import Svg, {
-  Defs,
-  LinearGradient,
-  Path,
-  Stop,
-  Circle,
-  Rect,
-} from 'react-native-svg'
+import Svg, { Defs, LinearGradient, RadialGradient, Stop, Circle, Rect } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { BrandMark } from '../BrandMark'
 import { Text } from '../../ui'
@@ -18,34 +11,21 @@ type Props = {
   width?: number
 }
 
-/** Topo do login - onda cobre AXEL + Bem-vindo (ref. wave, nossas cores) */
+/** Topo do login mobile: preto OLED + cobre, no espírito da landing. */
 export function AuthHeader({
-  welcomeLabel = 'Bem-vindo',
+  welcomeLabel = 'Organize.\nPlaneje.\nSimply.',
   compact,
   width: widthProp,
 }: Props)
 {
-  const { colors, space, mode } = useTheme()
+  const { colors, space } = useTheme()
   const insets = useSafeAreaInsets()
   const { width: vw } = useWindowDimensions()
   const width = widthProp ?? vw
-  const brandH = (compact ? 220 : 280) + insets.top
-  const waveY = brandH - 36
-  const isDark = mode === 'dark'
-  const copper = colors.axel
-  const copperDeep = isDark ? '#B85A38' : colors.axelHover
-
-  const wavePath = [
-    `M0,${waveY}`,
-    `C${width * 0.22},${waveY + 28} ${width * 0.38},${waveY - 18} ${width * 0.55},${waveY + 6}`,
-    `C${width * 0.72},${waveY + 28} ${width * 0.86},${waveY - 8} ${width},${waveY + 14}`,
-    `L${width},${brandH}`,
-    `L0,${brandH}`,
-    'Z',
-  ].join(' ')
+  const brandH = (compact ? 250 : 320) + insets.top
 
   return (
-    <View style={{ height: brandH }}>
+    <View style={{ height: brandH, backgroundColor: '#050403' }}>
       <Svg
         width={width}
         height={brandH}
@@ -54,64 +34,66 @@ export function AuthHeader({
         style={StyleSheet.absoluteFill}
       >
         <Defs>
-          <LinearGradient id="authWaveBg" x1="0" y1="0" x2="0.2" y2="1">
-            <Stop offset="0" stopColor={copper} />
-            <Stop offset="0.55" stopColor={copperDeep} />
-            <Stop offset="1" stopColor={isDark ? colors.elevated : copper} />
+          <LinearGradient id="authWaveBg" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor="#120E0C" />
+            <Stop offset="1" stopColor="#050403" />
           </LinearGradient>
+          <RadialGradient id="authGlow" cx="50%" cy="42%" rx="55%" ry="40%">
+            <Stop offset="0" stopColor={colors.axel} stopOpacity={0.48} />
+            <Stop offset="1" stopColor="#050403" stopOpacity={0} />
+          </RadialGradient>
         </Defs>
         <Rect width={width} height={brandH} fill="url(#authWaveBg)" />
-        {/* Contornos leves no espírito da referência */}
-        <Circle cx={width * 0.78} cy={brandH * 0.28} r={90} fill="rgba(255,255,255,0.08)" />
-        <Circle cx={width * 0.18} cy={brandH * 0.42} r={56} fill="rgba(255,255,255,0.06)" />
-        <Circle cx={width * 0.92} cy={brandH * 0.55} r={40} fill="rgba(0,0,0,0.06)" />
-        <Path
-          d={`M${width * 0.1},${brandH * 0.2} Q${width * 0.35},${brandH * 0.12} ${width * 0.55},${brandH * 0.26} T${width * 0.95},${brandH * 0.18}`}
-          stroke="rgba(255,255,255,0.18)"
-          strokeWidth={1.2}
-          fill="none"
-        />
-        <Path
-          d={`M${width * 0.05},${brandH * 0.34} Q${width * 0.3},${brandH * 0.28} ${width * 0.5},${brandH * 0.4} T${width * 0.9},${brandH * 0.32}`}
-          stroke="rgba(255,255,255,0.12)"
-          strokeWidth={1}
-          fill="none"
-        />
-        <Path d={wavePath} fill={colors.surface} />
+        <Rect width={width} height={brandH} fill="url(#authGlow)" />
+        <Circle cx={width * 0.82} cy={brandH * 0.22} r={80} fill="rgba(232,115,74,0.14)" />
+        <Circle cx={width * 0.12} cy={brandH * 0.5} r={48} fill="rgba(232,115,74,0.1)" />
       </Svg>
 
       <View
         style={{
           flex: 1,
-          paddingTop: insets.top + space.lg,
-          paddingBottom: space.xl + 28,
+          paddingTop: insets.top + space.md,
+          paddingBottom: space.lg,
           paddingHorizontal: space.lg,
           justifyContent: 'flex-end',
-          gap: space.md,
+          gap: 10,
         }}
       >
-        <BrandMark size={44} onFill />
+        <BrandMark size={40} onFill />
         <Text
           variant="hero"
           style={{
-            color: '#F5F1EC',
-            fontSize: compact ? 32 : 40,
+            color: '#F7F3EE',
+            fontSize: compact ? 30 : 36,
             letterSpacing: -1.2,
-            lineHeight: compact ? 36 : 44,
+            lineHeight: compact ? 34 : 40,
           }}
         >
-          {welcomeLabel}
+          {welcomeLabel.split('\n').map((line, i, all) => (
+            <Text
+              key={line}
+              variant="hero"
+              style={{
+                color: i === all.length - 1 ? colors.axel : '#F7F3EE',
+                fontSize: compact ? 30 : 36,
+                letterSpacing: -1.2,
+                lineHeight: compact ? 34 : 40,
+              }}
+            >
+              {i === 0 ? line : `\n${line}`}
+            </Text>
+          ))}
         </Text>
         <Text
           variant="body"
           style={{
-            color: 'rgba(245,241,236,0.88)',
-            maxWidth: 320,
+            color: 'rgba(245,241,236,0.82)',
+            maxWidth: 340,
             fontSize: 15,
             lineHeight: 22,
           }}
         >
-          Humor, água, tarefas e finanças em um só lugar. O AXEL prioriza o essencial e reduz o ruído do dia.
+          {'O essencial do seu dia, numa tela só.\nHumor, treino, tarefas e contas.'}
         </Text>
       </View>
     </View>

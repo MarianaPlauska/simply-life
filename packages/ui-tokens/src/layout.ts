@@ -19,6 +19,16 @@ export const SPACE = {
   xxl: 32,
 } as const
 
+/** Desktop/web: mesma hierarquia, menos ar. */
+export const SPACE_COMPACT = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 14,
+  xl: 16,
+  xxl: 24,
+} as const
+
 export const TOUCH = {
   min: 44,
   icon: 18,

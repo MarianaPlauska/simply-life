@@ -19,6 +19,7 @@ import { useAuthStore } from '../../src/store/authStore'
 import { MoveTaskSheet } from '../../src/components/kanban/MoveTaskSheet'
 import { TaskDetailEditor } from '../../src/components/kanban/TaskDetailEditor'
 import { TaskTimerPanel } from '../../src/components/kanban/TaskTimerPanel'
+import { openFocusForTask } from '../../src/lib/openFocus'
 
 type DetailTab = 'analise' | 'status' | 'detalhes' | 'anotacoes'
 
@@ -291,15 +292,16 @@ export default function TaskDetailScreen()
               </View>
             </View>
             <PrimaryButton
-              label="Executar agora"
+              label="Focar nesta tarefa"
               variant="ghost"
-              onPress={() => router.push('/foco')}
+              icon="timer-outline"
+              onPress={() => openFocusForTask(router, task.id)}
               style={{ width: '100%' }}
             />
           </View>
         ) : null}
 
-        {tab === 'status' ? <TaskTimerPanel /> : null}
+        {tab === 'status' ? <TaskTimerPanel taskId={task.id} /> : null}
 
         {tab === 'detalhes' ? (
           <TaskDetailEditor task={task} isGuest={isGuest} />

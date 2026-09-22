@@ -23,9 +23,13 @@
 | Planilha + CSV import/export | Feito |
 | Metas wizard + coach / forecast / 50-30-20 | Feito |
 | Fatura / quick spend nos cartões | Feito |
-| **Saúde shell** (Hoje / Cuidados / Diário) | Feito |
+| **Saúde shell** (Diário / Hoje / Cuidados / Apoio) | Feito |
 | **Saúde hub** (Hidratação / Alimentação / Academia / Medicamentos em Cuidados) | Feito |
-| Academy Mode (sessão + séries) | Feito |
+| Acalmar (respiração 4 tempos + cinco sentidos) + FAB | Feito |
+| Foco 25 min ligado a tarefa do Kanban | Feito |
+| Modo suave (humor ≤ 2 na aba Hoje) | Feito |
+| Modo treino (tela cheia + descanso por exercício) | Feito |
+| Padrão semanal de academia (editar exercícios/séries por dia do calendário) | Feito |
 | Medicamentos CRUD | Feito |
 | Diário: revisão semanal + heatmap | Feito |
 | Gamificação XP / conquistas / loja / celebrações | Feito |
@@ -61,9 +65,12 @@
 - [x] Metas criáveis
 - [x] Coach / forecast / 50-30-20
 - [x] Fatura / quick spend
-- [x] Academy utilizável
+- [x] Academy utilizável (modo treino tela cheia + restSec + padrão semanal)
 - [x] Meds CRUD
 - [x] Revisão semanal + heatmap no diário
+- [x] Acalmar (respiração 4 tempos + cinco sentidos) em Apoio e FAB
+- [x] Foco 25 min com “Focar nesta tarefa” no Kanban
+- [x] Modo suave na aba Hoje quando humor ≤ 2
 
 ### Onda 2 — Gamificação
 

@@ -10,7 +10,7 @@ import { ExecuteTimerFace } from '../timer/ExecuteTimerFace'
 const PRESETS = [10, 15, 25, 30, 45, 60]
 
 /** Timer da tarefa — mesmo rosto do modo foco. */
-export function TaskTimerPanel()
+export function TaskTimerPanel({ taskId }: { taskId?: string })
 {
   const { colors, space } = useTheme()
   const prefsMin = usePrefsStore((s) => s.prefs.pomodoro_focus) || 25
@@ -23,6 +23,7 @@ export function TaskTimerPanel()
   const resume = useFocusStore((s) => s.resume)
   const tick = useFocusStore((s) => s.tick)
   const reset = useFocusStore((s) => s.reset)
+  const setTargetTask = useFocusStore((s) => s.setTargetTask)
   const markAction = useActivityStore((s) => s.markAction)
   const [goalMin, setGoalMin] = useState(prefsMin)
 
@@ -49,7 +50,8 @@ export function TaskTimerPanel()
       return
     }
     markAction('focus')
-    start(goalMin, 'focus')
+    if (taskId) setTargetTask(taskId)
+    start(goalMin, 'focus', taskId ?? null)
   }
 
   return (

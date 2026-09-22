@@ -6,7 +6,7 @@ import {
   type MobileTask,
   type TaskStatus,
 } from '@simply-life/shared'
-import { Text, Chip, PrimaryButton } from '../../ui'
+import { Text, Chip, PrimaryButton, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useAuthStore } from '../../store/authStore'
@@ -105,12 +105,30 @@ export function DueBucketColumns({ tasks }: Props)
   const toggle = (id: string) => void toggleTaskDone(id, isGuest)
   const add = () => openCapture('task')
 
+  const openCount = tasks.filter((t) => t.status !== 'done').length
+
   return (
     <View style={{ gap: space.md }}>
+      <View style={{ gap: 4 }}>
+        <Text variant="section" style={{ fontSize: 18 }}>
+          Por prazo
+        </Text>
+        <Text variant="caption" muted>
+          Tarefas abertas agrupadas por quando vencem. Alterne para ver por status.
+        </Text>
+      </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
         <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />
       </View>
+
+      {openCount === 0 ? (
+        <EmptyState
+          title="Nenhuma tarefa aberta"
+          body="Crie uma tarefa com data de vencimento para ela aparecer nas colunas de prazo."
+          icon="calendar-outline"
+        />
+      ) : null}
 
       {isMobile ? (
         <View style={{ gap: 22 }}>
@@ -123,11 +141,16 @@ export function DueBucketColumns({ tasks }: Props)
               onAdd={add}
             />
           ))}
-          {empty.length > 0 ? (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {empty.map((g) => (
-                <Chip key={g.id} label={`${g.label} · 0`} onPress={add} />
-              ))}
+          {empty.length > 0 && filled.length > 0 ? (
+            <View style={{ gap: 8 }}>
+              <Text variant="caption" muted>
+                Colunas vazias
+              </Text>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                {empty.map((g) => (
+                  <Chip key={g.id} label={`${g.label} · 0`} onPress={add} />
+                ))}
+              </View>
             </View>
           ) : null}
         </View>

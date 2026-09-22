@@ -39,8 +39,9 @@
     "error_connection": "Connection error",
     "oauth_processing": "Connecting with Google…",
     "back_to_login": "Back to login",
-    "hero_title": "Organize your life in one place",
-    "hero_subtitle": "Tasks, finances, health and calendar - all synced at your pace.",
+    "hero_title": "Organize.\nPlan.\nSimply.",
+    "hero_subtitle": "Your whole day in one screen.\nMood, training, tasks and bills.",
+    "hero_badge": "Personal OS",
     "hero_feature_1": "Kanban and focus for daily execution",
     "hero_feature_2": "Finances and goals with clear visibility",
     "hero_feature_3": "Google Calendar and Gmail integration"

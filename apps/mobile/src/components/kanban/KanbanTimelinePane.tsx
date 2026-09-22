@@ -2,13 +2,14 @@ import { useMemo, useState } from 'react'
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
+  localTodayIso,
   minutesToLabel,
   timelineColorForTask,
   type MobileTask,
 } from '@simply-life/shared'
 import { Text, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
-import { KanbanDateStrip, buildForwardDays } from './KanbanDateStrip'
+import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 
 type Props = { tasks: MobileTask[] }
 
@@ -34,11 +35,12 @@ export function KanbanTimelinePane({ tasks }: Props)
 {
   const { colors, space } = useTheme()
   const router = useRouter()
-  const days = useMemo(() => buildForwardDays(7), [])
-  const [dayIso, setDayIso] = useState(days[0]?.iso ?? '')
+  const today = localTodayIso()
+  const days = useMemo(() => buildDayRange(15, 15), [])
+  const [dayIso, setDayIso] = useState(today)
   const dayTasks = useMemo(() => tasksForIso(tasks, dayIso), [tasks, dayIso])
   const nowMins = new Date().getHours() * 60 + new Date().getMinutes()
-  const isToday = dayIso === days[0]?.iso
+  const isToday = dayIso === today
   const monthLabel = new Date(`${dayIso}T12:00:00`).toLocaleDateString('pt-BR', {
     month: 'long',
     year: 'numeric',

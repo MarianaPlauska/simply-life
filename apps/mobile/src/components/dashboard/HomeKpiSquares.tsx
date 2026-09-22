@@ -2,6 +2,7 @@ import { View, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { Text, IconBadge } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useWorkspace } from '../../layout/useWorkspace'
 
 export type KpiSquare = {
   id: string
@@ -13,10 +14,15 @@ export type KpiSquare = {
   onPress?: () => void
 }
 
-/** Grade 2×2 estilo “Today’s Update”: ícone, título, status. */
+/** Grade 2×2 no celular; quatro na linha no desktop. */
 export function HomeKpiSquares({ items }: { items: KpiSquare[] })
 {
   const { colors } = useTheme()
+  const workspace = useWorkspace()
+  const dense = Boolean(workspace.isDesktop)
+  const tile = dense
+    ? { flexBasis: '22%' as const, minHeight: 96, borderRadius: 18, padding: 12, gap: 10 }
+    : { flexBasis: '46%' as const, minHeight: 124, borderRadius: 22, padding: 16, gap: 14 }
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
@@ -26,15 +32,11 @@ export function HomeKpiSquares({ items }: { items: KpiSquare[] })
           onPress={item.onPress}
           disabled={!item.onPress}
           style={{
-            width: '47%',
             flexGrow: 1,
-            flexBasis: '46%',
-            minHeight: 124,
-            borderRadius: 22,
+            width: dense ? '23%' : '47%',
             backgroundColor: colors.elevated,
-            padding: 16,
-            gap: 14,
             justifyContent: 'space-between',
+            ...tile,
           }}
         >
           <IconBadge name={item.icon} color={item.color} size={40} iconSize={18} />

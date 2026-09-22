@@ -341,31 +341,40 @@ export function LoginView()
   const isRegisterDisabled = !regEmail.trim() || !regSenha.trim() || !regConfirm.trim() || !regNome.trim();
 
   return (
-    <div className="relative min-h-screen w-screen bg-fundo overflow-hidden">
+    <div className="relative min-h-screen w-screen bg-fundo lg:bg-[#070605] overflow-hidden">
       <div className="absolute inset-0 sl-login-vignette pointer-events-none hidden lg:block" />
 
-      {/* Mobile / tablet: marca compacta no topo (Bloco H) - escuro: Dark Onyx + brilho accent */}
-      <div className="lg:hidden relative h-[150px] w-full overflow-hidden bg-gradient-to-br from-axel via-accent to-accent-hover dark:bg-[var(--bg-canvas)] dark:bg-none">
+      {/* Mobile: landing OLED + cobre AXEL */}
+      <div className="lg:hidden relative h-[260px] w-full overflow-hidden bg-[#050403]">
         <div
-          className="pointer-events-none absolute inset-0 hidden dark:block"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 55% 60% at 50% 42%, rgba(232,115,74,0.5) 0%, rgba(232,115,74,0.18) 42%, transparent 70%), linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-surface) 55%, var(--bg-canvas) 100%)',
+              'radial-gradient(ellipse 55% 60% at 50% 42%, rgba(232,115,74,0.5) 0%, rgba(232,115,74,0.18) 42%, transparent 70%)',
           }}
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pt-2">
+        <div className="absolute inset-0 flex flex-col items-start justify-end gap-2 px-5 pb-6">
           <SimplyLifeMark variant="icon" className="w-10 h-10" />
-          <p className="text-[18px] font-semibold text-[#F5F1EC] tracking-tight">Simply Life</p>
+          <p className="text-[30px] leading-[1.05] font-display text-[#F7F3EE] tracking-tight">
+            {t('login.hero_title').split('\n').map((line, i, all) => (
+              <span key={line} className={`block ${i === all.length - 1 ? 'text-accent' : ''}`}>
+                {line}
+              </span>
+            ))}
+          </p>
+          <p className="text-[13px] text-white/70 leading-snug max-w-[280px] whitespace-pre-line">
+            {t('login.hero_subtitle')}
+          </p>
         </div>
       </div>
 
-      <div className="relative z-10 min-h-[calc(100dvh-150px)] lg:min-h-screen flex items-stretch lg:items-center justify-center px-0 lg:px-4 py-0 lg:py-10">
-        <div className="w-full max-w-5xl grid lg:grid-cols-[1fr_420px] gap-0 lg:gap-10 xl:gap-16 items-stretch lg:items-center">
+      <div className="relative z-10 min-h-[calc(100dvh-260px)] lg:min-h-screen flex items-stretch lg:items-center justify-center px-0 lg:px-6 py-0 lg:py-10">
+        <div className="w-full max-w-7xl grid lg:grid-cols-[minmax(0,1.35fr)_380px] gap-0 lg:gap-8 xl:gap-10 items-stretch">
           <div className="hidden lg:block">
             <LoginHero />
           </div>
 
-          <div className="w-full max-w-none mx-auto lg:max-w-md -mt-3 lg:mt-0 rounded-t-[20px] lg:rounded-none bg-[var(--bg-surface)] lg:bg-transparent px-5 sm:px-6 lg:px-0 pt-6 pb-8 min-h-[calc(100dvh-138px)] lg:min-h-0">
+          <div className="w-full max-w-none mx-auto lg:max-w-md -mt-3 lg:mt-0 rounded-t-[20px] lg:rounded-none bg-[var(--bg-surface)] lg:bg-transparent px-5 sm:px-6 lg:px-0 pt-6 pb-8 min-h-[calc(100dvh-248px)] lg:min-h-0">
             <div className="sl-panel sl-login-glow p-5 sm:p-6 lg:p-8 border-0 lg:border shadow-none lg:shadow bg-[var(--bg-surface)]">
               <div className="mb-5 lg:mb-6">
                 <h2 className="text-h1 md:text-h1-md lg:text-h1-lg font-display text-ink">{t('login.title')}</h2>
