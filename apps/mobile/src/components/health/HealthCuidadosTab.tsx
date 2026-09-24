@@ -26,11 +26,13 @@ export function HealthCuidadosTab({ tab, onChange }: Props)
         onChange={onChange}
         accent="health"
       />
+      <View style={{ gap: space.md }}>
       {tab === 'hidratacao' && <HydrationPanel />}
       {tab === 'alimentacao' && <NutritionPanel />}
       {tab === 'sono' && <SleepPanel />}
       {tab === 'academia' && <AcademyPanel />}
       {tab === 'medicamentos' && <MedicamentosPanel />}
+      </View>
     </View>
   )
 }

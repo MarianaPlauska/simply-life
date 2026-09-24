@@ -10,12 +10,12 @@ export const TAN_PALETTE = {
   kanafeh: '#D08735',
 } as const
 
-/** Preto profundo das referências (Cryptora / Card Balance) — não o onyx arroxeado */
+/** Escuro quente (carvão + âmbar) — menos “buraco preto”, combina com a tab AXEL */
 export const DARK_ONYX = {
-  canvas: '#000000',
-  surface: '#141414',
-  elevated: '#1C1C1E',
-  hairline: '#2A2A2C',
+  canvas: '#1E1C1A',
+  surface: '#262422',
+  elevated: '#2E2C2A',
+  hairline: '#3C3A37',
   textPrimary: '#F5F1EC',
   textMuted: '#A8A29E',
   accent: '#E8734A',
@@ -32,6 +32,8 @@ export type ColorTokens = {
   inkFaint: string
   hairline: string
   hairlineStrong: string
+  /** Contorno sutil de cartões (rim), visível no escuro sem sombra pesada */
+  cardRim: string
   axel: string
   axelHover: string
   axelMuted: string
@@ -61,19 +63,20 @@ export const COLOR_DARK: ColorTokens = {
   inkFaint: 'rgba(168, 162, 158, 0.72)',
   hairline: DARK_ONYX.hairline,
   hairlineStrong: 'rgba(232, 115, 74, 0.55)',
+  cardRim: 'rgba(245, 241, 236, 0.07)',
   axel: DARK_ONYX.accent,
   axelHover: DARK_ONYX.accentPressed,
-  axelMuted: 'rgba(232, 115, 74, 0.22)',
+  axelMuted: 'rgba(232, 115, 74, 0.24)',
   axelOnFill: '#FFFFFF',
-  health: '#7BC9A0',
-  healthMuted: 'rgba(123, 201, 160, 0.16)',
-  finance: '#D4B896',
-  financeMuted: 'rgba(212, 184, 150, 0.16)',
-  tasks: '#9AA8B5',
-  tasksMuted: 'rgba(154, 168, 181, 0.14)',
+  health: '#4FC98A',
+  healthMuted: 'rgba(79, 201, 138, 0.2)',
+  finance: '#E3A855',
+  financeMuted: 'rgba(227, 168, 85, 0.2)',
+  tasks: '#7FAAD1',
+  tasksMuted: 'rgba(127, 170, 209, 0.18)',
   danger: '#E07A6A',
   attention: DARK_ONYX.accent,
-  done: '#7BC9A0',
+  done: '#4FC98A',
   overlay: 'rgba(0, 0, 0, 0.72)',
   widget: DARK_ONYX.elevated,
   widgetInk: DARK_ONYX.textPrimary,
@@ -90,6 +93,7 @@ export const COLOR_LIGHT: ColorTokens = {
   inkFaint: 'rgba(140, 130, 117, 0.72)',
   hairline: '#E8DDC9',
   hairlineStrong: 'rgba(232, 115, 74, 0.45)',
+  cardRim: 'rgba(42, 38, 34, 0.1)',
   axel: DARK_ONYX.accent,
   axelHover: DARK_ONYX.accentPressed,
   axelMuted: 'rgba(232, 115, 74, 0.14)',

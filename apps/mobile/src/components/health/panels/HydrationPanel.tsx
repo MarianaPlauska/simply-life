@@ -1,19 +1,13 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { findHabit, habitPct, aguaMlPorCopo } from '@simply-life/shared'
-import {
-  Card,
-  SectionHeader,
-  PrimaryButton,
-  PressableScale,
-  IconBadge,
-  StatusPill,
-} from '../../../ui'
+import { PrimaryButton, PressableScale } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useDataStore } from '../../../store/dataStore'
 import { useAuthStore } from '../../../store/authStore'
 import { WaterGoalEditor } from '../../dashboard/WaterGoalEditor'
+import { HealthPanelHero } from '../HealthPanelHero'
 
 export function HydrationPanel()
 {
@@ -32,14 +26,15 @@ export function HydrationPanel()
   const meta = agua?.metaDiaria ?? 10
 
   return (
-    <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <IconBadge name="water" color={colors.health} size={44} iconSize={22} />
-        <View style={{ flex: 1, gap: 6 }}>
-          <SectionHeader title="Hidratação" subtitle={`${atual}/${meta} copos · ${ml} ml`} />
-          <StatusPill label={`${pct}% da meta`} color={colors.health} />
-        </View>
-      </View>
+    <View style={{ gap: space.md }}>
+      <HealthPanelHero
+        icon="water"
+        kicker="Hidratação"
+        headline={`${atual}/${meta} copos`}
+        detail={`${ml} ml por copo`}
+        pillLabel={`${pct}% da meta`}
+        pillColor={colors.health}
+      />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
         {Array.from({ length: meta }).map((_, i) =>
         {
@@ -62,10 +57,10 @@ export function HydrationPanel()
               style={{
                 width: 44,
                 height: 48,
-                borderRadius: 14,
-                backgroundColor: filled ? colors.healthMuted : colors.surface,
-                borderWidth: 1,
-                borderColor: filled ? colors.health : colors.hairline,
+                borderRadius: 10,
+                backgroundColor: filled ? colors.healthMuted : colors.hairline,
+                borderWidth: filled ? 0 : StyleSheet.hairlineWidth,
+                borderColor: colors.hairline,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
@@ -95,11 +90,11 @@ export function HydrationPanel()
       </View>
       <PrimaryButton
         label={edit ? 'Fechar meta' : 'Editar ml e litros'}
-        variant="ghost"
+        variant="link"
         onPress={() => setEdit((v) => !v)}
-        style={pillBtn}
+        style={{ alignSelf: 'flex-start', marginTop: -4 }}
       />
       {edit ? <WaterGoalEditor /> : null}
-    </Card>
+    </View>
   )
 }

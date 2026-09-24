@@ -7,12 +7,8 @@ import {
   SONO_META_H,
 } from '@simply-life/shared'
 import {
-  Card,
   Text,
-  SectionHeader,
   PrimaryButton,
-  IconBadge,
-  StatusPill,
   MiniBarChart,
   Chip,
 } from '../../../ui'
@@ -20,6 +16,7 @@ import { useTheme } from '../../../theme/ThemeProvider'
 import { useDataStore } from '../../../store/dataStore'
 import { useAuthStore } from '../../../store/authStore'
 import { last7Iso, useBodyWeekStore } from '../../../store/bodyWeekStore'
+import { HealthPanelHero } from '../HealthPanelHero'
 
 const QUICK = [6, 6.5, 7, 7.5, 8, 8.5, 9]
 
@@ -47,32 +44,26 @@ export function SleepPanel()
     i === weekRaw.length - 1 ? atual : (sleepHours[iso] ?? 0),
   )
   const pillBtn = { borderRadius: 999 as const }
+  const headline = atual > 0 ? formatSleepHours(atual) : '—'
 
   return (
-    <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <IconBadge name="moon" color="#C4A574" size={44} iconSize={22} />
-        <View style={{ flex: 1, gap: 6 }}>
-          <SectionHeader
-            title="Sono"
-            subtitle={atual > 0 ? `${formatSleepHours(atual)} · meta ${meta}h` : `Meta ${meta}h`}
-          />
-          <StatusPill
-            label={done ? 'Noite ok' : atual > 0 ? `${pct}% da meta` : 'Sem registro'}
-            color={done ? colors.health : colors.axel}
-          />
-        </View>
-      </View>
+    <View style={{ gap: space.md }}>
+      <HealthPanelHero
+        icon="moon"
+        iconColor="#C4A574"
+        kicker="Sono"
+        headline={headline}
+        detail={atual > 0 ? `Meta ${meta}h` : `Meta ${meta}h · sem registro`}
+        pillLabel={done ? 'Noite ok' : atual > 0 ? `${pct}% da meta` : 'Sem registro'}
+        pillColor={done ? colors.health : colors.axel}
+      />
 
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-        <Text variant="hero" style={{ fontSize: 36, lineHeight: 40 }}>
-          {atual > 0 ? formatSleepHours(atual) : '—'}
-        </Text>
         <MiniBarChart
           values={week.map((v) => v || 0.4)}
           highlightIndex={6}
           color="#C4A574"
-          width={120}
+          width={160}
           height={56}
         />
       </View>
@@ -104,6 +95,6 @@ export function SleepPanel()
           style={[pillBtn, { flex: 1 }]}
         />
       </View>
-    </Card>
+    </View>
   )
 }

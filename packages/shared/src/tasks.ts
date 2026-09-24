@@ -15,6 +15,8 @@ export interface MobileTask
   checklist: { id: string; texto: string; feito: boolean }[]
   anotacao: string
   prioridade: 1 | 2 | 3
+  /** quando foi concluída (ISO). Banco: concluido_em (migração 059) */
+  concluidoEm?: string | null
 }
 
 export type DueBucket = 'vencido' | 'hoje' | 'esta_semana' | 'proxima_semana' | 'sem_prazo' | 'concluido'

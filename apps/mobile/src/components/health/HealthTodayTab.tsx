@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { View } from 'react-native'
+import { useEffect, useMemo } from 'react'
+import { View, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import {
   findHabit,
@@ -9,13 +9,16 @@ import {
   moodLabel,
   isSoftMoodDay,
 } from '@simply-life/shared'
-import { Card, Text, SectionHeader, PressableScale, IconBadge, StatusPill } from '../../ui'
+import { Text, PressableScale, IconBadge, StatusPill } from '../../ui'
 import { MoodFaceRow } from '../MoodFace'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import type { CuidadosTab } from './healthNav'
 import { HealthSoftModeView } from './HealthSoftModeView'
+import { HealthScreenSection } from './HealthScreenSection'
+import { HealthAxelStrip } from './HealthAxelStrip'
+import { useCalmFabSuppressStore } from '../../store/calmFabSuppressStore'
 
 type Props = {
   onGoCuidados: (tab: CuidadosTab) => void
@@ -35,7 +38,7 @@ const TILES: {
   { id: 'medicamentos', label: 'Medicamentos', icon: 'medical' },
 ]
 
-/** Aba Hoje: entrada calma, sem pressão de metas nem blocos de crise. */
+/** Aba Hoje: entrada calma, layout integrado na tela (sem painéis com borda). */
 export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
 {
   const { colors, space } = useTheme()
@@ -56,6 +59,13 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
     () => humor.find((h) => (h.data || '').slice(0, 10) === dia) ?? null,
     [humor, dia],
   )
+
+  useEffect(() =>
+  {
+    const { acquire, release } = useCalmFabSuppressStore.getState()
+    acquire()
+    return () => release()
+  }, [])
 
   const pendingTiles = useMemo(() =>
   {
@@ -126,36 +136,28 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
     }
   }
 
+  const moodHeadline = humorHoje ? moodLabel(humorHoje.humor) : 'Como você está?'
+
   return (
     <View style={{ gap: space.md }}>
-      <Card
-        tone="elevated"
-        style={{
-          gap: space.sm,
-          borderRadius: 18,
-          borderTopWidth: 1,
-          borderTopColor: colors.axel,
-          flexDirection: 'row',
-          alignItems: 'flex-start',
-        }}
-      >
-        <IconBadge name="sparkles" color={colors.axel} size={44} iconSize={22} />
-        <View style={{ flex: 1, gap: 6 }}>
-          <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
-            AXEL
-          </Text>
-          <Text variant="voice">
-            {lastAxelCare
-              || 'Sem pressa. Um passo de cada vez já conta.'}
-          </Text>
-        </View>
-      </Card>
+      <HealthAxelStrip
+        message={lastAxelCare || 'Sem pressa. Um passo de cada vez já conta.'}
+      />
 
-      <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
-        <SectionHeader
-          title="Como você está?"
-          subtitle={humorHoje ? moodLabel(humorHoje.humor) : 'Toque se quiser registrar'}
-        />
+      <HealthScreenSection dividerTop>
+        <View style={{ gap: 2 }}>
+          <Text variant="caption" muted>
+            {humorHoje ? 'Humor de hoje' : 'Check-in rápido'}
+          </Text>
+          <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
+            {moodHeadline}
+          </Text>
+          {!humorHoje ? (
+            <Text variant="caption" muted>
+              Toque se quiser registrar
+            </Text>
+          ) : null}
+        </View>
         <MoodFaceRow
           value={humorHoje?.humor}
           onChange={(m) => void addHumor(m, undefined, isGuest)}
@@ -165,26 +167,28 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
             Abrir diário completo
           </Text>
         </PressableScale>
-      </Card>
+      </HealthScreenSection>
 
       {pendingTiles.length > 0 ? (
-        <View style={{ gap: space.sm }}>
-          <SectionHeader
-            title="Se quiser registrar"
-            subtitle="Só o que fizer sentido agora"
-          />
-          {pendingTiles.slice(0, 2).map((tile) =>
+        <HealthScreenSection
+          dividerTop
+          title="Se quiser registrar"
+          subtitle="Só o que fizer sentido agora"
+        >
+          {pendingTiles.slice(0, 2).map((tile, index, arr) =>
           {
             const { pillLabel, done } = tileDetail(tile)
+            const last = index === arr.length - 1
             return (
               <PressableScale key={tile.id} onPress={() => onGoCuidados(tile.id)}>
-                <Card
-                  tone="elevated"
+                <View
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
                     gap: space.md,
-                    borderRadius: 18,
+                    paddingVertical: 12,
+                    borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
+                    borderBottomColor: colors.hairline,
                   }}
                 >
                   <IconBadge
@@ -193,7 +197,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
                     size={40}
                     iconSize={20}
                   />
-                  <View style={{ flex: 1, gap: 6 }}>
+                  <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
                     <Text variant="bodyStrong">{tile.label}</Text>
                     <StatusPill
                       label={pillLabel}
@@ -201,47 +205,49 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
                     />
                   </View>
                   <Ionicons name="chevron-forward" size={18} color={colors.inkFaint} />
-                </Card>
+                </View>
               </PressableScale>
             )
           })}
-        </View>
+        </HealthScreenSection>
       ) : (
-        <Card tone="elevated" style={{ gap: space.sm, borderRadius: 18 }}>
+        <HealthScreenSection dividerTop>
           <Text variant="bodyStrong">Você já registrou o essencial hoje</Text>
           <Text variant="caption" muted>
             Pode descansar ou revisar no diário quando quiser.
           </Text>
-        </Card>
+        </HealthScreenSection>
       )}
 
-      <PressableScale
-        onPress={() => onGoCuidados('hidratacao')}
-        accessibilityRole="button"
-        style={{
-          minHeight: 48,
-          paddingHorizontal: space.md,
-          borderRadius: 18,
-          borderWidth: 1.5,
-          borderColor: colors.health,
-          backgroundColor: colors.elevated,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-        }}
-      >
-        <Ionicons name="leaf-outline" size={18} color={colors.health} />
-        <Text variant="bodyStrong" color={colors.health}>
-          Ver todos os cuidados
-        </Text>
-      </PressableScale>
+      <HealthScreenSection dividerTop>
+        <PressableScale
+          onPress={() => onGoCuidados('hidratacao')}
+          accessibilityRole="button"
+          style={{
+            minHeight: 48,
+            paddingHorizontal: space.md,
+            borderRadius: 999,
+            borderWidth: 1.5,
+            borderColor: colors.health,
+            backgroundColor: 'transparent',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <Ionicons name="leaf-outline" size={18} color={colors.health} />
+          <Text variant="bodyStrong" color={colors.health}>
+            Ver todos os cuidados
+          </Text>
+        </PressableScale>
 
-      <PressableScale onPress={onGoApoio} accessibilityRole="button">
-        <Text variant="caption" muted style={{ textAlign: 'center' }}>
-          Precisa de apoio? CVV, TCC e foco estão na aba Apoio.
-        </Text>
-      </PressableScale>
+        <PressableScale onPress={onGoApoio} accessibilityRole="button">
+          <Text variant="caption" muted style={{ textAlign: 'center' }}>
+            Precisa de apoio? CVV, TCC e foco estão na aba Apoio.
+          </Text>
+        </PressableScale>
+      </HealthScreenSection>
     </View>
   )
 }

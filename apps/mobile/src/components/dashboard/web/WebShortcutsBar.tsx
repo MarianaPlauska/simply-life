@@ -12,6 +12,7 @@ import { usePrefsStore } from '../../../store/prefsStore'
 import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '../../../lib/homeMetrics'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 function iconFor(id: HomeMetricId): keyof typeof Ionicons.glyphMap
 {
@@ -81,38 +82,38 @@ export function WebShortcutsBar()
   if (rows.length === 0) return null
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, overflow: 'hidden' }}>
-      <View style={{ paddingHorizontal: 18, paddingTop: 16, paddingBottom: 10 }}>
-        <Text variant="section" style={{ fontSize: 16 }}>
-          Atalhos
-        </Text>
+    <View style={{ gap: 10 }}>
+      <Text variant="section" style={{ fontSize: 16 }}>
+        Atalhos
+      </Text>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+        {rows.map((row, i) => (
+          <WebHoverable
+            key={row.id}
+            onPress={row.onPress}
+            accessibilityLabel={`${row.label}: ${row.value}`}
+            style={(hovered) => webStyle({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              paddingHorizontal: 18,
+              paddingVertical: 11,
+              borderTopWidth: i === 0 ? 0 : 1,
+              borderTopColor: WEB_ROW_DIVIDER,
+              backgroundColor: hovered ? colors.surface : 'transparent',
+              cursor: 'pointer',
+            })}
+          >
+            <Ionicons name={row.icon} size={15} color={colors.axel} style={{ width: 20 }} />
+            <Text variant="body" style={{ flex: 1, fontSize: 13 }}>
+              {row.label}
+            </Text>
+            <Text variant="bodyStrong" style={{ fontSize: 13 }}>
+              {row.value}
+            </Text>
+          </WebHoverable>
+        ))}
       </View>
-      {rows.map((row, i) => (
-        <WebHoverable
-          key={row.id}
-          onPress={row.onPress}
-          accessibilityLabel={`${row.label}: ${row.value}`}
-          style={(hovered) => webStyle({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-            paddingHorizontal: 18,
-            paddingVertical: 11,
-            borderTopWidth: i === 0 ? 1 : 0,
-            borderTopColor: colors.hairline,
-            backgroundColor: hovered ? colors.surface : 'transparent',
-            cursor: 'pointer',
-          })}
-        >
-          <Ionicons name={row.icon} size={15} color={colors.axel} style={{ width: 20 }} />
-          <Text variant="body" style={{ flex: 1, fontSize: 13 }}>
-            {row.label}
-          </Text>
-          <Text variant="bodyStrong" style={{ fontSize: 13 }}>
-            {row.value}
-          </Text>
-        </WebHoverable>
-      ))}
     </View>
   )
 }

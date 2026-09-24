@@ -18,6 +18,7 @@ import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../../store/waterLogStore'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
@@ -74,7 +75,7 @@ export function WebBodyMetrics()
       label: 'Proteína',
       value: `${proteina?.progressoAtual ?? 0}`,
       unit: 'g',
-      color: colors.axel,
+      color: colors.inkMuted,
       viz: null,
     },
     {
@@ -83,7 +84,7 @@ export function WebBodyMetrics()
       label: 'Água',
       value: `${((agua?.progressoAtual ?? 0) * ml).toLocaleString('pt-BR')}`,
       unit: 'ml',
-      color: '#5B8DEF',
+      color: colors.inkMuted,
       viz: null,
     },
     {
@@ -92,12 +93,12 @@ export function WebBodyMetrics()
       label: 'Sono',
       value: todaySleep > 0 ? formatSleepHours(todaySleep) : 'Sem registro',
       unit: 'última noite',
-      color: '#C4A574',
+      color: colors.inkMuted,
       viz: (
         <MiniBarChart
           values={sleepSeries.map((v) => v || 0.4)}
           highlightIndex={todayIndex >= 0 ? todayIndex : 6}
-          color="#C4A574"
+          color={colors.inkMuted}
           width={56}
           height={26}
         />
@@ -109,11 +110,11 @@ export function WebBodyMetrics()
       label: 'Treino',
       value: treino?.progressoAtual ? 'Feito' : 'Sem sessão',
       unit: 'hoje',
-      color: colors.health,
+      color: colors.inkMuted,
       viz: (
         <MiniSparkline
           values={workoutSeries.map((v) => v * 3 + 1)}
-          color={colors.health}
+          color={colors.inkMuted}
           width={56}
           height={26}
         />
@@ -122,44 +123,44 @@ export function WebBodyMetrics()
   ]
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, overflow: 'hidden' }}>
-      <View style={{ paddingHorizontal: 18, paddingTop: 16, paddingBottom: 10 }}>
-        <Text variant="section" style={{ fontSize: 16 }}>
-          Corpo na semana
-        </Text>
+    <View style={{ gap: 10 }}>
+      <Text variant="section" style={{ fontSize: 16 }}>
+        Corpo na semana
+      </Text>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+        {rows.map((row, i) => (
+          <WebHoverable
+            key={row.id}
+            onPress={() => open(row.id)}
+            accessibilityLabel={`${row.label}: ${row.value} ${row.unit}`}
+            style={(hovered) => webStyle({
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              paddingHorizontal: 18,
+              paddingVertical: 12,
+              borderTopWidth: i === 0 ? 0 : 1,
+              borderTopColor: WEB_ROW_DIVIDER,
+              backgroundColor: hovered ? colors.surface : 'transparent',
+              cursor: 'pointer',
+            })}
+          >
+            <Ionicons name={row.icon} size={16} color={row.color} style={{ width: 20 }} />
+            <Text variant="body" style={{ width: 76, fontSize: 13 }}>
+              {row.label}
+            </Text>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+              <Text variant="bodyStrong" style={{ fontSize: 15 }}>
+                {row.value}
+              </Text>
+              <Text variant="micro" muted>
+                {row.unit}
+              </Text>
+            </View>
+            {row.viz}
+          </WebHoverable>
+        ))}
       </View>
-      {rows.map((row, i) => (
-        <WebHoverable
-          key={row.id}
-          onPress={() => open(row.id)}
-          accessibilityLabel={`${row.label}: ${row.value} ${row.unit}`}
-          style={(hovered) => webStyle({
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-            paddingHorizontal: 18,
-            paddingVertical: 12,
-            borderTopWidth: i === 0 ? 1 : 0,
-            borderTopColor: colors.hairline,
-            backgroundColor: hovered ? colors.surface : 'transparent',
-            cursor: 'pointer',
-          })}
-        >
-          <Ionicons name={row.icon} size={16} color={row.color} style={{ width: 20 }} />
-          <Text variant="body" style={{ width: 76, fontSize: 13 }}>
-            {row.label}
-          </Text>
-          <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
-            <Text variant="bodyStrong" style={{ fontSize: 15 }}>
-              {row.value}
-            </Text>
-            <Text variant="micro" muted>
-              {row.unit}
-            </Text>
-          </View>
-          {row.viz}
-        </WebHoverable>
-      ))}
     </View>
   )
 }

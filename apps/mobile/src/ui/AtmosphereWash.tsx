@@ -3,10 +3,10 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../theme/ThemeProvider'
 import { useWorkspace } from '../layout/useWorkspace'
 
-/** Degradê de clima. Escuro: cobre a tela inteira para não “cortar” o fundo. */
+/** Degradê de clima. Escuro: carvão quente — sem voltar ao #000 no rodapé. */
 export function AtmosphereWash()
 {
-  const { mode } = useTheme()
+  const { mode, colors } = useTheme()
   const { showRail } = useWorkspace()
 
   if (mode !== 'dark')
@@ -34,14 +34,24 @@ export function AtmosphereWash()
   }
 
   return (
-    <LinearGradient
-      pointerEvents="none"
-      colors={['#1A1614', '#0C0B0B', '#000000']}
-      locations={showRail ? [0, 0.55, 1] : [0, 0.42, 1]}
-      start={{ x: 0.85, y: 0 }}
-      end={{ x: 0.25, y: 1 }}
-      style={StyleSheet.absoluteFill}
-    />
+    <>
+      <LinearGradient
+        pointerEvents="none"
+        colors={[colors.canvas, colors.surface, colors.surface]}
+        locations={showRail ? [0, 0.5, 1] : [0, 0.45, 1]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <LinearGradient
+        pointerEvents="none"
+        colors={['rgba(232, 115, 74, 0.07)', 'transparent', 'transparent']}
+        locations={[0, 0.35, 1]}
+        start={{ x: 1, y: 0 }}
+        end={{ x: 0.1, y: 0.65 }}
+        style={styles.accent}
+      />
+    </>
   )
 }
 

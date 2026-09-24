@@ -9,6 +9,7 @@ import { useDataStore } from '../../../store/dataStore'
 import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 const MOOD_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   1: 'sad',
@@ -79,7 +80,7 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
   }
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, padding: 16, gap: 14 }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, padding: 16, gap: 14 }}>
       {showSleep ? (
         <View style={{ gap: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -103,6 +104,8 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
                   alignItems: 'center',
                   justifyContent: 'center',
                   backgroundColor: hours === h ? colors.axel : colors.surface,
+                  borderWidth: 1,
+                  borderColor: hours === h ? colors.axel : WEB_ROW_DIVIDER,
                   cursor: 'pointer',
                 })}
               >
@@ -146,7 +149,7 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
                     gap: 6,
                     backgroundColor: selected ? `${moodColor(m)}22` : colors.surface,
                     borderWidth: 1,
-                    borderColor: selected ? moodColor(m) : colors.hairline,
+                    borderColor: selected ? moodColor(m) : WEB_ROW_DIVIDER,
                     cursor: 'pointer',
                   })}
                 >
@@ -178,6 +181,8 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
               fontSize: 13,
               color: colors.ink,
               backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: WEB_ROW_DIVIDER,
             }}
           />
           {saving ? (

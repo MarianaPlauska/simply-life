@@ -1,5 +1,6 @@
 import { View } from 'react-native'
-import { Card, Text, Chip } from '../../ui'
+import { useRouter } from 'expo-router'
+import { Card, Text, Chip, PrimaryButton } from '../../ui'
 import { SettingsToggleRow } from '../settings/SettingsToggleRow'
 import { useTheme } from '../../theme/ThemeProvider'
 import { usePrefsStore } from '../../store/prefsStore'
@@ -11,14 +12,21 @@ export function HealthNeuroFocusPanel()
   const { space } = useTheme()
   const prefs = usePrefsStore((s) => s.prefs)
   const patch = usePrefsStore((s) => s.patch)
+  const router = useRouter()
 
   return (
-    <Card tone="elevated" style={{ gap: space.sm, borderRadius: 18 }}>
+    <Card tone="elevated" style={{ gap: space.sm }}>
       <Text variant="section">Foco e neurodivergência</Text>
       <Text variant="caption" muted>
         Não é diagnóstico. Ajusta quebra de tarefas, linha do dia na Home e gamificação
         opcional. Também aparece no onboarding inicial.
       </Text>
+      <PrimaryButton
+        label="Meu jeito de funcionar (TDAH, autismo, ansiedade)"
+        variant="secondary"
+        size="sm"
+        onPress={() => router.push('/meu-jeito')}
+      />
       <SettingsToggleRow
         icon="flash-outline"
         title="Apoio para foco / TDAH"

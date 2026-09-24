@@ -1,13 +1,9 @@
 import { useState } from 'react'
 import { View } from 'react-native'
 import {
-  Card,
   PrimaryButton,
   CheckRow,
   EmptyState,
-  IconBadge,
-  StatusPill,
-  SectionHeader,
   Field,
   Text,
 } from '../../../ui'
@@ -15,6 +11,8 @@ import { useTheme } from '../../../theme/ThemeProvider'
 import { useDataStore } from '../../../store/dataStore'
 import { useAuthStore } from '../../../store/authStore'
 import { medsTakenCount, sortMedsByTime, validateMedDraft } from '@simply-life/shared'
+import { HealthPanelHero } from '../HealthPanelHero'
+import { HealthScreenSection } from '../HealthScreenSection'
 
 export function MedicamentosPanel()
 {
@@ -35,47 +33,42 @@ export function MedicamentosPanel()
 
   return (
     <View style={{ gap: space.md }}>
-      <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <IconBadge name="medical" color={colors.health} size={44} iconSize={22} />
-          <View style={{ flex: 1, gap: 6 }}>
-            <SectionHeader title="Medicamentos" subtitle="Doses de hoje" />
-            <StatusPill
-              label={total ? `${taken}/${total} doses` : 'Pendente'}
-              color={done ? colors.health : colors.axel}
+      <HealthPanelHero
+        icon="medical"
+        kicker="Medicamentos"
+        headline={total ? `${taken}/${total} doses` : 'Nenhum cadastrado'}
+        detail="Doses de hoje"
+        pillLabel={total ? (done ? 'Tudo tomado' : 'Pendente') : 'Cadastre abaixo'}
+        pillColor={done ? colors.health : colors.axel}
+      />
+
+      {total === 0 ? (
+        <EmptyState
+          title="Nenhum remédio listado"
+          body="Cadastre abaixo com nome e horário."
+          icon="medical-outline"
+        />
+      ) : (
+        sorted.map((med, i) => (
+          <View key={med.id} style={{ gap: 4 }}>
+            <CheckRow
+              title={med.nome}
+              subtitle={`${med.horario} · dose`}
+              done={med.tomado}
+              onToggle={() => void toggleMedicamento(med.id, isGuest)}
+              showSeparator={i < sorted.length - 1}
+            />
+            <PrimaryButton
+              label="Remover"
+              variant="danger"
+              size="sm"
+              onPress={() => void removeMedicamento(med.id, isGuest)}
             />
           </View>
-        </View>
+        ))
+      )}
 
-        {total === 0 ? (
-          <EmptyState
-            title="Nenhum remédio listado"
-            body="Cadastre abaixo com nome e horário."
-            icon="medical-outline"
-          />
-        ) : (
-          sorted.map((med, i) => (
-            <View key={med.id} style={{ gap: 4 }}>
-              <CheckRow
-                title={med.nome}
-                subtitle={`${med.horario} · dose`}
-                done={med.tomado}
-                onToggle={() => void toggleMedicamento(med.id, isGuest)}
-                showSeparator={i < sorted.length - 1}
-              />
-              <PrimaryButton
-                label="Remover"
-                variant="danger"
-                size="sm"
-                onPress={() => void removeMedicamento(med.id, isGuest)}
-              />
-            </View>
-          ))
-        )}
-      </Card>
-
-      <Card tone="elevated" style={{ gap: space.sm, borderRadius: 18 }}>
-        <Text variant="section">Novo medicamento</Text>
+      <HealthScreenSection dividerTop title="Novo medicamento">
         <Field label="Nome" value={nome} onChangeText={setNome} placeholder="Vitamina D" />
         <Field
           label="Horário (HH:MM)"
@@ -104,7 +97,7 @@ export function MedicamentosPanel()
             setNome('')
           }}
         />
-      </Card>
+      </HealthScreenSection>
     </View>
   )
 }

@@ -23,6 +23,7 @@ import {
 } from '../lib/partnerWorkspace'
 import {
   applyTaskMeta,
+  planTaskDrafts,
   todayIso,
   isoMonthsFrom,
   moodLabel,
@@ -34,10 +35,19 @@ import { FinanceCategoriesSheet } from './finance/FinanceCategoriesSheet'
 import { FinanceFixasSheet } from './finance/FinanceFixasSheet'
 import {
   CaptureTaskForm,
+  SelectChip,
   emptyCaptureTaskDraft,
   parseCaptureHora,
   type CaptureTaskDraft,
 } from './CaptureTaskForm'
+import {
+  TaskPromptComposer,
+  buildTaskPromptSaveItems,
+  emptyTaskPromptState,
+  useOrchestratorContext,
+  type TaskPromptState,
+} from './TaskPromptComposer'
+import { useOrchestratorPrefsStore } from '../store/orchestratorPrefsStore'
 import { CaptureExpenseFields } from './CaptureExpenseFields'
 import { CaptureNoteFields } from './CaptureNoteFields'
 import { CaptureStudioChrome } from './CaptureStudioChrome'
@@ -79,7 +89,7 @@ function studioCopy(
   {
     return {
       title: 'Nova tarefa',
-      subtitle: 'Título, to-dos e contexto. No ritmo de um editor, não de um dump.',
+      subtitle: 'Escreva solto: o Axel separa, estima, encaixa na semana e liga aos seus gastos.',
     }
   }
   if (kind === 'expense')
@@ -160,11 +170,24 @@ export function CaptureSheet()
   const [expenseDate, setExpenseDate] = useState(() => todayIso())
   const [parcelas, setParcelas] = useState(1)
   const [taskDraft, setTaskDraft] = useState<CaptureTaskDraft>(() => emptyCaptureTaskDraft(null))
+  const [promptState, setPromptState] = useState<TaskPromptState>(() => emptyTaskPromptState())
+  const captureMode = useOrchestratorPrefsStore((s) => s.captureMode)
+  const hydrateOrchestratorPrefs = useOrchestratorPrefsStore((s) => s.hydrate)
+  const patchOrchestratorPrefs = useOrchestratorPrefsStore((s) => s.patch)
+  const orchestratorCtx = useOrchestratorContext()
+  const promptMode = kind === 'task' && captureMode === 'prompt'
+  const promptIncluded = promptState.drafts.filter(
+    (d) => !promptState.excluded[d.key] && d.titulo.trim(),
+  ).length
 
   useEffect(() =>
   {
-    if (open) hydrateFolders()
-  }, [open, hydrateFolders])
+    if (open)
+    {
+      hydrateFolders()
+      void hydrateOrchestratorPrefs()
+    }
+  }, [open, hydrateFolders, hydrateOrchestratorPrefs])
 
   useEffect(() =>
   {
@@ -211,12 +234,14 @@ export function CaptureSheet()
     setParcelas(1)
     setLancamento('despesa')
     setTaskDraft(emptyCaptureTaskDraft(null))
+    setPromptState(emptyTaskPromptState())
     closeCapture()
   }
 
   const canSave = (): boolean =>
   {
     if (saving) return false
+    if (promptMode) return promptIncluded > 0
     if (kind === 'task') return Boolean(taskDraft.titulo.trim())
     if (kind === 'note') return mood != null
     return Boolean(text.trim())
@@ -224,7 +249,11 @@ export function CaptureSheet()
 
   const onSave = async () =>
   {
-    if (kind === 'task')
+    if (promptMode)
+    {
+      if (promptIncluded === 0) return
+    }
+    else if (kind === 'task')
     {
       if (!taskDraft.titulo.trim()) return
     }
@@ -242,7 +271,18 @@ export function CaptureSheet()
     setError(null)
     try
     {
-      if (kind === 'task')
+      if (promptMode)
+      {
+        // aberto de uma pasta: rascunhos sem pasta herdam a pasta de origem
+        const drafts = promptState.drafts.map((d) => (d.listId || !listId ? d : { ...d, listId }))
+        const plans = planTaskDrafts(drafts, orchestratorCtx, promptState.chosen)
+        const items = buildTaskPromptSaveItems({ ...promptState, drafts }, plans)
+        for (const item of items)
+        {
+          await addTask(item.titulo, isGuest, item.notas, item.extra)
+        }
+      }
+      else if (kind === 'task')
       {
         const notas = applyTaskMeta(taskDraft.descricao, taskDraft.listId, taskDraft.dependsOnId)
         const n = Number(taskDraft.estimativa)
@@ -401,6 +441,32 @@ export function CaptureSheet()
     }
   }
 
+  const saveLabel = promptMode && promptIncluded > 0
+    ? `Criar ${promptIncluded} ${promptIncluded === 1 ? 'tarefa' : 'tarefas'}`
+    : 'Salvar'
+
+  const taskBody = (
+    <View style={{ gap: 14 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <SelectChip
+          label="Descrever (Axel organiza)"
+          active={captureMode === 'prompt'}
+          onPress={() => patchOrchestratorPrefs({ captureMode: 'prompt' })}
+        />
+        <SelectChip
+          label="Formulário"
+          active={captureMode === 'form'}
+          onPress={() => patchOrchestratorPrefs({ captureMode: 'form' })}
+        />
+      </View>
+      {captureMode === 'prompt' ? (
+        <TaskPromptComposer state={promptState} onChange={setPromptState} />
+      ) : (
+        <CaptureTaskForm draft={taskDraft} onChange={setTaskDraft} />
+      )}
+    </View>
+  )
+
   const extraSheets = (
     <Fragment>
       <FinanceCategoriesSheet visible={catsOpen} onClose={() => setCatsOpen(false)} />
@@ -429,6 +495,7 @@ export function CaptureSheet()
             title={studioCopy(kind, lancamento).title}
             subtitle={studioCopy(kind, lancamento).subtitle}
             onClose={resetAndClose}
+            expanded={promptMode && promptState.result != null}
             footer={(
               <>
                 {error ? (
@@ -440,7 +507,7 @@ export function CaptureSheet()
                   <PrimaryButton label="Salvo" variant="success" disabled />
                 ) : (
                   <PrimaryButton
-                    label="Salvar"
+                    label={saveLabel}
                     loading={saving}
                     onPress={() => void onSave()}
                     disabled={!canSave()}
@@ -454,7 +521,7 @@ export function CaptureSheet()
               <CaptureNoteFields text={text} onTextChange={setText} />
             ) : null}
             {kind === 'task' ? (
-              <CaptureTaskForm draft={taskDraft} onChange={setTaskDraft} />
+              taskBody
             ) : null}
             {kind === 'expense' ? (
               <CaptureExpenseFields
@@ -580,7 +647,7 @@ export function CaptureSheet()
               <View style={{ gap: space.md }}>
                 {kind === 'note' ? <MoodFaceRow value={mood} onChange={setMood} /> : null}
                 {kind === 'task' ? (
-                  <CaptureTaskForm draft={taskDraft} onChange={setTaskDraft} />
+                  taskBody
                 ) : null}
 
                 {kind === 'expense' ? (
@@ -672,7 +739,7 @@ export function CaptureSheet()
               </View>
             ) : (
               <PrimaryButton
-                label="Salvar"
+                label={saveLabel}
                 loading={saving}
                 onPress={() => void onSave()}
                 disabled={!canSave()}

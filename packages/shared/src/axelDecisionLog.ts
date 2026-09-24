@@ -4,6 +4,9 @@ export type AxelDecisionKind =
   | 'decay_backlog'
   | 'manual_override'
   | 'email_ingest'
+  | 'rescued_overdue'
+  | 'pulled_forward'
+  | 'undo'
 
 export interface AxelDecisionEvent
 {
@@ -15,6 +18,12 @@ export interface AxelDecisionEvent
   score: number | null
   horizon: string | null
   created_at: string
+  /** Fase 2: lote de replanejamento, gatilho e datas (migração 058) */
+  batch_id?: string | null
+  trigger?: string | null
+  from_date?: string | null
+  to_date?: string | null
+  undone_at?: string | null
 }
 
 export const AXEL_KIND_LABEL: Record<AxelDecisionKind, string> = {
@@ -23,6 +32,9 @@ export const AXEL_KIND_LABEL: Record<AxelDecisionKind, string> = {
   decay_backlog: 'Backlog por decay',
   manual_override: 'Override manual',
   email_ingest: 'Ingestão por e-mail',
+  rescued_overdue: 'Atrasadas replanejadas',
+  pulled_forward: 'Adiantadas',
+  undo: 'Desfeitas por você',
 }
 
 export function startIsoForPeriod(period: 'hoje' | 'semana' | 'mes'): string
@@ -41,8 +53,11 @@ export function groupDecisionsByKind(
 ): Array<{ kind: AxelDecisionKind; label: string; items: AxelDecisionEvent[] }>
 {
   const order: AxelDecisionKind[] = [
-    'promoted_hoje',
+    'rescued_overdue',
     'deferred_load',
+    'pulled_forward',
+    'promoted_hoje',
+    'undo',
     'decay_backlog',
     'manual_override',
     'email_ingest',

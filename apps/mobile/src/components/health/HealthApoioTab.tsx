@@ -53,7 +53,7 @@ export function HealthApoioTab()
 
   return (
     <View style={{ gap: space.md }}>
-      <Card tone="elevated" style={{ gap: space.sm, borderRadius: 18 }}>
+      <Card tone="elevated" style={{ gap: space.sm }}>
         <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
           Apoio emocional
         </Text>
@@ -71,7 +71,7 @@ export function HealthApoioTab()
 
       <HealthNeuroFocusPanel />
 
-      <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
+      <Card tone="elevated" style={{ gap: space.md }}>
         <SectionHeader
           title="Exercícios de TCC"
           subtitle="Jornadas curtas; ativação comportamental cria tarefa no Kanban"
@@ -101,7 +101,7 @@ export function HealthApoioTab()
         ))}
       </Card>
 
-      <Card tone="elevated" style={{ gap: space.sm, borderRadius: 18 }}>
+      <Card tone="elevated" style={{ gap: space.sm }}>
         <SectionHeader title="Registros recentes" subtitle="Últimos exercícios concluídos" />
         {loading ? (
           <Text variant="caption" muted>Carregando…</Text>

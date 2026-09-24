@@ -1,5 +1,5 @@
-import { Modal, Pressable, View } from 'react-native'
-import { groupDecisionsByKind, type AxelDecisionEvent } from '@simply-life/shared'
+import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { describeDayPt, groupDecisionsByKind, type AxelDecisionEvent } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -31,9 +31,10 @@ export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
               borderBottomLeftRadius: 0,
               borderBottomRightRadius: 0,
               gap: space.md,
-              maxHeight: 480,
+              maxHeight: 520,
             }}
           >
+            <ScrollView style={{ flexGrow: 0, maxHeight: 400 }} contentContainerStyle={{ gap: space.md }}>
             <Text variant="section">Decision log</Text>
             {groups.length === 0 ? (
               <EmptyState
@@ -45,13 +46,18 @@ export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
                 <View key={g.kind} style={{ gap: 4 }}>
                   <Text variant="bodyStrong">{g.label}</Text>
                   {g.items.slice(0, 4).map((ev) => (
-                    <Text key={ev.id} variant="caption" muted>
+                    <Text key={ev.id} variant="caption" muted style={ev.undone_at ? { opacity: 0.55 } : undefined}>
+                      {ev.from_date !== undefined && (ev.from_date || ev.to_date)
+                        ? `${describeDayPt(ev.from_date ?? null)} → ${describeDayPt(ev.to_date ?? null)} · `
+                        : ''}
                       {ev.rationale ?? ev.kind}
+                      {ev.undone_at ? ' (desfeita)' : ''}
                     </Text>
                   ))}
                 </View>
               ))
             )}
+            </ScrollView>
             <PrimaryButton label="Fechar" variant="dismiss" onPress={onClose} />
           </Card>
         </Pressable>

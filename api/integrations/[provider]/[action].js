@@ -8,6 +8,8 @@ import gmailImapSettings from '../../../_lib/handlers/integrations/gmail-imap-se
 import gmailImapStatus from '../../../_lib/handlers/integrations/gmail-imap-status.js';
 import gmailImapSync from '../../../_lib/handlers/integrations/gmail-imap-sync.js';
 import gmailImapTestMail from '../../../_lib/handlers/integrations/gmail-imap-test-mail.js';
+import calendarIcs from '../../../_lib/handlers/integrations/calendar-ics.js';
+import googleCalendarEvents from '../../../_lib/handlers/integrations/google-calendar-events.js';
 
 const ROUTES = {
   'google|status': googleStatus,
@@ -19,6 +21,8 @@ const ROUTES = {
   'gmail|imap-status': gmailImapStatus,
   'gmail|imap-sync': gmailImapSync,
   'gmail|imap-test-mail': gmailImapTestMail,
+  'calendar|ics': calendarIcs,
+  'google|calendar-events': googleCalendarEvents,
 };
 
 function pickQuery(value)

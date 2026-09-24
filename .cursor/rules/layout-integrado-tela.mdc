@@ -1,0 +1,29 @@
+---
+description: Layout integrado na tela (padrão Kanban/Tarefas) — sem painéis com borda
+alwaysApply: true
+---
+
+# Layout integrado na tela
+
+Ao melhorar UI/UX de abas e módulos (Saúde, Finanças, Kanban, etc.), **priorizar este padrão** quando o usuário pedir tela mais natural, menos “caixas” ou paridade com Tarefas:
+
+## Estrutura da tela
+
+1. **`TabShell`** — padding/gap do shell; não envolver a aba inteira em outro card.
+2. **`ScreenIntro`** — título + subtítulo direto no canvas.
+3. **`SubNavTabs`** (ou equivalente com sublinhado) — navegação principal; evitar `PillTabs` em cápsula cinza para abas de módulo, salvo sub-filtros locais.
+4. **Conteúdo** — `View` com `gap` (`space.md`), opcional `marginTop: space.sm` após as abas; **sem** `HealthWidgetPanel`, `Card` ou borda contínua envolvendo toda a seção.
+
+## Seções internas
+
+- Separar blocos com **hairline** (`borderTopWidth` + `colors.hairline`) e tipografia (caption + hero), não com cartões empilhados.
+- Alertas inline: faixa com borda lateral ou texto, não `Card tone="elevated"` dentro do fluxo.
+- Preservar **todas** as funcionalidades (regra `no-feature-removal`); só mudar chrome visual.
+
+## Anti-padrões
+
+- Painel `#1C1C1E` com `borderRadius` 24px em volta de título + abas + conteúdo.
+- `HealthModuleShell` ou “app dentro do app”.
+- Título/abas duplicados (fora e dentro de um widget).
+
+Referência viva: `apps/mobile/app/(tabs)/kanban.tsx` + `HealthDiaryTab` / `HealthDiaryStudio` após redesign integrado.

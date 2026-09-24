@@ -5,14 +5,15 @@ import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
 import { WEB_DISPLAY_FONT } from './webTypography'
+import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 export type WebStatItem = {
   id: string
   label: string
   value: string
   hint?: string
-  /** Mantido por compat. com quem monta a lista (KPI mobile usa ícone); não é mais desenhado aqui. */
-  icon?: keyof typeof Ionicons.glyphMap
+  /** Usado pelo fallback mobile-web (HomeKpiSquares); não é mais desenhado nesta faixa. */
+  icon: keyof typeof Ionicons.glyphMap
   color: string
   onPress?: () => void
 }
@@ -32,6 +33,8 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
         flexDirection: 'row',
         borderRadius: 14,
         backgroundColor: colors.elevated,
+        borderWidth: 1,
+        borderColor: WEB_CARD_BORDER,
         overflow: 'hidden',
       }}
     >
@@ -47,7 +50,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
             paddingHorizontal: 20,
             gap: 10,
             borderLeftWidth: i === 0 ? 0 : 1,
-            borderLeftColor: colors.hairline,
+            borderLeftColor: WEB_ROW_DIVIDER,
             backgroundColor: hovered && item.onPress ? colors.surface : 'transparent',
             cursor: item.onPress ? 'pointer' : 'default',
           })}
@@ -86,7 +89,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
                   width: 20,
                   height: 2,
                   borderRadius: 1,
-                  backgroundColor: hovered && item.onPress ? item.color : colors.hairline,
+                  backgroundColor: hovered && item.onPress ? item.color : WEB_ROW_DIVIDER,
                 }}
               />
             </>

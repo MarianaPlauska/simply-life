@@ -38,6 +38,8 @@ import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDash
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
+import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
+import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { HomeRpgStrip } from '../../src/components/dashboard/HomeRpgStrip'
 import { PersonalSummaryGrid } from '../../src/components/dashboard/PersonalSummaryGrid'
 import { LifeSummaryReport } from '../../src/components/metrics/LifeSummaryReport'
@@ -255,6 +257,8 @@ export default function DashboardScreen()
                 <HomeDayTimeline tasks={today} fill />
                 {waterOnHome ? <HomeWaterProgressCard compact /> : null}
                 {showAxel ? <AxelDayBrief /> : null}
+                <DayPlanHomeCard />
+                <VisualDayCard />
                 <MoodWeekReportGate humor={humor} />
                 <View style={{ gap: 10 }}>
                   <Text variant="section" style={{ fontSize: 16 }}>
@@ -283,6 +287,10 @@ export default function DashboardScreen()
                 ) : null
               }
             />
+
+            <DayPlanHomeCard />
+
+            <VisualDayCard />
 
             <MoodWeekReportGate humor={humor} />
 

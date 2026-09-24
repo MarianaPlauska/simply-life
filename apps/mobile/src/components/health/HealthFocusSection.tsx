@@ -11,7 +11,7 @@ export function HealthFocusSection()
   const minutes = usePrefsStore((s) => s.prefs.pomodoro_focus) || 25
 
   return (
-    <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
+    <Card tone="elevated" style={{ gap: space.md }}>
       <SectionHeader
         title="Sessão de foco"
         subtitle={`${minutes} min. Uma tarefa por vez. Sem vídeo, só timer.`}

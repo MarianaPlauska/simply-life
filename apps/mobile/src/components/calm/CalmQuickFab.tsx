@@ -9,6 +9,7 @@ import { Card, Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCaptureStore } from '../../store/captureStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
+import { useCalmFabSuppressStore } from '../../store/calmFabSuppressStore'
 import { hapticLight } from '../../lib/haptics'
 
 /** FAB global de acalmar: canto direito, acima da tab bar, sem competir com Captura. */
@@ -19,6 +20,7 @@ export function CalmQuickFab()
   const router = useRouter()
   const captureOpen = useCaptureStore((s) => s.open)
   const evolveOpen = useTaskEvolveStore((s) => Boolean(s.taskId))
+  const fabSuppressed = useCalmFabSuppressStore((s) => s.count > 0)
   const [sheet, setSheet] = useState(false)
 
   useEffect(() =>
@@ -26,7 +28,7 @@ export function CalmQuickFab()
     if (captureOpen || evolveOpen) setSheet(false)
   }, [captureOpen, evolveOpen])
 
-  if (captureOpen || evolveOpen) return null
+  if (captureOpen || evolveOpen || fabSuppressed) return null
 
   const bottom = TAB_BAR_CONTENT_HEIGHT + Math.max(insets.bottom, 8) + 8
 

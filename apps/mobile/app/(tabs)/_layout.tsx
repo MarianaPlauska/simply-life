@@ -7,6 +7,10 @@ import { DesktopSidebar } from '../../src/components/layout/DesktopSidebar'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { useDataSync } from '../../src/hooks/useDataSync'
+import { useBoardAutoReplan } from '../../src/hooks/useBoardAutoReplan'
+import { useTaskCompletionLog } from '../../src/hooks/useTaskCompletionLog'
+import { useDayCompanion } from '../../src/hooks/useTodayVisualDay'
+import { BoardReplanToast } from '../../src/components/kanban/BoardReplanToast'
 import { useAuthStore } from '../../src/store/authStore'
 import { SetupGuard } from '../../src/components/auth/SetupGuard'
 
@@ -17,6 +21,9 @@ export default function TabsLayout()
   const userId = useAuthStore((s) => s.userId)
   const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
   useDataSync()
+  useBoardAutoReplan()
+  useTaskCompletionLog()
+  useDayCompanion()
 
   if (!userId || mfaPending)
   {
@@ -48,6 +55,7 @@ export default function TabsLayout()
           <Tabs.Screen name="financeiro" options={{ title: 'Finanças' }} />
         </Tabs>
         {showRail ? null : <CalmQuickFab />}
+        <BoardReplanToast />
       </View>
       <CaptureSheet />
     </View>

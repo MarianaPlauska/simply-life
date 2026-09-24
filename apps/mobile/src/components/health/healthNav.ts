@@ -16,3 +16,22 @@ export const CUIDADOS_SUB_TABS = [
   { id: 'academia' as const, label: 'Academia' },
   { id: 'medicamentos' as const, label: 'Medicamentos' },
 ]
+
+export const HEALTH_SECTION_INTRO: Record<HealthSection, { title: string; subtitle: string }> = {
+  diario: {
+    title: 'Diário',
+    subtitle: 'Humor de hoje, padrões do mês e o que você escreveu.',
+  },
+  hoje: {
+    title: 'Hoje',
+    subtitle: 'O essencial do dia: humor, hábitos e próximo passo.',
+  },
+  cuidados: {
+    title: 'Cuidados',
+    subtitle: 'Água, sono, alimentação, treino e medicamentos.',
+  },
+  apoio: {
+    title: 'Apoio',
+    subtitle: 'Acalmar, foco e recursos quando precisar.',
+  },
+}

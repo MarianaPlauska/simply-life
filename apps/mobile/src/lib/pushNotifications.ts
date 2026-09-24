@@ -36,3 +36,37 @@ export async function getLastNativePushResponse(): Promise<{
 export async function setNativeAndroidChannel(): Promise<void>
 {
 }
+
+/** Web: sem notificação local agendada (o card da noite aparece na Home). */
+export async function scheduleEveningPlanReminder(_hour: number, _minute: number): Promise<boolean>
+{
+  return false
+}
+
+export async function cancelEveningPlanReminder(): Promise<void>
+{
+}
+
+export async function scheduleMorningFirstStep(_when: Date, _firstStep: string): Promise<void>
+{
+}
+
+export async function scheduleFocusEnd(_seconds: number, _taskTitle: string | null): Promise<void>
+{
+}
+
+export async function cancelFocusEnd(): Promise<void>
+{
+}
+
+export async function scheduleTransitionAlerts(_alerts: { at: Date; title: string; body: string }[]): Promise<void>
+{
+}
+
+export async function showStickyPlan(_title: string, _body: string): Promise<void>
+{
+}
+
+export async function clearStickyPlan(): Promise<void>
+{
+}

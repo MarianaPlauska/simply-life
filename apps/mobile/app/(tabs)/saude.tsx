@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { useLocalSearchParams } from 'expo-router'
-import { Screen, PillTabs } from '../../src/ui'
+import { Screen, SubNavTabs } from '../../src/ui'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
 import { ScreenIntro } from '../../src/components/dashboard/ScreenIntro'
@@ -12,19 +12,22 @@ import { HealthDiaryTab } from '../../src/components/health/HealthDiaryTab'
 import { HealthApoioTab } from '../../src/components/health/HealthApoioTab'
 import {
   HEALTH_MAIN_TABS,
+  HEALTH_SECTION_INTRO,
   type HealthSection,
   type CuidadosTab,
 } from '../../src/components/health/healthNav'
+import { useTheme } from '../../src/theme/ThemeProvider'
 
 export default function SaudeScreen()
 {
   const params = useLocalSearchParams<{ section?: string; care?: string }>()
   const [section, setSection] = useState<HealthSection>('diario')
   const [cuidadosTab, setCuidadosTab] = useState<CuidadosTab>('hidratacao')
-  const humor = useDataStore((s) => s.humor)
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const { space } = useTheme()
+  const intro = HEALTH_SECTION_INTRO[section]
 
   useEffect(() =>
   {
@@ -61,21 +64,16 @@ export default function SaudeScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro
-          title="Saúde"
-          subtitle="Check-in, cuidados e apoio no seu ritmo."
-        />
+        <ScreenIntro title={intro.title} subtitle={intro.subtitle} />
 
-        <PillTabs
-          tabs={HEALTH_MAIN_TABS.map((t) => ({
-            ...t,
-            count: t.id === 'diario' ? humor.length : undefined,
-          }))}
+        <SubNavTabs
+          accent="health"
+          tabs={HEALTH_MAIN_TABS}
           value={section}
           onChange={setSection}
         />
 
-        <View>
+        <View style={{ marginTop: space.sm }}>
           {section === 'hoje' && (
             <HealthTodayTab
               onGoCuidados={goCuidados}

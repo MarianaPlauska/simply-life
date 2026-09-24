@@ -8,10 +8,12 @@ import { useTheme } from '../../theme/ThemeProvider'
 type Props = {
   humor: HumorRegistro[]
   goal: LifeGoal | null | undefined
+  /** Sem cartão — faixa na tela (ex.: Diário integrado). */
+  inline?: boolean
 }
 
 /** Alerta de humor no período da meta (só em Saúde, expandido ao toque). */
-export function MoodGoalAlertCard({ humor, goal }: Props)
+export function MoodGoalAlertCard({ humor, goal, inline = false }: Props)
 {
   const { colors, space } = useTheme()
   const stats = moodGoalPeriodStats(humor, goal)
@@ -22,15 +24,8 @@ export function MoodGoalAlertCard({ humor, goal }: Props)
   const tone = stats.alertLevel === 'concern' ? colors.danger : colors.axel
   const line = `${stats.terribleCount} de ${stats.total} como Péssimo (${stats.terriblePct}%)`
 
-  return (
-    <Card
-      tone="elevated"
-      style={{
-        gap: space.sm,
-        borderTopWidth: 1,
-        borderTopColor: tone,
-      }}
-    >
+  const body = (
+    <>
       <Text variant="caption" style={{ color: tone, fontWeight: '700' }}>
         Humor no período da meta
       </Text>
@@ -71,6 +66,36 @@ export function MoodGoalAlertCard({ humor, goal }: Props)
           </Pressable>
         </>
       )}
+    </>
+  )
+
+  if (inline)
+  {
+    return (
+      <View
+        style={{
+          gap: space.sm,
+          paddingVertical: space.sm,
+          paddingLeft: 12,
+          borderLeftWidth: 3,
+          borderLeftColor: tone,
+        }}
+      >
+        {body}
+      </View>
+    )
+  }
+
+  return (
+    <Card
+      tone="elevated"
+      style={{
+        gap: space.sm,
+        borderTopWidth: 1,
+        borderTopColor: tone,
+      }}
+    >
+      {body}
     </Card>
   )
 }

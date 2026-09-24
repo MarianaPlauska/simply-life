@@ -14,7 +14,7 @@ export function HealthCalmSection()
   const patch = usePrefsStore((s) => s.patch)
 
   return (
-    <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
+    <Card tone="elevated" style={{ gap: space.md }}>
       <SectionHeader
         title="Acalmar agora"
         subtitle="Escolha um guia. Não é prova e não substitui o CVV 188."

@@ -5,6 +5,7 @@ import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 function timeLabel(mins: number | null): string
 {
@@ -28,15 +29,12 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
   const router = useRouter()
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, overflow: 'hidden' }}>
+    <View style={{ gap: 10 }}>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          paddingHorizontal: 20,
-          paddingTop: 18,
-          paddingBottom: 14,
         }}
       >
         <View style={{ gap: 2 }}>
@@ -58,6 +56,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
         </WebHoverable>
       </View>
 
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
       {tasks.length === 0 ? (
         <View style={{ paddingHorizontal: 20, paddingBottom: 22 }}>
           <Text variant="caption" muted>
@@ -72,7 +71,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
               paddingHorizontal: 20,
               paddingBottom: 8,
               borderBottomWidth: 1,
-              borderBottomColor: colors.hairline,
+              borderBottomColor: WEB_ROW_DIVIDER,
             }}
           >
             <Text variant="micro" muted style={{ width: 64, fontWeight: '700' }}>
@@ -110,7 +109,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
                     paddingHorizontal: 8,
                     paddingVertical: 3,
                     borderRadius: 999,
-                    backgroundColor: t.prioridade === 1 ? `${colors.danger}22` : colors.hairline,
+                    backgroundColor: t.prioridade === 1 ? `${colors.danger}22` : WEB_ROW_DIVIDER,
                   }}
                 >
                   <Text
@@ -128,6 +127,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
           ))}
         </View>
       )}
+      </View>
     </View>
   )
 }

@@ -9,12 +9,14 @@ import {
   resolveAcademyDay,
   weekPlanFromConfig,
 } from '@simply-life/shared'
-import { Card, Text, SectionHeader, PrimaryButton, IconBadge, StatusPill, CheckRow } from '../../../ui'
+import { Text, PrimaryButton, CheckRow } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useDataStore } from '../../../store/dataStore'
 import { useAuthStore } from '../../../store/authStore'
 import { useGamificationStore } from '../../../store/gamificationStore'
 import { AcademyPlanSheet } from '../academy/AcademyPlanSheet'
+import { HealthPanelHero } from '../HealthPanelHero'
+import { HealthScreenSection } from '../HealthScreenSection'
 
 export function AcademyPanel()
 {
@@ -46,43 +48,44 @@ export function AcademyPanel()
     })
   }
 
+  const subtitle = restDay
+    ? 'Folga neste padrão. Edite os dias se quiser treinar.'
+    : `${todayPlan.length} exercício${todayPlan.length === 1 ? '' : 's'} hoje`
+
   return (
     <View style={{ gap: space.md }}>
-      <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <IconBadge name="barbell" color={colors.health} size={44} iconSize={22} />
-          <View style={{ flex: 1, gap: 6 }}>
-            <SectionHeader
-              title={`${academyDayLabel(todayKey)} no calendário`}
-              subtitle={restDay ? 'Folga neste padrão. Edite os dias se quiser treinar.' : `${todayPlan.length} exercício${todayPlan.length === 1 ? '' : 's'} hoje`}
-            />
-            <StatusPill
-              label={sessionDone ? 'Treino do dia feito' : restDay ? 'Dia de folga' : 'Pronto para começar'}
-              color={sessionDone ? colors.health : restDay ? colors.inkMuted : colors.axel}
-            />
-          </View>
-        </View>
-        {!restDay ? (
-          <Text variant="caption" muted>
-            {progress.pct}% marcado à mão, se treinar fora do modo.
-          </Text>
-        ) : null}
-        {!restDay ? (
-          <PrimaryButton
-            label="Entrar no treino"
-            onPress={() => router.push('/academia/sessao')}
-            style={pillBtn}
-          />
-        ) : null}
-        {todayPlan.map((ex) => (
-          <CheckRow
-            key={ex.id}
-            title={ex.name}
-            subtitle={`${ex.sets}× ${ex.reps} · descanso ${ex.restSec}s`}
-            done={doneIds.includes(ex.id)}
-            onToggle={() => toggleEx(ex.id)}
-          />
-        ))}
+      <HealthPanelHero
+        icon="barbell"
+        kicker={academyDayLabel(todayKey)}
+        headline={restDay ? 'Dia de folga' : 'Treino de hoje'}
+        detail={subtitle}
+        pillLabel={
+          sessionDone ? 'Treino do dia feito' : restDay ? 'Descanso' : 'Pronto para começar'
+        }
+        pillColor={sessionDone ? colors.health : restDay ? colors.inkMuted : colors.axel}
+      />
+      {!restDay ? (
+        <Text variant="caption" muted>
+          {progress.pct}% marcado à mão, se treinar fora do modo.
+        </Text>
+      ) : null}
+      {!restDay ? (
+        <PrimaryButton
+          label="Entrar no treino"
+          onPress={() => router.push('/academia/sessao')}
+          style={pillBtn}
+        />
+      ) : null}
+      {todayPlan.map((ex) => (
+        <CheckRow
+          key={ex.id}
+          title={ex.name}
+          subtitle={`${ex.sets}× ${ex.reps} · descanso ${ex.restSec}s`}
+          done={doneIds.includes(ex.id)}
+          onToggle={() => toggleEx(ex.id)}
+        />
+      ))}
+      <HealthScreenSection dividerTop>
         <PrimaryButton
           label="Editar exercícios da semana"
           variant="secondary"
@@ -95,7 +98,7 @@ export function AcademyPanel()
           onPress={() => void toggleTreinoDone(isGuest)}
           style={pillBtn}
         />
-      </Card>
+      </HealthScreenSection>
       <AcademyPlanSheet
         visible={editorOpen}
         plan={weekPlan}

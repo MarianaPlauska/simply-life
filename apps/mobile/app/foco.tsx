@@ -1,9 +1,21 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { View, Pressable, ScrollView } from 'react-native'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { priorityTodayTasks, XP_FOCUS_SESSION } from '@simply-life/shared'
+import {
+  buildVisualDay,
+  firstTinyStep,
+  learnedFactorFor,
+  formatMinutesPt,
+  localTodayIso,
+  nowAndNext,
+  priorityTodayTasks,
+  timerMilestonesCrossed,
+  TIMER_MILESTONE_COPY,
+  XP_FOCUS_SESSION,
+  type TimerMilestone,
+} from '@simply-life/shared'
 import { Text, PressableScale, Chip } from '../src/ui'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
@@ -12,6 +24,11 @@ import { usePrefsStore } from '../src/store/prefsStore'
 import { useDataStore } from '../src/store/dataStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { ExecuteTimerFace } from '../src/components/timer/ExecuteTimerFace'
+import { useNeuroStore } from '../src/store/neuroStore'
+import { useCalendarStore } from '../src/store/calendarStore'
+import { cancelFocusEnd, scheduleFocusEnd } from '../src/lib/pushNotifications'
+import { hapticLight } from '../src/lib/haptics'
+import { useTimeLearning } from '../src/lib/timeLearning'
 
 const PRESETS = [10, 15, 25, 30, 45, 60]
 
@@ -41,6 +58,15 @@ export default function FocoScreen()
   const tick = useFocusStore((s) => s.tick)
   const setTargetTask = useFocusStore((s) => s.setTargetTask)
 
+  const timeAlerts = useNeuroStore((s) => s.timeAlerts)
+  const hyperfocusGuardMin = useNeuroStore((s) => s.hyperfocusGuardMin)
+  const estimateFactor = useNeuroStore((s) => s.estimateFactor)
+  const hydrateNeuro = useNeuroStore((s) => s.hydrate)
+  const calendarEvents = useCalendarStore((s) => s.events)
+  const learning = useTimeLearning()
+  const [milestone, setMilestone] = useState<TimerMilestone | null>(null)
+  const prevElapsed = useRef(0)
+
   const lastAwarded = useRef(0)
   const priority = useMemo(() => priorityTodayTasks(tasks, new Date(), 8), [tasks])
   const currentTask = useMemo(() =>
@@ -68,6 +94,38 @@ export default function FocoScreen()
 
   useEffect(() =>
   {
+    void hydrateNeuro()
+  }, [hydrateNeuro])
+
+  // cegueira temporal: avisa uma vez em cada marco (metade, faltam 5, fim, hiperfoco)
+  const elapsedSec = durationSec > 0 ? durationSec - remainingSec : 0
+  useEffect(() =>
+  {
+    if (phase !== 'focus')
+    {
+      prevElapsed.current = 0
+      return
+    }
+    const hit = timerMilestonesCrossed(durationSec, prevElapsed.current, elapsedSec, { timeAlerts, hyperfocusGuardMin })
+    prevElapsed.current = elapsedSec
+    if (hit.length)
+    {
+      setMilestone(hit[hit.length - 1])
+      hapticLight()
+    }
+  }, [elapsedSec, durationSec, phase, timeAlerts, hyperfocusGuardMin])
+
+  // fim do timer avisa mesmo com o app fechado
+  useEffect(() =>
+  {
+    if (running && phase === 'focus') void scheduleFocusEnd(remainingSec, currentTask?.titulo ?? null)
+    else void cancelFocusEnd()
+    // só quando liga/desliga, não a cada segundo
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running, phase])
+
+  useEffect(() =>
+  {
     if (completedFocusSessions <= lastAwarded.current) return
     lastAwarded.current = completedFocusSessions
     grantXp(XP_FOCUS_SESSION, 'Sessão de foco', currentTask?.titulo ?? 'Deep work')
@@ -81,8 +139,21 @@ export default function FocoScreen()
 
   useEffect(() =>
   {
-    if (!targetTaskId && currentTask) setTargetTask(currentTask.id)
-  }, [targetTaskId, currentTask, setTargetTask])
+    // tarefa vinda pelo link (?taskId) tem prioridade: não sobrescrever com a sugestão
+    const raw = Array.isArray(params.taskId) ? params.taskId[0] : params.taskId
+    if (!raw && !targetTaskId && currentTask) setTargetTask(currentTask.id)
+  }, [targetTaskId, currentTask, setTargetTask, params.taskId])
+
+  // o que vem depois (agenda + tarefas encaixadas): transição sem susto
+  const upcoming = useMemo(() =>
+  {
+    const day = buildVisualDay({ date: localTodayIso(), tasks, events: calendarEvents, estimateFactor })
+    return nowAndNext(day, new Date(), 2).next.find((b) => b.taskId !== currentTask?.id) ?? null
+  }, [tasks, calendarEvents, estimateFactor, currentTask?.id])
+  const taskMinutes = currentTask
+    ? Math.max(5, Math.round((currentTask.estimativaMinutos || 25) * (1 - (currentTask.progresso || 0))
+      * learnedFactorFor(currentTask.titulo, learning, estimateFactor) / 5) * 5)
+    : null
 
   if (!userId) return <Redirect href="/login" />
 
@@ -164,7 +235,12 @@ export default function FocoScreen()
           {currentTask ? (
             <PressableScale
               accessibilityLabel="Concluir tarefa"
-              onPress={() => void toggleTaskDone(currentTask.id, isGuest)}
+              onPress={() =>
+              {
+                // o tempo feito até aqui conta para aprender o seu ritmo
+                useFocusStore.getState().flush()
+                void toggleTaskDone(currentTask.id, isGuest)
+              }}
               style={{
                 width: 40,
                 height: 40,
@@ -179,7 +255,45 @@ export default function FocoScreen()
           ) : null}
         </Pressable>
 
+        {currentTask ? (
+          <Text variant="body" muted>
+            Comece por: {firstTinyStep(currentTask.titulo, currentTask.checklist).toLowerCase()}.
+          </Text>
+        ) : null}
+
+        {milestone ? (
+          <Pressable
+            onPress={() => setMilestone(null)}
+            accessibilityRole="alert"
+            style={{ padding: 12, borderRadius: 14, backgroundColor: colors.axelMuted, flexDirection: 'row', gap: 8, alignItems: 'center' }}
+          >
+            <Ionicons name={milestone === 'hiperfoco' ? 'cafe-outline' : 'time-outline'} size={18} color={colors.axel} />
+            <Text variant="body" style={{ flex: 1, fontSize: 14 }}>{TIMER_MILESTONE_COPY[milestone]}</Text>
+            <Ionicons name="close" size={16} color={colors.inkMuted} />
+          </Pressable>
+        ) : null}
+
+        {phase === 'focus' && durationSec > 0 ? (
+          <Text variant="bodyStrong" accessibilityLiveRegion="polite">
+            Restam {formatMinutesPt(Math.ceil(remainingSec / 60))} · já foram {formatMinutesPt(Math.floor(elapsedSec / 60))}
+          </Text>
+        ) : null}
+
+        {upcoming ? (
+          <Text variant="caption" muted>
+            Depois disso: {upcoming.titulo} às {Math.floor(upcoming.inicio / 60)}:{String(upcoming.inicio % 60).padStart(2, '0')}
+            {upcoming.fixed ? ' (horário marcado)' : ''}
+          </Text>
+        ) : null}
+
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {taskMinutes && !PRESETS.includes(taskMinutes) ? (
+            <Chip
+              label={`Tempo da tarefa · ${formatMinutesPt(taskMinutes)}`}
+              active={goalMin === taskMinutes && (running || phase !== 'idle')}
+              onPress={() => reset(taskMinutes)}
+            />
+          ) : null}
           {PRESETS.map((mins) => (
             <Chip
               key={mins}

@@ -60,7 +60,7 @@ function isoPlusDays(days: number): string
   return todayIso(d)
 }
 
-function SelectChip({
+export function SelectChip({
   label,
   active,
   onPress,

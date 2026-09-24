@@ -108,6 +108,10 @@ function RootNavigator()
         <Stack.Screen name="tcc/thought-record" />
         <Stack.Screen name="tcc/behavioral-activation" />
         <Stack.Screen name="tcc/gradual-exposure" />
+        <Stack.Screen name="planejar-amanha" />
+        <Stack.Screen name="ritmo" />
+        <Stack.Screen name="agenda" />
+        <Stack.Screen name="meu-jeito" />
         <Stack.Screen
           name="task/[id]"
           options={{ presentation: 'modal', headerShown: false }}

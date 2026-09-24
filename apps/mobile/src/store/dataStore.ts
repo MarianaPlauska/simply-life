@@ -81,6 +81,14 @@ import { useBodyWeekStore } from './bodyWeekStore'
 import { useActivityStore } from './activityStore'
 import { useDuePaidStore } from './duePaidStore'
 
+/** id local único (várias criações no mesmo milissegundo não colidem) */
+let localSeq = 0
+function localId(): string
+{
+  localSeq = (localSeq + 1) % 1e6
+  return `local-${Date.now()}-${localSeq}`
+}
+
 function useLocal(isGuest?: boolean): boolean
 {
   return Boolean(isGuest) || !supabaseConfigured
@@ -513,7 +521,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     if (useLocal(isGuest))
     {
       const t: MobileTask = {
-        id: `local-${Date.now()}`,
+        id: localId(),
         titulo,
         status,
         dataVencimento,
@@ -557,7 +565,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     if (useLocal(isGuest))
     {
       const tx: FinanceTx = {
-        id: `local-${Date.now()}`,
+        id: localId(),
         titulo: parsed.titulo,
         valor: parsed.valor,
         categoria: opts?.categoria ?? 'outros',

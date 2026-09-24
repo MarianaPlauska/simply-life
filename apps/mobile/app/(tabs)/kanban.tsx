@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { syncGmailNow, type AxelDecisionEvent } from '@simply-life/shared'
 import {
@@ -27,6 +27,8 @@ import { KanbanReportsPane } from '../../src/components/kanban/KanbanReportsPane
 import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
 import { KanbanRoutinePane } from '../../src/components/kanban/KanbanRoutinePane'
 import { authedApi } from '../../src/lib/integrationsApi'
+import { fetchDecisionEvents } from '../../src/lib/sync/decisionLog'
+import { useBoardReplanStore } from '../../src/store/boardReplanStore'
 
 type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'gantt' | 'relatorios'
 type ReportMode = 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
@@ -53,7 +55,35 @@ export default function KanbanScreen()
     [tasks],
   )
 
-  const events: AxelDecisionEvent[] = history
+  const lastBatch = useBoardReplanStore((s) => s.lastBatch)
+  const [remoteEvents, setRemoteEvents] = useState<AxelDecisionEvent[]>([])
+
+  useEffect(() =>
+  {
+    if (!logOpen || isGuest) return
+    const since = new Date(Date.now() - 30 * 86400000).toISOString()
+    void fetchDecisionEvents(since).then(setRemoteEvents)
+  }, [logOpen, isGuest, lastBatch])
+
+  // Convidado/offline: o último lote do Axel vem da memória local
+  const localBatchEvents: AxelDecisionEvent[] = lastBatch
+    ? lastBatch.moves.map((m) => ({
+        id: `${lastBatch.id}-${m.taskId}`,
+        user_id: 'local',
+        task_id: null,
+        kind: m.kind,
+        rationale: m.reason,
+        score: null,
+        horizon: m.to,
+        created_at: lastBatch.at,
+        batch_id: lastBatch.id,
+        from_date: m.from,
+        to_date: m.to,
+        undone_at: lastBatch.undone.includes(m.taskId) ? lastBatch.at : null,
+      }))
+    : []
+
+  const localEvents: AxelDecisionEvent[] = history
     .filter((h) => h.kind === 'decision')
     .map((h) => ({
       id: h.id,
@@ -65,6 +95,10 @@ export default function KanbanScreen()
       horizon: null,
       created_at: h.at,
     }))
+
+  const events: AxelDecisionEvent[] = remoteEvents.length
+    ? [...remoteEvents, ...localEvents]
+    : [...localBatchEvents, ...localEvents]
 
   return (
     <Screen

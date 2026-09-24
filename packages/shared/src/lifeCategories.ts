@@ -1,4 +1,5 @@
 import type { MobileTask } from './tasks'
+import { extractTaskSidecarTags, stripTaskSidecarTags } from './taskPrompt'
 
 /** Pilares de vida - UI estilo “Planos” (calendário amarelo) */
 export type LifeCategoryId =
@@ -191,7 +192,7 @@ export function stripTaskMetaTags(notas: string): string
 /** Texto visível: sem tags de pasta, dependência, flag ou evolução. */
 export function stripTaskDisplayNotes(notas: string): string
 {
-  return stripEvoTags(stripTaskMetaTags(notas))
+  return stripTaskSidecarTags(stripEvoTags(stripTaskMetaTags(notas)))
 }
 
 export function stampDepTag(notas: string, depId: string): string
@@ -210,6 +211,12 @@ export function applyTaskList(notas: string, listId: string | null): string
 function restampEvo(body: string, source: string): string
 {
   let next = stripEvoTags(body)
+  // custo/energia/prazo firme do orquestrador sobrevivem às edições do texto
+  const sidecar = extractTaskSidecarTags(source)
+  if (sidecar.length)
+  {
+    next = [stripTaskSidecarTags(next), ...sidecar].filter(Boolean).join('\n')
+  }
   const pct = parseEvoPct(source)
   if (pct != null) next = stampEvoPct(next, pct)
   for (const [key, text] of Object.entries(parseEvoNotes(source)))

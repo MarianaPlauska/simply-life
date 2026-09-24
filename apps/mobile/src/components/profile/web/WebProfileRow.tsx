@@ -5,6 +5,7 @@ import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from '../../dashboard/web/WebHoverable'
 import { webStyle } from '../../dashboard/web/webStyle'
+import { WEB_CARD_BORDER } from '../../dashboard/web/webPalette'
 
 type Props = {
   label: string
@@ -55,7 +56,7 @@ export function WebProfileSection({
 {
   const { colors } = useTheme()
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, overflow: 'hidden' }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
       <Text
         variant="micro"
         muted

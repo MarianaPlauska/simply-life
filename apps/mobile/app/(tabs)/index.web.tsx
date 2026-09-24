@@ -18,6 +18,8 @@ import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
 import { HomeWaterProgressCard } from '../../src/components/dashboard/HomeWaterProgressCard'
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
 import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
+import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
+import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
@@ -182,6 +184,10 @@ export default function DashboardScreenWeb()
               ) : null
             }
           />
+          <DayPlanHomeCard />
+
+          <VisualDayCard />
+
           <MoodWeekReportGate humor={humor} />
           <HomeDayTimeline tasks={today} />
           {waterOnHome ? <HomeWaterProgressCard /> : null}
@@ -215,8 +221,8 @@ export default function DashboardScreenWeb()
     <Screen scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
       <LifeGoalSheet visible={goalOpen} onClose={() => setGoalOpen(false)} />
       <TabShell>
-        <View style={{ maxWidth: DESKTOP_CONTENT_MAX, width: '100%', alignSelf: 'center', gap: 18 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: space.md }}>
+        <View style={{ maxWidth: DESKTOP_CONTENT_MAX, width: '100%', alignSelf: 'center', gap: 28 }}>
+          <View style={{ gap: 8 }}>
             <HomeFitnessHero
               greet={greet}
               name={name}
@@ -224,15 +230,16 @@ export default function DashboardScreenWeb()
               isAdmin={isAdmin}
               onAccount={() => setMenuOpen(true)}
             />
+            <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />
           </View>
 
-          <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />
+          <View style={{ gap: 20 }}>
+            <WebStatRow items={statItems} />
 
-          <WebStatRow items={statItems} />
-
-          {showMorningRitual ? (
-            <WebMoodCheckIn needSleep={showSleepForm} needMood={showMoodForm} />
-          ) : null}
+            {showMorningRitual ? (
+              <WebMoodCheckIn needSleep={showSleepForm} needMood={showMoodForm} />
+            ) : null}
+          </View>
 
           <View
             style={webStyle({
@@ -249,6 +256,10 @@ export default function DashboardScreenWeb()
             </View>
 
             <View style={{ gap: 16, minWidth: 0 }}>
+              <DayPlanHomeCard />
+
+              <VisualDayCard />
+
               <MoodWeekReportGate humor={humor} />
               {waterOnHome ? <WebHydrationWidget /> : null}
               <WebShortcutsBar />

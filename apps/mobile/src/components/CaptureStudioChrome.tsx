@@ -20,6 +20,8 @@ type Props = {
   children: ReactNode
   footer: ReactNode
   onClose: () => void
+  /** Quando vira true, expande sozinho (ex.: o Axel devolveu cartões para revisar). */
+  expanded?: boolean
 }
 
 /** Sheet de papel: abre compacto; puxa a alça para cima para expandir, para baixo para fechar. */
@@ -30,6 +32,7 @@ export function CaptureStudioChrome({
   children,
   footer,
   onClose,
+  expanded = false,
 }: Props)
 {
   const { colors, space } = useTheme()
@@ -107,6 +110,13 @@ export function CaptureStudioChrome({
       }),
     [expand, onClose, span],
   )
+
+  useEffect(() =>
+  {
+    if (open && expanded) snapExpand(1)
+    // snapExpand é estável o bastante: só depende do Animated.Value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, expanded])
 
   const sheetH = expand.interpolate({
     inputRange: [0, 1],

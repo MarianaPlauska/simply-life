@@ -24,6 +24,10 @@ export function mapPushUrlToRoute(url: string): string | null
     {
       return '/(tabs)/financeiro'
     }
+    if (pathname.startsWith('/planejar-amanha')) return '/planejar-amanha'
+    if (pathname.startsWith('/ritmo')) return '/ritmo'
+    if (pathname.startsWith('/foco')) return '/foco'
+    if (pathname.startsWith('/agenda')) return '/agenda'
     if (pathname.startsWith('/task/'))
     {
       const id = pathname.split('/task/')[1]

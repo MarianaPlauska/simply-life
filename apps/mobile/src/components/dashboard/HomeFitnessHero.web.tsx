@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { HomeWeatherChip } from './HomeWeatherChip'
 import { WEB_DISPLAY_FONT } from './web/webTypography'
+import { WEB_CARD_BORDER } from './web/webPalette'
 
 type Props = {
   greet: string
@@ -86,7 +87,8 @@ export function HomeFitnessHero({
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
-            ...elevation.card,
+            borderWidth: 1,
+            borderColor: WEB_CARD_BORDER,
           }}
         >
           <Ionicons
@@ -111,12 +113,11 @@ export function HomeFitnessHero({
             <HomeWeatherChip compact />
           </View>
           <Text
+            variant="hero"
             numberOfLines={1}
             style={{
-              fontFamily: WEB_DISPLAY_FONT,
-              color: colors.ink,
               fontSize: 22,
-              letterSpacing: -0.3,
+              letterSpacing: -0.6,
               lineHeight: 26,
               textAlign: 'center',
               width: '100%',

@@ -191,15 +191,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
     || (showSleepStep ? hours == null : moodSelected == null || moodUnchanged)
 
   return (
-    <Card
-      tone="elevated"
-      style={{
-        gap: space.md,
-        padding: 16,
-        borderTopWidth: 1,
-        borderTopColor: colors.health,
-      }}
-    >
+    <Card tone="elevated" accentTop="health" style={{ gap: space.md, padding: 16 }}>
       <View style={{ gap: 6 }}>
         <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
           Ritual da manhã

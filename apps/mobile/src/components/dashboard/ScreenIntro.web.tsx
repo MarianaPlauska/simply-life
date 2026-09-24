@@ -2,12 +2,14 @@ import { View } from 'react-native'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { SyncHint } from '../SyncHint'
+import { useWorkspace } from '../../layout/useWorkspace'
 import { WEB_DISPLAY_FONT } from './web/webTypography'
 
 /**
- * Título de tela — build web. Mesmo componente de sempre, só troca a fonte
- * do título para a serifada usada nos números do dashboard web (regra única
- * de tipografia, não uma exceção isolada). App nativo usa ScreenIntro.tsx.
+ * Título de tela — build web. Só troca a fonte do título para a serifada
+ * quando há espaço de desktop (showRail); em largura estreita (o mesmo
+ * corte usado pelo app nativo) fica idêntico ao ScreenIntro.tsx original,
+ * porque isso é o que roda quando alguém abre a build web num celular.
  */
 export function ScreenIntro({
   title,
@@ -18,12 +20,19 @@ export function ScreenIntro({
 })
 {
   const { space } = useTheme()
+  const { showRail } = useWorkspace()
 
   return (
     <View style={{ gap: 4 }}>
-      <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, letterSpacing: -0.4 }}>
-        {title}
-      </Text>
+      {showRail ? (
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, letterSpacing: -0.4 }}>
+          {title}
+        </Text>
+      ) : (
+        <Text variant="hero" style={{ letterSpacing: -0.4 }}>
+          {title}
+        </Text>
+      )}
       {subtitle ? (
         <Text variant="body" muted style={{ marginTop: 2 }}>
           {subtitle}
