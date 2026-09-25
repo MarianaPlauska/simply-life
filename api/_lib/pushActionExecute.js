@@ -109,6 +109,23 @@ export async function executePushAction(supabase, payload, action)
       });
     }
 
+    // Etapa 2: "Feito" = já paguei. Fixa → lança o gasto e marca o mês pago; despesa agendada → marca paga.
+    const billId = String(payload.billId || '');
+    if (billId.startsWith('fixa-'))
+    {
+      const paid = await settleFixaFromPush(supabase, userId, Number(billId.slice(5)), payload.billDue);
+      return { ok: true, action: 'done', message: paid };
+    }
+    if (billId.startsWith('tx-'))
+    {
+      await supabase
+        .from('despesas')
+        .update({ status_pagamento: 'pago' })
+        .eq('id', Number(billId.slice(3)))
+        .eq('user_id', userId);
+      return { ok: true, action: 'done', message: 'Conta marcada como paga' };
+    }
+
     return { ok: true, action: 'done', message: 'Conta anotada para depois' };
   }
 
@@ -127,4 +144,60 @@ export async function executePushAction(supabase, payload, action)
   }
 
   return { ok: false, error: 'Tipo de lembrete desconhecido' };
+}
+
+/**
+ * Conta fixa paga pela notificação: registra o "pago" do mês (mesma chave do app:
+ * fixa:<id>:<AAAA-MM>) e lança o gasto ligado à fixa. Se já estava paga, não repete.
+ */
+async function settleFixaFromPush(supabase, userId, fixaId, dueIso)
+{
+  if (!fixaId) return 'Conta anotada'
+  const { data: fixa } = await supabase
+    .from('fin_contas_fixas')
+    .select('id, nome, valor, categoria')
+    .eq('id', fixaId)
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (!fixa) return 'Conta anotada'
+
+  const today = new Date().toISOString().slice(0, 10)
+  const ym = String(dueIso || today).slice(0, 7)
+  const billKey = `fixa:${fixa.id}:${ym}`
+  const { data: already } = await supabase
+    .from('finance_bill_settlements')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('bill_id', billKey)
+    .maybeSingle()
+  if (already) return `${fixa.nome} já estava paga`
+
+  const despesa = {
+    user_id: userId,
+    descricao: fixa.nome,
+    valor: Number(fixa.valor) || 0,
+    categoria: fixa.categoria || 'habitacao',
+    data_gasto: today,
+    tipo: 'despesa',
+    forma_pagamento: 'debito',
+    status_pagamento: 'pago',
+    fixa_id: fixa.id,
+  }
+  let { error } = await supabase.from('despesas').insert(despesa)
+  if (error && /fixa_id/i.test(error.message))
+  {
+    // migração 061 pendente
+    delete despesa.fixa_id
+    ;({ error } = await supabase.from('despesas').insert(despesa))
+  }
+  if (error) return 'Não consegui lançar: abra o app para marcar'
+
+  await supabase.from('finance_bill_settlements').insert({
+    user_id: userId,
+    bill_id: billKey,
+    titulo: fixa.nome,
+    valor: Number(fixa.valor) || 0,
+    origem: 'push',
+  })
+  return `${fixa.nome} paga e lançada no app`
 }

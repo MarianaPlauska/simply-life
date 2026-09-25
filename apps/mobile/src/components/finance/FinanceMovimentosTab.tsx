@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { formatBRL } from '@simply-life/shared'
 import {
@@ -17,6 +17,7 @@ import { FinanceCsvPanel } from './FinanceCsvPanel'
 import { FinanceFoldersPane } from './FinanceFoldersPane'
 import { MOVIMENTOS_SUB_TABS, type MovimentosSubTab } from './financeNav'
 import { financeTxSubtitle } from '../../lib/financeTxLabel'
+import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 
 type Props = {
   subTab: MovimentosSubTab
@@ -28,6 +29,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
   const { space } = useTheme()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const txs = useDataStore((s) => s.finance)
+  const [editingTx, setEditingTx] = useState<string | null>(null)
   const rows = useMemo(() => txs.filter((t) => t.tipo === 'despesa' || t.tipo === 'receita'), [txs])
 
   return (
@@ -88,6 +90,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
               title={t.titulo}
               subtitle={financeTxSubtitle(t)}
               right={formatBRL(t.valor)}
+              onPress={() => setEditingTx(t.id)}
               showSeparator={i < arr.length - 1}
             />
           ))
@@ -98,12 +101,14 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
               title={t.titulo}
               subtitle={financeTxSubtitle(t)}
               right={`${t.tipo === 'receita' ? '+' : '−'}${formatBRL(t.valor)}`}
+              onPress={() => setEditingTx(t.id)}
               showSeparator={i < arr.length - 1}
             />
           ))
         )}
       </Card>
       )}
+      <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
     </View>
   )
 }

@@ -39,7 +39,7 @@ export function CaptureNoteFields({ text, onTextChange }: Props)
       <View
         style={{
           padding: 12,
-          borderRadius: radius.md,
+          borderRadius: radius.control,
           backgroundColor: colors.axelMuted,
           gap: 4,
         }}

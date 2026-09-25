@@ -77,6 +77,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
   const hydratePaid = useDuePaidStore((s) => s.hydrate)
   const isPaid = useDuePaidStore((s) => s.isPaid)
   const setPaid = useDuePaidStore((s) => s.setPaid)
+  const settleBill = useDataStore((s) => s.settleBill)
   const paidKeys = useDuePaidStore((s) => s.keys)
   const openEvolve = useTaskEvolveStore((s) => s.open)
   const [filter, setFilter] = useState<Filter>({ kind: 'life', id: 'todos' })
@@ -236,12 +237,8 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
             bill={bill}
             onToggle={() =>
             {
-              if (bill.kind === 'apagar')
-              {
-                void markContaAPagar(Number(bill.sourceId), true, isGuest)
-                return
-              }
-              setPaid(bill.key, true)
+              // fixa: lança o gasto e marca o mês · fatura: paga a fatura · a pagar: quita
+            void settleBill(bill, isGuest)
             }}
           />
         ))}
@@ -263,12 +260,8 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
             bill={bill}
             onToggle={() =>
             {
-              if (bill.kind === 'apagar')
-              {
-                void markContaAPagar(Number(bill.sourceId), true, isGuest)
-                return
-              }
-              setPaid(bill.key, true)
+              // fixa: lança o gasto e marca o mês · fatura: paga a fatura · a pagar: quita
+            void settleBill(bill, isGuest)
             }}
           />
         ))}
@@ -485,12 +478,8 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                     tagColor={colors.axel}
                     onPress={() =>
                     {
-                      if (bill.kind === 'apagar')
-                      {
-                        void markContaAPagar(Number(bill.sourceId), true, isGuest)
-                        return
-                      }
-                      setPaid(bill.key, true)
+                      // fixa: lança o gasto e marca o mês · fatura: paga a fatura · a pagar: quita
+            void settleBill(bill, isGuest)
                     }}
                   />
                 </View>
@@ -518,12 +507,8 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                     tagColor={colors.finance}
                     onPress={() =>
                     {
-                      if (bill.kind === 'apagar')
-                      {
-                        void markContaAPagar(Number(bill.sourceId), true, isGuest)
-                        return
-                      }
-                      setPaid(bill.key, true)
+                      // fixa: lança o gasto e marca o mês · fatura: paga a fatura · a pagar: quita
+            void settleBill(bill, isGuest)
                     }}
                   />
                 </View>

@@ -40,7 +40,17 @@ import {
 } from '@simply-life/shared'
 import { fetchHumorMes, registrarHumor } from '../lib/sync/humor'
 import { createTarefa, fetchTarefas, insertSubtarefa, archiveTarefa, patchTarefa, persistTaskStatus, toggleSubtarefa, updateTarefaDue, updateTarefaStatus } from '../lib/sync/tasks'
-import { addDespesa, fetchDespesas, parseExpenseQuick } from '../lib/sync/finance'
+import {
+  addDespesa,
+  deleteDespesa,
+  deleteDespesas,
+  DuplicateImportError,
+  fetchDespesas,
+  parseExpenseQuick,
+  updateDespesa,
+  type DespesaPatch,
+} from '../lib/sync/finance'
+import { monthPaidKey, planImport } from '@simply-life/shared'
 import {
   bumpHabitoProgress,
   ensureAguaHabit,
@@ -71,7 +81,15 @@ import {
   insertContaFixa,
   updateContaAPagarStatus,
   updateContaFixa,
+  insertFinanceCard,
+  updateFinanceCardRow,
+  deleteFinanceCard,
+  fetchFinanceGoals,
+  insertFinanceGoal,
+  updateFinanceGoalRow,
+  deleteFinanceGoal,
 } from '../lib/sync/financeAccounts'
+import { useAuthStore } from './authStore'
 import { loadOfflineBundle, saveOfflineBundle } from '../lib/offlineCache'
 import { supabaseConfigured } from '../lib/supabase'
 import { hapticLight } from '../lib/haptics'
@@ -87,6 +105,12 @@ function localId(): string
 {
   localSeq = (localSeq + 1) % 1e6
   return `local-${Date.now()}-${localSeq}`
+}
+
+/** Sem conta (convidado) ou sem Supabase: fica só no aparelho. */
+function remoteEnabled(): boolean
+{
+  return !useLocal(useAuthStore.getState().isGuest)
 }
 
 function useLocal(isGuest?: boolean): boolean
@@ -140,6 +164,8 @@ type DataState = {
       escopo?: import('@simply-life/shared').FinanceEscopo
       pagoContaCasal?: boolean
       partnerWorkspaceId?: string | null
+      /** parcelas da mesma compra */
+      grupoParcela?: string
     },
   ) => Promise<{ ok: boolean; error?: string }>
   commitDump: (text: string, isGuest?: boolean) => Promise<{ ok: boolean; error?: string; count?: number }>
@@ -157,14 +183,38 @@ type DataState = {
   addMedicamento: (nome: string, horario: string, isGuest?: boolean) => Promise<{ error?: string }>
   removeMedicamento: (id: number, isGuest?: boolean) => Promise<void>
   moveTaskBucket: (taskId: string, bucket: DueBucket, isGuest?: boolean) => Promise<void>
-  importFinanceRows: (rows: ImportedTransactionRow[], isGuest?: boolean) => Promise<number>
+  /**
+   * dedupe (padrão true, extrato CSV): pula o que já existe. Lançamento manual passa false.
+   * Volta quantos entraram, quantos já existiam e quantos falharam.
+   */
+  importFinanceRows: (
+    rows: ImportedTransactionRow[],
+    isGuest?: boolean,
+    opts?: { dedupe?: boolean },
+  ) => Promise<{ imported: number; duplicates: number; failed: number }>
+  /** editar um lançamento (antes só dava para inserir) */
+  updateFinanceTx: (id: string, patch: DespesaPatch, isGuest?: boolean) => Promise<{ ok: boolean; error?: string }>
+  removeFinanceTx: (id: string, isGuest?: boolean) => Promise<{ ok: boolean; error?: string }>
+  /** apaga vários (parcelas de uma compra) */
+  removeFinanceTxs: (ids: string[], isGuest?: boolean) => Promise<{ ok: boolean; error?: string }>
   addFinanceGoal: (titulo: string, meta: number) => void
+  /** guardar dinheiro numa meta (valor negativo = retirar) */
+  contributeFinanceGoal: (id: number, valor: number) => Promise<{ ok: boolean; error?: string }>
+  updateFinanceGoal: (id: number, patch: Partial<Pick<FinanceGoal, 'titulo' | 'meta' | 'atual'>>) => Promise<{ ok: boolean; error?: string }>
+  removeFinanceGoal: (id: number) => Promise<{ ok: boolean; error?: string }>
+  /**
+   * "Já paguei" numa conta fixa: lança o gasto ligado à fixa (entra no saldo e nos
+   * relatórios) e marca o mês como pago. Antes, marcar no Kanban só escondia a conta.
+   */
+  settleFixa: (fixaId: number, isGuest?: boolean) => Promise<{ ok: boolean; error?: string }>
+  /** conta do dia no Kanban (fixa, fatura ou "a pagar") → a ação certa para cada tipo */
+  settleBill: (bill: { kind: string; key: string; sourceId: string | number }, isGuest?: boolean) => Promise<void>
   addCardSpend: (
     cardId: string,
     valor: number,
     titulo: string,
     isGuest?: boolean,
-    opts?: { data?: string; categoria?: FinanceCategory; somarFatura?: boolean; folderId?: string },
+    opts?: { data?: string; categoria?: FinanceCategory; somarFatura?: boolean; folderId?: string; grupoParcela?: string },
   ) => Promise<{ ok: boolean; error?: string }>
   payCardInvoice: (
     cardId: string,
@@ -434,7 +484,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         if (isLocalHabitId(h.id) || !habitoPrecisaReset(h, today)) continue
         const live = habits.find((m) => m.id === h.id)
         if (live?.config?.ultima_data === today) continue
-        const diaAnterior = h.config?.ultima_data
+        const diaAnterior = typeof h.config?.ultima_data === 'string' ? h.config.ultima_data : undefined
         if (diaAnterior && diaAnterior !== today && h.progressoAtual > 0)
         {
           await upsertHabitHistoricoCups(h.id, h.progressoAtual, diaAnterior).catch(() => null)
@@ -446,6 +496,8 @@ export const useDataStore = create<DataState>((set, get) => ({
       const agua = findHabit(habits, 'agua')
       const waterWeekDays = agua ? await loadWaterWeekDays(agua, today) : {}
 
+      // metas vêm do banco (antes: sempre [] e o que a pessoa criou sumia)
+      const goals = await fetchFinanceGoals().catch(() => get().financeGoals)
       set({
         humor,
         tasks,
@@ -457,7 +509,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         financeCards: cards,
         contasFixas: fixas,
         contasAPagar: bills,
-        financeGoals: [],
+        financeGoals: goals,
         source: 'remote',
         loading: false,
       })
@@ -576,6 +628,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         folderId: opts?.folderId,
         escopo: opts?.escopo ?? 'pessoal',
         pagoContaCasal: Boolean(opts?.pagoContaCasal && opts?.escopo !== 'casal'),
+        grupoParcela: opts?.grupoParcela,
       }
       set({ finance: [tx, ...get().finance] })
       useGamificationStore.getState().grantXp(8, tipo === 'receita' ? 'Receita lançada' : 'Gasto lançado', parsed.titulo)
@@ -597,6 +650,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         escopo: opts?.escopo,
         pagoContaCasal: opts?.pagoContaCasal,
         partnerWorkspaceId: opts?.partnerWorkspaceId,
+        grupoParcela: opts?.grupoParcela,
       })
       set({ finance: [saved, ...get().finance] })
       useGamificationStore.getState().grantXp(8, tipo === 'receita' ? 'Receita lançada' : 'Gasto lançado', parsed.titulo)
@@ -914,6 +968,11 @@ export const useDataStore = create<DataState>((set, get) => ({
         c.id === cardId ? { ...c, status } : c,
       ),
     })
+    const card = get().financeCards.find((c) => c.id === cardId)
+    if (card && remoteEnabled())
+    {
+      void updateFinanceCardRow(card).catch((e) => set({ error: `Cartão não salvo: ${e instanceof Error ? e.message : 'tente de novo'}` }))
+    }
   },
 
   updateFinanceCard: (cardId, patch) =>
@@ -924,13 +983,20 @@ export const useDataStore = create<DataState>((set, get) => ({
         c.id === cardId ? { ...c, ...patch, id: c.id } : c,
       ),
     })
+    // só "faturaAberta" mudou: não vai ao banco (é recalculada das compras do cartão)
+    const persisted = Object.keys(patch).some((k) => k !== 'faturaAberta')
+    const card = get().financeCards.find((c) => c.id === cardId)
+    if (persisted && card && remoteEnabled())
+    {
+      void updateFinanceCardRow(card).catch((e) => set({ error: `Cartão não salvo: ${e instanceof Error ? e.message : 'tente de novo'}` }))
+    }
   },
 
   addFinanceCard: (input) =>
   {
     hapticLight()
     const card: FinanceCard = {
-      id: `c-${Date.now()}`,
+      id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       nome: input.nome.trim(),
       limite: input.limite,
       diaVencimento: input.diaVencimento,
@@ -944,15 +1010,34 @@ export const useDataStore = create<DataState>((set, get) => ({
       faturaAberta: 0,
     }
     set({ financeCards: [...get().financeCards, card] })
+    if (remoteEnabled())
+    {
+      void insertFinanceCard(card).catch((e) =>
+      {
+        // não conseguiu salvar: tira da tela para não enganar
+        set({
+          financeCards: get().financeCards.filter((c) => c.id !== card.id),
+          error: `Cartão não salvo: ${e instanceof Error ? e.message : 'tente de novo'}`,
+        })
+      })
+    }
     return card
   },
 
   removeFinanceCard: (cardId) =>
   {
     hapticLight()
+    const before = get().financeCards
     set({
-      financeCards: get().financeCards.filter((c) => c.id !== cardId),
+      financeCards: before.filter((c) => c.id !== cardId),
     })
+    if (remoteEnabled())
+    {
+      void deleteFinanceCard(cardId).catch((e) => set({
+        financeCards: before,
+        error: `Não consegui remover o cartão: ${e instanceof Error ? e.message : 'tente de novo'}`,
+      }))
+    }
   },
 
   moveTaskBucket: async (taskId, bucket, isGuest) =>
@@ -972,55 +1057,222 @@ export const useDataStore = create<DataState>((set, get) => ({
     await updateTarefaDue(taskId, due)
   },
 
-  importFinanceRows: async (rows, isGuest) =>
+  importFinanceRows: async (rows, isGuest, opts) =>
   {
-    let n = 0
-    for (const row of rows)
+    const dedupe = opts?.dedupe !== false
+    const plan = dedupe
+      ? planImport(rows, get().finance)
+      : { toInsert: rows.map((row) => ({ row, hash: undefined as string | undefined })), duplicates: [] }
+    let imported = 0
+    let duplicates = plan.duplicates.length
+    let failed = 0
+    for (const { row, hash } of plan.toInsert)
     {
-      const tx: FinanceTx = {
-        id: `imp-${Date.now()}-${n}`,
-        titulo: row.descricao,
-        valor: row.valor,
-        categoria: (row.categoria as FinanceCategory) || 'outros',
-        data: row.data,
-        tipo: row.tipo,
-      }
+      const categoria = (row.categoria as FinanceCategory) || 'outros'
       if (useLocal(isGuest))
       {
-        set({ finance: [tx, ...get().finance] })
+        set({ finance: [{ id: localId(), titulo: row.descricao, valor: row.valor, categoria, data: row.data, tipo: row.tipo }, ...get().finance] })
+        imported += 1
+        continue
       }
-      else
+      try
       {
-        try
-        {
-          const saved = await addDespesa({
-            titulo: row.descricao,
-            valor: row.valor,
-            data: row.data,
-            tipo: row.tipo,
-            categoria: (row.categoria as FinanceCategory) || 'outros',
-          })
-          set({ finance: [saved, ...get().finance] })
-        }
-        catch
-        {
-          set({ finance: [tx, ...get().finance] })
-        }
+        const saved = await addDespesa({
+          titulo: row.descricao,
+          valor: row.valor,
+          data: row.data,
+          tipo: row.tipo,
+          categoria,
+          importHash: hash,
+        })
+        set({ finance: [saved, ...get().finance] })
+        imported += 1
       }
-      n += 1
+      catch (e)
+      {
+        // já estava no banco (mesma impressão digital): conta como repetido, não como erro.
+        // Antes, qualquer erro virava um lançamento só local que sumia ao reabrir.
+        if (e instanceof DuplicateImportError) duplicates += 1
+        else failed += 1
+      }
     }
-    return n
+    return { imported, duplicates, failed }
+  },
+
+  updateFinanceTx: async (id, patch, isGuest) =>
+  {
+    const before = get().finance
+    const current = before.find((t) => t.id === id)
+    if (!current) return { ok: false, error: 'Lançamento não encontrado' }
+    if (patch.valor != null && !(patch.valor > 0)) return { ok: false, error: 'O valor precisa ser maior que zero' }
+    set({ finance: before.map((t) => (t.id === id ? { ...t, ...patch } : t)) })
+    if (useLocal(isGuest) || id.startsWith('local-')) return { ok: true }
+    try
+    {
+      await updateDespesa(id, patch)
+      return { ok: true }
+    }
+    catch (e)
+    {
+      set({ finance: before })
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar' }
+    }
+  },
+
+  removeFinanceTxs: async (ids, isGuest) =>
+  {
+    const before = get().finance
+    const drop = new Set(ids)
+    set({ finance: before.filter((t) => !drop.has(t.id)) })
+    if (useLocal(isGuest)) return { ok: true }
+    try
+    {
+      await deleteDespesas(ids)
+      return { ok: true }
+    }
+    catch (e)
+    {
+      set({ finance: before })
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui apagar' }
+    }
+  },
+
+  removeFinanceTx: async (id, isGuest) =>
+  {
+    const before = get().finance
+    set({ finance: before.filter((t) => t.id !== id) })
+    if (useLocal(isGuest) || id.startsWith('local-')) return { ok: true }
+    try
+    {
+      await deleteDespesa(id)
+      return { ok: true }
+    }
+    catch (e)
+    {
+      set({ finance: before })
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui apagar' }
+    }
   },
 
   addFinanceGoal: (titulo, meta) =>
   {
+    const tempId = -Date.now()
     const goal: FinanceGoal = {
-      id: Date.now(),
+      id: tempId,
       titulo: titulo.trim(),
       meta,
       atual: 0,
     }
     set({ financeGoals: [goal, ...get().financeGoals] })
+    if (!remoteEnabled()) return
+    // antes a meta nunca era salva; agora troca o id provisório pelo do banco
+    void insertFinanceGoal(goal.titulo, meta)
+      .then((saved) => set({ financeGoals: get().financeGoals.map((g) => (g.id === tempId ? saved : g)) }))
+      .catch((e) => set({
+        financeGoals: get().financeGoals.filter((g) => g.id !== tempId),
+        error: `Meta não salva: ${e instanceof Error ? e.message : 'tente de novo'}`,
+      }))
+  },
+
+  contributeFinanceGoal: async (id, valor) =>
+  {
+    const goal = get().financeGoals.find((g) => g.id === id)
+    if (!goal) return { ok: false, error: 'Meta não encontrada' }
+    return get().updateFinanceGoal(id, { atual: Math.max(0, Math.round((goal.atual + valor) * 100) / 100) })
+  },
+
+  updateFinanceGoal: async (id, patch) =>
+  {
+    const before = get().financeGoals
+    const goal = before.find((g) => g.id === id)
+    if (!goal) return { ok: false, error: 'Meta não encontrada' }
+    const next = { ...goal, ...patch }
+    set({ financeGoals: before.map((g) => (g.id === id ? next : g)) })
+    if (!remoteEnabled() || id < 0) return { ok: true }
+    try
+    {
+      await updateFinanceGoalRow(next)
+      return { ok: true }
+    }
+    catch (e)
+    {
+      set({ financeGoals: before })
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar a meta' }
+    }
+  },
+
+  settleFixa: async (fixaId, isGuest) =>
+  {
+    const fixa = get().contasFixas.find((f) => f.id === fixaId)
+    if (!fixa) return { ok: false, error: 'Conta fixa não encontrada' }
+    const today = new Date().toISOString().slice(0, 10)
+    const key = monthPaidKey('fixa', fixa.id, today)
+    if (useDuePaidStore.getState().isPaid(key)) return { ok: true }
+    const categoria = (fixa.categoria as FinanceCategory) || 'habitacao'
+    if (useLocal(isGuest))
+    {
+      set({ finance: [{ id: localId(), titulo: fixa.nome, valor: fixa.valor, categoria, data: today, tipo: 'despesa', formaPagamento: 'debito', fixaId: String(fixa.id) }, ...get().finance] })
+    }
+    else
+    {
+      try
+      {
+        const saved = await addDespesa({
+          titulo: fixa.nome,
+          valor: fixa.valor,
+          categoria,
+          data: today,
+          tipo: 'despesa',
+          formaPagamento: 'debito',
+          fixaId: fixa.id,
+        })
+        set({ finance: [{ ...saved, fixaId: String(fixa.id) }, ...get().finance] })
+      }
+      catch (e)
+      {
+        return { ok: false, error: e instanceof Error ? e.message : 'Não consegui lançar o pagamento' }
+      }
+    }
+    useDuePaidStore.getState().setPaid(key, true, { titulo: fixa.nome, valor: fixa.valor })
+    useActivityStore.getState().markAction('finance')
+    return { ok: true }
+  },
+
+  settleBill: async (bill, isGuest) =>
+  {
+    if (bill.kind === 'apagar')
+    {
+      await get().markContaAPagar(Number(bill.sourceId), true, isGuest)
+      return
+    }
+    if (bill.kind === 'fixa')
+    {
+      await get().settleFixa(Number(bill.sourceId), isGuest)
+      return
+    }
+    if (bill.kind === 'cartao')
+    {
+      await get().payCardInvoice(String(bill.sourceId), isGuest)
+      return
+    }
+    useDuePaidStore.getState().setPaid(bill.key, true)
+  },
+
+  removeFinanceGoal: async (id) =>
+  {
+    const before = get().financeGoals
+    set({ financeGoals: before.filter((g) => g.id !== id) })
+    if (!remoteEnabled() || id < 0) return { ok: true }
+    try
+    {
+      await deleteFinanceGoal(id)
+      return { ok: true }
+    }
+    catch (e)
+    {
+      set({ financeGoals: before })
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui apagar a meta' }
+    }
   },
 
   addContaFixa: async (input) =>
@@ -1136,6 +1388,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         cardId,
         formaPagamento: 'cartao',
         folderId: opts?.folderId,
+        grupoParcela: opts?.grupoParcela,
       }
       set({ finance: [tx, ...get().finance] })
       useGamificationStore.getState().logEvent('xp', 'Gasto no cartão', tagged)
@@ -1147,6 +1400,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       formaPagamento: 'cartao',
       cardId,
       folderId: opts?.folderId,
+      grupoParcela: opts?.grupoParcela,
     })
     if (res.ok)
     {

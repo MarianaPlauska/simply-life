@@ -1,5 +1,5 @@
 import { supabase } from '../supabase'
-import type { CashAccount, ContaAPagar, ContaFixa, FinanceCard, FinanceCardGradient } from '@simply-life/shared'
+import type { CashAccount, ContaAPagar, ContaFixa, FinanceCard, FinanceCardGradient, FinanceGoal } from '@simply-life/shared'
 
 export async function fetchCashAccount(): Promise<CashAccount>
 {
@@ -21,7 +21,7 @@ export async function fetchFinanceCards(): Promise<FinanceCard[]>
 {
   const { data, error } = await supabase
     .from('fin_cartoes')
-    .select('id, nome, limite, dia_vencimento, status, bandeira, tipo_gradiente, numero, titular')
+    .select('*')
     .order('created_at', { ascending: true })
 
   if (error) throw new Error(error.message)
@@ -44,6 +44,7 @@ export async function fetchFinanceCards(): Promise<FinanceCard[]>
       tipoGradiente,
       numeroMascarado: numero ? `•••• ${numero.slice(-4)}` : undefined,
       titular: r.titular ? String(r.titular) : undefined,
+      banco: r.banco ? String(r.banco) : undefined,
     }
   })
 }
@@ -168,5 +169,101 @@ export async function updateContaAPagarStatus(id: number, paga: boolean): Promis
     .update({ status: paga ? 'quitada' : 'aberta' })
     .eq('id', id)
 
+  if (error) throw new Error(error.message)
+}
+
+// ---------------------------------------------------------------------------
+// Cartões (Etapa 1 de integridade): antes só existiam na tela e sumiam ao reabrir.
+// Segurança: só os 4 últimos dígitos vão para o banco. Nunca número completo nem CVV.
+// A fatura aberta NÃO é salva: é recalculada das compras do cartão (cardFaturaAbertaDisplay).
+// ---------------------------------------------------------------------------
+
+function lastFour(masked: string | undefined): string | null
+{
+  const digits = (masked || '').replace(/\D/g, '')
+  return digits ? digits.slice(-4) : null
+}
+
+function cardRow(card: FinanceCard): Record<string, unknown>
+{
+  return {
+    nome: card.nome,
+    titular: card.titular || card.nome || 'Titular',
+    numero: lastFour(card.numeroMascarado),
+    limite: card.limite,
+    dia_vencimento: card.diaVencimento,
+    status: card.status,
+    bandeira: card.bandeira,
+    tipo_gradiente: card.tipoGradiente ?? 'copper',
+    banco: card.banco ?? null,
+  }
+}
+
+export async function insertFinanceCard(card: FinanceCard): Promise<void>
+{
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) throw new Error('Não autenticado')
+  const { error } = await supabase.from('fin_cartoes').insert({ id: card.id, user_id: uid, ...cardRow(card) })
+  if (error) throw new Error(error.message)
+}
+
+export async function updateFinanceCardRow(card: FinanceCard): Promise<void>
+{
+  const { error } = await supabase.from('fin_cartoes').update(cardRow(card)).eq('id', card.id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteFinanceCard(cardId: string): Promise<void>
+{
+  const { error } = await supabase.from('fin_cartoes').delete().eq('id', cardId)
+  if (error) throw new Error(error.message)
+}
+
+// ---------------------------------------------------------------------------
+// Metas (fin_metas): antes eram só locais e o "atual" ficava sempre em 0.
+// ---------------------------------------------------------------------------
+
+export async function fetchFinanceGoals(): Promise<FinanceGoal[]>
+{
+  const { data, error } = await supabase
+    .from('fin_metas')
+    .select('id, titulo, valor_alvo, valor_atual, concluida')
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(error.message)
+  return (data || []).map((r) => ({
+    id: Number(r.id),
+    titulo: String(r.titulo || 'Meta'),
+    meta: Number(r.valor_alvo) || 0,
+    atual: Number(r.valor_atual) || 0,
+  }))
+}
+
+export async function insertFinanceGoal(titulo: string, meta: number): Promise<FinanceGoal>
+{
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) throw new Error('Não autenticado')
+  const { data, error } = await supabase
+    .from('fin_metas')
+    .insert({ user_id: uid, titulo, valor_alvo: meta, valor_atual: 0 })
+    .select('id, titulo, valor_alvo, valor_atual')
+    .single()
+  if (error) throw new Error(error.message)
+  return { id: Number(data.id), titulo: String(data.titulo), meta: Number(data.valor_alvo) || 0, atual: Number(data.valor_atual) || 0 }
+}
+
+export async function updateFinanceGoalRow(goal: FinanceGoal): Promise<void>
+{
+  const { error } = await supabase
+    .from('fin_metas')
+    .update({ titulo: goal.titulo, valor_alvo: goal.meta, valor_atual: goal.atual, concluida: goal.atual >= goal.meta })
+    .eq('id', goal.id)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteFinanceGoal(id: number): Promise<void>
+{
+  const { error } = await supabase.from('fin_metas').delete().eq('id', id)
   if (error) throw new Error(error.message)
 }

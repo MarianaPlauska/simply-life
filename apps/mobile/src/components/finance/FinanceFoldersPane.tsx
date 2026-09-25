@@ -73,7 +73,7 @@ export function FinanceFoldersPane()
             backgroundColor: colors.elevated,
           }}
         >
-          <FolderGlyph color={row.list.color} size={48} />
+          <FolderGlyph color={row.list.color ?? colors.axel} size={48} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="bodyStrong">{row.list.name}</Text>
             <Text variant="caption" muted>

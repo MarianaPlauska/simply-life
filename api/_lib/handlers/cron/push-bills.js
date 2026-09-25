@@ -112,6 +112,9 @@ export default async function handler(req, res)
           kind: 'bill',
           snoozeKey: key,
           billKey: key,
+          // "Feito" na notificação marca ESTA conta como paga (fixa-12 / tx-345)
+          billId: bill.id,
+          billDue: bill.dueDate,
         });
         const fanout = await sendPushToSubscriptions(supabase, userSubs, payload);
           const anyOk = fanout.sent > 0;

@@ -20,6 +20,7 @@ import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRit
 import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
+import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
@@ -184,6 +185,8 @@ export default function DashboardScreenWeb()
               ) : null
             }
           />
+          <SalaryConfirmCard />
+
           <DayPlanHomeCard />
 
           <VisualDayCard />
@@ -256,6 +259,8 @@ export default function DashboardScreenWeb()
             </View>
 
             <View style={{ gap: 16, minWidth: 0 }}>
+              <SalaryConfirmCard />
+
               <DayPlanHomeCard />
 
               <VisualDayCard />

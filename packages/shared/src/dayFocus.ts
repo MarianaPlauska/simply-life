@@ -94,7 +94,7 @@ export type DayDueBill = {
 
 function pushBill(
   out: DayDueBill[],
-  bill: Omit<DayDueBill, 'daysLeft' | 'locked' | 'detalhe'> & { detalhe: string },
+  bill: Omit<DayDueBill, 'dueIso' | 'daysLeft' | 'locked' | 'detalhe'> & { detalhe: string },
   dueIso: string,
   dayIso: string,
   today: string,

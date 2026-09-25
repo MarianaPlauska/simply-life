@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { formatBRL } from '@simply-life/shared'
+import { formatBRL, parseBrlNumber } from '@simply-life/shared'
 import {
   Card,
   Text,
   SectionHeader,
   EmptyState,
   PrimaryButton,
+  Field,
 } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
@@ -31,6 +32,31 @@ export function FinancePlanningPanel()
   const [rows, setRows] = useState<MobileBudgetCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [limitText, setLimitText] = useState('')
+  const [savingLimit, setSavingLimit] = useState(false)
+
+  const saveLimit = async (id: number) =>
+  {
+    const valor = parseBrlNumber(limitText) ?? (limitText.trim() === '0' ? 0 : null)
+    if (valor == null) return
+    setSavingLimit(true)
+    try
+    {
+      await upsertBudgetLimit(id, valor)
+      setEditingId(null)
+      setLimitText('')
+      await reload()
+    }
+    catch (e)
+    {
+      setError(e instanceof Error ? e.message : 'Não consegui salvar o limite')
+    }
+    finally
+    {
+      setSavingLimit(false)
+    }
+  }
 
   const view = useMemo(() =>
   {
@@ -175,8 +201,8 @@ export function FinancePlanningPanel()
         <EmptyState title="Orçamentos" body={error} />
       ) : rows.length === 0 ? (
         <EmptyState
-          title="Sem limites ainda"
-          body="No web, em Análise → Orçamentos, defina o teto por categoria. Depois aparece aqui."
+          title="Sem categorias ainda"
+          body="As categorias aparecem aqui assim que a conta sincronizar. Toque numa delas para definir um limite."
         />
       ) : (
         <Card tone="elevated" style={{ gap: space.md }}>
@@ -216,14 +242,28 @@ export function FinancePlanningPanel()
                     }}
                   />
                 </View>
-                {r.limite <= 0 && (
+                {editingId === r.id ? (
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                    <View style={{ flex: 1 }}>
+                      <Field
+                        label={`Limite por mês em ${r.nome}`}
+                        placeholder="Ex.: 600"
+                        keyboardType="decimal-pad"
+                        value={limitText}
+                        onChangeText={setLimitText}
+                      />
+                    </View>
+                    <PrimaryButton label="Salvar" size="sm" loading={savingLimit} onPress={() => void saveLimit(r.id)} />
+                  </View>
+                ) : (
                   <PrimaryButton
-                    label="Limite R$ 500"
+                    label={r.limite > 0 ? 'Mudar limite' : 'Definir limite'}
                     variant="link"
                     size="sm"
                     onPress={() =>
                     {
-                      void upsertBudgetLimit(r.id, 500).then(reload)
+                      setEditingId(r.id)
+                      setLimitText(r.limite > 0 ? String(r.limite).replace('.', ',') : '')
                     }}
                   />
                 )}

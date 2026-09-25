@@ -33,9 +33,11 @@ export function FinanceSpreadsheetPane()
       setMsg('Informe descrição e valor')
       return
     }
+    // lançamento manual: a pessoa quer mesmo, então não deduplica
     await importFinanceRows(
       [{ descricao: desc.trim(), valor: v, tipo, data, categoria }],
       isGuest,
+      { dedupe: false },
     )
     setDesc('')
     setValor('')

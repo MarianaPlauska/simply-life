@@ -8,6 +8,7 @@ import {
   type CategoryMeta,
   type CategoryMetaMap,
 } from '../lib/categoryMeta'
+import { fetchCategoryMetaRemote, upsertCategoryMetaRemote } from '../lib/sync/financeMeta'
 
 type State = {
   loaded: boolean
@@ -28,6 +29,14 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
   {
     const map = await loadCategoryMeta()
     set({ map, loaded: true })
+    // o que foi personalizado em outro aparelho vem do banco (fin_categorias)
+    const remote = await fetchCategoryMetaRemote()
+    if (Object.keys(remote).length)
+    {
+      const merged: CategoryMetaMap = { ...get().map, ...remote }
+      set({ map: merged })
+      await saveCategoryMeta(merged)
+    }
   },
 
   patch: async (id, next) =>
@@ -39,6 +48,7 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
     }
     set({ map })
     await saveCategoryMeta(map)
+    void upsertCategoryMetaRemote(id, map[id] as CategoryMeta)
   },
 
   create: async (label, icon, color) =>
@@ -58,6 +68,7 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
     }
     set({ map })
     await saveCategoryMeta(map)
+    void upsertCategoryMetaRemote(id, map[id] as CategoryMeta)
     return id
   },
 
@@ -70,6 +81,8 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
       delete map[id]
       set({ map })
       await saveCategoryMeta(map)
+      // no banco só esconde: gastos antigos continuam apontando para ela
+      void upsertCategoryMetaRemote(id, { ...current, hidden: true })
       return
     }
     const map: CategoryMetaMap = {
@@ -78,6 +91,7 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
     }
     set({ map })
     await saveCategoryMeta(map)
+    void upsertCategoryMetaRemote(id, map[id] as CategoryMeta)
   },
 
   resolve: (id) => resolveCategoryMeta(id, get().map),

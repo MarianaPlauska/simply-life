@@ -34,6 +34,8 @@ import { FinanceCardDetailSheet } from './FinanceCardDetailSheet'
 import { CardInvoiceSpendSheet } from './CardInvoiceSpendSheet'
 import { FinanceCardEditSheet } from './FinanceCardEditSheet'
 import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
+import { FinanceTxEditSheet } from './FinanceTxEditSheet'
+import { MonthProjectionCard, SalaryConfirmCard } from './FinanceForecastCards'
 import { saldoToneForMonth } from './saldoTone'
 
 type Props = {
@@ -65,6 +67,7 @@ export function FinanceHomeTab({
   const [editOpen, setEditOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
   const [ledgerOpen, setLedgerOpen] = useState(false)
+  const [editingTx, setEditingTx] = useState<string | null>(null)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -435,6 +438,10 @@ export function FinanceHomeTab({
         </Card>
       </View>
 
+      {/* Etapa 2: salário a confirmar + quanto sobra no fim do mês */}
+      <SalaryConfirmCard />
+      <MonthProjectionCard />
+
       {/* Categorias — tiles leves (ref. imagem) */}
       <View style={{ gap: space.sm }}>
         <SectionHeader
@@ -603,6 +610,7 @@ export function FinanceHomeTab({
                 title={t.titulo}
                 subtitle={financeTxSubtitle(t)}
                 right={`${t.tipo === 'despesa' ? '−' : '+'}${formatBRL(t.valor)}`}
+                onPress={() => setEditingTx(t.id)}
                 showSeparator={i < recent.length - 1}
               />
             ))
@@ -611,6 +619,7 @@ export function FinanceHomeTab({
       </View>
 
       {sheets}
+      <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
       <View style={{ marginBottom: fabClearance }} />
     </View>
   )

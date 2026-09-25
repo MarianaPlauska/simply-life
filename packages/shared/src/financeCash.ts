@@ -97,6 +97,10 @@ export function monthDailyIncomeSeries(
   return totals.map((total, i) => ({ day: i + 1, total }))
 }
 
+/**
+ * ETAPA 2 (docs/FINANCAS_ETAPA_2.md §3): hoje só lê "3/12" do título. Parcelas de verdade
+ * = N lançamentos criados na compra, um por fatura, agrupados por grupo_parcela_id.
+ */
 export function parseParcela(titulo: string): { atual: number; total: number } | null
 {
   const m = titulo.trim().match(PARCELA_RE)
@@ -181,4 +185,66 @@ export function txsForFolder(
     return list.filter((t) => !t.folderId)
   }
   return list.filter((t) => t.folderId === folderId)
+}
+
+// ---------------------------------------------------------------------------
+// Parcelas de uma mesma compra
+// ---------------------------------------------------------------------------
+
+function normTitle(t: string): string
+{
+  return t
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(PARCELA_RE, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * Chave do grupo de parcelas. Lançamentos novos têm grupoParcela; os antigos
+ * são reconhecidos pelo "N/M" no fim do título + cartão + valor + total de parcelas.
+ */
+export function installmentGroupKey(tx: FinanceTx): string | null
+{
+  if (tx.grupoParcela) return `g:${tx.grupoParcela}`
+  const p = parseParcela(tx.titulo)
+  if (!p || p.total < 2) return null
+  return `leg:${tx.cardId ?? ''}|${normTitle(tx.titulo)}|${p.total}|${Math.round(tx.valor * 100)}`
+}
+
+export type InstallmentGroup = {
+  key: string
+  titulo: string
+  parcelas: FinanceTx[]
+  /** posição do lançamento consultado (1 = primeira) */
+  atual: number
+  total: number
+  valorParcela: number
+  /** parcelas depois desta */
+  restantes: FinanceTx[]
+  valorRestante: number
+}
+
+export function installmentGroupOf(txs: FinanceTx[], tx: FinanceTx): InstallmentGroup | null
+{
+  const key = installmentGroupKey(tx)
+  if (!key) return null
+  const parcelas = txs
+    .filter((t) => installmentGroupKey(t) === key)
+    .sort((a, b) => a.data.localeCompare(b.data) || (parseParcela(a.titulo)?.atual ?? 0) - (parseParcela(b.titulo)?.atual ?? 0))
+  if (parcelas.length < 2) return null
+  const idx = parcelas.findIndex((t) => t.id === tx.id)
+  const restantes = parcelas.slice(idx + 1)
+  return {
+    key,
+    titulo: tx.titulo.replace(PARCELA_RE, '').trim() || tx.titulo,
+    parcelas,
+    atual: parseParcela(tx.titulo)?.atual ?? idx + 1,
+    total: parseParcela(tx.titulo)?.total ?? parcelas.length,
+    valorParcela: tx.valor,
+    restantes,
+    valorRestante: Math.round(restantes.reduce((s, t) => s + t.valor, 0) * 100) / 100,
+  }
 }

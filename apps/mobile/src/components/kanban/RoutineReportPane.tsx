@@ -54,7 +54,7 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
       <View
         style={{
           padding: 16,
-          borderRadius: radius.lg,
+          borderRadius: radius.card,
           backgroundColor: colors.axelMuted,
           gap: 6,
         }}
@@ -79,7 +79,7 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
             key={row.id}
             style={{
               padding: 14,
-              borderRadius: radius.lg,
+              borderRadius: radius.card,
               backgroundColor: colors.elevated,
               gap: 10,
             }}

@@ -11,6 +11,8 @@ export function enrichPushPayload(base, ctx)
     horario,
     taskId,
     billKey,
+    billId,
+    billDue,
     nudgeKey,
   } = ctx;
 
@@ -22,6 +24,8 @@ export function enrichPushPayload(base, ctx)
     horario,
     taskId,
     billKey,
+    billId,
+    billDue,
     nudgeKey,
   });
 

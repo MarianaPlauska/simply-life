@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { formatBRL } from '@simply-life/shared'
+import { formatBRL, parseBrlNumber } from '@simply-life/shared'
 import {
   Card,
   Text,
   SectionHeader,
   EmptyState,
   SubNavTabs,
+  Field,
+  PrimaryButton,
 } from '../../ui'
+import { confirmDestructive } from '../../lib/confirmDestructive'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
@@ -26,6 +29,18 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
 {
   const { colors, space, radius } = useTheme()
   const goals = useDataStore((s) => s.financeGoals)
+  const contributeFinanceGoal = useDataStore((s) => s.contributeFinanceGoal)
+  const removeFinanceGoal = useDataStore((s) => s.removeFinanceGoal)
+  const [goalInput, setGoalInput] = useState<Record<number, string>>({})
+  const [goalMsg, setGoalMsg] = useState<string | null>(null)
+  const moveGoal = async (id: number, sign: 1 | -1) =>
+  {
+    const v = parseBrlNumber(goalInput[id] ?? '')
+    if (v == null) return setGoalMsg('Digite um valor, ex.: 150')
+    const res = await contributeFinanceGoal(id, sign * v)
+    setGoalMsg(res.ok ? null : res.error ?? 'Não consegui salvar')
+    if (res.ok) setGoalInput({ ...goalInput, [id]: '' })
+  }
   const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
 
   useEffect(() =>
@@ -79,10 +94,30 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
                       }}
                     />
                   </View>
+                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                    <View style={{ flex: 1 }}>
+                      <Field
+                        label="Valor"
+                        placeholder="Ex.: 150"
+                        keyboardType="decimal-pad"
+                        value={goalInput[goal.id] ?? ''}
+                        onChangeText={(v) => setGoalInput({ ...goalInput, [goal.id]: v })}
+                      />
+                    </View>
+                    <PrimaryButton label="Guardar" size="sm" onPress={() => void moveGoal(goal.id, 1)} />
+                    <PrimaryButton label="Retirar" size="sm" variant="ghost" onPress={() => void moveGoal(goal.id, -1)} />
+                  </View>
+                  <PrimaryButton
+                    label="Apagar meta"
+                    size="sm"
+                    variant="link"
+                    onPress={() => confirmDestructive('Apagar meta', `"${goal.titulo}" será removida.`, () => void removeFinanceGoal(goal.id))}
+                  />
                 </View>
               )
             })
           )}
+          {goalMsg ? <Text variant="caption" color={colors.danger}>{goalMsg}</Text> : null}
         </Card>
       )}
 

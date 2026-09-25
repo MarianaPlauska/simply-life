@@ -16,6 +16,7 @@ import { FinanceCardsHub } from './FinanceCardsHub'
 import { InvitePartnerCard } from './InvitePartnerCard'
 import { FinanceCategoriesSheet } from './FinanceCategoriesSheet'
 import { FinanceFixasSheet } from './FinanceFixasSheet'
+import { FinanceSalaryPane } from './FinanceSalaryPane'
 
 type Props = {
   subTab: ContasSubTab
@@ -112,6 +113,8 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
           <FinanceCategoriesSheet visible={catsOpen} onClose={() => setCatsOpen(false)} />
         </>
       )}
+
+      {subTab === 'salario' && <FinanceSalaryPane />}
 
       {subTab === 'cartoes' && (
         <FinanceCardsHub

@@ -98,3 +98,111 @@ export function parseTransactionsCsv(text: string): ImportedTransactionRow[]
 
   return out
 }
+
+// ---------------------------------------------------------------------------
+// Importação sem duplicar (Etapa 1 de integridade)
+// Cada linha ganha uma "impressão digital": data + valor + descrição normalizada
+// + tipo + ordem de aparição. Reimportar o mesmo extrato não duplica; duas
+// compras iguais no mesmo dia (dois cafés de R$ 8) continuam sendo duas.
+// ---------------------------------------------------------------------------
+
+function normText(v: string): string
+{
+  return (v || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/\[[^\]]*\]/g, ' ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
+function baseKey(r: { data: string; valor: number; descricao: string; tipo: string }): string
+{
+  return `${r.data.slice(0, 10)}|${Math.round(Math.abs(r.valor) * 100)}|${normText(r.descricao)}|${r.tipo}`
+}
+
+/** Hash curto e estável (FNV-1a 32 bits, em base 36). */
+function fnv1a(text: string): string
+{
+  let h = 0x811c9dc5
+  for (let i = 0; i < text.length; i += 1)
+  {
+    h ^= text.charCodeAt(i)
+    h = Math.imul(h, 0x01000193) >>> 0
+  }
+  return h.toString(36)
+}
+
+export function importRowHash(row: { data: string; valor: number; descricao: string; tipo: string }, occurrence: number): string
+{
+  const key = `${baseKey(row)}#${occurrence}`
+  return `imp1-${fnv1a(key)}-${key.length.toString(36)}`
+}
+
+export type ImportPlan = {
+  toInsert: { row: ImportedTransactionRow; hash: string }[]
+  duplicates: ImportedTransactionRow[]
+}
+
+/**
+ * Separa o que é novo do que já existe. `existing` são os lançamentos já no app
+ * (comparados pela mesma chave, contando repetições legítimas).
+ */
+export function planImport(
+  rows: ImportedTransactionRow[],
+  existing: { data: string; valor: number; titulo: string; tipo: string }[],
+): ImportPlan
+{
+  const have = new Map<string, number>()
+  for (const t of existing)
+  {
+    const k = baseKey({ data: t.data, valor: t.valor, descricao: t.titulo, tipo: t.tipo })
+    have.set(k, (have.get(k) ?? 0) + 1)
+  }
+  const seen = new Map<string, number>()
+  const plan: ImportPlan = { toInsert: [], duplicates: [] }
+  for (const row of rows)
+  {
+    const k = baseKey(row)
+    const n = (seen.get(k) ?? 0) + 1
+    seen.set(k, n)
+    // a n-ésima ocorrência desta linha já existe no app? então é repetição do mesmo extrato
+    if (n <= (have.get(k) ?? 0)) plan.duplicates.push(row)
+    else plan.toInsert.push({ row, hash: importRowHash(row, n) })
+  }
+  return plan
+}
+
+const CATEGORY_WORDS: [string, RegExp][] = [
+  ['alimentacao', /\b(aliment|mercado|supermerc|restaurante|ifood|lanche|padaria|comida|delivery)/],
+  ['transporte', /\b(transp|uber|99|combust|gasolina|onibus|metro|estacion|pedagio|carro)/],
+  ['habitacao', /\b(moradia|aluguel|condominio|luz|energia|agua|gas|internet|casa|habita)/],
+  ['saude', /\b(saude|farmacia|medic|consulta|exame|dentista|plano)/],
+  ['educacao', /\b(educa|curso|escola|faculdade|livro|mensalidade)/],
+  ['lazer', /\b(lazer|cinema|viagem|show|streaming|netflix|spotify|bar)/],
+  ['compras', /\b(compra|loja|roupa|shopping|amazon|shopee|mercado livre)/],
+]
+
+/**
+ * Texto de categoria vindo do CSV → categoria do app.
+ * Aceita o id ('alimentacao'), o nome ('Alimentação'), categorias personalizadas
+ * pelo nome, e palavras comuns do extrato do banco. Sem pista, 'outros'.
+ */
+export function mapImportedCategory(
+  raw: string | null | undefined,
+  known: { id: string; label: string }[] = [],
+): string
+{
+  const t = normText(raw || '')
+  if (!t) return 'outros'
+  for (const k of known)
+  {
+    if (normText(k.id) === t || normText(k.label) === t) return k.id
+  }
+  for (const [id, re] of CATEGORY_WORDS)
+  {
+    if (re.test(t)) return id
+  }
+  return 'outros'
+}

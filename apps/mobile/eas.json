@@ -4,16 +4,28 @@
     "appVersionSource": "local"
   },
   "build": {
+    "base": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://simply-life.vercel.app",
+        "EXPO_PUBLIC_APP_URL": "https://simply-life.vercel.app",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8"
+      }
+    },
     "preview": {
+      "extends": "base",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
+      "extends": "base",
       "android": {
         "buildType": "app-bundle"
-      }
+      },
+      "channel": "production"
     }
   }
 }

@@ -1,9 +1,10 @@
 import { supabase } from '../supabase'
-import type {
-  FinanceCategory,
-  FinanceEscopo,
-  FinancePaymentMethod,
-  FinanceTx,
+import {
+  FINANCE_CATEGORY_LABELS,
+  type FinanceCategory,
+  type FinanceEscopo,
+  type FinancePaymentMethod,
+  type FinanceTx,
 } from '@simply-life/shared'
 
 const CATEGORIES = new Set<FinanceCategory>([
@@ -64,6 +65,8 @@ function mapTx(row: Record<string, unknown>): FinanceTx
     folderId: row.pasta_id ? String(row.pasta_id) : undefined,
     escopo,
     pagoContaCasal,
+    fixaId: row.fixa_id ? String(row.fixa_id) : undefined,
+    grupoParcela: row.grupo_parcela ? String(row.grupo_parcela) : undefined,
   }
 }
 
@@ -104,6 +107,12 @@ export async function addDespesa(input: {
   escopo?: FinanceEscopo
   pagoContaCasal?: boolean
   partnerWorkspaceId?: string | null
+  /** importação: impressão digital da linha, para não duplicar (migração 060) */
+  importHash?: string
+  /** gasto lançado a partir de uma conta fixa (migração 061) */
+  fixaId?: number
+  /** parcelas da mesma compra (migração 061) */
+  grupoParcela?: string
 }): Promise<FinanceTx>
 {
   const { data: auth } = await supabase.auth.getUser()
@@ -121,6 +130,13 @@ export async function addDespesa(input: {
     data_gasto: dataGasto,
     tipo,
   }
+
+  // orçamento soma por categoria_id: sem isso o gasto não aparecia no limite da categoria
+  const categoriaId = await resolveCategoriaId(String(payload.categoria), tipo).catch(() => null)
+  if (categoriaId) payload.categoria_id = categoriaId
+  if (input.importHash) payload.import_hash = input.importHash
+  if (input.fixaId) payload.fixa_id = input.fixaId
+  if (input.grupoParcela) payload.grupo_parcela = input.grupoParcela
 
   if (input.cardId) payload.card_id = input.cardId
   if (input.folderId) payload.pasta_id = input.folderId
@@ -146,6 +162,21 @@ export async function addDespesa(input: {
     data = retry.data
     error = retry.error
   }
+  // migração 060 pendente: tenta de novo sem as colunas novas
+  if (error && /import_hash|categoria_id|fixa_id|grupo_parcela/i.test(error.message))
+  {
+    delete payload.import_hash
+    delete payload.categoria_id
+    delete payload.fixa_id
+    delete payload.grupo_parcela
+    const retry = await supabase.from('despesas').insert(payload).select().single()
+    data = retry.data
+    error = retry.error
+  }
+  if (error && (error as { code?: string }).code === '23505' && input.importHash)
+  {
+    throw new DuplicateImportError()
+  }
 
   if (error) throw new Error(error.message)
   const mapped = mapTx(data as Record<string, unknown>)
@@ -154,4 +185,104 @@ export async function addDespesa(input: {
     return { ...mapped, folderId: input.folderId }
   }
   return mapped
+}
+
+/** Linha de importação que já existe (mesmo import_hash). */
+export class DuplicateImportError extends Error
+{
+  constructor()
+  {
+    super('Lançamento já importado')
+    this.name = 'DuplicateImportError'
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Categoria do app ('alimentacao', 'c-pet'...) → fin_categorias.id (por slug).
+// Cria a linha na primeira vez. Cache por sessão para não consultar a cada gasto.
+// ---------------------------------------------------------------------------
+
+const categoriaCache = new Map<string, number>()
+
+function labelForSlug(slug: string): string
+{
+  const builtin = FINANCE_CATEGORY_LABELS[slug as FinanceCategory]
+  if (builtin) return builtin
+  const base = slug.replace(/^c-/, '').replace(/-/g, ' ').trim()
+  return base ? base.charAt(0).toUpperCase() + base.slice(1) : 'Outros'
+}
+
+export async function resolveCategoriaId(slug: string, tipo: 'despesa' | 'receita' = 'despesa', label?: string): Promise<number | null>
+{
+  const key = `${tipo}|${slug}`
+  const cached = categoriaCache.get(key)
+  if (cached) return cached
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) return null
+
+  const found = await supabase
+    .from('fin_categorias')
+    .select('id')
+    .eq('user_id', uid)
+    .eq('slug', slug)
+    .maybeSingle()
+  if (found.error) return null // coluna slug ausente (060 pendente)
+  if (found.data?.id)
+  {
+    categoriaCache.set(key, Number(found.data.id))
+    return Number(found.data.id)
+  }
+
+  const created = await supabase
+    .from('fin_categorias')
+    .insert({ user_id: uid, slug, nome: (label || labelForSlug(slug)).slice(0, 50), tipo })
+    .select('id')
+    .single()
+  if (created.error || !created.data) return null
+  categoriaCache.set(key, Number(created.data.id))
+  return Number(created.data.id)
+}
+
+// ---------------------------------------------------------------------------
+// Editar e apagar lançamentos (antes só dava para inserir).
+// ---------------------------------------------------------------------------
+
+export type DespesaPatch = Partial<Pick<FinanceTx, 'titulo' | 'valor' | 'categoria' | 'data' | 'tipo'>>
+
+export async function updateDespesa(id: string, patch: DespesaPatch): Promise<void>
+{
+  const payload: Record<string, unknown> = {}
+  if (patch.titulo != null) payload.descricao = patch.titulo.trim()
+  if (patch.valor != null) payload.valor = patch.valor
+  if (patch.data != null) payload.data_gasto = patch.data
+  if (patch.tipo != null) payload.tipo = patch.tipo
+  if (patch.categoria != null)
+  {
+    payload.categoria = patch.categoria
+    const catId = await resolveCategoriaId(patch.categoria, patch.tipo ?? 'despesa').catch(() => null)
+    if (catId) payload.categoria_id = catId
+  }
+  let { error } = await supabase.from('despesas').update(payload).eq('id', id)
+  if (error && /categoria_id/i.test(error.message))
+  {
+    delete payload.categoria_id
+    ;({ error } = await supabase.from('despesas').update(payload).eq('id', id))
+  }
+  if (error) throw new Error(error.message)
+}
+
+/** Apaga vários de uma vez (ex.: parcelas de uma compra). */
+export async function deleteDespesas(ids: string[]): Promise<void>
+{
+  const numeric = ids.filter((id) => /^\d+$/.test(id)).map(Number)
+  if (!numeric.length) return
+  const { error } = await supabase.from('despesas').delete().in('id', numeric)
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteDespesa(id: string): Promise<void>
+{
+  const { error } = await supabase.from('despesas').delete().eq('id', id)
+  if (error) throw new Error(error.message)
 }

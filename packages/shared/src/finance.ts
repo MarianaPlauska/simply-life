@@ -40,6 +40,10 @@ export interface FinanceTx
   escopo?: FinanceEscopo
   /** Gasto pessoal que saiu da conta compartilhada do casal */
   pagoContaCasal?: boolean
+  /** gasto lançado a partir de uma conta fixa (migração 061) */
+  fixaId?: string
+  /** parcelas da mesma compra compartilham este id (migração 061) */
+  grupoParcela?: string
 }
 
 export interface CategorySpend

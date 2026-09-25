@@ -61,7 +61,7 @@ export function Screen({
       />
     ) : undefined
 
-  const frame = [styles.flex, { backgroundColor: colors.canvas }] as const
+  const frame = [styles.flex, { backgroundColor: colors.canvas }]
 
   if (scroll)
   {

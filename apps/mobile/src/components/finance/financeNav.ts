@@ -2,7 +2,7 @@ export type FinanceMainTab = 'inicio' | 'movimentos' | 'contas' | 'analise'
 
 export type MovimentosSubTab = 'diario' | 'lista' | 'planilha' | 'pastas'
 
-export type ContasSubTab = 'conta' | 'cartoes' | 'faturas' | 'contas-fixas'
+export type ContasSubTab = 'conta' | 'salario' | 'cartoes' | 'faturas' | 'contas-fixas'
 
 export type AnaliseSubTab = 'visao-geral' | 'orcamentos' | 'metas' | 'coach'
 
@@ -22,6 +22,7 @@ export const MOVIMENTOS_SUB_TABS = [
 
 export const CONTAS_SUB_TABS = [
   { id: 'conta' as const, label: 'Conta' },
+  { id: 'salario' as const, label: 'Salário' },
   { id: 'cartoes' as const, label: 'Cartões' },
   { id: 'faturas' as const, label: 'A pagar' },
   { id: 'contas-fixas' as const, label: 'Fixas' },

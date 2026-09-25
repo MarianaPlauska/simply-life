@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 import {
   buildFinanceCoachTips,
-  cashflowForecast,
+  projectionMessage,
   computeSaldoDisponivel,
   formatBRL,
   monthExpenseTotal,
@@ -11,6 +11,7 @@ import {
 import { Card, Text, SectionHeader, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
+import { useMonthProjection } from './FinanceForecastCards'
 
 export function FinanceCoachCards()
 {
@@ -23,7 +24,8 @@ export function FinanceCoachCards()
   const income = monthIncomeTotal(txs)
   const spent = monthExpenseTotal(txs)
   const rule = rule503020(txs)
-  const forecast = cashflowForecast(pos.disponivel, txs, 14)
+  // mesma conta da Carteira: fixas a vencer, faturas, salário previsto e gasto do dia a dia
+  const projection = useMonthProjection()
   const tips = buildFinanceCoachTips({
     disponivel: pos.disponivel,
     spent,
@@ -31,10 +33,10 @@ export function FinanceCoachCards()
     openBills: bills.filter((b) => b.status === 'aberta').length,
   })
   const toneColor =
-    forecast.risk === 'danger'
-      ? colors.danger
-      : forecast.risk === 'attention'
-        ? colors.axel
+    projection.tom === 'apertado'
+      ? colors.attention
+      : projection.tom === 'atencao'
+        ? colors.finance
         : colors.health
 
   return (
@@ -59,15 +61,18 @@ export function FinanceCoachCards()
 
       <Card tone="elevated" style={{ gap: space.sm }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text variant="section">Forecast 14 dias</Text>
+          <Text variant="section">Fim do mês</Text>
           <StatusPill
-            label={forecast.risk === 'ok' ? 'Ok' : forecast.risk === 'attention' ? 'Atenção' : 'Risco'}
+            label={projection.tom === 'tranquilo' ? 'Tranquilo' : projection.tom === 'atencao' ? 'Pede atenção' : 'Apertado'}
             color={toneColor}
           />
         </View>
-        <Text variant="hero">{formatBRL(forecast.projected)}</Text>
+        <Text variant="hero">
+          {projection.sobra >= 0 ? formatBRL(projection.sobra) : `−${formatBRL(Math.abs(projection.sobra))}`}
+        </Text>
+        <Text variant="caption" muted>{projectionMessage(projection, formatBRL)}</Text>
         <Text variant="caption" muted>
-          Queima diária média {formatBRL(forecast.dailyBurn)}
+          Gasto médio do dia a dia {formatBRL(projection.mediaDiaria)} · faltam {projection.diasRestantes} dias
         </Text>
       </Card>
 

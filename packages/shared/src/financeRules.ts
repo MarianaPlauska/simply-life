@@ -30,6 +30,10 @@ export function rule503020(txs: FinanceTx[]): {
 }
 
 /** Forecast simples: saldo + média diária * dias restantes */
+/**
+ * ETAPA 2 (docs/FINANCAS_ETAPA_2.md §2): trocar esta média simples pela projeção do fim do mês
+ * (fixas a vencer, faturas, parcelas, salário previsto/confirmado e gasto variável mediano).
+ */
 export function cashflowForecast(
   disponivel: number,
   txs: FinanceTx[],

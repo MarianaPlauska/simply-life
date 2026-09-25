@@ -24,6 +24,7 @@ import {
 import {
   applyTaskMeta,
   planTaskDrafts,
+  monthPaidKey,
   todayIso,
   isoMonthsFrom,
   moodLabel,
@@ -48,6 +49,7 @@ import {
   type TaskPromptState,
 } from './TaskPromptComposer'
 import { useOrchestratorPrefsStore } from '../store/orchestratorPrefsStore'
+import { useDuePaidStore } from '../store/duePaidStore'
 import { CaptureExpenseFields } from './CaptureExpenseFields'
 import { CaptureNoteFields } from './CaptureNoteFields'
 import { CaptureStudioChrome } from './CaptureStudioChrome'
@@ -338,6 +340,8 @@ export function CaptureSheet()
           }
           const n = Math.max(1, Math.round(parcelas))
           const valores = splitCents(parsed.valor, n)
+          // mesmo id em todas as parcelas: dá para editar/apagar a compra inteira depois
+          const grupoParcela = n > 1 ? `gp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}` : undefined
           const baseDate = data
           for (let i = 0; i < n; i += 1)
           {
@@ -347,6 +351,7 @@ export function CaptureSheet()
               categoria,
               somarFatura: i === 0,
               folderId: folderId ?? undefined,
+              grupoParcela,
             })
             if (!res.ok)
             {
@@ -391,6 +396,12 @@ export function CaptureSheet()
             setError(fixaRes.error || 'Gasto salvo, mas a fixa falhou')
             setSaving(false)
             return
+          }
+          // o gasto deste mês acabou de ser lançado: a fixa já conta como paga neste mês
+          // (senão a projeção do fim do mês descontaria duas vezes)
+          if (fixaRes.id != null)
+          {
+            useDuePaidStore.getState().setPaid(monthPaidKey('fixa', fixaRes.id, data), true, { titulo: parsed.titulo, valor: parsed.valor })
           }
         }
       }

@@ -29,4 +29,7 @@ const native = `export const ctx = require.context(
 
 fs.writeFileSync(path.join(routerDir, '_ctx.web.js'), web)
 fs.writeFileSync(path.join(routerDir, '_ctx.js'), native)
+// Metro prefere _ctx.android.js / _ctx.ios.js ao _ctx.js no build nativo (APK)
+fs.writeFileSync(path.join(routerDir, '_ctx.android.js'), native)
+fs.writeFileSync(path.join(routerDir, '_ctx.ios.js'), native)
 console.log('[patch-expo-router-ctx] ok → ../../app (mode sync)')

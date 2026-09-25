@@ -40,6 +40,7 @@ import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
+import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeRpgStrip } from '../../src/components/dashboard/HomeRpgStrip'
 import { PersonalSummaryGrid } from '../../src/components/dashboard/PersonalSummaryGrid'
 import { LifeSummaryReport } from '../../src/components/metrics/LifeSummaryReport'
@@ -257,6 +258,7 @@ export default function DashboardScreen()
                 <HomeDayTimeline tasks={today} fill />
                 {waterOnHome ? <HomeWaterProgressCard compact /> : null}
                 {showAxel ? <AxelDayBrief /> : null}
+                <SalaryConfirmCard />
                 <DayPlanHomeCard />
                 <VisualDayCard />
                 <MoodWeekReportGate humor={humor} />
@@ -287,6 +289,8 @@ export default function DashboardScreen()
                 ) : null
               }
             />
+
+            <SalaryConfirmCard />
 
             <DayPlanHomeCard />
 

@@ -35,6 +35,7 @@ import { buildOrchestratorContext, type FullOrchestratorContext } from '../lib/o
 import { useCalendarStore } from '../store/calendarStore'
 import { useNeuroStore } from '../store/neuroStore'
 import { useTimeLearning } from '../lib/timeLearning'
+import { nextSalaryPayday, useSalaryStore } from '../store/salaryStore'
 
 export type TaskPromptState = {
   prompt: string
@@ -97,6 +98,7 @@ export function useOrchestratorContext(): FullOrchestratorContext
   const calendarEvents = useCalendarStore((s) => s.events)
   const estimateFactor = useNeuroStore((s) => s.estimateFactor)
   const learning = useTimeLearning()
+  const salary = useSalaryStore((s) => s.salary)
 
   return useMemo(
     () => buildOrchestratorContext({
@@ -112,8 +114,9 @@ export function useOrchestratorContext(): FullOrchestratorContext
       busyByDay: busyMinutesByDay(calendarEvents),
       estimateFactor,
       learning,
+      proximaReceitaIso: nextSalaryPayday(salary),
     }),
-    [tasks, humor, finance, fixas, cards, cash, lists, style, capacityMinutes, calendarEvents, estimateFactor, learning],
+    [tasks, humor, finance, fixas, cards, cash, lists, style, capacityMinutes, calendarEvents, estimateFactor, learning, salary],
   )
 }
 

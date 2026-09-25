@@ -14,6 +14,7 @@ import {
   type TimeLearning,
 } from '@simply-life/shared'
 import { timeLearningNow } from './timeLearning'
+import { nextSalaryPayday, useSalaryStore } from '../store/salaryStore'
 import { useDataStore } from '../store/dataStore'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
 import { useOrchestratorPrefsStore } from '../store/orchestratorPrefsStore'
@@ -35,6 +36,8 @@ export type OrchestratorInputs = {
   /** folga nas estimativas (perfil TDAH) */
   estimateFactor?: number
   learning?: TimeLearning | null
+  /** dia do próximo salário (cadastro em Contas → Salário); sem isso, palpite pelo histórico */
+  proximaReceitaIso?: string | null
 }
 
 export type FullOrchestratorContext = OrchestratorContext & { promptCtx: TaskPromptContext }
@@ -58,7 +61,7 @@ export function buildOrchestratorContext(input: OrchestratorInputs): FullOrchest
       saldoDisponivel: saldo,
       fixas: input.fixas ?? [],
       cards: (input.cards ?? []).map((c) => ({ id: c.id, nome: c.nome, diaVencimento: c.diaVencimento })),
-      proximaReceitaIso: estimateNextIncomeIso(input.finance ?? []),
+      proximaReceitaIso: input.proximaReceitaIso ?? estimateNextIncomeIso(input.finance ?? []),
     },
     promptCtx: {
       lists: input.lists,
@@ -87,5 +90,6 @@ export function orchestratorContextNow(): FullOrchestratorContext
     busyByDay: useCalendarStore.getState().busyByDay(),
     estimateFactor: useNeuroStore.getState().estimateFactor,
     learning: timeLearningNow(),
+    proximaReceitaIso: nextSalaryPayday(useSalaryStore.getState().salary),
   })
 }
