@@ -56,21 +56,37 @@ Imagine uma manhã corrida. Você abre o app e em menos de um minuto faz isto:
       Um toque na carinha e pronto. Se quiser, escreve uma linha sobre o momento.
     </td>
     <td align="center" width="50%">
-      <img src="docs/images/app/fluxo/passo-2.png" alt="Captura rápida com três linhas escritas" width="220" /><br />
+      <img src="docs/images/app/fluxo/passo-2.png" alt="Captura rápida com quatro linhas escritas" width="220" /><br />
       <strong>2. Tira da cabeça</strong><br />
       Toca no botão <strong>+</strong> e escreve tudo que está martelando, uma coisa por linha. Não precisa escolher categoria nem data.
     </td>
   </tr>
   <tr>
     <td align="center" width="50%">
-      <img src="docs/images/app/fluxo/passo-3.png" alt="Tela inicial mostrando a tarefa sugerida pelo Axel" width="220" /><br />
-      <strong>3. O Axel organiza o dia</strong><br />
-      As linhas viram tarefas e o Axel encaixa cada uma num horário livre do dia, entre os compromissos que você já tinha. Quando chega a hora, ele mostra o que fazer e oferece um timer para começar.
+      <img src="docs/images/app/fluxo/passo-3.png" alt="Tela Entendi assim com tarefas, gasto e conta a pagar" width="220" /><br />
+      <strong>3. Confere o que o app entendeu</strong><br />
+      O app separa sozinho o que é tarefa, lembrete, gasto, dinheiro que entrou e conta a pagar. Se algo ficou errado, é só tocar e trocar antes de salvar.
     </td>
     <td align="center" width="50%">
-      <img src="docs/images/app/fluxo/passo-4.png" alt="Extrato da carteira com o café de 12,50" width="220" /><br />
-      <strong>4. O gasto vai para a carteira</strong><br />
-      A linha "café 12,50" virou um gasto sozinha. O saldo do mês já foi atualizado.
+      <img src="docs/images/app/fluxo/passo-4.png" alt="Tela inicial mostrando a tarefa sugerida pelo Axel" width="220" /><br />
+      <strong>4. O Axel organiza o dia</strong><br />
+      As tarefas entram nos horários livres, entre os compromissos que você já tinha. Na hora certa, o Axel mostra o que fazer e oferece um timer para começar.
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/app/fluxo/passo-5.png" alt="Extrato da carteira com o café de 12,50" width="220" /><br />
+      <strong>5. O dinheiro vai para a carteira</strong><br />
+      O "café 12,50" virou um gasto e o "pagar a vitória 8,11" virou uma conta a pagar. O saldo do mês já foi atualizado.
+    </td>
+    <td align="left" width="50%">
+      <strong>Alguns jeitos de escrever que o app entende</strong><br /><br />
+      <code>dentista amanhã 9h</code> vira tarefa com dia e hora<br />
+      <code>ligar pro João às 15h</code> vira tarefa, e não gasto de 15<br />
+      <code>me lembra do remédio às 22h</code> vira lembrete com aviso<br />
+      <code>uber 23</code> ou <code>gastei 50 no mercado</code> vira gasto<br />
+      <code>recebi 500 do freela</code> vira dinheiro que entrou<br />
+      <code>colar 44,50 vence dia 11</code> vira conta a pagar
     </td>
   </tr>
 </table>
