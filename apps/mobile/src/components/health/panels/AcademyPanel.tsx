@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { useRouter } from 'expo-router'
+import { useRouter, type Href } from 'expo-router'
 import {
   academyDayLabel,
   academySessionProgress,
@@ -63,6 +63,13 @@ export function AcademyPanel()
           sessionDone ? 'Treino do dia feito' : restDay ? 'Descanso' : 'Pronto para começar'
         }
         pillColor={sessionDone ? colors.health : restDay ? colors.inkMuted : colors.axel}
+      />
+      <PrimaryButton
+        label="Registrar séries e cargas"
+        variant="secondary"
+        icon="barbell"
+        onPress={() => router.push('/treino' as Href)}
+        style={pillBtn}
       />
       {!restDay ? (
         <Text variant="caption" muted>
