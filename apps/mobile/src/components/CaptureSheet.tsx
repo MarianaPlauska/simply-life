@@ -28,6 +28,8 @@ import {
   todayIso,
   isoMonthsFrom,
   moodLabel,
+  DUMP_LOW_CONFIDENCE,
+  type DumpItem,
   type FinanceCategory,
   type FinanceEscopo,
 } from '@simply-life/shared'
@@ -55,6 +57,8 @@ import { CaptureNoteFields } from './CaptureNoteFields'
 import { CaptureStudioChrome } from './CaptureStudioChrome'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
 import { useNotesStore } from '../store/notesStore'
+import { DumpReview, dumpItemsMissingValue, dumpSummary } from './DumpReview'
+import { readDumpLocally, refineDumpWithAi } from '../lib/dumpCaptureApi'
 
 const TABS: { id: CaptureKind; label: string }[] = [
   { id: 'dump', label: 'Dump' },
@@ -64,7 +68,7 @@ const TABS: { id: CaptureKind; label: string }[] = [
 ]
 
 const PLACEHOLDERS: Record<CaptureKind, string> = {
-  dump: 'Uma linha por item: tarefas ou “café 12,50”',
+  dump: 'Uma coisa por linha. Ex.: dentista amanhã 9h, café 12,50, lembrar mãe de pagar conta',
   task: 'O que precisa ser feito?',
   expense: 'Ex: café 12,50',
   note: 'Escreva o que ficou do dia',
@@ -115,7 +119,7 @@ function studioCopy(
       subtitle: 'Humor e uma entrada rápida. Texto opcional.',
     }
   }
-  return { title: 'Captura', subtitle: 'Uma linha por item.' }
+  return { title: 'Captura', subtitle: 'Escreva solto, uma coisa por linha. Antes de salvar, você confere o que o app entendeu.' }
 }
 
 function expenseIso(raw: string): string
@@ -143,7 +147,7 @@ export function CaptureSheet()
   const addExpenseFromText = useDataStore((s) => s.addExpenseFromText)
   const addCardSpend = useDataStore((s) => s.addCardSpend)
   const addContaFixa = useDataStore((s) => s.addContaFixa)
-  const commitDump = useDataStore((s) => s.commitDump)
+  const commitDumpItems = useDataStore((s) => s.commitDumpItems)
   const contasFixas = useDataStore((s) => s.contasFixas)
   const financeCards = useDataStore((s) => s.financeCards)
   const folders = useKanbanListsStore((s) => s.lists)
@@ -173,6 +177,10 @@ export function CaptureSheet()
   const [parcelas, setParcelas] = useState(1)
   const [taskDraft, setTaskDraft] = useState<CaptureTaskDraft>(() => emptyCaptureTaskDraft(null))
   const [promptState, setPromptState] = useState<TaskPromptState>(() => emptyTaskPromptState())
+  /** null = escrevendo; lista = revisando o que o app entendeu */
+  const [dumpItems, setDumpItems] = useState<DumpItem[] | null>(null)
+  const [dumpReading, setDumpReading] = useState(false)
+  const [savedLabel, setSavedLabel] = useState<string | null>(null)
   const captureMode = useOrchestratorPrefsStore((s) => s.captureMode)
   const hydrateOrchestratorPrefs = useOrchestratorPrefsStore((s) => s.hydrate)
   const patchOrchestratorPrefs = useOrchestratorPrefsStore((s) => s.patch)
@@ -237,6 +245,9 @@ export function CaptureSheet()
     setLancamento('despesa')
     setTaskDraft(emptyCaptureTaskDraft(null))
     setPromptState(emptyTaskPromptState())
+    setDumpItems(null)
+    setDumpReading(false)
+    setSavedLabel(null)
     closeCapture()
   }
 
@@ -246,7 +257,83 @@ export function CaptureSheet()
     if (promptMode) return promptIncluded > 0
     if (kind === 'task') return Boolean(taskDraft.titulo.trim())
     if (kind === 'note') return mood != null
+    if (kind === 'dump' && dumpItems)
+    {
+      return dumpItems.length > 0 && dumpItemsMissingValue(dumpItems) === 0
+    }
+    if (kind === 'dump' && dumpReading) return false
     return Boolean(text.trim())
+  }
+
+  /** Dump, passo 1: lê as linhas (local primeiro; IA só nas duvidosas, com conta e rede). */
+  const onReviewDump = async () =>
+  {
+    const local = readDumpLocally(text, new Date())
+    if (local.length === 0) return
+    setError(null)
+    const needsAi = !isGuest && local.some((i) => i.confianca < DUMP_LOW_CONFIDENCE)
+    if (!needsAi)
+    {
+      setDumpItems(local)
+      return
+    }
+    setDumpReading(true)
+    try
+    {
+      const res = await refineDumpWithAi(local, { isGuest })
+      setDumpItems(res.items)
+    }
+    catch
+    {
+      setDumpItems(local)
+    }
+    finally
+    {
+      setDumpReading(false)
+    }
+  }
+
+  /** Dump, passo 2: salva cada item com a ação do seu tipo. */
+  const onSaveDump = async () =>
+  {
+    if (!dumpItems || dumpItems.length === 0) return
+    setSaving(true)
+    setError(null)
+    try
+    {
+      const res = await commitDumpItems(dumpItems, isGuest)
+      if (!res.ok)
+      {
+        // o que já entrou sai da lista, para não duplicar ao tentar de novo
+        if (res.count > 0) setDumpItems(dumpItems.slice(res.count))
+        setError(res.error || 'Não foi possível salvar tudo')
+        return
+      }
+      hapticLight()
+      const summary = dumpSummary(res.counts, true)
+      setSavedLabel(summary ? `Salvo: ${summary}` : 'Salvo')
+      setSaved(true)
+      setTimeout(resetAndClose, 1200)
+    }
+    catch (e)
+    {
+      setError(e instanceof Error ? e.message : 'Falha ao salvar')
+    }
+    finally
+    {
+      setSaving(false)
+    }
+  }
+
+  const onPrimary = () =>
+  {
+    if (kind === 'dump')
+    {
+      if (dumpItems) void onSaveDump()
+      else void onReviewDump()
+      return
+    }
+    void onSave()
   }
 
   const onSave = async () =>
@@ -430,13 +517,9 @@ export function CaptureSheet()
       }
       else
       {
-        const res = await commitDump(text, isGuest)
-        if (!res.ok)
-        {
-          setError(res.error || 'Não foi possível salvar o dump')
-          setSaving(false)
-          return
-        }
+        // Dump passa pela revisão (onReviewDump / onSaveDump)
+        setSaving(false)
+        return
       }
       hapticLight()
       setSaved(true)
@@ -452,9 +535,88 @@ export function CaptureSheet()
     }
   }
 
-  const saveLabel = promptMode && promptIncluded > 0
-    ? `Criar ${promptIncluded} ${promptIncluded === 1 ? 'tarefa' : 'tarefas'}`
-    : 'Salvar'
+  const saveLabel = kind === 'dump'
+    ? dumpItems
+      ? 'Salvar tudo'
+      : dumpReading
+        ? 'Lendo...'
+        : 'Revisar'
+    : promptMode && promptIncluded > 0
+      ? `Criar ${promptIncluded} ${promptIncluded === 1 ? 'tarefa' : 'tarefas'}`
+      : 'Salvar'
+
+  const dumpMissing = kind === 'dump' && dumpItems ? dumpItemsMissingValue(dumpItems) : 0
+
+  const dumpBody = dumpItems ? (
+    <DumpReview items={dumpItems} onChange={setDumpItems} />
+  ) : (
+    <View style={{ gap: space.sm }}>
+      <Field
+        label="Conteúdo"
+        placeholder={PLACEHOLDERS.dump}
+        multiline
+        value={text}
+        onChangeText={setText}
+        editable={!dumpReading}
+        style={{
+          minHeight: 120,
+          textAlignVertical: 'top',
+          paddingTop: 14,
+        }}
+      />
+      {dumpReading ? (
+        <View
+          accessibilityLiveRegion="polite"
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+        >
+          <Icon name="sparkles-outline" size={16} color={colors.inkMuted} />
+          <Text variant="caption" color={colors.inkMuted}>
+            Lendo com calma o que você escreveu...
+          </Text>
+        </View>
+      ) : (
+        <Text variant="micro" color={colors.inkMuted}>
+          Antes de salvar, você confere e ajusta cada linha.
+        </Text>
+      )}
+    </View>
+  )
+
+  const primaryAction = (
+    <PrimaryButton
+      label={saveLabel}
+      loading={saving}
+      onPress={onPrimary}
+      disabled={!canSave()}
+      accessibilityLabel={kind === 'dump' && !dumpItems ? 'Revisar o que o app entendeu' : saveLabel}
+      style={kind === 'dump' && dumpItems ? { flex: 2 } : undefined}
+    />
+  )
+
+  const actionRow = kind === 'dump' && dumpItems ? (
+    <View style={{ gap: 6 }}>
+      {dumpMissing > 0 ? (
+        <Text variant="micro" color={colors.attention}>
+          {dumpMissing === 1 ? 'Falta o valor em 1 item.' : `Falta o valor em ${dumpMissing} itens.`}
+        </Text>
+      ) : null}
+      <View style={{ flexDirection: 'row', gap: space.sm }}>
+        <PrimaryButton
+          label="Voltar"
+          variant="ghost"
+          onPress={() =>
+          {
+            setDumpItems(null)
+            setError(null)
+          }}
+          disabled={saving}
+          accessibilityLabel="Voltar para o texto"
+          style={{ flex: 1 }}
+        />
+        {primaryAction}
+      </View>
+    </View>
+  ) : primaryAction
 
   const taskBody = (
     <View style={{ gap: 14 }}>
@@ -515,14 +677,9 @@ export function CaptureSheet()
                   </Text>
                 ) : null}
                 {saved ? (
-                  <PrimaryButton label="Salvo" variant="success" disabled />
+                  <PrimaryButton label={savedLabel ?? 'Salvo'} variant="success" disabled />
                 ) : (
-                  <PrimaryButton
-                    label={saveLabel}
-                    loading={saving}
-                    onPress={() => void onSave()}
-                    disabled={!canSave()}
-                  />
+                  actionRow
                 )}
               </>
             )}
@@ -581,20 +738,7 @@ export function CaptureSheet()
                 onEditFixas={() => setFixasOpen(true)}
               />
             ) : null}
-            {kind !== 'task' && kind !== 'expense' && kind !== 'note' ? (
-              <Field
-                label="Conteúdo"
-                placeholder={PLACEHOLDERS[kind]}
-                multiline
-                value={text}
-                onChangeText={setText}
-                style={{
-                  minHeight: 120,
-                  textAlignVertical: 'top',
-                  paddingTop: 14,
-                }}
-              />
-            ) : null}
+            {kind === 'dump' ? dumpBody : null}
           </CaptureStudioChrome>
         </ThemeProvider>
       ) : (
@@ -713,20 +857,7 @@ export function CaptureSheet()
                   <CaptureNoteFields text={text} onTextChange={setText} />
                 ) : null}
 
-                {kind !== 'task' && kind !== 'expense' && kind !== 'note' ? (
-                <Field
-                  label="Conteúdo"
-                  placeholder={PLACEHOLDERS[kind]}
-                  multiline
-                  value={text}
-                  onChangeText={setText}
-                  style={{
-                    minHeight: 120,
-                    textAlignVertical: 'top',
-                    paddingTop: 14,
-                  }}
-                />
-                ) : null}
+                {kind === 'dump' ? dumpBody : null}
               </View>
             </ScrollView>
             {error ? (
@@ -745,16 +876,11 @@ export function CaptureSheet()
                 }}
               >
                 <Text variant="bodyStrong" color={colors.health}>
-                  Salvo
+                  {savedLabel ?? 'Salvo'}
                 </Text>
               </View>
             ) : (
-              <PrimaryButton
-                label={saveLabel}
-                loading={saving}
-                onPress={() => void onSave()}
-                disabled={!canSave()}
-              />
+              actionRow
             )}
           </Pressable>
         </Pressable>

@@ -70,3 +70,19 @@ export async function showStickyPlan(_title: string, _body: string): Promise<voi
 export async function clearStickyPlan(): Promise<void>
 {
 }
+
+/** Web: sem notificação local agendada; o lembrete fica como tarefa com hora. */
+export async function scheduleTaskReminder(_input: {
+  id: string
+  at: Date
+  title: string
+  body: string
+  quiet?: boolean
+}): Promise<boolean>
+{
+  return false
+}
+
+export async function cancelTaskReminder(_id: string): Promise<void>
+{
+}

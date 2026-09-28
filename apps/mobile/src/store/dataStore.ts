@@ -37,6 +37,10 @@ import {
   localTodayIso,
   stampEvoPct,
   invoicePaidKey,
+  classifyDump,
+  isQuietNotifyHour,
+  type DumpItem,
+  type DumpKind,
 } from '@simply-life/shared'
 import { fetchHumorMes, registrarHumor } from '../lib/sync/humor'
 import { createTarefa, fetchTarefas, insertSubtarefa, archiveTarefa, patchTarefa, persistTaskStatus, toggleSubtarefa, updateTarefaDue, updateTarefaStatus } from '../lib/sync/tasks'
@@ -79,6 +83,7 @@ import {
   fetchContasFixas,
   fetchFinanceCards,
   insertContaFixa,
+  insertContaAPagar,
   updateContaAPagarStatus,
   updateContaFixa,
   insertFinanceCard,
@@ -98,6 +103,25 @@ import { useWaterLogStore } from './waterLogStore'
 import { useBodyWeekStore } from './bodyWeekStore'
 import { useActivityStore } from './activityStore'
 import { useDuePaidStore } from './duePaidStore'
+import { cancelTaskReminder, scheduleTaskReminder } from '../lib/pushNotifications'
+
+export type DumpCounts = Record<DumpKind, number>
+
+export function emptyDumpCounts(): DumpCounts
+{
+  return { tarefa: 0, lembrete: 0, gasto: 0, receita: 0, conta: 0 }
+}
+
+/** Marca de lembrete na anotação da tarefa (mesmo padrão de #lista: e #verdepois). */
+export const DUMP_REMINDER_TAG = '#lembrete'
+
+function reminderDate(iso: string | null, horaMinutos: number): Date | null
+{
+  const base = iso && /^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso : localTodayIso()
+  const [y, m, d] = base.split('-').map(Number)
+  if (!y || !m || !d) return null
+  return new Date(y, m - 1, d, Math.floor(horaMinutos / 60), horaMinutos % 60, 0, 0)
+}
 
 /** id local único (várias criações no mesmo milissegundo não colidem) */
 let localSeq = 0
@@ -166,9 +190,19 @@ type DataState = {
       partnerWorkspaceId?: string | null
       /** parcelas da mesma compra */
       grupoParcela?: string
+      /** já lido (Dump): usa título e valor prontos, sem reler o texto */
+      lido?: { titulo: string; valor: number }
     },
   ) => Promise<{ ok: boolean; error?: string }>
-  commitDump: (text: string, isGuest?: boolean) => Promise<{ ok: boolean; error?: string; count?: number }>
+  /** Dump sem revisão: classifica e salva direto (compatibilidade). */
+  commitDump: (text: string, isGuest?: boolean) => Promise<{ ok: boolean; error?: string; count?: number; counts?: DumpCounts }>
+  /** Dump revisado: salva cada item com a ação do seu tipo. */
+  commitDumpItems: (items: DumpItem[], isGuest?: boolean) => Promise<{ ok: boolean; error?: string; count: number; counts: DumpCounts }>
+  /** Nova conta "a pagar" (aparece no Kanban e no Foco do dia) */
+  addContaAPagar: (
+    input: { titulo: string; valor: number; vencimento: string; categoria?: FinanceCategory | null },
+    isGuest?: boolean,
+  ) => Promise<{ ok: boolean; error?: string; id?: number }>
   toggleTaskCheck: (taskId: string, subId: string, feito: boolean, isGuest?: boolean) => Promise<void>
   toggleTaskDone: (taskId: string, isGuest?: boolean) => Promise<void>
   setTaskStatus: (taskId: string, status: TaskStatus, isGuest?: boolean) => Promise<void>
@@ -607,7 +641,9 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   addExpenseFromText: async (text, isGuest, opts) =>
   {
-    const parsed = parseExpenseQuick(text)
+    const parsed = opts?.lido && opts.lido.valor > 0
+      ? { titulo: opts.lido.titulo.trim() || (opts.tipo === 'receita' ? 'Receita' : 'Gasto'), valor: opts.lido.valor }
+      : parseExpenseQuick(text)
     if (!parsed) return { ok: false, error: 'Informe valor, ex: café 12,50' }
 
     const tipo = opts?.tipo === 'receita' ? 'receita' : 'despesa'
@@ -666,27 +702,106 @@ export const useDataStore = create<DataState>((set, get) => ({
 
   commitDump: async (text, isGuest) =>
   {
-    const lines = text
-      .split(/\n+/)
-      .map((l) => l.trim())
-      .filter(Boolean)
-    if (lines.length === 0) return { ok: false, error: 'Escreva ao menos uma linha' }
+    const items = classifyDump(text, { ref: new Date() })
+    if (items.length === 0) return { ok: false, error: 'Escreva ao menos uma linha' }
+    return get().commitDumpItems(items, isGuest)
+  },
 
+  commitDumpItems: async (items, isGuest) =>
+  {
+    const counts = emptyDumpCounts()
     let count = 0
-    for (const line of lines)
+    const done = (ok: boolean, error?: string) => ({ ok, error, count, counts })
+    if (items.length === 0) return done(false, 'Nada para salvar')
+
+    for (const item of items)
     {
-      if (parseExpenseQuick(line))
+      const titulo = item.titulo.trim() || item.linha.trim()
+      if (!titulo) continue
+
+      if (item.kind === 'tarefa' || item.kind === 'lembrete')
       {
-        const res = await get().addExpenseFromText(line, isGuest)
-        if (!res.ok) return { ok: false, error: res.error, count }
+        const lembrete = item.kind === 'lembrete'
+        await get().addTask(titulo, isGuest, lembrete ? DUMP_REMINDER_TAG : undefined, {
+          // sem data dita, a tarefa entra em hoje (como o Dump sempre fez), e o Axel encaixa no dia
+          dataVencimento: item.data ?? localTodayIso(),
+          horaMinutos: item.horaMinutos,
+          checklist: item.checklist,
+        })
+        if (lembrete && item.horaMinutos != null)
+        {
+          const at = reminderDate(item.data, item.horaMinutos)
+          const created = get().tasks[0]
+          if (at && created)
+          {
+            try
+            {
+              await scheduleTaskReminder({
+                id: created.id,
+                at,
+                title: 'Lembrete',
+                body: titulo,
+                quiet: isQuietNotifyHour(at.getHours()),
+              })
+            }
+            catch
+            {
+              /* sem permissão ou sem módulo: a tarefa com hora continua salva */
+            }
+          }
+        }
+      }
+      else if (item.kind === 'conta')
+      {
+        const res = await get().addContaAPagar({
+          titulo,
+          valor: item.valor ?? 0,
+          vencimento: item.data ?? localTodayIso(),
+          categoria: item.categoria,
+        }, isGuest)
+        if (!res.ok) return done(false, res.error)
       }
       else
       {
-        await get().addTask(line, isGuest)
+        const receita = item.kind === 'receita'
+        const res = await get().addExpenseFromText(item.linha, isGuest, {
+          lido: { titulo, valor: item.valor ?? 0 },
+          tipo: receita ? 'receita' : 'despesa',
+          categoria: item.categoria ?? 'outros',
+          data: item.data ?? localTodayIso(),
+          formaPagamento: receita ? 'pix' : 'debito',
+        })
+        if (!res.ok) return done(false, res.error)
       }
+      counts[item.kind] += 1
       count += 1
     }
-    return { ok: true, count }
+    return done(true)
+  },
+
+  addContaAPagar: async (input, isGuest) =>
+  {
+    const titulo = input.titulo.trim()
+    if (!titulo || !(input.valor > 0)) return { ok: false, error: 'Informe nome e valor da conta' }
+    const vencimento = /^\d{4}-\d{2}-\d{2}$/.test(input.vencimento) ? input.vencimento : localTodayIso()
+    if (useLocal(isGuest))
+    {
+      const bill: ContaAPagar = { id: Date.now() + Math.floor(Math.random() * 1000), titulo, valor: input.valor, vencimento, status: 'aberta' }
+      set({ contasAPagar: [...get().contasAPagar, bill] })
+      useActivityStore.getState().markAction('finance')
+      return { ok: true, id: bill.id }
+    }
+    try
+    {
+      const saved = await insertContaAPagar({ titulo, valor: input.valor, vencimento, categoria: input.categoria ?? null })
+      set({ contasAPagar: [...get().contasAPagar, saved] })
+      useActivityStore.getState().markAction('finance')
+      return { ok: true, id: saved.id }
+    }
+    catch (e)
+    {
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar a conta' }
+    }
   },
 
   toggleTaskCheck: async (taskId, subId, feito, isGuest) =>
@@ -733,6 +848,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     if (done)
     {
+      void cancelTaskReminder(taskId).catch(() => undefined)
       useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
       useGamificationStore.getState().unlockIf('first_task')
       useActivityStore.getState().markAction('task')
@@ -752,6 +868,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     const current = get().tasks.find((t) => t.id === taskId)
     if (!current || current.status === status) return
     hapticLight()
+    if (status === 'done') void cancelTaskReminder(taskId).catch(() => undefined)
     set({
       tasks: get().tasks.map((t) =>
         t.id === taskId
@@ -1507,6 +1624,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     // Feitas fica no histórico — só tira da lista o que ainda está aberto
     if (current.status === 'done') return
     set({ tasks: get().tasks.filter((t) => t.id !== taskId) })
+    void cancelTaskReminder(taskId).catch(() => undefined)
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
     try
     {

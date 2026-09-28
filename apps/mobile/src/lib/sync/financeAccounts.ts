@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { resolveCategoriaId } from './finance'
 import type { CashAccount, ContaAPagar, ContaFixa, FinanceCard, FinanceCardGradient, FinanceGoal } from '@simply-life/shared'
 
 export async function fetchCashAccount(): Promise<CashAccount>
@@ -160,6 +161,48 @@ export async function fetchContasAPagar(): Promise<ContaAPagar[]>
       status: statusRaw === 'quitada' || statusRaw === 'paga' ? 'paga' : 'aberta',
     }
   })
+}
+
+/** Nova conta "a pagar" (mesma tabela que o Kanban e o Foco do dia leem). */
+export async function insertContaAPagar(input: {
+  titulo: string
+  valor: number
+  vencimento: string
+  categoria?: string | null
+}): Promise<ContaAPagar>
+{
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) throw new Error('Sessão expirada')
+
+  const titulo = input.titulo.trim().slice(0, 120) || 'Conta'
+  // a tabela guarda o id da categoria; sem categoria conhecida a conta entra sem ela
+  const categoriaId = input.categoria
+    ? await resolveCategoriaId(input.categoria, 'despesa').catch(() => null)
+    : null
+  const { data, error } = await supabase
+    .from('fin_faturas_reservas')
+    .insert({
+      user_id: uid,
+      titulo,
+      valor_alocado: input.valor,
+      valor_gasto: 0,
+      data_vencimento: input.vencimento.slice(0, 10),
+      status: 'aberta',
+      ...(categoriaId ? { categoria_id: categoriaId } : {}),
+    })
+    .select('id, titulo, valor_alocado, data_vencimento, status')
+    .single()
+
+  if (error) throw new Error(error.message)
+  const r = data as Record<string, unknown>
+  return {
+    id: Number(r.id),
+    titulo: String(r.titulo || titulo),
+    valor: Number(r.valor_alocado) || input.valor,
+    vencimento: String(r.data_vencimento || input.vencimento).slice(0, 10),
+    status: 'aberta',
+  }
 }
 
 export async function updateContaAPagarStatus(id: number, paga: boolean): Promise<void>

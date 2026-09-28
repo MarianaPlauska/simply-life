@@ -17,6 +17,7 @@ import weeklyDigestTest from '../_lib/handlers/axel/weekly-digest-test.js';
 import accountDelete from '../_lib/handlers/axel/account-delete.js';
 import moodWeekReport from '../_lib/handlers/axel/mood-week-report.js';
 import parseTaskPrompt from '../_lib/handlers/axel/parse-task-prompt.js';
+import classifyDump from '../_lib/handlers/axel/classify-dump.js';
 
 const ROUTES = {
   'morning-brief': morningBrief,
@@ -36,6 +37,7 @@ const ROUTES = {
   'account-delete': accountDelete,
   'mood-week-report': moodWeekReport,
   'parse-task-prompt': parseTaskPrompt,
+  'classify-dump': classifyDump,
 };
 
 function pickQuery(value)

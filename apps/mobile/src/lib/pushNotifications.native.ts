@@ -231,3 +231,40 @@ export async function clearStickyPlan(): Promise<void>
 {
   await Notifications.dismissNotificationAsync(STICKY_ID).catch(() => undefined)
 }
+
+const TASK_REMINDER_PREFIX = 'axel-lembrete-'
+
+/**
+ * Lembrete pedido pela pessoa (Dump, "lembrar mãe às 18h"): uma vez, na hora dita.
+ * A hora foi escolhida por ela, então não é adiada; no silêncio (22h às 8h) chega sem som.
+ */
+export async function scheduleTaskReminder(input: {
+  id: string
+  at: Date
+  title: string
+  body: string
+  quiet?: boolean
+}): Promise<boolean>
+{
+  if (input.at.getTime() <= Date.now() + 30000) return false
+  const granted = await requestNativePushPermission()
+  if (!granted) return false
+  const identifier = `${TASK_REMINDER_PREFIX}${input.id}`
+  await Notifications.cancelScheduledNotificationAsync(identifier).catch(() => undefined)
+  await Notifications.scheduleNotificationAsync({
+    identifier,
+    content: {
+      title: input.title,
+      body: input.body,
+      sound: input.quiet ? false : 'default',
+      data: { url: `/task/${input.id}` },
+    },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: input.at },
+  })
+  return true
+}
+
+export async function cancelTaskReminder(id: string): Promise<void>
+{
+  await Notifications.cancelScheduledNotificationAsync(`${TASK_REMINDER_PREFIX}${id}`).catch(() => undefined)
+}
