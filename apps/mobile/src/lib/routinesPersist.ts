@@ -1,5 +1,4 @@
-import { Platform } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
+import { readPersisted, writePersisted } from './persistStorage'
 import {
   defaultRoutines,
   normalizeLegacyRoutines,
@@ -10,44 +9,15 @@ import {
 const ITEMS_KEY = 'simply-life-routines-v1'
 const LOGS_KEY = 'simply-life-routine-logs-v1'
 
-function storageGet(key: string): string | null
+/** Arquivo no nativo (logs crescem além do limite do SecureStore); migra o que estava no SecureStore. */
+function storageRead(key: string): Promise<string | null>
 {
-  try
-  {
-    if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-    {
-      return localStorage.getItem(key)
-    }
-  }
-  catch
-  {
-    return null
-  }
-  return null
+  return readPersisted(key, true)
 }
 
-async function storageRead(key: string): Promise<string | null>
+function storageWrite(key: string, value: string): Promise<void>
 {
-  const web = storageGet(key)
-  if (web != null) return web
-  try
-  {
-    return await SecureStore.getItemAsync(key)
-  }
-  catch
-  {
-    return null
-  }
-}
-
-async function storageWrite(key: string, value: string): Promise<void>
-{
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-  {
-    localStorage.setItem(key, value)
-    return
-  }
-  await SecureStore.setItemAsync(key, value)
+  return writePersisted(key, value)
 }
 
 function parseItems(raw: string | null): RoutineHabit[] | null

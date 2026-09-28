@@ -1,6 +1,12 @@
-import { Platform } from 'react-native'
 import { create } from 'zustand'
 import { localTodayIso, localIsoDaysAgo } from '@simply-life/shared'
+import {
+  isPersistReady,
+  persistStorage,
+  runHydrated,
+  whenPersistReady,
+  type SyncStorage,
+} from '../lib/persistStorage'
 
 const KEY = 'simply-life-body-week-v1'
 
@@ -13,20 +19,11 @@ type BodyWeekState = {
   seedDemoIfEmpty: () => void
 }
 
-function storage()
+let loaded = false
+
+function storage(): SyncStorage
 {
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-  {
-    return localStorage
-  }
-  const mem = new Map<string, string>()
-  return {
-    getItem: (k: string) => mem.get(k) ?? null,
-    setItem: (k: string, v: string) =>
-    {
-      mem.set(k, v)
-    },
-  }
+  return persistStorage
 }
 
 function persist(state: Pick<BodyWeekState, 'sleepHours' | 'workout'>): void
@@ -46,6 +43,12 @@ export const useBodyWeekStore = create<BodyWeekState>((set, get) => ({
 
   hydrate: () =>
   {
+    if (!isPersistReady())
+    {
+      void whenPersistReady().then(() => get().hydrate())
+      return
+    }
+    loaded = true
     try
     {
       const raw = storage().getItem(KEY)
@@ -64,6 +67,7 @@ export const useBodyWeekStore = create<BodyWeekState>((set, get) => ({
 
   recordSleep: (hours) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().recordSleep(hours))) return
     const next = {
       sleepHours: { ...get().sleepHours, [localTodayIso()]: Math.max(0, Math.min(16, hours)) },
       workout: get().workout,
@@ -74,6 +78,7 @@ export const useBodyWeekStore = create<BodyWeekState>((set, get) => ({
 
   recordWorkout: (done) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().recordWorkout(done))) return
     const next = {
       sleepHours: get().sleepHours,
       workout: { ...get().workout, [localTodayIso()]: done ? 1 : 0 },
@@ -84,6 +89,7 @@ export const useBodyWeekStore = create<BodyWeekState>((set, get) => ({
 
   seedDemoIfEmpty: () =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().seedDemoIfEmpty())) return
     if (Object.keys(get().sleepHours).length > 0) return
     const sleepHours: Record<string, number> = {}
     const workout: Record<string, number> = {}

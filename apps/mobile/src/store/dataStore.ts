@@ -71,6 +71,7 @@ import {
   mergeHabitosAfterFetch,
 } from '../lib/sync/habitDayBoundary'
 import { fetchHabitHistoricoRows, upsertHabitHistoricoCups } from '../lib/sync/habitHistorico'
+import { saveHabitDay } from '../lib/habitDailyTotals'
 import {
   deleteMedicamento,
   fetchMedicamentos,
@@ -915,6 +916,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       waterWeekDays: { ...get().waterWeekDays, [today]: updated.progressoAtual },
     })
     useWaterLogStore.getState().recordSip(updated.progressoAtual)
+    void saveHabitDay('agua', updated.progressoAtual, { habitoId: updated.id, remote: !useLocal(isGuest), iso: today })
     useActivityStore.getState().markAction('water')
 
     if (useLocal(isGuest) || isLocalHabitId(updated.id))
@@ -924,7 +926,6 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
 
     await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
-    await upsertHabitHistoricoCups(updated.id, updated.progressoAtual, today)
     await writeOffline(get())
   },
 
@@ -940,6 +941,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       waterWeekDays: { ...get().waterWeekDays, [today]: updated.progressoAtual },
     })
     useWaterLogStore.getState().recordSip(updated.progressoAtual)
+    void saveHabitDay('agua', updated.progressoAtual, { habitoId: updated.id, remote: !useLocal(isGuest), iso: today })
 
     if (useLocal(isGuest) || isLocalHabitId(updated.id))
     {
@@ -948,7 +950,6 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
 
     await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
-    await upsertHabitHistoricoCups(updated.id, updated.progressoAtual, today)
     await writeOffline(get())
   },
 
@@ -1012,6 +1013,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         h.id === prot.id ? { ...h, progressoAtual: next } : h,
       ),
     })
+    void saveHabitDay('proteina', next, { habitoId: prot.id, remote: !useLocal(isGuest) })
     if (useLocal(isGuest) || prot.id.startsWith('h-')) return
     await bumpHabitoProgress(prot.id, next)
   },
@@ -1030,6 +1032,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       ),
     })
     useBodyWeekStore.getState().recordSleep(rounded)
+    void saveHabitDay('sono', rounded, { habitoId: sono.id, remote: !useLocal(isGuest) })
     if (useLocal(isGuest) || sono.id.startsWith('h-'))
     {
       await writeOffline(get())
@@ -1051,6 +1054,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       ),
     })
     useBodyWeekStore.getState().recordWorkout(next > 0)
+    void saveHabitDay('treino', next > 0 ? 1 : 0, { habitoId: treino.id, remote: !useLocal(isGuest) })
     if (useLocal(isGuest) || treino.id.startsWith('h-')) return
     await bumpHabitoProgress(treino.id, next)
   },
