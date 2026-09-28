@@ -5,7 +5,7 @@ import type { FinanceTx } from './finance'
 import { formatBRL, monthExpenseTotal, monthIncomeTotal } from './finance'
 import { todayIso, isoDaysAgo } from './dates'
 import type { HabitoDiario } from './habits'
-import { demoHabits, findHabit, habitPct } from './habits'
+import { findHabit, habitPct } from './habits'
 
 /** Dados de demo para UI mobile sem backend */
 export function demoHumor(): HumorRegistro[]
