@@ -479,7 +479,7 @@ export function buildMonthOutlook(
     : null
 
   let tone: MonthOutlook['tone'] = 'ok'
-  let headline = isFuture
+  const headline = isFuture
     ? `Previsão para ${monthLabel}`
     : isPast
       ? `Fechamento · ${monthLabel}`

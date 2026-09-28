@@ -68,7 +68,7 @@ const COMPROMISSO_RE = /dentist|médic|consulta|marcar|reunião|quinta|sexta|seg
 const PROJETO_RE = /aceitar|projeto|freelance|extra|demanda|cliente novo|proposta/i
 const SOCIAL_RE = /sair|festa|bar|cinema|viagem|jantar|encontro/i
 
-const MONEY_RE = /r\$\s*([\d.,]+)|(\d+[\.,]?\d*)\s*reais?/i
+const MONEY_RE = /r\$\s*([\d.,]+)|(\d+[.,]?\d*)\s*reais?/i
 
 function parseMoneyFromText(text: string): number | null
 {
@@ -196,7 +196,7 @@ export function buildAxelTodayVerdict(input: AxelTodayVerdictInput): AxelTodayVe
   let summary = capacity.axelPhrase
   let prazoDetail = `${activeHoje.length} tarefa(s) em Hoje · carga ${load.percent}%`
   let dinheiroDetail = financeFactor.detail
-  let energiaDetail = moodFactor.detail
+  const energiaDetail = moodFactor.detail
 
   if (intent === 'compromisso')
   {

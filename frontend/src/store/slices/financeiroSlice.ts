@@ -218,6 +218,12 @@ function notifyBudgetAlert(
   toast.warning(title, { description })
 }
 
+/** Ações de outros slices chamadas daqui (a store junta todos os slices). */
+type CrossSliceActions = {
+  incrementQuestProgress?: (titulo: string, valor: number, opts?: { silent?: boolean }) => Promise<void>
+  addXP?: (modulo: string, xp: number) => Promise<unknown>
+}
+
 export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], FinanceiroSlice> = (set, get) => ({
   despesas: [],
   transactions: [],
@@ -407,7 +413,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
           })
         }
 
-        const anyGet = get() as any
+        const anyGet = get() as unknown as CrossSliceActions
         if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('Registrar 1 movimentação', 1)
 
         set((s) => {
@@ -574,7 +580,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       await recordBillSettlementFromTransaction({ ...target, status_pagamento: 'pago' })
       void get().fetchBillSettlements()
 
-      const anyGet = get() as any
+      const anyGet = get() as unknown as CrossSliceActions
       if (anyGet.incrementQuestProgress)
       {
         await (anyGet.incrementQuestProgress as (t: string, v: number) => Promise<void>)(
@@ -772,7 +778,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
 
     if (isCompleting)
     {
-      const anyGet = get() as any
+      const anyGet = get() as unknown as CrossSliceActions
       if (anyGet.addXP) await anyGet.addXP('financeiro', 50)
     }
   },
@@ -1203,7 +1209,7 @@ export const createFinanceiroSlice: StateCreator<FinanceiroSlice, [], [], Financ
       )
       recordReconciliationStreak(snap.alinhado)
 
-      const anyGet = get() as any
+      const anyGet = get() as unknown as CrossSliceActions
       if (anyGet.incrementQuestProgress) await anyGet.incrementQuestProgress('financeira', 1, { silent: true })
     }
     catch (e) { console.error('setBankBalance:', e) }

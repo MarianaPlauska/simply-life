@@ -33,8 +33,8 @@ function devOrchestrateMock(): Plugin
           return
         }
 
-        let body = ''
-        req.on('data', (chunk) => { body += chunk })
+        // o corpo é consumido e descartado: o mock responde sempre igual
+        req.on('data', () => {})
         req.on('end', () =>
         {
           res.end(JSON.stringify({
