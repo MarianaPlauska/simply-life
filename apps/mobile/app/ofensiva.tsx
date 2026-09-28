@@ -23,6 +23,7 @@ import {
   useActivityStore,
   type LifeActionKind,
 } from '../src/store/activityStore'
+import { METAS_HREF } from '../src/lib/sharedGoalRoutes'
 
 type Tab = 'sequencia' | 'ativos'
 
@@ -263,6 +264,33 @@ export default function OfensivaScreen()
           )}
         </View>
       )}
+
+      <Pressable
+        onPress={() => router.push(METAS_HREF)}
+        accessibilityRole="button"
+        accessibilityLabel="Metas juntos"
+        style={({ pressed }) => ({
+          marginTop: space.lg,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
+          padding: space.md,
+          borderRadius: 20,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.cardRim,
+          opacity: pressed ? 0.88 : 1,
+        })}
+      >
+        <Icon name="people-outline" size={22} color={colors.ink} />
+        <View style={{ flex: 1 }}>
+          <Text variant="bodyStrong">Metas juntos</Text>
+          <Text variant="caption" muted>
+            Semana vale mais que dia. Com amigos, sem ver o número de ninguém.
+          </Text>
+        </View>
+        <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
+      </Pressable>
 
       <Modal visible={help} transparent animationType="fade" onRequestClose={() => setHelp(false)}>
         <Pressable
