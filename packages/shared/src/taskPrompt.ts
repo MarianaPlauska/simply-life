@@ -972,3 +972,20 @@ export function stampTaskSidecar(
   if (meta.prazoRigido) lines.push('#prazo:firme')
   return lines.filter(Boolean).join('\n')
 }
+
+// ---------------------------------------------------------------------------
+// Reuso pelos outros parsers de texto livre (Dump). Só apelidos: mesmo comportamento.
+// ---------------------------------------------------------------------------
+
+export type PromptTextWork = Work
+export type PromptDateHit = DateHit
+export {
+  cut as cutPromptText,
+  extractDate as extractPromptDate,
+  extractHour as extractPromptHour,
+  cleanupTitle as cleanupPromptTitle,
+  blankFiller as blankPromptFiller,
+  detectCategory as detectPromptCategory,
+  capitalize as capitalizePromptText,
+  nextWeekday as nextWeekdayIso,
+}
