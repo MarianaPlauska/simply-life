@@ -1,5 +1,5 @@
 import { ActivityIndicator, Pressable, type PressableProps, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from './Icon'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
 import { useTheme } from '../theme/ThemeProvider'
@@ -22,7 +22,7 @@ type Props = PressableProps & {
   loading?: boolean
   variant?: ButtonVariant
   size?: Size
-  icon?: keyof typeof Ionicons.glyphMap
+  icon?: keyof typeof Icon.glyphMap
 }
 
 export function PrimaryButton({
@@ -48,11 +48,11 @@ export function PrimaryButton({
   const isDismiss = variant === 'dismiss'
   const iconSize = size === 'sm' ? 16 : 18
 
-  const iceFill = mode === 'dark' ? 'rgba(245, 241, 236, 0.14)' : 'rgba(255, 255, 255, 0.72)'
-  const iceLine = mode === 'dark' ? 'rgba(245, 241, 236, 0.45)' : 'rgba(42, 38, 34, 0.18)'
+  const iceFill = mode === 'dark' ? 'rgba(238, 242, 240, 0.14)' : 'rgba(255, 255, 255, 0.72)'
+  const iceLine = mode === 'dark' ? 'rgba(238, 242, 240, 0.45)' : 'rgba(31, 42, 42, 0.18)'
 
   const bg = isPrimary
-    ? colors.axel
+    ? colors.axelFill
     : isDanger
       ? colors.danger
       : isSuccess
@@ -63,8 +63,11 @@ export function PrimaryButton({
             ? iceFill
             : 'transparent'
 
-  const fg = isPrimary || isDanger || isSuccess
+  // Erro e sucesso no claro são escuros o bastante para texto branco; no escuro, carvão
+  const fg = isPrimary
     ? colors.axelOnFill
+    : isDanger || isSuccess
+      ? (mode === 'dark' ? colors.axelOnFill : colors.chrome)
     : isLink
       ? colors.inkMuted
       : isDismiss || isGhost
@@ -103,7 +106,7 @@ export function PrimaryButton({
         <ActivityIndicator color={fg} />
       ) : (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          {icon ? <Ionicons name={icon} size={iconSize} color={fg} /> : null}
+          {icon ? <Icon name={icon} size={iconSize} color={fg} /> : null}
           <Text
             variant={isLink || size === 'sm' ? 'label' : 'bodyStrong'}
             color={fg}

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   describeDayPt,
   formatBRL,
@@ -102,7 +102,7 @@ export function FinanceSalaryPane()
           <Row label="Bruto previsto" value={formatBRL(forecast.bruto)} strong />
           <Row
             label={forecast.liquido != null ? 'Líquido estimado' : 'Líquido: informe em Editar para estimar'}
-            value={forecast.liquido != null ? formatBRL(forecast.liquido) : '—'}
+            value={forecast.liquido != null ? formatBRL(forecast.liquido) : '--'}
             strong={forecast.liquido != null}
           />
           <Text variant="micro" muted>
@@ -133,7 +133,7 @@ export function FinanceSalaryPane()
                 {describeDayPt(e.data)} · {formatMinutesPt(e.minutos)} · {KIND_LABEL[e.tipo]}
               </Text>
               <Pressable onPress={() => void removeOvertime(e.id!)} accessibilityRole="button" accessibilityLabel="Remover hora extra" hitSlop={8}>
-                <Ionicons name="close" size={18} color={colors.inkMuted} />
+                <Icon name="close" size={18} color={colors.inkMuted} />
               </Pressable>
             </View>
           ))
@@ -147,7 +147,7 @@ export function FinanceSalaryPane()
             <Row
               key={c.competencia}
               label={`${competenciaLabel(c.competencia)} · previsto ${formatBRL(c.valorPrevisto)}`}
-              value={c.valorReal != null ? formatBRL(c.valorReal) : '—'}
+              value={c.valorReal != null ? formatBRL(c.valorReal) : '--'}
             />
           ))}
           {salary.taxaDesconto != null ? (
@@ -272,7 +272,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
       />
       <Field
         label="Seu líquido num mês sem hora extra (opcional)"
-        placeholder={initial.taxaDesconto != null ? `Desconto atual: ${(initial.taxaDesconto * 100).toFixed(1)}%` : 'Ex.: 2980 — para estimar o líquido'}
+        placeholder={initial.taxaDesconto != null ? `Desconto atual: ${(initial.taxaDesconto * 100).toFixed(1)}%` : 'Ex.: 2980, para estimar o líquido'}
         keyboardType="decimal-pad"
         value={f.liquido}
         onChangeText={(v) => patch({ liquido: v })}

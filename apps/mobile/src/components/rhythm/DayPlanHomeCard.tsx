@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { DAY_PLAN_MODE_COPY, addDaysIso, firstTinyStep, localTodayIso } from '@simply-life/shared'
 import { Card, Text, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -46,7 +46,7 @@ export function DayPlanHomeCard()
       return (
         <Pressable onPress={() => router.push('/planejar-amanha')} accessibilityRole="button">
           <Card tone="elevated" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Ionicons name="moon-outline" size={18} color={colors.axel} />
+            <Icon name="moon-outline" size={18} color={colors.axel} />
             <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
               Amanhã já está planejado ({DAY_PLAN_MODE_COPY[planTomorrow.mode].label.toLowerCase()}). Bom descanso.
             </Text>
@@ -58,7 +58,7 @@ export function DayPlanHomeCard()
     return (
       <Card tone="elevated" accentTop="axel" style={{ gap: space.sm }}>
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-          <Ionicons name="moon-outline" size={20} color={colors.axel} />
+          <Icon name="moon-outline" size={20} color={colors.axel} />
           <Text variant="section" style={{ flex: 1 }}>Planejar amanhã</Text>
         </View>
         <Text variant="body" muted>
@@ -93,7 +93,7 @@ export function DayPlanHomeCard()
           accessibilityState={{ checked: t.status === 'done' }}
           style={{ flexDirection: 'row', gap: 10, alignItems: 'center', minHeight: 40 }}
         >
-          <Ionicons
+          <Icon
             name={t.status === 'done' ? 'checkmark-circle' : 'ellipse-outline'}
             size={22}
             color={t.status === 'done' ? colors.axel : colors.inkMuted}

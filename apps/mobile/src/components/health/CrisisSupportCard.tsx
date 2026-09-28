@@ -29,7 +29,7 @@ export function CrisisSupportCard({ compact = false }: { compact?: boolean })
     >
       <SectionHeader
         title="Apoio emocional 24h"
-        subtitle="CVV — Centro de Valorização da Vida"
+        subtitle="CVV, Centro de Valorização da Vida"
       />
       <Text variant="body" muted>
         Se o momento está difícil, você pode ligar gratuitamente para o CVV ({CVV_NUMBER}).

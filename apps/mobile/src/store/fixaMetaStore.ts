@@ -5,6 +5,7 @@ import {
   saveFixaMeta,
   type FixaMeta,
   type FixaMetaMap,
+  type ResolvedFixaMeta,
 } from '../lib/fixaMeta'
 import { fetchFixaMetaRemote, upsertFixaMetaRemote } from '../lib/sync/financeMeta'
 
@@ -13,7 +14,7 @@ type State = {
   map: FixaMetaMap
   hydrate: () => Promise<void>
   patch: (id: string | number, next: Partial<FixaMeta>) => Promise<void>
-  resolve: (id: string | number, categoria: string) => FixaMeta
+  resolve: (id: string | number, categoria: string) => ResolvedFixaMeta
 }
 
 export const useFixaMetaStore = create<State>((set, get) => ({

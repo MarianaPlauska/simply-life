@@ -3,11 +3,11 @@ import { type TypeRole } from '@simply-life/ui-tokens'
 import { useTheme } from '../theme/ThemeProvider'
 
 /** Famílias nomeadas - sem fontWeight extra (quebra o face no RN/web) */
-const WEIGHT_TO_MANROPE: Record<string, string> = {
-  '400': 'Manrope_400Regular',
-  '500': 'Manrope_500Medium',
-  '600': 'Manrope_600SemiBold',
-  '700': 'Manrope_700Bold',
+const WEIGHT_TO_LEXEND: Record<string, string> = {
+  '400': 'Lexend_400Regular',
+  '500': 'Lexend_500Medium',
+  '600': 'Lexend_600SemiBold',
+  '700': 'Lexend_700Bold',
 }
 
 type Props = Omit<TextProps, 'role'> & {
@@ -28,7 +28,7 @@ export function Text({ variant = 'body', muted, color, style, ...rest }: Props)
     lineHeight: spec.lineHeight,
     fontFamily: isVoice
       ? 'Fraunces_500Medium'
-      : (WEIGHT_TO_MANROPE[weightKey] ?? 'Manrope_400Regular'),
+      : (WEIGHT_TO_LEXEND[weightKey] ?? 'Lexend_400Regular'),
     color: color ?? (muted ? colors.inkMuted : colors.ink),
   }
 

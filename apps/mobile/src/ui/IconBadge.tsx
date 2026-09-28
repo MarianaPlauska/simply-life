@@ -1,8 +1,8 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from './Icon'
 
 type Props = {
-  name: keyof typeof Ionicons.glyphMap
+  name: keyof typeof Icon.glyphMap
   color: string
   size?: number
   iconSize?: number
@@ -31,7 +31,7 @@ export function IconBadge({ name, color, size = 40, iconSize = 20 }: Props)
         backgroundColor: wash(color, 0.15),
       }}
     >
-      <Ionicons name={name} size={iconSize} color={color} />
+      <Icon name={name} size={iconSize} color={color} />
     </View>
   )
 }

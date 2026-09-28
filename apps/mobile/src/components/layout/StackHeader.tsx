@@ -1,6 +1,6 @@
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -32,7 +32,7 @@ export function StackHeader({
             backgroundColor: colors.elevated,
           }}
         >
-          <Ionicons name="chevron-back" size={22} color={colors.ink} />
+          <Icon name="chevron-back" size={22} color={colors.ink} />
         </Pressable>
         <View style={{ flex: 1, minWidth: 0 }}>
           <Text variant="title" numberOfLines={1}>

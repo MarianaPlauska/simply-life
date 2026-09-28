@@ -4,13 +4,14 @@ import {
   computeSaldoDisponivel,
   formatBRL,
   formatSaldo,
+  seriesColor,
 } from '@simply-life/shared'
 import { Card, Text, SectionHeader, ListRow, EmptyState, SubNavTabs, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useFixaMetaStore } from '../../store/fixaMetaStore'
 import { FIXA_URGENCIA_LABELS } from '../../lib/fixaMeta'
-import { LucideFinanceIcon } from '../../lib/lucideFinanceIcons'
+import { FinanceIcon } from '../../lib/financeIcons'
 import { CONTAS_SUB_TABS, type ContasSubTab } from './financeNav'
 import { FinanceCardsHub } from './FinanceCardsHub'
 import { InvitePartnerCard } from './InvitePartnerCard'
@@ -26,7 +27,7 @@ type Props = {
 
 export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Props)
 {
-  const { colors, space } = useTheme()
+  const { colors, space, chart } = useTheme()
   const txs = useDataStore((s) => s.finance)
   const cash = useDataStore((s) => s.cashAccount)
   const cards = useDataStore((s) => s.financeCards)
@@ -176,10 +177,10 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                         borderRadius: 999,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        backgroundColor: `${meta.color}33`,
+                        backgroundColor: `${seriesColor(meta.color, chart)}33`,
                       }}
                     >
-                      <LucideFinanceIcon name={meta.icon} size={18} color={meta.color} />
+                      <FinanceIcon name={meta.icon} size={18} color={seriesColor(meta.color, chart)} />
                     </View>
                     <View style={{ flex: 1 }}>
                       <ListRow

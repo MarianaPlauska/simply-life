@@ -1,5 +1,6 @@
 import { View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = {
   ratio: number
@@ -9,6 +10,7 @@ type Props = {
 /** Barra vertical com marcador — métricas da referência de clima. */
 export function RangeTick({ ratio, colors }: Props)
 {
+  const { colors: theme } = useTheme()
   const pct = Math.max(0.06, Math.min(0.94, ratio))
   return (
     <View style={{ width: 10, height: 28, alignItems: 'center', justifyContent: 'center' }}>
@@ -22,7 +24,7 @@ export function RangeTick({ ratio, colors }: Props)
           width: 10,
           height: 3,
           borderRadius: 999,
-          backgroundColor: '#2A2622',
+          backgroundColor: theme.ink,
         }}
       />
     </View>

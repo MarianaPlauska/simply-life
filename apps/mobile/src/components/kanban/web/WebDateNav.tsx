@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { localTodayIso } from '@simply-life/shared'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -72,14 +72,14 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
             accessibilityLabel="Semana anterior"
             style={webStyle({ padding: 4, cursor: 'pointer' })}
           >
-            <Ionicons name="chevron-back" size={13} color={colors.inkMuted} />
+            <Icon name="chevron-back" size={13} color={colors.inkMuted} />
           </WebHoverable>
           <WebHoverable
             onPress={() => onSelect(today)}
             accessibilityLabel="Hoje"
             style={webStyle({ paddingHorizontal: 6, paddingVertical: 4, cursor: 'pointer' })}
           >
-            <Text variant="micro" style={{ color: colors.axel, fontWeight: '700', fontSize: 10 }}>
+            <Text variant="micro" style={{ color: colors.axel, fontWeight: '700', fontSize: 11 }}>
               HOJE
             </Text>
           </WebHoverable>
@@ -88,7 +88,7 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
             accessibilityLabel="Próxima semana"
             style={webStyle({ padding: 4, cursor: 'pointer' })}
           >
-            <Ionicons name="chevron-forward" size={13} color={colors.inkMuted} />
+            <Icon name="chevron-forward" size={13} color={colors.inkMuted} />
           </WebHoverable>
         </View>
       </View>
@@ -110,7 +110,7 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
                 cursor: 'pointer',
               })}
             >
-              <Text variant="micro" muted style={{ fontSize: 10 }}>
+              <Text variant="micro" muted style={{ fontSize: 11 }}>
                 {d.weekday}
               </Text>
               <View
@@ -120,7 +120,7 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
                   borderRadius: 6,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: active ? colors.axel : 'transparent',
+                  backgroundColor: active ? colors.axelFill : 'transparent',
                 }}
               >
                 <Text
@@ -128,7 +128,7 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
                   style={{
                     fontSize: 12,
                     fontWeight: '700',
-                    color: active ? '#FFFFFF' : isToday ? colors.axel : colors.ink,
+                    color: active ? colors.axelOnFill : isToday ? colors.axel : colors.ink,
                   }}
                 >
                   {d.num}

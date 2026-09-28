@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 import Svg, { Defs, Path, RadialGradient, Stop } from 'react-native-svg'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -98,7 +98,7 @@ export function ExecuteTimerFace({
           gap: 8,
         }}
       >
-        <Ionicons name={running ? 'pause' : 'play'} size={22} color={colors.ink} />
+        <Icon name={running ? 'pause' : 'play'} size={22} color={colors.ink} />
       </PressableScale>
     </View>
   )

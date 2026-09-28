@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../src/ui/Icon'
 import { addDaysIso, describeDayPt, localTodayIso } from '@simply-life/shared'
 import { Screen, Text, Card, Field, PrimaryButton } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
@@ -114,7 +114,7 @@ export default function AgendaScreen()
             {sources.map((s) => (
               <View key={s.id} style={{ gap: 2, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Ionicons
+                  <Icon
                     name={sourceErrors[s.id] ? 'alert-circle-outline' : 'checkmark-circle'}
                     size={18}
                     color={sourceErrors[s.id] ? colors.attention : colors.axel}
@@ -122,7 +122,7 @@ export default function AgendaScreen()
                   <Text variant="bodyStrong" style={{ flex: 1 }}>{s.label}</Text>
                   <Text variant="caption" muted>{(bySource[s.id] ?? []).length} eventos</Text>
                   <Pressable onPress={() => void removeSource(s.id)} accessibilityRole="button" accessibilityLabel={`Remover ${s.label}`} hitSlop={8}>
-                    <Ionicons name="trash-outline" size={18} color={colors.inkMuted} />
+                    <Icon name="trash-outline" size={18} color={colors.inkMuted} />
                   </Pressable>
                 </View>
                 {sourceErrors[s.id] ? <Text variant="caption" color={colors.attention}>{sourceErrors[s.id]}</Text> : null}
@@ -166,7 +166,7 @@ export default function AgendaScreen()
             ))}
             {GUIDES[guide].note ? (
               <View style={{ flexDirection: 'row', gap: 8, padding: 10, borderRadius: 12, backgroundColor: colors.hairline }}>
-                <Ionicons name="information-circle-outline" size={16} color={colors.inkMuted} style={{ marginTop: 2 }} />
+                <Icon name="information-circle-outline" size={16} color={colors.inkMuted} style={{ marginTop: 2 }} />
                 <Text variant="caption" style={{ flex: 1 }}>{GUIDES[guide].note}</Text>
               </View>
             ) : null}

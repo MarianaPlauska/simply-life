@@ -167,6 +167,78 @@ export default function DashboardScreenWeb()
     },
   ]
 
+  // Menu da conta: precisa existir nas duas composições (estreita e desktop)
+  const accountMenu = (
+    <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
+      <View style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}>
+        <Pressable
+          accessibilityLabel="Fechar menu"
+          onPress={() => setMenuOpen(false)}
+          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        />
+        <ScrollView
+          style={{
+            backgroundColor: colors.surface,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            maxWidth: 480,
+            maxHeight: '80%',
+            alignSelf: 'center',
+            width: '100%',
+          }}
+          contentContainerStyle={{ padding: space.lg, paddingBottom: space.xl, gap: space.md }}
+        >
+          <View style={{ gap: 4 }}>
+            <Text variant="section">Mais</Text>
+            <Text variant="caption" muted>
+              Conta, personalização e atalhos
+            </Text>
+          </View>
+          <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
+            {(
+              [
+                { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
+                { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
+                { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
+                { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
+                { label: 'Preferências', subtitle: 'Notificações e hábitos', href: '/preferencias' },
+                { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
+                { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
+                { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
+                { label: 'Ofensiva', subtitle: 'Dias no app e no plano', href: '/ofensiva' },
+                { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
+              ] as const
+            ).map((item, i, arr) => (
+              <ListRow
+                key={item.href}
+                title={item.label}
+                subtitle={item.subtitle}
+                right="›"
+                showSeparator={i < arr.length - 1}
+                onPress={() =>
+                {
+                  setMenuOpen(false)
+                  router.push(item.href)
+                }}
+              />
+            ))}
+          </Card>
+          <PrimaryButton
+            label="Sair"
+            variant="ghost"
+            onPress={() =>
+            {
+              setMenuOpen(false)
+              void signOut()
+              router.replace('/login')
+            }}
+          />
+          <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setMenuOpen(false)} />
+        </ScrollView>
+      </View>
+    </Modal>
+  )
+
   if (!isDesktop)
   {
     // Navegador estreito (celular): mantém a mesma composição visual do app mobile.
@@ -216,6 +288,7 @@ export default function DashboardScreenWeb()
             <HomeMetricShortcuts />
           </View>
         </TabShell>
+        {accountMenu}
       </Screen>
     )
   }
@@ -281,74 +354,7 @@ export default function DashboardScreenWeb()
         </View>
       </TabShell>
 
-      <Modal visible={menuOpen} transparent animationType="fade" onRequestClose={() => setMenuOpen(false)}>
-        <View style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}>
-          <Pressable
-            accessibilityLabel="Fechar menu"
-            onPress={() => setMenuOpen(false)}
-            style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
-          />
-          <ScrollView
-            style={{
-              backgroundColor: colors.surface,
-              borderTopLeftRadius: 24,
-              borderTopRightRadius: 24,
-              maxWidth: 480,
-              maxHeight: '80%',
-              alignSelf: 'center',
-              width: '100%',
-            }}
-            contentContainerStyle={{ padding: space.lg, paddingBottom: space.xl, gap: space.md }}
-          >
-            <View style={{ gap: 4 }}>
-              <Text variant="section">Mais</Text>
-              <Text variant="caption" muted>
-                Conta, personalização e atalhos
-              </Text>
-            </View>
-            <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
-              {(
-                [
-                  { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
-                  { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
-                  { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
-                  { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
-                  { label: 'Preferências', subtitle: 'Notificações e hábitos', href: '/preferencias' },
-                  { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
-                  { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
-                  { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                  { label: 'Ofensiva', subtitle: 'Dias no app e no plano', href: '/ofensiva' },
-                  { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
-                ] as const
-              ).map((item, i, arr) => (
-                <ListRow
-                  key={item.href}
-                  title={item.label}
-                  subtitle={item.subtitle}
-                  right="›"
-                  showSeparator={i < arr.length - 1}
-                  onPress={() =>
-                  {
-                    setMenuOpen(false)
-                    router.push(item.href)
-                  }}
-                />
-              ))}
-            </Card>
-            <PrimaryButton
-              label="Sair"
-              variant="ghost"
-              onPress={() =>
-              {
-                setMenuOpen(false)
-                void signOut()
-                router.replace('/login')
-              }}
-            />
-            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setMenuOpen(false)} />
-          </ScrollView>
-        </View>
-      </Modal>
+      {accountMenu}
     </Screen>
   )
 }

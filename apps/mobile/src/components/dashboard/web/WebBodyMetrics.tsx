@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { useRouter } from 'expo-router'
 import {
   aguaMlPorCopo,
@@ -18,7 +18,6 @@ import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../../store/waterLogStore'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
@@ -62,7 +61,7 @@ export function WebBodyMetrics()
 
   const rows: {
     id: Care
-    icon: keyof typeof Ionicons.glyphMap
+    icon: keyof typeof Icon.glyphMap
     label: string
     value: string
     unit: string
@@ -127,7 +126,7 @@ export function WebBodyMetrics()
       <Text variant="section" style={{ fontSize: 16 }}>
         Corpo na semana
       </Text>
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
         {rows.map((row, i) => (
           <WebHoverable
             key={row.id}
@@ -140,12 +139,12 @@ export function WebBodyMetrics()
               paddingHorizontal: 18,
               paddingVertical: 12,
               borderTopWidth: i === 0 ? 0 : 1,
-              borderTopColor: WEB_ROW_DIVIDER,
+              borderTopColor: colors.cardRim,
               backgroundColor: hovered ? colors.surface : 'transparent',
               cursor: 'pointer',
             })}
           >
-            <Ionicons name={row.icon} size={16} color={row.color} style={{ width: 20 }} />
+            <Icon name={row.icon} size={16} color={row.color} style={{ width: 20 }} />
             <Text variant="body" style={{ width: 76, fontSize: 13 }}>
               {row.label}
             </Text>

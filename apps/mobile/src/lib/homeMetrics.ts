@@ -15,7 +15,7 @@ export const HOME_METRIC_CATALOG: {
   glanceId: string
 }[] = [
   { id: 'humor', label: 'Humor', hint: 'Check-in do dia', glanceId: 'g-humor' },
-  { id: 'sleep', label: 'Sono', hint: 'Manhã — horas da noite', glanceId: 'g-sono' },
+  { id: 'sleep', label: 'Sono', hint: 'Manhã: horas da noite', glanceId: 'g-sono' },
   { id: 'water', label: 'Água', hint: 'Copos / meta', glanceId: 'g-agua' },
   { id: 'protein', label: 'Proteína', hint: 'Gramas do dia', glanceId: 'g-proteina' },
   { id: 'tasks', label: 'Tarefas', hint: 'Em aberto', glanceId: 'g-tasks' },

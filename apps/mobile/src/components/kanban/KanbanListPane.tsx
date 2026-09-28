@@ -13,12 +13,13 @@ import {
 } from '@simply-life/shared'
 import { Text, Chip, EmptyState, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import type { ColorTokens } from '@simply-life/ui-tokens'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useCaptureStore } from '../../store/captureStore'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useDuePaidStore } from '../../store/duePaidStore'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { KanbanTaskRow } from './KanbanTaskRow'
 import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 import { KanbanDayTaskCard } from './KanbanDayTaskCard'
@@ -29,17 +30,21 @@ type Props = {
   onSeeDone?: () => void
 }
 
-const PRI: { id: 1 | 2 | 3; label: string; tint: string; ink: string }[] = [
-  { id: 1, label: 'Alta', tint: 'rgba(232, 115, 74, 0.16)', ink: '#E8734A' },
-  { id: 2, label: 'Média', tint: 'rgba(212, 184, 150, 0.22)', ink: '#B8956B' },
-  { id: 3, label: 'Baixa', tint: 'rgba(154, 168, 181, 0.18)', ink: '#9AA8B5' },
-]
+function priorityStyles(colors: ColorTokens): { id: 1 | 2 | 3; label: string; tint: string; ink: string }[]
+{
+  return [
+    { id: 1, label: 'Alta', tint: colors.dangerMuted, ink: colors.danger },
+    { id: 2, label: 'Média', tint: colors.attentionMuted, ink: colors.attention },
+    { id: 3, label: 'Baixa', tint: colors.tasksMuted, ink: colors.tasks },
+  ]
+}
 
 type Filter = { kind: 'life'; id: LifeCategoryId } | { kind: 'user'; id: string }
 
 export function KanbanListPane({ tasks, onSeeDone }: Props)
 {
   const { space, colors } = useTheme()
+  const PRI = priorityStyles(colors)
   const isGuest = useAuthStore((s) => s.isGuest)
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
   const markContaAPagar = useDataStore((s) => s.markContaAPagar)
@@ -172,7 +177,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
             style={{
               flex: 1,
               minHeight: 44,
-              borderRadius: 16,
+              borderRadius: 14,
               paddingHorizontal: 14,
               color: colors.ink,
               backgroundColor: colors.surface,
@@ -259,7 +264,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
           style={{
             minHeight: 44,
             paddingHorizontal: 14,
-            borderRadius: 16,
+            borderRadius: 14,
             backgroundColor: colors.surface,
             flexDirection: 'row',
             alignItems: 'center',
@@ -321,7 +326,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                   backgroundColor: colors.surface,
                 }}
               >
-                <Ionicons name="add" size={16} color={colors.inkMuted} />
+                <Icon name="add" size={16} color={colors.inkMuted} />
               </PressableScale>
             </View>
             {list.map((t) => (

@@ -136,7 +136,7 @@ export function MfaEnrollPanel()
           <Text variant="caption" muted>
             Adicione a chave no app autenticador e confirme o código.
           </Text>
-          <Text variant="caption" style={{ fontFamily: 'Manrope_600SemiBold' }}>
+          <Text variant="caption" style={{ fontFamily: 'Lexend_600SemiBold' }}>
             {secret}
           </Text>
           <Field

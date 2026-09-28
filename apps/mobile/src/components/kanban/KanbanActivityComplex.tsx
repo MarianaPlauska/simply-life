@@ -12,13 +12,13 @@ type Props = { tasks: MobileTask[] }
 /** Heatmap + barras da semana — complexo de atividades no Kanban. */
 export function KanbanActivityComplex({ tasks }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors } = useTheme()
   const series = useMemo(() => taskActivityGrid(tasks, WEEKS), [tasks])
   const week = useMemo(() => taskActivityByDay(tasks, 7).slice().reverse(), [tasks])
   const peak = Math.max(...week.map((d) => d.count), 1)
-  const idle = mode === 'dark' ? '#2C2C2E' : '#E4D8C8'
-  const empty = mode === 'dark' ? '#2C2C2E' : '#EDE8E0'
-  const cardBg = mode === 'dark' ? 'rgba(28, 28, 30, 0.5)' : 'rgba(255, 255, 255, 0.72)'
+  const idle = colors.hairline
+  const empty = colors.hairline
+  const cardBg = colors.surface
   const streak = useMemo(
     () => consecutiveActivity(series.filter((d) => d.count > 0).map((d) => d.iso)),
     [series],
@@ -27,7 +27,7 @@ export function KanbanActivityComplex({ tasks }: Props)
   const to = series[series.length - 1]?.iso
   const range =
     from && to
-      ? `${from.slice(8, 10)}/${from.slice(5, 7)} – ${to.slice(8, 10)}/${to.slice(5, 7)}`
+      ? `${from.slice(8, 10)}/${from.slice(5, 7)} a ${to.slice(8, 10)}/${to.slice(5, 7)}`
       : ''
 
   const columns: { iso: string; count: number }[][] = []
@@ -45,7 +45,7 @@ export function KanbanActivityComplex({ tasks }: Props)
   }
 
   return (
-    <View style={{ gap: 14, padding: 18, borderRadius: 24, backgroundColor: cardBg }}>
+    <View style={{ gap: 14, padding: 18, borderRadius: 20, backgroundColor: cardBg }}>
       <View>
         <Text variant="caption" muted style={{ fontWeight: '700', letterSpacing: 0.6 }}>
           CONSTÂNCIA
@@ -106,7 +106,7 @@ export function KanbanActivityComplex({ tasks }: Props)
                 flex: 1,
                 height: ht,
                 borderRadius: 8,
-                backgroundColor: today ? colors.axel : idle,
+                backgroundColor: today ? colors.axelFill : idle,
               }}
             />
           )

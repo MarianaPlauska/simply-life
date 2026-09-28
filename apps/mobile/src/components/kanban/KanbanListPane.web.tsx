@@ -15,6 +15,7 @@ import {
 } from '@simply-life/shared'
 import { Text, Chip, EmptyState, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import type { ColorTokens } from '@simply-life/ui-tokens'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -22,7 +23,7 @@ import { useCaptureStore } from '../../store/captureStore'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useDuePaidStore } from '../../store/duePaidStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { KanbanTaskRow } from './KanbanTaskRow'
 import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 import { KanbanDayTaskCard } from './KanbanDayTaskCard'
@@ -30,7 +31,6 @@ import { DayBillCard } from './DayBillCard'
 import { WebHoverable } from '../dashboard/web/WebHoverable'
 import { webStyle } from '../dashboard/web/webStyle'
 import { WEB_DISPLAY_FONT } from '../dashboard/web/webTypography'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from '../dashboard/web/webPalette'
 import { WebDateNav } from './web/WebDateNav'
 import { WebKanbanRow } from './web/WebKanbanRow'
 
@@ -39,17 +39,14 @@ type Props = {
   onSeeDone?: () => void
 }
 
-const PRI_MOBILE: { id: 1 | 2 | 3; label: string; tint: string; ink: string }[] = [
-  { id: 1, label: 'Alta', tint: 'rgba(232, 115, 74, 0.16)', ink: '#E8734A' },
-  { id: 2, label: 'Média', tint: 'rgba(212, 184, 150, 0.22)', ink: '#B8956B' },
-  { id: 3, label: 'Baixa', tint: 'rgba(154, 168, 181, 0.18)', ink: '#9AA8B5' },
-]
-
-const PRI_DESKTOP: { id: 1 | 2 | 3; label: string; color: string }[] = [
-  { id: 1, label: 'Alta', color: '#E8734A' },
-  { id: 2, label: 'Média', color: '#E3A855' },
-  { id: 3, label: 'Baixa', color: '#7FAAD1' },
-]
+function priorityStyles(colors: ColorTokens): { id: 1 | 2 | 3; label: string; tint: string; ink: string }[]
+{
+  return [
+    { id: 1, label: 'Alta', tint: colors.dangerMuted, ink: colors.danger },
+    { id: 2, label: 'Média', tint: colors.attentionMuted, ink: colors.attention },
+    { id: 3, label: 'Baixa', tint: colors.tasksMuted, ink: colors.tasks },
+  ]
+}
 
 type Filter = { kind: 'life'; id: LifeCategoryId } | { kind: 'user'; id: string }
 
@@ -63,6 +60,8 @@ type Filter = { kind: 'life'; id: LifeCategoryId } | { kind: 'user'; id: string 
 export function KanbanListPane({ tasks, onSeeDone }: Props)
 {
   const { space, colors } = useTheme()
+  const PRI_MOBILE = priorityStyles(colors)
+  const PRI_DESKTOP = PRI_MOBILE.map((p) => ({ id: p.id, label: p.label, color: p.ink }))
   const { showRail } = useWorkspace()
   const isGuest = useAuthStore((s) => s.isGuest)
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
@@ -194,7 +193,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
               style={{
                 flex: 1,
                 minHeight: 44,
-                borderRadius: 16,
+                borderRadius: 14,
                 paddingHorizontal: 14,
                 color: colors.ink,
                 backgroundColor: colors.surface,
@@ -281,7 +280,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
             style={{
               minHeight: 44,
               paddingHorizontal: 14,
-              borderRadius: 16,
+              borderRadius: 14,
               backgroundColor: colors.surface,
               flexDirection: 'row',
               alignItems: 'center',
@@ -343,7 +342,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                     backgroundColor: colors.surface,
                   }}
                 >
-                  <Ionicons name="add" size={16} color={colors.inkMuted} />
+                  <Icon name="add" size={16} color={colors.inkMuted} />
                 </PressableScale>
               </View>
               {list.map((t) => (
@@ -379,11 +378,11 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
 
   return (
     <View style={webStyle({ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 20, alignItems: 'start' })}>
-      <View style={{ gap: 20, borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, padding: 16 }}>
+      <View style={{ gap: 20, borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 16 }}>
         <WebDateNav selectedIso={dayIso} onSelect={setDayIso} />
 
         <View style={{ gap: 2 }}>
-          <Text variant="micro" muted style={{ fontSize: 10, letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4 }}>
+          <Text variant="micro" muted style={{ fontSize: 11, letterSpacing: 0.6, textTransform: 'uppercase', marginBottom: 4 }}>
             Listas
           </Text>
           {filterRows.map((row) => (
@@ -465,11 +464,11 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
           </Text>
         </View>
 
-        <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+        <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
           {hasNow || soonBills.length > 0 || restOpenDay.length > 0 ? (
             <>
               {lockedBills.map((bill, i) => (
-                <View key={bill.key} style={{ borderTopWidth: i === 0 ? 0 : 1, borderTopColor: WEB_ROW_DIVIDER }}>
+                <View key={bill.key} style={{ borderTopWidth: i === 0 ? 0 : 1, borderTopColor: colors.cardRim }}>
                   <WebKanbanRow
                     title={bill.titulo}
                     meta={`${bill.detalhe} · atrasada`}
@@ -485,7 +484,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                 </View>
               ))}
               {pinned.map((t, i) => (
-                <View key={t.id} style={{ borderTopWidth: i === 0 && lockedBills.length === 0 ? 0 : 1, borderTopColor: WEB_ROW_DIVIDER }}>
+                <View key={t.id} style={{ borderTopWidth: i === 0 && lockedBills.length === 0 ? 0 : 1, borderTopColor: colors.cardRim }}>
                   <WebKanbanRow
                     time={t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : undefined}
                     title={t.titulo}
@@ -498,7 +497,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
               {soonBills.map((bill, i) => (
                 <View
                   key={bill.key}
-                  style={{ borderTopWidth: i === 0 && lockedBills.length === 0 && pinned.length === 0 ? 0 : 1, borderTopColor: WEB_ROW_DIVIDER }}
+                  style={{ borderTopWidth: i === 0 && lockedBills.length === 0 && pinned.length === 0 ? 0 : 1, borderTopColor: colors.cardRim }}
                 >
                   <WebKanbanRow
                     title={bill.titulo}
@@ -518,7 +517,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                   key={t.id}
                   style={{
                     borderTopWidth: i === 0 && lockedBills.length === 0 && pinned.length === 0 && soonBills.length === 0 ? 0 : 1,
-                    borderTopColor: WEB_ROW_DIVIDER,
+                    borderTopColor: colors.cardRim,
                   }}
                 >
                   <WebKanbanRow
@@ -555,7 +554,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                 paddingHorizontal: 16,
                 paddingVertical: 10,
                 borderTopWidth: 1,
-                borderTopColor: WEB_ROW_DIVIDER,
+                borderTopColor: colors.cardRim,
                 cursor: 'pointer',
               })}
             >
@@ -574,7 +573,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
           const list = open.filter((t) => t.prioridade === p.id)
           if (list.length === 0) return null
           return (
-            <View key={p.id} style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+            <View key={p.id} style={{ borderRadius: 20, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
               <View
                 style={{
                   flexDirection: 'row',
@@ -592,11 +591,11 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                   accessibilityLabel={`Nova tarefa ${p.label}`}
                   style={webStyle({ padding: 4, cursor: 'pointer' })}
                 >
-                  <Ionicons name="add" size={15} color={colors.inkMuted} />
+                  <Icon name="add" size={15} color={colors.inkMuted} />
                 </WebHoverable>
               </View>
               {list.map((t, i) => (
-                <View key={t.id} style={{ borderTopWidth: i === 0 ? 1 : 1, borderTopColor: WEB_ROW_DIVIDER }}>
+                <View key={t.id} style={{ borderTopWidth: i === 0 ? 1 : 1, borderTopColor: colors.cardRim }}>
                   <WebKanbanRow
                     title={t.titulo}
                     done={t.status === 'done'}

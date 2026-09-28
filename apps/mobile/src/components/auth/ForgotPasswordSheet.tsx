@@ -15,7 +15,7 @@ type Props = {
 /** Modal leve para recuperação de senha */
 export function ForgotPasswordSheet({ visible, initialEmail, onClose }: Props)
 {
-  const { space, elevation } = useTheme()
+  const { space, elevation, colors } = useTheme()
   const resetPassword = useAuthStore((s) => s.resetPassword)
   const [email, setEmail] = useState(initialEmail)
   const [loading, setLoading] = useState(false)
@@ -58,7 +58,7 @@ export function ForgotPasswordSheet({ visible, initialEmail, onClose }: Props)
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(26, 24, 22, 0.72)',
+          backgroundColor: colors.overlay,
           justifyContent: 'center',
           alignItems: 'center',
           padding: space.lg,

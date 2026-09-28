@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   cardFaturaAbertaDisplay,
   formatBRL,
@@ -37,6 +37,7 @@ import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
 import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 import { MonthProjectionCard, SalaryConfirmCard } from './FinanceForecastCards'
 import { saldoToneForMonth } from './saldoTone'
+import { BalanceCardFace } from './BalanceCardFace'
 
 type Props = {
   onGoMovimentos: () => void
@@ -58,7 +59,7 @@ export function FinanceHomeTab({
   onCardsFocusChange,
 }: Props)
 {
-  const { colors, space } = useTheme()
+  const { colors, space, chart } = useTheme()
   const { showRail } = useWorkspace()
   const insets = useSafeAreaInsets()
   const [detailId, setDetailId] = useState<string | null>(null)
@@ -97,8 +98,8 @@ export function FinanceHomeTab({
     [txs],
   )
   const ranking = useMemo(
-    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap)).slice(0, 4),
-    [txs, catMap],
+    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap), chart).slice(0, 4),
+    [txs, catMap, chart],
   )
   const budgets = ranking.slice(0, 2)
 
@@ -107,7 +108,7 @@ export function FinanceHomeTab({
     void hydrateCats()
   }, [hydrateCats])
 
-  const CAT_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  const CAT_ICONS: Record<string, keyof typeof Icon.glyphMap> = {
     alimentacao: 'restaurant-outline',
     transporte: 'car-outline',
     habitacao: 'home-outline',
@@ -118,20 +119,13 @@ export function FinanceHomeTab({
     outros: 'ellipse-outline',
   }
 
-  const last4 = (primaryCard?.numeroMascarado || '').replace(/\D/g, '').slice(-4) || '0000'
-  const expLabel =
-    primaryCard?.validadeMesAno
-    || (primaryCard
-      ? `${String(primaryCard.diaVencimento).padStart(2, '0')}/${String(new Date().getFullYear() + 3).slice(-2)}`
-      : '--/--')
   const deltaPct =
     pos.receitas > 0 ? Math.round((saldoCaixa / pos.receitas) * 1000) / 10 : 0
-  const deltaPositive = saldoCaixa >= 0
 
   const quickIcons: {
     id: string
     label: string
-    icon: keyof typeof Ionicons.glyphMap
+    icon: keyof typeof Icon.glyphMap
     onPress: () => void
   }[] = [
     { id: 'send', label: 'Gasto', icon: 'swap-vertical-outline', onPress: () => openCapture('expense', null, { studio: true }) },
@@ -241,7 +235,7 @@ export function FinanceHomeTab({
                 backgroundColor: colors.elevated,
               }}
             >
-              <Ionicons name="settings-outline" size={20} color={colors.ink} />
+              <Icon name="settings-outline" size={20} color={colors.ink} />
             </PressableScale>
             <PressableScale
               accessibilityLabel="Novo cartão"
@@ -255,7 +249,7 @@ export function FinanceHomeTab({
                 backgroundColor: colors.elevated,
               }}
             >
-              <Ionicons name="add" size={22} color={colors.ink} />
+              <Icon name="add" size={22} color={colors.ink} />
             </PressableScale>
           </View>
         </View>
@@ -300,12 +294,6 @@ export function FinanceHomeTab({
     )
   }
 
-  // ── Início: card sólido na cor da faixa + ações abaixo (ref. wallet) ───
-  const deltaColor =
-    tone.bg === '#E0A800'
-      ? (deltaPositive ? '#145A32' : '#8B1E1E')
-      : (deltaPositive ? '#7CFFB2' : '#FFB4B4')
-
   return (
     <View style={{ gap: space.sm + 2 }}>
       <View style={{ gap: 1 }}>
@@ -317,70 +305,27 @@ export function FinanceHomeTab({
         </Text>
       </View>
 
-      {/* Card de saldo — compacto */}
-      <Card
-        tone="elevated"
-        style={{
-          backgroundColor: tone.bg,
-          borderRadius: 16,
-          padding: 14,
-          gap: 10,
-          minHeight: 132,
-          justifyContent: 'space-between',
+      <CardCarousel
+        cards={cards}
+        selectedId={null}
+        onSelect={(id) =>
+        {
+          setVisibleCardId(id)
+          setDetailId(id)
         }}
-      >
-        <View style={{ gap: 4 }}>
-          <Text
-            variant="hero"
-            style={{ color: tone.fg, fontSize: 28, letterSpacing: -0.8, lineHeight: 32 }}
-          >
-            {formatBRL(pos.disponivel)}
-          </Text>
-          <Text variant="caption" style={{ color: deltaColor, fontWeight: '700', fontSize: 12 }}>
-            {deltaPositive ? '+' : ''}
-            {deltaPct}% no mês · {tone.label}
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', gap: 14 }}>
-            <View style={{ gap: 1 }}>
-              <Text variant="micro" style={{ color: tone.muted, fontSize: 10 }}>
-                Número
-              </Text>
-              <Text variant="bodyStrong" style={{ color: tone.fg, fontSize: 13, letterSpacing: 0.4 }}>
-                **** {last4}
-              </Text>
-            </View>
-            <View style={{ gap: 1 }}>
-              <Text variant="micro" style={{ color: tone.muted, fontSize: 10 }}>
-                Exp
-              </Text>
-              <Text variant="bodyStrong" style={{ color: tone.fg, fontSize: 13 }}>
-                {expLabel}
-              </Text>
-            </View>
-          </View>
-
-          <PressableScale
-            accessibilityRole="button"
-            accessibilityLabel="Registrar gasto"
-            onPress={() => openCapture('expense')}
-            style={{
-              backgroundColor: tone.fg,
-              borderRadius: 999,
-              minHeight: 34,
-              paddingHorizontal: 12,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text variant="label" style={{ color: tone.bg, fontWeight: '700', fontSize: 12 }}>
-              + Gasto
-            </Text>
-          </PressableScale>
-        </View>
-      </Card>
+        onVisibleChange={setVisibleCardId}
+        onAdd={() => setCreateOpen(true)}
+        leading={
+          <BalanceCardFace
+            tone={tone}
+            disponivel={pos.disponivel}
+            deltaPct={deltaPct}
+            entradas={pos.receitas}
+            saidas={pos.despesas}
+            onAddExpense={() => openCapture('expense')}
+          />
+        }
+      />
 
       {/* Ações leves */}
       <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -402,9 +347,9 @@ export function FinanceHomeTab({
                 justifyContent: 'center',
               }}
             >
-              <Ionicons name={a.icon} size={16} color={colors.ink} />
+              <Icon name={a.icon} size={16} color={colors.ink} />
             </View>
-            <Text variant="micro" muted style={{ fontWeight: '600', fontSize: 10 }}>
+            <Text variant="micro" muted style={{ fontWeight: '600', fontSize: 11 }}>
               {a.label}
             </Text>
           </PressableScale>
@@ -412,7 +357,7 @@ export function FinanceHomeTab({
       </View>
 
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 16 }}>
+        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
           <Text variant="micro" muted>
             Receita
           </Text>
@@ -420,7 +365,7 @@ export function FinanceHomeTab({
             {formatBRL(pos.receitas)}
           </Text>
         </Card>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 16 }}>
+        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
           <Text variant="micro" muted>
             Saiu da conta
           </Text>
@@ -428,7 +373,7 @@ export function FinanceHomeTab({
             {formatBRL(pos.despesas)}
           </Text>
         </Card>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 16 }}>
+        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
           <Text variant="micro" muted>
             No cartão
           </Text>
@@ -473,7 +418,7 @@ export function FinanceHomeTab({
                 flexGrow: 1,
                 flexBasis: '46%',
                 minHeight: 68,
-                borderRadius: 16,
+                borderRadius: 14,
                 backgroundColor: colors.surface,
                 borderWidth: StyleSheet.hairlineWidth,
                 borderColor: colors.hairline,
@@ -491,13 +436,13 @@ export function FinanceHomeTab({
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons
+                <Icon
                   name={CAT_ICONS[row.categoria] ?? 'ellipse-outline'}
                   size={13}
                   color={row.color}
                 />
               </View>
-              <Text variant="caption" muted style={{ fontSize: 10 }} numberOfLines={1}>
+              <Text variant="caption" muted style={{ fontSize: 11 }} numberOfLines={1}>
                 {row.label}
               </Text>
               <Text variant="bodyStrong" style={{ fontSize: 12 }}>
@@ -533,7 +478,7 @@ export function FinanceHomeTab({
                   tone="elevated"
                   style={{
                     padding: 10,
-                    borderRadius: 16,
+                    borderRadius: 14,
                     gap: 6,
                     backgroundColor: `${b.color}14`,
                     borderWidth: 0,
@@ -550,7 +495,7 @@ export function FinanceHomeTab({
                         justifyContent: 'center',
                       }}
                     >
-                      <Ionicons
+                      <Icon
                         name={CAT_ICONS[b.categoria] ?? 'ellipse-outline'}
                         size={14}
                         color={b.color}
@@ -560,7 +505,7 @@ export function FinanceHomeTab({
                       <Text variant="bodyStrong" style={{ fontSize: 12 }}>
                         {b.label}
                       </Text>
-                      <Text variant="micro" muted style={{ fontSize: 10 }}>
+                      <Text variant="micro" muted style={{ fontSize: 11 }}>
                         {formatBRL(b.total)} / {formatBRL(meta)}
                       </Text>
                     </View>
@@ -609,7 +554,7 @@ export function FinanceHomeTab({
                 key={t.id}
                 title={t.titulo}
                 subtitle={financeTxSubtitle(t)}
-                right={`${t.tipo === 'despesa' ? '−' : '+'}${formatBRL(t.valor)}`}
+                right={`${t.tipo === 'despesa' ? '-' : '+'}${formatBRL(t.valor)}`}
                 onPress={() => setEditingTx(t.id)}
                 showSeparator={i < recent.length - 1}
               />

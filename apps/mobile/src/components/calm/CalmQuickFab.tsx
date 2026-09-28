@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Modal, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { CALM_EXERCISES } from '@simply-life/shared'
 import { TAB_BAR_CONTENT_HEIGHT } from '@simply-life/ui-tokens'
@@ -58,7 +58,7 @@ export function CalmQuickFab()
           ...elevation.fab,
         }}
       >
-        <Ionicons name="leaf-outline" size={20} color={colors.health} />
+        <Icon name="leaf-outline" size={20} color={colors.health} weight="duotone" />
       </PressableScale>
 
       <Modal visible={sheet} transparent animationType="fade" onRequestClose={() => setSheet(false)}>
@@ -92,7 +92,7 @@ export function CalmQuickFab()
                   style={{
                     minHeight: 52,
                     padding: space.md,
-                    borderRadius: 18,
+                    borderRadius: 14,
                     backgroundColor: colors.axelMuted,
                     gap: 4,
                   }}

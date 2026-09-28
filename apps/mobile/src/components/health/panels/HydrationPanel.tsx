@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { findHabit, habitPct, aguaMlPorCopo } from '@simply-life/shared'
 import { PrimaryButton, PressableScale } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -65,7 +65,7 @@ export function HydrationPanel()
                 justifyContent: 'center',
               }}
             >
-              <Ionicons
+              <Icon
                 name="water"
                 size={20}
                 color={filled ? colors.health : colors.inkFaint}
@@ -76,7 +76,7 @@ export function HydrationPanel()
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <PrimaryButton
-          label="− Copo"
+          label="-1 copo"
           variant="secondary"
           onPress={() => void removeWaterCup(isGuest)}
           disabled={atual <= 0}

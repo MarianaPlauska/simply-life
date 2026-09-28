@@ -41,7 +41,7 @@ export function HomeActivityHeatmap({ tasks }: Props)
   return (
     <View
       style={{
-        borderRadius: 24,
+        borderRadius: 20,
         padding: 20,
         gap: 16,
         backgroundColor: colors.axelMuted,
@@ -74,7 +74,7 @@ export function HomeActivityHeatmap({ tasks }: Props)
           alignSelf: 'stretch',
           minHeight: 44,
           borderRadius: 999,
-          backgroundColor: colors.axel,
+          backgroundColor: colors.axelFill,
           alignItems: 'center',
           justifyContent: 'center',
         }}

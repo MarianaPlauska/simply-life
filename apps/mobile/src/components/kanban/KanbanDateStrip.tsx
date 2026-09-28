@@ -94,11 +94,11 @@ export function KanbanDateStrip({ days, selectedIso, onSelect }: Props)
               minWidth: CHIP_W,
               minHeight: 68,
               paddingHorizontal: 10,
-              borderRadius: 18,
+              borderRadius: 14,
               alignItems: 'center',
               justifyContent: 'center',
               gap: 4,
-              backgroundColor: active ? colors.axel : colors.elevated,
+              backgroundColor: active ? colors.axelFill : colors.elevated,
               opacity: d.isPast && !active ? 0.72 : 1,
             }}
           >

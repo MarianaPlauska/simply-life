@@ -1,11 +1,10 @@
 import { type ReactNode } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from '../../dashboard/web/WebHoverable'
 import { webStyle } from '../../dashboard/web/webStyle'
-import { WEB_CARD_BORDER } from '../../dashboard/web/webPalette'
 
 type Props = {
   label: string
@@ -41,7 +40,7 @@ export function WebProfileRow({ label, value, onPress, danger }: Props)
           {value}
         </Text>
       ) : null}
-      {onPress ? <Ionicons name="chevron-forward" size={14} color={colors.inkFaint} /> : null}
+      {onPress ? <Icon name="chevron-forward" size={14} color={colors.inkFaint} /> : null}
     </WebHoverable>
   )
 }
@@ -56,7 +55,7 @@ export function WebProfileSection({
 {
   const { colors } = useTheme()
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
       <Text
         variant="micro"
         muted
@@ -66,7 +65,7 @@ export function WebProfileSection({
           paddingBottom: 6,
           textTransform: 'uppercase',
           letterSpacing: 0.6,
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: '700',
         }}
       >

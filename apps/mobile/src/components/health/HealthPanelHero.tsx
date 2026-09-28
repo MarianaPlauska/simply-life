@@ -1,10 +1,10 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, IconBadge, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = {
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   iconColor?: string
   kicker: string
   headline: string

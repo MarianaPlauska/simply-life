@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View, Linking, Platform } from 'react-native'
-import { Redirect } from 'expo-router'
+import { Redirect, useRouter } from 'expo-router'
 import {
   fetchGmailImapStatus,
   saveGmailImapSettings,
@@ -20,6 +20,7 @@ import { SettingsToggleRow } from '../src/components/settings/SettingsToggleRow'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
+import { useCalendarStore } from '../src/store/calendarStore'
 import { authedApi } from '../src/lib/integrationsApi'
 import { getApiBaseUrl } from '../src/lib/apiBase'
 import { supabase } from '../src/lib/supabase'
@@ -31,6 +32,9 @@ const STATE_KEY = 'axel-google-oauth-state'
 export default function ConfiguracoesScreen()
 {
   const { space, colors } = useTheme()
+  const router = useRouter()
+  const calendarSources = useCalendarStore((s) => s.sources)
+  const hydrateCalendar = useCalendarStore((s) => s.hydrate)
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const hydrate = usePrefsStore((s) => s.hydrate)
@@ -73,6 +77,7 @@ export default function ConfiguracoesScreen()
   useEffect(() =>
   {
     void hydrate()
+    void hydrateCalendar()
     void loadIntegrations()
     void (async () =>
     {
@@ -80,7 +85,7 @@ export default function ConfiguracoesScreen()
       const { data, error } = await supabase.rpc('webhook_secret_configured')
       if (!error) setHasWebhook(Boolean(data))
     })()
-  }, [hydrate, loadIntegrations, isGuest])
+  }, [hydrate, hydrateCalendar, loadIntegrations, isGuest])
 
   if (!userId) return <Redirect href="/login" />
 
@@ -109,7 +114,22 @@ export default function ConfiguracoesScreen()
 
         {tab === 'integracoes' ? (
           <View style={{ gap: space.md }}>
-            <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 20 }}>
+              <Text variant="section">Minha agenda</Text>
+              <Text variant="caption" muted>
+                {calendarSources.length > 0
+                  ? `${calendarSources.length === 1 ? '1 agenda conectada' : `${calendarSources.length} agendas conectadas`}: ${calendarSources.map((c) => c.label).join(', ')}.`
+                  : 'Conecte Google, Teams ou Outlook para o Axel ver seus horários ocupados.'}
+              </Text>
+              <PrimaryButton
+                label={calendarSources.length > 0 ? 'Gerenciar agendas' : 'Conectar agenda'}
+                variant={calendarSources.length > 0 ? 'secondary' : 'primary'}
+                disabled={isGuest}
+                onPress={() => router.push('/agenda')}
+              />
+            </Card>
+
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 20 }}>
               <Text variant="section">Gmail com senha de app</Text>
               <Text variant="caption" muted>
                 {imap?.configured
@@ -199,7 +219,7 @@ export default function ConfiguracoesScreen()
               </View>
             </Card>
 
-            <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 20 }}>
               <Text variant="section">Google OAuth (opcional)</Text>
               <Text variant="caption" muted>
                 {google?.connected
@@ -273,7 +293,7 @@ export default function ConfiguracoesScreen()
         ) : null}
 
         {tab === 'webhooks' ? (
-          <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
+          <Card tone="elevated" style={{ gap: space.md, borderRadius: 20 }}>
             <Text variant="section">Webhooks AXEL</Text>
             <Text variant="caption" muted>
               Endpoint: {endpoint}
@@ -315,7 +335,7 @@ export default function ConfiguracoesScreen()
               value={prefs.ai_coach_enabled}
               onValueChange={(next) => void patch({ ai_coach_enabled: next })}
             />
-            <Card tone="elevated" style={{ gap: space.md, borderRadius: 22 }}>
+            <Card tone="elevated" style={{ gap: space.md, borderRadius: 20 }}>
               <Text variant="section">Palavras-chave de email</Text>
               <Field
                 label="Nova palavra"

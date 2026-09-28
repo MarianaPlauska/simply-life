@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
-import { View, Pressable, Alert, Platform } from 'react-native'
+import { View, Pressable } from 'react-native'
+import { confirmDestructive } from '../../src/lib/confirmDestructive'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import Svg, { Circle } from 'react-native-svg'
 import {
@@ -212,7 +213,7 @@ export default function TaskDetailScreen()
               <View
                 style={{
                   flex: 1,
-                  borderRadius: 18,
+                  borderRadius: 14,
                   gap: 8,
                   padding: 16,
                   backgroundColor: colors.surface,
@@ -230,7 +231,7 @@ export default function TaskDetailScreen()
               <View
                 style={{
                   flex: 1,
-                  borderRadius: 18,
+                  borderRadius: 14,
                   gap: 8,
                   padding: 16,
                   backgroundColor: colors.surface,
@@ -257,7 +258,7 @@ export default function TaskDetailScreen()
             <View
               style={{
                 width: '100%',
-                borderRadius: 18,
+                borderRadius: 14,
                 gap: 8,
                 padding: 16,
                 backgroundColor: colors.surface,
@@ -321,7 +322,7 @@ export default function TaskDetailScreen()
                 )
               }
               multiline
-              placeholder="Contexto e decisões — não é lista de to-dos"
+              placeholder="Contexto e decisões, não é lista de to-dos"
             />
             <PrimaryButton
               label="Salvar notas"
@@ -346,22 +347,7 @@ export default function TaskDetailScreen()
                 void removeTask(task.id, isGuest)
                 router.back()
               }
-              if (Platform.OS === 'web')
-              {
-                if (typeof window !== 'undefined' && window.confirm('Sai da lista. O histórico de feitas permanece.'))
-                {
-                  go()
-                }
-                return
-              }
-              Alert.alert(
-                'Excluir tarefa',
-                'Sai da lista. O histórico de feitas permanece.',
-                [
-                  { text: 'Cancelar', style: 'cancel' },
-                  { text: 'Excluir', style: 'destructive', onPress: go },
-                ],
-              )
+              confirmDestructive('Excluir tarefa', 'Sai da lista. O histórico de feitas permanece.', go)
             }}
           />
         ) : null}

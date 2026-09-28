@@ -1,10 +1,10 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = {
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   title: string
   subtitle: string
   value?: boolean
@@ -34,7 +34,7 @@ function SettingsSwitch({
         paddingHorizontal: 3,
         justifyContent: 'center',
         alignItems: value ? 'flex-end' : 'flex-start',
-        backgroundColor: value ? colors.axel : colors.hairline,
+        backgroundColor: value ? colors.axelFill : colors.hairline,
       }}
     >
       <View
@@ -44,10 +44,10 @@ function SettingsSwitch({
           borderRadius: 999,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#FFFFFF',
+          backgroundColor: colors.onBrand,
         }}
       >
-        <Ionicons
+        <Icon
           name={value ? 'checkmark' : 'close'}
           size={14}
           color={value ? colors.axel : colors.inkMuted}
@@ -67,8 +67,8 @@ export function SettingsToggleRow({
   onPress,
 }: Props)
 {
-  const { colors, mode } = useTheme()
-  const card = mode === 'dark' ? colors.elevated : '#FFFFFF'
+  const { colors } = useTheme()
+  const card = colors.elevated
   const interactive = Boolean(onPress) && onValueChange == null
   const body = (
     <>
@@ -82,7 +82,7 @@ export function SettingsToggleRow({
           backgroundColor: colors.axelMuted,
         }}
       >
-        <Ionicons name={icon} size={20} color={colors.axel} />
+        <Icon name={icon} size={20} color={colors.axel} />
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text variant="bodyStrong" style={{ fontSize: 15 }}>
@@ -95,7 +95,7 @@ export function SettingsToggleRow({
       {onValueChange != null ? (
         <SettingsSwitch value={Boolean(value)} onValueChange={onValueChange} />
       ) : (
-        <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
+        <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
       )}
     </>
   )
@@ -107,7 +107,7 @@ export function SettingsToggleRow({
     minHeight: 72,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    borderRadius: 22,
+    borderRadius: 20,
     backgroundColor: card,
   }
 

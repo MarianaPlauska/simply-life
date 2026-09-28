@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
+  folderColor,
   formatBRL,
   monthExpenseTotal,
   monthIncomeTotal,
@@ -16,7 +17,7 @@ import { FolderGlyph } from '../kanban/FolderGlyph'
 /** Mesmas pastas das tarefas — gastos relacionados compartilham histórico. */
 export function FinanceFoldersPane()
 {
-  const { colors, space } = useTheme()
+  const { colors, space, chart } = useTheme()
   const router = useRouter()
   const txs = useDataStore((s) => s.finance)
   const lists = useKanbanListsStore((s) => s.lists)
@@ -31,17 +32,18 @@ export function FinanceFoldersPane()
   const loose = useMemo(() => txsForFolder(txs, 'loose'), [txs])
   const rows = useMemo(
     () =>
-      lists.map((list) =>
+      lists.map((list, index) =>
       {
         const items = txsForFolder(txs, list.id)
         return {
           list,
+          color: folderColor(list.color, chart, index),
           items,
           gasto: monthExpenseTotal(items),
           receita: monthIncomeTotal(items),
         }
       }),
-    [lists, txs],
+    [lists, txs, chart],
   )
 
   return (
@@ -69,11 +71,11 @@ export function FinanceFoldersPane()
             gap: 12,
             minHeight: 72,
             padding: 12,
-            borderRadius: 18,
+            borderRadius: 14,
             backgroundColor: colors.elevated,
           }}
         >
-          <FolderGlyph color={row.list.color ?? colors.axel} size={48} />
+          <FolderGlyph color={row.color} size={48} />
           <View style={{ flex: 1, gap: 2 }}>
             <Text variant="bodyStrong">{row.list.name}</Text>
             <Text variant="caption" muted>

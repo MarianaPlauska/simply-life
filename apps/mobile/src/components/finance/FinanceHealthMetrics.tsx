@@ -84,7 +84,7 @@ export function FinanceHealthMetrics({
             {formatBRL(disponivel)}
           </Text>
           <Text variant="caption" muted>
-            Após receitas − despesas
+            Receitas menos despesas
           </Text>
         </Card>
         <Card tone="elevated" style={kpiStyle}>

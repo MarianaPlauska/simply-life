@@ -386,7 +386,7 @@ export default function DashboardScreen()
                         key={t.id}
                         onPress={() => router.push(`/task/${t.id}`)}
                         style={{
-                          borderRadius: 16,
+                          borderRadius: 14,
                           backgroundColor: colors.elevated,
                           padding: 14,
                           minHeight: 52,

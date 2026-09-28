@@ -23,7 +23,7 @@ export const TCC_JOURNEYS: TccJourney[] = [
   {
     id: 'behavioral_activation',
     title: 'Ativação comportamental',
-    subtitle: 'Escolha uma micro-ação de 5–15 min e coloque no seu dia como tarefa.',
+    subtitle: 'Escolha uma micro-ação de 5 a 15 min e coloque no seu dia como tarefa.',
     durationMin: 5,
     steps: 3,
     route: '/tcc/behavioral-activation',

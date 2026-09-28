@@ -46,7 +46,7 @@ export const GAMIFICATION_MODE_OPTIONS: {
   {
     id: 'rpg',
     label: 'Aventura',
-    hint: 'Nível, moedas e trilha visíveis na Home. Útil para motivação com TDAH — sem punir dias parados.',
+    hint: 'Nível, moedas e trilha visíveis na Home. Útil para motivação com TDAH, sem punir dias parados.',
   },
 ]
 
@@ -68,7 +68,7 @@ export const NOTIFY_CADENCE_OPTIONS: {
   {
     id: 'batch3',
     label: 'Até três no dia',
-    hint: '9h, 15h e 21h — como no estudo da Duke sobre bem-estar digital. Sem urgência.',
+    hint: '9h, 15h e 21h, como no estudo da Duke sobre bem-estar digital. Sem urgência.',
   },
 ]
 

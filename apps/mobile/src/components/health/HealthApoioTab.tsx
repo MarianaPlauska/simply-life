@@ -83,7 +83,7 @@ export function HealthApoioTab()
             style={{
               minHeight: 56,
               padding: space.md,
-              borderRadius: 18,
+              borderRadius: 14,
               gap: 4,
               backgroundColor: colors.axelMuted,
               borderWidth: 1,

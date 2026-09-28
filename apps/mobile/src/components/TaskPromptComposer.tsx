@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { View, ScrollView, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../ui/Icon'
 import {
   applyTaskMeta,
   busyMinutesByDay,
@@ -338,7 +338,7 @@ export function TaskPromptComposer({ state, onChange }: Props)
       {state.result ? (
         <View style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <Ionicons
+            <Icon
               name={state.result.source === 'local' ? 'hardware-chip-outline' : 'sparkles'}
               size={14}
               color={colors.axel}
@@ -372,7 +372,7 @@ export function TaskPromptComposer({ state, onChange }: Props)
 
           {state.result.perguntas.map((q) => (
             <View key={q} style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
-              <Ionicons name="help-circle-outline" size={16} color={colors.inkMuted} />
+              <Icon name="help-circle-outline" size={16} color={colors.inkMuted} />
               <Text variant="caption" muted style={{ flex: 1 }}>
                 {q}
               </Text>
@@ -477,7 +477,7 @@ function SignalRow({ signal }: { signal: TaskSignal })
   const icon = signal.tone === 'danger' ? 'alert-circle' : signal.tone === 'warn' ? 'warning-outline' : 'information-circle-outline'
   return (
     <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-start' }}>
-      <Ionicons name={icon} size={14} color={color} style={{ marginTop: 2 }} />
+      <Icon name={icon} size={14} color={color} style={{ marginTop: 2 }} />
       <Text variant="caption" color={color} style={{ flex: 1 }}>
         {signal.label}
       </Text>
@@ -534,7 +534,7 @@ function DraftCard({
       style={{
         gap: 10,
         padding: 14,
-        borderRadius: 16,
+        borderRadius: 14,
         borderWidth: 1,
         borderColor: included ? colors.hairlineStrong : colors.hairline,
         backgroundColor: colors.elevated,
@@ -550,7 +550,7 @@ function DraftCard({
           hitSlop={10}
           style={{ minWidth: 28, minHeight: 28, justifyContent: 'center' }}
         >
-          <Ionicons
+          <Icon
             name={included ? 'checkbox' : 'square-outline'}
             size={22}
             color={included ? colors.axel : colors.inkMuted}

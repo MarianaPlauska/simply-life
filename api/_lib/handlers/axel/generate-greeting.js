@@ -1,3 +1,4 @@
+import { stripDashes } from '../../noDashes.js'
 // GET /api/generate-greeting?lat=X&lon=Y
 // Gera saudação contextual JARVIS cruzando clima + dados do user via Google Gemini
 export default async function handler(req, res) {
@@ -102,7 +103,7 @@ Regras absolutas:
     }
 
     const dataRes = await response.json();
-    const greeting = dataRes.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const greeting = stripDashes(dataRes.candidates?.[0]?.content?.parts?.[0]?.text) || '';
 
     return res.status(200).json({
       greeting: greeting.trim(),

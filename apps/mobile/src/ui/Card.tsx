@@ -50,7 +50,7 @@ export function Card({ children, style, tone = 'default', accentTop, ...rest }: 
       : dark
         ? hero
           ? {
-              shadowColor: '#000000',
+              shadowColor: elevation.hero.shadowColor,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.2,
               shadowRadius: 8,

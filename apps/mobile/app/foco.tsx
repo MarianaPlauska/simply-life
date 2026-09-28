@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { View, Pressable, ScrollView } from 'react-native'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../src/ui/Icon'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   buildVisualDay,
@@ -190,7 +190,7 @@ export default function FocoScreen()
               justifyContent: 'center',
             }}
           >
-            <Ionicons name="close" size={22} color={colors.ink} />
+            <Icon name="close" size={22} color={colors.ink} />
           </Pressable>
           <View style={{ flex: 1 }} />
         </View>
@@ -229,7 +229,7 @@ export default function FocoScreen()
               Tarefa atual
             </Text>
             <Text variant="bodyStrong" numberOfLines={1}>
-              {currentTask?.titulo ?? 'Nenhuma tarefa — capture uma'}
+              {currentTask?.titulo ?? 'Nenhuma tarefa. Capture uma'}
             </Text>
           </View>
           {currentTask ? (
@@ -250,7 +250,7 @@ export default function FocoScreen()
                 backgroundColor: colors.axelMuted,
               }}
             >
-              <Ionicons name="checkmark" size={20} color={colors.axel} />
+              <Icon name="checkmark" size={20} color={colors.axel} />
             </PressableScale>
           ) : null}
         </Pressable>
@@ -267,9 +267,9 @@ export default function FocoScreen()
             accessibilityRole="alert"
             style={{ padding: 12, borderRadius: 14, backgroundColor: colors.axelMuted, flexDirection: 'row', gap: 8, alignItems: 'center' }}
           >
-            <Ionicons name={milestone === 'hiperfoco' ? 'cafe-outline' : 'time-outline'} size={18} color={colors.axel} />
+            <Icon name={milestone === 'hiperfoco' ? 'cafe-outline' : 'time-outline'} size={18} color={colors.axel} />
             <Text variant="body" style={{ flex: 1, fontSize: 14 }}>{TIMER_MILESTONE_COPY[milestone]}</Text>
-            <Ionicons name="close" size={16} color={colors.inkMuted} />
+            <Icon name="close" size={16} color={colors.inkMuted} />
           </Pressable>
         ) : null}
 
@@ -305,7 +305,7 @@ export default function FocoScreen()
         </View>
 
         <Text variant="caption" muted>
-          {cycles} ciclo{cycles === 1 ? '' : 's'} hoje. Pause no botão — o setor cobre o tempo já feito.
+          {cycles} ciclo{cycles === 1 ? '' : 's'} hoje. Pause no botão. O setor cobre o tempo já feito.
         </Text>
       </ScrollView>
     </SafeAreaView>

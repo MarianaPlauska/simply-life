@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, IconBadge } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
@@ -9,7 +9,7 @@ export type KpiSquare = {
   label: string
   value: string
   hint?: string
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   color: string
   onPress?: () => void
 }
@@ -21,8 +21,8 @@ export function HomeKpiSquares({ items }: { items: KpiSquare[] })
   const workspace = useWorkspace()
   const dense = Boolean(workspace.isDesktop)
   const tile = dense
-    ? { flexBasis: '22%' as const, minHeight: 96, borderRadius: 18, padding: 12, gap: 10 }
-    : { flexBasis: '46%' as const, minHeight: 124, borderRadius: 22, padding: 16, gap: 14 }
+    ? { flexBasis: '22%' as const, minHeight: 96, borderRadius: 14, padding: 12, gap: 10 }
+    : { flexBasis: '46%' as const, minHeight: 124, borderRadius: 20, padding: 16, gap: 14 }
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>

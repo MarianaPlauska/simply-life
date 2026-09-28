@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { formatMinutesPt, nowAndNext, type DayBlock } from '@simply-life/shared'
 import { Card, Text, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -11,7 +11,7 @@ import { useMinuteClock, useVisualDay } from '../../hooks/useTodayVisualDay'
 
 const hhmm = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`
 
-const KIND_META: Record<DayBlock['kind'], { icon: keyof typeof Ionicons.glyphMap; label: string }> = {
+const KIND_META: Record<DayBlock['kind'], { icon: keyof typeof Icon.glyphMap; label: string }> = {
   agenda: { icon: 'calendar-outline', label: 'Agenda' },
   compromisso: { icon: 'time-outline', label: 'Horário marcado' },
   tarefa: { icon: 'ellipse-outline', label: 'Sugerido pelo Axel' },
@@ -131,9 +131,9 @@ function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number;
   return (
     <View style={{ gap: 8, padding: 12, borderRadius: 14, backgroundColor: block.kind === 'tarefa' ? colors.axelMuted : colors.hairline }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Ionicons name={meta.icon} size={18} color={colors.ink} />
+        <Icon name={meta.icon} size={18} color={colors.ink} />
         <Text variant="caption" muted style={{ flex: 1 }}>Agora · {meta.label}</Text>
-        <Text variant="caption" muted>{hhmm(block.inicio)}–{hhmm(block.fim)}</Text>
+        <Text variant="caption" muted>{hhmm(block.inicio)} às {hhmm(block.fim)}</Text>
       </View>
       <Text variant="title" style={{ fontSize: 20 }}>{block.titulo}</Text>
       {/* tempo visível (cegueira temporal): barra que enche + minutos restantes em texto */}
@@ -141,7 +141,7 @@ function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number;
         accessibilityLabel={`Restam ${left} minutos`}
         style={{ height: 8, borderRadius: 4, backgroundColor: colors.surface, overflow: 'hidden' }}
       >
-        <View style={{ width: `${Math.round(done * 100)}%`, height: 8, borderRadius: 4, backgroundColor: colors.axel }} />
+        <View style={{ width: `${Math.round(done * 100)}%`, height: 8, borderRadius: 4, backgroundColor: colors.axelFill }} />
       </View>
       <Text variant="bodyStrong" style={{ fontSize: 14 }}>Restam {formatMinutesPt(left)}</Text>
       {onStart ? <PrimaryButton label="Começar com timer" size="sm" onPress={onStart} /> : null}
@@ -183,7 +183,7 @@ function BlockRow({ block, compact, past }: { block: DayBlock; compact?: boolean
           borderLeftColor: isTask ? colors.axel : colors.inkFaint,
         }}
       >
-        <Ionicons name={block.essential ? 'star' : meta.icon} size={15} color={isPause ? colors.inkMuted : colors.ink} />
+        <Icon name={block.essential ? 'star' : meta.icon} size={15} color={isPause ? colors.inkMuted : colors.ink} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text variant={isPause ? 'caption' : 'bodyStrong'} muted={isPause} style={{ fontSize: 14 }} numberOfLines={2}>
             {block.titulo}
@@ -205,7 +205,7 @@ function NowLine({ nowMin }: { nowMin: number })
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLabel={`Agora, ${hhmm(nowMin)}`}>
       <Text variant="micro" color={colors.axel} style={{ width: 42, fontWeight: '700' }}>{hhmm(nowMin)}</Text>
-      <View style={{ flex: 1, height: 2, backgroundColor: colors.axel, borderRadius: 1 }} />
+      <View style={{ flex: 1, height: 2, backgroundColor: colors.axelFill, borderRadius: 1 }} />
     </View>
   )
 }

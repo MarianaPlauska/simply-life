@@ -1,6 +1,6 @@
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   inferLifeCategory,
   minutesToLabel,
@@ -12,11 +12,14 @@ import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 
-const PASTEL: Record<string, { bg: string; dark: string }> = {
-  importante: { bg: '#F6E4D8', dark: '#2A2018' },
-  saude: { bg: '#DCEFE6', dark: '#15241E' },
-  crescimento: { bg: '#EEE6F6', dark: '#1E1A28' },
-  carreira: { bg: '#DCE8F4', dark: '#152028' },
+type TintKey = 'brandMuted' | 'healthMuted' | 'financeMuted' | 'tasksMuted'
+
+/** Fundo suave por categoria de vida (tokens do tema, claro e escuro). */
+const CATEGORY_TINT: Record<string, TintKey> = {
+  importante: 'brandMuted',
+  saude: 'healthMuted',
+  crescimento: 'financeMuted',
+  carreira: 'tasksMuted',
 }
 
 function statusLabel(task: MobileTask): string
@@ -34,14 +37,13 @@ type Props = {
 /** Card pastel da timeline do dia (marca esquerda = urgência/pasta). */
 export function KanbanDayCard({ task, onToggle }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors, chart, mode } = useTheme()
   const router = useRouter()
   const lists = useKanbanListsStore((s) => s.lists)
   const cat = inferLifeCategory(task)
-  const tint = PASTEL[cat] ?? PASTEL.carreira
-  const bg = mode === 'dark' ? tint.dark : tint.bg
-  const mark = taskMarkColor(task, lists, colors.danger)
-  const icon = timelineIconForTask(task) as keyof typeof Ionicons.glyphMap
+  const bg = colors[CATEGORY_TINT[cat] ?? 'tasksMuted']
+  const mark = taskMarkColor(task, lists, colors.danger, chart)
+  const icon = timelineIconForTask(task) as keyof typeof Icon.glyphMap
   const pct = Math.round((task.progresso ?? 0) * 100)
 
   return (
@@ -50,7 +52,7 @@ export function KanbanDayCard({ task, onToggle }: Props)
       style={{
         flex: 1,
         flexDirection: 'row',
-        borderRadius: 18,
+        borderRadius: 20,
         backgroundColor: bg,
         overflow: 'hidden',
         minHeight: 88,
@@ -96,7 +98,7 @@ export function KanbanDayCard({ task, onToggle }: Props)
               justifyContent: 'center',
             }}
           >
-            <Ionicons name={task.status === 'done' ? 'checkmark' : icon} size={16} color={colors.ink} />
+            <Icon name={task.status === 'done' ? 'checkmark' : icon} size={16} color={colors.ink} />
           </PressableScale>
           <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Text variant="bodyStrong" numberOfLines={2} style={{ fontSize: 14 }}>

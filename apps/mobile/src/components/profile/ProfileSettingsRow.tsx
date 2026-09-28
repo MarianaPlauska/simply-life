@@ -1,11 +1,11 @@
 import { type ReactNode } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = {
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   label: string
   value?: string
   onPress?: () => void
@@ -51,7 +51,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
           justifyContent: 'center',
         }}
       >
-        {iconNode ?? <Ionicons name={icon} size={18} color={tint} />}
+        {iconNode ?? <Icon name={icon} size={18} color={tint} />}
       </View>
       <Text
         variant="bodyStrong"
@@ -65,7 +65,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
         </Text>
       ) : null}
       {onPress ? (
-        <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />
+        <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
       ) : null}
     </PressableScale>
   )

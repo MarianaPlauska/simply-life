@@ -1,3 +1,4 @@
+import { chartColor, type ChartPalette, type ChartSeries } from '@simply-life/ui-tokens'
 import type { MobileTask } from './tasks'
 import { extractTaskSidecarTags, stripTaskSidecarTags } from './taskPrompt'
 
@@ -13,17 +14,24 @@ export type LifeCategoryDef = {
   id: LifeCategoryId
   label: string
   icon: string
-  /** Cor de acento para chips/timeline */
-  accent: string
+  /** Série da paleta categórica; a cor sai de `lifeCategoryAccent` com `colors.chart` */
+  series: ChartSeries
 }
 
 export const LIFE_CATEGORIES: LifeCategoryDef[] = [
-  { id: 'importante', label: 'Importante', icon: 'flag-outline', accent: '#E85D4C' },
-  { id: 'todos', label: 'Todos', icon: 'albums-outline', accent: '#5B8DEF' },
-  { id: 'saude', label: 'Saúde', icon: 'heart-outline', accent: '#3DBE8B' },
-  { id: 'crescimento', label: 'Crescimento pessoal', icon: 'book-outline', accent: '#F0A03A' },
-  { id: 'carreira', label: 'Carreira', icon: 'briefcase-outline', accent: '#6B7280' },
+  { id: 'importante', label: 'Importante', icon: 'flag-outline', series: 'clay' },
+  { id: 'todos', label: 'Todos', icon: 'albums-outline', series: 'blue' },
+  { id: 'saude', label: 'Saúde', icon: 'heart-outline', series: 'green' },
+  { id: 'crescimento', label: 'Crescimento pessoal', icon: 'book-outline', series: 'amber' },
+  { id: 'carreira', label: 'Carreira', icon: 'briefcase-outline', series: 'slate' },
 ]
+
+/** Cor do pilar no modo atual: passe `colors.chart` do tema. */
+export function lifeCategoryAccent(id: LifeCategoryId, palette: ChartPalette): string
+{
+  const def = LIFE_CATEGORIES.find((c) => c.id === id)
+  return chartColor(palette, def?.series ?? 'blue')
+}
 
 /** Filtros visíveis no Kanban (sem pilares genéricos de inferência). */
 export const KANBAN_LIFE_FILTERS = LIFE_CATEGORIES.filter(
@@ -274,8 +282,7 @@ export function timelineIconForTask(task: MobileTask): string
   return 'ellipse-outline'
 }
 
-export function timelineColorForTask(task: MobileTask): string
+export function timelineColorForTask(task: MobileTask, palette: ChartPalette): string
 {
-  const cat = inferLifeCategory(task)
-  return LIFE_CATEGORIES.find((c) => c.id === cat)?.accent ?? '#B76021'
+  return lifeCategoryAccent(inferLifeCategory(task), palette)
 }

@@ -3,7 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../theme/ThemeProvider'
 import { useWorkspace } from '../layout/useWorkspace'
 
-/** Degradê de clima. Escuro: carvão quente — sem voltar ao #000 no rodapé. */
+/** Degradê de clima: névoa petróleo discreta no topo, sem coral (o coral é só para ações). */
 export function AtmosphereWash()
 {
   const { mode, colors } = useTheme()
@@ -15,7 +15,7 @@ export function AtmosphereWash()
       <>
         <LinearGradient
           pointerEvents="none"
-          colors={['#F4D5BC', '#F6EEE3', '#E8D9C4']}
+          colors={[colors.brandMuted, colors.canvas, colors.surface]}
           locations={[0, 0.38, 1]}
           start={{ x: 0.15, y: 0 }}
           end={{ x: 0.85, y: 1 }}
@@ -23,7 +23,7 @@ export function AtmosphereWash()
         />
         <LinearGradient
           pointerEvents="none"
-          colors={['rgba(232, 115, 74, 0.16)', 'rgba(232, 115, 74, 0.05)', 'transparent']}
+          colors={['rgba(31, 58, 61, 0.08)', 'rgba(31, 58, 61, 0.02)', 'transparent']}
           locations={[0, 0.3, 1]}
           start={{ x: 1, y: 0 }}
           end={{ x: 0.2, y: 0.75 }}
@@ -45,7 +45,7 @@ export function AtmosphereWash()
       />
       <LinearGradient
         pointerEvents="none"
-        colors={['rgba(232, 115, 74, 0.07)', 'transparent', 'transparent']}
+        colors={['rgba(31, 58, 61, 0.55)', 'rgba(31, 58, 61, 0.12)', 'transparent']}
         locations={[0, 0.35, 1]}
         start={{ x: 1, y: 0 }}
         end={{ x: 0.1, y: 0.65 }}

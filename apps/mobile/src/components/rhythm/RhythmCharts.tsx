@@ -17,7 +17,7 @@ const AXIS_W = 28
 const LABEL_H = 18
 /** respiro no topo para o rótulo do eixo não ser cortado */
 const PAD_T = 10
-const FONT = 'Manrope_500Medium'
+const FONT = 'Lexend_500Medium'
 
 /** Coluna com topo arredondado (4px) e base reta. */
 function columnPath(x: number, y: number, w: number, h: number): string

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View, TextInput, useWindowDimensions } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   buildLifeScopeSnapshots,
   buildLooseScopeSnapshot,
@@ -19,7 +19,7 @@ type Props = { tasks: MobileTask[] }
 /** Pastas em grade (ícone + contagem) e leitura das anotações de cada tarefa. */
 export function KanbanFoldersPane({ tasks }: Props)
 {
-  const { colors, space } = useTheme()
+  const { colors, chart, space } = useTheme()
   const { width } = useWindowDimensions()
   const router = useRouter()
   const lists = useKanbanListsStore((s) => s.lists)
@@ -34,12 +34,15 @@ export function KanbanFoldersPane({ tasks }: Props)
     hydrate()
   }, [hydrate])
 
-  const userScopes = useMemo(() => buildUserScopeSnapshots(tasks, lists), [tasks, lists])
+  const userScopes = useMemo(() => buildUserScopeSnapshots(tasks, lists, chart), [tasks, lists, chart])
   const lifeScopes = useMemo(
-    () => buildLifeScopeSnapshots(tasks).filter((s) => s.total > 0),
-    [tasks],
+    () => buildLifeScopeSnapshots(tasks, chart).filter((s) => s.total > 0),
+    [tasks, chart],
   )
-  const loose = useMemo(() => buildLooseScopeSnapshot(tasks), [tasks])
+  const loose = useMemo(
+    () => buildLooseScopeSnapshot(tasks, colors.inkFaint),
+    [tasks, colors.inkFaint],
+  )
   const q = query.trim().toLowerCase()
   const folders = userScopes.filter((s) => !q || s.name.toLowerCase().includes(q))
   const tile = Math.max(88, Math.floor((Math.min(width, 480) - 56) / 3))
@@ -87,7 +90,7 @@ export function KanbanFoldersPane({ tasks }: Props)
           backgroundColor: colors.surface,
         }}
       >
-        <Ionicons name="search" size={16} color={colors.inkMuted} />
+        <Icon name="search" size={16} color={colors.inkMuted} />
         <TextInput
           value={query}
           onChangeText={setQuery}
@@ -148,7 +151,7 @@ export function KanbanFoldersPane({ tasks }: Props)
             style={{
               flex: 1,
               minHeight: 44,
-              borderRadius: 16,
+              borderRadius: 14,
               paddingHorizontal: 14,
               color: colors.ink,
               backgroundColor: colors.surface,
@@ -193,7 +196,7 @@ export function KanbanFoldersPane({ tasks }: Props)
             alignItems: 'center',
             gap: 12,
             padding: 14,
-            borderRadius: 18,
+            borderRadius: 14,
             backgroundColor: colors.elevated,
           }}
         >
@@ -214,7 +217,7 @@ export function KanbanFoldersPane({ tasks }: Props)
         {notes.length === 0 ? (
           <EmptyState
             title="Nenhuma anotação ainda"
-            body="Na ficha da tarefa, a aba Notas guarda contexto — sem lista de to-dos."
+            body="Na ficha da tarefa, a aba Notas guarda contexto, sem lista de to-dos."
             icon="document-text-outline"
           />
         ) : (
@@ -227,7 +230,7 @@ export function KanbanFoldersPane({ tasks }: Props)
                 alignItems: 'center',
                 gap: 12,
                 padding: 14,
-                borderRadius: 18,
+                borderRadius: 14,
                 backgroundColor: colors.elevated,
                 minHeight: 64,
               }}
@@ -237,12 +240,12 @@ export function KanbanFoldersPane({ tasks }: Props)
                   width: 40,
                   height: 40,
                   borderRadius: 12,
-                  backgroundColor: `${colors.axel}22`,
+                  backgroundColor: `${colors.axelFill}22`,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons name="document-text-outline" size={18} color={colors.axel} />
+                <Icon name="document-text-outline" size={18} color={colors.axel} />
               </View>
               <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
                 <Text variant="bodyStrong" numberOfLines={1}>

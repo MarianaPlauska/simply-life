@@ -1,12 +1,12 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../ui/Icon'
 import { moodColor, moodLabel } from '@simply-life/shared'
 import { COLOR_DARK } from '@simply-life/ui-tokens'
 import { Text, PressableScale } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 import { hapticLight } from '../lib/haptics'
 
-const ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
+const ICONS: Record<number, keyof typeof Icon.glyphMap> = {
   1: 'sad',
   2: 'sad-outline',
   3: 'remove-outline',
@@ -14,7 +14,7 @@ const ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
   5: 'happy',
 }
 
-/** Face geométrica Ionicons - sem emoji Unicode */
+/** Face geométrica Icon - sem emoji Unicode */
 export function MoodFace({
   mood,
   selected,
@@ -56,7 +56,7 @@ export function MoodFace({
           borderColor: colors.hairline,
         }}
       >
-        <Ionicons name={icon} size={size} color={iconColor} />
+        <Icon name={icon} size={size} color={iconColor} />
       </View>
       {showLabel ? (
         <Text

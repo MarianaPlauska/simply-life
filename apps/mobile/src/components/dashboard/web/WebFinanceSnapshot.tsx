@@ -5,7 +5,6 @@ import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
-import { WEB_CARD_BORDER } from './webPalette'
 
 /** Painel de finanças no dashboard web: total do mês + últimos lançamentos. */
 export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
@@ -33,7 +32,7 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
         </WebHoverable>
       </View>
 
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, padding: 18, gap: 12 }}>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 18, gap: 12 }}>
         {recent.length === 0 ? (
           <Text variant="caption" muted>
             Sem lançamentos recentes.

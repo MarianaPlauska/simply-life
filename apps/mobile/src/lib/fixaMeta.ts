@@ -1,9 +1,11 @@
 import { Platform } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
 import {
-  FINANCE_CATEGORY_COLORS,
-  type FinanceCategory,
+  FINANCE_CATEGORY_SERIES,
+  financeSeriesFromStored,
+  isBuiltinFinanceCategory,
 } from '@simply-life/shared'
+import type { ChartSeries } from '@simply-life/ui-tokens'
 import { DEFAULT_CATEGORY_ICONS } from './categoryMeta'
 
 const KEY = 'simply_life_finance_fixa_meta_v1'
@@ -11,6 +13,7 @@ const KEY = 'simply_life_finance_fixa_meta_v1'
 export type FixaUrgencia = 1 | 2 | 3
 
 export type FixaMeta = {
+  /** Chave da paleta categórica; dados antigos podem trazer hex (ver `resolveFixaMeta`). */
   color: string
   urgencia: FixaUrgencia
   icon: string
@@ -18,28 +21,19 @@ export type FixaMeta = {
 
 export type FixaMetaMap = Record<string, Partial<FixaMeta>>
 
-const CATEGORIES = new Set<FinanceCategory>([
-  'habitacao',
-  'alimentacao',
-  'transporte',
-  'lazer',
-  'saude',
-  'educacao',
-  'compras',
-  'outros',
-])
-
 export const FIXA_URGENCIA_LABELS: Record<FixaUrgencia, string> = {
   1: 'Alta',
   2: 'Média',
   3: 'Baixa',
 }
 
-export function defaultFixaColor(categoria: string): string
+export type ResolvedFixaMeta = Omit<FixaMeta, 'color'> & { color: ChartSeries }
+
+/** Chave padrão: a da categoria da conta; categoria desconhecida fica em ardósia. */
+export function defaultFixaColor(categoria: string): ChartSeries
 {
-  const k = categoria.toLowerCase() as FinanceCategory
-  if (CATEGORIES.has(k)) return FINANCE_CATEGORY_COLORS[k]
-  return '#E8734A'
+  const k = categoria.toLowerCase()
+  return isBuiltinFinanceCategory(k) ? FINANCE_CATEGORY_SERIES[k] : 'slate'
 }
 
 export function defaultFixaIcon(categoria: string): string
@@ -48,7 +42,7 @@ export function defaultFixaIcon(categoria: string): string
   return DEFAULT_CATEGORY_ICONS[k] ?? 'circle'
 }
 
-export function defaultFixaMeta(categoria: string): FixaMeta
+export function defaultFixaMeta(categoria: string): ResolvedFixaMeta
 {
   return {
     color: defaultFixaColor(categoria),
@@ -106,7 +100,14 @@ export function resolveFixaMeta(
   id: string | number,
   map: FixaMetaMap,
   categoria: string,
-): FixaMeta
+): ResolvedFixaMeta
 {
-  return { ...defaultFixaMeta(categoria), ...map[String(id)] }
+  const base = defaultFixaMeta(categoria)
+  const extra = map[String(id)]
+  return {
+    ...base,
+    ...extra,
+    // chave, hex antigo ou hex qualquer viram chave; vazio fica no padrão da categoria
+    color: extra?.color ? financeSeriesFromStored(extra.color, categoria) : base.color,
+  }
 }

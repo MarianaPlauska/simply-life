@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   dayCount,
   habitMetOn,
@@ -68,7 +68,7 @@ export function RoutineHabitRow({
           justifyContent: 'center',
         }}
       >
-        {done ? <Ionicons name="checkmark" size={16} color="#fff" /> : null}
+        {done ? <Icon name="checkmark" size={16} color={colors.canvas} /> : null}
       </View>
       <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -115,7 +115,7 @@ export function RoutineHabitRow({
             gap: 4,
           }}
         >
-          <Ionicons name="information-circle-outline" size={14} color={colors.danger} />
+          <Icon name="information-circle-outline" size={14} color={colors.danger} />
           <Text variant="micro" style={{ color: colors.danger, fontWeight: '700' }}>
             Dica
           </Text>

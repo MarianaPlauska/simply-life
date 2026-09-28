@@ -210,7 +210,7 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
                   width: 8,
                   height: 8,
                   borderRadius: 999,
-                  backgroundColor: colors.axel,
+                  backgroundColor: colors.axelFill,
                 }}
               />
               <Text variant="body" style={{ flex: 1 }} numberOfLines={1}>

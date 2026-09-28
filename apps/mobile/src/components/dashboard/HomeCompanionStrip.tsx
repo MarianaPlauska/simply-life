@@ -49,7 +49,7 @@ export function HomeCompanionStrip({ lowMood }: Props)
         />
         <Text variant="body" muted>
           Gastos do casal e metas compartilhadas ficam em Finanças. Em dias difíceis, um
-          registro de humor já é um passo — não é obrigatório conversar com ninguém.
+          registro de humor já é um passo. Não é obrigatório conversar com ninguém.
         </Text>
         <PrimaryButton
           label="Abrir finanças do casal"
@@ -67,7 +67,7 @@ export function HomeCompanionStrip({ lowMood }: Props)
     <Card tone="elevated" style={{ gap: space.sm }}>
       <SectionHeader
         title="Companhia"
-        subtitle="Opcional — sem pressão para responder"
+        subtitle="Opcional, sem pressão para responder"
       />
       <Text variant="body" muted>
         Dias com humor baixo pesam mais sozinhos. Você pode convidar alguém de confiança para

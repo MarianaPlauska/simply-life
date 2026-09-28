@@ -39,7 +39,7 @@ function monthChipLabel(offset: number): string
 /** Relatório mensal: receita, caixa, crédito e categorias. */
 export function FinanceMonthReport()
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space, radius, chart } = useTheme()
   const { isDesktop } = useWorkspace()
   const txs = useDataStore((s) => s.finance)
   const catMap = useCategoryMetaStore((s) => s.map)
@@ -54,8 +54,8 @@ export function FinanceMonthReport()
   const series = useMemo(() => monthDailyExpenseSeries(monthTxs, ref), [monthTxs, ref])
   const incomeSeries = useMemo(() => monthDailyIncomeSeries(monthTxs, ref), [monthTxs, ref])
   const ranking = useMemo(
-    () => rankCategoriesBySpend(monthTxs, colorMapFromMeta(catMap)),
-    [monthTxs, catMap],
+    () => rankCategoriesBySpend(monthTxs, colorMapFromMeta(catMap), chart),
+    [monthTxs, catMap, chart],
   )
   const max = ranking[0]?.total ?? 1
   const donutSegments = ranking.map((r) => ({

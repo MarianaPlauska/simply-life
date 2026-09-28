@@ -72,7 +72,7 @@ export async function exportFinanceExcel(
 export async function exportFinancePdf(
   txs: FinanceTx[],
   lists: { id: string; name: string }[],
-  title = 'Gastos — Simply Life',
+  title = 'Gastos · Simply Life',
 ): Promise<string>
 {
   const html = buildFinancePdfHtml(financeTxsToExportRows(txs, folderNameLookup(lists)), title)

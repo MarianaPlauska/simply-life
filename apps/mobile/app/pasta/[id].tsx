@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import {
-  FOLDER_PALETTE,
+  FOLDER_SERIES,
+  FOLDER_SERIES_LABELS,
+  folderColor,
+  folderSeriesFromStored,
+  lifeCategoryAccent,
   applyTaskList,
   LIFE_CATEGORIES,
   tasksForScope,
@@ -38,7 +42,7 @@ export default function PastaScreen()
   const { id } = useLocalSearchParams<{ id: string }>()
   const scopeId = Array.isArray(id) ? id[0] : id
   const router = useRouter()
-  const { colors, space } = useTheme()
+  const { colors, space, chart } = useTheme()
   const tasks = useDataStore((s) => s.tasks) ?? []
   const finance = useDataStore((s) => s.finance) ?? []
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
@@ -60,7 +64,9 @@ export default function PastaScreen()
   }, [hydrate])
 
   const kind = kindOf(scopeId || '')
-  const list = lists.find((l) => l.id === scopeId) ?? null
+  const listIndex = lists.findIndex((l) => l.id === scopeId)
+  const list = listIndex >= 0 ? lists[listIndex] : null
+  const listSeries = list ? folderSeriesFromStored(list.color, listIndex) : null
   const scoped = useMemo(
     () => tasksForScope(tasks, scopeId || '', lists),
     [tasks, scopeId, lists],
@@ -74,6 +80,11 @@ export default function PastaScreen()
     list?.name ??
     lifeCat?.label ??
     (kind === 'loose' ? 'Sem pasta' : 'Pasta')
+  const scopeColor = list
+    ? folderColor(list.color, chart, listIndex)
+    : lifeCat
+      ? lifeCategoryAccent(lifeCat.id, chart)
+      : colors.inkFaint
 
   useEffect(() =>
   {
@@ -162,7 +173,7 @@ export default function PastaScreen()
                   key={t.id}
                   title={t.titulo}
                   subtitle={`${t.data} · ${t.tipo}`}
-                  right={`${t.tipo === 'receita' ? '+' : '−'}${formatBRL(t.valor)}`}
+                  right={`${t.tipo === 'receita' ? '+' : '-'}${formatBRL(t.valor)}`}
                   showSeparator={i < arr.length - 1}
                 />
               ))
@@ -200,17 +211,18 @@ export default function PastaScreen()
                   Cor
                 </Text>
                 <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-                  {FOLDER_PALETTE.map((c) => (
+                  {FOLDER_SERIES.map((key) => (
                     <PressableScale
-                      key={c}
-                      accessibilityLabel={`Cor ${c}`}
-                      onPress={() => list && patchList(list.id, { color: c })}
+                      key={key}
+                      accessibilityLabel={`Cor ${FOLDER_SERIES_LABELS[key]}`}
+                      accessibilityState={{ selected: listSeries === key }}
+                      onPress={() => list && patchList(list.id, { color: key })}
                       style={{
                         width: 36,
                         height: 36,
                         borderRadius: 999,
-                        backgroundColor: c,
-                        borderWidth: list?.color === c ? 3 : 0,
+                        backgroundColor: folderColor(key, chart),
+                        borderWidth: listSeries === key ? 3 : 0,
                         borderColor: colors.ink,
                       }}
                     />
@@ -281,7 +293,7 @@ export default function PastaScreen()
               progress={pct}
               size={160}
               strokeWidth={10}
-              color={list?.color ?? colors.axel}
+              color={scopeColor}
               centerLabel={`${pct}%`}
             />
             <View style={{ width: '100%' }}>
@@ -289,7 +301,7 @@ export default function PastaScreen()
                 pct={pct}
                 currentLabel={`${done} feitas`}
                 targetLabel={`${scoped.length} (${pct}%)`}
-                fill={list?.color ?? colors.axel}
+                fill={scopeColor}
               />
             </View>
             <View style={{ width: '100%' }}>
@@ -304,7 +316,7 @@ export default function PastaScreen()
                   pct={taskProgressPct(t)}
                   currentLabel={`${taskProgressPct(t)}%`}
                   targetLabel={t.status === 'done' ? 'Feito' : 'Meta'}
-                  fill={list?.color ?? colors.tasks}
+                  fill={scopeColor}
                 />
               </View>
             ))}
@@ -325,7 +337,7 @@ export default function PastaScreen()
               />
             ) : (
               <Text variant="body" muted>
-                Anotações das tarefas deste recorte — texto livre, sem to-dos.
+                Anotações das tarefas deste recorte: texto livre, sem to-dos.
               </Text>
             )}
             {scoped
@@ -337,7 +349,7 @@ export default function PastaScreen()
                   onPress={() => router.push(`/task/${t.id}`)}
                   style={{
                     padding: 14,
-                    borderRadius: 18,
+                    borderRadius: 14,
                     backgroundColor: colors.elevated,
                     gap: 4,
                     minHeight: 56,

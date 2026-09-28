@@ -1,3 +1,4 @@
+import { stripDashes } from '../../noDashes.js'
 // POST /api/axel/today-verdict
 // AXEL - "posso fazer isso hoje?" com IA opcional (Groq/Gemini)
 
@@ -31,7 +32,7 @@ async function callGroq(apiKey, systemInstruction, userPrompt)
 
   if (!res.ok) throw new Error(`Groq HTTP ${res.status}`)
   const data = await res.json()
-  return data.choices?.[0]?.message?.content || ''
+  return stripDashes(data.choices?.[0]?.message?.content) || ''
 }
 
 export default async function handler(req, res)
@@ -100,7 +101,7 @@ ${JSON.stringify(localVerdict || {}, null, 2)}`
         },
       )
       const data = await response.json()
-      raw = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      raw = stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text) || ''
     }
 
     const parsed = parseJsonFromText(raw)

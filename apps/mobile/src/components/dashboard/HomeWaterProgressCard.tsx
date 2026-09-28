@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   localTodayIso,
   findHabit,
@@ -68,7 +68,7 @@ export function HomeWaterProgressCard({ compact }: Props)
   return (
     <View
       style={{
-        borderRadius: 24,
+        borderRadius: 20,
         padding: 20,
         gap: 16,
         backgroundColor: colors.healthMuted,
@@ -114,7 +114,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             ]
           ).map((row) => (
             <View key={row.label} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-              <Ionicons name={row.icon} size={13} color={colors.axel} />
+              <Icon name={row.icon} size={13} color={colors.axel} />
               <Text variant="micro" muted style={{ fontSize: 11 }} numberOfLines={1}>
                 {row.label}
               </Text>
@@ -157,7 +157,7 @@ export function HomeWaterProgressCard({ compact }: Props)
                   style={{
                     color: isToday ? colors.health : colors.inkMuted,
                     fontWeight: isToday ? '700' : '500',
-                    fontSize: 9,
+                    fontSize: 11,
                   }}
                 >
                   {WEEKDAYS[new Date(`${iso}T12:00:00`).getDay()]}
@@ -184,7 +184,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             opacity: atual <= 0 ? 0.4 : 1,
           }}
         >
-          <Ionicons name="remove" size={20} color={colors.ink} />
+          <Icon name="remove" size={20} color={colors.ink} />
         </PressableScale>
         <PressableScale
           accessibilityLabel={`Registrar copo de ${ml} ml`}
@@ -200,7 +200,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             gap: 6,
           }}
         >
-          <Ionicons name="water" size={16} color={colors.canvas} />
+          <Icon name="water" size={16} color={colors.canvas} />
           <Text variant="label" style={{ color: colors.canvas, fontWeight: '700', fontSize: 13 }}>
             + Copo ({ml} ml)
           </Text>
@@ -218,7 +218,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             justifyContent: 'center',
           }}
         >
-          <Ionicons name="options-outline" size={18} color={colors.ink} />
+          <Icon name="options-outline" size={18} color={colors.ink} />
         </PressableScale>
       </View>
 

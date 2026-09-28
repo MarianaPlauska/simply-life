@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from 'react'
 import { View, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Card, Text, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -34,7 +34,7 @@ export function HomeCollapsible({
     <Card
       tone="elevated"
       style={{
-        borderRadius: 24,
+        borderRadius: 20,
         gap: open ? space.sm : space.xs,
         padding: 16,
       }}
@@ -81,7 +81,7 @@ export function HomeCollapsible({
             justifyContent: 'center',
           }}
         >
-          <Ionicons
+          <Icon
             name={open ? 'chevron-up' : 'chevron-down'}
             size={16}
             color={colors.inkMuted}

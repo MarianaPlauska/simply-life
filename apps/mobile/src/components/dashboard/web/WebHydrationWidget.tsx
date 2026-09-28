@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { AGUA_META_COPOS, aguaMlPorCopo, findHabit, habitPct } from '@simply-life/shared'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -10,7 +10,6 @@ import { useWaterLogStore } from '../../../store/waterLogStore'
 import { WaterGoalEditor } from '../WaterGoalEditor'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 /** Hidratação como barra de progresso horizontal + controles compactos — sem ilustração de garrafa. */
 export function WebHydrationWidget()
@@ -35,7 +34,7 @@ export function WebHydrationWidget()
   const pct = habitPct(agua)
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, padding: 18, gap: 12 }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 18, gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <View style={{ gap: 2 }}>
           <Text variant="section" style={{ fontSize: 16 }}>
@@ -61,7 +60,7 @@ export function WebHydrationWidget()
               cursor: atual <= 0 ? 'default' : 'pointer',
             })}
           >
-            <Ionicons name="remove" size={16} color={colors.ink} />
+            <Icon name="remove" size={16} color={colors.ink} />
           </WebHoverable>
           <WebHoverable
             onPress={() => void addWaterCup(isGuest)}
@@ -77,7 +76,7 @@ export function WebHydrationWidget()
               cursor: 'pointer',
             })}
           >
-            <Ionicons name="add" size={14} color={colors.canvas} />
+            <Icon name="add" size={14} color={colors.canvas} />
             <Text variant="micro" style={{ color: colors.canvas, fontWeight: '700' }}>
               Copo
             </Text>
@@ -95,12 +94,12 @@ export function WebHydrationWidget()
               cursor: 'pointer',
             })}
           >
-            <Ionicons name="options-outline" size={14} color={colors.ink} />
+            <Icon name="options-outline" size={14} color={colors.ink} />
           </WebHoverable>
         </View>
       </View>
 
-      <View style={{ height: 6, borderRadius: 999, backgroundColor: WEB_ROW_DIVIDER, overflow: 'hidden' }}>
+      <View style={{ height: 6, borderRadius: 999, backgroundColor: colors.hairline, overflow: 'hidden' }}>
         <View
           style={{
             width: `${Math.min(100, pct)}%`,

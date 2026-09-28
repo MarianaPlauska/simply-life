@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, Share, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../src/ui/Icon'
 import {
   DAY_PLAN_MODE_COPY,
   addDaysIso,
@@ -80,7 +80,7 @@ export default function RhythmScreen()
         {report.care.level !== 'none' ? (
           <Card tone="elevated" style={{ gap: space.sm }}>
             <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-start' }}>
-              <Ionicons name="heart-outline" size={18} color={colors.axel} style={{ marginTop: 2 }} />
+              <Icon name="heart-outline" size={18} color={colors.axel} style={{ marginTop: 2 }} />
               <Text variant="body" style={{ flex: 1 }}>{report.care.text}</Text>
             </View>
             {report.care.level === 'concern' ? <CrisisSupportCard compact /> : null}
@@ -91,7 +91,7 @@ export default function RhythmScreen()
           <StatTile label="Noites planejadas" value={`${t.nightsPlanned}`} sub={`de ${report.days.length}`} />
           <StatTile
             label="Essenciais feitos"
-            value={t.essentials ? `${t.essentialsDone}/${t.essentials}` : '–'}
+            value={t.essentials ? `${t.essentialsDone}/${t.essentials}` : '--'}
             sub={t.essentials ? `${Math.round((t.essentialsDone / t.essentials) * 100)}%` : 'planeje uma noite para ver'}
           />
           <StatTile label="Tarefas concluídas" value={`${t.doneCount}`} />
@@ -152,7 +152,7 @@ export default function RhythmScreen()
             <Text variant="section">O que o Axel percebeu</Text>
             {report.insights.map((i) => (
               <View key={i} style={{ flexDirection: 'row', gap: 8 }}>
-                <Ionicons name="sparkles-outline" size={14} color={colors.axel} style={{ marginTop: 3 }} />
+                <Icon name="sparkles-outline" size={14} color={colors.axel} style={{ marginTop: 3 }} />
                 <Text variant="body" style={{ flex: 1, fontSize: 14 }}>{i}</Text>
               </View>
             ))}

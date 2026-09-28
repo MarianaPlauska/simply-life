@@ -1,16 +1,19 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import type { StreakWeekCell } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = { cells: StreakWeekCell[] }
 
-function glyph(kind: StreakWeekCell['kind']): { name: keyof typeof Ionicons.glyphMap; color: string } | 'num'
+function glyph(
+  kind: StreakWeekCell['kind'],
+  colors: { axel: string; danger: string; attention: string },
+): { name: keyof typeof Icon.glyphMap; color: string } | 'num'
 {
-  if (kind === 'action') return { name: 'flame', color: '#E8734A' }
-  if (kind === 'missed') return { name: 'close-circle', color: '#E07A6A' }
-  if (kind === 'open' || kind === 'today') return { name: 'alert-circle', color: '#E8734A' }
+  if (kind === 'action') return { name: 'flame', color: colors.axel }
+  if (kind === 'missed') return { name: 'close-circle', color: colors.danger }
+  if (kind === 'open' || kind === 'today') return { name: 'alert-circle', color: colors.attention }
   return 'num'
 }
 
@@ -23,7 +26,7 @@ export function StreakWeekRow({ cells }: Props)
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 4 }}>
       {cells.map((cell) =>
       {
-        const g = glyph(cell.kind)
+        const g = glyph(cell.kind, colors)
         const future = cell.kind === 'future'
         return (
           <View key={cell.iso} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
@@ -48,7 +51,7 @@ export function StreakWeekRow({ cells }: Props)
                   {cell.dayNum}
                 </Text>
               ) : (
-                <Ionicons name={g.name} size={20} color={g.color} />
+                <Icon name={g.name} size={20} color={g.color} />
               )}
             </View>
           </View>

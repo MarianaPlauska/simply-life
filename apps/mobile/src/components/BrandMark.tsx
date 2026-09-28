@@ -29,7 +29,7 @@ export function BrandMark({
         x="16"
         y="20.5"
         textAnchor="middle"
-        fontFamily="Manrope_700Bold"
+        fontFamily="Lexend_700Bold"
         fontSize="13"
         fontWeight="700"
         fill={fg}

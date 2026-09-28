@@ -17,7 +17,7 @@ type Props = { tasks: MobileTask[] }
 /** Desempenho das tarefas no mesmo framework do resumo geral. */
 export function KanbanReportsPane({ tasks }: Props)
 {
-  const { space } = useTheme()
+  const { space, chart } = useTheme()
   const router = useRouter()
   const lists = useKanbanListsStore((s) => s.lists)
   const hydrate = useKanbanListsStore((s) => s.hydrate)
@@ -29,10 +29,10 @@ export function KanbanReportsPane({ tasks }: Props)
 
   const snapshots = useMemo(() =>
   {
-    const user = buildUserScopeSnapshots(tasks, lists)
-    const life = buildLifeScopeSnapshots(tasks).filter((s) => s.total > 0)
+    const user = buildUserScopeSnapshots(tasks, lists, chart)
+    const life = buildLifeScopeSnapshots(tasks, chart).filter((s) => s.total > 0)
     return [...user, ...life]
-  }, [tasks, lists])
+  }, [tasks, lists, chart])
 
   const open = snapshots.filter((s) => s.open > 0).slice(0, 6)
 

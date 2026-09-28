@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router'
 import {
   aggregateHumorByDay,
   buildMoodDistribution,
-  buildCurrentMonthCalendar,
   weeklyMoodReview,
   isSoftMoodDay,
   AGUA_META_COPOS,
@@ -55,7 +54,6 @@ export function HealthDiaryTab()
 
   const slices = useMemo(() => buildMoodDistribution(humor), [humor])
   const agregados = useMemo(() => aggregateHumorByDay(humor), [humor])
-  const cells = useMemo(() => buildCurrentMonthCalendar(agregados), [agregados])
   const total = humor.length
   const dia = new Date().toISOString().slice(0, 10)
   const last = useMemo(
@@ -70,7 +68,6 @@ export function HealthDiaryTab()
         .slice(0, 12),
     [humor],
   )
-  const trend = useMemo(() => agregados.slice(-30), [agregados])
   const prompt = useMemo(() => promptOfDay(), [])
 
   const habitCorrelation = useMemo(() =>
@@ -135,9 +132,8 @@ export function HealthDiaryTab()
         onOpenNotes={() => router.push('/anotacoes')}
         total={total}
         slices={slices}
-        trend={trend}
+        days={agregados}
         week={week}
-        cells={cells}
         comNota={comNota}
         habits={habitCorrelation}
       />

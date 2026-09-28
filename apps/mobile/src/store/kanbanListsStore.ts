@@ -1,11 +1,13 @@
 import { create } from 'zustand'
-import { FOLDER_PALETTE, type UserTaskList } from '@simply-life/shared'
+import type { ChartSeries } from '@simply-life/ui-tokens'
+import { defaultFolderSeries, type UserTaskList } from '@simply-life/shared'
 import { loadKanbanLists, saveKanbanLists } from '../lib/kanbanListsPersist'
 
 type State = {
   lists: UserTaskList[]
   hydrate: () => void
-  addList: (name: string, color?: string) => UserTaskList | null
+  /** `color` é uma chave da paleta (`ChartSeries`), resolvida na renderização */
+  addList: (name: string, color?: ChartSeries) => UserTaskList | null
   patchList: (id: string, patch: Partial<Pick<UserTaskList, 'name' | 'color' | 'notas'>>) => void
   removeList: (id: string) => void
 }
@@ -24,7 +26,7 @@ export const useKanbanListsStore = create<State>((set, get) => ({
     const item: UserTaskList = {
       id: `l${Date.now().toString(36)}`,
       name: label,
-      color: color || FOLDER_PALETTE[lists.length % FOLDER_PALETTE.length],
+      color: color || defaultFolderSeries(lists.length),
       notas: '',
       createdAt: new Date().toISOString(),
     }

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope'
+import { useFonts, Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold, Lexend_700Bold } from '@expo-google-fonts/lexend'
 import { Fraunces_500Medium } from '@expo-google-fonts/fraunces'
 import { colorsFor } from '@simply-life/ui-tokens'
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider'
@@ -14,6 +14,7 @@ import { usePrefsStore } from '../src/store/prefsStore'
 import { readColorSchemeSync } from '../src/lib/sync/prefs'
 import { CelebrationOverlay } from '../src/components/dashboard/CelebrationOverlay'
 import { TaskEvolveSheet } from '../src/components/kanban/TaskEvolveSheet'
+import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
 
 function RootNavigator()
@@ -123,6 +124,7 @@ function RootNavigator()
       </Stack>
       <CelebrationOverlay />
       <TaskEvolveSheet />
+      <ConfirmDialogHost />
     </>
   )
 }
@@ -130,10 +132,10 @@ function RootNavigator()
 export default function RootLayout()
 {
   const [fontsLoaded] = useFonts({
-    Manrope_400Regular,
-    Manrope_500Medium,
-    Manrope_600SemiBold,
-    Manrope_700Bold,
+    Lexend_400Regular,
+    Lexend_500Medium,
+    Lexend_600SemiBold,
+    Lexend_700Bold,
     Fraunces_500Medium,
   })
 

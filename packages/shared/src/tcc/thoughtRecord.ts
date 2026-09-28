@@ -28,7 +28,7 @@ export const THOUGHT_RECORD_STEPS: {
   {
     id: 'automaticThought',
     title: 'Pensamento automático',
-    hint: 'O que passou pela sua cabeça na hora — a frase exata, se lembrar.',
+    hint: 'O que passou pela sua cabeça na hora: a frase exata, se lembrar.',
     placeholder: 'Ex.: “Falei tudo errado, vão me demitir.”',
   },
   {
@@ -46,7 +46,7 @@ export const THOUGHT_RECORD_STEPS: {
   {
     id: 'alternativeThought',
     title: 'Pensamento alternativo',
-    hint: 'Uma leitura mais equilibrada, ainda honesta — não precisa ser positiva à força.',
+    hint: 'Uma leitura mais equilibrada, ainda honesta. Não precisa ser positiva à força.',
     placeholder: 'Ex.: “Fiquei nervoso, mas entreguei o essencial. Posso revisar o próximo slide.”',
   },
 ]
@@ -70,19 +70,19 @@ export function thoughtRecordToMarkdown(entry: ThoughtRecordEntry): string
     `**Data:** ${new Date(entry.createdAt).toLocaleString('pt-BR')}`,
     '',
     '## Situação',
-    entry.situation.trim() || '—',
+    entry.situation.trim() || '(vazio)',
     '',
     '## Pensamento automático',
-    entry.automaticThought.trim() || '—',
+    entry.automaticThought.trim() || '(vazio)',
     '',
     '## Evidências a favor',
-    entry.evidenceFor.trim() || '—',
+    entry.evidenceFor.trim() || '(vazio)',
     '',
     '## Evidências contra',
-    entry.evidenceAgainst.trim() || '—',
+    entry.evidenceAgainst.trim() || '(vazio)',
     '',
     '## Pensamento alternativo',
-    entry.alternativeThought.trim() || '—',
+    entry.alternativeThought.trim() || '(vazio)',
     '',
     '_Exercício de organização pessoal. Não substitui psicoterapia._',
   ].join('\n')

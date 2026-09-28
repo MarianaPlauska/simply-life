@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   cardFaturaAbertaDisplay,
   computeSaldoDisponivel,
@@ -55,7 +55,7 @@ export function SalaryConfirmCard()
   return (
     <Card tone="elevated" accentTop="finance" style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-        <Ionicons name="cash-outline" size={20} color={colors.finance} />
+        <Icon name="cash-outline" size={20} color={colors.finance} />
         <Text variant="section" style={{ flex: 1 }}>Seu salário de {pending.label.split(' de ')[0]} caiu?</Text>
       </View>
       <Text variant="caption" muted>
@@ -159,7 +159,7 @@ export function MonthProjectionCard()
       <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" accessibilityLabel="Ver a conta do fim do mês" style={{ gap: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text variant="caption" muted style={{ flex: 1 }}>Fim do mês (dia {projection.fimDoMes.slice(8, 10)})</Text>
-          <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkMuted} />
+          <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkMuted} />
         </View>
         <Text variant="title" style={{ fontSize: 26 }} color={tone}>
           {projection.sobra >= 0 ? `Sobra ~${formatBRL(projection.sobra)}` : `Faltam ~${formatBRL(Math.abs(projection.sobra))}`}
@@ -201,7 +201,7 @@ export function MonthProjectionCard()
                   {l.label}{l.data ? ` · ${describeDayPt(l.data).toLowerCase()}` : ''}
                 </Text>
                 <Text variant="bodyStrong" style={{ fontSize: 14 }}>
-                  {l.valor >= 0 ? '+' : '−'}{formatBRL(Math.abs(l.valor))}
+                  {l.valor >= 0 ? '+' : '-'}{formatBRL(Math.abs(l.valor))}
                 </Text>
                 {fixa ? (
                   <PrimaryButton
@@ -230,7 +230,7 @@ export function MonthProjectionCard()
             </View>
           ) : null}
           <Text variant="micro" muted>
-            Conta: saldo de hoje − contas que ainda vencem − faturas + o que ainda entra − o gasto médio do dia a dia.
+            Como calculamos: o saldo de hoje, menos as contas que ainda vencem e as faturas, mais o que ainda vai entrar, menos o gasto médio do dia a dia.
           </Text>
         </View>
       ) : null}

@@ -9,7 +9,7 @@ export const COMPONENT_SPEC = {
     background: 'canvas',
   },
   Card: {
-    radius: 24,
+    radius: 20,
     padding: 16,
     background: 'surface',
     elevation: 'card',
@@ -51,7 +51,7 @@ export const COMPONENT_SPEC = {
     iconSize: 20,
   },
   ChartCard: {
-    radius: 24,
+    radius: 20,
     padding: 14,
     chartMinHeight: 110,
   },

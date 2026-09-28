@@ -68,7 +68,7 @@ export function ListRow({
               style={{
                 width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%`,
                 height: '100%',
-                backgroundColor: colors.axel,
+                backgroundColor: colors.axelFill,
                 borderRadius: 999,
               }}
             />

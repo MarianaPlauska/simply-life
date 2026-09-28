@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { View, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { BrandMark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -49,10 +49,11 @@ export function WebSidebar()
   const collapsed = isTablet && !isDesktop ? !tabletExpanded : prefsCollapsed
   const width = collapsed ? DESKTOP_SIDEBAR_COLLAPSED : DESKTOP_SIDEBAR_WIDTH
 
-  const CREAM = colors.ink
-  const inkOnBrand = 'rgba(243, 230, 216, 0.82)'
-  const inkMutedOnBrand = 'rgba(243, 230, 216, 0.48)'
-  const divider = 'rgba(243, 230, 216, 0.12)'
+  // Navegação é o 30%: barra em petróleo. Coral só marca o item ativo (borda e ícone)
+  const CREAM = colors.widgetInk
+  const inkOnBrand = 'rgba(238, 242, 240, 0.82)'
+  const inkMutedOnBrand = colors.brandInk
+  const divider = 'rgba(185, 207, 202, 0.16)'
 
   const isActive = (item: (typeof NAV)[0]) =>
   {
@@ -78,7 +79,7 @@ export function WebSidebar()
       style={{
         width,
         alignSelf: 'stretch',
-        backgroundColor: colors.canvas,
+        backgroundColor: colors.brand,
         paddingTop: space.lg,
         paddingBottom: space.lg,
         justifyContent: 'space-between',
@@ -119,7 +120,7 @@ export function WebSidebar()
               accessibilityLabel="Recolher menu"
               style={webStyle({ padding: 4, cursor: 'pointer' })}
             >
-              <Ionicons name="chevron-back" size={14} color={inkMutedOnBrand} />
+              <Icon name="chevron-back" size={14} color={inkMutedOnBrand} />
             </WebHoverable>
           ) : null}
         </View>
@@ -141,15 +142,17 @@ export function WebSidebar()
                   minHeight: 38,
                   paddingHorizontal: collapsed ? 0 : 20,
                   borderLeftWidth: 2,
-                  borderLeftColor: active ? colors.axel : 'transparent',
-                  backgroundColor: hovered && !active ? 'rgba(243, 230, 216, 0.04)' : 'transparent',
+                  borderLeftColor: active ? colors.axelFill : 'transparent',
+                  backgroundColor: active
+                    ? 'rgba(185, 207, 202, 0.12)'
+                    : hovered ? 'rgba(185, 207, 202, 0.06)' : 'transparent',
                   cursor: 'pointer',
                 })}
               >
-                <Ionicons
-                  name={active ? (item.icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap) : item.icon}
+                <Icon
+                  name={active ? (item.icon.replace('-outline', '') as keyof typeof Icon.glyphMap) : item.icon}
                   size={15}
-                  color={active ? colors.axel : inkOnBrand}
+                  color={active ? colors.axelFill : inkOnBrand}
                 />
                 {!collapsed ? (
                   <Text
@@ -158,8 +161,8 @@ export function WebSidebar()
                       fontSize: 11,
                       letterSpacing: 0.6,
                       textTransform: 'uppercase',
-                      fontFamily: active ? 'Manrope_700Bold' : 'Manrope_500Medium',
-                      color: active ? colors.axel : inkOnBrand,
+                      fontFamily: active ? 'Lexend_700Bold' : 'Lexend_500Medium',
+                      color: active ? CREAM : inkOnBrand,
                     }}
                   >
                     {item.label}
@@ -185,13 +188,13 @@ export function WebSidebar()
               gap: 6,
               minHeight: 36,
               borderRadius: 8,
-              backgroundColor: colors.axel,
+              backgroundColor: colors.axelFill,
               cursor: 'pointer',
             })}
           >
-            <Ionicons name="add" size={14} color="#FFFFFF" />
+            <Icon name="add" size={14} color={colors.axelOnFill} />
             {!collapsed ? (
-              <Text style={{ fontSize: 12, fontFamily: 'Manrope_700Bold', color: '#FFFFFF' }}>
+              <Text style={{ fontSize: 12, fontFamily: 'Lexend_700Bold', color: colors.axelOnFill }}>
                 Capturar
               </Text>
             ) : null}
@@ -220,21 +223,21 @@ export function WebSidebar()
             width: 22,
             height: 22,
             borderRadius: 6,
-            backgroundColor: colors.axelMuted,
+            backgroundColor: 'rgba(185, 207, 202, 0.16)',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Text style={{ fontFamily: 'Manrope_700Bold', color: colors.axel, fontSize: 11 }}>
+          <Text style={{ fontFamily: 'Lexend_700Bold', color: CREAM, fontSize: 11 }}>
             {name.slice(0, 1).toUpperCase()}
           </Text>
         </View>
         {!collapsed ? (
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text numberOfLines={1} style={{ fontSize: 12, fontFamily: 'Manrope_600SemiBold', color: CREAM }}>
+            <Text numberOfLines={1} style={{ fontSize: 12, fontFamily: 'Lexend_600SemiBold', color: CREAM }}>
               {name}
             </Text>
-            <Text numberOfLines={1} style={{ fontSize: 10, fontFamily: 'Manrope_500Medium', color: inkMutedOnBrand }}>
+            <Text numberOfLines={1} style={{ fontSize: 11, fontFamily: 'Lexend_500Medium', color: inkMutedOnBrand }}>
               {isAdmin ? 'Admin' : 'Perfil'}
             </Text>
           </View>

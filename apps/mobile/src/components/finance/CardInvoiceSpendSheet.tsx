@@ -65,7 +65,7 @@ export function CardInvoiceSpendSheet({ card, mode, onClose }: Props)
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(26, 24, 22, 0.72)',
+          backgroundColor: colors.overlay,
           justifyContent: 'flex-end',
         }}
       >

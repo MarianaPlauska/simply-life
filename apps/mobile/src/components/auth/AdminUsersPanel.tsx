@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { ShieldCheck, Users } from 'lucide-react-native'
+import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
+import { UsersIcon as Users } from 'phosphor-react-native/src/icons/Users'
 import { Card, Text, PrimaryButton, Field, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { supabase, supabaseConfigured } from '../../lib/supabase'
@@ -132,7 +133,7 @@ export function AdminUsersPanel()
             width: 40,
             height: 40,
             borderRadius: 12,
-            backgroundColor: `${colors.axel}22`,
+            backgroundColor: `${colors.axelFill}22`,
             alignItems: 'center',
             justifyContent: 'center',
           }}

@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { buildOrchestrationHints, classifyDueBucket, type MobileTask } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -40,7 +40,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
             paddingVertical: 4,
           }}
         >
-          <Ionicons name="flash-outline" size={16} color={colors.axel} />
+          <Icon name="flash-outline" size={16} color={colors.axel} />
           <Text variant="caption" muted style={{ fontWeight: '700' }}>
             Agora
           </Text>
@@ -52,7 +52,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
               {overdue} atrasada{overdue === 1 ? '' : 's'}
             </Text>
           ) : null}
-          <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />
+          <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
         </Pressable>
       ) : null}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
@@ -64,7 +64,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           hitSlop={6}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, opacity: running ? 0.5 : 1 }}
         >
-          <Ionicons name="sparkles-outline" size={15} color={colors.axel} />
+          <Icon name="sparkles-outline" size={15} color={colors.axel} />
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             {running ? 'Reorganizando…' : 'Reorganizar quadro'}
           </Text>
@@ -76,7 +76,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           hitSlop={6}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36 }}
         >
-          <Ionicons name="moon-outline" size={15} color={colors.axel} />
+          <Icon name="moon-outline" size={15} color={colors.axel} />
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             Planejar amanhã
           </Text>
@@ -89,7 +89,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           hitSlop={6}
           style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36 }}
         >
-          <Ionicons
+          <Icon
             name={autoReplan ? 'checkmark-circle' : 'ellipse-outline'}
             size={15}
             color={autoReplan ? colors.axel : colors.inkMuted}

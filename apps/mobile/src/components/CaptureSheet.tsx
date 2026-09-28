@@ -7,7 +7,7 @@ import {
   ScrollView,
   useWindowDimensions,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../ui/Icon'
 import { useEffect, useState, Fragment } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text, PrimaryButton, PillTabs, Field } from '../ui'
@@ -64,7 +64,7 @@ const TABS: { id: CaptureKind; label: string }[] = [
 ]
 
 const PLACEHOLDERS: Record<CaptureKind, string> = {
-  dump: 'Uma linha por item - tarefas ou “café 12,50”',
+  dump: 'Uma linha por item: tarefas ou “café 12,50”',
   task: 'O que precisa ser feito?',
   expense: 'Ex: café 12,50',
   note: 'Escreva o que ficou do dia',
@@ -635,7 +635,7 @@ export function CaptureSheet()
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons name="close" size={20} color={colors.inkMuted} />
+                <Icon name="close" size={20} color={colors.inkMuted} />
               </Pressable>
             </View>
             <PillTabs

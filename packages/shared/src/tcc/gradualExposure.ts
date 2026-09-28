@@ -71,15 +71,15 @@ export function gradualExposureToMarkdown(entry: GradualExposureEntry): string
     `**Data:** ${new Date(entry.createdAt).toLocaleString('pt-BR')}`,
     '',
     '## Situação evitada',
-    entry.situation.trim() || '—',
+    entry.situation.trim() || '(vazio)',
     '',
     '## Hierarquia',
-    hierarchy || '—',
+    hierarchy || '(vazio)',
     '',
     '## Passo de hoje',
-    chosen?.label.trim() || '—',
+    chosen?.label.trim() || '(vazio)',
     '',
-    '_Um passo foi adicionado às tarefas. Avance no seu ritmo — não substitui psicoterapia._',
+    '_Um passo foi adicionado às tarefas. Avance no seu ritmo. Não substitui psicoterapia._',
   ].join('\n')
 }
 

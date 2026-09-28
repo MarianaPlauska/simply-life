@@ -44,13 +44,13 @@ export function SleepPanel()
     i === weekRaw.length - 1 ? atual : (sleepHours[iso] ?? 0),
   )
   const pillBtn = { borderRadius: 999 as const }
-  const headline = atual > 0 ? formatSleepHours(atual) : '—'
+  const headline = atual > 0 ? formatSleepHours(atual) : '--'
 
   return (
     <View style={{ gap: space.md }}>
       <HealthPanelHero
         icon="moon"
-        iconColor="#C4A574"
+        iconColor={colors.finance}
         kicker="Sono"
         headline={headline}
         detail={atual > 0 ? `Meta ${meta}h` : `Meta ${meta}h · sem registro`}
@@ -62,13 +62,13 @@ export function SleepPanel()
         <MiniBarChart
           values={week.map((v) => v || 0.4)}
           highlightIndex={6}
-          color="#C4A574"
+          color={colors.finance}
           width={160}
           height={56}
         />
       </View>
       <Text variant="caption" muted>
-        Semana — a barra mais escura é hoje.
+        Semana: a barra mais escura é hoje.
       </Text>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
@@ -83,7 +83,7 @@ export function SleepPanel()
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         <PrimaryButton
-          label="− 30 min"
+          label="-30 min"
           variant="secondary"
           onPress={() => void setSleepHours(Math.max(0, atual - 0.5), isGuest)}
           disabled={atual <= 0}

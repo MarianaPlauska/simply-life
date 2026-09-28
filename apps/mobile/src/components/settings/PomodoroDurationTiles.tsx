@@ -22,8 +22,8 @@ function cycle(current: number, opts: number[]): number
 /** Três quadrados de duração — Foco / Pausa / Longa. */
 export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }: Props)
 {
-  const { colors, mode } = useTheme()
-  const tileBg = mode === 'dark' ? colors.elevated : '#FFFFFF'
+  const { colors } = useTheme()
+  const tileBg = colors.elevated
 
   const tiles = [
     {
@@ -61,7 +61,7 @@ export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }
               style={{
                 alignSelf: 'stretch',
                 minHeight: 88,
-                borderRadius: 22,
+                borderRadius: 20,
                 backgroundColor: tileBg,
                 alignItems: 'center',
                 justifyContent: 'center',

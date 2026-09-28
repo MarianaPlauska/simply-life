@@ -7,6 +7,7 @@ import {
   visibleCategoryIds,
   type CategoryMeta,
   type CategoryMetaMap,
+  type ResolvedCategoryMeta,
 } from '../lib/categoryMeta'
 import { fetchCategoryMetaRemote, upsertCategoryMetaRemote } from '../lib/sync/financeMeta'
 
@@ -17,7 +18,7 @@ type State = {
   patch: (id: string, next: Partial<CategoryMeta>) => Promise<void>
   create: (label: string, icon: string, color: string) => Promise<string | null>
   remove: (id: string) => Promise<void>
-  resolve: (id: string) => CategoryMeta
+  resolve: (id: string) => ResolvedCategoryMeta
   ids: () => string[]
 }
 

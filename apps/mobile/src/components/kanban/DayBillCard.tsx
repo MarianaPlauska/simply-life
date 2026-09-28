@@ -1,6 +1,6 @@
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { formatBRL, type DayDueBill } from '@simply-life/shared'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -51,7 +51,7 @@ export function DayBillCard({ bill, onToggle }: Props)
           width: 5,
           alignSelf: 'stretch',
           borderRadius: 999,
-          backgroundColor: bill.locked ? colors.axel : colors.finance,
+          backgroundColor: bill.locked ? colors.axelFill : colors.finance,
         }}
       />
       <View
@@ -59,12 +59,12 @@ export function DayBillCard({ bill, onToggle }: Props)
           width: 40,
           height: 40,
           borderRadius: 999,
-          backgroundColor: bill.locked ? `${colors.axel}26` : `${colors.finance}26`,
+          backgroundColor: bill.locked ? `${colors.axelFill}26` : `${colors.finance}26`,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Ionicons
+        <Icon
           name={bill.locked ? 'lock-closed' : 'card-outline'}
           size={18}
           color={bill.locked ? colors.axel : colors.finance}

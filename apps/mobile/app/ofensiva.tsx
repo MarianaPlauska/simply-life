@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Modal, Pressable, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../src/ui/Icon'
 import {
   buildStreakMonth,
   buildStreakWeek,
@@ -112,7 +112,7 @@ export default function OfensivaScreen()
             backgroundColor: colors.elevated,
           }}
         >
-          <Ionicons name="chevron-back" size={22} color={colors.ink} />
+          <Icon name="chevron-back" size={22} color={colors.ink} />
         </Pressable>
         <View style={{ flex: 1 }} />
         <Pressable
@@ -127,7 +127,7 @@ export default function OfensivaScreen()
             backgroundColor: colors.elevated,
           }}
         >
-          <Ionicons name="help" size={18} color={colors.ink} />
+          <Icon name="help" size={18} color={colors.ink} />
         </Pressable>
       </View>
       <Text variant="hero" style={{ fontSize: 32, letterSpacing: -0.8, marginBottom: 12 }}>
@@ -148,7 +148,7 @@ export default function OfensivaScreen()
           <StreakWeekRow cells={week} />
 
           <View style={{ alignItems: 'center', gap: 4 }}>
-            <Ionicons name="flame" size={88} color={colors.axel} />
+            <Icon name="flame" size={88} color={colors.axel} />
             <Text
               variant="hero"
               style={{
@@ -181,7 +181,7 @@ export default function OfensivaScreen()
                 style={{
                   width: `${barPct}%`,
                   height: '100%',
-                  backgroundColor: colors.axel,
+                  backgroundColor: colors.axelFill,
                   borderRadius: 999,
                 }}
               />
@@ -199,7 +199,7 @@ export default function OfensivaScreen()
             </Text>
             <Text variant="caption" muted>
               {todayOk
-                ? 'Volte amanhã — ou continue anotando e concluindo agora.'
+                ? 'Volte amanhã, ou continue anotando e concluindo agora.'
                 : 'Abra o app, anote, conclua uma tarefa ou registre o humor.'}
             </Text>
           </View>
@@ -241,11 +241,11 @@ export default function OfensivaScreen()
                   gap: 12,
                   minHeight: 52,
                   paddingHorizontal: 14,
-                  borderRadius: 16,
+                  borderRadius: 14,
                   backgroundColor: colors.elevated,
                 }}
               >
-                <Ionicons name="flame" size={18} color={colors.axel} />
+                <Icon name="flame" size={18} color={colors.axel} />
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyStrong">
                     {new Date(`${row.iso}T12:00:00`).toLocaleDateString('pt-BR', {
@@ -278,7 +278,7 @@ export default function OfensivaScreen()
             onPress={() => undefined}
             style={{
               backgroundColor: colors.surface,
-              borderRadius: 24,
+              borderRadius: 20,
               padding: space.lg,
               gap: 10,
             }}

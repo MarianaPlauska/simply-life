@@ -1,6 +1,7 @@
-import { useEffect, useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import { View, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { useFocusEffect } from 'expo-router'
+import { Icon } from '../../ui/Icon'
 import {
   findHabit,
   habitPct,
@@ -29,7 +30,7 @@ type Props = {
 const TILES: {
   id: CuidadosTab
   label: string
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
 }[] = [
   { id: 'hidratacao', label: 'Água', icon: 'water' },
   { id: 'alimentacao', label: 'Comida', icon: 'restaurant' },
@@ -60,12 +61,15 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
     [humor, dia],
   )
 
-  useEffect(() =>
-  {
-    const { acquire, release } = useCalmFabSuppressStore.getState()
-    acquire()
-    return () => release()
-  }, [])
+  // Abas do Tabs continuam montadas ao trocar de aba: só suprime o FAB enquanto em foco
+  useFocusEffect(
+    useCallback(() =>
+    {
+      const { acquire, release } = useCalmFabSuppressStore.getState()
+      acquire()
+      return () => release()
+    }, []),
+  )
 
   const pendingTiles = useMemo(() =>
   {
@@ -204,7 +208,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
                       color={done ? colors.health : colors.axel}
                     />
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color={colors.inkFaint} />
+                  <Icon name="chevron-forward" size={18} color={colors.inkFaint} />
                 </View>
               </PressableScale>
             )
@@ -236,7 +240,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
             gap: 8,
           }}
         >
-          <Ionicons name="leaf-outline" size={18} color={colors.health} />
+          <Icon name="leaf-outline" size={18} color={colors.health} />
           <Text variant="bodyStrong" color={colors.health}>
             Ver todos os cuidados
           </Text>

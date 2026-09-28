@@ -2,11 +2,11 @@ import Svg, { Line, Path } from 'react-native-svg'
 
 type Props = {
   size?: number
-  color?: string
+  color: string
 }
 
 /** Semicírculo no horizonte com raios — símbolo de meteorologia da referência. */
-export function SunsetGlyph({ size = 56, color = '#2A2622' }: Props)
+export function SunsetGlyph({ size = 56, color }: Props)
 {
   const s = size
   const cx = s / 2

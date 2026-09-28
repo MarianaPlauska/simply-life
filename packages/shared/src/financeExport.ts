@@ -72,7 +72,7 @@ export function buildFinanceExcelXml(rows: FinanceExportRow[], sheetName = 'Gast
 /** HTML para PDF / impressão — acompanhamento pessoal. */
 export function buildFinancePdfHtml(
   rows: FinanceExportRow[],
-  title = 'Gastos — Simply Life',
+  title = 'Gastos · Simply Life',
 ): string
 {
   const totalDespesa = rows.filter((r) => r.tipo === 'despesa').reduce((a, r) => a + r.valor, 0)

@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import { ScrollView, View } from 'react-native'
-import type { FinanceCategory } from '@simply-life/shared'
+import { seriesColor, type FinanceCategory } from '@simply-life/shared'
 import { Text, PressableScale, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
-import { LucideFinanceIcon } from '../../lib/lucideFinanceIcons'
+import { FinanceIcon } from '../../lib/financeIcons'
 import { useFixaMetaStore } from '../../store/fixaMetaStore'
 import { FIXA_URGENCIA_LABELS } from '../../lib/fixaMeta'
 
@@ -19,7 +19,7 @@ type Props = {
 /** Chips de categoria com ícone personalizável */
 export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Props)
 {
-  const { colors } = useTheme()
+  const { colors, chart } = useTheme()
   const hydrate = useCategoryMetaStore((s) => s.hydrate)
   const resolve = useCategoryMetaStore((s) => s.resolve)
   const map = useCategoryMetaStore((s) => s.map)
@@ -55,7 +55,7 @@ export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Prop
         {
           const meta = resolve(id)
           const active = value === id
-          const accent = meta.color
+          const accent = seriesColor(meta.color, chart)
           void map
           return (
             <PressableScale
@@ -85,7 +85,7 @@ export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Prop
                   backgroundColor: accent,
                 }}
               />
-              <LucideFinanceIcon name={String(meta.icon)} size={16} color={accent} />
+              <FinanceIcon name={String(meta.icon)} size={16} color={accent} />
               <Text
                 variant="caption"
                 style={{
@@ -121,7 +121,7 @@ export function ExpenseFixasChips({
   onEditFixas?: () => void
 })
 {
-  const { colors } = useTheme()
+  const { colors, chart } = useTheme()
   const hydrate = useFixaMetaStore((s) => s.hydrate)
   const resolve = useFixaMetaStore((s) => s.resolve)
   const map = useFixaMetaStore((s) => s.map)
@@ -148,7 +148,7 @@ export function ExpenseFixasChips({
       </View>
       {fixas.length === 0 ? (
         <Text variant="caption" muted>
-          Nenhuma fixa ainda — toque em Editar para criar.
+          Nenhuma fixa ainda. Toque em Editar para criar.
         </Text>
       ) : (
         <ScrollView
@@ -159,7 +159,7 @@ export function ExpenseFixasChips({
           {fixas.slice(0, 12).map((f) =>
           {
             const meta = resolve(f.id, f.categoria)
-            const accent = meta.urgencia === 1 ? colors.danger : meta.color
+            const accent = meta.urgencia === 1 ? colors.danger : seriesColor(meta.color, chart)
             void map
             return (
               <PressableScale
@@ -186,7 +186,7 @@ export function ExpenseFixasChips({
                     backgroundColor: accent,
                   }}
                 />
-                <LucideFinanceIcon name={meta.icon} size={16} color={accent} />
+                <FinanceIcon name={meta.icon} size={16} color={accent} />
                 <Text variant="caption" style={{ fontWeight: '600' }} numberOfLines={1}>
                   {f.nome}
                 </Text>

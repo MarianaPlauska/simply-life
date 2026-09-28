@@ -35,13 +35,13 @@ export function PeriodFilter({ value, onChange }: Props)
               borderRadius: 999,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: active ? colors.axel : colors.elevated,
+              backgroundColor: active ? colors.axelFill : colors.elevated,
             }}
           >
             <Text
               variant="caption"
               color={active ? colors.axelOnFill : colors.inkMuted}
-              style={{ fontFamily: 'Manrope_600SemiBold' }}
+              style={{ fontFamily: 'Lexend_600SemiBold' }}
             >
               {p.label}
             </Text>

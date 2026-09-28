@@ -15,7 +15,7 @@ type Props = {
 /** Lançamentos vinculados ao cartão (cardId ou título com nome). */
 export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Props)
 {
-  const { space } = useTheme()
+  const { space, colors } = useTheme()
   const txs = useDataStore((s) => s.finance) ?? []
 
   const rows = useMemo(() =>
@@ -43,7 +43,7 @@ export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Prop
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(26, 24, 22, 0.72)',
+          backgroundColor: colors.overlay,
           justifyContent: 'flex-end',
         }}
       >
@@ -80,7 +80,7 @@ export function FinanceCardLedgerSheet({ card, visible, onClose, onSpend }: Prop
                         ? `${t.data} · ${parcela.atual} de ${parcela.total}`
                         : t.data
                     }
-                    right={`−${formatBRL(t.valor)}`}
+                    right={`-${formatBRL(t.valor)}`}
                     showSeparator={i < rows.length - 1}
                   />
                   )

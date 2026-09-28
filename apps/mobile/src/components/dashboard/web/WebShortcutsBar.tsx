@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { useRouter } from 'expo-router'
 import { findHabit, formatBRL, monthExpenseTotal, moodLabel, AGUA_META_COPOS } from '@simply-life/shared'
 import { Text } from '../../../ui'
@@ -12,9 +12,8 @@ import { usePrefsStore } from '../../../store/prefsStore'
 import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '../../../lib/homeMetrics'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
-function iconFor(id: HomeMetricId): keyof typeof Ionicons.glyphMap
+function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
 {
   if (id === 'humor') return 'happy-outline'
   if (id === 'water') return 'water-outline'
@@ -54,20 +53,20 @@ export function WebShortcutsBar()
       id === 'humor'
         ? humorHoje
           ? moodLabel(humorHoje)
-          : '—'
+          : '--'
         : id === 'water'
           ? agua
             ? `${agua.progressoAtual}/${agua.metaDiaria ?? AGUA_META_COPOS}`
-            : '—'
+            : '--'
           : id === 'protein'
             ? proteina
               ? `${proteina.progressoAtual}g`
-              : '—'
+              : '--'
             : id === 'tasks'
               ? String(openTasks)
               : id === 'finance'
                 ? formatBRL(gastosMes)
-                : '—'
+                : '--'
     const onPress =
       id === 'water'
         ? () => void addWaterCup(isGuest)
@@ -86,7 +85,7 @@ export function WebShortcutsBar()
       <Text variant="section" style={{ fontSize: 16 }}>
         Atalhos
       </Text>
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
         {rows.map((row, i) => (
           <WebHoverable
             key={row.id}
@@ -99,12 +98,12 @@ export function WebShortcutsBar()
               paddingHorizontal: 18,
               paddingVertical: 11,
               borderTopWidth: i === 0 ? 0 : 1,
-              borderTopColor: WEB_ROW_DIVIDER,
+              borderTopColor: colors.cardRim,
               backgroundColor: hovered ? colors.surface : 'transparent',
               cursor: 'pointer',
             })}
           >
-            <Ionicons name={row.icon} size={15} color={colors.axel} style={{ width: 20 }} />
+            <Icon name={row.icon} size={15} color={colors.axel} style={{ width: 20 }} />
             <Text variant="body" style={{ flex: 1, fontSize: 13 }}>
               {row.label}
             </Text>

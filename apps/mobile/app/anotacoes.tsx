@@ -91,7 +91,7 @@ export default function AnotacoesScreen()
               style={{
                 minHeight: 44,
                 color: colors.ink,
-                fontFamily: 'Manrope_600SemiBold',
+                fontFamily: 'Lexend_600SemiBold',
                 fontSize: 18,
               }}
             />
@@ -105,7 +105,7 @@ export default function AnotacoesScreen()
                 minHeight: 160,
                 textAlignVertical: 'top',
                 color: colors.ink,
-                fontFamily: 'Manrope_400Regular',
+                fontFamily: 'Lexend_400Regular',
                 fontSize: 16,
                 borderRadius: radius.control,
                 backgroundColor: colors.surface,

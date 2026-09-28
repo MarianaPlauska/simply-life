@@ -1,7 +1,7 @@
 import { Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native'
 import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   cardFaturaAbertaDisplay,
   cardInstallments,
@@ -71,7 +71,7 @@ export function FinanceCardDetailSheet({
       value: card.enderecoCobranca || 'Não informado',
       copy: Boolean(card.enderecoCobranca),
     },
-    { label: 'CEP', value: card.cep || '—' },
+    { label: 'CEP', value: card.cep || '--' },
   ]
 
   const fatura = cardFaturaAbertaDisplay(card, txs)
@@ -85,7 +85,7 @@ export function FinanceCardDetailSheet({
     setPaying(true)
     const res = await payCardInvoice(card.id, isGuest)
     setPaying(false)
-    setPayMsg(res.ok ? 'Fatura paga — o valor saiu do saldo.' : (res.error || 'Não foi possível pagar'))
+    setPayMsg(res.ok ? 'Fatura paga. O valor saiu do saldo.' : (res.error || 'Não foi possível pagar'))
   }
 
   return (
@@ -138,7 +138,7 @@ export function FinanceCardDetailSheet({
                   backgroundColor: colors.elevated,
                 }}
               >
-                <Ionicons name="chevron-back" size={20} color={colors.ink} />
+                <Icon name="chevron-back" size={20} color={colors.ink} />
               </PressableScale>
               <Text variant="section">Cartões</Text>
               <PressableScale
@@ -153,7 +153,7 @@ export function FinanceCardDetailSheet({
                   backgroundColor: colors.elevated,
                 }}
               >
-                <Ionicons name="settings-outline" size={20} color={colors.ink} />
+                <Icon name="settings-outline" size={20} color={colors.ink} />
               </PressableScale>
             </View>
           </View>
@@ -199,7 +199,7 @@ export function FinanceCardDetailSheet({
                       backgroundColor: colors.elevated,
                     }}
                   >
-                    <Ionicons name={a.icon} size={20} color={colors.axel} />
+                    <Icon name={a.icon} size={20} color={colors.axel} />
                   </View>
                   <Text variant="micro" muted style={{ fontWeight: '600' }}>
                     {a.label}
@@ -234,7 +234,7 @@ export function FinanceCardDetailSheet({
                   style={{
                     width: `${usadoPct}%`,
                     height: '100%',
-                    backgroundColor: colors.axel,
+                    backgroundColor: colors.axelFill,
                     borderRadius: 999,
                   }}
                 />
@@ -277,7 +277,7 @@ export function FinanceCardDetailSheet({
                     key={p.id}
                     title={p.titulo}
                     subtitle={`${p.atual} de ${p.total} · ${p.data}`}
-                    right={`−${formatBRL(p.valor)}`}
+                    right={`-${formatBRL(p.valor)}`}
                     showSeparator={i < parcelas.length - 1}
                   />
                 ))}

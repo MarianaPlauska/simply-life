@@ -68,7 +68,7 @@ export function FinanceCoachCards()
           />
         </View>
         <Text variant="hero">
-          {projection.sobra >= 0 ? formatBRL(projection.sobra) : `−${formatBRL(Math.abs(projection.sobra))}`}
+          {projection.sobra >= 0 ? formatBRL(projection.sobra) : `-${formatBRL(Math.abs(projection.sobra))}`}
         </Text>
         <Text variant="caption" muted>{projectionMessage(projection, formatBRL)}</Text>
         <Text variant="caption" muted>

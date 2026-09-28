@@ -7,6 +7,7 @@ export type MobileBudgetCategory = {
   /** categoria do app ('alimentacao', 'c-pet'), quando ligada por slug */
   slug: string | null
   nome: string
+  /** Valor cru de fin_categorias.cor (chave da paleta ou hex antigo); pinte com `financeCategoryColor`. */
   cor: string
   icone: string
   limite: number
@@ -75,7 +76,7 @@ export async function fetchBudgetPlanning(monthOffset = 0): Promise<MobileBudget
         id,
         slug,
         nome: String(c.nome || 'Categoria'),
-        cor: String(c.cor || '#E8734A'),
+        cor: c.cor ? String(c.cor) : '',
         icone: String(c.icone || 'Tag'),
         limite: limitByCat.get(id) || 0,
         gasto: spendByCat.get(id) || 0,

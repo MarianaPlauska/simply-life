@@ -124,7 +124,7 @@ export default function BehavioralActivationScreen()
             <Text variant="section">No seu dia</Text>
             <Text variant="body" muted>
               “{draft.action.trim()}” foi adicionada às tarefas de hoje ({draft.durationMin} min).
-              Um passo já é suficiente — não precisa fazer mais nada agora.
+              Um passo já é suficiente. Não precisa fazer mais nada agora.
             </Text>
           </Card>
           <PrimaryButton
@@ -170,7 +170,7 @@ export default function BehavioralActivationScreen()
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="section">O que está pesado?</Text>
             <Text variant="body" muted>
-              Opcional. Nomear o bloqueio ajuda a escolher uma ação menor — sem resolver tudo de uma vez.
+              Opcional. Nomear o bloqueio ajuda a escolher uma ação menor, sem resolver tudo de uma vez.
             </Text>
             <Field
               label="Contexto"

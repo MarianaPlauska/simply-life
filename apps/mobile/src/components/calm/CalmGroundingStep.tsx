@@ -18,7 +18,7 @@ export function CalmGroundingStep({ stepIndex }: Props)
   if (!step) return null
 
   return (
-    <Card tone="elevated" style={{ gap: space.md, borderRadius: 18 }}>
+    <Card tone="elevated" style={{ gap: space.md, borderRadius: 14 }}>
       <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
         Passo {stepIndex + 1} de {GROUNDING_STEPS.length} · {step.sense}
       </Text>

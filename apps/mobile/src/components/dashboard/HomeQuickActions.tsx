@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -7,7 +7,7 @@ export type HomeShortcut = {
   id: string
   label: string
   value?: string
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   onPress: () => void
 }
 
@@ -34,7 +34,7 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
             flexGrow: 1,
             flexBasis: `${(100 / perRow) - 3}%` as `${number}%`,
             minHeight: 96,
-            borderRadius: 22,
+            borderRadius: 20,
             backgroundColor: colors.surface,
             alignItems: 'center',
             justifyContent: 'center',
@@ -58,7 +58,7 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
               justifyContent: 'center',
             }}
           >
-            <Ionicons name={a.icon} size={18} color={colors.ink} />
+            <Icon name={a.icon} size={18} color={colors.ink} />
           </View>
           {a.value ? (
             <Text

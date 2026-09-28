@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { View, Switch, Modal, Pressable } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { ShieldCheck } from 'lucide-react-native'
+import { Icon } from '../src/ui/Icon'
+import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { createFriendInvite } from '@simply-life/shared'
 import { Screen, Text, Card, PrimaryButton, Field } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
@@ -19,6 +19,7 @@ import { WebHoverable } from '../src/components/dashboard/web/WebHoverable'
 import { webStyle } from '../src/components/dashboard/web/webStyle'
 import { WebProfileRow, WebProfileSection } from '../src/components/profile/web/WebProfileRow'
 import { WEB_DISPLAY_FONT } from '../src/components/dashboard/web/webTypography'
+import { BRAND, COLOR_DARK } from '@simply-life/ui-tokens'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useWorkspace } from '../src/layout/useWorkspace'
 import { useAuthStore } from '../src/store/authStore'
@@ -30,7 +31,8 @@ import { resolveAxelName } from '../src/lib/axelName'
 
 type Sheet = 'nome' | 'a11y' | 'seguranca' | 'circulo' | 'xp' | 'admin' | 'senha' | null
 
-const AVATAR_TINTS = ['#E8734A', '#C45A32', '#F2EDE6', '#A69C8E', '#6B7FD7'] as const
+/** Cores do avatar ficam salvas como hex no perfil: vêm da paleta, não do tema */
+const AVATAR_TINTS = [BRAND.coral, BRAND.petroleo, BRAND.menta, COLOR_DARK.finance, COLOR_DARK.tasks] as const
 
 /**
  * Perfil — build web. Em largura estreita (o mesmo corte do app nativo)
@@ -153,7 +155,7 @@ export default function PerfilScreenWeb()
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons name="settings-outline" size={18} color={colors.inkMuted} />
+                <Icon name="settings-outline" size={18} color={colors.inkMuted} />
               </Pressable>
             </View>
             <View style={{ alignItems: 'center', gap: 4 }}>
@@ -177,20 +179,20 @@ export default function PerfilScreenWeb()
           <PersonalSummaryGrid />
 
           <ProfileSection title="Dados">
-            <ProfileSettingsRow icon="mail-outline" label="E-mail" value={email ?? '-'} accent="#6B7FD7" />
+            <ProfileSettingsRow icon="mail-outline" label="E-mail" value={email ?? '-'} accent={colors.tasks} />
             <ProfileSettingsRow
               icon="call-outline"
               label="Telefone"
               value={prefs.profile_phone?.trim() || 'Adicionar'}
-              accent="#5BA88A"
+              accent={colors.health}
               onPress={() => setSheet('nome')}
             />
-            <ProfileSettingsRow icon="calendar-outline" label="Data de registro" value={memberSince} accent="#C4A574" />
+            <ProfileSettingsRow icon="calendar-outline" label="Data de registro" value={memberSince} accent={colors.finance} />
             <ProfileSettingsRow
               icon="location-outline"
               label="Cidade"
               value={prefs.profile_city?.trim() || 'Adicionar'}
-              accent="#E07A6A"
+              accent={colors.attention}
               onPress={() => setSheet('nome')}
             />
             <ProfileSettingsRow
@@ -204,13 +206,13 @@ export default function PerfilScreenWeb()
               icon="cloud-outline"
               label="Sincronização na nuvem"
               value={prefs.cloud_sync_opt_in ? 'Opt-in' : 'Local'}
-              accent="#6B9BD1"
+              accent={colors.tasks}
               onPress={() => void patch({ cloud_sync_opt_in: !prefs.cloud_sync_opt_in })}
             />
             <ProfileSettingsRow
               icon="key-outline"
               label="Redefinir senha"
-              accent="#A69C8E"
+              accent={colors.inkMuted}
               onPress={isGuest ? undefined : () => setSheet('senha')}
             />
           </ProfileSection>
@@ -275,7 +277,7 @@ export default function PerfilScreenWeb()
             label="Sair da conta"
             variant="ghost"
             onPress={() => void signOut().then(() => router.replace('/login'))}
-            style={{ borderRadius: 16 }}
+            style={{ borderRadius: 14 }}
           />
         </View>
 
@@ -335,7 +337,7 @@ export default function PerfilScreenWeb()
             <Card tone="elevated" style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24, gap: space.md, paddingBottom: space.xl }}>
               <Text variant="section">Acessibilidade</Text>
               <Text variant="caption" muted>
-                Preferências locais - vão na fila de sync quando a nuvem estiver pronta.
+                Preferências locais. Vão na fila de sincronização quando a nuvem estiver pronta.
               </Text>
               {(
                 [
@@ -445,7 +447,7 @@ export default function PerfilScreenWeb()
           accessibilityLabel="Voltar"
           style={webStyle({ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', cursor: 'pointer' })}
         >
-          <Ionicons name="chevron-back" size={14} color={colors.inkMuted} />
+          <Icon name="chevron-back" size={14} color={colors.inkMuted} />
           <Text variant="caption" muted>
             Voltar
           </Text>

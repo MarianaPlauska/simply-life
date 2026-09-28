@@ -1,6 +1,6 @@
 import { View, StyleSheet, useWindowDimensions } from 'react-native'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TOUCH } from '@simply-life/ui-tokens'
 import { PressableScale, Text } from '../ui'
@@ -8,7 +8,7 @@ import { useTheme } from '../theme/ThemeProvider'
 import { useCaptureStore, captureForTab, captureFabLabel } from '../store/captureStore'
 import { hapticLight } from '../lib/haptics'
 
-const ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
+const ICONS: Record<string, keyof typeof Icon.glyphMap> = {
   index: 'home-outline',
   kanban: 'checkbox-outline',
   saude: 'heart-outline',
@@ -29,7 +29,7 @@ const GLOW = 66
 
 export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
 {
-  const { colors, elevation, mode } = useTheme()
+  const { colors, elevation } = useTheme()
   const insets = useSafeAreaInsets()
   const { width: vw } = useWindowDimensions()
   const openCapture = useCaptureStore((s) => s.openCapture)
@@ -40,17 +40,18 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
   const left = routes.slice(0, 2)
   const right = routes.slice(2)
 
-  const barBg = colors.axel
-  const idleFg = 'rgba(255,255,255,0.82)'
-  const activeBg = mode === 'dark' ? '#F5F1EC' : '#FFFFFF'
-  const activeFg = colors.axel
+  // 60-30-10: barra em petróleo (30%), coral só na aba ativa e no botão + (10%)
+  const barBg = colors.brand
+  const idleFg = colors.brandInk
+  const activeBg = colors.axelFill
+  const activeFg = colors.axelOnFill
   const barW = Math.min(vw - 24, 420)
 
   const renderTab = (route: (typeof routes)[number], i: number) =>
   {
     const focused = i === activeIndex
     const outline = ICONS[route.name] ?? 'ellipse-outline'
-    const filled = outline.replace('-outline', '') as keyof typeof Ionicons.glyphMap
+    const filled = outline.replace('-outline', '') as keyof typeof Icon.glyphMap
     const label = LABELS[route.name] ?? route.name
 
     return (
@@ -75,7 +76,7 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
               : null,
           ]}
         >
-          <Ionicons
+          <Icon
             name={focused ? filled : outline}
             size={20}
             color={focused ? activeFg : idleFg}
@@ -85,8 +86,8 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
             style={{
               color: focused ? activeFg : idleFg,
               fontWeight: focused ? '700' : '600',
-              fontSize: 9,
-              lineHeight: 11,
+              fontSize: 11,
+              lineHeight: 13,
               marginTop: 1,
             }}
           >
@@ -133,8 +134,7 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
             style={[
               styles.glow,
               {
-                backgroundColor:
-                  mode === 'dark' ? 'rgba(232,115,74,0.35)' : 'rgba(232,115,74,0.22)',
+                backgroundColor: colors.canvas,
               },
             ]}
           >
@@ -142,14 +142,12 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
               style={[
                 styles.fab,
                 {
-                  backgroundColor: activeBg,
-                  borderWidth: 2,
-                  borderColor: colors.axel,
+                  backgroundColor: colors.axelFill,
                   ...elevation.fab,
                 },
               ]}
             >
-              <Ionicons name="add" size={TOUCH.icon + 2} color={activeFg} />
+              <Icon name="add" size={TOUCH.icon + 2} color={activeFg} />
             </View>
           </View>
         </PressableScale>

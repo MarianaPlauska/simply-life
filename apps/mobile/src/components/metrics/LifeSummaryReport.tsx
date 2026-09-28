@@ -63,7 +63,7 @@ export function LifeSummaryReport({ variant = 'life', snapshots }: Props)
         ? null
         : Math.round((humor.reduce((s, h) => s + h.humor, 0) / humor.length) * 10) / 10
     return [
-      { label: 'Humor', value: moodAvg != null ? moodAvg.toFixed(1) : '—' },
+      { label: 'Humor', value: moodAvg != null ? moodAvg.toFixed(1) : '--' },
       { label: 'Água', value: `${habitPct(agua)}%` },
       { label: 'Treino', value: treino && treino.progressoAtual > 0 ? 'Feito' : 'Pendente' },
       { label: 'Gastos', value: formatBRL(monthExpenseTotal(finance)) },

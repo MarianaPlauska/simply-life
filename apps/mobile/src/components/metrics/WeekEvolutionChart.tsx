@@ -46,7 +46,7 @@ export function WeekEvolutionChart({ series, metric, onMetricChange }: Props)
           const today = p.iso === todayIso
           return (
             <View key={p.iso} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
-              <Text variant="micro" style={{ fontSize: 10, color: today ? colors.axel : colors.inkMuted }}>
+              <Text variant="micro" style={{ fontSize: 11, color: today ? colors.axel : colors.inkMuted }}>
                 {value}
               </Text>
               <View
@@ -54,14 +54,14 @@ export function WeekEvolutionChart({ series, metric, onMetricChange }: Props)
                   width: '78%',
                   height: h,
                   borderRadius: 8,
-                  backgroundColor: today ? colors.axel : colors.axelMuted,
+                  backgroundColor: today ? colors.axelFill : colors.axelMuted,
                 }}
               />
               <Text
                 variant="micro"
                 muted={!today}
                 color={today ? colors.axel : undefined}
-                style={{ fontFamily: today ? 'Manrope_700Bold' : 'Manrope_400Regular' }}
+                style={{ fontFamily: today ? 'Lexend_700Bold' : 'Lexend_400Regular' }}
               >
                 {p.label}
               </Text>

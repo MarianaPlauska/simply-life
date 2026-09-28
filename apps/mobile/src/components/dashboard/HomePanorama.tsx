@@ -18,7 +18,7 @@ import { colorMapFromMeta } from '../../lib/categoryMeta'
 /** Gráficos e panorama abaixo da dobra - Início não fica “vazio”. */
 export function HomePanorama()
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space, radius, chart } = useTheme()
   const { isDesktop } = useWorkspace()
   const router = useRouter()
   const finance = useDataStore((s) => s.finance) ?? []
@@ -27,8 +27,8 @@ export function HomePanorama()
   const gastos = monthExpenseTotal(finance)
   const series = useMemo(() => monthDailyExpenseSeries(finance), [finance])
   const ranking = useMemo(
-    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap)).slice(0, 5),
-    [finance, catMap],
+    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap), chart).slice(0, 5),
+    [finance, catMap, chart],
   )
 
   useEffect(() =>

@@ -3,10 +3,11 @@ import { Modal, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text, Field, PrimaryButton, ListRow } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
-import { defaultCategoryMeta } from '../../lib/categoryMeta'
+import { seriesColor } from '@simply-life/shared'
+import { defaultCategoryMeta, nextFreeCategorySeries } from '../../lib/categoryMeta'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
 import { FinanceColorSwatches } from './FinanceColorSwatches'
-import { LucideIconPicker } from './LucideIconPicker'
+import { FinanceIconPicker } from './FinanceIconPicker'
 
 type Props = {
   visible: boolean
@@ -16,7 +17,7 @@ type Props = {
 /** Editar, criar e excluir categorias de despesa */
 export function FinanceCategoriesSheet({ visible, onClose }: Props)
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space, radius, chart } = useTheme()
   const insets = useSafeAreaInsets()
   const hydrate = useCategoryMetaStore((s) => s.hydrate)
   const resolve = useCategoryMetaStore((s) => s.resolve)
@@ -30,7 +31,7 @@ export function FinanceCategoriesSheet({ visible, onClose }: Props)
   const [creating, setCreating] = useState(false)
   const [label, setLabel] = useState('')
   const [icon, setIcon] = useState('circle')
-  const [color, setColor] = useState('#E8734A')
+  const [color, setColor] = useState<string>('slate')
 
   const ids = listIds()
 
@@ -54,7 +55,6 @@ export function FinanceCategoriesSheet({ visible, onClose }: Props)
     setCreating(false)
     setLabel('')
     setIcon('circle')
-    setColor('#E8734A')
   }
 
   const formOpen = Boolean(editId) || creating
@@ -95,7 +95,7 @@ export function FinanceCategoriesSheet({ visible, onClose }: Props)
               <View style={{ gap: space.md }}>
                 <Field label="Nome" value={label} onChangeText={setLabel} placeholder="Ex: Pet" />
                 <FinanceColorSwatches value={color} onChange={setColor} />
-                <LucideIconPicker value={icon} onChange={setIcon} />
+                <FinanceIconPicker value={icon} onChange={setIcon} />
                 <PrimaryButton
                   label={creating ? 'Criar categoria' : 'Salvar categoria'}
                   disabled={!label.trim()}
@@ -143,7 +143,7 @@ export function FinanceCategoriesSheet({ visible, onClose }: Props)
                           width: 6,
                           height: 36,
                           borderRadius: 999,
-                          backgroundColor: meta.color,
+                          backgroundColor: seriesColor(meta.color, chart),
                         }}
                       />
                       <View style={{ flex: 1 }}>
@@ -167,7 +167,7 @@ export function FinanceCategoriesSheet({ visible, onClose }: Props)
                   setCreating(true)
                   setLabel('')
                   setIcon('circle')
-                  setColor('#E8734A')
+                  setColor(nextFreeCategorySeries(map))
                 }}
               />
               <PrimaryButton label="Fechar" variant="dismiss" onPress={onClose} />

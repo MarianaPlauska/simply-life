@@ -8,7 +8,7 @@ import {
 } from 'react-native'
 import { Redirect } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../src/ui/Icon'
 import { BREAKPOINT } from '@simply-life/ui-tokens'
 import { Screen, Text } from '../src/ui'
 import { AuthHeader } from '../src/components/auth/AuthHeader'
@@ -76,7 +76,7 @@ export default function LoginScreen()
                 borderColor: colors.hairline,
               }}
             >
-              <Ionicons
+              <Icon
                 name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
                 size={18}
                 color={colors.axel}
@@ -115,7 +115,7 @@ export default function LoginScreen()
       >
         <View style={{ position: 'relative' }}>
           <AuthHeader
-            welcomeLabel={authMode === 'register' ? 'Comece.\nOrganize.\nSimply.' : 'Organize.\nPlaneje.\nSimply.'}
+            welcomeLabel={authMode === 'register' ? 'Organize\na sua vida.\nSeja Simply.' : 'Organize.\nPlaneje.\nSimply.'}
             compact={authMode === 'register'}
             width={vw}
           />
@@ -134,10 +134,10 @@ export default function LoginScreen()
               justifyContent: 'center',
             }}
           >
-            <Ionicons
+            <Icon
               name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
               size={18}
-              color="#F2EDE6"
+              color={colors.widgetInk}
             />
           </Pressable>
         </View>

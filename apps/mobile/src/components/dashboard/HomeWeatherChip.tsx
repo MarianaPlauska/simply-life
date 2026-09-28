@@ -9,7 +9,7 @@ import {
   ScrollView,
   type AppStateStatus,
 } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import * as Location from 'expo-location'
 import { Text, PrimaryButton, IconBadge, Card } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -27,7 +27,7 @@ type Props = { compact?: boolean }
 
 export function HomeWeatherChip({ compact = false }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors } = useTheme()
   const [snap, setSnap] = useState<WeatherSnapshot | null>(() => loadWeatherCache())
   const [loading, setLoading] = useState(false)
   /** true = falta cidade; o sheet só abre com pickerOpen */
@@ -159,7 +159,7 @@ export function HomeWeatherChip({ compact = false }: Props)
 
   const hours = snap?.hourly?.slice(0, 8) ?? []
   const peak = hours.length ? Math.max(...hours.map((h) => h.tempC), snap?.tempC ?? 1) : 1
-  const barIdle = mode === 'dark' ? '#2C2C2E' : colors.hairline
+  const barIdle = colors.hairline
 
   return (
     <>
@@ -169,7 +169,7 @@ export function HomeWeatherChip({ compact = false }: Props)
           accessibilityLabel="Clima"
           style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Ionicons name={snap?.icon ?? 'partly-sunny-outline'} size={22} color={badgeColor} />
+          <Icon name={snap?.icon ?? 'partly-sunny-outline'} size={22} color={badgeColor} />
         </Pressable>
       ) : (
       <Card tone="elevated" style={{ gap: 14, padding: 18 }}>
@@ -211,7 +211,7 @@ export function HomeWeatherChip({ compact = false }: Props)
               </>
             )}
           </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.inkFaint} />
+          <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
         </Pressable>
 
         {hours.length > 0 ? (
@@ -226,7 +226,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                     flex: 1,
                     height: ht,
                     borderRadius: 8,
-                    backgroundColor: i === 0 ? colors.axel : barIdle,
+                    backgroundColor: i === 0 ? colors.axelFill : barIdle,
                   }}
                 />
               )
@@ -275,7 +275,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                         {loading ? 'Atualizando…' : snap.hint}
                       </Text>
                     </View>
-                    <Ionicons name={snap.icon} size={28} color={badgeColor} />
+                    <Icon name={snap.icon} size={28} color={badgeColor} />
                   </View>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {[
@@ -371,7 +371,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                     placeholderTextColor={colors.inkFaint}
                     style={{
                       minHeight: 48,
-                      borderRadius: 16,
+                      borderRadius: 14,
                       paddingHorizontal: 14,
                       fontSize: 15,
                       color: colors.ink,

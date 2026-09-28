@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'r
 import { useWindowDimensions } from 'react-native'
 import {
   colorsFor,
+  chartFor,
+  type ChartPalette,
   type ColorTokens,
   type ThemeMode,
   type ElevationSet,
@@ -20,6 +22,8 @@ import { readColorSchemeSync } from '../lib/sync/prefs'
 type ThemeContextValue = {
   mode: ThemeMode
   colors: ColorTokens
+  /** Paleta categórica do modo (hábitos, pilares, séries de gráfico) */
+  chart: ChartPalette
   radius: typeof RADIUS
   space: typeof SPACE | typeof SPACE_COMPACT
   type: Record<TypeRole, TypeSpec>
@@ -83,6 +87,7 @@ export function ThemeProvider({
     return {
       mode,
       colors,
+      chart: chartFor(mode),
       radius: RADIUS,
       space: width >= BREAKPOINT.desktop ? SPACE_COMPACT : SPACE,
       type,

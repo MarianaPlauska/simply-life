@@ -1,3 +1,4 @@
+import { chartColor, type ChartPalette } from '@simply-life/ui-tokens'
 import { localIsoDaysAgo, localTodayIso, mondayOfLocalWeek } from './dates'
 
 export type RoutineCadence = 'daily' | 'weekly'
@@ -180,7 +181,7 @@ export function streakLine(
   if (win >= 7) return { text: `${win} seguidos. Muito bem!`, tone: 'good' }
   if (win >= 3) return { text: `${win} seguidos. Segue assim.`, tone: 'good' }
   if (win >= 1) return { text: `${win} seguidos. Continua.`, tone: 'good' }
-  return { text: 'Começa hoje — um check já vale.', tone: 'neutral' }
+  return { text: 'Começa hoje. Um check já vale.', tone: 'neutral' }
 }
 
 export type RoutineWeekCell = {
@@ -314,19 +315,24 @@ function metOnDay(
 export const ROUTINE_ADVICE = [
   'Não precisa recuperar o dia inteiro. Um check agora já corta a sequência de falta.',
   'Encolhe o hábito: metade do alvo ainda conta. O fogo volta amanhã.',
-  'Emparelha com algo que você já faz — depois do café, depois do banho.',
+  'Emparelha com algo que você já faz: depois do café, depois do banho.',
 ]
 
-export const HABIT_ACCENTS = ['#E8734A', '#7BC9A0', '#5B8DEF', '#C4A574', '#E07A6A'] as const
-
-export function habitAccent(id: string): string
+/** Índice estável na paleta categórica, derivado do id (nada é persistido). */
+export function habitSeriesIndex(id: string): number
 {
   let h = 0
   for (let i = 0; i < id.length; i += 1)
   {
     h = (h * 31 + id.charCodeAt(i)) >>> 0
   }
-  return HABIT_ACCENTS[h % HABIT_ACCENTS.length]
+  return h
+}
+
+/** Cor do hábito no modo atual: passe `colors.chart` do tema. */
+export function habitAccent(id: string, palette: ChartPalette): string
+{
+  return chartColor(palette, habitSeriesIndex(id))
 }
 
 export type HeatCell = {

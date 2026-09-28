@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { SyncHint } from '../SyncHint'
@@ -78,7 +78,7 @@ export function HomeFitnessHero({
             ...elevation.card,
           }}
         >
-          <Ionicons
+          <Icon
             name={isAdmin ? 'shield-checkmark' : 'person-outline'}
             size={16}
             color={isAdmin ? colors.axel : colors.ink}
@@ -136,7 +136,7 @@ export function HomeFitnessHero({
             ...elevation.card,
           }}
         >
-          <Ionicons
+          <Icon
             name={isAdmin ? 'shield-checkmark' : 'person-outline'}
             size={16}
             color={isAdmin ? colors.axel : colors.ink}

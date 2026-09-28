@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { useRouter } from 'expo-router'
 import {
   findHabit,
@@ -130,7 +130,7 @@ export function HomeHealthStudio()
               minWidth: 140,
               gap: 8,
               padding: space.md,
-              borderRadius: 16,
+              borderRadius: 14,
               backgroundColor: colors.surface,
               borderWidth: 1,
               borderColor: colors.hairline,
@@ -163,7 +163,7 @@ export function HomeHealthStudio()
         style={{
           gap: space.md,
           padding: space.md,
-          borderRadius: 18,
+          borderRadius: 14,
           backgroundColor: colors.healthMuted,
         }}
       >
@@ -196,7 +196,7 @@ export function HomeHealthStudio()
                   justifyContent: 'center',
                 }}
               >
-                <Ionicons
+                <Icon
                   name="water"
                   size={20}
                   color={filled ? colors.canvas : colors.inkFaint}

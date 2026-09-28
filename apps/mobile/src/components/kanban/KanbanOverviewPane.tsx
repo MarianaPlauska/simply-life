@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   minutesToLabel,
   partitionTodayTimeline,
@@ -24,7 +24,7 @@ type OverviewTile = {
   value: number
   color: string
   bg: string
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   href?: string
 }
 
@@ -33,7 +33,7 @@ type OverviewTile = {
  */
 export function KanbanOverviewPane({ tasks }: Props)
 {
-  const { colors, space } = useTheme()
+  const { colors, space, mode, elevation } = useTheme()
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
@@ -58,16 +58,16 @@ export function KanbanOverviewPane({ tasks }: Props)
       id: 'today',
       label: 'Hoje',
       value: today.length,
-      color: '#5B6BC6',
-      bg: '#E8EAF8',
+      color: colors.tasks,
+      bg: colors.tasksMuted,
       icon: 'pulse-outline',
     },
     {
       id: 'schedule',
       label: 'Agenda',
       value: week.length,
-      color: '#C4784A',
-      bg: '#F7E8DC',
+      color: mode === 'dark' ? colors.brandInk : colors.brand,
+      bg: colors.brandMuted,
       icon: 'trending-up-outline',
       href: '/calendario',
     },
@@ -75,16 +75,16 @@ export function KanbanOverviewPane({ tasks }: Props)
       id: 'overdue',
       label: 'Atrasadas',
       value: overdue.length,
-      color: '#4A8BC8',
-      bg: '#E3F0FA',
+      color: colors.danger,
+      bg: colors.dangerMuted,
       icon: 'git-branch-outline',
     },
     {
       id: 'all',
       label: 'Todas',
       value: open.length,
-      color: '#3F9A78',
-      bg: '#E3F5EE',
+      color: colors.health,
+      bg: colors.healthMuted,
       icon: 'checkbox-outline',
     },
   ]
@@ -160,7 +160,7 @@ export function KanbanOverviewPane({ tasks }: Props)
             justifyContent: 'center',
           }}
         >
-          <Ionicons name="notifications-outline" size={18} color={colors.inkMuted} />
+          <Icon name="notifications-outline" size={18} color={colors.inkMuted} />
         </PressableScale>
       </View>
 
@@ -197,7 +197,7 @@ export function KanbanOverviewPane({ tasks }: Props)
               width: '47%',
               flexGrow: 1,
               minWidth: 140,
-              borderRadius: 22,
+              borderRadius: 20,
               backgroundColor: tile.bg,
               padding: space.md,
               gap: 14,
@@ -211,13 +211,13 @@ export function KanbanOverviewPane({ tasks }: Props)
               >
                 {tile.value}
               </Text>
-              <Ionicons name="chevron-forward" size={15} color={tile.color} />
+              <Icon name="chevron-forward" size={15} color={tile.color} />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <Text variant="caption" style={{ color: tile.color, fontWeight: '700', fontSize: 13 }}>
                 {tile.label}
               </Text>
-              <Ionicons name={tile.icon} size={18} color={tile.color} style={{ opacity: 0.85 }} />
+              <Icon name={tile.icon} size={18} color={tile.color} style={{ opacity: 0.85 }} />
             </View>
           </Pressable>
         ))}
@@ -245,7 +245,7 @@ export function KanbanOverviewPane({ tasks }: Props)
                 borderRadius: 20,
                 padding: space.md,
                 gap: 8,
-                shadowColor: '#1A1208',
+                shadowColor: elevation.card.shadowColor,
                 shadowOpacity: 0.05,
                 shadowRadius: 14,
                 shadowOffset: { width: 0, height: 4 },
@@ -286,12 +286,12 @@ export function KanbanOverviewPane({ tasks }: Props)
               width: 42,
               height: 42,
               borderRadius: 999,
-              backgroundColor: colors.axel,
+              backgroundColor: colors.axelFill,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Ionicons name="add" size={22} color={colors.axelOnFill} />
+            <Icon name="add" size={22} color={colors.axelOnFill} />
           </PressableScale>
         </View>
 
@@ -333,7 +333,7 @@ export function KanbanOverviewPane({ tasks }: Props)
                     : t.dataVencimento ?? 'Sem hora'}
                 </Text>
               </View>
-              <Ionicons name="analytics-outline" size={18} color={colors.inkFaint} />
+              <Icon name="analytics-outline" size={18} color={colors.inkFaint} />
             </Pressable>
           ))
         )}

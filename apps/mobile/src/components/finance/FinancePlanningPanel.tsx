@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { formatBRL, parseBrlNumber } from '@simply-life/shared'
+import { financeCategoryColor, formatBRL, parseBrlNumber } from '@simply-life/shared'
 import {
   Card,
   Text,
@@ -11,6 +11,7 @@ import {
 } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
+import { useCategoryMetaStore } from '../../store/categoryMetaStore'
 import {
   fetchBudgetPlanning,
   upsertBudgetLimit,
@@ -26,7 +27,14 @@ const MONTHS = [
 /** Hub Orçamentos no Expo - limites por categoria + alerta simples */
 export function FinancePlanningPanel()
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space, radius, chart } = useTheme()
+  const resolveCat = useCategoryMetaStore((s) => s.resolve)
+  const catMap = useCategoryMetaStore((s) => s.map)
+  const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
+  useEffect(() =>
+  {
+    void hydrateCats()
+  }, [hydrateCats])
   const isGuest = useAuthStore((s) => s.isGuest)
   const [monthOffset, setMonthOffset] = useState(0)
   const [rows, setRows] = useState<MobileBudgetCategory[]>([])
@@ -207,8 +215,13 @@ export function FinancePlanningPanel()
       ) : (
         <Card tone="elevated" style={{ gap: space.md }}>
           <SectionHeader title="Por categoria" subtitle="Gasto vs limite" />
-          {rows.map((r) =>
+          {rows.map((r, i) =>
           {
+            void catMap
+            // categoria do app: mesma cor do seletor; senão o valor do banco (chave ou hex antigo)
+            const catColor = r.slug
+              ? financeCategoryColor(resolveCat(r.slug).color, chart, r.slug)
+              : financeCategoryColor(r.cor, chart, null, i)
             const pct = r.limite > 0 ? Math.min(100, (r.gasto / r.limite) * 100) : 0
             return (
               <View key={r.id} style={{ gap: 6 }}>
@@ -238,7 +251,7 @@ export function FinancePlanningPanel()
                           ? colors.danger
                           : pct >= 80
                             ? colors.attention
-                            : r.cor || colors.finance,
+                            : catColor,
                     }}
                   />
                 </View>

@@ -99,12 +99,12 @@ export function KanbanCalendarPane({ tasks }: Props)
               style={{
                 width: 52,
                 minHeight: 78,
-                borderRadius: 18,
+                borderRadius: 14,
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 4,
                 paddingVertical: 8,
-                backgroundColor: active ? colors.axel : colors.elevated,
+                backgroundColor: active ? colors.axelFill : colors.elevated,
               }}
             >
               <Text
@@ -125,7 +125,7 @@ export function KanbanCalendarPane({ tasks }: Props)
               </Text>
               <Text
                 variant="micro"
-                style={{ color: active ? colors.axelOnFill : colors.inkFaint, fontSize: 10 }}
+                style={{ color: active ? colors.axelOnFill : colors.inkFaint, fontSize: 11 }}
               >
                 {count}
               </Text>
@@ -145,14 +145,14 @@ export function KanbanCalendarPane({ tasks }: Props)
               <View key={t.id} style={{ flexDirection: 'row', gap: 10, minHeight: 88 }}>
                 <View style={{ width: 46, alignItems: 'center' }}>
                   <Text variant="micro" muted style={{ fontWeight: '700' }}>
-                    {t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : '—'}
+                    {t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : '--'}
                   </Text>
                   <View
                     style={{
                       width: 8,
                       height: 8,
                       borderRadius: 999,
-                      backgroundColor: t.status === 'done' ? colors.health : colors.axel,
+                      backgroundColor: t.status === 'done' ? colors.health : colors.axelFill,
                       marginTop: 6,
                     }}
                   />

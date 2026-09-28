@@ -15,7 +15,7 @@ import {
   EmptyState,
   PressableScale,
 } from '../../ui'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -241,7 +241,7 @@ export function HomeAgendaStudio({ tasks }: Props)
                       backgroundColor: colors.elevated,
                     }}
                   >
-                    <Ionicons
+                    <Icon
                       name={task.status === 'done' ? 'checkmark-circle' : 'ellipse-outline'}
                       size={22}
                       color={task.status === 'done' ? colors.health : colors.inkMuted}

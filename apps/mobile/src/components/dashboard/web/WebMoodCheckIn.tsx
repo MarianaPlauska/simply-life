@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { TextInput, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { findHabit, formatSleepHours, humorDoDia, moodColor, moodLabel, SONO_META_H } from '@simply-life/shared'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -9,9 +9,8 @@ import { useDataStore } from '../../../store/dataStore'
 import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
-const MOOD_ICONS: Record<number, keyof typeof Ionicons.glyphMap> = {
+const MOOD_ICONS: Record<number, keyof typeof Icon.glyphMap> = {
   1: 'sad',
   2: 'sad-outline',
   3: 'remove-outline',
@@ -80,12 +79,12 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
   }
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, padding: 16, gap: 14 }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 16, gap: 14 }}>
       {showSleep ? (
         <View style={{ gap: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text variant="caption" style={{ fontWeight: '700' }}>
-              Sono — meta {meta}h
+              Sono · meta {meta}h
             </Text>
           </View>
           <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
@@ -103,15 +102,15 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
                   borderRadius: 8,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: hours === h ? colors.axel : colors.surface,
+                  backgroundColor: hours === h ? colors.axelFill : colors.surface,
                   borderWidth: 1,
-                  borderColor: hours === h ? colors.axel : WEB_ROW_DIVIDER,
+                  borderColor: hours === h ? colors.axel : colors.hairline,
                   cursor: 'pointer',
                 })}
               >
                 <Text
                   variant="caption"
-                  style={{ color: hours === h ? '#FFFFFF' : colors.ink, fontWeight: '600' }}
+                  style={{ color: hours === h ? colors.axelOnFill : colors.ink, fontWeight: '600' }}
                 >
                   {formatSleepHours(h)}
                 </Text>
@@ -149,11 +148,11 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
                     gap: 6,
                     backgroundColor: selected ? `${moodColor(m)}22` : colors.surface,
                     borderWidth: 1,
-                    borderColor: selected ? moodColor(m) : WEB_ROW_DIVIDER,
+                    borderColor: selected ? moodColor(m) : colors.hairline,
                     cursor: 'pointer',
                   })}
                 >
-                  <Ionicons name={MOOD_ICONS[m]} size={16} color={selected ? moodColor(m) : colors.inkMuted} />
+                  <Icon name={MOOD_ICONS[m]} size={16} color={selected ? moodColor(m) : colors.inkMuted} />
                   <Text
                     variant="micro"
                     style={{ color: selected ? moodColor(m) : colors.inkMuted, fontWeight: '700' }}
@@ -182,7 +181,7 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
               color: colors.ink,
               backgroundColor: colors.surface,
               borderWidth: 1,
-              borderColor: WEB_ROW_DIVIDER,
+              borderColor: colors.hairline,
             }}
           />
           {saving ? (

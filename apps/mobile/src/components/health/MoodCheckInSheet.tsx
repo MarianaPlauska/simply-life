@@ -102,7 +102,7 @@ export function MoodCheckInSheet()
         >
           <Text variant="section">Como está o seu humor hoje?</Text>
           <Text variant="caption" muted>
-            Um toque já conta. Se quiser, escreva também — dá para complementar depois em Saúde ou Anotações.
+            Um toque já conta. Se quiser, escreva também. Dá para complementar depois em Saúde ou Anotações.
           </Text>
           <MoodFaceRow value={mood} onChange={setMood} />
           <TextInput

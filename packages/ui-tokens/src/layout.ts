@@ -1,6 +1,6 @@
 export const RADIUS = {
-  card: 24,
-  control: 16,
+  card: 20,
+  control: 14,
   pill: 999,
   sheet: 28,
   fab: 16,

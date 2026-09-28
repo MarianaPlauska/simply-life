@@ -109,7 +109,7 @@ export function FinanceSpreadsheetPane()
               variant="bodyStrong"
               color={t.tipo === 'receita' ? colors.health : colors.finance}
             >
-              {t.tipo === 'receita' ? '+' : '−'}
+              {t.tipo === 'receita' ? '+' : '-'}
               {formatBRL(t.valor)}
             </Text>
           </View>

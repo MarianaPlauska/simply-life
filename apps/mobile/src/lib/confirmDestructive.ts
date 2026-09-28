@@ -1,22 +1,12 @@
-import { Alert, Platform } from 'react-native'
+import { useConfirmStore } from '../store/confirmStore'
 
-/** Confirma ação irreversível (web e nativo). */
+/** Confirma ação irreversível no diálogo do app (web e nativo), sem alert do navegador. */
 export function confirmDestructive(
   title: string,
   message: string,
   onConfirm: () => void,
+  confirmLabel?: string,
 ): void
 {
-  if (Platform.OS === 'web')
-  {
-    if (typeof window !== 'undefined' && window.confirm(`${title}\n\n${message}`))
-    {
-      onConfirm()
-    }
-    return
-  }
-  Alert.alert(title, message, [
-    { text: 'Cancelar', style: 'cancel' },
-    { text: 'Excluir', style: 'destructive', onPress: onConfirm },
-  ])
+  useConfirmStore.getState().ask({ title, message, onConfirm, confirmLabel })
 }

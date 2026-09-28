@@ -2,7 +2,21 @@ import type { DashboardPriority } from './dashboardWidgets'
 
 /** Conteúdo do onboarding. Linguagem institucional, sem gíria. */
 
-export const SETUP_STEP_COUNT = 11
+export const SETUP_STEPS = [
+  'welcome',
+  'name',
+  'pace',
+  'focus',
+  'home',
+  'cards',
+  'goal',
+  'alerts',
+  'summary',
+] as const
+
+export type SetupStepId = (typeof SETUP_STEPS)[number]
+
+export const SETUP_STEP_COUNT = SETUP_STEPS.length
 
 export const SETUP_PRIORITY: {
   id: DashboardPriority
@@ -26,20 +40,20 @@ export const SETUP_PRIORITY: {
   },
 ]
 
+const TITLES: Record<SetupStepId, string> = {
+  welcome: 'Bem-vindo ao Simply Life',
+  name: 'Como devemos te chamar',
+  pace: 'Ritmo e aparência',
+  focus: 'Foco e neurodivergência',
+  home: 'Sua tela inicial',
+  cards: 'Seus cartões',
+  goal: 'Sua meta',
+  alerts: 'Alertas no celular',
+  summary: 'Pronto para começar',
+}
+
 export function setupStepTitle(step: number): string
 {
-  const titles = [
-    'Bem-vindo ao Simply Life',
-    'O que você vai ver',
-    'Ritmo e aparência',
-    'Foco e neurodivergência',
-    'Como devemos te chamar',
-    'Ordem das prioridades',
-    'Sua meta',
-    'Humor e cuidados',
-    'Alertas no celular',
-    'Dinheiro com clareza',
-    'Pronto para começar',
-  ]
-  return titles[step] ?? 'Configuração'
+  const id = SETUP_STEPS[step]
+  return id ? TITLES[id] : 'Configuração'
 }

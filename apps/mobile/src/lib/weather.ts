@@ -1,11 +1,11 @@
 import { Platform } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../ui/Icon'
 
 const CACHE_KEY = 'simply-life-weather-v1'
 export const WEATHER_TTL_MS = 30 * 60 * 1000
 
-type WeatherIcon = keyof typeof Ionicons.glyphMap
+type WeatherIcon = keyof typeof Icon.glyphMap
 
 export type WeatherSnapshot = {
   tempC: number

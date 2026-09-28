@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   habitAccent,
   routineLeafSummaries,
@@ -21,7 +21,7 @@ type Props = {
 /** Relatório semanal de hábitos e rotinas. */
 export function RoutineReportPane({ items, logs, weekOffset }: Props)
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, chart, space, radius } = useTheme()
   const title = useMemo(() => routineWeekTitle(weekOffset), [weekOffset])
   const rows = useMemo(
     () => routineLeafSummaries(items, logs, weekOffset),
@@ -72,7 +72,7 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
 
       {rows.map((row) =>
       {
-        const accent = habitAccent(row.id)
+        const accent = habitAccent(row.id, chart)
         const capped = Math.min(100, row.pct)
         return (
           <View
@@ -96,7 +96,7 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
                 ) : null}
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                <Ionicons name="flame" size={14} color={row.streak > 0 ? accent : colors.inkFaint} />
+                <Icon name="flame" size={14} color={row.streak > 0 ? accent : colors.inkFaint} />
                 <Text variant="caption" style={{ color: row.streak > 0 ? accent : colors.inkMuted, fontWeight: '700' }}>
                   {row.streak}
                 </Text>

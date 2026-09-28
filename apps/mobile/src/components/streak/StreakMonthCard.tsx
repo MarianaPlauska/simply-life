@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import type { StreakMonthCell } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -14,10 +14,10 @@ type Props = {
   onNext: () => void
 }
 
-function dotColor(kind: StreakMonthCell['kind'], colors: { axel: string; danger: string; hairline: string }): string
+function dotColor(kind: StreakMonthCell['kind'], colors: { axel: string; danger: string; attention: string; hairline: string }): string
 {
   if (kind === 'action') return colors.axel
-  if (kind === 'open' || kind === 'today') return '#C9A15C'
+  if (kind === 'open' || kind === 'today') return colors.attention
   if (kind === 'missed') return colors.danger
   return colors.hairline
 }
@@ -35,7 +35,7 @@ export function StreakMonthCard({ label, cells, todayIso, onPrev, onNext }: Prop
   return (
     <View
       style={{
-        borderRadius: 24,
+        borderRadius: 20,
         padding: space.lg,
         gap: 12,
         backgroundColor: colors.elevated,
@@ -47,7 +47,7 @@ export function StreakMonthCard({ label, cells, todayIso, onPrev, onNext }: Prop
           accessibilityLabel="Mês anterior"
           style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Ionicons name="chevron-back" size={18} color={colors.ink} />
+          <Icon name="chevron-back" size={18} color={colors.ink} />
         </Pressable>
         <Text variant="bodyStrong" style={{ textTransform: 'lowercase' }}>
           {label}
@@ -57,7 +57,7 @@ export function StreakMonthCard({ label, cells, todayIso, onPrev, onNext }: Prop
           accessibilityLabel="Próximo mês"
           style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Ionicons name="chevron-forward" size={18} color={colors.ink} />
+          <Icon name="chevron-forward" size={18} color={colors.ink} />
         </Pressable>
       </View>
       <View style={{ flexDirection: 'row' }}>
@@ -85,7 +85,7 @@ export function StreakMonthCard({ label, cells, todayIso, onPrev, onNext }: Prop
                   alignItems: 'center',
                   paddingVertical: 6,
                   borderRadius: radius.pill,
-                    backgroundColor: isToday ? colors.axel : 'transparent',
+                    backgroundColor: isToday ? colors.axelFill : 'transparent',
                 }}
               >
                 <Text

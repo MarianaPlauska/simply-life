@@ -1,7 +1,7 @@
-import { useMemo, useState, type ComponentType, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { View, TextInput, Pressable, ScrollView } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { Search as LucideSearch } from 'lucide-react-native'
+import { Icon } from '../../ui/Icon'
+import { MagnifyingGlassIcon } from 'phosphor-react-native/src/icons/MagnifyingGlass'
 import { useRouter } from 'expo-router'
 import {
   consecutiveActivity,
@@ -16,12 +16,6 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useGamificationStore } from '../../store/gamificationStore'
 import { LifeGoalMicroLine, LifeGoalSheet } from './LifeGoalSheet'
-
-const SearchIcon = LucideSearch as ComponentType<{
-  size?: number
-  color?: string
-  strokeWidth?: number
-}>
 
 type Props = {
   tasks: MobileTask[]
@@ -89,14 +83,14 @@ export function HomeTodayDashboard({
           flexDirection: 'row',
           alignItems: 'center',
           minHeight: 48,
-          borderRadius: 16,
+          borderRadius: 14,
           paddingHorizontal: 14,
           gap: 10,
           backgroundColor: colors.elevated,
           ...elevation.card,
         }}
       >
-        <SearchIcon size={18} color={colors.inkMuted} strokeWidth={2} />
+        <MagnifyingGlassIcon size={18} color={colors.inkMuted} />
         <TextInput
           placeholder="Buscar tarefas, gastos…"
           placeholderTextColor={colors.inkFaint}
@@ -118,7 +112,7 @@ export function HomeTodayDashboard({
             accessibilityLabel="Cancelar busca"
             hitSlop={8}
           >
-            <Ionicons name="close" size={20} color={colors.inkMuted} />
+            <Icon name="close" size={20} color={colors.inkMuted} />
           </Pressable>
         ) : null}
       </View>
@@ -126,7 +120,7 @@ export function HomeTodayDashboard({
       {searching ? (
         <View
           style={{
-            borderRadius: 24,
+            borderRadius: 20,
             padding: 20,
             gap: 14,
             backgroundColor: colors.widget,
@@ -138,7 +132,7 @@ export function HomeTodayDashboard({
               {hits.length > 0 ? `${hits.length} resultado(s)` : 'Busca'}
             </Text>
             <Pressable onPress={cancelSearch} accessibilityLabel="Fechar busca" hitSlop={8}>
-              <Ionicons name="close-circle" size={22} color={colors.widgetMuted} />
+              <Icon name="close-circle" size={22} color={colors.widgetMuted} />
             </Pressable>
           </View>
 
@@ -175,7 +169,7 @@ export function HomeTodayDashboard({
         <>
           <View
             style={{
-              borderRadius: 24,
+              borderRadius: 20,
               padding: 20,
               gap: 14,
               backgroundColor: colors.widget,
@@ -204,7 +198,7 @@ export function HomeTodayDashboard({
                 size={72}
                 strokeWidth={7}
                 color={colors.axel}
-                trackColor="rgba(245,241,236,0.16)"
+                trackColor="rgba(238,242,240,0.16)"
                 centerLabel={`${pct}%`}
                 labelColor={colors.widgetInk}
               />
@@ -243,7 +237,7 @@ export function HomeTodayDashboard({
                   ...elevation.card,
                 }}
               >
-                <Ionicons name={g.icon} size={18} color={g.color} />
+                <Icon name={g.icon} size={18} color={g.color} />
                 <Text variant="title" style={{ fontSize: 22 }}>
                   {g.value}
                 </Text>

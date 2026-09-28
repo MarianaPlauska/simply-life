@@ -5,11 +5,10 @@ import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 function timeLabel(mins: number | null): string
 {
-  if (mins == null) return '—'
+  if (mins == null) return '--'
   const h = Math.floor(mins / 60).toString().padStart(2, '0')
   const m = (mins % 60).toString().padStart(2, '0')
   return `${h}:${m}`
@@ -56,7 +55,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
         </WebHoverable>
       </View>
 
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: WEB_CARD_BORDER, overflow: 'hidden' }}>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
       {tasks.length === 0 ? (
         <View style={{ paddingHorizontal: 20, paddingBottom: 22 }}>
           <Text variant="caption" muted>
@@ -71,7 +70,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
               paddingHorizontal: 20,
               paddingBottom: 8,
               borderBottomWidth: 1,
-              borderBottomColor: WEB_ROW_DIVIDER,
+              borderBottomColor: colors.cardRim,
             }}
           >
             <Text variant="micro" muted style={{ width: 64, fontWeight: '700' }}>
@@ -109,7 +108,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
                     paddingHorizontal: 8,
                     paddingVertical: 3,
                     borderRadius: 999,
-                    backgroundColor: t.prioridade === 1 ? `${colors.danger}22` : WEB_ROW_DIVIDER,
+                    backgroundColor: t.prioridade === 1 ? `${colors.danger}22` : colors.hairline,
                   }}
                 >
                   <Text

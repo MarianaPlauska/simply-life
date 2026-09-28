@@ -12,10 +12,10 @@ type Props = {
 /** Barra horizontal com marcador - estilo metas/pastas das referências. */
 export function MetricTrack({ pct, currentLabel, targetLabel, fill }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors } = useTheme()
   const clamped = Math.max(0, Math.min(100, pct))
   const color = fill ?? colors.axel
-  const track = mode === 'dark' ? '#2A2A2C' : '#E8E0D4'
+  const track = colors.hairline
 
   return (
     <View style={{ gap: 6 }}>

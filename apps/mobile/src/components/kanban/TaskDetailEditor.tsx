@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View, ScrollView } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   applyTaskMeta,
   minutesToLabel,
@@ -189,7 +189,7 @@ export function TaskDetailEditor({ task, isGuest }: Props)
               backgroundColor: criarPastaOpen ? colors.axelMuted : colors.elevated,
             }}
           >
-            <Ionicons name={criarPastaOpen ? 'close' : 'add'} size={20} color={colors.axel} />
+            <Icon name={criarPastaOpen ? 'close' : 'add'} size={20} color={colors.axel} />
           </PressableScale>
         </View>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { formatBRL, cardFaturaAbertaDisplay, type FinanceCard } from '@simply-life/shared'
 import {
   Card,
@@ -143,7 +143,7 @@ export function FinanceCardsHub({
               style={{
                 width: 48,
                 height: 48,
-                borderRadius: 16,
+                borderRadius: 14,
                 backgroundColor: colors.elevated,
                 borderWidth: 1,
                 borderColor: colors.hairline,
@@ -151,7 +151,7 @@ export function FinanceCardsHub({
                 justifyContent: 'center',
               }}
             >
-              <Ionicons name={a.icon} size={20} color={colors.ink} />
+              <Icon name={a.icon} size={20} color={colors.ink} />
             </View>
             <Text variant="micro" muted style={{ fontSize: 11 }}>
               {a.label}
@@ -196,7 +196,7 @@ export function FinanceCardsHub({
               style={{
                 width: `${usadoPct}%`,
                 height: '100%',
-                backgroundColor: colors.axel,
+                backgroundColor: colors.axelFill,
               }}
             />
           </View>

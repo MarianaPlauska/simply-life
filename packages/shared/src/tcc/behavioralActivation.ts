@@ -48,14 +48,14 @@ export function behavioralActivationToMarkdown(entry: BehavioralActivationEntry)
     `**Data:** ${new Date(entry.createdAt).toLocaleString('pt-BR')}`,
     '',
     '## O que estava pesado',
-    entry.barrier.trim() || '—',
+    entry.barrier.trim() || '(vazio)',
     '',
     '## Micro-ação escolhida',
-    entry.action.trim() || '—',
+    entry.action.trim() || '(vazio)',
     '',
     `**Tempo previsto:** ${entry.durationMin} minutos`,
     '',
-    '_Uma ação foi adicionada às tarefas de hoje. Exercício de organização pessoal — não substitui psicoterapia._',
+    '_Uma ação foi adicionada às tarefas de hoje. Exercício de organização pessoal. Não substitui psicoterapia._',
   ].join('\n')
 }
 

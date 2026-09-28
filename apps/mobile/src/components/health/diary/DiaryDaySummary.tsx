@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { DAY_PLAN_MODE_COPY, completionDays, localTodayIso } from '@simply-life/shared'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -47,7 +47,7 @@ export function DiaryDaySummary()
           <Text variant="caption" muted style={{ fontWeight: '600' }}>Na agenda</Text>
           {todayEvents.map((e) => (
             <View key={e.id} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <Ionicons name="calendar-outline" size={14} color={colors.inkMuted} />
+              <Icon name="calendar-outline" size={14} color={colors.inkMuted} />
               <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
                 {hhmm(e.inicio)} · {e.titulo}
               </Text>
@@ -71,7 +71,7 @@ export function DiaryDaySummary()
         {doneToday.length ? (
           doneToday.slice(0, 8).map((t) => (
             <View key={t.id} style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
-              <Ionicons name="checkmark-circle" size={14} color={colors.axel} />
+              <Icon name="checkmark-circle" size={14} color={colors.axel} />
               <Text variant="body" style={{ flex: 1, fontSize: 14 }}>{t.titulo}</Text>
             </View>
           ))

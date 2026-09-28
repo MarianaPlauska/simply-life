@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { confirmDestructive } from '../../lib/confirmDestructive'
 import {
   buildRoutineWeek,
@@ -190,7 +190,7 @@ export function KanbanRoutinePane()
               justifyContent: 'center',
             }}
           >
-            <Ionicons name="chevron-back" size={18} color={colors.inkMuted} />
+            <Icon name="chevron-back" size={18} color={colors.inkMuted} />
           </PressableScale>
           <View style={{ flex: 1, alignItems: 'center', gap: 2 }}>
             <Text variant="bodyStrong" style={{ textTransform: 'capitalize' }}>
@@ -230,7 +230,7 @@ export function KanbanRoutinePane()
               justifyContent: 'center',
             }}
           >
-            <Ionicons name="chevron-forward" size={18} color={colors.inkMuted} />
+            <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
           </PressableScale>
         </View>
         {view === 'hoje' ? (

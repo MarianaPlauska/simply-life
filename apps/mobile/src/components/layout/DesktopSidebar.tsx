@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { View, Pressable, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { ShieldCheck } from 'lucide-react-native'
+import { Icon } from '../../ui/Icon'
+import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { Text } from '../../ui'
 import { BrandMark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -17,6 +17,7 @@ const NAV = [
   { href: '/(tabs)/kanban', match: 'kanban', label: 'Tarefas', icon: 'list-outline' as const },
   { href: '/(tabs)/saude', match: 'saude', label: 'Saúde', icon: 'heart-outline' as const },
   { href: '/(tabs)/financeiro', match: 'financeiro', label: 'Finanças', icon: 'wallet-outline' as const },
+  { href: '/calendario', match: 'calendario', label: 'Calendário', icon: 'calendar-outline' as const },
 ]
 
 export const DESKTOP_SIDEBAR_WIDTH = 220
@@ -51,16 +52,18 @@ export function DesktopSidebar()
   const collapsed = isTablet && !isDesktop ? !tabletExpanded : prefsCollapsed
 
   const width = collapsed ? DESKTOP_SIDEBAR_COLLAPSED : DESKTOP_SIDEBAR_WIDTH
+  // Navegação é o 30%: barra em petróleo; o item ativo "encaixa" na página (mesma cor do fundo)
   const ORANGE = colors.axel
-  const CREAM = colors.ink
-  const sidebarBg = colors.canvas
-  const activePill = CREAM
-  const inkOnBrand = 'rgba(243, 230, 216, 0.88)'
-  const inkMutedOnBrand = 'rgba(243, 230, 216, 0.55)'
-  const pressedBg = colors.axelMuted
-  const divider = 'rgba(243, 230, 216, 0.14)'
-  const avatarBg = colors.axelMuted
-  const ctaBg = colors.axelMuted
+  const CREAM = colors.onBrand
+  const sidebarBg = colors.brand
+  const activePill = colors.canvas
+  const inkOnBrand = `${colors.onBrand}E0`
+  const inkMutedOnBrand = colors.brandInk
+  const pressedBg = `${colors.brandInk}1A`
+  const divider = `${colors.brandInk}29`
+  const avatarBg = `${colors.brandInk}29`
+  const ctaBg = colors.axelFill
+  const ctaFg = colors.axelOnFill
 
   const isActive = (item: (typeof NAV)[0]) =>
   {
@@ -134,7 +137,7 @@ export function DesktopSidebar()
               backgroundColor: pressedBg,
             }}
           >
-            <Ionicons
+            <Icon
               name={collapsed ? 'chevron-forward' : 'chevron-back'}
               size={16}
               color={CREAM}
@@ -150,7 +153,7 @@ export function DesktopSidebar()
               paddingHorizontal: 14,
               textTransform: 'uppercase',
               letterSpacing: 0.8,
-              fontSize: 10,
+              fontSize: 11,
             }}
           >
             Menu
@@ -244,10 +247,10 @@ export function DesktopSidebar()
                     borderLeftColor: active ? ORANGE : 'transparent',
                   })}
                 >
-                  <Ionicons
+                  <Icon
                     name={
                       active
-                        ? (item.icon.replace('-outline', '') as keyof typeof Ionicons.glyphMap)
+                        ? (item.icon.replace('-outline', '') as keyof typeof Icon.glyphMap)
                         : item.icon
                     }
                     size={18}
@@ -296,9 +299,9 @@ export function DesktopSidebar()
           })}
         >
           {collapsed ? (
-            <Ionicons name="add" size={20} color={CREAM} />
+            <Icon name="add" size={20} color={ctaFg} />
           ) : (
-            <Text variant="label" style={{ color: CREAM, fontSize: 12, fontWeight: '700' }}>
+            <Text variant="label" style={{ color: ctaFg, fontSize: 12, fontWeight: '700' }}>
               + Capturar
             </Text>
           )}
@@ -349,7 +352,7 @@ export function DesktopSidebar()
                 justifyContent: 'center',
               }}
             >
-              <ShieldCheck size={12} color={ORANGE} />
+              <ShieldCheck size={12} color={colors.axelFill} />
             </View>
           ) : null}
         </View>
@@ -358,7 +361,7 @@ export function DesktopSidebar()
             <Text variant="label" numberOfLines={1} style={{ color: CREAM, fontSize: 12 }}>
               {name}
             </Text>
-            <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 10 }}>
+            <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 11 }}>
               {isAdmin ? 'Admin' : 'Perfil'}
             </Text>
           </View>

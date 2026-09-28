@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { View, Pressable, ActivityIndicator } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { useRouter } from 'expo-router'
 import {
   buildMoodWeekReport,
@@ -61,7 +61,7 @@ export function MoodWeekReportCard({ humor }: Props)
           <Text variant="micro" muted>{weekLabel}</Text>
         </View>
         <Pressable onPress={dismiss} accessibilityLabel="Fechar relatório" hitSlop={8}>
-          <Ionicons name="close" size={20} color={colors.inkMuted} />
+          <Icon name="close" size={20} color={colors.inkMuted} />
         </Pressable>
       </View>
 
@@ -69,7 +69,7 @@ export function MoodWeekReportCard({ humor }: Props)
         style={{
           gap: 8,
           padding: 12,
-          borderRadius: 16,
+          borderRadius: 14,
           backgroundColor: colors.elevated,
         }}
       >

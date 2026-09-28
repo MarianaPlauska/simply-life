@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   minutesToLabel,
   inferLifeCategory,
@@ -13,7 +13,7 @@ import { MetricTrack } from '../metrics/MetricTrack'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
 
-const CAT_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+const CAT_ICON: Record<string, keyof typeof Icon.glyphMap> = {
   importante: 'flag-outline',
   saude: 'heart-outline',
   crescimento: 'book-outline',
@@ -29,18 +29,17 @@ type Props = {
 /** Linha de tarefa: ícone, título, checkbox — sem caixa extra. */
 export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors, chart } = useTheme()
   const openEvolve = useTaskEvolveStore((s) => s.open)
   const lists = useKanbanListsStore((s) => s.lists)
   const done = task.status === 'done'
   const cat = inferLifeCategory(task)
-  const accent = taskMarkColor(task, lists, colors.danger)
+  const accent = taskMarkColor(task, lists, colors.danger, chart)
   const icon = CAT_ICON[cat] ?? 'checkbox-outline'
   const detail =
     task.horaMinutos != null
       ? minutesToLabel(task.horaMinutos)
       : task.dataVencimento ?? undefined
-  const cardBg = mode === 'dark' ? 'rgba(28, 28, 30, 0.55)' : 'rgba(255, 255, 255, 0.78)'
 
   return (
     <Pressable
@@ -54,8 +53,10 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
         paddingVertical: 14,
         paddingRight: 14,
         paddingLeft: 10,
-        borderRadius: 22,
-        backgroundColor: cardBg,
+        borderRadius: 20,
+        backgroundColor: colors.elevated,
+        borderWidth: 1,
+        borderColor: colors.cardRim,
         minHeight: 64,
         overflow: 'hidden',
       }}
@@ -79,7 +80,7 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
           justifyContent: 'center',
         }}
       >
-        <Ionicons name={icon} size={18} color={accent} />
+        <Icon name={icon} size={18} color={accent} />
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
         <Text
@@ -121,7 +122,7 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
           justifyContent: 'center',
         }}
       >
-        {done ? <Ionicons name="checkmark" size={14} color={colors.canvas} /> : null}
+        {done ? <Icon name="checkmark" size={14} color={colors.canvas} /> : null}
       </PressableScale>
     </Pressable>
   )

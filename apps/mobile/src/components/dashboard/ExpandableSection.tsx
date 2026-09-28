@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react'
 import { View, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Card, Text, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -39,7 +39,7 @@ export function ExpandableSection({
       tone="elevated"
       style={{
         gap: expanded ? space.sm : space.xs,
-        borderRadius: 24,
+        borderRadius: 20,
         overflow: 'hidden',
         padding: 16,
       }}
@@ -86,7 +86,7 @@ export function ExpandableSection({
             justifyContent: 'center',
           }}
         >
-          <Ionicons
+          <Icon
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={16}
             color={colors.inkMuted}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Platform, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../src/ui/Icon'
 import {
   ANXIETY_LABELS,
   CARRY_LABELS,
@@ -368,7 +368,7 @@ export default function PlanTomorrowScreen()
                   accessibilityLabel={`Remover ${d.titulo}`}
                   hitSlop={10}
                 >
-                  <Ionicons name="close" size={18} color={colors.inkMuted} />
+                  <Icon name="close" size={18} color={colors.inkMuted} />
                 </Pressable>
               </View>
             ))}
@@ -454,7 +454,7 @@ export default function PlanTomorrowScreen()
                 {plan.sequence.map((s, idx) => (
                   <View key={`${s.kind}-${idx}`} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                     <Text variant="caption" muted style={{ width: 44 }}>{formatHourPt(s.inicio)}</Text>
-                    <Ionicons
+                    <Icon
                       name={s.kind === 'pausa' ? 'cafe-outline' : s.kind === 'cuidado' ? 'heart-outline' : s.kind === 'compromisso' ? 'time-outline' : 'ellipse-outline'}
                       size={14}
                       color={s.kind === 'tarefa' ? colors.axel : colors.inkMuted}
@@ -477,7 +477,7 @@ export default function PlanTomorrowScreen()
 
         {step === 3 && applied ? (
           <Card tone="elevated" style={{ gap: space.md }}>
-            <Ionicons name="moon-outline" size={28} color={colors.axel} />
+            <Icon name="moon-outline" size={28} color={colors.axel} />
             <Text variant="section">Amanhã está organizado. Agora é descanso.</Text>
             <Text variant="body" muted>
               {firstPlanItem(applied)
@@ -544,7 +544,7 @@ function StepDots({ step }: { step: number })
             height: 6,
             flex: 1,
             borderRadius: 3,
-            backgroundColor: i <= step ? colors.axel : colors.hairline,
+            backgroundColor: i <= step ? colors.axelFill : colors.hairline,
           }}
         />
       ))}
@@ -559,7 +559,7 @@ function ModeBadge({ mode }: { mode: TomorrowPlan['mode'] })
   const icon = mode === 'cuidado' ? 'heart' : mode === 'gentil' ? 'leaf-outline' : 'sunny-outline'
   return (
     <View style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
-      <Ionicons name={icon} size={18} color={colors.axel} style={{ marginTop: 2 }} />
+      <Icon name={icon} size={18} color={colors.axel} style={{ marginTop: 2 }} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text variant="bodyStrong">{copy.label}</Text>
         <Text variant="caption" muted>{copy.hint}</Text>
@@ -577,7 +577,7 @@ function CapacityMeter({ planned, capacity }: { planned: number; capacity: numbe
   return (
     <View style={{ gap: 6 }} accessibilityLabel={`${formatMinutesPt(planned)} planejados de ${formatMinutesPt(capacity)} de tempo livre`}>
       <View style={{ height: 8, borderRadius: 4, backgroundColor: colors.hairline, overflow: 'hidden' }}>
-        <View style={{ width: `${Math.round(pct * 100)}%`, height: 8, borderRadius: 4, backgroundColor: over ? colors.attention : colors.axel }} />
+        <View style={{ width: `${Math.round(pct * 100)}%`, height: 8, borderRadius: 4, backgroundColor: over ? colors.attention : colors.axelFill }} />
       </View>
       <Text variant="caption" muted>
         {formatMinutesPt(planned)} de {formatMinutesPt(capacity)} do seu tempo livre

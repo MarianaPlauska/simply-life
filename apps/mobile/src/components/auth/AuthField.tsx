@@ -1,13 +1,13 @@
 import { useState, type ReactNode } from 'react'
 import { TextInput, View, type TextInputProps } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = TextInputProps & {
   label: string
   error?: string
-  leadingIcon: keyof typeof Ionicons.glyphMap
+  leadingIcon: keyof typeof Icon.glyphMap
   trailing?: ReactNode
 }
 
@@ -53,7 +53,7 @@ export function AuthField({
           gap: 10,
         }}
       >
-        <Ionicons
+        <Icon
           name={leadingIcon}
           size={18}
           color={focused ? colors.axel : colors.inkMuted}
@@ -75,7 +75,7 @@ export function AuthField({
               flex: 1,
               minHeight: 48,
               fontSize: 16,
-              fontFamily: 'Manrope_400Regular',
+              fontFamily: 'Lexend_400Regular',
               color: colors.ink,
               paddingVertical: 0,
             },

@@ -119,7 +119,7 @@ export default function ThoughtRecordScreen()
                 flex: 1,
                 height: 4,
                 borderRadius: 999,
-                backgroundColor: i <= step ? colors.axel : colors.hairline,
+                backgroundColor: i <= step ? colors.axelFill : colors.hairline,
               }}
             />
           ))}

@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { SyncHint } from '../SyncHint'
@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { HomeWeatherChip } from './HomeWeatherChip'
 import { WEB_DISPLAY_FONT } from './web/webTypography'
-import { WEB_CARD_BORDER } from './web/webPalette'
 
 type Props = {
   greet: string
@@ -88,10 +87,10 @@ export function HomeFitnessHero({
             justifyContent: 'center',
             backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
             borderWidth: 1,
-            borderColor: WEB_CARD_BORDER,
+            borderColor: colors.hairline,
           }}
         >
-          <Ionicons
+          <Icon
             name={isAdmin ? 'shield-checkmark' : 'person-outline'}
             size={16}
             color={isAdmin ? colors.axel : colors.ink}
@@ -149,7 +148,7 @@ export function HomeFitnessHero({
             ...elevation.card,
           }}
         >
-          <Ionicons
+          <Icon
             name={isAdmin ? 'shield-checkmark' : 'person-outline'}
             size={16}
             color={isAdmin ? colors.axel : colors.ink}

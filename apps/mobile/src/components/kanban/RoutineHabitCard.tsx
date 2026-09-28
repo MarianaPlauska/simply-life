@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   dayCount,
   habitAccent,
@@ -66,10 +66,10 @@ export function RoutineHabitCard({
   onExpand,
 }: Props)
 {
-  const { colors } = useTheme()
+  const { colors, chart } = useTheme()
   const done = checked ?? habitMetOn(habit, logs, iso)
   const count = dayCount(logs, habit.id, iso)
-  const accent = habitAccent(habit.id)
+  const accent = habitAccent(habit.id, chart)
   const streak = winStreak(habit, logs, new Date(), items)
   const cells = habitHeatmap(habit, logs, 28, new Date(), items)
   const groupHeader = isGroupHeader || habit.isGroup
@@ -97,7 +97,7 @@ export function RoutineHabitCard({
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-            <Ionicons name="flame" size={14} color={streak > 0 ? accent : colors.inkFaint} />
+            <Icon name="flame" size={14} color={streak > 0 ? accent : colors.inkFaint} />
             <Text variant="caption" style={{ color: streak > 0 ? accent : colors.inkMuted, fontWeight: '700' }}>
               {streak}
             </Text>
@@ -117,7 +117,7 @@ export function RoutineHabitCard({
                 backgroundColor: colors.surface,
               }}
             >
-              <Ionicons name="pencil-outline" size={16} color={colors.inkMuted} />
+              <Icon name="pencil-outline" size={16} color={colors.inkMuted} />
             </PressableScale>
           ) : null}
           {onDelete ? (
@@ -135,7 +135,7 @@ export function RoutineHabitCard({
                 backgroundColor: colors.surface,
               }}
             >
-              <Ionicons name="trash-outline" size={16} color={colors.danger} />
+              <Icon name="trash-outline" size={16} color={colors.danger} />
             </PressableScale>
           ) : null}
           {onExpand ? (
@@ -153,7 +153,7 @@ export function RoutineHabitCard({
                 backgroundColor: colors.surface,
               }}
             >
-              <Ionicons
+              <Icon
                 name={expanded ? 'chevron-up' : 'chevron-down'}
                 size={18}
                 color={colors.inkMuted}
@@ -190,7 +190,7 @@ export function RoutineHabitCard({
               justifyContent: 'center',
             }}
           >
-            <Ionicons
+            <Icon
               name={
                 done
                   ? 'checkmark'
@@ -201,7 +201,7 @@ export function RoutineHabitCard({
                       : 'checkmark-outline'
               }
               size={22}
-              color={done ? '#fff' : checkDisabled ? colors.inkFaint : accent}
+              color={done ? colors.axelOnFill : checkDisabled ? colors.inkFaint : accent}
             />
           </View>
           <Text

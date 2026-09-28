@@ -1,5 +1,5 @@
 import { View, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { daysUntilDue, formatCountdown, type ScopeSnapshot } from '@simply-life/shared'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -30,7 +30,7 @@ export function KanbanFolderCard({ scope, onPress, onToggle }: Props)
     <Pressable
       onPress={onPress}
       style={{
-        borderRadius: 18,
+        borderRadius: 14,
         backgroundColor: cardBg,
         padding: 14,
         gap: 10,
@@ -54,7 +54,7 @@ export function KanbanFolderCard({ scope, onPress, onToggle }: Props)
             justifyContent: 'center',
           }}
         >
-          {complete ? <Ionicons name="checkmark" size={14} color={colors.axelOnFill} /> : null}
+          {complete ? <Icon name="checkmark" size={14} color={colors.axelOnFill} /> : null}
         </PressableScale>
         <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
           <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 16 }}>

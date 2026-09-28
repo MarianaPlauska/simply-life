@@ -49,14 +49,14 @@ export default function PersonalizarInicioScreen()
     <Screen scroll tabBarInset={false}>
       <StackHeader
         title="Personalize seu Início"
-        subtitle="O que aparece acima da dobra — o resto fica no resumo"
+        subtitle="O que aparece acima da dobra. O resto fica no resumo"
       />
       <View style={{ gap: space.lg, paddingBottom: space.xl }}>
         <Text variant="body" muted>
-          Sem cobrança - só o essencial no seu ritmo. Você pode mudar isso depois em Preferências.
+          Sem cobrança, só o essencial no seu ritmo. Você pode mudar isso depois em Preferências.
         </Text>
 
-        <Card tone="elevated" style={{ gap: 0, borderRadius: 18, overflow: 'hidden' }}>
+        <Card tone="elevated" style={{ gap: 0, borderRadius: 14, overflow: 'hidden' }}>
           {HOME_METRIC_CATALOG.map((item, i) =>
           {
             const on = selected.includes(item.id)
@@ -83,7 +83,7 @@ export default function PersonalizarInicioScreen()
                   value={on}
                   onValueChange={() => onToggle(item.id)}
                   trackColor={{ false: colors.hairline, true: colors.axel }}
-                  thumbColor={on ? colors.axelOnFill : '#F5F1EC'}
+                  thumbColor={on ? colors.axelOnFill : colors.inkMuted}
                   ios_backgroundColor={colors.hairline}
                 />
               </View>

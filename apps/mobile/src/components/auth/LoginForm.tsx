@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text, PrimaryButton, Card } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
@@ -146,8 +146,8 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
   const title = mode === 'login' ? 'Entrar' : 'Criar conta'
   const subtitle =
     mode === 'login'
-      ? 'Email e senha para acessar seu Simply-Life.'
-      : 'Crie sua conta para sincronizar entre aparelhos.'
+      ? 'Que bom ter você de volta.'
+      : 'Leva menos de um minuto e funciona em todos os seus aparelhos.'
 
   const fields = (
     <View style={{ gap: space.md }}>
@@ -299,7 +299,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
                 }}
               >
                 {remember ? (
-                  <Ionicons name="checkmark" size={14} color={colors.canvas} />
+                  <Icon name="checkmark" size={14} color={colors.canvas} />
                 ) : null}
               </View>
               <Text variant="caption" color={colors.ink}>

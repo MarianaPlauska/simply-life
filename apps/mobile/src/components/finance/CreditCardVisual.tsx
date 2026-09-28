@@ -1,22 +1,30 @@
-import { View, StyleSheet, Pressable } from 'react-native'
-import Svg, { Defs, LinearGradient as SvgGradient, Rect, Stop } from 'react-native-svg'
-import { Ionicons } from '@expo/vector-icons'
+import { Pressable, StyleSheet, View } from 'react-native'
+import { LinearGradient } from 'expo-linear-gradient'
+import { ContactlessPaymentIcon } from 'phosphor-react-native/src/icons/ContactlessPayment'
 import { formatBRL, type FinanceCard, type FinanceCardGradient } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
-/** Proporção próxima ao card balance das referências (um pouco mais alto) */
-export const CARD_ASPECT = 1.55
+/** Proporção do cartão bancário (ISO/IEC 7810 ID-1: 85,60 × 53,98 mm) */
+export const CARD_ASPECT = 85.6 / 53.98
 
-/** Skins no preto/cobre das referências Cryptora + Card Balance */
-const SKINS: Record<FinanceCardGradient, [string, string, string]> = {
-  purple: ['#2A2438', '#1A1624', '#0B0B0B'],
-  obsidian: ['#2A2A2C', '#161618', '#0B0B0B'],
-  sunset: ['#E8734A', '#C45A32', '#3D1E14'],
-  ocean: ['#1E3A4A', '#122430', '#0B0B0B'],
-  mint: ['#1E3A32', '#142822', '#0B0B0B'],
-  copper: ['#E8734A', '#C45A32', '#2A160E'],
+/**
+ * Cores do cartão (as chaves ficam salvas no banco; só o desenho mudou).
+ * Todas passam de 4,5:1 com texto branco no ponto mais claro.
+ */
+export const CARD_SKINS: Record<FinanceCardGradient, { label: string; from: string; to: string }> = {
+  copper: { label: 'Coral', from: '#A84B27', to: '#5A2412' },
+  ocean: { label: 'Petróleo', from: '#2F5A5E', to: '#152B2D' },
+  mint: { label: 'Floresta', from: '#2B7454', to: '#143626' },
+  sunset: { label: 'Âmbar', from: '#8A5E0E', to: '#40300A' },
+  purple: { label: 'Ameixa', from: '#5B3A5E', to: '#2A1B2C' },
+  obsidian: { label: 'Carvão', from: '#3A3F3F', to: '#151A1A' },
 }
+
+export const CARD_SKIN_ORDER: FinanceCardGradient[] = ['copper', 'ocean', 'mint', 'sunset', 'purple', 'obsidian']
+
+const INK = '#FFFFFF'
+const INK_SOFT = 'rgba(255,255,255,0.86)'
 
 type Props = {
   card: FinanceCard
@@ -25,183 +33,187 @@ type Props = {
   onPress?: () => void
 }
 
-/**
- * Cartão estilo “Card Balance”: valor grande, chip, titular e finais.
- */
+/** Cartão de crédito com cara de cartão: nome, chip, disponível, fatura, vencimento, finais e validade. */
 export function CreditCardVisual({ card, width, selected, onPress }: Props)
 {
-  const { radius } = useTheme()
-  const skin = SKINS[card.tipoGradiente ?? 'copper']
-  const height = Math.round(width / CARD_ASPECT)
+  const { colors } = useTheme()
+  const skin = CARD_SKINS[card.tipoGradiente ?? 'copper'] ?? CARD_SKINS.copper
   const fatura = card.faturaAberta ?? 0
   const disponivel = Math.max(0, card.limite - fatura)
   const usage = card.limite > 0 ? Math.min(100, (fatura / card.limite) * 100) : 0
   const blocked = card.status === 'bloqueado'
-  const digits = (card.numeroMascarado || '•••• 0000').replace(/\s/g, '').slice(-4)
-  const titular = card.titular?.trim() || card.nome
+  const digits = (card.numeroMascarado || '').replace(/\D/g, '').slice(-4) || '0000'
+  const titular = (card.titular?.trim() || card.nome).toUpperCase()
+  const validade = card.validadeMesAno?.trim() || '--/--'
 
-  const shell = (
+  const face = (
     <View
-      style={{
-        width,
-        borderRadius: radius.control + 6,
-        overflow: 'hidden',
-        opacity: blocked ? 0.72 : 1,
-        borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
-        borderColor: selected ? 'rgba(232,115,74,0.85)' : 'rgba(255,255,255,0.08)',
-        shadowColor: '#000',
-        shadowOpacity: 0.35,
-        shadowRadius: 18,
-        shadowOffset: { width: 0, height: 10 },
-        elevation: 6,
-      }}
+      style={[
+        styles.shadow,
+        {
+          width,
+          opacity: blocked ? 0.72 : 1,
+          borderRadius: 16,
+          borderWidth: selected ? 2 : 0,
+          borderColor: selected ? colors.axelFill : 'transparent',
+        },
+      ]}
     >
-      <View style={{ minHeight: height, padding: 16, justifyContent: 'space-between' }}>
-        <Svg
-          width="100%"
-          height="100%"
-          style={StyleSheet.absoluteFill}
-          preserveAspectRatio="none"
-        >
-          <Defs>
-            <SvgGradient id={`card-${card.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={skin[0]} />
-              <Stop offset="48%" stopColor={skin[1]} />
-              <Stop offset="100%" stopColor={skin[2]} />
-            </SvgGradient>
-          </Defs>
-          <Rect width="100%" height="100%" fill={`url(#card-${card.id})`} />
-        </Svg>
-
-        <View
+      <LinearGradient
+        colors={[skin.from, skin.to]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.card, { aspectRatio: CARD_ASPECT }]}
+      >
+        <LinearGradient
           pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFillObject,
-            { borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
-          ]}
+          colors={['rgba(255,255,255,0.14)', 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0.7, y: 0.6 }}
+          style={StyleSheet.absoluteFill}
         />
 
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <View style={styles.row}>
           <Text
-            variant="caption"
-            style={{ color: 'rgba(255,255,255,0.78)', fontWeight: '600', letterSpacing: 0.2 }}
+            variant="label"
+            numberOfLines={1}
+            style={{ color: INK, fontFamily: 'Fraunces_500Medium', fontSize: 16, flexShrink: 1 }}
           >
-            Saldo do cartão
+            {card.nome}
           </Text>
           {blocked ? (
-            <View
-              style={{
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                borderRadius: 8,
-                backgroundColor: 'rgba(0,0,0,0.35)',
-                borderWidth: 1,
-                borderColor: 'rgba(255,180,180,0.45)',
-              }}
-            >
-              <Text variant="micro" style={{ color: '#FFB4B4' }}>
-                Bloqueado
-              </Text>
+            <View style={styles.pill}>
+              <Text variant="micro" style={{ color: INK, fontWeight: '700' }}>Bloqueado</Text>
             </View>
           ) : (
-            <Text variant="micro" style={{ color: 'rgba(255,255,255,0.7)' }}>
-              {Math.round(usage)}% usado
+            <Text variant="label" style={{ color: INK, fontWeight: '700', fontStyle: 'italic', letterSpacing: 0.4 }}>
+              {card.bandeira === 'visa' ? 'VISA' : 'mastercard'}
             </Text>
           )}
         </View>
 
-        <View style={{ gap: 4, marginTop: 8 }}>
+        <View style={[styles.row, { alignItems: 'center' }]}>
+          <View style={styles.chip} accessibilityElementsHidden importantForAccessibility="no">
+            <View style={styles.chipLine} />
+            <View style={[styles.chipLine, { top: '66%' }]} />
+            <View style={styles.chipMid} />
+          </View>
+          <ContactlessPaymentIcon size={24} color={INK_SOFT} weight="regular" />
+        </View>
+
+        <View style={{ gap: 2 }}>
+          <Text variant="micro" style={{ color: INK_SOFT }}>
+            Disponível · {Math.round(usage)}% usado
+          </Text>
           <Text
             variant="hero"
-            style={{
-              color: '#FFFFFF',
-              fontSize: 26,
-              letterSpacing: -0.6,
-              lineHeight: 30,
-            }}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            style={{ color: INK, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, fontVariant: ['tabular-nums'] }}
           >
             {formatBRL(disponivel)}
           </Text>
-          <Text variant="caption" style={{ color: 'rgba(255,255,255,0.72)' }}>
-            Fatura {formatBRL(fatura)} · limite {formatBRL(card.limite)}
-          </Text>
         </View>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            marginTop: 18,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
-            <View
-              style={{
-                width: 40,
-                height: 30,
-                borderRadius: 6,
-                backgroundColor: 'rgba(255,255,220,0.88)',
-                borderWidth: 1,
-                borderColor: 'rgba(255,255,255,0.35)',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Ionicons name="hardware-chip-outline" size={18} color="#5C4034" />
-            </View>
-            <View style={{ gap: 2, flex: 1, minWidth: 0 }}>
-              <Text variant="micro" style={{ color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase' }}>
-                Titular
-              </Text>
-              <Text variant="bodyStrong" style={{ color: '#FFFFFF' }} numberOfLines={1}>
-                {titular}
-              </Text>
-            </View>
+        <View style={[styles.row, { alignItems: 'flex-end' }]}>
+          <View style={{ gap: 2, flexShrink: 1 }}>
+            <Text variant="bodyStrong" style={{ color: INK, letterSpacing: 2, fontVariant: ['tabular-nums'] }}>
+              •••• {digits}
+            </Text>
+            <Text variant="micro" numberOfLines={1} style={{ color: INK_SOFT, letterSpacing: 0.8 }}>
+              {titular} · {validade}
+            </Text>
           </View>
           <View style={{ alignItems: 'flex-end', gap: 2 }}>
-            <Text variant="micro" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              {card.bandeira === 'visa' ? 'Visa' : 'Mastercard'}
+            <Text variant="micro" style={{ color: INK_SOFT }}>
+              Fatura {formatBRL(fatura)}
             </Text>
-            <Text
-              variant="bodyStrong"
-              style={{ color: '#FFFFFF', letterSpacing: 1.6, fontVariant: ['tabular-nums'] }}
-            >
-              ···· {digits}
+            <Text variant="micro" style={{ color: INK, fontWeight: '700' }}>
+              Vence dia {card.diaVencimento}
             </Text>
           </View>
         </View>
 
-        <View
-          style={{
-            marginTop: 14,
-            height: 5,
-            borderRadius: 999,
-            backgroundColor: 'rgba(255,255,255,0.18)',
-            overflow: 'hidden',
-          }}
-        >
-          <View
-            style={{
-              width: `${Math.max(usage > 0 ? 4 : 0, usage)}%`,
-              height: '100%',
-              backgroundColor: usage >= 90 ? '#FFB4B4' : 'rgba(255,255,255,0.92)',
-            }}
-          />
+        <View style={styles.usageTrack}>
+          <View style={[styles.usageFill, { width: `${Math.max(usage > 0 ? 3 : 0, usage)}%` }]} />
         </View>
-      </View>
+      </LinearGradient>
     </View>
   )
 
-  if (!onPress) return shell
+  if (!onPress) return face
 
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Abrir cartão ${card.nome}`}
-    >
-      {shell}
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`Abrir cartão ${card.nome}`}>
+      {face}
     </Pressable>
   )
 }
+
+const styles = StyleSheet.create({
+  shadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.28,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
+  },
+  card: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 18,
+    justifyContent: 'space-between',
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  pill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  chip: {
+    width: 40,
+    height: 30,
+    borderRadius: 6,
+    backgroundColor: '#D9BC7A',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.12)',
+    overflow: 'hidden',
+  },
+  chipLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: '33%',
+    height: 1,
+    backgroundColor: 'rgba(90,62,10,0.35)',
+  },
+  chipMid: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: '40%',
+    width: 1,
+    backgroundColor: 'rgba(90,62,10,0.35)',
+  },
+  usageTrack: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 4,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+  },
+  usageFill: {
+    height: '100%',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+})

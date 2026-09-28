@@ -3,6 +3,7 @@ import { Modal, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   formatBRL,
+  seriesColor,
   type FinanceCategory,
 } from '@simply-life/shared'
 import { Text, Field, PrimaryButton, ListRow } from '../../ui'
@@ -18,8 +19,8 @@ import {
 } from '../../lib/fixaMeta'
 import { FinanceColorSwatches } from './FinanceColorSwatches'
 import { ExpenseCategoryChips } from './ExpenseCategoryChips'
-import { LucideIconPicker } from './LucideIconPicker'
-import { LucideFinanceIcon } from '../../lib/lucideFinanceIcons'
+import { FinanceIconPicker } from './FinanceIconPicker'
+import { FinanceIcon } from '../../lib/financeIcons'
 
 type Props = {
   visible: boolean
@@ -36,7 +37,7 @@ function parseMoney(raw: string): number
 /** Editar contas fixas: nome, valor, vencimento, cor e urgência */
 export function FinanceFixasSheet({ visible, onClose }: Props)
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space, radius, chart } = useTheme()
   const insets = useSafeAreaInsets()
   const isGuest = useAuthStore((s) => s.isGuest)
   const fixas = useDataStore((s) => s.contasFixas)
@@ -52,7 +53,7 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
   const [valor, setValor] = useState('')
   const [dia, setDia] = useState('5')
   const [categoria, setCategoria] = useState<FinanceCategory>('outros')
-  const [color, setColor] = useState('#E8734A')
+  const [color, setColor] = useState<string>(defaultFixaColor('outros'))
   const [icon, setIcon] = useState(defaultFixaIcon('outros'))
   const [urgencia, setUrgencia] = useState<FixaUrgencia>(2)
   const [error, setError] = useState<string | null>(null)
@@ -215,7 +216,7 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
                   }}
                 />
                 <FinanceColorSwatches value={color} onChange={setColor} />
-                <LucideIconPicker value={icon} onChange={setIcon} />
+                <FinanceIconPicker value={icon} onChange={setIcon} />
                 <Text variant="caption" muted>
                   Urgência
                 </Text>
@@ -291,10 +292,10 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
                             borderRadius: 999,
                             alignItems: 'center',
                             justifyContent: 'center',
-                            backgroundColor: `${meta.color}33`,
+                            backgroundColor: `${seriesColor(meta.color, chart)}33`,
                           }}
                         >
-                          <LucideFinanceIcon name={meta.icon} size={18} color={meta.color} />
+                          <FinanceIcon name={meta.icon} size={18} color={seriesColor(meta.color, chart)} />
                         </View>
                         <View style={{ flex: 1 }}>
                           <ListRow

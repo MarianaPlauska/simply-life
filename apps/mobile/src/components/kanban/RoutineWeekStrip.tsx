@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import type { RoutineWeekCell } from '@simply-life/shared'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -40,7 +40,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
             style={{
               flex: 1,
               minHeight: 84,
-              borderRadius: 16,
+              borderRadius: 14,
               paddingVertical: 8,
               alignItems: 'center',
               gap: 4,
@@ -53,13 +53,13 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
               {cell.label}
             </Text>
             <Text variant="bodyStrong">{cell.dayNum}</Text>
-            <Text variant="micro" muted style={{ fontSize: 10, lineHeight: 12 }}>
+            <Text variant="micro" muted style={{ fontSize: 11, lineHeight: 14 }}>
               {new Date(`${cell.iso}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}
             </Text>
             <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
               {cell.done > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                  <Ionicons name="checkmark" size={11} color={colors.health} />
+                  <Icon name="checkmark" size={11} color={colors.health} />
                   <Text variant="micro" style={{ color: colors.health }}>
                     {cell.done}
                   </Text>
@@ -67,7 +67,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
               ) : null}
               {cell.miss > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                  <Ionicons name="close" size={11} color={colors.danger} />
+                  <Icon name="close" size={11} color={colors.danger} />
                   <Text variant="micro" style={{ color: colors.danger }}>
                     {cell.miss}
                   </Text>

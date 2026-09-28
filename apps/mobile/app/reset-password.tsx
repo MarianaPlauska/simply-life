@@ -9,7 +9,7 @@ import { supabase, supabaseConfigured } from '../src/lib/supabase'
 
 export default function ResetPasswordScreen()
 {
-  const { space } = useTheme()
+  const { space, colors } = useTheme()
   const router = useRouter()
   const completeSessionFromUrl = useAuthStore((s) => s.completeSessionFromUrl)
   const updatePassword = useAuthStore((s) => s.updatePassword)
@@ -124,7 +124,7 @@ export default function ResetPasswordScreen()
                   onChangeText={setConfirmar}
                 />
                 {error ? (
-                  <Text variant="caption" color="#E24B4A">
+                  <Text variant="caption" color={colors.danger}>
                     {error}
                   </Text>
                 ) : null}

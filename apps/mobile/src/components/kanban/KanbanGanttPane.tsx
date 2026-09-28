@@ -123,7 +123,7 @@ export function KanbanGanttPane({ tasks }: Props)
   if (withDue.length === 0)
   {
     return (
-      <Card tone="elevated" style={{ borderRadius: 16 }}>
+      <Card tone="elevated" style={{ borderRadius: 14 }}>
         <EmptyState
           title="Nenhuma tarefa com prazo"
           body="Defina datas nas tarefas para ver o Gantt."
@@ -149,7 +149,7 @@ export function KanbanGanttPane({ tasks }: Props)
         />
       </View>
 
-      <Card tone="elevated" style={{ borderRadius: 16, padding: 0, overflow: 'hidden' }}>
+      <Card tone="elevated" style={{ borderRadius: 14, padding: 0, overflow: 'hidden' }}>
         <ScrollView
           style={{ maxHeight: 480 }}
           nestedScrollEnabled
@@ -211,7 +211,7 @@ export function KanbanGanttPane({ tasks }: Props)
                       top: 0,
                       bottom: 0,
                       width: 2,
-                      backgroundColor: colors.axel,
+                      backgroundColor: colors.axelFill,
                     }}
                   />
                 ) : null}
@@ -228,7 +228,7 @@ export function KanbanGanttPane({ tasks }: Props)
                     backgroundColor: colors.surface,
                   }}
                 >
-                  <Text variant="micro" style={{ fontFamily: 'Manrope_700Bold' }}>
+                  <Text variant="micro" style={{ fontFamily: 'Lexend_700Bold' }}>
                     {group.label}
                   </Text>
                 </View>

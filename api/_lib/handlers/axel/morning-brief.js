@@ -1,3 +1,4 @@
+import { stripDashes } from '../../noDashes.js'
 // GET/POST /api/morning-brief - resumo matinal com IA (Groq/Gemini) + fallback
 
 function buildFallbackBrief(ctx)
@@ -81,7 +82,7 @@ Carga percentual NÃO entra na headline. Sem emojis. Sem "atrasado", "crítico" 
 
     if (!res.ok) throw new Error(`Groq ${res.status}`)
     const data = await res.json()
-    const parsed = JSON.parse(data.choices?.[0]?.message?.content || '{}')
+    const parsed = JSON.parse(stripDashes(data.choices?.[0]?.message?.content) || '{}')
     return {
       headline: parsed.headline || buildFallbackBrief(ctx).headline,
       loadLine: buildFallbackBrief(ctx).loadLine,
@@ -110,7 +111,7 @@ Carga percentual NÃO entra na headline. Sem emojis. Sem "atrasado", "crítico" 
 
     if (!res.ok) throw new Error(`Gemini ${res.status}`)
     const data = await res.json()
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}'
+    const raw = stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text) || '{}'
     const parsed = JSON.parse(raw)
     return {
       headline: parsed.headline || buildFallbackBrief(ctx).headline,

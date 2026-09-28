@@ -1,5 +1,5 @@
 import { Pressable, View, StyleSheet } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from './Icon'
 import { Text } from './Text'
 import { useTheme } from '../theme/ThemeProvider'
 
@@ -60,7 +60,7 @@ export function CheckRow({
           }}
         >
           {done ? (
-            <Ionicons name="checkmark" size={15} color={colors.axelOnFill} />
+            <Icon name="checkmark" size={15} color={colors.axelOnFill} />
           ) : null}
         </Pressable>
         <View style={{ flex: 1, minWidth: 0, gap: 2 }}>

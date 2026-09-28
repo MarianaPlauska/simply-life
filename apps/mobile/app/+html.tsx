@@ -1,5 +1,6 @@
 import { ScrollViewStyleReset } from 'expo-router/html'
 import { type PropsWithChildren } from 'react'
+import { COLOR_DARK, COLOR_LIGHT } from '@simply-life/ui-tokens'
 
 /**
  * Casca HTML raiz — só existe na build web (convenção do Expo Router;
@@ -25,13 +26,13 @@ export default function Root({ children }: PropsWithChildren)
 }
 
 const webInputStyles = `
-  html, body { background-color: #1E1C1A; }
+  html, body { background-color: ${COLOR_LIGHT.canvas}; }
+  @media (prefers-color-scheme: dark) { html, body { background-color: ${COLOR_DARK.canvas}; } }
   input:focus, textarea:focus {
-    outline: 2px solid rgba(232, 115, 74, 0.55);
+    outline: 2px solid ${COLOR_LIGHT.axelFill};
     outline-offset: 1px;
   }
   ::selection {
-    background-color: rgba(232, 115, 74, 0.35);
-    color: #F5F1EC;
+    background-color: rgba(232, 115, 74, 0.30);
   }
 `

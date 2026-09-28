@@ -1,6 +1,6 @@
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   hasReviewLater,
   minutesToLabel,
@@ -28,13 +28,13 @@ function timeRange(task: MobileTask): string
   if (task.horaMinutos == null) return 'Sem hora'
   const start = minutesToLabel(task.horaMinutos)
   const endMins = task.horaMinutos + Math.max(30, task.estimativaMinutos || 30)
-  return `${start} – ${minutesToLabel(endMins % (24 * 60))}`
+  return `${start} às ${minutesToLabel(endMins % (24 * 60))}`
 }
 
 /** Card de tarefa no estilo agenda: horário | título | flag | checkbox. */
 export function KanbanDayTaskCard({ task, onToggle }: Props)
 {
-  const { colors } = useTheme()
+  const { colors, chart } = useTheme()
   const router = useRouter()
   const openEvolve = useTaskEvolveStore((s) => s.open)
   const patchTask = useDataStore((s) => s.patchTask)
@@ -43,10 +43,13 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
   const done = task.status === 'done'
   const later = hasReviewLater(task.anotacao)
   const accent = taskHasAccent(task)
-  const mark = taskMarkColor(task, lists, colors.danger)
+  const mark = taskMarkColor(task, lists, colors.danger, chart)
   const ink = accent ? colors.axelOnFill : colors.ink
-  const muted = accent ? 'rgba(255,255,255,0.82)' : colors.inkMuted
-  const bg = accent ? colors.axel : colors.elevated
+  // Destaque usa o preenchimento coral (igual nos dois modos) com tinta carvão por cima;
+  // `colors.axel` é tom de texto e escurece no modo claro, por isso não serve de fundo.
+  const muted = accent ? `${colors.axelOnFill}CC` : colors.inkMuted
+  const bg = accent ? colors.axelFill : colors.elevated
+  const chipBg = accent ? `${colors.axelOnFill}1F` : colors.canvas
 
   return (
     <Pressable
@@ -60,6 +63,8 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
         paddingLeft: 10,
         borderRadius: 20,
         backgroundColor: bg,
+        borderWidth: 1,
+        borderColor: accent ? 'transparent' : colors.cardRim,
         minHeight: 72,
         overflow: 'hidden',
       }}
@@ -106,10 +111,10 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
             borderRadius: 8,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: accent ? 'rgba(255,255,255,0.18)' : colors.canvas,
+            backgroundColor: chipBg,
           }}
         >
-          <Ionicons
+          <Icon
             name="timer-outline"
             size={14}
             color={accent ? colors.axelOnFill : colors.axel}
@@ -128,10 +133,10 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
           borderRadius: 8,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: accent ? 'rgba(255,255,255,0.18)' : colors.canvas,
+          backgroundColor: chipBg,
         }}
       >
-        <Ionicons
+        <Icon
           name={later ? 'flag' : 'flag-outline'}
           size={14}
           color={accent ? colors.axelOnFill : later ? colors.axel : colors.inkMuted}
@@ -154,9 +159,9 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
         }}
       >
         {done ? (
-          <Ionicons name="checkmark" size={14} color={colors.canvas} />
+          <Icon name="checkmark" size={14} color={colors.canvas} />
         ) : accent ? (
-          <Ionicons name="checkmark" size={14} color={colors.axel} />
+          <Icon name="checkmark" size={14} color={colors.axelFill} />
         ) : null}
       </PressableScale>
     </Pressable>

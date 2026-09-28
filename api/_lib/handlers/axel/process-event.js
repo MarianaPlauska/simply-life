@@ -1,6 +1,7 @@
 // POST /api/process-event - triagem de evento via IA (servidor)
 // Exige JWT Supabase
 
+import { stripDashes } from '../../noDashes.js';
 import { applyCors } from '../../cors.js';
 import { getUserFromBearer } from '../../supabaseUser.js';
 
@@ -100,7 +101,7 @@ Corpo: ${(body || '').substring(0, 1000)}`;
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const text = stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text) || '{}';
 
     let result;
     try

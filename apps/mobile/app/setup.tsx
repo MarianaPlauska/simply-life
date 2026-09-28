@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import {
   CARE_PACE_OPTIONS,
@@ -13,18 +13,33 @@ import {
   type LifeGoalCadence,
   type LifeGoalCategory,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, Field, PressableScale, Chip } from '../src/ui'
+import { Screen, Text, Card, PrimaryButton, Field, PressableScale, Chip, Icon } from '../src/ui'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
+import { useDataStore } from '../src/store/dataStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { widgetsForModuleOrder, type DashboardPriority } from '../src/lib/dashboardWidgets'
-import { DEFAULT_HOME_METRICS, type HomeMetricId } from '../src/lib/homeMetrics'
+import {
+  HOME_METRIC_CATALOG,
+  normalizeHomeMetrics,
+  toggleHomeMetric,
+  type HomeMetricId,
+} from '../src/lib/homeMetrics'
 import {
   SETUP_PRIORITY,
+  SETUP_STEPS,
   SETUP_STEP_COUNT,
   setupStepTitle,
 } from '../src/lib/setupOnboarding'
+import { CreditCardVisual } from '../src/components/finance/CreditCardVisual'
+import {
+  FinanceCardForm,
+  cardDraftToPatch,
+  emptyCardDraft,
+  validateCardDraft,
+  type CardDraft,
+} from '../src/components/finance/FinanceCardForm'
 
 function ChoiceCard({
   title,
@@ -38,7 +53,7 @@ function ChoiceCard({
   onPress: () => void
 })
 {
-  const { colors, space } = useTheme()
+  const { colors, space, radius } = useTheme()
   return (
     <PressableScale
       onPress={onPress}
@@ -47,7 +62,7 @@ function ChoiceCard({
       style={{
         minHeight: 56,
         padding: space.md,
-        borderRadius: 16,
+        borderRadius: radius.control,
         gap: 4,
         backgroundColor: active ? colors.axelMuted : colors.elevated,
         borderWidth: 1,
@@ -62,7 +77,7 @@ function ChoiceCard({
   )
 }
 
-/** Onboarding institucional: ensina o app e registra escolhas com cuidado. */
+/** Onboarding: poucos passos, cada um com uma decisão. Tudo pode ser mudado depois. */
 export default function SetupScreen()
 {
   const { colors, space, radius, setMode } = useTheme()
@@ -72,6 +87,9 @@ export default function SetupScreen()
   const loaded = usePrefsStore((s) => s.loaded)
   const hydrate = usePrefsStore((s) => s.hydrate)
   const patch = usePrefsStore((s) => s.patch)
+  const cards = useDataStore((s) => s.financeCards)
+  const addCard = useDataStore((s) => s.addFinanceCard)
+  const updateCard = useDataStore((s) => s.updateFinanceCard)
   const logEvent = useGamificationStore((s) => s.logEvent)
   const grantXp = useGamificationStore((s) => s.grantXp)
   const [step, setStep] = useState(0)
@@ -79,6 +97,7 @@ export default function SetupScreen()
   const [moduleOrder, setModuleOrder] = useState<DashboardPriority[]>(
     prefs.home_module_order?.length ? prefs.home_module_order : [],
   )
+  const [metrics, setMetrics] = useState<HomeMetricId[]>(() => normalizeHomeMetrics(prefs.home_metric_cards))
   const [goalCategory, setGoalCategory] = useState<LifeGoalCategory>('custom')
   const [goalTitle, setGoalTitle] = useState(prefs.life_goal?.title ?? '')
   const [goalCadence, setGoalCadence] = useState<LifeGoalCadence>(
@@ -86,10 +105,12 @@ export default function SetupScreen()
   )
   const [pace, setPace] = useState<CarePace>(prefs.care_pace || 'balanced')
   const [scheme, setScheme] = useState<'light' | 'dark'>(prefs.color_scheme || 'light')
-  const [moodOnHome, setMoodOnHome] = useState(true)
   const [notifyCadence, setNotifyCadence] = useState<NotifyCadence>('off')
   const [adhdSupport, setAdhdSupport] = useState(false)
   const [gamificationMode, setGamificationMode] = useState<GamificationMode>('calm')
+  const [cardFormOpen, setCardFormOpen] = useState(false)
+  const [cardDraft, setCardDraft] = useState<CardDraft>(emptyCardDraft)
+  const [cardMsg, setCardMsg] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() =>
@@ -109,14 +130,8 @@ export default function SetupScreen()
     {
       setScheme(prefs.color_scheme)
     }
-    if (prefs.home_metric_cards)
-    {
-      setMoodOnHome(prefs.home_metric_cards.includes('humor'))
-    }
-    if (prefs.notify_cadence)
-    {
-      setNotifyCadence(prefs.notify_cadence)
-    }
+    if (prefs.home_metric_cards?.length) setMetrics(normalizeHomeMetrics(prefs.home_metric_cards))
+    if (prefs.notify_cadence) setNotifyCadence(prefs.notify_cadence)
     if (prefs.adhd_support) setAdhdSupport(true)
     if (prefs.gamification_mode === 'rpg') setGamificationMode('rpg')
   }, [
@@ -137,8 +152,25 @@ export default function SetupScreen()
     return <Redirect href="/(tabs)" />
   }
 
+  const current = SETUP_STEPS[step]
   const back = () => setStep((s) => Math.max(0, s - 1))
   const next = () => setStep((s) => Math.min(SETUP_STEP_COUNT - 1, s + 1))
+
+  const saveCard = () =>
+  {
+    const problem = validateCardDraft(cardDraft)
+    if (problem)
+    {
+      setCardMsg(problem)
+      return
+    }
+    const { validadeMesAno, banco, enderecoCobranca, cep, ...base } = cardDraftToPatch(cardDraft)
+    const created = addCard(base)
+    updateCard(created.id, { validadeMesAno, banco, enderecoCobranca, cep })
+    setCardMsg(`${base.nome} entrou na sua carteira.`)
+    setCardDraft(emptyCardDraft())
+    setCardFormOpen(false)
+  }
 
   const finish = async () =>
   {
@@ -147,20 +179,16 @@ export default function SetupScreen()
       ? moduleOrder
       : ['tasks', 'health', 'finance']
     const primary = order[0] ?? 'tasks'
-    const metrics: HomeMetricId[] = moodOnHome
-      ? [...DEFAULT_HOME_METRICS]
-      : DEFAULT_HOME_METRICS.filter((id) => id !== 'humor')
     const trimmedGoal = goalTitle.trim()
-    const template = LIFE_GOAL_TEMPLATES.find((t) => t.id === goalCategory)
     await patch({
       axel_calls_you: name.trim(),
       display_name: name.trim(),
       dashboard_priority: primary,
       home_module_order: order,
       dashboard_quick_widgets: widgetsForModuleOrder(order),
-      life_goal: trimmedGoal || template?.example
+      life_goal: trimmedGoal
         ? {
-            title: trimmedGoal || template?.example || 'Minha meta',
+            title: trimmedGoal,
             category: goalCategory,
             cadence: goalCadence,
             periodStart: localTodayIso(),
@@ -171,7 +199,7 @@ export default function SetupScreen()
       adhd_support: adhdSupport,
       gamification_mode: gamificationMode,
       color_scheme: scheme,
-      home_metric_cards: metrics.length ? metrics : ['tasks'],
+      home_metric_cards: normalizeHomeMetrics(metrics),
       home_metrics_configured_at: new Date().toISOString(),
       setup_completed_at: new Date().toISOString(),
     })
@@ -182,10 +210,10 @@ export default function SetupScreen()
     router.replace('/(tabs)')
   }
 
-  const nav = (canContinue: boolean, onContinue: () => void) => (
+  const nav = (canContinue: boolean, onContinue: () => void, label?: string) => (
     <View style={{ gap: space.sm }}>
       <PrimaryButton
-        label={step === SETUP_STEP_COUNT - 1 ? 'Entrar no aplicativo' : 'Continuar'}
+        label={label ?? (step === SETUP_STEP_COUNT - 1 ? 'Entrar no aplicativo' : 'Continuar')}
         disabled={!canContinue}
         loading={saving}
         onPress={onContinue}
@@ -203,70 +231,80 @@ export default function SetupScreen()
           Passo {step + 1} de {SETUP_STEP_COUNT}
         </Text>
         <View
-          style={{
-            flexDirection: 'row',
-            gap: 4,
-          }}
+          style={{ flexDirection: 'row', gap: 4 }}
           accessibilityRole="progressbar"
           accessibilityValue={{ now: step + 1, min: 1, max: SETUP_STEP_COUNT }}
         >
-          {Array.from({ length: SETUP_STEP_COUNT }, (_, i) => (
+          {SETUP_STEPS.map((id, i) => (
             <View
-              key={i}
+              key={id}
               style={{
                 flex: 1,
                 height: 4,
                 borderRadius: radius.pill,
-                backgroundColor: i <= step ? colors.axel : colors.hairline,
+                backgroundColor: i <= step ? colors.axelFill : colors.hairline,
               }}
             />
           ))}
         </View>
         <Text variant="hero">{setupStepTitle(step)}</Text>
 
-        {step === 0 ? (
+        {current === 'welcome' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="body">
-              Simply Life reúne tarefas, saúde e finanças. O AXEL é o eixo do aplicativo:
-              ele apoia, prioriza e registra o que você faz, para o dia caber em uma tela.
+              Simply Life reúne tarefas, saúde e finanças. O AXEL apoia, prioriza e registra o que
+              você faz, para o dia caber em uma tela.
             </Text>
-            <Text variant="body" muted>
-              Você verá o essencial primeiro. Detalhes ficam a um toque, nunca todos de uma vez.
-            </Text>
+            {[
+              { icon: 'home-outline', title: 'Início', body: 'O dia de hoje, do jeito que você escolher no próximo passo.' },
+              { icon: 'checkbox-outline', title: 'Tarefas', body: 'Lista, pastas, rotina e prazos. Contas perto do vencimento entram sozinhas.' },
+              { icon: 'heart-outline', title: 'Saúde', body: 'Água, sono, treino, medicamentos e diário. Na aba Apoio: TDAH, TCC e CVV.' },
+              { icon: 'wallet-outline', title: 'Finanças', body: 'Saldo, cartões, extrato e relatórios. O botão + registra um gasto ou uma tarefa.' },
+            ].map((a) => (
+              <View key={a.title} style={{ flexDirection: 'row', gap: space.md, alignItems: 'flex-start' }}>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    backgroundColor: colors.brandMuted,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Icon name={a.icon as 'home-outline'} size={18} color={colors.ink} />
+                </View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="bodyStrong">{a.title}</Text>
+                  <Text variant="caption" muted>{a.body}</Text>
+                </View>
+              </View>
+            ))}
             <Text variant="caption" muted>
               Este aplicativo organiza a rotina. Não substitui psicoterapia, psiquiatria nem
               diagnóstico. Em sofrimento intenso, procure um profissional de saúde ou o CVV (188).
             </Text>
-            {nav(true, next)}
+            {nav(true, next, 'Começar')}
           </Card>
         ) : null}
 
-        {step === 1 ? (
+        {current === 'name' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="body" muted>
-              Quatro áreas, sempre no mesmo lugar:
+              Esse nome aparece só para você, na tela inicial. Não é público.
             </Text>
-            <Text variant="bodyStrong">Início</Text>
-            <Text variant="caption" muted>
-              O dia de hoje: humor opcional, água, o que vence e um próximo passo.
-            </Text>
-            <Text variant="bodyStrong">Tarefas</Text>
-            <Text variant="caption" muted>
-              Lista, pastas, rotina e prazos. Contas próximas do vencimento entram sozinhas.
-            </Text>
-            <Text variant="bodyStrong">Saúde</Text>
-            <Text variant="caption" muted>
-              Hidratação, alimentação, treino, medicamentos e diário. Aba Apoio: TDAH, TCC e CVV.
-            </Text>
-            <Text variant="bodyStrong">Finanças</Text>
-            <Text variant="caption" muted>
-              Saldo, extrato, cartões e relatórios. O botão central captura um gasto ou uma tarefa.
-            </Text>
-            {nav(true, next)}
+            <Field
+              label="Nome ou como prefere ser chamado"
+              value={name}
+              onChangeText={setName}
+              placeholder="Seu nome"
+              autoCapitalize="words"
+            />
+            {nav(Boolean(name.trim()), next)}
           </Card>
         ) : null}
 
-        {step === 2 ? (
+        {current === 'pace' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="body" muted>
               Escolha o ritmo das mensagens. Em dias pesados, o aplicativo mostra um único passo.
@@ -281,23 +319,37 @@ export default function SetupScreen()
               />
             ))}
             <Text variant="bodyStrong">Aparência</Text>
-            <ChoiceCard
-              title="Clara"
-              body="Mais luz. Útil se a tela escura aumenta o cansaço."
-              active={scheme === 'light'}
-              onPress={() => setScheme('light')}
-            />
-            <ChoiceCard
-              title="Escura"
-              body="Menos brilho. Melhor à noite e em OLED."
-              active={scheme === 'dark'}
-              onPress={() => setScheme('dark')}
-            />
+            <View style={{ flexDirection: 'row', gap: space.sm }}>
+              <View style={{ flex: 1 }}>
+                <ChoiceCard
+                  title="Clara"
+                  body="Mais luz durante o dia."
+                  active={scheme === 'light'}
+                  onPress={() =>
+                  {
+                    setScheme('light')
+                    setMode('light')
+                  }}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <ChoiceCard
+                  title="Escura"
+                  body="Menos brilho, melhor à noite."
+                  active={scheme === 'dark'}
+                  onPress={() =>
+                  {
+                    setScheme('dark')
+                    setMode('dark')
+                  }}
+                />
+              </View>
+            </View>
             {nav(true, next)}
           </Card>
         ) : null}
 
-        {step === 3 ? (
+        {current === 'focus' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="body" muted>
               Isto não é diagnóstico. Serve para ajustar quebra de tarefas, linha do dia e
@@ -305,7 +357,7 @@ export default function SetupScreen()
             </Text>
             <ChoiceCard
               title="Quero apoio para foco / TDAH"
-              body="Sugestão de passos menores ao capturar tarefas e timeline mais visível."
+              body="Sugestão de passos menores ao capturar tarefas e linha do dia mais visível."
               active={adhdSupport}
               onPress={() => setAdhdSupport(true)}
             />
@@ -337,27 +389,11 @@ export default function SetupScreen()
           </Card>
         ) : null}
 
-        {step === 4 ? (
+        {current === 'home' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Esse nome aparece só para você, na tela inicial. Não é público.
-            </Text>
-            <Field
-              label="Nome ou como prefere ser chamado"
-              value={name}
-              onChangeText={setName}
-              placeholder="Seu nome"
-              autoCapitalize="words"
-            />
-            {nav(Boolean(name.trim()), next)}
-          </Card>
-        ) : null}
-
-        {step === 5 ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Toque na ordem em que quer ver no Início: primeiro o mais importante para você.
-              A ordem aparece nos atalhos e no resumo do dia.
+            <Text variant="bodyStrong">O que vem primeiro</Text>
+            <Text variant="caption" muted style={{ marginTop: -space.sm }}>
+              Toque na ordem de importância. Ela define os atalhos e o resumo do dia.
             </Text>
             {SETUP_PRIORITY.map((p) =>
             {
@@ -367,22 +403,13 @@ export default function SetupScreen()
                 <PressableScale
                   key={p.id}
                   onPress={() =>
-                  {
-                    setModuleOrder((prev) =>
-                    {
-                      if (prev.includes(p.id))
-                      {
-                        return prev.filter((x) => x !== p.id)
-                      }
-                      return [...prev, p.id]
-                    })
-                  }}
+                    setModuleOrder((prev) => (prev.includes(p.id) ? prev.filter((x) => x !== p.id) : [...prev, p.id]))}
                   accessibilityRole="button"
                   accessibilityState={{ selected: active }}
                   style={{
                     minHeight: 56,
                     padding: space.md,
-                    borderRadius: 16,
+                    borderRadius: radius.control,
                     gap: 4,
                     backgroundColor: active ? colors.axelMuted : colors.elevated,
                     borderWidth: 1,
@@ -397,22 +424,123 @@ export default function SetupScreen()
                     <Text variant="caption" muted>{p.hint}</Text>
                   </View>
                   {active ? (
-                    <Text variant="bodyStrong" color={colors.axel}>
-                      {pos + 1}º
-                    </Text>
+                    <View
+                      style={{
+                        width: 28,
+                        height: 28,
+                        borderRadius: 999,
+                        backgroundColor: colors.axelFill,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Text variant="label" color={colors.axelOnFill}>{pos + 1}</Text>
+                    </View>
                   ) : null}
                 </PressableScale>
               )
             })}
+
+            <Text variant="bodyStrong" style={{ marginTop: space.sm }}>Resumo no topo do Início</Text>
+            <Text variant="caption" muted style={{ marginTop: -space.sm }}>
+              Escolha os números que você quer ver ao abrir o app. Humor é opcional e nunca é diagnóstico.
+            </Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+              {HOME_METRIC_CATALOG.map((m) =>
+              {
+                const on = metrics.includes(m.id)
+                return (
+                  <PressableScale
+                    key={m.id}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: on }}
+                    onPress={() => setMetrics((prev) => toggleHomeMetric(prev, m.id))}
+                    style={{
+                      width: '48%',
+                      flexGrow: 1,
+                      minHeight: 64,
+                      padding: space.sm + 2,
+                      borderRadius: radius.control,
+                      backgroundColor: on ? colors.brandMuted : colors.elevated,
+                      borderWidth: 1,
+                      borderColor: on ? colors.brand : colors.hairline,
+                      gap: 2,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text variant="bodyStrong">{m.label}</Text>
+                      <Icon name={on ? 'checkmark-circle' : 'ellipse-outline'} size={18} color={on ? colors.health : colors.inkFaint} />
+                    </View>
+                    <Text variant="micro" muted>{m.hint}</Text>
+                  </PressableScale>
+                )
+              })}
+            </View>
+            <Text variant="caption" muted>
+              {metrics.length} {metrics.length === 1 ? 'item escolhido' : 'itens escolhidos'}. Dá para mudar em Mais → Personalizar Início.
+            </Text>
             {nav(moduleOrder.length > 0, next)}
           </Card>
         ) : null}
 
-        {step === 6 ? (
+        {current === 'cards' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="body" muted>
-              Uma meta por semana ou por mês — gastos, sono, saúde mental, tarefa ou o que você
-              escolher. Semanal renova todo domingo; mensal, no próximo mês.
+              Cadastre seus cartões de crédito para acompanhar limite, fatura e vencimento. Gastos no
+              débito ou PIX saem do saldo na hora; no crédito, só quando você paga a fatura.
+            </Text>
+
+            {cards.length > 0 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+                {cards.map((c) => (
+                  <CreditCardVisual key={c.id} card={c} width={240} />
+                ))}
+              </ScrollView>
+            ) : null}
+            {cardMsg && !cardFormOpen ? (
+              <Text variant="caption" color={colors.health}>{cardMsg}</Text>
+            ) : null}
+
+            {cardFormOpen ? (
+              <View style={{ gap: space.md }}>
+                <FinanceCardForm value={cardDraft} onChange={setCardDraft} previewWidth={300} />
+                {cardMsg ? <Text variant="caption" color={colors.danger}>{cardMsg}</Text> : null}
+                <View style={{ flexDirection: 'row', gap: space.sm }}>
+                  <PrimaryButton
+                    label="Cancelar"
+                    variant="ghost"
+                    style={{ flex: 1 }}
+                    onPress={() =>
+                    {
+                      setCardFormOpen(false)
+                      setCardMsg('')
+                    }}
+                  />
+                  <PrimaryButton label="Salvar cartão" style={{ flex: 1 }} onPress={saveCard} />
+                </View>
+              </View>
+            ) : (
+              <PrimaryButton
+                label={cards.length ? 'Adicionar outro cartão' : 'Adicionar cartão'}
+                variant="secondary"
+                icon="add"
+                onPress={() =>
+                {
+                  setCardMsg('')
+                  setCardFormOpen(true)
+                }}
+              />
+            )}
+
+            {cardFormOpen ? null : nav(true, next, cards.length ? 'Continuar' : 'Pular por agora')}
+          </Card>
+        ) : null}
+
+        {current === 'goal' ? (
+          <Card tone="elevated" style={{ gap: space.md }}>
+            <Text variant="body" muted>
+              Uma meta por semana ou por mês: gastos, sono, saúde mental, tarefa ou o que você
+              escolher. Semanal renova todo domingo; mensal, no próximo mês. É opcional.
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {LIFE_GOAL_TEMPLATES.map((t) => (
@@ -437,48 +565,14 @@ export default function SetupScreen()
               style={{ minHeight: 72, textAlignVertical: 'top', paddingTop: 14 }}
             />
             <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Chip
-                label="Semana"
-                active={goalCadence === 'week'}
-                onPress={() => setGoalCadence('week')}
-              />
-              <Chip
-                label="Mês"
-                active={goalCadence === 'month'}
-                onPress={() => setGoalCadence('month')}
-              />
+              <Chip label="Semana" active={goalCadence === 'week'} onPress={() => setGoalCadence('week')} />
+              <Chip label="Mês" active={goalCadence === 'month'} onPress={() => setGoalCadence('month')} />
             </View>
-            {nav(Boolean(goalTitle.trim()), next)}
+            {nav(true, next, goalTitle.trim() ? 'Continuar' : 'Pular por agora')}
           </Card>
         ) : null}
 
-        {step === 7 ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              O check-in de humor é um registro pessoal, de 1 a 5. Não é escala clínica e não
-              classifica ansiedade nem depressão. Você pode pular qualquer dia.
-            </Text>
-            <ChoiceCard
-              title="Mostrar humor no início"
-              body="Um toque ao abrir o app. Dá para desligar depois no perfil."
-              active={moodOnHome}
-              onPress={() => setMoodOnHome(true)}
-            />
-            <ChoiceCard
-              title="Não mostrar no início"
-              body="O diário continua em Saúde. O início fica só com o dia prático."
-              active={!moodOnHome}
-              onPress={() => setMoodOnHome(false)}
-            />
-            <Text variant="caption" muted>
-              Em Cuidados você registra água, refeições, treino e medicamentos. Nada disso é
-              obrigatório no primeiro dia.
-            </Text>
-            {nav(true, next)}
-          </Card>
-        ) : null}
-
-        {step === 8 ? (
+        {current === 'alerts' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="body" muted>
               Alertas frequentes aumentam tensão. O aplicativo não cobra sequência e não envia
@@ -500,37 +594,34 @@ export default function SetupScreen()
           </Card>
         ) : null}
 
-        {step === 9 ? (
+        {current === 'summary' ? (
           <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Gastos na conta (PIX, débito, dinheiro) saem do saldo na hora. Compras no crédito
-              ficam na fatura e só deixam o saldo quando você paga o cartão.
-            </Text>
-            <Text variant="body" muted>
-              Pastas agrupam gastos de um mesmo contexto (viagem, reforma). Relatórios separam
-              receita, o que saiu da conta e o que ainda está no cartão. Você pode exportar PDF
-              ou Excel quando quiser uma planilha própria.
-            </Text>
-            <Text variant="caption" muted>
-              O aplicativo não julga gastos. Números existem para você decidir, não para cobrar.
-            </Text>
-            {nav(true, next)}
-          </Card>
-        ) : null}
-
-        {step === 10 ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="section">Resumo</Text>
-            <Text variant="body" muted>
-              Vamos te chamar de {name.trim() || 'você'}. Ritmo {CARE_PACE_OPTIONS.find((p) => p.id === pace)?.label.toLowerCase()}.
-              Ordem no início:{' '}
-              {moduleOrder.map((id) => SETUP_PRIORITY.find((p) => p.id === id)?.label.toLowerCase()).join(' → ') || 'padrão'}.
-              Meta: {goalTitle.trim() || 'não definida'} ({goalCadence === 'week' ? 'semana' : 'mês'}).
-              Apoio foco/TDAH: {adhdSupport ? 'sim' : 'não'}.
-              {adhdSupport ? ` Modo ${GAMIFICATION_MODE_OPTIONS.find((g) => g.id === gamificationMode)?.label.toLowerCase()}.` : ''}
-              Humor no início: {moodOnHome ? 'sim' : 'não'}. Alertas:{' '}
-              {NOTIFY_CADENCE_OPTIONS.find((p) => p.id === notifyCadence)?.label.toLowerCase()}.
-            </Text>
+            {[
+              ['Nome', name.trim() || 'Não informado'],
+              ['Ritmo', CARE_PACE_OPTIONS.find((p) => p.id === pace)?.label ?? ''],
+              ['Aparência', scheme === 'dark' ? 'Escura' : 'Clara'],
+              ['Ordem no Início', moduleOrder.map((id) => SETUP_PRIORITY.find((p) => p.id === id)?.label).join(', ') || 'Padrão'],
+              ['Resumo do Início', metrics.map((id) => HOME_METRIC_CATALOG.find((m) => m.id === id)?.label).join(', ')],
+              ['Cartões', cards.length ? cards.map((c) => c.nome).join(', ') : 'Nenhum por enquanto'],
+              ['Meta', goalTitle.trim() ? `${goalTitle.trim()} (${goalCadence === 'week' ? 'semana' : 'mês'})` : 'Sem meta por enquanto'],
+              ['Apoio foco/TDAH', adhdSupport ? 'Sim' : 'Não'],
+              ['Alertas', NOTIFY_CADENCE_OPTIONS.find((p) => p.id === notifyCadence)?.label ?? ''],
+            ].map(([k, v], i) => (
+              <View
+                key={k}
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  gap: space.md,
+                  paddingTop: i === 0 ? 0 : space.sm,
+                  borderTopWidth: i === 0 ? 0 : 1,
+                  borderTopColor: colors.hairline,
+                }}
+              >
+                <Text variant="caption" muted>{k}</Text>
+                <Text variant="label" style={{ flexShrink: 1, textAlign: 'right' }}>{v}</Text>
+              </View>
+            ))}
             <Text variant="caption" muted>
               Tudo isso pode ser alterado em Perfil e Preferências. Se o dia pesar, um único
               passo já basta. Cuidado profissional continua sendo o caminho para saúde mental.

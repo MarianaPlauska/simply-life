@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, ScrollView, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TAB_BAR_CONTENT_HEIGHT } from '@simply-life/ui-tokens'
 import { BOARD_MOVE_LABEL, describeDayPt, replanHeadline, type BoardMove } from '@simply-life/shared'
@@ -15,7 +15,7 @@ const NOTICE_MS = 4000
 /** Aviso global "Axel moveu N tarefas · Ver · Desfazer" + detalhe de cada movimento. */
 export function BoardReplanToast()
 {
-  const { colors } = useTheme()
+  const { colors, elevation } = useTheme()
   const insets = useSafeAreaInsets()
   const { showRail } = useWorkspace()
   const batch = useBoardReplanStore((s) => s.lastBatch)
@@ -62,18 +62,18 @@ export function BoardReplanToast()
             gap: 10,
             paddingVertical: 10,
             paddingHorizontal: 14,
-            borderRadius: 16,
+            borderRadius: 12,
             backgroundColor: colors.elevated,
             borderWidth: 1,
             borderColor: colors.axel,
-            shadowColor: '#000',
+            shadowColor: elevation.bar.shadowColor,
             shadowOpacity: 0.25,
             shadowRadius: 12,
             shadowOffset: { width: 0, height: 4 },
             elevation: 6,
           }}
         >
-          <Ionicons name="sparkles" size={16} color={colors.axel} />
+          <Icon name="sparkles" size={16} color={colors.axel} />
           <Text variant="bodyStrong" style={{ flex: 1, fontSize: 14 }} numberOfLines={2}>
             {visible ? replanHeadline(active) : notice}
           </Text>
@@ -116,7 +116,7 @@ export function BoardReplanToast()
             </>
           ) : null}
           <Pressable onPress={dismiss} accessibilityRole="button" accessibilityLabel="Fechar aviso" hitSlop={8}>
-            <Ionicons name="close" size={18} color={colors.inkMuted} />
+            <Icon name="close" size={18} color={colors.inkMuted} />
           </Pressable>
         </View>
       </View>
@@ -241,13 +241,13 @@ function ProposalBanner({ bottom }: { bottom: number })
             gap: 10,
             paddingVertical: 10,
             paddingHorizontal: 14,
-            borderRadius: 16,
+            borderRadius: 14,
             backgroundColor: colors.elevated,
             borderWidth: 1,
             borderColor: colors.hairlineStrong,
           }}
         >
-          <Ionicons name="help-circle-outline" size={18} color={colors.axel} />
+          <Icon name="help-circle-outline" size={18} color={colors.axel} />
           <Text variant="bodyStrong" style={{ flex: 1, fontSize: 14 }} numberOfLines={2}>
             {n === 1 ? 'O Axel sugere mudar 1 tarefa' : `O Axel sugere mudar ${n} tarefas`}
           </Text>
@@ -255,7 +255,7 @@ function ProposalBanner({ bottom }: { bottom: number })
             <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>Ver</Text>
           </Pressable>
           <Pressable onPress={dismissProposal} accessibilityRole="button" accessibilityLabel="Deixar como está" hitSlop={8}>
-            <Ionicons name="close" size={18} color={colors.inkMuted} />
+            <Icon name="close" size={18} color={colors.inkMuted} />
           </Pressable>
         </View>
       </View>

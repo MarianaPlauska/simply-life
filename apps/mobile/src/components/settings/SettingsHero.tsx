@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import {
@@ -50,14 +50,13 @@ function conditionRatio(snap: WeatherSnapshot | null): number
 /** Céu em degradê + engrenagem + meteorologia, no recorte da referência. */
 export function SettingsHero({ title = 'Configurações' }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors, radius } = useTheme()
   const router = useRouter()
   const [snap, setSnap] = useState<WeatherSnapshot | null>(() => loadWeatherCache())
-  const sky = mode === 'dark'
-    ? (['#3D2E4A', '#C4784A', '#E8A05A'] as const)
-    : (['#C9C6E8', '#E8C4B0', '#F0A35A'] as const)
-  const panel = mode === 'dark' ? colors.elevated : '#F3F1EE'
-  const glyph = mode === 'dark' ? colors.ink : '#2A2622'
+  // Faixa de destaque em petróleo (os 30%); coral fica só em detalhes pequenos
+  const sky = [colors.brandDeep, colors.brand] as const
+  const panel = colors.elevated
+  const glyph = colors.ink
   const vis = visibilityPct(snap)
   const humidity = snap?.humidity ?? 0
   const temp = snap?.tempC ?? 0
@@ -85,7 +84,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
 
   return (
     <View style={{ gap: 0, marginBottom: 12 }}>
-      <View style={{ borderRadius: 28, overflow: 'hidden' }}>
+      <View style={{ borderRadius: radius.card, overflow: 'hidden' }}>
         <LinearGradient
           colors={[...sky]}
           start={{ x: 0.2, y: 0 }}
@@ -104,15 +103,15 @@ export function SettingsHero({ title = 'Configurações' }: Props)
                   borderRadius: 999,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: 'rgba(255,255,255,0.32)',
+                  backgroundColor: `${colors.brandInk}29`,
                 }}
               >
-                <Ionicons name="chevron-back" size={22} color="#2A2622" />
+                <Icon name="chevron-back" size={22} color={colors.onBrand} />
               </Pressable>
               <View style={{ gap: 5, paddingTop: 4 }}>
-                <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: '#E8734A' }} />
-                <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: '#F0C14A' }} />
-                <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: '#9B8EC4' }} />
+                <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: colors.axelFill }} />
+                <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: colors.brandInk }} />
+                <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: colors.onBrand }} />
               </View>
             </View>
             <View
@@ -125,11 +124,11 @@ export function SettingsHero({ title = 'Configurações' }: Props)
                 minHeight: 44,
                 paddingHorizontal: 14,
                 borderRadius: 999,
-                backgroundColor: 'rgba(42, 38, 34, 0.82)',
+                backgroundColor: `${colors.brandInk}1F`,
               }}
             >
-              <Ionicons name="settings" size={16} color="#F5F1EC" />
-              <Text variant="bodyStrong" style={{ color: '#F5F1EC' }}>
+              <Icon name="settings" size={16} color={colors.onBrand} />
+              <Text variant="bodyStrong" style={{ color: colors.onBrand }}>
                 {title}
               </Text>
             </View>
@@ -141,7 +140,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
         style={{
           marginTop: -40,
           marginHorizontal: 8,
-          borderRadius: 26,
+          borderRadius: 20,
           backgroundColor: panel,
           paddingHorizontal: 18,
           paddingTop: 16,
@@ -155,14 +154,14 @@ export function SettingsHero({ title = 'Configurações' }: Props)
               <Text
                 variant="micro"
                 muted
-                style={{ letterSpacing: 1.4, textTransform: 'uppercase', fontSize: 10 }}
+                style={{ letterSpacing: 1.4, textTransform: 'uppercase', fontSize: 11 }}
               >
                 Céu de hoje
               </Text>
               <View style={{ flexDirection: 'row', gap: 4 }}>
-                <View style={{ width: 7, height: 7, borderRadius: 2, backgroundColor: '#E8734A' }} />
-                <View style={{ width: 7, height: 7, borderRadius: 2, backgroundColor: '#E8A07A' }} />
-                <View style={{ width: 7, height: 7, borderRadius: 2, backgroundColor: '#9B8EC4' }} />
+                <View style={{ width: 7, height: 7, borderRadius: 2, backgroundColor: colors.axel }} />
+                <View style={{ width: 7, height: 7, borderRadius: 2, backgroundColor: colors.attention }} />
+                <View style={{ width: 7, height: 7, borderRadius: 2, backgroundColor: colors.tasks }} />
               </View>
             </View>
             <Text variant="caption" muted numberOfLines={1}>
@@ -191,25 +190,25 @@ export function SettingsHero({ title = 'Configurações' }: Props)
           <View style={{ flex: 1, gap: 12 }}>
             <MeterLine
               label="Condição"
-              value={snap?.label ?? '—'}
-              tick={<RangeTick ratio={conditionRatio(snap)} colors={['#9B8EC4', '#E8734A']} />}
+              value={snap?.label ?? '--'}
+              tick={<RangeTick ratio={conditionRatio(snap)} colors={[colors.health, colors.danger]} />}
             />
             <MeterLine
               label="Vento"
-              value={snap ? `${wind} km/h` : '—'}
-              tick={<RangeTick ratio={Math.min(1, wind / 40)} colors={['#A8C4D8', '#E07A6A']} />}
+              value={snap ? `${wind} km/h` : '--'}
+              tick={<RangeTick ratio={Math.min(1, wind / 40)} colors={[colors.tasksMuted, colors.tasks]} />}
             />
           </View>
           <View style={{ flex: 1, gap: 12 }}>
             <MeterLine
               label="Temperatura"
-              value={snap ? `${temp}°` : '—'}
-              tick={<RangeTick ratio={Math.max(0.08, Math.min(0.94, (temp + 5) / 45))} colors={['#7BA7D9', '#E8734A']} />}
+              value={snap ? `${temp}°` : '--'}
+              tick={<RangeTick ratio={Math.max(0.08, Math.min(0.94, (temp + 5) / 45))} colors={[colors.tasks, colors.attention]} />}
             />
             <MeterLine
               label="Umidade"
-              value={snap ? `${humidity}%` : '—'}
-              tick={<RangeTick ratio={humidity / 100} colors={['#D4E8F2', '#5B8DEF']} />}
+              value={snap ? `${humidity}%` : '--'}
+              tick={<RangeTick ratio={humidity / 100} colors={[colors.tasksMuted, colors.tasks]} />}
             />
           </View>
         </View>
@@ -218,7 +217,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
           <Text
             variant="micro"
             muted
-            style={{ letterSpacing: 1.1, textTransform: 'uppercase', fontSize: 9 }}
+            style={{ letterSpacing: 1.1, textTransform: 'uppercase', fontSize: 11 }}
           >
             % visibilidade
           </Text>
@@ -227,19 +226,19 @@ export function SettingsHero({ title = 'Configurações' }: Props)
               height: 32,
               borderRadius: 999,
               overflow: 'hidden',
-              backgroundColor: mode === 'dark' ? colors.surface : '#E6E2DC',
+              backgroundColor: colors.hairline,
               justifyContent: 'center',
             }}
           >
             <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${vis}%` }}>
               <LinearGradient
-                colors={['#E8C14A', '#C9D8F0']}
+                colors={[colors.tasksMuted, colors.tasks]}
                 start={{ x: 0, y: 0.5 }}
                 end={{ x: 1, y: 0.5 }}
                 style={{ flex: 1 }}
               />
             </View>
-            <Text variant="micro" style={{ fontSize: 11, color: '#2A2622', paddingLeft: 14 }}>
+            <Text variant="micro" style={{ fontSize: 11, color: colors.ink, paddingLeft: 14 }}>
               {vis}
             </Text>
           </View>
@@ -262,7 +261,7 @@ function MeterLine({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-        <Text variant="micro" muted style={{ letterSpacing: 0.7, textTransform: 'uppercase', fontSize: 9 }}>
+        <Text variant="micro" muted style={{ letterSpacing: 0.7, textTransform: 'uppercase', fontSize: 11 }}>
           {label}
         </Text>
         <Text variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={1}>

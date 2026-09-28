@@ -1,3 +1,4 @@
+import { stripDashes } from './noDashes.js'
 // Prompt solto → tarefas estruturadas (Groq → Gemini). A normalização final
 // (ids válidos, faixas, datas) acontece no app via normalizeAiTask (shared).
 
@@ -75,7 +76,7 @@ async function callGroq(apiKey, system, user)
     throw new Error(`Groq HTTP ${res.status}: ${err.slice(0, 200)}`)
   }
   const data = await res.json()
-  return data.choices?.[0]?.message?.content || ''
+  return stripDashes(data.choices?.[0]?.message?.content) || ''
 }
 
 async function callGemini(apiKey, system, user)
@@ -102,7 +103,7 @@ async function callGemini(apiKey, system, user)
     throw new Error(`Gemini HTTP ${res.status}: ${err.slice(0, 200)}`)
   }
   const data = await res.json()
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  return stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text) || ''
 }
 
 function arr(v, max)

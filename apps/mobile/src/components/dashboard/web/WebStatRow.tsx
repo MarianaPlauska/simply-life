@@ -1,11 +1,10 @@
 import { View } from 'react-native'
-import type { Ionicons } from '@expo/vector-icons'
+import type { IconName } from '../../../ui/Icon'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
 import { WEB_DISPLAY_FONT } from './webTypography'
-import { WEB_CARD_BORDER, WEB_ROW_DIVIDER } from './webPalette'
 
 export type WebStatItem = {
   id: string
@@ -13,7 +12,7 @@ export type WebStatItem = {
   value: string
   hint?: string
   /** Usado pelo fallback mobile-web (HomeKpiSquares); não é mais desenhado nesta faixa. */
-  icon: keyof typeof Ionicons.glyphMap
+  icon: IconName
   color: string
   onPress?: () => void
 }
@@ -34,7 +33,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
         borderRadius: 14,
         backgroundColor: colors.elevated,
         borderWidth: 1,
-        borderColor: WEB_CARD_BORDER,
+        borderColor: colors.hairline,
         overflow: 'hidden',
       }}
     >
@@ -50,7 +49,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
             paddingHorizontal: 20,
             gap: 10,
             borderLeftWidth: i === 0 ? 0 : 1,
-            borderLeftColor: WEB_ROW_DIVIDER,
+            borderLeftColor: colors.cardRim,
             backgroundColor: hovered && item.onPress ? colors.surface : 'transparent',
             cursor: item.onPress ? 'pointer' : 'default',
           })}
@@ -61,7 +60,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
                 variant="micro"
                 muted
                 numberOfLines={1}
-                style={{ fontSize: 10, letterSpacing: 1, textTransform: 'uppercase' }}
+                style={{ fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' }}
               >
                 {item.label}
               </Text>
@@ -89,7 +88,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
                   width: 20,
                   height: 2,
                   borderRadius: 1,
-                  backgroundColor: hovered && item.onPress ? item.color : WEB_ROW_DIVIDER,
+                  backgroundColor: hovered && item.onPress ? item.color : colors.hairline,
                 }}
               />
             </>

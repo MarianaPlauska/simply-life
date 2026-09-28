@@ -1,3 +1,4 @@
+import { stripDashes } from '../../noDashes.js'
 // POST /api/finance-coach
 // Conselho financeiro personalizado via Groq/Gemini com contexto dos gastos do usuário
 
@@ -36,7 +37,7 @@ async function callGroq(apiKey, systemInstruction, userPrompt)
   }
 
   const data = await res.json()
-  return data.choices?.[0]?.message?.content || ''
+  return stripDashes(data.choices?.[0]?.message?.content) || ''
 }
 
 async function callGemini(apiKey, systemInstruction, userPrompt)
@@ -65,7 +66,7 @@ async function callGemini(apiKey, systemInstruction, userPrompt)
   }
 
   const data = await response.json()
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+  return stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text) || ''
 }
 
 export default async function handler(req, res)

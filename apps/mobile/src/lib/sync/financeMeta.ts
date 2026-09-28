@@ -8,6 +8,7 @@
  */
 import { supabase, supabaseConfigured } from '../supabase'
 import { useAuthStore } from '../../store/authStore'
+import { financeSeriesFromStored } from '@simply-life/shared'
 import { resolveCategoriaId } from './finance'
 import type { CategoryMeta, CategoryMetaMap } from '../categoryMeta'
 import type { FixaMeta, FixaMetaMap } from '../fixaMeta'
@@ -96,7 +97,8 @@ export async function fetchCategoryMetaRemote(): Promise<CategoryMetaMap>
       out[slug] = {
         label: String(r.nome || slug),
         icon: String(r.icone || 'circle'),
-        color: String(r.cor || '#E8734A'),
+        // chave da paleta ou hex antigo; vazio usa o padrão (resolveCategoryMeta normaliza)
+        color: r.cor ? String(r.cor) : '',
         custom: slug.startsWith('c-'),
         hidden: Boolean(r.oculta),
       }
@@ -120,7 +122,9 @@ export async function upsertCategoryMetaRemote(slug: string, meta: CategoryMeta)
       .from('fin_categorias')
       .update({
         nome: meta.label.slice(0, 50),
-        cor: meta.color.slice(0, 7),
+        // sempre a chave da paleta; todas têm até 7 letras, então cabem em VARCHAR(7)
+        // mesmo antes da migração 062 (que troca a coluna para TEXT)
+        cor: financeSeriesFromStored(meta.color, slug),
         icone: String(meta.icon).slice(0, 50),
         oculta: Boolean(meta.hidden),
         personalizada: true,
@@ -166,6 +170,8 @@ export async function upsertFixaMetaRemote(id: string | number, meta: Partial<Fi
   {
     const payload: Record<string, unknown> = {}
     if (meta.icon) payload.icone = meta.icon
+    // chave da paleta vinda do seletor (ou hex antigo intocado); a leitura normaliza.
+    // fin_contas_fixas.cor já é TEXT desde a 061.
     if (meta.color) payload.cor = meta.color
     if (meta.urgencia) payload.urgencia = meta.urgencia
     if (!Object.keys(payload).length) return

@@ -102,8 +102,9 @@ export function aggregateHumorByDay(rows: HumorRegistro[]): DiaHumorAgregado[]
   const map = new Map<string, { sum: number; n: number }>()
   for (const r of rows)
   {
-    const prev = map.get(r.data) ?? { sum: 0, n: 0 }
-    map.set(r.data, { sum: prev.sum + r.humor, n: prev.n + 1 })
+    const day = (r.data || '').slice(0, 10)
+    const prev = map.get(day) ?? { sum: 0, n: 0 }
+    map.set(day, { sum: prev.sum + r.humor, n: prev.n + 1 })
   }
   return [...map.entries()]
     .map(([data, { sum, n }]) => ({

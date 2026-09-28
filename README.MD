@@ -1,119 +1,158 @@
-<h1 align="center">Simply-Life OS</h1>
+<h1 align="center">Simply Life</h1>
 
 <p align="center">
-  <strong>Sistema operacional pessoal com o AXEL no centro — priorização automática, explicada, que você pode sobrescrever.</strong>
+  Um app para organizar o dia sem pressão.<br />
+  Tarefas, humor, saúde e dinheiro no mesmo lugar.
 </p>
 
 <p align="center">
-  <a href="https://simply-life.vercel.app/login"><strong>Ver demo ao vivo</strong></a>
-  · na tela de login use <strong>Ver demo</strong> (workspace de exemplo; os dados reiniciam)
+  <a href="https://simply-life.vercel.app/login"><strong>Experimentar agora</strong></a><br />
+  <sub>Na tela de entrada, toque em <strong>Continuar como convidado</strong>. Você vê o app com dados de exemplo e não precisa criar conta.</sub>
 </p>
 
 <p align="center">
-  <a href="https://github.com/MarianaPlauska/simply-life/actions/workflows/ci.yml"><img src="https://github.com/MarianaPlauska/simply-life/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-  <img src="https://img.shields.io/badge/coverage-Vitest-0A0?logo=vitest" alt="Cobertura Vitest" />
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Supabase-Postgres-3ECF8E?logo=supabase&logoColor=white" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Vercel-Serverless-000000?logo=vercel&logoColor=white" alt="Vercel" />
+  <img src="docs/images/app/inicio.png" alt="Tela inicial do Simply Life" width="240" />
+  <img src="docs/images/app/tarefas.png" alt="Tela de tarefas" width="240" />
+  <img src="docs/images/app/financas.png" alt="Tela da carteira" width="240" />
 </p>
 
-Simply-Life une **tarefas, finanças e saúde** num único app (PWA). O AXEL dá a cada demanda um **score 0–100 com motivo em português**, coloca no horizonte Hoje / Semana / Backlog e **respeita** quando você arrasta o card — o ajuste grava no banco e entra no histórico.
+## Por que eu criei esse app
 
----
+Muita gente vive com ansiedade, depressão ou TDAH e tenta se organizar com apps de produtividade comuns. Na prática, esses apps costumam piorar as coisas. Mandam notificação o tempo todo, cobram sequência de dias, mostram listas enormes e fazem a pessoa se sentir culpada quando não dá conta.
 
-## Galeria
+O Simply Life foi pensado para o dia difícil, não para o dia perfeito. A ideia é simples:
+
+* **Um passo de cada vez.** O app mostra o que importa agora, e não a lista inteira de uma vez.
+* **Sem castigo.** Se você passar dias sem abrir, nada é perdido e ninguém te cobra.
+* **Tudo junto.** Tarefa, humor, remédio, água, conta para pagar. É tudo parte do mesmo dia, então fica tudo na mesma tela.
+* **Uma ajuda que explica.** O Axel, o assistente do app, sugere a ordem das tarefas e diz o porquê. Se você discordar, é só mudar. A escolha final é sempre sua.
+
+> O Simply Life ajuda a organizar a rotina. Ele não faz diagnóstico e não substitui terapia ou médico. Se você estiver em crise, ligue para o CVV no **188**, de graça, a qualquer hora.
+
+## O que dá para fazer
+
+| Parte do app | Para que serve |
+|---|---|
+| **Início** | Ver como está o dia, quanto você já fez e registrar como está se sentindo |
+| **Tarefas** | Listar o que precisa fazer, separar por dia e quebrar tarefas grandes em passos pequenos |
+| **Saúde** | Diário de humor, água, proteína, sono, remédios e exercícios de respiração para momentos de aperto |
+| **Carteira** | Saldo, cartões, contas a pagar e quanto deve sobrar no fim do mês |
+| **Calendário** | Ver o mês inteiro e ligar sua agenda do Google, Outlook ou Teams |
 
 <p align="center">
-  <img src="docs/images/dashboard.png" alt="Dashboard Simply-Life — centro de comando" width="88%" />
+  <img src="docs/images/app/saude.png" alt="Diário de humor na tela de saúde" width="240" />
+  <img src="docs/images/app/login.png" alt="Tela de entrada" width="240" />
 </p>
-<p align="center"><em>Dashboard · comando do dia, bem-estar e métricas</em></p>
 
-<br />
+## Como funciona na prática
 
-<p align="center">
-  <img src="docs/images/kanban.png" alt="Kanban AXEL — Hoje, Semana e Backlog" width="88%" />
-</p>
-<p align="center"><em>Centro de Execução · AXEL organiza, você executa</em></p>
+Imagine uma manhã corrida. Você abre o app e em menos de um minuto faz isto:
 
-<br />
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/app/fluxo/passo-1.png" alt="Escolhendo o humor Bom na tela inicial" width="220" /><br />
+      <strong>1. Diz como está</strong><br />
+      Um toque na carinha e pronto. Se quiser, escreve uma linha sobre o momento.
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/app/fluxo/passo-2.png" alt="Captura rápida com três linhas escritas" width="220" /><br />
+      <strong>2. Tira da cabeça</strong><br />
+      Toca no botão <strong>+</strong> e escreve tudo que está martelando, uma coisa por linha. Não precisa escolher categoria nem data.
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="docs/images/app/fluxo/passo-3.png" alt="Tela inicial mostrando a tarefa sugerida pelo Axel" width="220" /><br />
+      <strong>3. O Axel organiza o dia</strong><br />
+      As linhas viram tarefas e o Axel encaixa cada uma num horário livre do dia, entre os compromissos que você já tinha. Quando chega a hora, ele mostra o que fazer e oferece um timer para começar.
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/app/fluxo/passo-4.png" alt="Extrato da carteira com o café de 12,50" width="220" /><br />
+      <strong>4. O gasto vai para a carteira</strong><br />
+      A linha "café 12,50" virou um gasto sozinha. O saldo do mês já foi atualizado.
+    </td>
+  </tr>
+</table>
 
-<p align="center">
-  <img src="docs/images/financas.png" alt="Finanças Simply-Life — visão do mês" width="88%" />
-</p>
-<p align="center"><em>Finanças · 50/30/20, contas e lançamentos</em></p>
+Os prints acima são do app de verdade, no modo convidado, e não montagens.
 
----
+## Instalar no celular Android (APK)
 
-## O que o produto faz
+O Simply Life é um app nativo de Android, não um site dentro de uma moldura. Ele é instalado por um arquivo **APK**, como qualquer outro app baixado fora da loja.
 
-| Módulo | Para quê |
-|--------|----------|
-| **Kanban / execução** | Fila Hoje, Semana e Backlog; foco absoluto; override manual persistido |
-| **AXEL** | Score + razão; orquestração de carga; histórico em `/axel/historico` |
-| **Finanças** | 50/30/20, contas, cartões, metas do mês |
-| **Saúde** | Hidratação, proteína, humor, medicamentos |
-| **E-mail grátis** | IMAP + senha de app do Gmail → tarefa (sem Google Cloud OAuth) |
-| **PWA** | Instalar na tela inicial, atalho Rotina Guiada, push (VAPID) |
-| **Resumo semanal** | Digest no cron diário — e-mail da conta IMAP e/ou push |
+**Para instalar:**
 
----
+1. Abra no celular o link do APK e baixe o arquivo.
+2. Toque no arquivo baixado. Se o Android perguntar, permita instalar apps dessa fonte.
+3. Toque em **Instalar** e depois em **Abrir**.
+4. Entre com sua conta ou toque em **Continuar como convidado**.
 
-## Como foi construído
+Com as atualizações automáticas ligadas (o EAS Update, explicado no guia abaixo), o app recebe as telas novas pela internet e não precisa ser reinstalado. Só é preciso baixar um APK novo quando muda algo mais profundo do app.
 
+**Para gerar o APK** (para quem cuida do código):
+
+```bash
+cd apps/mobile
+npx eas-cli login
+npx eas-cli init              # só na primeira vez
+npx eas-cli build -p android --profile preview
 ```
-Frontend (Vite + React 19)  →  Supabase (Auth, Postgres + RLS, Realtime)
-                            →  Vercel Serverless /api  (IA Groq, IMAP, push, crons)
-```
 
-- **RLS** `user_id = auth.uid()` em todas as tabelas de usuário — a demo é só mais um UUID.
-- **IA no servidor** — `GROQ_API_KEY` nunca vai no bundle.
-- **Um cron Hobby** (`/api/cron/daily` às 09:00 UTC) — Gmail, push, reset da demo e digest semanal no mesmo job.
+O build roda na nuvem da Expo e leva uns 15 minutos. No fim aparece um link e um QR code para baixar o APK. O passo a passo completo está em [`docs/MOBILE_INSTALADOR.md`](docs/MOBILE_INSTALADOR.md).
 
-Referência de engenharia: [`docs/SISTEMA_REFERENCIA.md`](docs/SISTEMA_REFERENCIA.md).
+No iPhone, por enquanto, o app funciona pelo navegador ou pelo Expo Go.
 
----
+## Com o que ele foi feito
 
-## Como rodar
+Para quem tem curiosidade sobre a parte técnica:
 
-Node 20+, projeto [Supabase](https://supabase.com). Groq é opcional (priorização local se a chave faltar).
+* **TypeScript** é a linguagem principal. Todo o app que você vê na tela foi escrito nela.
+* **React Native com Expo** faz o mesmo código rodar no celular e no navegador.
+* **JavaScript (Node.js)** roda no servidor, na Vercel. É ali que ficam a inteligência do Axel, a leitura de e-mails e as notificações.
+* **SQL** no **Supabase**, que guarda os dados e cuida do login. Cada pessoa só enxerga os próprios dados.
+* **Python (FastAPI)** aparece na pasta `backend`, com parte da lógica de priorização.
+* **Groq** e **Gemini** são os modelos de IA que ajudam o Axel a entender e ordenar as tarefas.
+
+A identidade visual usa as cores petróleo e coral, as fontes Fraunces e Lexend e os ícones Phosphor. As cores foram escolhidas para passar calma e deixar o texto fácil de ler.
+
+## Como rodar no seu computador
+
+Você vai precisar do [Node.js](https://nodejs.org) versão 20 ou mais nova e de um projeto gratuito no [Supabase](https://supabase.com).
 
 ```bash
 git clone https://github.com/MarianaPlauska/simply-life.git
-cd simply-life/frontend
+cd simply-life
 npm install
-cp .env.example .env   # VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY
-npm run dev            # http://localhost:5173
+cp apps/mobile/.env.example apps/mobile/.env
 ```
 
-APIs + frontend na mesma origem (raiz do repo):
+Abra o arquivo `apps/mobile/.env` e preencha `EXPO_PUBLIC_SUPABASE_URL` e `EXPO_PUBLIC_SUPABASE_ANON_KEY` com os dados do seu Supabase. Depois:
 
 ```bash
-cp .env.example .env.local   # GROQ_API_KEY, SUPABASE_SERVICE_ROLE_KEY, ENCRYPTION_KEY
-npx vercel login
-npm run dev                  # vercel dev
+npm run mobile:web   # abre no navegador em http://localhost:8082
+npm run mobile       # abre o QR code para testar no celular com o Expo Go
 ```
 
-Deploy: [`docs/DEPLOY_VERCEL.md`](docs/DEPLOY_VERCEL.md). Demo: [`docs/DEMO.md`](docs/DEMO.md). E-mail grátis: [`docs/SETUP_EMAIL_GRATIS.md`](docs/SETUP_EMAIL_GRATIS.md). PWA: [`docs/PWA.md`](docs/PWA.md).
+Se quiser só olhar, não precisa configurar nada. Use o botão **Continuar como convidado**.
 
----
+Mais detalhes para quem vai publicar ou mexer no servidor estão na pasta [`docs`](docs), por exemplo [`DEPLOY_VERCEL.md`](docs/DEPLOY_VERCEL.md) e [`SISTEMA_REFERENCIA.md`](docs/SISTEMA_REFERENCIA.md).
 
-## Segurança
+## Segurança e privacidade
 
-RLS por usuário, 2FA TOTP **opt-in**, senha IMAP cifrada (AES-256-GCM), rate limit nas APIs Vercel. **Sem Open Finance.** E-mail só com IMAP/SMTP gratuito.
+* Cada conta só acessa os próprios dados. Isso é garantido pelo banco, não só pela tela.
+* Dá para ligar a verificação em duas etapas no perfil.
+* Senhas de e-mail ficam guardadas com criptografia.
+* O app não se conecta ao seu banco. Os valores da carteira são os que você mesmo anota.
 
----
+## Atualizar os prints
 
-## Roadmap
+As imagens deste README saem direto do app. Com o app rodando no navegador, execute:
 
-- [x] Kanban com horizonte persistido e histórico AXEL
-- [x] PWA (tema unificado, Rotina Guiada, push de teste)
-- [x] Ingestão Gmail via IMAP (pasta opcional, sem OAuth Cloud)
-- [x] Resumo semanal no cron diário
-- [ ] Provisionar a conta demo em produção (`VITE_DEMO_*` + migration 047)
-- [ ] OAuth Gmail/Calendar da Google Cloud **não** é a aposta — o caminho grátis é senha de app
-
----
+```bash
+node scripts/readme-shots.mjs   # telas principais
+node scripts/readme-flow.mjs    # passo a passo de uso
+```
 
 <p align="center">
   <sub>Feito por <a href="https://github.com/MarianaPlauska">Mariana Plauska</a></sub>

@@ -1,5 +1,6 @@
 // Motor de urgência AXEL - triagem antes de persistir (Motor de Relevância)
 
+import { stripDashes } from './noDashes.js';
 import { calculateUrgency } from './relevanceEngine.js';
 import { parseEmailWithAI, heuristicEmailParse } from './emailGroqParser.js';
 
@@ -162,7 +163,7 @@ Responda APENAS JSON: {"scores":[{"task_id":0,"score":number,"rationale":string}
 
     if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
     const data = await res.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = stripDashes(data.choices?.[0]?.message?.content);
     return parseIngestAI(content, projectTag);
   }
 
@@ -183,7 +184,7 @@ Responda APENAS JSON: {"scores":[{"task_id":0,"score":number,"rationale":string}
 
     if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
     const data = await res.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text);
     return parseIngestAI(content, projectTag);
   }
 
@@ -290,7 +291,7 @@ async function fetchBatchUrgencyFromAI(tasks, keys)
 
     if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
     const data = await res.json();
-    const content = data.choices?.[0]?.message?.content;
+    const content = stripDashes(data.choices?.[0]?.message?.content);
     return parseBatchAI(content);
   }
 
@@ -311,7 +312,7 @@ async function fetchBatchUrgencyFromAI(tasks, keys)
 
     if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
     const data = await res.json();
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const content = stripDashes(data.candidates?.[0]?.content?.parts?.[0]?.text);
     return parseBatchAI(content);
   }
 

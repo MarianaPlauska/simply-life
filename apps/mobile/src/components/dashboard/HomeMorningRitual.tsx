@@ -261,7 +261,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
       {showMoodStep ? (
         <View style={{ gap: space.sm }}>
           <Text variant="caption" muted>
-            Registro pessoal (1 a 5). Pode pular qualquer dia — detalhes em Saúde.
+            Registro pessoal (1 a 5). Pode pular qualquer dia. Detalhes em Saúde.
           </Text>
           <MoodFaceRow
             value={moodSelected}

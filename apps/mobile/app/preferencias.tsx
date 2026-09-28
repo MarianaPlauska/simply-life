@@ -93,10 +93,10 @@ export default function PreferenciasScreen()
             <SettingsToggleRow
               icon="heart-outline"
               title="Foco, TDAH e TCC"
-              subtitle="Apoio emocional, neurodivergência e exercícios — em Saúde → Apoio"
+              subtitle="Apoio emocional, neurodivergência e exercícios, em Saúde → Apoio"
               onPress={() => router.push('/(tabs)/saude?section=apoio')}
             />
-            <Card tone="elevated" style={{ gap: space.sm, borderRadius: 22 }}>
+            <Card tone="elevated" style={{ gap: space.sm, borderRadius: 20 }}>
               <Text variant="section">Widgets extras</Text>
               <Text variant="caption" muted>
                 Até 3 widgets legados do setup.
@@ -171,7 +171,7 @@ export default function PreferenciasScreen()
             <SettingsToggleRow
               icon="moon-outline"
               title="Modo escuro"
-              subtitle="Só claro ou escuro da conta — a paleta AXEL permanece"
+              subtitle="Só claro ou escuro da conta. A paleta do app continua a mesma"
               value={mode === 'dark'}
               onValueChange={(v) => setMode(v ? 'dark' : 'light')}
             />
@@ -231,7 +231,7 @@ export default function PreferenciasScreen()
             <Card tone="elevated" style={{ gap: space.sm }}>
               <Text variant="section">Widget da tela inicial</Text>
               <Text variant="caption" muted>
-                Hoje os atalhos vivem dentro do app (Início). Widget nativo iOS/Android (WidgetKit) entra no build nativo - ainda não neste preview.
+                Hoje os atalhos vivem dentro do app (Início). Widget nativo iOS/Android (WidgetKit) entra no build nativo, ainda não neste preview.
               </Text>
             </Card>
           </View>

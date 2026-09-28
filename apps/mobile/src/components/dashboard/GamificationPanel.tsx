@@ -41,7 +41,7 @@ export function GamificationPanel()
             style={{
               width: `${pct}%`,
               height: '100%',
-              backgroundColor: colors.axel,
+              backgroundColor: colors.axelFill,
             }}
           />
         </View>

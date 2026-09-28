@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   LIFE_CATEGORIES,
   countByLifeCategory,
+  lifeCategoryAccent,
   filterByLifeCategory,
   type LifeCategoryId,
   type MobileTask,
@@ -14,11 +15,6 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useGamificationStore } from '../../store/gamificationStore'
 import { useCaptureStore } from '../../store/captureStore'
 
-/** Amarelo da ref “Organize sua Vida / Planos” */
-const PLANS_YELLOW = '#F5C518'
-const PLANS_YELLOW_DEEP = '#E8B400'
-const COIN_GOLD = '#F0B429'
-const TROPHY_GOLD = '#D4A017'
 
 type DayBadge = 'empty' | 'coin' | 'trophy' | 'today' | 'future'
 
@@ -54,11 +50,11 @@ type Props = {
 }
 
 /**
- * Calendário de Planos - moedas/troféus + lista de categorias (ref amarela).
+ * Calendário de Planos - moedas/troféus + lista de categorias.
  */
 export function PlansCalendar({ tasks }: Props)
 {
-  const { colors, space } = useTheme()
+  const { colors, chart, space, radius } = useTheme()
   const router = useRouter()
   const gold = useGamificationStore((s) => s.gold)
   const streak = useGamificationStore((s) => s.streak)
@@ -103,11 +99,11 @@ export function PlansCalendar({ tasks }: Props)
 
   return (
     <View style={{ gap: space.lg }}>
-      {/* Header amarelo */}
+      {/* Destaque em petróleo (os 30%) */}
       <View
         style={{
-          backgroundColor: PLANS_YELLOW,
-          borderRadius: 28,
+          backgroundColor: colors.brand,
+          borderRadius: radius.card,
           paddingTop: space.lg,
           paddingHorizontal: space.md,
           paddingBottom: space.xl + 8,
@@ -116,7 +112,7 @@ export function PlansCalendar({ tasks }: Props)
       >
         <Text
           variant="hero"
-          style={{ fontSize: 26, color: '#1A1A1A', letterSpacing: -0.6, lineHeight: 32 }}
+          style={{ fontSize: 26, color: colors.onBrand, letterSpacing: -0.6, lineHeight: 32 }}
         >
           Organize sua Vida{'\n'}Acompanhe o Progresso
         </Text>
@@ -126,14 +122,14 @@ export function PlansCalendar({ tasks }: Props)
               flexDirection: 'row',
               alignItems: 'center',
               gap: 6,
-              backgroundColor: 'rgba(255,255,255,0.55)',
+              backgroundColor: `${colors.brandInk}29`,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 999,
             }}
           >
-            <Ionicons name="medal" size={16} color={TROPHY_GOLD} />
-            <Text variant="label" style={{ color: '#1A1A1A', fontWeight: '700' }}>
+            <Icon name="medal" size={16} color={colors.brandInk} />
+            <Text variant="label" style={{ color: colors.onBrand, fontWeight: '700' }}>
               {gold} ouro
             </Text>
           </View>
@@ -142,43 +138,45 @@ export function PlansCalendar({ tasks }: Props)
               flexDirection: 'row',
               alignItems: 'center',
               gap: 6,
-              backgroundColor: 'rgba(255,255,255,0.55)',
+              backgroundColor: `${colors.brandInk}29`,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 999,
             }}
           >
-            <Ionicons name="flame" size={16} color="#E85D4C" />
-            <Text variant="label" style={{ color: '#1A1A1A', fontWeight: '700' }}>
+            <Icon name="flame" size={16} color={colors.axelFill} />
+            <Text variant="label" style={{ color: colors.onBrand, fontWeight: '700' }}>
               {streak} dias
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Card branco sobreposto - grade + categorias */}
+      {/* Card sobreposto: grade + categorias */}
       <View
         style={{
           marginTop: -36,
-          backgroundColor: '#FFF',
-          borderRadius: 28,
+          backgroundColor: colors.elevated,
+          borderRadius: radius.card,
           padding: space.md,
           gap: space.md,
           borderWidth: 1,
-          borderColor: 'rgba(0,0,0,0.04)',
+          borderColor: colors.cardRim,
         }}
       >
         <View
           style={{
             alignSelf: 'center',
-            backgroundColor: PLANS_YELLOW,
+            backgroundColor: colors.elevated,
+            borderWidth: 1,
+            borderColor: colors.hairline,
             paddingHorizontal: 28,
             paddingVertical: 10,
             borderRadius: 999,
             marginTop: -28,
           }}
         >
-          <Text variant="label" style={{ color: '#1A1A1A', fontWeight: '800', fontSize: 15 }}>
+          <Text variant="label" style={{ color: colors.ink, fontWeight: '800', fontSize: 15 }}>
             Planos
           </Text>
         </View>
@@ -188,11 +186,11 @@ export function PlansCalendar({ tasks }: Props)
             onPress={() => setCursor(new Date(year, month - 1, 1))}
             style={{ minHeight: 44, paddingHorizontal: 8, justifyContent: 'center' }}
           >
-            <Ionicons name="chevron-back" size={20} color="#888" />
+            <Icon name="chevron-back" size={20} color={colors.inkMuted} />
           </Pressable>
           <Text
             variant="caption"
-            style={{ textTransform: 'capitalize', color: '#666', fontWeight: '600' }}
+            style={{ textTransform: 'capitalize', color: colors.inkMuted, fontWeight: '600' }}
           >
             {label}
           </Text>
@@ -200,7 +198,7 @@ export function PlansCalendar({ tasks }: Props)
             onPress={() => setCursor(new Date(year, month + 1, 1))}
             style={{ minHeight: 44, paddingHorizontal: 8, justifyContent: 'center' }}
           >
-            <Ionicons name="chevron-forward" size={20} color="#888" />
+            <Icon name="chevron-forward" size={20} color={colors.inkMuted} />
           </Pressable>
         </View>
 
@@ -209,7 +207,7 @@ export function PlansCalendar({ tasks }: Props)
             <Text
               key={`${d}-${i}`}
               variant="micro"
-              style={{ flex: 1, textAlign: 'center', color: '#AAA', fontWeight: '700' }}
+              style={{ flex: 1, textAlign: 'center', color: colors.inkFaint, fontWeight: '700' }}
             >
               {d}
             </Text>
@@ -262,6 +260,7 @@ export function PlansCalendar({ tasks }: Props)
           {
             const active = category === cat.id
             const n = counts[cat.id]
+            const accent = lifeCategoryAccent(cat.id, chart)
             return (
               <PressableScale
                 key={cat.id}
@@ -272,8 +271,8 @@ export function PlansCalendar({ tasks }: Props)
                   gap: 12,
                   minHeight: 52,
                   paddingHorizontal: 8,
-                  borderRadius: 14,
-                  backgroundColor: active ? 'rgba(245, 197, 24, 0.18)' : 'transparent',
+                  borderRadius: radius.control,
+                  backgroundColor: active ? colors.axelMuted : 'transparent',
                 }}
               >
                 <View
@@ -281,24 +280,24 @@ export function PlansCalendar({ tasks }: Props)
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    backgroundColor: `${cat.accent}22`,
+                    backgroundColor: `${accent}22`,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
-                  <Ionicons
-                    name={cat.icon as keyof typeof Ionicons.glyphMap}
+                  <Icon
+                    name={cat.icon as keyof typeof Icon.glyphMap}
                     size={18}
-                    color={cat.accent}
+                    color={accent}
                   />
                 </View>
-                <Text variant="bodyStrong" style={{ flex: 1, color: '#1A1A1A', fontSize: 15 }}>
+                <Text variant="bodyStrong" style={{ flex: 1, color: colors.ink, fontSize: 15 }}>
                   {cat.label}
                 </Text>
                 <Text variant="caption" muted style={{ fontWeight: '700' }}>
                   {n}
                 </Text>
-                <Ionicons name="chevron-forward" size={16} color="#CCC" />
+                <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
               </PressableScale>
             )
           })}
@@ -309,7 +308,7 @@ export function PlansCalendar({ tasks }: Props)
       <View
         style={{
           backgroundColor: colors.elevated,
-          borderRadius: 20,
+          borderRadius: radius.card,
           paddingVertical: space.sm,
           overflow: 'hidden',
         }}
@@ -348,6 +347,7 @@ function DayCell({
   selected: boolean
 })
 {
+  const { colors } = useTheme()
   if (badge === 'today')
   {
     return (
@@ -356,14 +356,14 @@ function DayCell({
           width: 36,
           height: 36,
           borderRadius: 999,
-          backgroundColor: selected ? '#4C8DFF' : '#5B9BFF',
+          backgroundColor: colors.axelFill,
           alignItems: 'center',
           justifyContent: 'center',
           borderWidth: selected ? 2 : 0,
-          borderColor: '#1A1A1A',
+          borderColor: colors.ink,
         }}
       >
-        <Ionicons name="add" size={18} color="#FFF" />
+        <Icon name="add" size={18} color={colors.axelOnFill} />
       </View>
     )
   }
@@ -377,14 +377,14 @@ function DayCell({
             width: 34,
             height: 34,
             borderRadius: 999,
-            backgroundColor: PLANS_YELLOW,
+            backgroundColor: colors.healthMuted,
             alignItems: 'center',
             justifyContent: 'center',
             borderWidth: selected ? 2 : 0,
-            borderColor: PLANS_YELLOW_DEEP,
+            borderColor: colors.ink,
           }}
         >
-          <Ionicons name="trophy" size={16} color={TROPHY_GOLD} />
+          <Icon name="trophy" size={16} color={colors.done} />
         </View>
       </View>
     )
@@ -398,15 +398,14 @@ function DayCell({
           width: 34,
           height: 34,
           borderRadius: 999,
-          backgroundColor: PLANS_YELLOW,
+          backgroundColor: colors.financeMuted,
           alignItems: 'center',
           justifyContent: 'center',
-          opacity: 0.95,
           borderWidth: selected ? 2 : 0,
-          borderColor: '#1A1A1A',
+          borderColor: colors.ink,
         }}
       >
-        <Ionicons name="ellipse" size={14} color={COIN_GOLD} />
+        <Icon name="ellipse" size={14} color={colors.finance} />
       </View>
     )
   }
@@ -419,12 +418,12 @@ function DayCell({
           width: 34,
           height: 34,
           borderRadius: 999,
-          backgroundColor: 'rgba(245, 197, 24, 0.35)',
+          backgroundColor: colors.hairline,
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Text variant="micro" style={{ color: '#888', fontWeight: '700' }}>
+        <Text variant="micro" style={{ color: colors.inkMuted, fontWeight: '700' }}>
           {day}
         </Text>
       </View>
@@ -437,13 +436,11 @@ function DayCell({
         width: 34,
         height: 34,
         borderRadius: 999,
-        backgroundColor: 'rgba(245, 197, 24, 0.22)',
         alignItems: 'center',
         justifyContent: 'center',
-        opacity: 0.55,
       }}
     >
-      <Ionicons name="ellipse-outline" size={14} color={COIN_GOLD} />
+      <Icon name="ellipse-outline" size={14} color={colors.inkFaint} />
     </View>
   )
 }

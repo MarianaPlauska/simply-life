@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../../ui/Icon'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from '../../dashboard/web/WebHoverable'
@@ -57,11 +57,11 @@ export function WebKanbanRow({
             justifyContent: 'center',
             borderWidth: done ? 0 : 1.5,
             borderColor: colors.inkMuted,
-            backgroundColor: done ? colors.axel : 'transparent',
+            backgroundColor: done ? colors.axelFill : 'transparent',
             cursor: 'pointer',
           })}
         >
-          {done ? <Ionicons name="checkmark" size={12} color="#FFFFFF" /> : null}
+          {done ? <Icon name="checkmark" size={12} color={colors.axelOnFill} /> : null}
         </WebHoverable>
       ) : null}
 

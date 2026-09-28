@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
+import { Icon } from '../../ui/Icon'
 import {
   aguaMlPorCopo,
   currentWeekIsos,
@@ -17,21 +17,12 @@ import { useBodyWeekStore } from '../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../store/waterLogStore'
 import { useAuthStore } from '../../store/authStore'
 
-function wash(color: string, alpha: number): string
-{
-  if (!color.startsWith('#') || color.length < 7) return `rgba(232,115,74,${alpha})`
-  const r = parseInt(color.slice(1, 3), 16)
-  const g = parseInt(color.slice(3, 5), 16)
-  const b = parseInt(color.slice(5, 7), 16)
-  return `rgba(${r},${g},${b},${alpha})`
-}
-
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
 /** Seu resumo: corpo na semana (único bloco na Home). */
 export function PersonalSummaryGrid()
 {
-  const { colors, mode } = useTheme()
+  const { colors } = useTheme()
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits)
@@ -71,9 +62,10 @@ export function PersonalSummaryGrid()
     router.push(`/(tabs)/saude?section=cuidados&care=${care}`)
   }
 
-  const proteinColor = colors.axel
-  const waterColor = '#5B8DEF'
-  const sleepColor = '#C4A574'
+  // Coral fica só para ações; cada métrica usa um par tom + fundo suave do tema
+  const proteinColor = colors.attention
+  const waterColor = colors.tasks
+  const sleepColor = colors.finance
   const trainColor = colors.health
   const ink = colors.ink
 
@@ -95,7 +87,7 @@ export function PersonalSummaryGrid()
           unit="g"
           accent={proteinColor}
           ink={ink}
-          washBg={wash(proteinColor, mode === 'dark' ? 0.16 : 0.1)}
+          washBg={colors.attentionMuted}
           onPress={() => open('alimentacao')}
           viz={
             <ProgressRing
@@ -114,7 +106,7 @@ export function PersonalSummaryGrid()
           unit="ml"
           accent={waterColor}
           ink={ink}
-          washBg={wash(waterColor, mode === 'dark' ? 0.18 : 0.1)}
+          washBg={colors.tasksMuted}
           onPress={() => open('hidratacao')}
           viz={
             <ProgressRing
@@ -135,7 +127,7 @@ export function PersonalSummaryGrid()
           unit="última noite"
           accent={sleepColor}
           ink={ink}
-          washBg={wash(sleepColor, mode === 'dark' ? 0.18 : 0.12)}
+          washBg={colors.financeMuted}
           onPress={() => open('sono')}
           viz={
             <MiniBarChart
@@ -152,7 +144,7 @@ export function PersonalSummaryGrid()
           unit="sessão"
           accent={trainColor}
           ink={ink}
-          washBg={wash(trainColor, mode === 'dark' ? 0.16 : 0.1)}
+          washBg={colors.healthMuted}
           onPress={() => open('academia')}
           viz={<MiniSparkline values={workoutSeries.map((v) => v * 3 + 1)} color={trainColor} />}
         />
@@ -174,7 +166,7 @@ function MetricCard({
   onPress,
 }: {
   label: string
-  icon: keyof typeof Ionicons.glyphMap
+  icon: keyof typeof Icon.glyphMap
   value: string
   unit: string
   accent: string
@@ -192,7 +184,7 @@ function MetricCard({
       style={{
         flex: 1,
         minHeight: 148,
-        borderRadius: 24,
+        borderRadius: 20,
         padding: 14,
         backgroundColor: washBg,
         justifyContent: 'space-between',
@@ -200,7 +192,7 @@ function MetricCard({
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Ionicons name={icon} size={16} color={accent} />
+        <Icon name={icon} size={16} color={accent} />
         <Text variant="caption" style={{ color: ink, fontSize: 13 }}>
           {label}
         </Text>

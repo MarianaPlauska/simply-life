@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react'
 import { View, ScrollView, Pressable } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { todayIso, FOLDER_PALETTE, suggestTaskSteps, type TaskStatus } from '@simply-life/shared'
+import { Icon } from '../ui/Icon'
+import type { ChartSeries } from '@simply-life/ui-tokens'
+import {
+  todayIso,
+  FOLDER_SERIES,
+  FOLDER_SERIES_LABELS,
+  defaultFolderSeries,
+  folderColor,
+  suggestTaskSteps,
+  type TaskStatus,
+} from '@simply-life/shared'
 import { Text, Field, PrimaryButton, PressableScale } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
@@ -123,13 +132,13 @@ type Props = {
 /** Captura de tarefa no mesmo modelo do Kanban (prazo, pasta, prioridade, tempo). */
 export function CaptureTaskForm({ draft, onChange }: Props)
 {
-  const { colors } = useTheme()
+  const { colors, chart } = useTheme()
   const lists = useKanbanListsStore((s) => s.lists)
   const hydrateLists = useKanbanListsStore((s) => s.hydrate)
   const addList = useKanbanListsStore((s) => s.addList)
   const tasks = useDataStore((s) => s.tasks) ?? []
   const [novaLista, setNovaLista] = useState('')
-  const [novaCor, setNovaCor] = useState<string>(FOLDER_PALETTE[0])
+  const [novaCor, setNovaCor] = useState<ChartSeries>(defaultFolderSeries(0))
   const [criarPastaOpen, setCriarPastaOpen] = useState(false)
   const [todoDraft, setTodoDraft] = useState('')
 
@@ -150,7 +159,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
     if (created)
     {
       patch({ listId: created.id })
-      setNovaCor(FOLDER_PALETTE[(lists.length + 1) % FOLDER_PALETTE.length])
+      setNovaCor(defaultFolderSeries(lists.length + 1))
       setCriarPastaOpen(false)
     }
   }
@@ -221,7 +230,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
               }
               style={{ minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}
             >
-              <Ionicons name="close" size={18} color={colors.inkMuted} />
+              <Icon name="close" size={18} color={colors.inkMuted} />
             </PressableScale>
           </View>
         ))}
@@ -388,7 +397,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
               backgroundColor: criarPastaOpen ? colors.axelMuted : colors.hairline,
             }}
           >
-            <Ionicons name={criarPastaOpen ? 'close' : 'add'} size={20} color={colors.axel} />
+            <Icon name={criarPastaOpen ? 'close' : 'add'} size={20} color={colors.axel} />
           </PressableScale>
         </View>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
@@ -398,11 +407,11 @@ export function CaptureTaskForm({ draft, onChange }: Props)
               active={!draft.listId}
               onPress={() => patch({ listId: null })}
             />
-            {lists.map((l) => (
+            {lists.map((l, i) => (
               <SelectChip
                 key={l.id}
                 label={l.name}
-                dotColor={l.color}
+                dotColor={folderColor(l.color, chart, i)}
                 active={draft.listId === l.id}
                 onPress={() => patch({ listId: l.id })}
               />
@@ -422,19 +431,19 @@ export function CaptureTaskForm({ draft, onChange }: Props)
               Cor da pasta
             </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {FOLDER_PALETTE.map((c) => (
+              {FOLDER_SERIES.map((key) => (
                 <Pressable
-                  key={c}
+                  key={key}
                   accessibilityRole="button"
-                  accessibilityLabel={`Cor ${c}`}
-                  accessibilityState={{ selected: novaCor === c }}
-                  onPress={() => setNovaCor(c)}
+                  accessibilityLabel={`Cor ${FOLDER_SERIES_LABELS[key]}`}
+                  accessibilityState={{ selected: novaCor === key }}
+                  onPress={() => setNovaCor(key)}
                   style={{
                     width: 36,
                     height: 36,
                     borderRadius: 999,
-                    backgroundColor: c,
-                    borderWidth: novaCor === c ? 3 : 0,
+                    backgroundColor: folderColor(key, chart),
+                    borderWidth: novaCor === key ? 3 : 0,
                     borderColor: colors.ink,
                   }}
                 />

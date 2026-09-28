@@ -100,7 +100,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
               key={t.id}
               title={t.titulo}
               subtitle={financeTxSubtitle(t)}
-              right={`${t.tipo === 'receita' ? '+' : '−'}${formatBRL(t.valor)}`}
+              right={`${t.tipo === 'receita' ? '+' : '-'}${formatBRL(t.valor)}`}
               onPress={() => setEditingTx(t.id)}
               showSeparator={i < arr.length - 1}
             />

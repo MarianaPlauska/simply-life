@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
+  inferLifeCategory,
   localTodayIso,
   minutesToLabel,
-  timelineColorForTask,
   type MobileTask,
 } from '@simply-life/shared'
 import { Text, EmptyState } from '../../ui'
@@ -14,6 +14,16 @@ import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 type Props = { tasks: MobileTask[] }
 
 const PRI_LABEL: Record<number, string> = { 1: 'Alta', 2: 'Média', 3: 'Baixa' }
+
+type TintKey = 'brandMuted' | 'healthMuted' | 'financeMuted' | 'tasksMuted'
+
+/** Fundo suave por categoria de vida (tokens do tema, claro e escuro). */
+const CATEGORY_TINT: Record<string, TintKey> = {
+  importante: 'brandMuted',
+  saude: 'healthMuted',
+  crescimento: 'financeMuted',
+  carreira: 'tasksMuted',
+}
 
 function tasksForIso(tasks: MobileTask[], iso: string): MobileTask[]
 {
@@ -60,13 +70,13 @@ export function KanbanTimelinePane({ tasks }: Props)
         <View style={{ gap: 12 }}>
           {isToday ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <View style={{ flex: 1, height: 2, backgroundColor: colors.axel, borderRadius: 999 }} />
+              <View style={{ flex: 1, height: 2, backgroundColor: colors.axelFill, borderRadius: 999 }} />
               <View
                 style={{
                   paddingHorizontal: 10,
                   paddingVertical: 4,
                   borderRadius: 999,
-                  backgroundColor: colors.axel,
+                  backgroundColor: colors.axelFill,
                 }}
               >
                 <Text variant="micro" style={{ color: colors.axelOnFill, fontWeight: '700' }}>
@@ -77,8 +87,8 @@ export function KanbanTimelinePane({ tasks }: Props)
           ) : null}
           {dayTasks.map((t) =>
           {
-            const bg = timelineColorForTask(t)
-            const start = t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : '—'
+            const bg = colors[CATEGORY_TINT[inferLifeCategory(t)] ?? 'tasksMuted']
+            const start = t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : '--'
             const end =
               t.horaMinutos != null
                 ? minutesToLabel(t.horaMinutos + Math.max(30, t.estimativaMinutos || 30))
@@ -114,10 +124,10 @@ export function KanbanTimelinePane({ tasks }: Props)
                         paddingHorizontal: 8,
                         paddingVertical: 4,
                         borderRadius: 999,
-                        backgroundColor: 'rgba(255,255,255,0.28)',
+                        backgroundColor: colors.elevated,
                       }}
                     >
-                      <Text variant="micro" style={{ color: '#FFF', fontWeight: '700' }}>
+                      <Text variant="micro" style={{ color: colors.ink, fontWeight: '700' }}>
                         {PRI_LABEL[t.prioridade] ?? 'Média'}
                       </Text>
                     </View>
@@ -126,19 +136,19 @@ export function KanbanTimelinePane({ tasks }: Props)
                         paddingHorizontal: 8,
                         paddingVertical: 4,
                         borderRadius: 999,
-                        backgroundColor: 'rgba(0,0,0,0.18)',
+                        backgroundColor: colors.hairline,
                       }}
                     >
-                      <Text variant="micro" style={{ color: '#FFF', fontWeight: '600' }}>
+                      <Text variant="micro" style={{ color: colors.inkMuted, fontWeight: '600' }}>
                         {statusLabel(t)}
                       </Text>
                     </View>
                   </View>
-                  <Text variant="bodyStrong" style={{ color: '#FFF', fontSize: 16 }}>
+                  <Text variant="bodyStrong" style={{ color: colors.ink, fontSize: 16 }}>
                     {t.titulo}
                   </Text>
-                  <Text variant="caption" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                    {end ? `${start} – ${end}` : start}
+                  <Text variant="caption" style={{ color: colors.inkMuted }}>
+                    {end ? `${start} às ${end}` : start}
                   </Text>
                 </View>
               </Pressable>

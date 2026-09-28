@@ -12,7 +12,7 @@ import {
   XP_FOCUS_SESSION,
 } from '@simply-life/shared'
 import { PrimaryButton } from '../../../ui'
-import { ThemeProvider } from '../../../theme/ThemeProvider'
+import { ThemeProvider, useTheme } from '../../../theme/ThemeProvider'
 import { useKeepAwake } from '../../../lib/keepAwake'
 import { safeBack } from '../../../lib/safeBack'
 import { hapticLight } from '../../../lib/haptics'
@@ -39,6 +39,7 @@ export function AcademySessionView()
 function AcademySessionInner()
 {
   useKeepAwake()
+  const { colors } = useTheme()
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits)
@@ -108,7 +109,7 @@ function AcademySessionInner()
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#000' }} edges={['top', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={['top', 'bottom']}>
       <StatusBar hidden style="light" />
       <View style={{ flex: 1, padding: 24, gap: 18, justifyContent: 'space-between' }}>
         <AcademySessionStage

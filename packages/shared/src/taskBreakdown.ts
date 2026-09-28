@@ -6,7 +6,7 @@
 const MICRO_TEMPLATES: Record<string, string[]> = {
   estudar: [
     'Abrir material e definir um único tópico',
-    'Ler ou assistir um trecho curto (10–15 min)',
+    'Ler ou assistir um trecho curto (10 a 15 min)',
     'Fazer anotações do essencial',
     'Revisar em 5 minutos e encerrar',
   ],
@@ -36,7 +36,7 @@ const MICRO_TEMPLATES: Record<string, string[]> = {
   ],
   exercicio: [
     'Vestir roupa e preparar água',
-    'Aquecimento de 3–5 minutos',
+    'Aquecimento de 3 a 5 minutos',
     'Bloco principal no tempo disponível',
     'Alongar e registrar no diário',
   ],

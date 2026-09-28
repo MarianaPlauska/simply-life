@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native'
+import { confirmDestructive } from '../../lib/confirmDestructive'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
@@ -151,7 +152,7 @@ export function TaskEvolveSheet()
                 label={`Nota em ${step}% (eu do futuro)`}
                 value={note}
                 onChangeText={setNote}
-                placeholder="O que este marco significa — um lembrete para você depois."
+                placeholder="O que este marco significa: um lembrete para você depois."
                 multiline
                 style={{ minHeight: 96, textAlignVertical: 'top', paddingTop: 14 }}
               />
@@ -217,24 +218,10 @@ export function TaskEvolveSheet()
                     void removeTask(task.id, isGuest)
                     close()
                   }
-                  if (Platform.OS === 'web')
-                  {
-                    if (
-                      typeof window !== 'undefined' &&
-                      window.confirm('Sai da lista. O que já foi concluído continua no histórico Feitas.')
-                    )
-                    {
-                      go()
-                    }
-                    return
-                  }
-                  Alert.alert(
+                  confirmDestructive(
                     'Excluir tarefa',
                     'Sai da lista. O que já foi concluído continua no histórico Feitas.',
-                    [
-                      { text: 'Cancelar', style: 'cancel' },
-                      { text: 'Excluir', style: 'destructive', onPress: go },
-                    ],
+                    go,
                   )
                 }}
               />

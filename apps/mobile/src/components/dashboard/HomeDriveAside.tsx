@@ -65,7 +65,7 @@ export function AxelDayBrief()
       tone="elevated"
       style={{
         gap: open ? space.md : space.xs,
-        borderRadius: 24,
+        borderRadius: 20,
         borderWidth: 1,
         borderColor: colors.hairline,
         padding: space.lg,
@@ -103,7 +103,7 @@ export function AxelDayBrief()
               style={{
                 gap: 4,
                 padding: space.md,
-                borderRadius: 16,
+                borderRadius: 14,
                 backgroundColor: colors.surface,
               }}
             >

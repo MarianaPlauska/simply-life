@@ -153,7 +153,7 @@ export default function GradualExposureScreen()
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="section">Exposição gradual</Text>
             <Text variant="body" muted>
-              “{chosen.label.trim()}” foi adicionado às tarefas de hoje. Avance no menor degrau —
+              “{chosen.label.trim()}” foi adicionado às tarefas de hoje. Avance no menor degrau,
               repetir o mesmo passo até a ansiedade baixar é parte do método.
             </Text>
           </Card>
@@ -191,7 +191,7 @@ export default function GradualExposureScreen()
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="section">O que você evita?</Text>
             <Text variant="body" muted>
-              Nomeie a situação ou medo — sem precisar enfrentar tudo de uma vez.
+              Nomeie a situação ou medo, sem precisar enfrentar tudo de uma vez.
             </Text>
             <Field
               label="Situação"

@@ -114,7 +114,7 @@ export function CaptureExpenseFields({
 
       <View style={{ gap: 8 }}>
         <Text variant="caption" muted>
-          Pasta — gastos da mesma história ficam juntos
+          Pasta: gastos da mesma história ficam juntos
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -337,13 +337,13 @@ export function CaptureExpenseFields({
             borderRadius: 4,
             borderWidth: salvarFixa ? 0 : 1.5,
             borderColor: colors.ink,
-            backgroundColor: salvarFixa ? colors.axel : 'transparent',
+            backgroundColor: salvarFixa ? colors.axelFill : 'transparent',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
           {salvarFixa ? (
-            <Text variant="micro" style={{ color: '#373539' }}>
+            <Text variant="micro" style={{ color: colors.axelOnFill }}>
               ✓
             </Text>
           ) : null}
@@ -437,13 +437,13 @@ export function CaptureExpenseFields({
                   borderRadius: 4,
                   borderWidth: pagoContaCasal ? 0 : 1.5,
                   borderColor: colors.ink,
-                  backgroundColor: pagoContaCasal ? colors.axel : 'transparent',
+                  backgroundColor: pagoContaCasal ? colors.axelFill : 'transparent',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
                 {pagoContaCasal ? (
-                  <Text variant="micro" style={{ color: '#373539' }}>
+                  <Text variant="micro" style={{ color: colors.axelOnFill }}>
                     ✓
                   </Text>
                 ) : null}
