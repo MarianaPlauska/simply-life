@@ -9,6 +9,7 @@ import { ArrowsDownUpIcon } from 'phosphor-react-native/src/icons/ArrowsDownUp'
 import { ArrowsLeftRightIcon } from 'phosphor-react-native/src/icons/ArrowsLeftRight'
 import { AtIcon } from 'phosphor-react-native/src/icons/At'
 import { BarbellIcon } from 'phosphor-react-native/src/icons/Barbell'
+import { BarcodeIcon } from 'phosphor-react-native/src/icons/Barcode'
 import { BellIcon } from 'phosphor-react-native/src/icons/Bell'
 import { BookOpenIcon } from 'phosphor-react-native/src/icons/BookOpen'
 import { BriefcaseIcon } from 'phosphor-react-native/src/icons/Briefcase'
@@ -139,6 +140,7 @@ const BY_NAME: Record<string, ComponentType<IconProps>> = {
   at: AtIcon,
   'bar-chart': ChartBarIcon,
   barbell: BarbellIcon,
+  barcode: BarcodeIcon,
   body: PersonIcon,
   book: BookOpenIcon,
   briefcase: BriefcaseIcon,

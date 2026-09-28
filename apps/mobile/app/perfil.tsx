@@ -3,7 +3,6 @@ import { View, Switch, Modal, Pressable } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import { Icon } from '../src/ui/Icon'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
-import { createFriendInvite } from '@simply-life/shared'
 import { Screen, Text, Card, PrimaryButton, Field } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { MfaEnrollPanel } from '../src/components/auth/MfaEnrollPanel'
@@ -19,11 +18,10 @@ import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
-import { supabase } from '../src/lib/supabase'
-import { appOrigin } from '../src/lib/appOrigin'
 import { resolveAxelName } from '../src/lib/axelName'
+import { METAS_HREF, AMIGOS_HREF } from '../src/lib/sharedGoalRoutes'
 
-type Sheet = 'nome' | 'a11y' | 'seguranca' | 'circulo' | 'xp' | 'admin' | null
+type Sheet = 'nome' | 'a11y' | 'seguranca' | 'xp' | 'admin' | null
 
 /** Cores do avatar ficam salvas como hex no perfil: vêm da paleta, não do tema */
 const AVATAR_TINTS = [BRAND.coral, BRAND.petroleo, BRAND.menta, COLOR_DARK.finance, COLOR_DARK.tasks] as const
@@ -46,8 +44,6 @@ export default function PerfilScreen()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [city, setCity] = useState('')
-  const [invite, setInvite] = useState('')
-  const [inviteMsg, setInviteMsg] = useState('')
 
   useEffect(() =>
   {
@@ -260,7 +256,13 @@ export default function PerfilScreen()
           <ProfileSettingsRow
             icon="people-outline"
             label="Círculo"
-            onPress={() => setSheet('circulo')}
+            value="Amigos"
+            onPress={() => router.push(AMIGOS_HREF)}
+          />
+          <ProfileSettingsRow
+            icon="flag-outline"
+            label="Metas juntos"
+            onPress={() => router.push(METAS_HREF)}
           />
           <ProfileSettingsRow
             icon="sparkles-outline"
@@ -452,43 +454,6 @@ export default function PerfilScreen()
             <MfaEnrollPanel />
             <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} style={{ marginTop: space.md }} />
           </View>
-        </View>
-      </Modal>
-
-      <Modal visible={sheet === 'circulo'} transparent animationType="slide" onRequestClose={() => setSheet(null)}>
-        <View style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}>
-          <Pressable style={{ flex: 1 }} onPress={() => setSheet(null)} />
-          <Card tone="elevated" style={{ borderTopLeftRadius: 24, borderTopRightRadius: 24, gap: space.md, paddingBottom: space.xl }}>
-            <Text variant="section">Convite ao Círculo</Text>
-            <Text variant="caption" muted>
-              Gere um código de 7 dias para um amigo entrar na sua rede.
-            </Text>
-            {invite ? <Text variant="bodyStrong">{invite}</Text> : null}
-            {inviteMsg ? (
-              <Text variant="caption" color={colors.axel}>
-                {inviteMsg}
-              </Text>
-            ) : null}
-            <PrimaryButton
-              label="Gerar convite"
-              disabled={isGuest}
-              onPress={() =>
-              {
-                void (async () =>
-                {
-                  const res = await createFriendInvite(supabase as never, appOrigin())
-                  if (!res)
-                  {
-                    setInviteMsg('Não foi possível gerar. Faça login.')
-                    return
-                  }
-                  setInvite(res.url)
-                  setInviteMsg(`Código ${res.code}`)
-                })()
-              }}
-            />
-            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setSheet(null)} />
-          </Card>
         </View>
       </Modal>
 

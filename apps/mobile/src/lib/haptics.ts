@@ -48,3 +48,30 @@ export function hapticBreathPulse(): void
   pulseNative()
 }
 
+
+/** Fim do descanso no treino: aviso de sucesso (mais perceptível que o leve). */
+export function hapticRestDone(): void
+{
+  if (Platform.OS === 'web')
+  {
+    try
+    {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate?.([30, 60, 30])
+    }
+    catch
+    {
+      /* ignore */
+    }
+    return
+  }
+  try
+  {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Haptics = require('expo-haptics') as typeof import('expo-haptics')
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+  }
+  catch
+  {
+    pulseNative()
+  }
+}

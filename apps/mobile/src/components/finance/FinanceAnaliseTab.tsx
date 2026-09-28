@@ -18,6 +18,7 @@ import { FinanceGoalWizard } from './FinanceGoalWizard'
 import { FinanceCoachCards } from './FinanceCoachCards'
 import { FinancePlanningPanel } from './FinancePlanningPanel'
 import { FinanceMonthReport } from './FinanceMonthReport'
+import { FoodSpendCard } from '../food/FoodSpendCard'
 import { ANALISE_SUB_TABS, type AnaliseSubTab } from './financeNav'
 
 type Props = {
@@ -58,6 +59,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
       />
 
       {subTab === 'visao-geral' && <FinanceMonthReport />}
+      {subTab === 'visao-geral' && <FoodSpendCard />}
 
       {subTab === 'orcamentos' && <FinancePlanningPanel />}
 

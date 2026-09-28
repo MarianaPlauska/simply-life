@@ -1,5 +1,4 @@
-import { Platform } from 'react-native'
-import * as SecureStore from 'expo-secure-store'
+import { readPersisted, writePersisted } from './persistStorage'
 import { folderSeriesFromStored, type UserTaskList } from '@simply-life/shared'
 
 /**
@@ -41,10 +40,10 @@ function needsWriteBack(raw: unknown, lists: UserTaskList[]): boolean
   })
 }
 
-async function readRaw(): Promise<string | null>
+/** Arquivo no nativo; migra o que estava no SecureStore. */
+function readRaw(): Promise<string | null>
 {
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined') return localStorage.getItem(KEY)
-  return SecureStore.getItemAsync(KEY)
+  return readPersisted(KEY, true)
 }
 
 /**
@@ -70,11 +69,5 @@ export async function loadKanbanLists(): Promise<UserTaskList[]>
 
 export async function saveKanbanLists(lists: UserTaskList[]): Promise<void>
 {
-  const payload = JSON.stringify(lists)
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-  {
-    localStorage.setItem(KEY, payload)
-    return
-  }
-  await SecureStore.setItemAsync(KEY, payload)
+  await writePersisted(KEY, JSON.stringify(lists))
 }

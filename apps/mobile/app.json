@@ -37,6 +37,13 @@
       "expo-asset",
       "expo-font",
       [
+        "expo-camera",
+        {
+          "cameraPermission": "O Simply-Life usa a câmera só para ler o código de barras dos alimentos.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/icon.png",

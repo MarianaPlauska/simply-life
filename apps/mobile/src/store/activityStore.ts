@@ -1,7 +1,13 @@
 import { create } from 'zustand'
-import { Platform } from 'react-native'
 import { localTodayIso } from '@simply-life/shared'
 import { useGamificationStore } from './gamificationStore'
+import {
+  isPersistReady,
+  persistStorage,
+  runHydrated,
+  whenPersistReady,
+  type SyncStorage,
+} from '../lib/persistStorage'
 
 const KEY = 'simply_life_activity_days_v1'
 
@@ -22,20 +28,11 @@ type State = {
   seedDates: (isos: string[], kind: LifeActionKind) => void
 }
 
-function storage()
+let loaded = false
+
+function storage(): SyncStorage
 {
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-  {
-    return localStorage
-  }
-  const mem = new Map<string, string>()
-  return {
-    getItem: (k: string) => mem.get(k) ?? null,
-    setItem: (k: string, v: string) =>
-    {
-      mem.set(k, v)
-    },
-  }
+  return persistStorage
 }
 
 function readDays(): PersistShape
@@ -66,11 +63,18 @@ export const useActivityStore = create<State>((set, get) => ({
 
   hydrate: () =>
   {
+    if (!isPersistReady())
+    {
+      void whenPersistReady().then(() => get().hydrate())
+      return
+    }
+    loaded = true
     set({ days: readDays() })
   },
 
   markOpen: () =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().markOpen())) return
     const iso = localTodayIso()
     const days = { ...get().days }
     const row = ensureDay(days, iso)
@@ -82,6 +86,7 @@ export const useActivityStore = create<State>((set, get) => ({
 
   markAction: (kind) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().markAction(kind))) return
     const iso = localTodayIso()
     const days = { ...get().days }
     const row = ensureDay(days, iso)
@@ -98,6 +103,7 @@ export const useActivityStore = create<State>((set, get) => ({
 
   seedDates: (isos, kind) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().seedDates(isos, kind))) return
     const days = { ...get().days }
     let changed = false
     for (const raw of isos)

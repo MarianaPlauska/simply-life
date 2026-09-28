@@ -52,58 +52,27 @@ export async function createFriendInvite(): Promise<{ code: string; url: string 
   return { code, url: `${base}/join/${code}` }
 }
 
+/** Aceite atômico no banco (RPC accept_friend_invite, migração 064). */
 export async function acceptFriendInvite(code: string): Promise<{ ok: boolean; message: string }>
 {
   const uid = (await supabase.auth.getUser()).data.user?.id
   if (!uid) return { ok: false, message: 'Faça login para aceitar o convite' }
 
-  const { data: invite, error } = await supabase
-    .from('friend_invites')
-    .select('*')
-    .eq('code', code.toUpperCase())
-    .maybeSingle()
+  const { data, error } = await supabase.rpc('accept_friend_invite', {
+    p_code: code.trim().toUpperCase(),
+  })
 
-  if (error || !invite)
+  if (error)
   {
-    return { ok: false, message: 'Convite inválido ou expirado' }
+    console.error('acceptFriendInvite:', error)
+    return { ok: false, message: 'Não foi possível aceitar agora. Tente de novo em instantes' }
   }
 
-  if (new Date(invite.expires_at) < new Date())
-  {
-    return { ok: false, message: 'Este convite expirou' }
+  const payload = (data ?? null) as { ok?: boolean; message?: string } | null
+  return {
+    ok: Boolean(payload?.ok),
+    message: payload?.message ?? 'Não foi possível aceitar agora. Tente de novo em instantes',
   }
-
-  if (invite.uses_left <= 0)
-  {
-    return { ok: false, message: 'Convite esgotado' }
-  }
-
-  if (invite.inviter_id === uid)
-  {
-    return { ok: false, message: 'Você não pode aceitar o próprio convite' }
-  }
-
-  const userA = invite.inviter_id < uid ? invite.inviter_id : uid
-  const userB = invite.inviter_id < uid ? uid : invite.inviter_id
-
-  const { error: friendErr } = await supabase.from('friendships').upsert({
-    user_a: userA,
-    user_b: userB,
-    status: 'accepted',
-  }, { onConflict: 'user_a,user_b' })
-
-  if (friendErr)
-  {
-    console.error('acceptFriendInvite:', friendErr)
-    return { ok: false, message: 'Não foi possível criar amizade' }
-  }
-
-  await supabase
-    .from('friend_invites')
-    .update({ uses_left: Math.max(0, invite.uses_left - 1) })
-    .eq('id', invite.id)
-
-  return { ok: true, message: 'Vocês estão no mesmo Círculo!' }
 }
 
 export async function fetchFriendCircle(): Promise<FriendPublicCard[]>

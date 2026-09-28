@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Platform } from 'react-native'
+import { isPersistReady, persistStorage, runHydrated, whenPersistReady } from '../lib/persistStorage'
 import {
   capXpGrant,
   levelFromTotalXp,
@@ -21,28 +21,8 @@ const HIST_KEY = 'simply-life-axel-history'
 const STREAK_KEY = 'simply-life-streak'
 const STREAK_DAY_KEY = 'simply-life-streak-day'
 
-type MemoryStorage = {
-  getItem: (key: string) => string | null
-  setItem: (key: string, value: string) => void
-}
-
-function webStorage(): MemoryStorage
-{
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-  {
-    return localStorage
-  }
-  const mem = new Map<string, string>()
-  return {
-    getItem: (k) => mem.get(k) ?? null,
-    setItem: (k, v) =>
-    {
-      mem.set(k, v)
-    },
-  }
-}
-
-const storage = webStorage()
+const storage = persistStorage
+let loaded = false
 
 function readNum(key: string, fallback = 0): number
 {
@@ -107,6 +87,12 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   hydrate: () =>
   {
+    if (!isPersistReady())
+    {
+      void whenPersistReady().then(() => get().hydrate())
+      return
+    }
+    loaded = true
     set({
       totalXp: readNum(XP_KEY),
       gold: readNum(GOLD_KEY),
@@ -119,6 +105,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   grantXp: (amount, title, detail) =>
   {
+    // ainda carregando do disco: concede logo depois (retorno 0 só nesse instante inicial)
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => void get().grantXp(amount, title, detail))) return 0
     const { granted } = capXpGrant(storage, amount)
     if (granted <= 0) return 0
     const totalXp = get().totalXp + granted
@@ -141,6 +129,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   unlockIf: (id) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().unlockIf(id))) return
     if (get().unlocked.includes(id)) return
     const ach: Achievement | undefined = STARTER_ACHIEVEMENTS.find((a) => a.id === id)
     if (!ach) return
@@ -152,6 +141,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   buyItem: (id, cost) =>
   {
+    if (!isPersistReady()) return { ok: false, message: 'Carregando, tente de novo' }
+    if (!loaded) get().hydrate()
     if (get().owned.includes(id)) return { ok: false, message: 'Já adquirido' }
     if (get().gold < cost) return { ok: false, message: 'Moedas insuficientes' }
     const gold = get().gold - cost
@@ -169,6 +160,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   bumpStreak: () =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().bumpStreak())) return
     const today = localTodayIso()
     if (storage.getItem(STREAK_DAY_KEY) === today) return
     const streak = get().streak + 1
@@ -182,6 +174,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
 
   logEvent: (kind, title, detail) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().logEvent(kind, title, detail))) return
     const history = appendHistory(get().history, { kind, title, detail })
     storage.setItem(HIST_KEY, JSON.stringify(history))
     set({ history })

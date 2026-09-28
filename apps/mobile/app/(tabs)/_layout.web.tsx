@@ -10,6 +10,7 @@ import { useDataSync } from '../../src/hooks/useDataSync'
 import { useBoardAutoReplan } from '../../src/hooks/useBoardAutoReplan'
 import { useTaskCompletionLog } from '../../src/hooks/useTaskCompletionLog'
 import { useDayCompanion } from '../../src/hooks/useTodayVisualDay'
+import { useSharedGoalContributions } from '../../src/hooks/useSharedGoalContributions'
 import { BoardReplanToast } from '../../src/components/kanban/BoardReplanToast'
 import { useAuthStore } from '../../src/store/authStore'
 import { SetupGuard } from '../../src/components/auth/SetupGuard'
@@ -29,6 +30,7 @@ export default function TabsLayoutWeb()
   useBoardAutoReplan()
   useTaskCompletionLog()
   useDayCompanion()
+  useSharedGoalContributions()
 
   if (!userId || mfaPending)
   {

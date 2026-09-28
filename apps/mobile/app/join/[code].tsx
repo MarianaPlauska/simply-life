@@ -6,6 +6,7 @@ import { Screen, Text, PrimaryButton } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { supabase } from '../../src/lib/supabase'
+import { AMIGOS_HREF } from '../../src/lib/sharedGoalRoutes'
 
 export default function JoinFriendScreen()
 {
@@ -30,7 +31,7 @@ export default function JoinFriendScreen()
       setStatus(result.ok ? 'done' : 'error')
       if (result.ok)
       {
-        setTimeout(() => router.replace('/(tabs)'), 1200)
+        setTimeout(() => router.replace(AMIGOS_HREF), 1200)
       }
     })
     return () =>
@@ -77,7 +78,10 @@ export default function JoinFriendScreen()
             <Text variant="body" style={{ textAlign: 'center' }}>
               {message}
             </Text>
-            <PrimaryButton label="Ir ao início" onPress={() => router.replace('/(tabs)')} />
+            <PrimaryButton
+              label={status === 'done' ? 'Ver meu Círculo' : 'Ir ao início'}
+              onPress={() => router.replace(status === 'done' ? AMIGOS_HREF : '/(tabs)')}
+            />
           </>
         )}
       </View>

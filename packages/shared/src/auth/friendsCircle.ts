@@ -4,6 +4,10 @@ export type FriendsDb = {
   auth: {
     getUser: () => Promise<{ data: { user: { id: string } | null } }>
   }
+  rpc: (
+    fn: string,
+    args?: Record<string, unknown>,
+  ) => PromiseLike<{ data: unknown; error: { message: string } | null }>
   from: (table: string) => {
     insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>
     select: (cols: string) => {
@@ -43,54 +47,32 @@ export async function createFriendInvite(
   return { code, url: buildJoinUrl(origin, code) }
 }
 
+/**
+ * Aceite atômico no banco (RPC accept_friend_invite, migração 064):
+ * trava o convite, cria a amizade em `friendships` (par ordenado) e
+ * desconta o uso. Antes, o app gravava em `friend_links`, tabela que não existe.
+ */
 export async function acceptFriendInvite(
   db: FriendsDb,
   code: string,
-): Promise<{ ok: boolean; message: string }>
+): Promise<{ ok: boolean; message: string; friendId?: string }>
 {
   const uid = (await db.auth.getUser()).data.user?.id
   if (!uid) return { ok: false, message: 'Faça login para aceitar o convite' }
 
-  const { data: invite, error } = await db
-    .from('friend_invites')
-    .select('*')
-    .eq('code', code.toUpperCase())
-    .maybeSingle()
+  const clean = code.trim().toUpperCase()
+  if (!clean) return { ok: false, message: 'Convite inválido ou expirado' }
 
-  if (error || !invite)
+  const { data, error } = await db.rpc('accept_friend_invite', { p_code: clean })
+  if (error)
   {
-    return { ok: false, message: 'Convite inválido ou expirado' }
+    return { ok: false, message: 'Não deu para aceitar agora. Tente de novo em instantes' }
   }
 
-  if (new Date(String(invite.expires_at)) < new Date())
-  {
-    return { ok: false, message: 'Este convite expirou' }
+  const payload = (data ?? null) as { ok?: boolean; message?: string; friend_id?: string } | null
+  return {
+    ok: Boolean(payload?.ok),
+    message: payload?.message ?? 'Não deu para aceitar agora. Tente de novo em instantes',
+    friendId: payload?.friend_id ?? undefined,
   }
-
-  if (Number(invite.uses_left) <= 0)
-  {
-    return { ok: false, message: 'Convite esgotado' }
-  }
-
-  if (invite.inviter_id === uid)
-  {
-    return { ok: false, message: 'Você não pode aceitar o próprio convite' }
-  }
-
-  const { error: linkErr } = await db.from('friend_links').insert({
-    user_a: invite.inviter_id,
-    user_b: uid,
-  })
-
-  if (linkErr && !String(linkErr.message).includes('duplicate'))
-  {
-    return { ok: false, message: linkErr.message }
-  }
-
-  await db
-    .from('friend_invites')
-    .update({ uses_left: Number(invite.uses_left) - 1 })
-    .eq('code', String(invite.code))
-
-  return { ok: true, message: 'Você entrou no Círculo!' }
 }

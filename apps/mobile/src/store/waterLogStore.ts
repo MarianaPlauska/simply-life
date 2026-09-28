@@ -1,6 +1,6 @@
-import { Platform } from 'react-native'
 import { create } from 'zustand'
 import { localTodayIso } from '@simply-life/shared'
+import { isPersistReady, persistStorage, runHydrated, whenPersistReady } from '../lib/persistStorage'
 
 const KEY = 'simply-life-water-log'
 
@@ -11,21 +11,7 @@ type WaterLogState = {
   hydrate: () => void
 }
 
-function storage()
-{
-  if (Platform.OS === 'web' && typeof localStorage !== 'undefined')
-  {
-    return localStorage
-  }
-  const mem = new Map<string, string>()
-  return {
-    getItem: (k: string) => mem.get(k) ?? null,
-    setItem: (k: string, v: string) =>
-    {
-      mem.set(k, v)
-    },
-  }
-}
+let loaded = false
 
 function todayIso(): string
 {
@@ -38,9 +24,15 @@ export const useWaterLogStore = create<WaterLogState>((set, get) => ({
 
   hydrate: () =>
   {
+    if (!isPersistReady())
+    {
+      void whenPersistReady().then(() => get().hydrate())
+      return
+    }
+    loaded = true
     try
     {
-      const raw = storage().getItem(KEY)
+      const raw = persistStorage.getItem(KEY)
       if (!raw) return
       const parsed = JSON.parse(raw) as { lastSipAt?: string | null; days?: Record<string, number> }
       set({
@@ -56,12 +48,13 @@ export const useWaterLogStore = create<WaterLogState>((set, get) => ({
 
   recordSip: (cups) =>
   {
+    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().recordSip(cups))) return
     const next = {
       lastSipAt: new Date().toISOString(),
       days: { ...get().days, [todayIso()]: cups },
     }
     set(next)
-    storage().setItem(KEY, JSON.stringify(next))
+    persistStorage.setItem(KEY, JSON.stringify(next))
   },
 }))
 

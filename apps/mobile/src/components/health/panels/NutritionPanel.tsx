@@ -1,4 +1,5 @@
 import { View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { findHabit, habitPct } from '@simply-life/shared'
 import { PrimaryButton } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
@@ -9,6 +10,7 @@ import { HealthPanelHero } from '../HealthPanelHero'
 export function NutritionPanel()
 {
   const { colors, space } = useTheme()
+  const router = useRouter()
   const habits = useDataStore((s) => s.habits)
   const addProteinGrams = useDataStore((s) => s.addProteinGrams)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -46,6 +48,13 @@ export function NutritionPanel()
         label="Registrar refeição rápida (+25g)"
         variant="ghost"
         onPress={() => void addProteinGrams(25, isGuest)}
+        style={pillBtn}
+      />
+      <PrimaryButton
+        label="Comida: o que comi e quanto custou"
+        variant="secondary"
+        icon="restaurant-outline"
+        onPress={() => router.push('/comida')}
         style={pillBtn}
       />
     </View>
