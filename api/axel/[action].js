@@ -6,6 +6,7 @@ import taskEstimate from '../_lib/handlers/axel/task-estimate.js';
 import ingestEmail from '../_lib/handlers/axel/ingest-email.js';
 import ingestTasks from '../_lib/handlers/axel/ingest-tasks.js';
 import estimateProtein from '../_lib/handlers/axel/estimate-protein.js';
+import estimateFoodKcal from '../_lib/handlers/axel/estimate-food-kcal.js';
 import processEvent from '../_lib/handlers/axel/process-event.js';
 import financeCoach from '../_lib/handlers/axel/finance-coach.js';
 import financePurchaseCheck from '../_lib/handlers/axel/finance-purchase-check.js';
@@ -27,6 +28,7 @@ const ROUTES = {
   'ingest-email': ingestEmail,
   'ingest-tasks': ingestTasks,
   'estimate-protein': estimateProtein,
+  'estimate-food-kcal': estimateFoodKcal,
   'process-event': processEvent,
   'finance-coach': financeCoach,
   'finance-purchase-check': financePurchaseCheck,
