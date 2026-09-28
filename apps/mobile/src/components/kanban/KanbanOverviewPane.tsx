@@ -123,7 +123,7 @@ export function KanbanOverviewPane({ tasks }: Props)
   return (
     <View style={{ gap: space.md }}>
       {/* Header Welcome - ref Overview */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <View
           style={{
             width: 44,
@@ -138,7 +138,7 @@ export function KanbanOverviewPane({ tasks }: Props)
             {displayName.slice(0, 1).toUpperCase()}
           </Text>
         </View>
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant="caption" muted>
             Welcome
           </Text>
@@ -185,7 +185,7 @@ export function KanbanOverviewPane({ tasks }: Props)
       </View>
 
       {/* Grid 2×2 tiles pastéis */}
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
         {tiles.map((tile) => (
           <Pressable
             key={tile.id}
@@ -200,7 +200,7 @@ export function KanbanOverviewPane({ tasks }: Props)
               borderRadius: 20,
               backgroundColor: tile.bg,
               padding: space.md,
-              gap: 14,
+              gap: 16,
               minHeight: 108,
             }}
           >
@@ -244,7 +244,7 @@ export function KanbanOverviewPane({ tasks }: Props)
                 backgroundColor: colors.surface,
                 borderRadius: 20,
                 padding: space.md,
-                gap: 8,
+                gap: 12,
                 shadowColor: elevation.card.shadowColor,
                 shadowOpacity: 0.05,
                 shadowRadius: 14,
@@ -305,7 +305,7 @@ export function KanbanOverviewPane({ tasks }: Props)
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 12,
+                gap: 16,
                 paddingVertical: 14,
                 borderBottomWidth: 1,
                 borderBottomColor: colors.hairline,
@@ -323,7 +323,7 @@ export function KanbanOverviewPane({ tasks }: Props)
                   borderColor: colors.axel,
                 }}
               />
-              <View style={{ flex: 1, gap: 2 }}>
+              <View style={{ flex: 1, gap: 4 }}>
                 <Text variant="bodyStrong" numberOfLines={1}>
                   {t.titulo}
                 </Text>

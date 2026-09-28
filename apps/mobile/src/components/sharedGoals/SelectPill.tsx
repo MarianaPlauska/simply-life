@@ -32,7 +32,7 @@ export function SelectPill({
         borderRadius: 12,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 12,
         backgroundColor: active ? on : colors.elevated,
       }}
     >

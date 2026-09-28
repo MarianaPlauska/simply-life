@@ -22,7 +22,7 @@ export function WorkoutVolumeBars({ rows }: { rows: MuscleGroupVolume[] })
       {rows.map((r, i) => (
         <View
           key={r.group}
-          style={{ gap: 4 }}
+          style={{ gap: 6 }}
           accessible
           accessibilityLabel={`${r.label}: ${r.sets} séries, ${formatWorkoutKg(r.volumeKg)}`}
         >

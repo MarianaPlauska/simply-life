@@ -64,7 +64,7 @@ export function GamificationPanel()
       <Card tone="elevated" style={{ gap: space.sm }}>
         <SectionHeader title="Conquistas" />
         {STARTER_ACHIEVEMENTS.map((a) => (
-          <View key={a.id} style={{ gap: 2 }}>
+          <View key={a.id} style={{ gap: 4 }}>
             <Text variant="bodyStrong">
               {unlocked.includes(a.id) ? '● ' : '○ '}
               {a.title}
@@ -79,7 +79,7 @@ export function GamificationPanel()
       <Card tone="elevated" style={{ gap: space.sm }}>
         <SectionHeader title="Loja de recompensas" subtitle={`${gold} moedas`} />
         {REWARD_SHOP.map((item) => (
-          <View key={item.id} style={{ gap: 6 }}>
+          <View key={item.id} style={{ gap: 8 }}>
             <Text variant="bodyStrong">{item.title}</Text>
             <Text variant="caption" muted>
               {item.cost} moedas · {item.kind}

@@ -13,7 +13,6 @@ import { MoodFaceRow } from '../../MoodFace'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useWorkspace } from '../../../layout/useWorkspace'
 import { DiarySection } from './DiarySection'
-import { DIARY_DIVIDER } from './diaryStyles'
 import { MoodTrendChart, MoodYearGrid } from './MoodCharts'
 
 type WeekReview = {
@@ -51,18 +50,18 @@ type Props = {
 
 function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; total: number })
 {
-  const { radius } = useTheme()
+  const { radius, colors } = useTheme()
   if (total === 0) return null
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <View
         style={{
           height: 12,
           borderRadius: radius.pill,
           flexDirection: 'row',
           overflow: 'hidden',
-          backgroundColor: 'rgba(238, 242, 240, 0.08)',
+          backgroundColor: colors.featureTrack,
         }}
       >
         {([1, 2, 3, 4, 5] as const).map((m) =>
@@ -83,14 +82,14 @@ function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; tota
           )
         })}
       </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
         {([1, 2, 3, 4, 5] as const).map((m) =>
         {
           const slice = slices.find((s) => s.mood === m)
           const count = slice?.value ?? 0
           if (count <= 0) return null
           return (
-            <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View
                 style={{
                   width: 8,
@@ -99,7 +98,7 @@ function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; tota
                   backgroundColor: moodColor(m),
                 }}
               />
-              <Text variant="micro" style={{ color: 'rgba(238, 242, 240, 0.72)', fontSize: 11 }}>
+              <Text variant="micro" style={{ color: colors.featureMuted, fontSize: 11 }}>
                 {moodLabel(m)} {Math.round((count / total) * 100)}%
               </Text>
             </View>
@@ -177,7 +176,7 @@ export function HealthDiaryStudio(props: Props)
   const patternsBlock = (
     <View style={{ gap: space.md }}>
       {total === 0 ? (
-        <Text variant="body" style={{ color: colors.widgetMuted, lineHeight: 22 }}>
+        <Text variant="body" style={{ color: colors.featureMuted, lineHeight: 22 }}>
           Depois de alguns check-ins, você vê aqui como o humor se distribui e evolui.
         </Text>
       ) : (
@@ -188,17 +187,17 @@ export function HealthDiaryStudio(props: Props)
         </>
       )}
       {habits ? (
-        <View style={{ gap: 8, paddingTop: 4 }}>
-          <Text variant="caption" style={{ color: colors.widgetMuted, fontWeight: '600' }}>
+        <View style={{ gap: 12, paddingTop: 4 }}>
+          <Text variant="caption" style={{ color: colors.featureMuted, fontWeight: '600' }}>
             Sono e água
           </Text>
           {habits.sleep.good != null && habits.sleep.bad != null ? (
-            <Text variant="caption" style={{ color: 'rgba(238, 242, 240, 0.78)', lineHeight: 20 }}>
+            <Text variant="caption" style={{ color: colors.featureInk, lineHeight: 20 }}>
               Sono: {moodLabel(habits.sleep.good)} quando dormiu bem · {moodLabel(habits.sleep.bad)} quando não
             </Text>
           ) : null}
           {habits.water.good != null && habits.water.bad != null ? (
-            <Text variant="caption" style={{ color: 'rgba(238, 242, 240, 0.78)', lineHeight: 20 }}>
+            <Text variant="caption" style={{ color: colors.featureInk, lineHeight: 20 }}>
               Água: {moodLabel(habits.water.good)} na meta · {moodLabel(habits.water.bad)} abaixo
             </Text>
           ) : null}
@@ -213,7 +212,7 @@ export function HealthDiaryStudio(props: Props)
     <View style={{ gap: space.md }}>
       {alertSlot ? <View style={{ gap: space.sm }}>{alertSlot}</View> : null}
 
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: 4 }}>
         <Text variant="caption" muted>
           {dateLine}
         </Text>
@@ -264,10 +263,10 @@ export function HealthDiaryStudio(props: Props)
               <View
                 key={h.id}
                 style={{
-                  gap: 4,
+                  gap: 6,
                   paddingVertical: 10,
                   borderBottomWidth: i < comNota.length - 1 ? StyleSheet.hairlineWidth : 0,
-                  borderBottomColor: DIARY_DIVIDER,
+                  borderBottomColor: colors.hairline,
                 }}
               >
                 <Text variant="caption" muted>

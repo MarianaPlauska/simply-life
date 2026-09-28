@@ -122,7 +122,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: 4 }}>
         <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
           Hoje
         </Text>
@@ -141,7 +141,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
         contentContainerStyle={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: 12,
           paddingRight: 8,
         }}
       >
@@ -167,7 +167,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
       </ScrollView>
 
       {naming ? (
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
           <TextInput
             value={draft}
             onChangeText={setDraft}
@@ -269,7 +269,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 8,
+            gap: 12,
           }}
         >
           <Text variant="caption" muted>
@@ -297,8 +297,8 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
         const list = open.filter((t) => t.prioridade === p.id)
         if (list.length === 0) return null
         return (
-          <View key={p.id} style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View key={p.id} style={{ gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View
                 style={{
                   paddingHorizontal: 12,

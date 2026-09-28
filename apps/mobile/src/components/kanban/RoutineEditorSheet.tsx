@@ -98,7 +98,7 @@ export function RoutineEditorSheet({ visible, mode, editing, onClose, onSave }: 
                   <Text variant="caption" muted>
                     Frequência
                   </Text>
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                  <View style={{ flexDirection: 'row', gap: 12 }}>
                     <Chip
                       label="Todo dia"
                       active={cadence === 'daily'}

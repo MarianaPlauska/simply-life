@@ -82,7 +82,7 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
       >
         <Icon name={icon} size={18} color={accent} />
       </View>
-      <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
+      <View style={{ flex: 1, minWidth: 0, gap: 8 }}>
         <Text
           variant="bodyStrong"
           numberOfLines={2}

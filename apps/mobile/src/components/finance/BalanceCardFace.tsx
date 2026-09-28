@@ -62,7 +62,7 @@ export function BalanceCardFace({ tone, disponivel, deltaPct, entradas, saidas, 
           <ContactlessPaymentIcon size={24} color={tone.muted} weight="regular" />
         </View>
 
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="micro" style={{ color: tone.muted }}>
             Saldo da conta · {delta}
           </Text>
@@ -77,7 +77,7 @@ export function BalanceCardFace({ tone, disponivel, deltaPct, entradas, saidas, 
         </View>
 
         <View style={[styles.row, { alignItems: 'flex-end' }]}>
-          <View style={{ gap: 2, flexShrink: 1 }}>
+          <View style={{ gap: 4, flexShrink: 1 }}>
             <Text variant="micro" numberOfLines={1} style={{ color: tone.muted, fontVariant: ['tabular-nums'] }}>
               Entrou {formatBRL(entradas)}
             </Text>
@@ -115,14 +115,14 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 16,
     overflow: 'hidden',
-    padding: 18,
+    padding: 20,
     justifyContent: 'space-between',
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 16,
   },
   status: {
     paddingHorizontal: 10,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
     minHeight: 36,
     paddingHorizontal: 14,
     borderRadius: 999,

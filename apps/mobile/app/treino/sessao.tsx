@@ -143,7 +143,7 @@ export default function TreinoSessaoScreen()
               { label: 'Séries', value: String(t.sets) },
               { label: 'Exercícios', value: String(t.exercises) },
             ].map((m) => (
-              <View key={m.label} style={{ minWidth: 120, gap: 2 }}>
+              <View key={m.label} style={{ minWidth: 120, gap: 4 }}>
                 <Text variant="micro" muted>{m.label}</Text>
                 <Text variant="title">{m.value}</Text>
               </View>
@@ -160,7 +160,7 @@ export default function TreinoSessaoScreen()
               </Text>
             ) : (
               summary.prs.map((p) => (
-                <View key={p.exerciseId} style={{ gap: 2 }}>
+                <View key={p.exerciseId} style={{ gap: 4 }}>
                   <Text variant="bodyStrong">{p.name}</Text>
                   <Text variant="caption" muted>
                     {p.best.cargaKg ? `${String(p.best.cargaKg).replace('.', ',')} kg × ${p.best.reps}` : `${p.best.reps} reps`}

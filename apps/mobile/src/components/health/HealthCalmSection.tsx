@@ -27,7 +27,7 @@ export function HealthCalmSection()
             minHeight: 56,
             padding: space.md,
             borderRadius: 14,
-            gap: 4,
+            gap: 6,
             backgroundColor: colors.axelMuted,
             borderWidth: 1,
             borderColor: colors.hairline,

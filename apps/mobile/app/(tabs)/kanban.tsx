@@ -141,7 +141,7 @@ export default function KanbanScreen()
               value={report}
               onChange={setReport}
             />
-            <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
               <PrimaryButton
                 label="Decision log"
                 variant="ghost"

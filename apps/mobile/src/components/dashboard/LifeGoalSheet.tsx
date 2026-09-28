@@ -69,7 +69,7 @@ export function LifeGoalSheet({ visible, onClose }: Props)
             <Text variant="caption" muted>
               Semanal renova todo domingo; mensal, no próximo mês. Você escolhe o foco.
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {LIFE_GOAL_TEMPLATES.map((t) => (
                 <Chip
                   key={t.id}
@@ -91,7 +91,7 @@ export function LifeGoalSheet({ visible, onClose }: Props)
               multiline
               style={{ minHeight: 72, textAlignVertical: 'top', paddingTop: 14 }}
             />
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
               <Chip
                 label="Semana"
                 active={cadence === 'week'}
@@ -150,7 +150,7 @@ export function LifeGoalMicroLine({ onPress }: { onPress: () => void })
           <Text style={{ color: colors.axel, fontWeight: '700' }}>
             Meta {cadence}:{' '}
           </Text>
-          <Text style={{ color: colors.widgetInk }}>
+          <Text style={{ color: colors.featureInk }}>
             {title}
           </Text>
         </Text>

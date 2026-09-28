@@ -149,7 +149,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
       />
 
       <HealthScreenSection dividerTop>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="caption" muted>
             {humorHoje ? 'Humor de hoje' : 'Check-in rápido'}
           </Text>
@@ -201,7 +201,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
                     size={40}
                     iconSize={20}
                   />
-                  <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
+                  <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
                     <Text variant="bodyStrong">{tile.label}</Text>
                     <StatusPill
                       label={pillLabel}
@@ -237,7 +237,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
+            gap: 12,
           }}
         >
           <Icon name="leaf-outline" size={18} color={colors.health} />

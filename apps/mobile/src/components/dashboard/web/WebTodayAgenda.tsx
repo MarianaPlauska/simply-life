@@ -28,7 +28,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
   const router = useRouter()
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <View
         style={{
           flexDirection: 'row',
@@ -36,7 +36,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
           justifyContent: 'space-between',
         }}
       >
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="section" style={{ fontSize: 18 }}>
             Agenda de hoje
           </Text>

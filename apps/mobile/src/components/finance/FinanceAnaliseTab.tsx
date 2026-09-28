@@ -73,7 +73,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
             {
               const pct = goal.meta > 0 ? Math.min(100, Math.round((goal.atual / goal.meta) * 100)) : 0
               return (
-                <View key={goal.id} style={{ gap: 6 }}>
+                <View key={goal.id} style={{ gap: 8 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text variant="bodyStrong">{goal.titulo}</Text>
                     <Text variant="caption" muted>
@@ -96,7 +96,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
                       }}
                     />
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
                     <View style={{ flex: 1 }}>
                       <Field
                         label="Valor"

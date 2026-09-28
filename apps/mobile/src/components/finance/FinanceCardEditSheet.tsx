@@ -104,7 +104,7 @@ export function FinanceCardEditSheet({
               maxHeight: '92%',
             }}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Icon name="card-outline" size={20} color={colors.axel} />
               <Text variant="section" style={{ flex: 1 }}>
                 {isCreate ? 'Novo cartão' : 'Personalizar cartão'}

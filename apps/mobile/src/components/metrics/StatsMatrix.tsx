@@ -14,7 +14,7 @@ export function StatsMatrix({ rows }: Props)
   const visible = rows.filter((r) => r.done + r.missed > 0 || r.id === 'tasks')
 
   return (
-    <Card tone="elevated" style={{ gap: space.sm, padding: 16 }}>
+    <Card tone="elevated" style={{ gap: space.sm, padding: 20 }}>
       <Text variant="section" style={{ fontSize: 16 }}>
         Estatísticas
       </Text>

@@ -41,7 +41,7 @@ export function ExpandableSection({
         gap: expanded ? space.sm : space.xs,
         borderRadius: 20,
         overflow: 'hidden',
-        padding: 16,
+        padding: 20,
       }}
     >
       <Pressable
@@ -52,7 +52,7 @@ export function ExpandableSection({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: 12,
           minHeight: 40,
         }}
       >
@@ -65,7 +65,7 @@ export function ExpandableSection({
             minHeight: 28,
           }}
         />
-        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+        <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
           <Text variant="section" style={{ fontSize: 15 }}>
             {title}
           </Text>

@@ -103,7 +103,7 @@ export default function TreinoRotinaScreen()
 
         {draft.exercises.map((e, i) => (
           <Card key={`${e.exerciseId}-${i}`} tone="elevated" style={{ padding: space.md, gap: space.sm }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <Text variant="bodyStrong" numberOfLines={2}>{e.name}</Text>
                 <Text variant="micro" muted>{MUSCLE_GROUP_LABEL[e.group] ?? ''}</Text>
@@ -135,7 +135,7 @@ export default function TreinoRotinaScreen()
                 { label: e.bodyweight ? 'kg extra' : 'kg', node: <WorkoutStepper label="carga" value={e.cargaKg ?? 0} step={2.5} decimals max={999} onChange={(cargaKg) => patchEx(i, { cargaKg })} /> },
                 { label: 'Descanso s', node: <WorkoutStepper label="descanso em segundos" value={e.restSec} step={15} max={600} width={40} onChange={(restSec) => patchEx(i, { restSec })} /> },
               ].map((f) => (
-                <View key={f.label} style={{ gap: 4 }}>
+                <View key={f.label} style={{ gap: 6 }}>
                   <Text variant="micro" muted>{f.label}</Text>
                   {f.node}
                 </View>

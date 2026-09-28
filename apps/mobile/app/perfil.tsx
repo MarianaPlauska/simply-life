@@ -137,7 +137,7 @@ export default function PerfilScreen()
               <Icon name="settings-outline" size={18} color={colors.inkMuted} />
             </Pressable>
           </View>
-          <View style={{ alignItems: 'center', gap: 4 }}>
+          <View style={{ alignItems: 'center', gap: 6 }}>
             <Text variant="title" style={{ fontSize: 22 }}>
               {displayName}
             </Text>
@@ -145,7 +145,7 @@ export default function PerfilScreen()
               {email ?? (isGuest ? 'Modo convidado' : 'sem e-mail')}
             </Text>
             {isAdmin ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
                 <ShieldCheck size={16} color={colors.axel} />
                 <Text variant="caption" style={{ color: colors.axel, fontWeight: '700' }}>
                   Administradora
@@ -205,7 +205,7 @@ export default function PerfilScreen()
         </ProfileSection>
 
         {prefs.cloud_sync_opt_in ? (
-          <Card tone="elevated" style={{ borderRadius: 14, gap: 6 }}>
+          <Card tone="elevated" style={{ borderRadius: 14, gap: 8 }}>
             <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
               Sync preparado
             </Text>
@@ -283,7 +283,7 @@ export default function PerfilScreen()
         {/* Histórico de atividade */}
         <ProfileSection title="Histórico de atividade">
           {recent.length === 0 ? (
-            <Text variant="caption" muted style={{ padding: 12 }}>
+            <Text variant="caption" muted style={{ padding: 16 }}>
               Ainda sem eventos. Complete uma tarefa ou um check-in.
             </Text>
           ) : (
@@ -347,7 +347,7 @@ export default function PerfilScreen()
             <Text variant="caption" muted>
               Cor do avatar
             </Text>
-            <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
               {AVATAR_TINTS.map((tint) => (
                 <Pressable
                   key={tint}
@@ -413,11 +413,11 @@ export default function PerfilScreen()
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 16,
                   minHeight: 52,
                 }}
               >
-                <View style={{ flex: 1, gap: 2 }}>
+                <View style={{ flex: 1, gap: 4 }}>
                   <Text variant="bodyStrong">{row.label}</Text>
                   <Text variant="caption" muted>
                     {row.hint}

@@ -27,7 +27,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
   ).length
 
   return (
-    <View style={{ gap: 2 }}>
+    <View style={{ gap: 4 }}>
       {top ? (
         <Pressable
           onPress={() => router.push(`/task/${top.taskId}`)}
@@ -35,7 +35,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
+            gap: 12,
             minHeight: 44,
             paddingVertical: 4,
           }}
@@ -62,7 +62,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           accessibilityRole="button"
           accessibilityLabel="Reorganizar o quadro com o Axel"
           hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, opacity: running ? 0.5 : 1 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36, opacity: running ? 0.5 : 1 }}
         >
           <Icon name="sparkles-outline" size={15} color={colors.axel} />
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
@@ -74,7 +74,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           accessibilityRole="button"
           accessibilityLabel="Planejar amanhã"
           hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 }}
         >
           <Icon name="moon-outline" size={15} color={colors.axel} />
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
@@ -87,7 +87,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           accessibilityState={{ checked: autoReplan }}
           accessibilityLabel="Reorganizar automaticamente"
           hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 }}
         >
           <Icon
             name={autoReplan ? 'checkmark-circle' : 'ellipse-outline'}

@@ -101,7 +101,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
           <ContactlessPaymentIcon size={24} color={INK_SOFT} weight="regular" />
         </View>
 
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="micro" style={{ color: INK_SOFT }}>
             Disponível · {Math.round(usage)}% usado
           </Text>
@@ -116,7 +116,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
         </View>
 
         <View style={[styles.row, { alignItems: 'flex-end' }]}>
-          <View style={{ gap: 2, flexShrink: 1 }}>
+          <View style={{ gap: 4, flexShrink: 1 }}>
             <Text variant="bodyStrong" style={{ color: INK, letterSpacing: 2, fontVariant: ['tabular-nums'] }}>
               •••• {digits}
             </Text>
@@ -124,7 +124,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
               {titular} · {validade}
             </Text>
           </View>
-          <View style={{ alignItems: 'flex-end', gap: 2 }}>
+          <View style={{ alignItems: 'flex-end', gap: 4 }}>
             <Text variant="micro" style={{ color: INK_SOFT }}>
               Fatura {formatBRL(fatura)}
             </Text>
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    gap: 12,
+    gap: 16,
   },
   pill: {
     paddingHorizontal: 10,

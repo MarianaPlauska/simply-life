@@ -25,7 +25,7 @@ export function WebProfileRow({ label, value, onPress, danger }: Props)
       style={(hovered) => webStyle({
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
         paddingHorizontal: 16,
         paddingVertical: 12,
         backgroundColor: hovered && onPress ? colors.surface : 'transparent',

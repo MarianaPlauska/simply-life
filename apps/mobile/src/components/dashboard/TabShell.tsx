@@ -21,10 +21,11 @@ export function TabShell({ children }: { children: ReactNode })
   return (
     <View
       style={{
-        gap: showRail ? DESKTOP_GUTTER : space.md,
-        paddingTop: showRail ? space.md : space.sm,
-        paddingBottom: showRail ? space.lg : space.sm,
-        paddingHorizontal: showRail ? DESKTOP_PAD_H : space.sm,
+        gap: showRail ? DESKTOP_GUTTER : space.xl,
+        paddingTop: space.md,
+        paddingBottom: showRail ? space.lg : space.md,
+        // Celular: o gutter de 20 já vem do Screen
+        paddingHorizontal: showRail ? DESKTOP_PAD_H : 0,
         maxWidth: showRail ? undefined : contentMaxWidth,
         alignSelf: showRail || !capped ? 'stretch' : 'center',
         width: '100%',

@@ -45,7 +45,7 @@ export function WorkoutExerciseCard({
   return (
     <Card tone="elevated" style={{ gap: space.sm, padding: space.md }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.sm }}>
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text variant="section" numberOfLines={2}>{exercise.name}</Text>
           <Text variant="caption" muted>
             {MUSCLE_GROUP_LABEL[exercise.group] ?? 'Exercício'} · {doneCount}/{exercise.sets.length} séries
@@ -69,7 +69,7 @@ export function WorkoutExerciseCard({
           alignSelf: 'flex-start',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 6,
+          gap: 8,
           minHeight: 32,
           paddingHorizontal: 12,
           borderRadius: radius.pill,
@@ -82,9 +82,9 @@ export function WorkoutExerciseCard({
         </Text>
       </Pressable>
 
-      <View style={{ flexDirection: 'row', paddingHorizontal: 6, gap: 6 }}>
+      <View style={{ flexDirection: 'row', paddingHorizontal: 6, gap: 8 }}>
         <Text variant="micro" muted style={{ width: 28, textAlign: 'center' }}>Série</Text>
-        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', gap: 6 }}>
+        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', gap: 8 }}>
           <Text variant="micro" muted style={{ width: 106, textAlign: 'center' }}>
             {exercise.bodyweight ? 'kg extra' : 'kg'}
           </Text>
@@ -115,7 +115,7 @@ export function WorkoutExerciseCard({
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 6,
+          gap: 8,
           backgroundColor: colors.canvas,
           opacity: pressed ? 0.8 : 1,
         })}

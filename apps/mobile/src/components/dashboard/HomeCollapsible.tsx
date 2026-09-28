@@ -36,7 +36,7 @@ export function HomeCollapsible({
       style={{
         borderRadius: 20,
         gap: open ? space.sm : space.xs,
-        padding: 16,
+        padding: 20,
       }}
     >
       <Pressable
@@ -47,7 +47,7 @@ export function HomeCollapsible({
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: 12,
           minHeight: 40,
         }}
       >
@@ -60,7 +60,7 @@ export function HomeCollapsible({
             minHeight: 28,
           }}
         />
-        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+        <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
           <Text variant="section" style={{ fontSize: 15 }}>
             {title}
           </Text>

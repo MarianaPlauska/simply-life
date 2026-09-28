@@ -131,7 +131,7 @@ function MetaChip({ icon, label, accessibilityLabel }: MetaChipProps)
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: 6,
         minHeight: 28,
         paddingHorizontal: 10,
         borderRadius: radius.pill,
@@ -187,10 +187,10 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
         borderWidth: 1,
         borderColor: doubtful ? colors.attentionMuted : colors.hairline,
         padding: space.md,
-        gap: 10,
+        gap: 12,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
         <Text variant="micro" color={colors.inkFaint} style={{ flex: 1 }} numberOfLines={2}>
           {item.linha}
         </Text>
@@ -201,7 +201,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 4,
+              gap: 6,
               paddingHorizontal: 8,
               minHeight: 22,
               borderRadius: radius.pill,
@@ -247,7 +247,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
         }}
       />
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         <Pressable
           onPress={() => setPicking((p) => !p)}
           accessibilityRole="button"
@@ -256,7 +256,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 6,
+            gap: 8,
             minHeight: 32,
             paddingHorizontal: 12,
             borderRadius: radius.pill,
@@ -292,7 +292,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
       {picking ? (
         <View
           accessibilityRole="radiogroup"
-          style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}
+          style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}
         >
           {DUMP_KINDS.map((k) =>
           {
@@ -307,7 +307,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 6,
+                  gap: 8,
                   minHeight: 36,
                   paddingHorizontal: 12,
                   borderRadius: radius.pill,
@@ -325,12 +325,12 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
       ) : null}
 
       {money ? (
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: 6 }}>
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
               paddingHorizontal: 12,
               borderRadius: radius.control,
               backgroundColor: colors.elevated,
@@ -384,7 +384,7 @@ export function DumpReview({ items, onChange }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: 6 }}>
         <Text variant="section">Entendi assim</Text>
         <Text variant="caption" color={colors.inkMuted}>
           {items.length === 0 ? 'Nada na lista. Volte para escrever de novo.' : summary}

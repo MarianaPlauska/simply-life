@@ -18,7 +18,7 @@ export function MetricTrack({ pct, currentLabel, targetLabel, fill }: Props)
   const track = colors.hairline
 
   return (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: 8 }}>
       <View
         style={{
           height: 8,

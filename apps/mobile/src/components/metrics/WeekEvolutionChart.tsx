@@ -24,11 +24,11 @@ export function WeekEvolutionChart({ series, metric, onMetricChange }: Props)
   const todayIso = new Date().toISOString().slice(0, 10)
 
   return (
-    <Card tone="elevated" style={{ gap: space.sm, padding: 16 }}>
+    <Card tone="elevated" style={{ gap: space.sm, padding: 20 }}>
       <Text variant="section" style={{ fontSize: 16 }}>
         Evolução semanal
       </Text>
-      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+      <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
         {METRICS.map((m) => (
           <Chip
             key={m.id}
@@ -38,14 +38,14 @@ export function WeekEvolutionChart({ series, metric, onMetricChange }: Props)
           />
         ))}
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 132 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 132 }}>
         {series.map((p, i) =>
         {
           const value = values[i]
           const h = 16 + Math.round((value / peak) * 88)
           const today = p.iso === todayIso
           return (
-            <View key={p.iso} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
+            <View key={p.iso} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
               <Text variant="micro" style={{ fontSize: 11, color: today ? colors.axel : colors.inkMuted }}>
                 {value}
               </Text>

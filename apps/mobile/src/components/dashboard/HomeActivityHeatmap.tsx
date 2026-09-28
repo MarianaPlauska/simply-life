@@ -55,7 +55,7 @@ export function HomeActivityHeatmap({ tasks }: Props)
           color={colors.axel}
           centerLabel={String(current)}
         />
-        <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
+        <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
           <Text variant="caption" muted>
             Sequência
           </Text>

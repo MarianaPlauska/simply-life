@@ -52,7 +52,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
                 : 'Lista'
         }
         action={
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <PrimaryButton
               label="Receita"
               variant="link"

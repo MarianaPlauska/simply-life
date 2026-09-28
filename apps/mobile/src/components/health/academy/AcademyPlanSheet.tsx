@@ -75,7 +75,7 @@ export function AcademyPlanSheet({ visible, plan, savedConfig, onClose, onSave }
           <Text variant="caption" muted>
             Segunda com X exercícios, terça com outros. O treino de hoje segue o calendário.
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
             {ACADEMY_WEEK_DAYS.map((item) => (
               <Chip
                 key={item.key}
@@ -86,7 +86,7 @@ export function AcademyPlanSheet({ visible, plan, savedConfig, onClose, onSave }
               />
             ))}
           </ScrollView>
-          <ScrollView style={{ maxHeight: 420 }} contentContainerStyle={{ gap: 10, paddingBottom: 8 }}>
+          <ScrollView style={{ maxHeight: 420 }} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
             {list.map((ex, index) => (
               <AcademyExerciseRow
                 key={ex.id}

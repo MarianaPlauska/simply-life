@@ -26,7 +26,7 @@ export function TimeTriadCard({ triad }: Props)
   ]
 
   return (
-    <Card tone="elevated" style={{ gap: space.md, padding: 16 }}>
+    <Card tone="elevated" style={{ gap: space.md, padding: 20 }}>
       <Text variant="section" style={{ fontSize: 16 }}>
         Tríade do tempo
       </Text>
@@ -38,9 +38,9 @@ export function TimeTriadCard({ triad }: Props)
           size={132}
           strokeWidth={12}
         />
-        <View style={{ flex: 1, gap: 10 }}>
+        <View style={{ flex: 1, gap: 12 }}>
           {legend.map((row) => (
-            <View key={row.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View key={row.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View
                 style={{
                   width: 8,

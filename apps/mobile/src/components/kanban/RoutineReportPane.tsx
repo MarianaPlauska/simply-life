@@ -42,7 +42,7 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: 6 }}>
         <Text variant="section" style={{ fontSize: 18 }}>
           Relatório
         </Text>
@@ -53,10 +53,10 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
 
       <View
         style={{
-          padding: 16,
+          padding: 20,
           borderRadius: radius.card,
           backgroundColor: colors.axelMuted,
-          gap: 6,
+          gap: 8,
         }}
       >
         <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
@@ -78,14 +78,14 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
           <View
             key={row.id}
             style={{
-              padding: 14,
+              padding: 16,
               borderRadius: radius.card,
               backgroundColor: colors.elevated,
-              gap: 10,
+              gap: 12,
             }}
           >
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-              <View style={{ flex: 1, gap: 2 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+              <View style={{ flex: 1, gap: 4 }}>
                 <Text variant="bodyStrong" numberOfLines={1}>
                   {row.title}
                 </Text>
@@ -95,14 +95,14 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
                   </Text>
                 ) : null}
               </View>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <Icon name="flame" size={14} color={row.streak > 0 ? accent : colors.inkFaint} />
                 <Text variant="caption" style={{ color: row.streak > 0 ? accent : colors.inkMuted, fontWeight: '700' }}>
                   {row.streak}
                 </Text>
               </View>
             </View>
-            <View style={{ gap: 6 }}>
+            <View style={{ gap: 8 }}>
               <View
                 style={{
                   height: 6,

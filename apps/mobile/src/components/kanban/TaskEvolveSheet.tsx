@@ -137,7 +137,7 @@ export function TaskEvolveSheet()
             <Text variant="hero" style={{ fontSize: 42, letterSpacing: -1.2 }}>
               {step}%
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {EVO_STEPS.map((pct) => (
                 <Chip
                   key={pct}

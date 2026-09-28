@@ -26,7 +26,7 @@ export function HealthWidgetPanel({
     <View
       style={{
         borderRadius: radius.card,
-        backgroundColor: colors.widget,
+        backgroundColor: colors.featureBg,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: colors.cardRim,
@@ -47,7 +47,7 @@ export function HealthWidgetSection({
   chrome = false,
 }: SectionProps & { chrome?: boolean })
 {
-  const { colors, space } = useTheme()
+  const { colors, space, mode } = useTheme()
 
   return (
     <View
@@ -57,18 +57,18 @@ export function HealthWidgetSection({
         gap: chrome ? space.md : space.md,
         borderTopWidth: dividerTop ? 1 : 0,
         borderTopColor: colors.cardRim,
-        backgroundColor: inset ? 'rgba(0, 0, 0, 0.22)' : 'transparent',
+        backgroundColor: inset ? (mode === 'dark' ? 'rgba(0, 0, 0, 0.22)' : 'rgba(31, 58, 61, 0.05)') : 'transparent',
       }}
     >
       {title || lead ? (
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: 6 }}>
           {title ? (
-            <Text variant="caption" style={{ color: colors.widgetMuted, fontWeight: '600' }}>
+            <Text variant="caption" style={{ color: colors.featureMuted, fontWeight: '600' }}>
               {title}
             </Text>
           ) : null}
           {lead ? (
-            <Text variant="title" style={{ color: colors.widgetInk, fontSize: 22, lineHeight: 28 }}>
+            <Text variant="title" style={{ color: colors.featureInk, fontSize: 22, lineHeight: 28 }}>
               {lead}
             </Text>
           ) : null}

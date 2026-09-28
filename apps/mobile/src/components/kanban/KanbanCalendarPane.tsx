@@ -62,7 +62,7 @@ export function KanbanCalendarPane({ tasks }: Props)
   {
     return (
       <View style={{ gap: space.sm }}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           <Chip label="Dia" onPress={() => setView('dia')} />
           <Chip label="Mês" active onPress={() => setView('mes')} />
         </View>
@@ -77,7 +77,7 @@ export function KanbanCalendarPane({ tasks }: Props)
         <Text variant="section" style={{ fontSize: 16, textTransform: 'capitalize' }}>
           {selected.month}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           <Chip label="Dia" active onPress={() => setView('dia')} />
           <Chip label="Mês" onPress={() => setView('mes')} />
         </View>
@@ -86,7 +86,7 @@ export function KanbanCalendarPane({ tasks }: Props)
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+        contentContainerStyle={{ gap: 12, paddingVertical: 2 }}
       >
         {strip.map((d) =>
         {
@@ -102,7 +102,7 @@ export function KanbanCalendarPane({ tasks }: Props)
                 borderRadius: 14,
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 4,
+                gap: 6,
                 paddingVertical: 8,
                 backgroundColor: active ? colors.axelFill : colors.elevated,
               }}
@@ -142,7 +142,7 @@ export function KanbanCalendarPane({ tasks }: Props)
           {
             const last = i === dayTasks.length - 1
             return (
-              <View key={t.id} style={{ flexDirection: 'row', gap: 10, minHeight: 88 }}>
+              <View key={t.id} style={{ flexDirection: 'row', gap: 12, minHeight: 88 }}>
                 <View style={{ width: 46, alignItems: 'center' }}>
                   <Text variant="micro" muted style={{ fontWeight: '700' }}>
                     {t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : '--'}

@@ -54,7 +54,7 @@ export function MoodWeekReportCard({ humor }: Props)
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View style={{ flex: 1, gap: 4 }}>
+        <View style={{ flex: 1, gap: 6 }}>
           <Text variant="caption" style={{ color: colors.health, fontWeight: '700' }}>
             Relatório da semana
           </Text>
@@ -67,13 +67,13 @@ export function MoodWeekReportCard({ humor }: Props)
 
       <View
         style={{
-          gap: 8,
-          padding: 12,
+          gap: 12,
+          padding: 16,
           borderRadius: 14,
           backgroundColor: colors.elevated,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Text variant="caption" style={{ color: colors.axel, fontWeight: '700' }}>
             Leitura do AXEL
           </Text>
@@ -103,10 +103,10 @@ export function MoodWeekReportCard({ humor }: Props)
             {report.daysLogged} dias com registro · {report.totalEntries} check-ins
           </Text>
 
-          <View style={{ gap: 8 }}>
+          <View style={{ gap: 12 }}>
             <Text variant="caption" muted>Humor mais frequente</Text>
             {report.topMoods.map((m) => (
-              <View key={m.mood} style={{ gap: 4 }}>
+              <View key={m.mood} style={{ gap: 6 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                   <Text variant="bodyStrong">{m.label}</Text>
                   <Text variant="caption" muted>{m.pct}%</Text>
@@ -136,7 +136,7 @@ export function MoodWeekReportCard({ humor }: Props)
           ) : null}
 
           {themes.length > 0 ? (
-            <View style={{ gap: 6 }}>
+            <View style={{ gap: 8 }}>
               <Text variant="caption" muted>Temas que se repetiram</Text>
               {themes.map((t) => (
                 <Text key={`${t.label}-${t.count}`} variant="caption">

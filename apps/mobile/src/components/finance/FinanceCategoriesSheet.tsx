@@ -136,7 +136,7 @@ export function FinanceCategoriesSheet({ visible, onClose }: Props)
                   return (
                     <View
                       key={id}
-                      style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                      style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
                     >
                       <View
                         style={{

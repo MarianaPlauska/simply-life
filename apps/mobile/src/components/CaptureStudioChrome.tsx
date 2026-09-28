@@ -169,7 +169,7 @@ export function CaptureStudioChrome({
                 backgroundColor: colors.hairline,
               }}
             />
-            <View style={{ gap: 2 }}>
+            <View style={{ gap: 4 }}>
               <Text variant="hero" style={{ fontSize: 26, letterSpacing: -0.6 }}>
                 {title}
               </Text>

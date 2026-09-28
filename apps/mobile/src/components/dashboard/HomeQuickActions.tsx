@@ -22,7 +22,7 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
   const perRow = actions.length <= 4 ? actions.length : 3
 
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
       {actions.map((a) => (
         <PressableScale
           key={a.id}
@@ -38,7 +38,7 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
             backgroundColor: colors.surface,
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 6,
+            gap: 8,
             paddingVertical: 14,
             paddingHorizontal: 10,
             shadowColor: colors.ink,

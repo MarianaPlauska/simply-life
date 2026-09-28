@@ -33,7 +33,7 @@ export function MoveStatusSheet({ visible, onClose, onPick }: Props)
         <Pressable onPress={(e) => e.stopPropagation()}>
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="section">Mover no board</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {OPTIONS.map((opt) => (
                 <Chip
                   key={opt.id}

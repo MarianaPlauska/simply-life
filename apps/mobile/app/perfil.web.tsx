@@ -158,7 +158,7 @@ export default function PerfilScreenWeb()
                 <Icon name="settings-outline" size={18} color={colors.inkMuted} />
               </Pressable>
             </View>
-            <View style={{ alignItems: 'center', gap: 4 }}>
+            <View style={{ alignItems: 'center', gap: 6 }}>
               <Text variant="title" style={{ fontSize: 22 }}>
                 {displayName}
               </Text>
@@ -166,7 +166,7 @@ export default function PerfilScreenWeb()
                 {email ?? (isGuest ? 'Modo convidado' : 'sem e-mail')}
               </Text>
               {isAdmin ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 6 }}>
                   <ShieldCheck size={16} color={colors.axel} />
                   <Text variant="caption" style={{ color: colors.axel, fontWeight: '700' }}>
                     Administradora
@@ -252,7 +252,7 @@ export default function PerfilScreenWeb()
 
           <ProfileSection title="Histórico de atividade">
             {recent.length === 0 ? (
-              <Text variant="caption" muted style={{ padding: 12 }}>
+              <Text variant="caption" muted style={{ padding: 16 }}>
                 Ainda sem eventos. Complete uma tarefa ou um check-in.
               </Text>
             ) : (
@@ -297,7 +297,7 @@ export default function PerfilScreenWeb()
               <Text variant="caption" muted>
                 Cor do avatar
               </Text>
-              <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+              <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
                 {AVATAR_TINTS.map((tint) => (
                   <Pressable
                     key={tint}
@@ -346,8 +346,8 @@ export default function PerfilScreenWeb()
                   { key: 'a11y_high_contrast' as const, label: 'Alto contraste', hint: 'Bordas e textos mais firmes' },
                 ]
               ).map((row) => (
-                <View key={row.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 52 }}>
-                  <View style={{ flex: 1, gap: 2 }}>
+                <View key={row.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 52 }}>
+                  <View style={{ flex: 1, gap: 4 }}>
                     <Text variant="bodyStrong">{row.label}</Text>
                     <Text variant="caption" muted>
                       {row.hint}
@@ -445,7 +445,7 @@ export default function PerfilScreenWeb()
         <WebHoverable
           onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
           accessibilityLabel="Voltar"
-          style={webStyle({ flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', cursor: 'pointer' })}
+          style={webStyle({ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', cursor: 'pointer' })}
         >
           <Icon name="chevron-back" size={14} color={colors.inkMuted} />
           <Text variant="caption" muted>
@@ -456,7 +456,7 @@ export default function PerfilScreenWeb()
           Perfil
         </Text>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
           <Pressable
             onPress={() => setSheet('nome')}
             accessibilityLabel="Editar perfil"
@@ -475,13 +475,13 @@ export default function PerfilScreenWeb()
               {initial}
             </Text>
           </Pressable>
-          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 16 }}>
                 {displayName}
               </Text>
               {isAdmin ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <ShieldCheck size={13} color={colors.axel} />
                   <Text variant="micro" style={{ color: colors.axel, fontWeight: '700' }}>
                     Admin
@@ -560,7 +560,7 @@ export default function PerfilScreenWeb()
 
         <WebProfileSection title="Histórico de atividade">
           {recent.length === 0 ? (
-            <View style={{ padding: 16 }}>
+            <View style={{ padding: 20 }}>
               <Text variant="caption" muted>
                 Ainda sem eventos. Complete uma tarefa ou um check-in.
               </Text>
@@ -599,7 +599,7 @@ export default function PerfilScreenWeb()
             <Text variant="caption" muted>
               Cor do avatar
             </Text>
-            <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
               {AVATAR_TINTS.map((tint) => (
                 <Pressable
                   key={tint}
@@ -649,8 +649,8 @@ export default function PerfilScreenWeb()
                 { key: 'a11y_high_contrast' as const, label: 'Alto contraste', hint: 'Bordas e textos mais firmes' },
               ]
             ).map((row) => (
-              <View key={row.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 }}>
-                <View style={{ flex: 1, gap: 2 }}>
+              <View key={row.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 44 }}>
+                <View style={{ flex: 1, gap: 4 }}>
                   <Text variant="bodyStrong">{row.label}</Text>
                   <Text variant="caption" muted>
                     {row.hint}

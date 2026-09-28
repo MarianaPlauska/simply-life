@@ -32,12 +32,12 @@ export function KanbanFolderCard({ scope, onPress, onToggle }: Props)
       style={{
         borderRadius: 14,
         backgroundColor: cardBg,
-        padding: 14,
-        gap: 10,
+        padding: 16,
+        gap: 12,
         minHeight: 88,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <PressableScale
           accessibilityRole="checkbox"
           accessibilityState={{ checked: complete }}
@@ -56,7 +56,7 @@ export function KanbanFolderCard({ scope, onPress, onToggle }: Props)
         >
           {complete ? <Icon name="checkmark" size={14} color={colors.axelOnFill} /> : null}
         </PressableScale>
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 16 }}>
             {scope.name}
           </Text>
@@ -66,7 +66,7 @@ export function KanbanFolderCard({ scope, onPress, onToggle }: Props)
             {scope.open} aberta{scope.open === 1 ? '' : 's'}
           </Text>
         </View>
-        <View style={{ alignItems: 'flex-end', gap: 2 }}>
+        <View style={{ alignItems: 'flex-end', gap: 4 }}>
           <Text variant="caption" muted>
             {formatDue(scope.latestDue)}
           </Text>

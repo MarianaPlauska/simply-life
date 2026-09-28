@@ -49,11 +49,11 @@ export function WebSidebar()
   const collapsed = isTablet && !isDesktop ? !tabletExpanded : prefsCollapsed
   const width = collapsed ? DESKTOP_SIDEBAR_COLLAPSED : DESKTOP_SIDEBAR_WIDTH
 
-  // Navegação é o 30%: barra em petróleo. Coral só marca o item ativo (borda e ícone)
-  const CREAM = colors.widgetInk
-  const inkOnBrand = 'rgba(238, 242, 240, 0.82)'
-  const inkMutedOnBrand = colors.brandInk
-  const divider = 'rgba(185, 207, 202, 0.16)'
+  // Escuro: barra petróleo. Claro: barra branca com contorno. Coral só marca o item ativo (borda e ícone)
+  const CREAM = colors.heroInk
+  const inkOnBrand = `${colors.heroInk}D1`
+  const inkMutedOnBrand = colors.navInk
+  const divider = `${colors.navInk}29`
 
   const isActive = (item: (typeof NAV)[0]) =>
   {
@@ -79,7 +79,9 @@ export function WebSidebar()
       style={{
         width,
         alignSelf: 'stretch',
-        backgroundColor: colors.brand,
+        backgroundColor: colors.navBg,
+        borderRightWidth: 1,
+        borderRightColor: colors.navBorder,
         paddingTop: space.lg,
         paddingBottom: space.lg,
         justifyContent: 'space-between',
@@ -144,15 +146,15 @@ export function WebSidebar()
                   borderLeftWidth: 2,
                   borderLeftColor: active ? colors.axelFill : 'transparent',
                   backgroundColor: active
-                    ? 'rgba(185, 207, 202, 0.12)'
-                    : hovered ? 'rgba(185, 207, 202, 0.06)' : 'transparent',
+                    ? `${colors.navInk}1F`
+                    : hovered ? `${colors.navInk}0F` : 'transparent',
                   cursor: 'pointer',
                 })}
               >
                 <Icon
                   name={active ? (item.icon.replace('-outline', '') as keyof typeof Icon.glyphMap) : item.icon}
                   size={15}
-                  color={active ? colors.axelFill : inkOnBrand}
+                  color={active ? colors.axel : inkOnBrand}
                 />
                 {!collapsed ? (
                   <Text
@@ -223,7 +225,7 @@ export function WebSidebar()
             width: 22,
             height: 22,
             borderRadius: 6,
-            backgroundColor: 'rgba(185, 207, 202, 0.16)',
+            backgroundColor: `${colors.navInk}29`,
             alignItems: 'center',
             justifyContent: 'center',
           }}

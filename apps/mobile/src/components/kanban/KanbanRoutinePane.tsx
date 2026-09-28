@@ -141,8 +141,8 @@ export function KanbanRoutinePane()
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
-        <View style={{ flex: 1, gap: 2 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
             Rotina
           </Text>
@@ -169,8 +169,8 @@ export function KanbanRoutinePane()
         onChange={setView}
       />
 
-      <View style={{ gap: 8 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <View style={{ gap: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <PressableScale
             accessibilityLabel="Semana anterior"
             onPress={() =>
@@ -192,7 +192,7 @@ export function KanbanRoutinePane()
           >
             <Icon name="chevron-back" size={18} color={colors.inkMuted} />
           </PressableScale>
-          <View style={{ flex: 1, alignItems: 'center', gap: 2 }}>
+          <View style={{ flex: 1, alignItems: 'center', gap: 4 }}>
             <Text variant="bodyStrong" style={{ textTransform: 'capitalize' }}>
               {weekTitle}
             </Text>
@@ -285,7 +285,7 @@ export function KanbanRoutinePane()
         const expanded = openGroups[item.id] !== false
         const allDone = groupCompleteToday(items, logs, item.id, viewIso)
         return (
-          <View key={item.id} style={{ gap: 10 }}>
+          <View key={item.id} style={{ gap: 12 }}>
             <RoutineHabitCard
               habit={item}
               logs={logs}
@@ -327,7 +327,7 @@ export function KanbanRoutinePane()
                   paddingLeft: 14,
                   borderLeftWidth: 2,
                   borderLeftColor: colors.hairline,
-                  gap: 10,
+                  gap: 12,
                 }}
               >
                 {kids.map((kid) => (

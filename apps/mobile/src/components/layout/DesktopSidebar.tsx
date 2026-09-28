@@ -52,16 +52,16 @@ export function DesktopSidebar()
   const collapsed = isTablet && !isDesktop ? !tabletExpanded : prefsCollapsed
 
   const width = collapsed ? DESKTOP_SIDEBAR_COLLAPSED : DESKTOP_SIDEBAR_WIDTH
-  // Navegação é o 30%: barra em petróleo; o item ativo "encaixa" na página (mesma cor do fundo)
+  // Escuro: barra petróleo. Claro: barra branca com contorno. O item ativo "encaixa" na página (mesma cor do fundo)
   const ORANGE = colors.axel
-  const CREAM = colors.onBrand
-  const sidebarBg = colors.brand
+  const CREAM = colors.heroInk
+  const sidebarBg = colors.navBg
   const activePill = colors.canvas
-  const inkOnBrand = `${colors.onBrand}E0`
-  const inkMutedOnBrand = colors.brandInk
-  const pressedBg = `${colors.brandInk}1A`
-  const divider = `${colors.brandInk}29`
-  const avatarBg = `${colors.brandInk}29`
+  const inkOnBrand = `${colors.heroInk}E0`
+  const inkMutedOnBrand = colors.navInk
+  const pressedBg = `${colors.navInk}1A`
+  const divider = `${colors.navInk}29`
+  const avatarBg = `${colors.navInk}29`
   const ctaBg = colors.axelFill
   const ctaFg = colors.axelOnFill
 

@@ -70,7 +70,7 @@ export function KanbanFoldersPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: 6 }}>
         <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
           Pastas
         </Text>
@@ -83,7 +83,7 @@ export function KanbanFoldersPane({ tasks }: Props)
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: 12,
           minHeight: 44,
           borderRadius: 999,
           paddingHorizontal: 14,
@@ -109,11 +109,11 @@ export function KanbanFoldersPane({ tasks }: Props)
         </Text>
       </View>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
         <PressableScale
           accessibilityLabel="Criar pasta"
           onPress={() => setNaming(true)}
-          style={{ width: tile, alignItems: 'center', gap: 8, paddingVertical: 4 }}
+          style={{ width: tile, alignItems: 'center', gap: 12, paddingVertical: 4 }}
         >
           <FolderGlyph color={colors.axel} plus size={tile - 8} />
           <Text variant="bodyStrong" style={{ fontSize: 13 }}>
@@ -127,7 +127,7 @@ export function KanbanFoldersPane({ tasks }: Props)
           <PressableScale
             key={scope.id}
             onPress={() => go(scope.id)}
-            style={{ width: tile, alignItems: 'center', gap: 8, paddingVertical: 4 }}
+            style={{ width: tile, alignItems: 'center', gap: 12, paddingVertical: 4 }}
           >
             <FolderGlyph color={scope.color} size={tile - 8} />
             <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 13 }}>
@@ -141,7 +141,7 @@ export function KanbanFoldersPane({ tasks }: Props)
       </View>
 
       {naming ? (
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
           <TextInput
             value={draft}
             onChangeText={setDraft}
@@ -164,16 +164,16 @@ export function KanbanFoldersPane({ tasks }: Props)
       ) : null}
 
       {lifeScopes.length > 0 ? (
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 12 }}>
           <Text variant="section" style={{ fontSize: 18 }}>
             Pilares
           </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
             {lifeScopes.map((scope) => (
               <PressableScale
                 key={scope.id}
                 onPress={() => go(scope.id)}
-                style={{ width: tile, alignItems: 'center', gap: 8 }}
+                style={{ width: tile, alignItems: 'center', gap: 12 }}
               >
                 <FolderGlyph color={scope.color} size={tile - 8} />
                 <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 13 }}>
@@ -194,8 +194,8 @@ export function KanbanFoldersPane({ tasks }: Props)
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 12,
-            padding: 14,
+            gap: 16,
+            padding: 16,
             borderRadius: 14,
             backgroundColor: colors.elevated,
           }}
@@ -210,7 +210,7 @@ export function KanbanFoldersPane({ tasks }: Props)
         </PressableScale>
       ) : null}
 
-      <View style={{ gap: 10 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="section" style={{ fontSize: 18 }}>
           Anotações
         </Text>
@@ -228,8 +228,8 @@ export function KanbanFoldersPane({ tasks }: Props)
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 12,
-                padding: 14,
+                gap: 16,
+                padding: 16,
                 borderRadius: 14,
                 backgroundColor: colors.elevated,
                 minHeight: 64,
@@ -247,7 +247,7 @@ export function KanbanFoldersPane({ tasks }: Props)
               >
                 <Icon name="document-text-outline" size={18} color={colors.axel} />
               </View>
-              <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+              <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
                 <Text variant="bodyStrong" numberOfLines={1}>
                   {task.titulo}
                 </Text>

@@ -148,7 +148,7 @@ export default function OfensivaScreen()
         <View style={{ gap: 28, paddingTop: 8, alignItems: 'center' }}>
           <StreakWeekRow cells={week} />
 
-          <View style={{ alignItems: 'center', gap: 4 }}>
+          <View style={{ alignItems: 'center', gap: 6 }}>
             <Icon name="flame" size={88} color={colors.axel} />
             <Text
               variant="hero"
@@ -169,7 +169,7 @@ export default function OfensivaScreen()
             </Text>
           </View>
 
-          <View style={{ alignSelf: 'stretch', gap: 8 }}>
+          <View style={{ alignSelf: 'stretch', gap: 12 }}>
             <View
               style={{
                 height: 10,
@@ -194,7 +194,7 @@ export default function OfensivaScreen()
             </Text>
           </View>
 
-          <View style={{ alignSelf: 'stretch', gap: 6 }}>
+          <View style={{ alignSelf: 'stretch', gap: 8 }}>
             <Text variant="bodyStrong">
               {todayOk ? 'Bom trabalho hoje.' : 'Ainda dá tempo de fechar o dia.'}
             </Text>
@@ -226,7 +226,7 @@ export default function OfensivaScreen()
           />
         </View>
       ) : (
-        <View style={{ gap: 12, paddingTop: 12 }}>
+        <View style={{ gap: 16, paddingTop: 12 }}>
           <Text variant="caption" muted>
             Dias em que você fez algo: tarefa, nota, humor, gasto, água ou foco.
           </Text>
@@ -239,7 +239,7 @@ export default function OfensivaScreen()
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 16,
                   minHeight: 52,
                   paddingHorizontal: 14,
                   borderRadius: 14,
@@ -273,7 +273,7 @@ export default function OfensivaScreen()
           marginTop: space.lg,
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 12,
+          gap: 16,
           padding: space.md,
           borderRadius: 20,
           backgroundColor: colors.surface,
@@ -308,7 +308,7 @@ export default function OfensivaScreen()
               backgroundColor: colors.surface,
               borderRadius: 20,
               padding: space.lg,
-              gap: 10,
+              gap: 12,
             }}
           >
             <Text variant="section">Como conta</Text>

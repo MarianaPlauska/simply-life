@@ -85,7 +85,7 @@ export function HomeTodayDashboard({
           minHeight: 48,
           borderRadius: 14,
           paddingHorizontal: 14,
-          gap: 10,
+          gap: 12,
           backgroundColor: colors.elevated,
           ...elevation.card,
         }}
@@ -122,22 +122,22 @@ export function HomeTodayDashboard({
           style={{
             borderRadius: 20,
             padding: 20,
-            gap: 14,
-            backgroundColor: colors.widget,
+            gap: 16,
+            backgroundColor: colors.featureBg,
             minHeight: 200,
           }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Text variant="caption" style={{ color: colors.widgetMuted }}>
+            <Text variant="caption" style={{ color: colors.featureMuted }}>
               {hits.length > 0 ? `${hits.length} resultado(s)` : 'Busca'}
             </Text>
             <Pressable onPress={cancelSearch} accessibilityLabel="Fechar busca" hitSlop={8}>
-              <Icon name="close-circle" size={22} color={colors.widgetMuted} />
+              <Icon name="close-circle" size={22} color={colors.featureMuted} />
             </Pressable>
           </View>
 
           {hits.length === 0 ? (
-            <Text variant="title" style={{ color: colors.widgetInk, fontSize: 18 }}>
+            <Text variant="title" style={{ color: colors.featureInk, fontSize: 18 }}>
               Nenhum resultado para “{query.trim()}”
             </Text>
           ) : (
@@ -151,13 +151,13 @@ export function HomeTodayDashboard({
                     paddingVertical: 12,
                     borderBottomWidth: 1,
                     borderBottomColor: colors.hairline,
-                    gap: 4,
+                    gap: 6,
                   }}
                 >
-                  <Text variant="bodyStrong" style={{ color: colors.widgetInk }} numberOfLines={1}>
+                  <Text variant="bodyStrong" style={{ color: colors.featureInk }} numberOfLines={1}>
                     {hit.title}
                   </Text>
-                  <Text variant="caption" style={{ color: colors.widgetMuted }} numberOfLines={1}>
+                  <Text variant="caption" style={{ color: colors.featureMuted }} numberOfLines={1}>
                     {hit.subtitle}
                   </Text>
                 </Pressable>
@@ -171,23 +171,23 @@ export function HomeTodayDashboard({
             style={{
               borderRadius: 20,
               padding: 20,
-              gap: 14,
-              backgroundColor: colors.widget,
+              gap: 16,
+              backgroundColor: colors.featureBg,
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-              <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
-                <Text variant="caption" style={{ color: colors.widgetMuted }}>
+              <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
+                <Text variant="caption" style={{ color: colors.featureMuted }}>
                   Progresso de hoje
                 </Text>
-                <Text variant="title" style={{ color: colors.widgetInk, fontSize: 22 }}>
+                <Text variant="title" style={{ color: colors.featureInk, fontSize: 22 }}>
                   {todayTotal > 0
                     ? `${doneToday} de ${todayTotal} concluídas`
                     : pending > 0
                       ? `${pending} em aberto`
                       : 'Nada no dia ainda'}
                 </Text>
-                <Text variant="caption" style={{ color: colors.widgetMuted }}>
+                <Text variant="caption" style={{ color: colors.featureMuted }}>
                   {todayTotal > 0
                     ? `${pct}% do dia, um passo de cada vez`
                     : 'As tarefas da sua conta aparecem aqui'}
@@ -198,17 +198,17 @@ export function HomeTodayDashboard({
                 size={72}
                 strokeWidth={7}
                 color={colors.axel}
-                trackColor="rgba(238,242,240,0.16)"
+                trackColor={colors.featureTrack}
                 centerLabel={`${pct}%`}
-                labelColor={colors.widgetInk}
+                labelColor={colors.featureInk}
               />
             </View>
-            <View style={{ gap: 10 }}>
+            <View style={{ gap: 12 }}>
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Text variant="micro" style={{ color: colors.widgetMuted }}>
+                <Text variant="micro" style={{ color: colors.featureMuted }}>
                   {streak}d sequência
                 </Text>
-                <Text variant="micro" style={{ color: colors.widgetMuted }}>
+                <Text variant="micro" style={{ color: colors.featureMuted }}>
                   {weekLogged}/7 dias com registro
                 </Text>
               </View>
@@ -216,7 +216,7 @@ export function HomeTodayDashboard({
             </View>
           </View>
 
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             {(
               [
                 { label: 'Pendentes', value: String(pending), icon: 'time-outline' as const, color: colors.axel, href: '/(tabs)/kanban' },
@@ -232,8 +232,8 @@ export function HomeTodayDashboard({
                   minHeight: 88,
                   borderRadius: 20,
                   backgroundColor: colors.elevated,
-                  padding: 12,
-                  gap: 8,
+                  padding: 16,
+                  gap: 12,
                   ...elevation.card,
                 }}
               >

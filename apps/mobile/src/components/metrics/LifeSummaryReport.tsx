@@ -78,7 +78,7 @@ export function LifeSummaryReport({ variant = 'life', snapshots }: Props)
       <WeekEvolutionChart series={series} metric={metric} onMetricChange={setMetric} />
       {variant !== 'compact' ? <TimeTriadCard triad={triad} /> : null}
       {lifeChips.length > 0 ? (
-        <Card tone="elevated" style={{ gap: 10, padding: 16 }}>
+        <Card tone="elevated" style={{ gap: 12, padding: 20 }}>
           <Text variant="section" style={{ fontSize: 16 }}>
             Resumo geral
           </Text>

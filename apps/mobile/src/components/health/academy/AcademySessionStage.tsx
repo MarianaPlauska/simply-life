@@ -44,7 +44,7 @@ export function AcademySessionStage({
   {
     const restDay = plan.length === 0
     return (
-      <View style={{ gap: 14, flex: 1 }}>
+      <View style={{ gap: 16, flex: 1 }}>
         <Text variant="hero" style={{ color: colors.ink, fontSize: 32 }}>
           {restDay ? 'Folga hoje' : 'Modo treino'}
         </Text>
@@ -66,7 +66,7 @@ export function AcademySessionStage({
   {
     const timed = Boolean(step.workSec)
     return (
-      <View style={{ gap: 12, flex: 1, justifyContent: 'center', alignItems: timed ? 'center' : 'flex-start' }}>
+      <View style={{ gap: 16, flex: 1, justifyContent: 'center', alignItems: timed ? 'center' : 'flex-start' }}>
         {sessionClock}
         <Text variant="caption" style={{ color: colors.inkMuted }}>
           Série {step.setIndex} de {step.setTotal}
@@ -100,7 +100,7 @@ export function AcademySessionStage({
   if (phase === 'rest')
   {
     return (
-      <View style={{ gap: 12, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ gap: 16, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         {sessionClock}
         <Text variant="caption" style={{ color: colors.inkMuted }}>Descanso</Text>
         <Text variant="hero" style={{ color: colors.done, fontSize: 72, letterSpacing: -2 }}>
@@ -118,7 +118,7 @@ export function AcademySessionStage({
   if (phase === 'done')
   {
     return (
-      <View style={{ gap: 14, flex: 1, justifyContent: 'center' }}>
+      <View style={{ gap: 16, flex: 1, justifyContent: 'center' }}>
         <Text variant="hero" style={{ color: colors.ink, fontSize: 32 }}>Treino concluído</Text>
         <Text variant="body" style={{ color: colors.inkMuted }}>
           {formatRestClock(elapsedSec)} no total. Pode marcar o dia e voltar.

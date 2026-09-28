@@ -185,7 +185,7 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
             <ScrollView keyboardShouldPersistTaps="handled" style={{ maxHeight: 440 }}>
               <View style={{ gap: space.md }}>
                 <Field label="Nome" value={nome} onChangeText={setNome} placeholder="Aluguel" />
-                <View style={{ flexDirection: 'row', gap: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 12 }}>
                   <View style={{ flex: 1 }}>
                     <Field
                       label="Valor"
@@ -220,7 +220,7 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
                 <Text variant="caption" muted>
                   Urgência
                 </Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                   {([1, 2, 3] as FixaUrgencia[]).map((u) =>
                   {
                     const active = urgencia === u
@@ -283,7 +283,7 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
                     return (
                       <View
                         key={conta.id}
-                        style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                        style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
                       >
                         <View
                           style={{

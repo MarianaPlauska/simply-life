@@ -47,7 +47,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
             minWidth: 0,
             paddingVertical: 18,
             paddingHorizontal: 20,
-            gap: 10,
+            gap: 12,
             borderLeftWidth: i === 0 ? 0 : 1,
             borderLeftColor: colors.cardRim,
             backgroundColor: hovered && item.onPress ? colors.surface : 'transparent',
@@ -64,7 +64,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
               >
                 {item.label}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12, minWidth: 0 }}>
                 <Text
                   numberOfLines={1}
                   style={{

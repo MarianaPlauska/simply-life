@@ -45,7 +45,7 @@ export function DayPlanHomeCard()
     {
       return (
         <Pressable onPress={() => router.push('/planejar-amanha')} accessibilityRole="button">
-          <Card tone="elevated" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Card tone="elevated" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Icon name="moon-outline" size={18} color={colors.axel} />
             <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
               Amanhã já está planejado ({DAY_PLAN_MODE_COPY[planTomorrow.mode].label.toLowerCase()}). Bom descanso.
@@ -57,14 +57,14 @@ export function DayPlanHomeCard()
     if (dismissed === today) return null
     return (
       <Card tone="elevated" accentTop="axel" style={{ gap: space.sm }}>
-        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
           <Icon name="moon-outline" size={20} color={colors.axel} />
           <Text variant="section" style={{ flex: 1 }}>Planejar amanhã</Text>
         </View>
         <Text variant="body" muted>
           Uns 3 minutos. Você conta como está e o que tem; o Axel deixa o amanhã do tamanho certo, com pausas.
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           <PrimaryButton label="Agora não" variant="ghost" size="sm" onPress={() => dismissEvening(today)} style={{ flex: 1 }} />
           <PrimaryButton label="Planejar" size="sm" onPress={() => router.push('/planejar-amanha')} style={{ flex: 2 }} />
         </View>
@@ -81,7 +81,7 @@ export function DayPlanHomeCard()
 
   return (
     <Card tone="elevated" accentTop="axel" style={{ gap: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Text variant="section" style={{ flex: 1 }}>Seu plano de hoje</Text>
         <Text variant="caption" muted>{DAY_PLAN_MODE_COPY[planToday.mode].label}</Text>
       </View>
@@ -91,7 +91,7 @@ export function DayPlanHomeCard()
           onPress={() => void toggleTaskDone(t.id, isGuest)}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: t.status === 'done' }}
-          style={{ flexDirection: 'row', gap: 10, alignItems: 'center', minHeight: 40 }}
+          style={{ flexDirection: 'row', gap: 12, alignItems: 'center', minHeight: 40 }}
         >
           <Icon
             name={t.status === 'done' ? 'checkmark-circle' : 'ellipse-outline'}

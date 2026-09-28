@@ -69,7 +69,7 @@ export function FinanceMonthReport()
   return (
     <View style={{ gap: space.md }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {MONTH_OFFSETS.map((n) => (
             <Chip
               key={n}
@@ -84,7 +84,7 @@ export function FinanceMonthReport()
       <Card tone="elevated" style={{ gap: space.sm }}>
         <SectionHeader title="Relatório do mês" subtitle={monthTitle} />
         <View style={{ flexDirection: 'row', gap: space.sm }}>
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" muted>
               Receitas
             </Text>
@@ -92,7 +92,7 @@ export function FinanceMonthReport()
               {formatBRL(receitas)}
             </Text>
           </View>
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" muted>
               Saiu do saldo
             </Text>
@@ -100,7 +100,7 @@ export function FinanceMonthReport()
               {formatBRL(naConta)}
             </Text>
           </View>
-          <View style={{ flex: 1, gap: 4, alignItems: 'flex-end' }}>
+          <View style={{ flex: 1, gap: 6, alignItems: 'flex-end' }}>
             <Text variant="caption" muted>
               No cartão
             </Text>
@@ -183,9 +183,9 @@ export function FinanceMonthReport()
             <EmptyState title="Sem categorias" body="Os gráficos aparecem com o primeiro gasto." />
           ) : (
             ranking.map((row) => (
-              <View key={row.categoria} style={{ gap: 6 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+              <View key={row.categoria} style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
                     <View
                       style={{
                         width: 10,

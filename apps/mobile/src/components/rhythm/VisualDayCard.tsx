@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { formatMinutesPt, nowAndNext, type DayBlock } from '@simply-life/shared'
@@ -7,6 +7,7 @@ import { Card, Text, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useNeuroStore } from '../../store/neuroStore'
+import { useAgendaPromptStore, useShowAgendaPrompt } from '../../store/agendaPromptStore'
 import { useMinuteClock, useVisualDay } from '../../hooks/useTodayVisualDay'
 
 const hhmm = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`
@@ -32,6 +33,8 @@ export function VisualDayCard()
   const maxVisible = useNeuroStore((s) => s.maxVisibleTasks)
   const source = useCalendarStore((s) => s.source)
   const [expanded, setExpanded] = useState(false)
+  const showAgendaPrompt = useShowAgendaPrompt() && !source
+  const snoozeAgenda = useAgendaPromptStore((s) => s.snooze)
   const nn = nowAndNext(day, now, maxVisible)
   const nowMin = now.getHours() * 60 + now.getMinutes()
 
@@ -40,16 +43,22 @@ export function VisualDayCard()
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Text variant="section" style={{ flex: 1 }}>Agora e depois</Text>
-        {source ? (
-          <Text variant="micro" muted>Agenda conectada</Text>
-        ) : (
-          <Pressable onPress={() => router.push('/agenda')} accessibilityRole="button" hitSlop={8}>
-            <Text variant="caption" color={colors.axel} style={{ fontWeight: '600' }}>Conectar agenda</Text>
-          </Pressable>
-        )}
+        {source ? <Text variant="micro" muted>Agenda conectada</Text> : null}
       </View>
+
+      {showAgendaPrompt ? (
+        <View style={{ gap: 12, padding: 16, borderRadius: 14, backgroundColor: colors.featureBg }}>
+          <Text variant="body" color={colors.featureInk}>
+            Conecte sua agenda para o Axel encaixar as tarefas entre os seus compromissos.
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
+            <PrimaryButton label="Conectar agenda" variant="secondary" size="sm" onPress={() => router.push('/agenda')} />
+            <PrimaryButton label="Conectar depois" variant="ghost" size="sm" onPress={snoozeAgenda} />
+          </View>
+        </View>
+      ) : null}
 
       {day.allDay.length ? (
         <Text variant="caption" muted>Hoje: {day.allDay.map((e) => e.titulo).join(' · ')}</Text>
@@ -62,7 +71,7 @@ export function VisualDayCard()
           onStart={nn.now.taskId ? () => router.push(`/foco?taskId=${nn.now!.taskId}`) : undefined}
         />
       ) : (
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: 6 }}>
           <Text variant="bodyStrong">
             {nn.next[0] ? `Livre até ${hhmm(nn.next[0].inicio)}` : nothing ? 'Nada marcado para hoje' : 'Nada mais marcado hoje'}
           </Text>
@@ -75,20 +84,20 @@ export function VisualDayCard()
       )}
 
       {nn.next.length ? (
-        <View style={{ gap: 6 }}>
+        <View style={{ gap: 8 }}>
           <Text variant="caption" muted>Depois</Text>
           {nn.next.map((b) => <BlockRow key={b.id} block={b} compact />)}
         </View>
       ) : null}
 
       {expanded ? (
-        <View style={{ gap: 6, paddingTop: 4 }}>
+        <View style={{ gap: 8, paddingTop: 4 }}>
           <Text variant="caption" muted>O dia todo (horários do Axel são sugestão)</Text>
           {day.blocks.map((b, i) =>
           {
             const showNowLine = b.inicio > nowMin && (i === 0 || day.blocks[i - 1].inicio <= nowMin)
             return (
-              <View key={b.id} style={{ gap: 6 }}>
+              <View key={b.id} style={{ gap: 8 }}>
                 {showNowLine ? <NowLine nowMin={nowMin} /> : null}
                 <BlockRow block={b} past={b.fim <= nowMin} />
               </View>
@@ -103,7 +112,7 @@ export function VisualDayCard()
         </Text>
       ) : null}
 
-      <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+      <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
         {day.blocks.length ? (
           <PrimaryButton
             label={expanded ? 'Mostrar menos' : 'Ver o dia todo'}
@@ -111,9 +120,6 @@ export function VisualDayCard()
             size="sm"
             onPress={() => setExpanded(!expanded)}
           />
-        ) : null}
-        {!source ? (
-          <PrimaryButton label="Encaixar com minha agenda" variant="ghost" size="sm" onPress={() => router.push('/agenda')} />
         ) : null}
         <PrimaryButton label="Ajustar ao meu jeito" variant="ghost" size="sm" onPress={() => router.push('/meu-jeito')} />
       </View>
@@ -129,8 +135,8 @@ function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number;
   const left = Math.max(0, block.fim - nowMin)
   const meta = KIND_META[block.kind]
   return (
-    <View style={{ gap: 8, padding: 12, borderRadius: 14, backgroundColor: block.kind === 'tarefa' ? colors.axelMuted : colors.hairline }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    <View style={{ gap: 12, padding: 16, borderRadius: 14, backgroundColor: block.kind === 'tarefa' ? colors.axelMuted : colors.hairline }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Icon name={meta.icon} size={18} color={colors.ink} />
         <Text variant="caption" muted style={{ flex: 1 }}>Agora · {meta.label}</Text>
         <Text variant="caption" muted>{hhmm(block.inicio)} às {hhmm(block.fim)}</Text>
@@ -161,7 +167,7 @@ function BlockRow({ block, compact, past }: { block: DayBlock; compact?: boolean
     <View
       style={{
         flexDirection: 'row',
-        gap: 10,
+        gap: 12,
         alignItems: compact ? 'center' : 'flex-start',
         minHeight: compact ? 40 : height,
         opacity: past ? 0.45 : block.soft ? 0.7 : 1,
@@ -172,7 +178,7 @@ function BlockRow({ block, compact, past }: { block: DayBlock; compact?: boolean
         style={{
           flex: 1,
           flexDirection: 'row',
-          gap: 8,
+          gap: 12,
           alignItems: 'center',
           paddingHorizontal: 10,
           paddingVertical: 8,
@@ -184,7 +190,7 @@ function BlockRow({ block, compact, past }: { block: DayBlock; compact?: boolean
         }}
       >
         <Icon name={block.essential ? 'star' : meta.icon} size={15} color={isPause ? colors.inkMuted : colors.ink} />
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant={isPause ? 'caption' : 'bodyStrong'} muted={isPause} style={{ fontSize: 14 }} numberOfLines={2}>
             {block.titulo}
           </Text>
@@ -203,7 +209,7 @@ function NowLine({ nowMin }: { nowMin: number })
 {
   const { colors } = useTheme()
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} accessibilityLabel={`Agora, ${hhmm(nowMin)}`}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }} accessibilityLabel={`Agora, ${hhmm(nowMin)}`}>
       <Text variant="micro" color={colors.axel} style={{ width: 42, fontWeight: '700' }}>{hhmm(nowMin)}</Text>
       <View style={{ flex: 1, height: 2, backgroundColor: colors.axelFill, borderRadius: 1 }} />
     </View>

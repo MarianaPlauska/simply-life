@@ -102,9 +102,35 @@ export type ColorTokens = {
   attentionMuted: string
   done: string
   overlay: string
+  /** @deprecated use `featureBg` (mesmo valor) */
   widget: string
+  /** @deprecated use `featureInk` */
   widgetInk: string
+  /** @deprecated use `featureMuted` */
   widgetMuted: string
+  /** Barra de abas / sidebar: fundo */
+  navBg: string
+  /** Contorno fino da barra (claro); transparente no escuro */
+  navBorder: string
+  /** Ícone e rótulo inativos na barra */
+  navInk: string
+  /** Pílula da aba ativa */
+  navActiveBg: string
+  /** Ícone e rótulo da aba ativa */
+  navActiveInk: string
+  /** Cartão de destaque (progresso de hoje, painel de saúde, busca) */
+  featureBg: string
+  featureInk: string
+  /** Texto secundário no cartão de destaque (4,5:1 ou mais) */
+  featureMuted: string
+  /** Trilho de anel/barra de progresso no cartão de destaque */
+  featureTrack: string
+  /** Faixa de marca (cabeçalho de calendário, hero de ajustes, avatar) */
+  heroBg: string
+  /** Fim do gradiente da faixa de marca */
+  heroBgDeep: string
+  heroInk: string
+  heroMuted: string
 }
 
 export const COLOR_DARK: ColorTokens = {
@@ -145,6 +171,19 @@ export const COLOR_DARK: ColorTokens = {
   widget: '#232C2B',
   widgetInk: '#EEF2F0',
   widgetMuted: '#9FB0AC',
+  navBg: BRAND.petroleo,
+  navBorder: 'transparent',
+  navInk: BRAND.menta,
+  navActiveBg: BRAND.coral,
+  navActiveInk: BRAND.carvao,
+  featureBg: '#232C2B',
+  featureInk: '#EEF2F0',
+  featureMuted: '#9FB0AC',
+  featureTrack: 'rgba(238, 242, 240, 0.16)',
+  heroBg: BRAND.petroleo,
+  heroBgDeep: '#152B2D',
+  heroInk: '#EEF2F0',
+  heroMuted: BRAND.menta,
 }
 
 export const COLOR_LIGHT: ColorTokens = {
@@ -180,9 +219,30 @@ export const COLOR_LIGHT: ColorTokens = {
   attentionMuted: 'rgba(138, 94, 14, 0.12)',
   done: '#2B7454',
   overlay: 'rgba(31, 42, 42, 0.40)',
-  widget: BRAND.petroleo,
-  widgetInk: '#EEF2F0',
-  widgetMuted: BRAND.menta,
+  widget: '#E4EDEA',
+  widgetInk: BRAND.petroleo,
+  widgetMuted: '#4A5E5B',
+  /** Claro: barra branca com contorno fino, nada de bloco petróleo */
+  navBg: '#FFFFFF',
+  navBorder: 'rgba(31, 58, 61, 0.10)',
+  /** 5,6:1 no branco */
+  navInk: '#5E6B69',
+  /** Tinta petróleo suave: o coral fica só no botão + */
+  navActiveBg: '#E3ECE9',
+  /** 10,1:1 no navActiveBg */
+  navActiveInk: BRAND.petroleo,
+  featureBg: '#E4EDEA',
+  /** 10,2:1 */
+  featureInk: BRAND.petroleo,
+  /** 5,8:1 */
+  featureMuted: '#4A5E5B',
+  featureTrack: 'rgba(31, 58, 61, 0.14)',
+  heroBg: '#DCE8E4',
+  heroBgDeep: '#CFDFDA',
+  /** 8,8:1 no heroBgDeep */
+  heroInk: BRAND.petroleo,
+  /** 5,3:1 no heroBgDeep */
+  heroMuted: '#405B57',
 }
 
 export type ThemeMode = 'light' | 'dark'

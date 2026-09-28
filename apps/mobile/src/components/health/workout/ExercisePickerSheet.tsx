@@ -70,13 +70,13 @@ export function ExercisePickerSheet({ visible, onClose, onPick }: Props)
         >
           <Text variant="title">Adicionar exercício</Text>
           <Field label="Buscar" value={query} onChangeText={setQuery} placeholder="Supino, costas, prancha" autoCorrect={false} />
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
             <Chip label="Todos" active={group == null} onPress={() => setGroup(null)} />
             {MUSCLE_GROUP_ORDER.map((g) => (
               <Chip key={g} label={MUSCLE_GROUP_LABEL[g]} active={group === g} onPress={() => setGroup(g)} />
             ))}
           </ScrollView>
-          <ScrollView style={{ maxHeight: 440 }} contentContainerStyle={{ gap: 4, paddingBottom: 8 }} keyboardShouldPersistTaps="handled">
+          <ScrollView style={{ maxHeight: 440 }} contentContainerStyle={{ gap: 6, paddingBottom: 8 }} keyboardShouldPersistTaps="handled">
             {canCustom ? (
               <Pressable
                 onPress={() => pick({ id: `proprio-${slug(custom)}`, name: custom, group: group ?? 'corpo', bodyweight: false })}

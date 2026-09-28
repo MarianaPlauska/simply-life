@@ -25,11 +25,11 @@ export function Field({ label, error, tone = 'default', style, onFocus, onBlur, 
     tone === 'widget'
       ? focused
         ? colors.health
-        : colors.widgetMuted
+        : colors.featureMuted
       : focused
         ? colors.axel
         : colors.inkMuted
-  const textColor = tone === 'widget' ? colors.widgetInk : colors.ink
+  const textColor = tone === 'widget' ? colors.featureInk : colors.ink
 
   return (
     <View style={{ gap: 6 }}>

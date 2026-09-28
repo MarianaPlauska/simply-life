@@ -135,9 +135,9 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
         <CreditCardVisual card={cardPreviewFrom(d, base)} width={previewWidth} />
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="label">Cor</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {CARD_SKIN_ORDER.map((id) =>
           {
             const skin = CARD_SKINS[id]
@@ -149,7 +149,7 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
                 accessibilityLabel={`Cor ${skin.label}`}
                 accessibilityState={{ selected: active }}
                 onPress={() => set('grad', id)}
-                style={{ alignItems: 'center', gap: 4 }}
+                style={{ alignItems: 'center', gap: 6 }}
               >
                 <LinearGradient
                   colors={[skin.from, skin.to]}
@@ -226,9 +226,9 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
         </View>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="label">Bandeira</Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {(['mastercard', 'visa'] as const).map((b) => (
             <Chip key={b} label={b === 'visa' ? 'Visa' : 'Mastercard'} active={d.bandeira === b} onPress={() => set('bandeira', b)} />
           ))}
@@ -238,7 +238,7 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
       <Pressable
         accessibilityRole="button"
         onPress={() => setMore((v) => !v)}
-        style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6 }}
+        style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8 }}
       >
         <Icon name={more ? 'chevron-up' : 'chevron-down'} size={16} color={colors.axel} />
         <Text variant="label" color={colors.axel}>

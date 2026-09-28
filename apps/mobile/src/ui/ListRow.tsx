@@ -28,18 +28,19 @@ export function ListRow({
         onPress={onPress}
         disabled={!onPress}
         style={({ pressed }) => ({
-          minHeight: spec.minHeight,
           paddingVertical: spec.paddingVertical,
-          paddingHorizontal: space.sm,
+          minHeight: subtitle ? spec.minHeightTwoLine : spec.minHeight,
+          paddingHorizontal: spec.paddingHorizontal,
           borderRadius: radius.control,
           backgroundColor: pressed ? colors.elevated : 'transparent',
           opacity: pressed ? 0.88 : 1,
           transform: [{ scale: pressed && onPress ? 0.97 : 1 }],
-          gap: 6,
+          justifyContent: 'center',
+          gap: space.sm,
         })}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View style={{ flex: 1, minWidth: 0 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Text variant="bodyStrong" numberOfLines={1}>
               {title}
             </Text>

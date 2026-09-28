@@ -35,7 +35,7 @@ export function HydrationPanel()
         pillLabel={`${pct}% da meta`}
         pillColor={colors.health}
       />
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {Array.from({ length: meta }).map((_, i) =>
         {
           const filled = i < atual
@@ -74,7 +74,7 @@ export function HydrationPanel()
           )
         })}
       </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <PrimaryButton
           label="-1 copo"
           variant="secondary"

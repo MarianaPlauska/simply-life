@@ -23,7 +23,7 @@ const LABELS: Record<string, string> = {
 }
 
 /** Barra compacta + Captura sempre elevada (FAB) */
-const BAR_H = 52
+const BAR_H = 58
 const FAB = 54
 const GLOW = 66
 
@@ -40,11 +40,11 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
   const left = routes.slice(0, 2)
   const right = routes.slice(2)
 
-  // 60-30-10: barra em petróleo (30%), coral só na aba ativa e no botão + (10%)
-  const barBg = colors.brand
-  const idleFg = colors.brandInk
-  const activeBg = colors.axelFill
-  const activeFg = colors.axelOnFill
+  // Escuro: barra petróleo e aba ativa coral. Claro: barra branca, aba ativa em tinta petróleo.
+  const barBg = colors.navBg
+  const idleFg = colors.navInk
+  const activeBg = colors.navActiveBg
+  const activeFg = colors.navActiveInk
   const barW = Math.min(vw - 24, 420)
 
   const renderTab = (route: (typeof routes)[number], i: number) =>
@@ -86,9 +86,9 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
             style={{
               color: focused ? activeFg : idleFg,
               fontWeight: focused ? '700' : '600',
-              fontSize: 11,
-              lineHeight: 13,
-              marginTop: 1,
+              fontSize: 12,
+              lineHeight: 16,
+              marginTop: 2,
             }}
           >
             {label}
@@ -110,6 +110,8 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
             {
               height: BAR_H,
               backgroundColor: barBg,
+              borderWidth: StyleSheet.hairlineWidth,
+              borderColor: colors.navBorder,
               ...elevation.bar,
             },
           ]}
@@ -147,7 +149,7 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
                 },
               ]}
             >
-              <Icon name="add" size={TOUCH.icon + 2} color={activeFg} />
+              <Icon name="add" size={TOUCH.icon + 2} color={colors.axelOnFill} />
             </View>
           </View>
         </PressableScale>

@@ -567,7 +567,7 @@ export function CaptureSheet()
       {dumpReading ? (
         <View
           accessibilityLiveRegion="polite"
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
         >
           <Icon name="sparkles-outline" size={16} color={colors.inkMuted} />
           <Text variant="caption" color={colors.inkMuted}>
@@ -594,7 +594,7 @@ export function CaptureSheet()
   )
 
   const actionRow = kind === 'dump' && dumpItems ? (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: 8 }}>
       {dumpMissing > 0 ? (
         <Text variant="micro" color={colors.attention}>
           {dumpMissing === 1 ? 'Falta o valor em 1 item.' : `Falta o valor em ${dumpMissing} itens.`}
@@ -619,8 +619,8 @@ export function CaptureSheet()
   ) : primaryAction
 
   const taskBody = (
-    <View style={{ gap: 14 }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+    <View style={{ gap: 16 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         <SelectChip
           label="Descrever (Axel organiza)"
           active={captureMode === 'prompt'}

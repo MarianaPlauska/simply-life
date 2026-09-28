@@ -4,6 +4,7 @@ import {
   RefreshControl,
   type ViewProps,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
@@ -35,13 +36,18 @@ export function Screen({
   const { colors } = useTheme()
   const { showRail } = useWorkspace()
   const insets = useSafeAreaInsets()
+  const { width: vw } = useWindowDimensions()
   // Desktop com sidebar: sem padding da tab bar mobile
   const useTabPad = tabBarInset && !showRail
   const bottom = useTabPad
     ? tabBarScreenPadding(insets.bottom)
     : Math.max(insets.bottom, 16)
   // Desktop: padding vem do TabShell; Screen só reserva o fundo
-  const hPad = showRail ? 0 : COMPONENT_SPEC.Screen.paddingHorizontal
+  const hPad = showRail
+    ? 0
+    : vw < 360
+      ? COMPONENT_SPEC.Screen.paddingHorizontalNarrow
+      : COMPONENT_SPEC.Screen.paddingHorizontal
 
   const pad = padded
     ? {

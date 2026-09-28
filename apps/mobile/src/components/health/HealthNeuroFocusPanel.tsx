@@ -45,7 +45,7 @@ export function HealthNeuroFocusPanel()
           <Text variant="caption" muted>
             Modo de motivação na Home
           </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {GAMIFICATION_MODE_OPTIONS.map((opt) =>
             {
               const active = (prefs.gamification_mode || 'calm') === opt.id

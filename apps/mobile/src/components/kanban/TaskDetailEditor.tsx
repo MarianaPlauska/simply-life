@@ -100,12 +100,12 @@ export function TaskDetailEditor({ task, isGuest }: Props)
         }}
       />
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Status
         </Text>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             {STATUS.map((s) => (
               <Chip
                 key={s.id}
@@ -118,11 +118,11 @@ export function TaskDetailEditor({ task, isGuest }: Props)
         </ScrollView>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Prioridade
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {([1, 2, 3] as const).map((p) => (
             <Chip
               key={p}
@@ -172,7 +172,7 @@ export function TaskDetailEditor({ task, isGuest }: Props)
         }}
       />
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text variant="caption" muted>
             Pasta / lista
@@ -193,7 +193,7 @@ export function TaskDetailEditor({ task, isGuest }: Props)
           </PressableScale>
         </View>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <Chip
               label="Nenhuma"
               active={!listId}
@@ -226,12 +226,12 @@ export function TaskDetailEditor({ task, isGuest }: Props)
         ) : null}
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Depende de
         </Text>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <Chip
               label="Nenhuma"
               active={!depId}
@@ -261,7 +261,7 @@ export function TaskDetailEditor({ task, isGuest }: Props)
         style={{ minHeight: 160, textAlignVertical: 'top', paddingVertical: 14 }}
       />
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="section">Checklist</Text>
         {task.checklist.length === 0 ? (
           <Text variant="caption" muted>

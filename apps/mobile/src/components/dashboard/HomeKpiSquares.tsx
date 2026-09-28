@@ -21,11 +21,11 @@ export function HomeKpiSquares({ items }: { items: KpiSquare[] })
   const workspace = useWorkspace()
   const dense = Boolean(workspace.isDesktop)
   const tile = dense
-    ? { flexBasis: '22%' as const, minHeight: 96, borderRadius: 14, padding: 12, gap: 10 }
-    : { flexBasis: '46%' as const, minHeight: 124, borderRadius: 20, padding: 16, gap: 14 }
+    ? { flexBasis: '22%' as const, minHeight: 96, borderRadius: 14, padding: 16, gap: 12 }
+    : { flexBasis: '46%' as const, minHeight: 124, borderRadius: 20, padding: 20, gap: 16 }
 
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
       {items.slice(0, 4).map((item) => (
         <Pressable
           key={item.id}
@@ -40,7 +40,7 @@ export function HomeKpiSquares({ items }: { items: KpiSquare[] })
           }}
         >
           <IconBadge name={item.icon} color={item.color} size={40} iconSize={18} />
-          <View style={{ gap: 4 }}>
+          <View style={{ gap: 6 }}>
             <Text variant="bodyStrong" style={{ fontSize: 16 }}>
               {item.label}
             </Text>

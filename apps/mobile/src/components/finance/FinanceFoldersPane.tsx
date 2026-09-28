@@ -68,15 +68,15 @@ export function FinanceFoldersPane()
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 12,
+            gap: 16,
             minHeight: 72,
-            padding: 12,
+            padding: 16,
             borderRadius: 14,
             backgroundColor: colors.elevated,
           }}
         >
           <FolderGlyph color={row.color} size={48} />
-          <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flex: 1, gap: 4 }}>
             <Text variant="bodyStrong">{row.list.name}</Text>
             <Text variant="caption" muted>
               {row.items.length} lançamento{row.items.length === 1 ? '' : 's'}
@@ -87,7 +87,7 @@ export function FinanceFoldersPane()
         </PressableScale>
       ))}
       {loose.length > 0 ? (
-        <Card tone="inset" style={{ gap: 6 }}>
+        <Card tone="inset" style={{ gap: 8 }}>
           <Text variant="bodyStrong">Sem pasta</Text>
           <Text variant="caption" muted>
             {loose.length} lançamento{loose.length === 1 ? '' : 's'} ainda soltos · {formatBRL(monthExpenseTotal(loose))}

@@ -98,7 +98,7 @@ export function SelectChip({
         justifyContent: 'center',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        gap: 12,
         backgroundColor: active ? fill : colors.hairline,
         borderWidth: 1,
         borderColor: active ? accent : colors.hairline,
@@ -175,7 +175,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
   const outros = tasks.filter((t) => t.status !== 'done')
 
   return (
-    <View style={{ gap: 14 }}>
+    <View style={{ gap: 16 }}>
       <Field tone="sand"
         label="Título"
         placeholder="O que precisa ser feito?"
@@ -192,8 +192,8 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         style={{ minHeight: 88, textAlignVertical: 'top', paddingTop: 14 }}
       />
 
-      <View style={{ gap: 8 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      <View style={{ gap: 12 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <Text variant="caption" muted>
             To-dos nesta tarefa
           </Text>
@@ -219,7 +219,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
           />
         </View>
         {draft.checklist.map((item, i) => (
-          <View key={`${item}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View key={`${item}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
               · {item}
             </Text>
@@ -251,12 +251,12 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         />
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Depende de outra tarefa?
         </Text>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <SelectChip
               label="Não"
               active={!draft.dependsOnId}
@@ -279,11 +279,11 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         ) : null}
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Status
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {STATUS.map((s) => (
             <SelectChip
               key={s.id}
@@ -295,11 +295,11 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         </View>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Prioridade
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {([1, 2, 3] as const).map((p) => (
             <SelectChip
               key={p}
@@ -312,12 +312,12 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         </View>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Prazo
         </Text>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <SelectChip
               label="Hoje"
               active={draft.due === todayIso()}
@@ -343,7 +343,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         />
       </View>
 
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <View style={{ flex: 1 }}>
           <Field tone="sand"
             label="Horário (HH:MM)"
@@ -362,12 +362,12 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         </View>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Tempo estimado
         </Text>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             {ESTIMATES.map((n) => (
               <SelectChip
                 key={n}
@@ -380,7 +380,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
         </ScrollView>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text variant="caption" muted>
             Pasta / grupo
@@ -401,7 +401,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
           </PressableScale>
         </View>
         <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <SelectChip
               label="Nenhuma"
               active={!draft.listId}
@@ -419,7 +419,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
           </View>
         </ScrollView>
         {criarPastaOpen ? (
-          <View style={{ gap: 8 }}>
+          <View style={{ gap: 12 }}>
             <Field tone="sand"
               label="Nova pasta"
               placeholder="Nome da pasta"
@@ -430,7 +430,7 @@ export function CaptureTaskForm({ draft, onChange }: Props)
             <Text variant="caption" muted>
               Cor da pasta
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {FOLDER_SERIES.map((key) => (
                 <Pressable
                   key={key}

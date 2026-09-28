@@ -34,7 +34,7 @@ export function MoodFace({
   const { colors } = useTheme()
   const m = Math.min(5, Math.max(1, Math.round(mood)))
   const icon = ICONS[m] ?? 'ellipse-outline'
-  const tint = selected ? moodColor(m) : onWidget ? colors.widgetMuted : colors.inkMuted
+  const tint = selected ? moodColor(m) : onWidget ? colors.featureMuted : colors.inkMuted
   const bg = selected
     ? moodColor(m)
     : onWidget
@@ -64,8 +64,8 @@ export function MoodFace({
           color={
             onWidget
               ? selected
-                ? colors.widgetInk
-                : colors.widgetMuted
+                ? colors.featureInk
+                : colors.featureMuted
               : selected
                 ? colors.ink
                 : colors.inkMuted

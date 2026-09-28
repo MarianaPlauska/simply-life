@@ -50,7 +50,7 @@ export function MedicamentosPanel()
         />
       ) : (
         sorted.map((med, i) => (
-          <View key={med.id} style={{ gap: 4 }}>
+          <View key={med.id} style={{ gap: 6 }}>
             <CheckRow
               title={med.nome}
               subtitle={`${med.horario} · dose`}

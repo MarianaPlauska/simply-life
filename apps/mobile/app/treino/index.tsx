@@ -97,7 +97,7 @@ export default function TreinoHubScreen()
           {routines.map((r) => (
             <Card key={r.id} tone="elevated" style={{ padding: space.md, gap: space.sm }}>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.sm }}>
-                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
                   <Text variant="bodyStrong" numberOfLines={1}>{r.name}</Text>
                   <Text variant="caption" muted numberOfLines={2}>
                     {r.exercises.length
@@ -120,7 +120,7 @@ export default function TreinoHubScreen()
         </View>
 
         <Card tone="elevated" style={{ gap: space.md }}>
-          <View style={{ gap: 2 }}>
+          <View style={{ gap: 4 }}>
             <Text variant="section">Esta semana</Text>
             <Text variant="caption" muted>
               {week.count === 0

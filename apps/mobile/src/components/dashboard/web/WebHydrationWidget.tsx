@@ -34,9 +34,9 @@ export function WebHydrationWidget()
   const pct = habitPct(agua)
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 18, gap: 12 }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="section" style={{ fontSize: 16 }}>
             Hidratação
           </Text>
@@ -44,7 +44,7 @@ export function WebHydrationWidget()
             {atual}/{meta} copos · {atual * ml}/{meta * ml} ml
           </Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: 6 }}>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
           <WebHoverable
             onPress={() => void removeWaterCup(isGuest)}
             disabled={atual <= 0}
@@ -68,7 +68,7 @@ export function WebHydrationWidget()
             style={webStyle({
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 6,
+              gap: 8,
               height: 30,
               paddingHorizontal: 12,
               borderRadius: 8,

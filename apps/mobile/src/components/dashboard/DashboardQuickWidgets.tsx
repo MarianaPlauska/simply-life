@@ -50,7 +50,7 @@ function WaterWidget()
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="caption" muted>
             Água
           </Text>

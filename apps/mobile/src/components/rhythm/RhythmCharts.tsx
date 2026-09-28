@@ -67,7 +67,7 @@ export function RhythmColumns({ data, formatTick = (v) => String(v), legend, acc
   const showEvery = data.length > 14 ? Math.ceil(data.length / 7) : 1
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       {legend ? <Legend items={[{ label: legend.value, color: colors.axel }, { label: legend.track, color: colors.hairlineStrong }]} /> : null}
       <Text variant="caption" muted style={{ minHeight: 18 }}>
         {selected != null ? data[selected]?.detail : 'Toque numa barra para ver o valor'}
@@ -156,7 +156,7 @@ export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; ac
   })
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="caption" muted style={{ minHeight: 18 }}>
         {selected != null ? data[selected]?.detail : 'Toque num ponto para ver o dia'}
       </Text>
@@ -214,7 +214,7 @@ function Legend({ items }: { items: { label: string; color: string }[] })
   return (
     <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
       {items.map((it) => (
-        <View key={it.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <View key={it.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: it.color }} />
           <Text variant="caption" muted>{it.label}</Text>
         </View>
@@ -241,7 +241,7 @@ function DataTable({ rows }: { rows: [string, string][] })
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: colors.hairline }}>
       {rows.map(([a, b], i) => (
-        <View key={`${a}-${i}`} style={{ flexDirection: 'row', gap: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
+        <View key={`${a}-${i}`} style={{ flexDirection: 'row', gap: 16, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
           <Text variant="caption" style={{ width: 52 }}>{a}</Text>
           <Text variant="caption" muted style={{ flex: 1 }}>{b}</Text>
         </View>
@@ -259,10 +259,10 @@ export function StatTile({ label, value, sub }: { label: string; value: string; 
       style={{
         flexGrow: 1,
         flexBasis: '45%',
-        padding: 12,
+        padding: 16,
         borderRadius: 14,
         backgroundColor: colors.hairline,
-        gap: 2,
+        gap: 4,
       }}
     >
       <Text variant="caption" muted>{label}</Text>

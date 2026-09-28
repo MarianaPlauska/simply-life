@@ -45,7 +45,7 @@ function BoardColumn({
 })
 {
   return (
-    <View style={width ? { width, gap: 10 } : { gap: 10 }}>
+    <View style={width ? { width, gap: 12 } : { gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text variant="section" style={{ fontSize: 16 }}>
           {group.label}
@@ -109,7 +109,7 @@ export function DueBucketColumns({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: 6 }}>
         <Text variant="section" style={{ fontSize: 18 }}>
           Por prazo
         </Text>
@@ -117,7 +117,7 @@ export function DueBucketColumns({ tasks }: Props)
           Tarefas abertas agrupadas por quando vencem. Alterne para ver por status.
         </Text>
       </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
         <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />
       </View>
@@ -131,7 +131,7 @@ export function DueBucketColumns({ tasks }: Props)
       ) : null}
 
       {isMobile ? (
-        <View style={{ gap: 22 }}>
+        <View style={{ gap: 24 }}>
           {filled.map((g) => (
             <BoardColumn
               key={g.id}
@@ -142,11 +142,11 @@ export function DueBucketColumns({ tasks }: Props)
             />
           ))}
           {empty.length > 0 && filled.length > 0 ? (
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: 12 }}>
               <Text variant="caption" muted>
                 Colunas vazias
               </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                 {empty.map((g) => (
                   <Chip key={g.id} label={`${g.label} · 0`} onPress={add} />
                 ))}

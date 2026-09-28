@@ -65,7 +65,7 @@ export function TaskTimerPanel({ taskId }: { taskId?: string })
       <Text variant="caption" muted>
         Tempo
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {PRESETS.map((mins) => (
           <Chip
             key={mins}

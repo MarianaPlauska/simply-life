@@ -18,7 +18,7 @@ export function PeriodFilter({ value, onChange }: Props)
       horizontal
       nestedScrollEnabled
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ flexDirection: 'row', gap: 8, paddingRight: 8 }}
+      contentContainerStyle={{ flexDirection: 'row', gap: 12, paddingRight: 8 }}
     >
       {REPORT_PERIODS.map((p) =>
       {

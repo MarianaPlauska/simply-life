@@ -77,13 +77,14 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
 
   return (
     <Card tone="elevated" style={{ gap: space.sm, ...(fill ? { flex: 1 } : {}) }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-        <View>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+        {/* flex + minWidth: o texto quebra a linha em vez de passar por baixo do link */}
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             Linha do dia
           </Text>
           <Text variant="bodyStrong">{todayLabel()}</Text>
-          <Text variant="micro" muted style={{ marginTop: 2 }}>
+          <Text variant="caption" muted>
             Tarefas de hoje por horário, em uma faixa visual.
           </Text>
         </View>
@@ -186,7 +187,7 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
       )}
 
       {untimed.length > 0 ? (
-        <View style={{ gap: 6, marginTop: space.xs }}>
+        <View style={{ gap: 8, marginTop: space.xs }}>
           <Text variant="caption" muted>
             Sem horário definido
           </Text>
@@ -202,7 +203,7 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
                 backgroundColor: colors.hairline,
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 8,
+                gap: 12,
               }}
             >
               <View

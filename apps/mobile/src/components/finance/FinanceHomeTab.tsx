@@ -222,7 +222,7 @@ export function FinanceHomeTab({
             onPress={() => onCardsFocusChange(false)}
           />
           <Text variant="section">Cartões</Text>
-          <View style={{ flexDirection: 'row', gap: 4 }}>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
             <PressableScale
               accessibilityLabel="Personalizar cartão"
               onPress={openEditPrimary}
@@ -328,14 +328,14 @@ export function FinanceHomeTab({
       />
 
       {/* Ações leves */}
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         {quickIcons.map((a) => (
           <PressableScale
             key={a.id}
             onPress={a.onPress}
             accessibilityRole="button"
             accessibilityLabel={a.label}
-            style={{ flex: 1, alignItems: 'center', gap: 4 }}
+            style={{ flex: 1, alignItems: 'center', gap: 6 }}
           >
             <View
               style={{
@@ -349,15 +349,15 @@ export function FinanceHomeTab({
             >
               <Icon name={a.icon} size={16} color={colors.ink} />
             </View>
-            <Text variant="micro" muted style={{ fontWeight: '600', fontSize: 11 }}>
+            <Text variant="micro" muted style={{ fontWeight: '600' }}>
               {a.label}
             </Text>
           </PressableScale>
         ))}
       </View>
 
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <Card tone="elevated" style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12, gap: 8, borderRadius: 14, justifyContent: 'space-between' }}>
           <Text variant="micro" muted>
             Receita
           </Text>
@@ -365,7 +365,7 @@ export function FinanceHomeTab({
             {formatBRL(pos.receitas)}
           </Text>
         </Card>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
+        <Card tone="elevated" style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12, gap: 8, borderRadius: 14, justifyContent: 'space-between' }}>
           <Text variant="micro" muted>
             Saiu da conta
           </Text>
@@ -373,7 +373,7 @@ export function FinanceHomeTab({
             {formatBRL(pos.despesas)}
           </Text>
         </Card>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
+        <Card tone="elevated" style={{ flex: 1, paddingVertical: 16, paddingHorizontal: 12, gap: 8, borderRadius: 14, justifyContent: 'space-between' }}>
           <Text variant="micro" muted>
             No cartão
           </Text>
@@ -400,7 +400,7 @@ export function FinanceHomeTab({
             />
           }
         />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {(ranking.length
             ? ranking
             : [
@@ -422,8 +422,8 @@ export function FinanceHomeTab({
                 backgroundColor: colors.surface,
                 borderWidth: StyleSheet.hairlineWidth,
                 borderColor: colors.hairline,
-                padding: 10,
-                gap: 4,
+                padding: 12,
+                gap: 6,
               }}
             >
               <View
@@ -467,7 +467,7 @@ export function FinanceHomeTab({
               />
             }
           />
-          <View style={{ gap: 8 }}>
+          <View style={{ gap: 12 }}>
             {budgets.map((b) =>
             {
               const meta = Math.max(b.total * 1.25, 1)
@@ -477,14 +477,14 @@ export function FinanceHomeTab({
                   key={b.categoria}
                   tone="elevated"
                   style={{
-                    padding: 10,
+                    padding: 12,
                     borderRadius: 14,
-                    gap: 6,
+                    gap: 8,
                     backgroundColor: `${b.color}14`,
                     borderWidth: 0,
                   }}
                 >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                     <View
                       style={{
                         width: 28,

@@ -45,7 +45,7 @@ export function KanbanActivityComplex({ tasks }: Props)
   }
 
   return (
-    <View style={{ gap: 14, padding: 18, borderRadius: 20, backgroundColor: cardBg }}>
+    <View style={{ gap: 16, padding: 20, borderRadius: 20, backgroundColor: cardBg }}>
       <View>
         <Text variant="caption" muted style={{ fontWeight: '700', letterSpacing: 0.6 }}>
           CONSTÂNCIA
@@ -58,8 +58,8 @@ export function KanbanActivityComplex({ tasks }: Props)
         </Text>
       </View>
 
-      <View style={{ flexDirection: 'row', gap: 4 }}>
-        <View style={{ gap: 3, paddingTop: 2, paddingRight: 4 }}>
+      <View style={{ flexDirection: 'row', gap: 6 }}>
+        <View style={{ gap: 4, paddingTop: 2, paddingRight: 4 }}>
           {DAY_LETTERS.map((l, i) => (
             <Text
               key={`${l}-${i}`}
@@ -71,9 +71,9 @@ export function KanbanActivityComplex({ tasks }: Props)
             </Text>
           ))}
         </View>
-        <View style={{ flex: 1, flexDirection: 'row', gap: 3 }}>
+        <View style={{ flex: 1, flexDirection: 'row', gap: 4 }}>
           {columns.map((col, wi) => (
-            <View key={wi} style={{ flex: 1, gap: 3 }}>
+            <View key={wi} style={{ flex: 1, gap: 4 }}>
               {col.map((d) => (
                 <View
                   key={d.iso}
@@ -94,7 +94,7 @@ export function KanbanActivityComplex({ tasks }: Props)
         {range}
       </Text>
 
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 36 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 36 }}>
         {week.map((d, i) =>
         {
           const ht = d.count <= 0 ? 10 : 10 + Math.round((d.count / peak) * 26)

@@ -188,7 +188,7 @@ export default function DashboardScreenWeb()
           }}
           contentContainerStyle={{ padding: space.lg, paddingBottom: space.xl, gap: space.md }}
         >
-          <View style={{ gap: 4 }}>
+          <View style={{ gap: 6 }}>
             <Text variant="section">Mais</Text>
             <Text variant="caption" muted>
               Conta, personalização e atalhos
@@ -266,7 +266,7 @@ export default function DashboardScreenWeb()
           <MoodWeekReportGate humor={humor} />
           <HomeDayTimeline tasks={today} />
           {waterOnHome ? <HomeWaterProgressCard /> : null}
-          <View style={{ gap: 12 }}>
+          <View style={{ gap: 16 }}>
             <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
               Seu dia
             </Text>
@@ -281,7 +281,7 @@ export default function DashboardScreenWeb()
               }))}
             />
           </View>
-          <View style={{ gap: 12 }}>
+          <View style={{ gap: 16 }}>
             <Text variant="section" style={{ fontSize: 17 }}>
               Atalhos
             </Text>
@@ -298,7 +298,7 @@ export default function DashboardScreenWeb()
       <LifeGoalSheet visible={goalOpen} onClose={() => setGoalOpen(false)} />
       <TabShell>
         <View style={{ maxWidth: DESKTOP_CONTENT_MAX, width: '100%', alignSelf: 'center', gap: 28 }}>
-          <View style={{ gap: 8 }}>
+          <View style={{ gap: 12 }}>
             <HomeFitnessHero
               greet={greet}
               name={name}

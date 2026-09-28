@@ -52,7 +52,7 @@ export function HomePanorama()
         style={{ alignSelf: 'flex-start', borderRadius: 999 }}
       />
 
-      <Card tone="elevated" style={{ gap: space.xs, borderRadius: 14, padding: 10 }}>
+      <Card tone="elevated" style={{ gap: space.xs, borderRadius: 14, padding: 12 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <Text variant="caption" muted>
             Evolução de gastos
@@ -79,7 +79,7 @@ export function HomePanorama()
             gap: space.xs,
             borderRadius: 14,
             minHeight: 180,
-            padding: 10,
+            padding: 12,
           }}
         >
           <Text variant="caption" muted>
@@ -100,7 +100,7 @@ export function HomePanorama()
           )}
         </Card>
 
-        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.sm, borderRadius: 14, padding: 10 }}>
+        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.sm, borderRadius: 14, padding: 12 }}>
           <Text variant="caption" muted>
             Ranking do mês
           </Text>
@@ -110,8 +110,8 @@ export function HomePanorama()
             </Text>
           ) : (
             ranking.map((row) => (
-              <View key={row.categoria} style={{ gap: 6 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              <View key={row.categoria} style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
                   <Text variant="bodyStrong">{row.label}</Text>
                   <Text variant="caption" muted>
                     {formatBRL(row.total)} · {row.pct}%

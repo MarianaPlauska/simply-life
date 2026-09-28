@@ -38,7 +38,7 @@ export function KanbanReportsPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
+      <View style={{ gap: 6 }}>
         <Text variant="hero" style={{ fontSize: 26, letterSpacing: -0.6 }}>
           Desempenho
         </Text>
@@ -48,7 +48,7 @@ export function KanbanReportsPane({ tasks }: Props)
       </View>
       <LifeSummaryReport variant="tasks" snapshots={snapshots} />
       {open.length > 0 ? (
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 12 }}>
           <Text variant="section" style={{ fontSize: 16 }}>
             Pastas em andamento
           </Text>

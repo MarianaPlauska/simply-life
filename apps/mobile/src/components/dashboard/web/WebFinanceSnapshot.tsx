@@ -15,9 +15,9 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
   const recent = [...finance].sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5)
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="section" style={{ fontSize: 18 }}>
             Finanças
           </Text>
@@ -32,13 +32,13 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
         </WebHoverable>
       </View>
 
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 18, gap: 12 }}>
+      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 }}>
         {recent.length === 0 ? (
           <Text variant="caption" muted>
             Sem lançamentos recentes.
           </Text>
         ) : (
-          <View style={{ gap: 2 }}>
+          <View style={{ gap: 4 }}>
             {recent.map((tx) => (
               <WebHoverable
                 key={tx.id}
@@ -47,7 +47,7 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
                   flexDirection: 'row',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: 12,
+                  gap: 16,
                   paddingVertical: 8,
                   paddingHorizontal: 8,
                   borderRadius: 10,

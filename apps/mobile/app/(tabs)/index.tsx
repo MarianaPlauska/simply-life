@@ -262,7 +262,7 @@ export default function DashboardScreen()
                 <DayPlanHomeCard />
                 <VisualDayCard />
                 <MoodWeekReportGate humor={humor} />
-                <View style={{ gap: 10 }}>
+                <View style={{ gap: 12 }}>
                   <Text variant="section" style={{ fontSize: 16 }}>
                     Atalhos
                   </Text>
@@ -304,8 +304,8 @@ export default function DashboardScreen()
 
             {showAxel || waterOnHome ? (
               (isTablet) && waterOnHome ? (
-                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
-                  <View style={{ flex: 1, minWidth: 0, gap: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 16, alignItems: 'stretch' }}>
+                  <View style={{ flex: 1, minWidth: 0, gap: 16 }}>
                     {showAxel ? <AxelDayBrief /> : null}
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
@@ -320,14 +320,14 @@ export default function DashboardScreen()
               )
             ) : null}
 
-            <View style={{ gap: 12 }}>
+            <View style={{ gap: 16 }}>
               <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
                 Seu dia
               </Text>
               <HomeKpiSquares items={kpiItems} />
             </View>
 
-            <View style={{ gap: 12 }}>
+            <View style={{ gap: 16 }}>
               <Text variant="section" style={{ fontSize: 17 }}>
                 Atalhos
               </Text>
@@ -364,7 +364,7 @@ export default function DashboardScreen()
               <View style={{ gap: space.sm, paddingTop: space.xs }}>
                 <PersonalSummaryGrid />
                 {!statsOnHome ? <LifeSummaryReport variant="compact" /> : null}
-                <View style={{ gap: 10 }}>
+                <View style={{ gap: 12 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text variant="section">Em seguida</Text>
                     <Pressable
@@ -388,7 +388,7 @@ export default function DashboardScreen()
                         style={{
                           borderRadius: 14,
                           backgroundColor: colors.elevated,
-                          padding: 14,
+                          padding: 16,
                           minHeight: 52,
                           justifyContent: 'center',
                         }}
@@ -499,7 +499,7 @@ export default function DashboardScreen()
             }}
             contentContainerStyle={{ padding: space.lg, paddingBottom: space.xl, gap: space.md }}
           >
-            <View style={{ gap: 4 }}>
+            <View style={{ gap: 6 }}>
               <Text variant="section">Mais</Text>
               <Text variant="caption" muted>
                 Conta, personalização e atalhos

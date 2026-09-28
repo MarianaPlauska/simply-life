@@ -59,7 +59,7 @@ export function BoardReplanToast()
             maxWidth: 520,
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
+            gap: 12,
             paddingVertical: 10,
             paddingHorizontal: 14,
             borderRadius: 12,
@@ -131,14 +131,14 @@ function MoveRow({ move, undone, onUndo }: { move: BoardMove; undone: boolean; o
   return (
     <View
       style={{
-        gap: 4,
+        gap: 6,
         paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: colors.hairline,
         opacity: undone ? 0.5 : 1,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Text variant="bodyStrong" style={{ flex: 1, fontSize: 14 }} numberOfLines={2}>
           {move.titulo}
         </Text>
@@ -238,7 +238,7 @@ function ProposalBanner({ bottom }: { bottom: number })
             maxWidth: 520,
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
+            gap: 12,
             paddingVertical: 10,
             paddingHorizontal: 14,
             borderRadius: 14,
@@ -280,7 +280,7 @@ function ProposalBanner({ bottom }: { bottom: number })
               </Text>
               <ScrollView style={{ flexGrow: 0 }}>
                 {proposal.moves.map((m) => (
-                  <View key={m.taskId} style={{ gap: 4, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
+                  <View key={m.taskId} style={{ gap: 6, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
                     <Text variant="bodyStrong" style={{ fontSize: 14 }}>{m.titulo}</Text>
                     <Text variant="caption">{describeDayPt(m.from)} → {describeDayPt(m.to)}</Text>
                     <Text variant="caption" muted>{m.reason}</Text>

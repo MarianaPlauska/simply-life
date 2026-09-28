@@ -110,7 +110,7 @@ export default function MetasScreen()
                 })}
               >
                 <Icon name={SHARED_GOAL_METRIC_ICON[g.metrica]} size={24} color={colors.ink} />
-                <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+                <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
                   <Text variant="bodyStrong" numberOfLines={1}>
                     {g.titulo}
                   </Text>

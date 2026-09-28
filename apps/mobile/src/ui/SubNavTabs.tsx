@@ -28,7 +28,7 @@ export function SubNavTabs<T extends string>({
   return (
     <View style={{ borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ flexDirection: 'row', gap: 4 }}>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
           {tabs.map((tab) =>
           {
             const active = tab.id === value
@@ -41,9 +41,10 @@ export function SubNavTabs<T extends string>({
                 key={tab.id}
                 onPress={() => onChange(tab.id)}
                 style={{
-                  minHeight: 40,
+                  minHeight: 48,
                   paddingHorizontal: 12,
-                  paddingVertical: 8,
+                  paddingVertical: 12,
+                  justifyContent: 'center',
                   borderBottomWidth: 2,
                   borderBottomColor: active ? accentColor : 'transparent',
                   marginBottom: -1,

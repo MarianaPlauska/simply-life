@@ -58,7 +58,7 @@ export function HomeMentalStudio()
             style={{
               flexDirection: 'row',
               alignItems: 'flex-end',
-              gap: 6,
+              gap: 8,
               height: 72,
             }}
           >
@@ -66,7 +66,7 @@ export function HomeMentalStudio()
             {
               const h = d.value > 0 ? 12 + (d.value / 5) * 52 : 8
               return (
-                <View key={d.iso} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
+                <View key={d.iso} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
                   <View
                     style={{
                       width: '100%',

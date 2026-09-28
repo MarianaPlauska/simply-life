@@ -134,7 +134,7 @@ export function KanbanGanttPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           {withDue.length} com prazo
         </Text>
@@ -169,7 +169,7 @@ export function KanbanGanttPane({ tasks }: Props)
                 backgroundColor: colors.surface,
               }}
             >
-              <View style={{ width: LABEL_W, padding: 10, justifyContent: 'center' }}>
+              <View style={{ width: LABEL_W, padding: 12, justifyContent: 'center' }}>
                 <Text variant="micro" muted>
                   TAREFA
                 </Text>

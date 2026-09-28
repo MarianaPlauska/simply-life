@@ -57,7 +57,7 @@ export function FinanceHealthMetrics({
     flexBasis: '30%' as const,
     minWidth: 140,
     minHeight: 108,
-    gap: 4,
+    gap: 6,
     justifyContent: 'center' as const,
   }
 
@@ -102,8 +102,8 @@ export function FinanceHealthMetrics({
 
       <Card tone="elevated" style={{ gap: space.md }}>
         {rows.map((row) => (
-          <View key={row.label} style={{ gap: 6 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+          <View key={row.label} style={{ gap: 8 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
               <Text variant="bodyStrong">{row.label}</Text>
               <Text variant="caption" color={row.color}>
                 {row.value}

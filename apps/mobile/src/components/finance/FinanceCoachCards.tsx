@@ -49,7 +49,7 @@ export function FinanceCoachCards()
           </Text>
         ) : (
           tips.map((t) => (
-            <View key={t.id} style={{ gap: 4 }}>
+            <View key={t.id} style={{ gap: 6 }}>
               <Text variant="bodyStrong">{t.title}</Text>
               <Text variant="caption" muted>
                 {t.body}
@@ -90,7 +90,7 @@ export function FinanceCoachCards()
         {
           const pct = row.cap > 0 ? Math.min(100, Math.round((row.used / row.cap) * 100)) : 0
           return (
-            <View key={row.label} style={{ gap: 4 }}>
+            <View key={row.label} style={{ gap: 6 }}>
               <Text variant="caption">{row.label}</Text>
               <View
                 style={{

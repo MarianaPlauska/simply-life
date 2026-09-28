@@ -73,7 +73,7 @@ export function KanbanDonePane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 2 }}>
+      <View style={{ gap: 4 }}>
         <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
           Histórico
         </Text>
@@ -89,7 +89,7 @@ export function KanbanDonePane({ tasks }: Props)
         contentContainerStyle={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: 12,
           paddingRight: 8,
         }}
       >
@@ -122,7 +122,7 @@ export function KanbanDonePane({ tasks }: Props)
       ) : null}
 
       {groups.map((g) => (
-        <View key={g.key} style={{ gap: 10 }}>
+        <View key={g.key} style={{ gap: 12 }}>
           <Text variant="caption" muted>
             {g.label}
           </Text>

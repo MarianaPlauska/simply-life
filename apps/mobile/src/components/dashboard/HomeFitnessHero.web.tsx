@@ -51,8 +51,8 @@ export function HomeFitnessHero({
           marginBottom: space.xs,
         }}
       >
-        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <View style={{ flex: 1, minWidth: 0, gap: space.sm }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Text variant="caption" muted numberOfLines={1}>
               {dateLabel}
             </Text>
@@ -65,13 +65,13 @@ export function HomeFitnessHero({
               color: colors.ink,
               fontSize: 28,
               letterSpacing: -0.4,
-              lineHeight: 32,
+              lineHeight: 36,
             }}
           >
             {title}
           </Text>
           {line ? (
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 13, lineHeight: 18 }}>
+            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 13, lineHeight: 19 }}>
               {line}
             </Text>
           ) : null}
@@ -100,37 +100,23 @@ export function HomeFitnessHero({
     )
   }
 
+  // Celular: leitura de cima para baixo, alinhada à esquerda. Data pequena, saudação grande
+  // e frase formam um grupo só (perto um do outro); a conta fica no canto, fora do grupo.
   return (
-    <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.xs }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View style={{ width: SIDE }} />
-        <View style={{ flex: 1, alignItems: 'center', gap: 4, minWidth: 0, paddingHorizontal: 8 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <Text variant="caption" muted style={{ textAlign: 'center' }} numberOfLines={1}>
+    <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
+        <View style={{ flex: 1, minWidth: 0, gap: space.xs }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
+            <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
               {dateLabel}
             </Text>
             <HomeWeatherChip compact />
           </View>
-          <Text
-            variant="hero"
-            numberOfLines={1}
-            style={{
-              fontSize: 22,
-              letterSpacing: -0.6,
-              lineHeight: 26,
-              textAlign: 'center',
-              width: '100%',
-            }}
-          >
+          <Text variant="title" numberOfLines={2}>
             {title}
           </Text>
           {line ? (
-            <Text
-              variant="caption"
-              muted
-              numberOfLines={2}
-              style={{ textAlign: 'center', fontSize: 12, lineHeight: 16 }}
-            >
+            <Text variant="body" muted numberOfLines={2}>
               {line}
             </Text>
           ) : null}
@@ -139,8 +125,8 @@ export function HomeFitnessHero({
           onPress={onAccount}
           accessibilityLabel={isAdmin ? 'Conta, administradora' : 'Conta'}
           style={{
-            width: SIDE,
-            height: SIDE,
+            width: 44,
+            height: 44,
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
@@ -150,12 +136,12 @@ export function HomeFitnessHero({
         >
           <Icon
             name={isAdmin ? 'shield-checkmark' : 'person-outline'}
-            size={16}
+            size={18}
             color={isAdmin ? colors.axel : colors.ink}
           />
         </PressableScale>
       </View>
-      {!showRail ? <SyncHint /> : null}
+      <SyncHint />
     </View>
   )
 }

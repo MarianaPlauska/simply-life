@@ -36,7 +36,7 @@ export function DayBillCard({ bill, onToggle }: Props)
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
         paddingVertical: 14,
         paddingRight: 14,
         paddingLeft: 10,
@@ -70,7 +70,7 @@ export function DayBillCard({ bill, onToggle }: Props)
           color={bill.locked ? colors.axel : colors.finance}
         />
       </View>
-      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+      <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
         <Text variant="bodyStrong" numberOfLines={2}>
           {bill.titulo}
         </Text>

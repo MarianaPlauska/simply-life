@@ -134,7 +134,7 @@ export function FinanceCardsHub({
             style={{
               flex: 1,
               alignItems: 'center',
-              gap: 8,
+              gap: 12,
               minHeight: 72,
               justifyContent: 'center',
             }}
@@ -167,7 +167,7 @@ export function FinanceCardsHub({
             subtitle={primary.nome}
           />
           <View style={{ flexDirection: 'row', gap: space.md }}>
-            <View style={{ flex: 1, gap: 4 }}>
+            <View style={{ flex: 1, gap: 6 }}>
               <Text variant="caption" muted>
                 Disponível
               </Text>
@@ -175,7 +175,7 @@ export function FinanceCardsHub({
                 {formatBRL(Math.max(0, primary.limite - faturaPrimary))}
               </Text>
             </View>
-            <View style={{ flex: 1, gap: 4 }}>
+            <View style={{ flex: 1, gap: 6 }}>
               <Text variant="caption" muted>
                 Fatura aberta
               </Text>

@@ -168,7 +168,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                 return (
                   <View
                     key={conta.id}
-                    style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 8 }}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingLeft: 8 }}
                   >
                     <View
                       style={{

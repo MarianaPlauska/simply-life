@@ -28,7 +28,7 @@ export function HealthScreenSection({
       }}
     >
       {title || subtitle ? (
-        <View style={{ gap: 4 }}>
+        <View style={{ gap: 6 }}>
           {title ? (
             <Text variant="caption" muted style={{ fontWeight: '600' }}>
               {title}

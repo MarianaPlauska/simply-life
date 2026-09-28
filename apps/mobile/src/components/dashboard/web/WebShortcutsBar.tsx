@@ -81,7 +81,7 @@ export function WebShortcutsBar()
   if (rows.length === 0) return null
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="section" style={{ fontSize: 16 }}>
         Atalhos
       </Text>
@@ -94,7 +94,7 @@ export function WebShortcutsBar()
             style={(hovered) => webStyle({
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 12,
+              gap: 16,
               paddingHorizontal: 18,
               paddingVertical: 11,
               borderTopWidth: i === 0 ? 0 : 1,

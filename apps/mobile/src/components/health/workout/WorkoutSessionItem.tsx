@@ -40,7 +40,7 @@ export function WorkoutSessionItem({
         accessibilityState={{ expanded: open }}
         style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44 }}
       >
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+        <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text variant="bodyStrong" numberOfLines={1}>{session.title}</Text>
           <Text variant="caption" muted numberOfLines={1}>{formatWorkoutDate(session.startedAt)}</Text>
           <Text variant="micro" muted>
@@ -56,7 +56,7 @@ export function WorkoutSessionItem({
             <Text variant="caption" muted>Sem séries detalhadas neste registro.</Text>
           ) : null}
           {session.exercises.map((e) => (
-            <View key={e.id} style={{ gap: 2 }}>
+            <View key={e.id} style={{ gap: 4 }}>
               <Text variant="label">{e.name}</Text>
               <Text variant="caption" muted>
                 {e.sets

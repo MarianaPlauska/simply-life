@@ -53,7 +53,7 @@ export function RoutineHabitRow({
         paddingRight: 4,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
       }}
     >
       <View
@@ -70,8 +70,8 @@ export function RoutineHabitRow({
       >
         {done ? <Icon name="checkmark" size={16} color={colors.canvas} /> : null}
       </View>
-      <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Text
             variant="bodyStrong"
             numberOfLines={1}
@@ -112,7 +112,7 @@ export function RoutineHabitRow({
             backgroundColor: `${colors.danger}22`,
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 4,
+            gap: 6,
           }}
         >
           <Icon name="information-circle-outline" size={14} color={colors.danger} />

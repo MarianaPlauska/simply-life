@@ -43,7 +43,7 @@ export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
               />
             ) : (
               groups.map((g) => (
-                <View key={g.kind} style={{ gap: 4 }}>
+                <View key={g.kind} style={{ gap: 6 }}>
                   <Text variant="bodyStrong">{g.label}</Text>
                   {g.items.slice(0, 4).map((ev) => (
                     <Text key={ev.id} variant="caption" muted style={ev.undone_at ? { opacity: 0.55 } : undefined}>

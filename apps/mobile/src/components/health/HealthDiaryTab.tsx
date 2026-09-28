@@ -109,7 +109,7 @@ export function HealthDiaryTab()
   const softMode = isSoftMoodDay(humor)
 
   const alertSlot = softMode ? (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: 8 }}>
       <Text variant="bodyStrong">Modo suave ativo na aba Hoje</Text>
       <Text variant="caption" muted>
         Menos metas, mais espaço. Cuidados e apoio continuam nas outras abas.
@@ -118,7 +118,7 @@ export function HealthDiaryTab()
   ) : undefined
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 16 }}>
       <MoodGoalAlertCard humor={humor} goal={lifeGoal} inline />
       <HealthDiaryStudio
         alertSlot={alertSlot}

@@ -84,7 +84,7 @@ export function HealthApoioTab()
               minHeight: 56,
               padding: space.md,
               borderRadius: 14,
-              gap: 4,
+              gap: 6,
               backgroundColor: colors.axelMuted,
               borderWidth: 1,
               borderColor: colors.hairline,
@@ -117,10 +117,10 @@ export function HealthApoioTab()
                 paddingVertical: 8,
                 borderBottomWidth: 1,
                 borderBottomColor: colors.hairline,
-                gap: 4,
+                gap: 6,
               }}
             >
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
                 <Text variant="caption" muted>
                   {new Date(row.entry.createdAt).toLocaleDateString('pt-BR', {
                     day: 'numeric',

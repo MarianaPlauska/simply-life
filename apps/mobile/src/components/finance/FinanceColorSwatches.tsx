@@ -19,11 +19,11 @@ export function FinanceColorSwatches({ value, onChange, label = 'Cor' }: Props)
   const selected = value ? seriesFromStored(value) : null
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="caption" muted>
         {label}
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {FINANCE_SWATCHES.map((key) =>
         {
           const active = selected === key

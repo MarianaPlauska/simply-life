@@ -146,7 +146,7 @@ export function CardCarousel({ cards, selectedId, onSelect, onVisibleChange, lea
                         backgroundColor: colors.brandMuted,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: 8,
+                        gap: 12,
                       }}
                     >
                       <View
@@ -179,7 +179,7 @@ export function CardCarousel({ cards, selectedId, onSelect, onVisibleChange, lea
       ) : null}
 
       {pages.length > 1 ? (
-        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: space.sm }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: space.sm }}>
           {pages.map((p, i) => (
             <PressableScale
               key={`dot-${i}`}

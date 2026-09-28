@@ -54,7 +54,7 @@ export function SalaryConfirmCard()
 
   return (
     <Card tone="elevated" accentTop="finance" style={{ gap: space.sm }}>
-      <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
         <Icon name="cash-outline" size={20} color={colors.finance} />
         <Text variant="section" style={{ flex: 1 }}>Seu salário de {pending.label.split(' de ')[0]} caiu?</Text>
       </View>
@@ -64,7 +64,7 @@ export function SalaryConfirmCard()
       </Text>
       <Field label="Valor que caiu" keyboardType="decimal-pad" value={valor} onChangeText={setValor} />
       {msg ? <Text variant="caption" color={colors.danger}>{msg}</Text> : null}
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <PrimaryButton label="Ainda não caiu" variant="ghost" size="sm" onPress={snooze} style={{ flex: 1 }} />
         <PrimaryButton
           label="Confirmar"
@@ -156,8 +156,8 @@ export function MonthProjectionCard()
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
-      <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" accessibilityLabel="Ver a conta do fim do mês" style={{ gap: 4 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" accessibilityLabel="Ver a conta do fim do mês" style={{ gap: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <Text variant="caption" muted style={{ flex: 1 }}>Fim do mês (dia {projection.fimDoMes.slice(8, 10)})</Text>
           <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkMuted} />
         </View>
@@ -168,11 +168,11 @@ export function MonthProjectionCard()
       </Pressable>
 
       {projection.vencidas.map((v) => (
-        <View key={v.fixaId} style={{ gap: 6, padding: 10, borderRadius: 12, backgroundColor: colors.hairline }}>
+        <View key={v.fixaId} style={{ gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.hairline }}>
           <Text variant="body" style={{ fontSize: 14 }}>
             {v.nome} venceu dia {v.data.slice(8, 10)} ({formatBRL(v.valor)}). Você já pagou?
           </Text>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <PrimaryButton
               label="Já paguei"
               size="sm"
@@ -191,12 +191,12 @@ export function MonthProjectionCard()
       ))}
 
       {open ? (
-        <View style={{ gap: 6, paddingTop: 4 }}>
+        <View style={{ gap: 8, paddingTop: 4 }}>
           {projection.lines.map((l, i) =>
           {
             const fixa = l.kind === 'fixa' ? fixas.find((f) => f.id === l.refId) ?? null : null
             return (
-              <View key={`${l.kind}-${l.label}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 32 }}>
+              <View key={`${l.kind}-${l.label}-${i}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 32 }}>
                 <Text variant="body" style={{ flex: 1, fontSize: 14 }} numberOfLines={2}>
                   {l.label}{l.data ? ` · ${describeDayPt(l.data).toLowerCase()}` : ''}
                 </Text>
@@ -222,7 +222,7 @@ export function MonthProjectionCard()
             )
           })}
           {future.length ? (
-            <View style={{ gap: 4, paddingTop: 6 }}>
+            <View style={{ gap: 6, paddingTop: 6 }}>
               <Text variant="caption" muted>Já comprometido nos próximos meses (parcelas)</Text>
               <Text variant="body" style={{ fontSize: 14 }}>
                 {future.map((f) => `${MONTHS_SHORT[Number(f.ym.slice(5, 7)) - 1]} ${formatBRL(f.total)}`).join(' · ')}
