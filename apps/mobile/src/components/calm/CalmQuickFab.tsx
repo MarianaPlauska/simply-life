@@ -3,19 +3,20 @@ import { Modal, Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { CALM_EXERCISES } from '@simply-life/shared'
-import { TAB_BAR_CONTENT_HEIGHT } from '@simply-life/ui-tokens'
+import { TAB_BAR_CONTENT_HEIGHT, chartColor } from '@simply-life/ui-tokens'
 import { Card, Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCaptureStore } from '../../store/captureStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
 import { useCalmFabSuppressStore } from '../../store/calmFabSuppressStore'
 import { hapticLight } from '../../lib/haptics'
+import { CalmExerciseList } from './CalmExerciseList'
 
 /** FAB global de acalmar: canto direito, acima da tab bar, sem competir com Captura. */
 export function CalmQuickFab()
 {
-  const { colors, space, elevation } = useTheme()
+  const { colors, space, elevation, chart } = useTheme()
+  const calmTint = chartColor(chart, 'teal')
   const insets = useSafeAreaInsets()
   const router = useRouter()
   const captureOpen = useCaptureStore((s) => s.open)
@@ -53,12 +54,12 @@ export function CalmQuickFab()
           justifyContent: 'center',
           backgroundColor: colors.elevated,
           borderWidth: 1.5,
-          borderColor: colors.health,
+          borderColor: calmTint,
           zIndex: 20,
           ...elevation.fab,
         }}
       >
-        <Icon name="leaf-outline" size={20} color={colors.health} weight="duotone" />
+        <Icon name="leaf-outline" size={20} color={calmTint} weight="duotone" />
       </PressableScale>
 
       <Modal visible={sheet} transparent animationType="fade" onRequestClose={() => setSheet(false)}>
@@ -72,46 +73,44 @@ export function CalmQuickFab()
               style={{
                 marginHorizontal: 12,
                 marginBottom: bottom,
-                gap: space.sm,
+                gap: space.md,
                 borderRadius: 20,
                 padding: space.md,
               }}
             >
-              <Text variant="section">Acalmar agora</Text>
-              <Text variant="caption" muted>
-                Escolha um guia curto. Não substitui o CVV 188.
-              </Text>
-              {CALM_EXERCISES.map((ex) => (
+              {/* título com fechar no canto: fechar vira um botão de verdade, não um texto solto */}
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text variant="section">Acalmar agora</Text>
+                  <Text variant="caption" muted>
+                    Escolha um guia curto. Não substitui o CVV 188.
+                  </Text>
+                </View>
                 <PressableScale
-                  key={ex.id}
-                  onPress={() =>
-                  {
-                    setSheet(false)
-                    router.push(ex.route as '/calm/box-breathing' | '/calm/grounding')
-                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fechar"
+                  onPress={() => setSheet(false)}
                   style={{
-                    minHeight: 52,
-                    padding: space.md,
-                    borderRadius: 14,
-                    backgroundColor: colors.axelMuted,
-                    gap: 4,
+                    width: 40,
+                    height: 40,
+                    borderRadius: 999,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: colors.surface,
+                    borderWidth: 1,
+                    borderColor: colors.hairline,
                   }}
                 >
-                  <Text variant="bodyStrong">{ex.title}</Text>
-                  <Text variant="caption" muted>
-                    {ex.subtitle}
-                  </Text>
-                  <Text variant="caption" color={colors.axel}>
-                    Cerca de {ex.durationMin} min
-                  </Text>
+                  <Icon name="close" size={18} color={colors.ink} />
                 </PressableScale>
-              ))}
-              <PressableScale
-                onPress={() => setSheet(false)}
-                style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Text variant="caption" muted>Fechar</Text>
-              </PressableScale>
+              </View>
+              <CalmExerciseList
+                onPick={(route) =>
+                {
+                  setSheet(false)
+                  router.push(route as '/calm/box-breathing' | '/calm/grounding')
+                }}
+              />
             </Card>
           </Pressable>
         </Pressable>

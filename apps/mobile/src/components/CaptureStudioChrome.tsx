@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { PrimaryButton, Text } from '../ui'
+import { Icon, PressableScale, Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 
 type Props = {
@@ -145,7 +145,7 @@ export function CaptureStudioChrome({
             borderTopLeftRadius: sheetRadius,
             borderTopRightRadius: sheetRadius,
             borderTopWidth: 1,
-            borderTopColor: colors.axel,
+            borderTopColor: colors.hairline,
             paddingHorizontal: space.lg,
             paddingTop: space.md,
             paddingBottom: Math.max(insets.bottom, space.md),
@@ -169,13 +169,33 @@ export function CaptureStudioChrome({
                 backgroundColor: colors.hairline,
               }}
             />
-            <View style={{ gap: 4 }}>
-              <Text variant="hero" style={{ fontSize: 26, letterSpacing: -0.6 }}>
-                {title}
-              </Text>
-              <Text variant="caption" muted>
-                {subtitle}
-              </Text>
+            {/* fechar no canto do título: sem botão solto no rodapé */}
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text variant="hero" style={{ fontSize: 24, lineHeight: 32, letterSpacing: -0.25 }}>
+                  {title}
+                </Text>
+                <Text variant="caption" muted>
+                  {subtitle}
+                </Text>
+              </View>
+              <PressableScale
+                accessibilityRole="button"
+                accessibilityLabel="Fechar"
+                onPress={onClose}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: colors.elevated,
+                  borderWidth: 1,
+                  borderColor: colors.hairline,
+                }}
+              >
+                <Icon name="close" size={18} color={colors.ink} />
+              </PressableScale>
             </View>
           </View>
           <ScrollView
@@ -189,7 +209,6 @@ export function CaptureStudioChrome({
             </View>
           </ScrollView>
           {footer}
-          <PrimaryButton label="Fechar" variant="ghost" onPress={onClose} />
         </Animated.View>
       </View>
     </KeyboardAvoidingView>

@@ -271,7 +271,7 @@ export function FinanceHomeTab({
               onVisibleChange={setVisibleCardId}
             />
             <Text variant="caption" muted style={{ textAlign: 'center' }}>
-              Toque no cartão para ver os detalhes
+              Toque no cartão para ver os detalhes.
             </Text>
             {onGoCartoes ? (
               <PrimaryButton

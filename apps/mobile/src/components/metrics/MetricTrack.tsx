@@ -1,6 +1,7 @@
 import { View } from 'react-native'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useAccents } from '../../theme/useAccents'
 
 type Props = {
   pct: number
@@ -13,8 +14,9 @@ type Props = {
 export function MetricTrack({ pct, currentLabel, targetLabel, fill }: Props)
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const clamped = Math.max(0, Math.min(100, pct))
-  const color = fill ?? colors.axel
+  const color = fill ?? accents.data
   const track = colors.hairline
 
   return (

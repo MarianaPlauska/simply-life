@@ -66,7 +66,7 @@ if (only === 'tarefas')
   await bar('Tarefas')
   for (const [l, n] of [['Lista', 'lista'], [/^Feitas/, 'feitas'], ['Rotina', 'rotina'], ['Pastas', 'pastas'], [/^Prazos/, 'prazos'], ['Gantt', 'gantt'], ['Relatórios', 'relatorios']])
   { await clickTab(l); await full(`tarefas-${n}`) }
-  for (const [l, n] of [['Visão geral', 'visao'], ['Calendário', 'calendario'], ['Timeline', 'timeline'], ['Ritmo', 'ritmo']])
+  for (const [l, n] of [['Agenda', 'agenda'], ['Desempenho', 'desempenho'], ['Ritmo', 'ritmo']])
   { await clickTab(l, 'last'); await full(`tarefas-rel-${n}`) }
 }
 if (only !== 'carteira' && only !== 'tarefas')

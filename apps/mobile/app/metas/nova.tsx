@@ -195,7 +195,7 @@ export default function NovaMetaScreen()
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
             <SelectPill
               label="Pote juntos"
-              hint="Todos somam para um total"
+              hint="Todos somam para um total."
               active={modo === 'pote'}
               onPress={() =>
               {
@@ -205,7 +205,7 @@ export default function NovaMetaScreen()
             />
             <SelectPill
               label="Cada um a sua"
-              hint="Cada pessoa tem a própria meta"
+              hint="Cada pessoa tem a própria meta."
               active={modo === 'cada_um'}
               onPress={() =>
               {
@@ -300,13 +300,13 @@ export default function NovaMetaScreen()
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
             <SelectPill
               label="Faixas"
-              hint="O pote enche em quartos"
+              hint="O pote enche em quartos."
               active={exibicao === 'faixas'}
               onPress={() => setExibicao('faixas')}
             />
             <SelectPill
               label="Só o ritmo"
-              hint="No ritmo, atrás ou à frente"
+              hint="No ritmo, atrás ou à frente."
               active={exibicao === 'ritmo'}
               onPress={() => setExibicao('ritmo')}
             />

@@ -28,6 +28,9 @@ import { CheckCircleIcon } from 'phosphor-react-native/src/icons/CheckCircle'
 import { CheckSquareIcon } from 'phosphor-react-native/src/icons/CheckSquare'
 import { CircleIcon } from 'phosphor-react-native/src/icons/Circle'
 import { ClockIcon } from 'phosphor-react-native/src/icons/Clock'
+import { ClockCounterClockwiseIcon } from 'phosphor-react-native/src/icons/ClockCounterClockwise'
+import { ArrowBendDownRightIcon } from 'phosphor-react-native/src/icons/ArrowBendDownRight'
+import { ExportIcon } from 'phosphor-react-native/src/icons/Export'
 import { CloudIcon } from 'phosphor-react-native/src/icons/Cloud'
 import { CloudLightningIcon } from 'phosphor-react-native/src/icons/CloudLightning'
 import { CloudRainIcon } from 'phosphor-react-native/src/icons/CloudRain'
@@ -240,6 +243,12 @@ const BY_NAME: Record<string, ComponentType<IconProps>> = {
   'swap-vertical': ArrowsDownUpIcon,
   thunderstorm: CloudLightningIcon,
   time: ClockIcon,
+  /** Histórico (relógio voltando): decisões, registros anteriores */
+  reload: ClockCounterClockwiseIcon,
+  /** Adiado, ficou para depois */
+  'return-down-forward': ArrowBendDownRightIcon,
+  /** Compartilhar ou exportar */
+  share: ExportIcon,
   timer: TimerIcon,
   today: CalendarCheckIcon,
   trash: TrashIcon,

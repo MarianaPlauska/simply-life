@@ -394,17 +394,17 @@ export default function PerfilScreen()
                 {
                   key: 'a11y_large_text' as const,
                   label: 'Texto maior',
-                  hint: 'Aumenta tipografia confortável',
+                  hint: 'Aumenta tipografia confortável.',
                 },
                 {
                   key: 'a11y_reduce_motion' as const,
                   label: 'Reduzir movimento',
-                  hint: 'Menos animações e scale',
+                  hint: 'Menos animações e scale.',
                 },
                 {
                   key: 'a11y_high_contrast' as const,
                   label: 'Alto contraste',
-                  hint: 'Bordas e textos mais firmes',
+                  hint: 'Bordas e textos mais firmes.',
                 },
               ]
             ).map((row) => (

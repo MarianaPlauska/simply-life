@@ -87,7 +87,7 @@ export function HomePanorama()
           </Text>
           {ranking.length === 0 ? (
             <Text variant="caption" muted>
-              Sem gastos no mês ainda
+              Sem gastos no mês ainda.
             </Text>
           ) : (
             <FinanceDonut

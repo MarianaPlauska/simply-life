@@ -63,7 +63,7 @@ export function DiaryDaySummary()
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <Pressable onPress={() => router.push('/agenda')} accessibilityRole="button" hitSlop={6}>
             <Text variant="caption" color={colors.axel} style={{ fontWeight: '600' }}>
-              Conectar agenda para ver seus compromissos aqui
+              Conectar agenda para ver seus compromissos aqui.
             </Text>
           </Pressable>
           <Pressable onPress={snoozeAgenda} accessibilityRole="button" accessibilityLabel="Conectar agenda depois" hitSlop={6}>

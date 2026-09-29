@@ -336,7 +336,7 @@ export default function DashboardScreen()
             style={{ paddingVertical: 4 }}
           >
             <Text variant="caption" muted>
-              Quando quiser, personalize seu Início
+              Quando quiser, personalize seu Início.
             </Text>
           </Pressable>
         ) : null}

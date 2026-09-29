@@ -7,6 +7,7 @@ import {
   type TaskStatus,
 } from '@simply-life/shared'
 import { Text, Chip, PrimaryButton, EmptyState, PaneTitle } from '../../ui'
+import { AgendaLoadPane } from './reports/AgendaLoadPane'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useAuthStore } from '../../store/authStore'
@@ -20,7 +21,7 @@ type Props = {
   tasks: MobileTask[]
 }
 
-type BoardKind = 'prazo' | 'status'
+type BoardKind = 'prazo' | 'status' | 'agenda'
 
 const STATUS_COLS: { id: TaskStatus; label: string }[] = [
   { id: 'todo', label: 'A fazer' },
@@ -96,7 +97,7 @@ export function DueBucketColumns({ tasks }: Props)
       })),
     [tasks],
   )
-  const groups = (kind === 'prazo' ? prazoGroups : statusGroups) as Group[]
+  const groups = (kind === 'status' ? statusGroups : prazoGroups) as Group[]
   const filled = groups.filter((g) => g.tasks.length > 0)
   const empty = groups.filter((g) => g.tasks.length === 0)
   const colW = Math.min(winW - 48, 340)
@@ -109,11 +110,22 @@ export function DueBucketColumns({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <PaneTitle title="Prazos" subtitle="Tarefas abertas agrupadas por quando vencem. Alterne para ver por status." />
-      <View style={{ flexDirection: 'row', gap: 12 }}>
+      <PaneTitle
+        title="Prazos"
+        subtitle={kind === 'agenda'
+          ? 'Compromissos e tarefas contra o tempo livre, das 8h às 18h.'
+          : 'Tarefas abertas agrupadas por quando vencem. Alterne para ver por status ou pela agenda.'}
+      />
+      <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
         <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
         <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />
+        <Chip label="Agenda" active={kind === 'agenda'} onPress={() => setKind('agenda')} />
       </View>
+
+      {/* Agenda: carga da semana e prazos em risco, perto de onde os prazos moram */}
+      {kind === 'agenda' ? <AgendaLoadPane tasks={tasks} embedded /> : null}
+      {kind === 'agenda' ? null : (
+      <>
 
       {openCount === 0 ? (
         <EmptyState
@@ -189,6 +201,8 @@ export function DueBucketColumns({ tasks }: Props)
             if (moveId) void setTaskStatus(moveId, status, isGuest)
           }}
         />
+      )}
+      </>
       )}
     </View>
   )

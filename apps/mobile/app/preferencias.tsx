@@ -6,6 +6,8 @@ import {
   GAMIFICATION_MODE_OPTIONS,
   NOTIFY_CADENCE_OPTIONS,
   computeSaldoDisponivel,
+  ORCHESTRATOR_STYLES,
+  minutesLabel,
   type NotifyCadence,
 } from '@simply-life/shared'
 import { Screen, Text, SubNavTabs, PrimaryButton, Field, Chip, PaneTitle } from '../src/ui'
@@ -17,6 +19,8 @@ import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { useDataStore } from '../src/store/dataStore'
 import { useSalaryStore } from '../src/store/salaryStore'
+import { useOrchestratorPrefsStore } from '../src/store/orchestratorPrefsStore'
+import { OnbNumber } from '../src/components/onboarding/OnbNumber'
 import { useConfirmStore } from '../src/store/confirmStore'
 import {
   DASHBOARD_WIDGET_CATALOG,
@@ -86,6 +90,10 @@ export default function PreferenciasScreen()
   const salary = useSalaryStore((s) => s.salary)
   const hydrateSalary = useSalaryStore((s) => s.hydrate)
   const askConfirm = useConfirmStore((s) => s.ask)
+  const orgStyle = useOrchestratorPrefsStore((s) => s.style)
+  const capacityMinutes = useOrchestratorPrefsStore((s) => s.capacityMinutes)
+  const patchOrg = useOrchestratorPrefsStore((s) => s.patch)
+  const hydrateOrg = useOrchestratorPrefsStore((s) => s.hydrate)
 
   const [tab, setTab] = useState<Tab>(TAB_IDS.has(params.tab ?? '') ? (params.tab as Tab) : 'uso')
   const [kwInput, setKwInput] = useState('')
@@ -103,7 +111,8 @@ export default function PreferenciasScreen()
   {
     void hydrate()
     void hydrateSalary()
-  }, [hydrate, hydrateSalary])
+    void hydrateOrg()
+  }, [hydrate, hydrateSalary, hydrateOrg])
 
   useEffect(() =>
   {
@@ -229,8 +238,33 @@ export default function PreferenciasScreen()
             </OnbBlock>
 
             <OnbBlock title="Aparência">
-              <OnbChoice kind="radio" icon="sunny" title="Clara" hint="Mais luz durante o dia" selected={mode === 'light'} onPress={() => setMode('light')} />
-              <OnbChoice kind="radio" icon="moon" title="Escura" hint="Menos brilho, melhor à noite" selected={mode === 'dark'} onPress={() => setMode('dark')} />
+              <OnbChoice kind="radio" icon="sunny" title="Clara" hint="Mais luz durante o dia." selected={mode === 'light'} onPress={() => setMode('light')} />
+              <OnbChoice kind="radio" icon="moon" title="Escura" hint="Menos brilho, melhor à noite." selected={mode === 'dark'} onPress={() => setMode('dark')} />
+            </OnbBlock>
+
+            <OnbBlock title="Como o AXEL organiza suas tarefas" hint="Vale para toda tarefa que você descreve. Dá para mudar quando quiser.">
+              {ORCHESTRATOR_STYLES.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={orgStyle === opt.id}
+                  onPress={() => patchOrg({ style: opt.id })}
+                />
+              ))}
+              <OnbNumber
+                label="Tempo para tarefas por dia"
+                value={capacityMinutes}
+                onChange={(v) => patchOrg({ capacityMinutes: v })}
+                step={30}
+                min={30}
+                max={720}
+                format={minutesLabel}
+              />
+              <Text variant="caption" muted>
+                O que sobra do dia depois de compromissos e rotina. O AXEL não enche um dia além disso.
+              </Text>
             </OnbBlock>
 
             <OnbBlock title="Tom das mensagens">

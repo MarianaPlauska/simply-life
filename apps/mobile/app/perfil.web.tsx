@@ -341,9 +341,9 @@ export default function PerfilScreenWeb()
               </Text>
               {(
                 [
-                  { key: 'a11y_large_text' as const, label: 'Texto maior', hint: 'Aumenta tipografia confortável' },
-                  { key: 'a11y_reduce_motion' as const, label: 'Reduzir movimento', hint: 'Menos animações e scale' },
-                  { key: 'a11y_high_contrast' as const, label: 'Alto contraste', hint: 'Bordas e textos mais firmes' },
+                  { key: 'a11y_large_text' as const, label: 'Texto maior', hint: 'Aumenta tipografia confortável.' },
+                  { key: 'a11y_reduce_motion' as const, label: 'Reduzir movimento', hint: 'Menos animações e scale.' },
+                  { key: 'a11y_high_contrast' as const, label: 'Alto contraste', hint: 'Bordas e textos mais firmes.' },
                 ]
               ).map((row) => (
                 <View key={row.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 52 }}>
@@ -644,9 +644,9 @@ export default function PerfilScreenWeb()
             <Text variant="section">Acessibilidade</Text>
             {(
               [
-                { key: 'a11y_large_text' as const, label: 'Texto maior', hint: 'Aumenta tipografia confortável' },
-                { key: 'a11y_reduce_motion' as const, label: 'Reduzir movimento', hint: 'Menos animações e scale' },
-                { key: 'a11y_high_contrast' as const, label: 'Alto contraste', hint: 'Bordas e textos mais firmes' },
+                { key: 'a11y_large_text' as const, label: 'Texto maior', hint: 'Aumenta tipografia confortável.' },
+                { key: 'a11y_reduce_motion' as const, label: 'Reduzir movimento', hint: 'Menos animações e scale.' },
+                { key: 'a11y_high_contrast' as const, label: 'Alto contraste', hint: 'Bordas e textos mais firmes.' },
               ]
             ).map((row) => (
               <View key={row.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 44 }}>

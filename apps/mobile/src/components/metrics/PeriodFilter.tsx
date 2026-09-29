@@ -2,6 +2,7 @@ import { ScrollView, View } from 'react-native'
 import { REPORT_PERIODS, type ReportPeriod } from '@simply-life/shared'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useAccents } from '../../theme/useAccents'
 
 type Props = {
   value: ReportPeriod
@@ -12,6 +13,7 @@ type Props = {
 export function PeriodFilter({ value, onChange }: Props)
 {
   const { colors } = useTheme()
+  const accents = useAccents()
 
   return (
     <ScrollView
@@ -35,12 +37,12 @@ export function PeriodFilter({ value, onChange }: Props)
               borderRadius: 999,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: active ? colors.axelFill : colors.elevated,
+              backgroundColor: active ? accents.selectBg : colors.elevated,
             }}
           >
             <Text
               variant="caption"
-              color={active ? colors.axelOnFill : colors.inkMuted}
+              color={active ? accents.selectFg : colors.inkMuted}
               style={{ fontFamily: 'Lexend_600SemiBold' }}
             >
               {p.label}

@@ -2,6 +2,7 @@ import { View } from 'react-native'
 import type { BinaryStat } from '@simply-life/shared'
 import { Card, Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useAccents } from '../../theme/useAccents'
 
 type Props = {
   rows: BinaryStat[]
@@ -11,6 +12,7 @@ type Props = {
 export function StatsMatrix({ rows }: Props)
 {
   const { colors, space } = useTheme()
+  const accents = useAccents()
   const visible = rows.filter((r) => r.done + r.missed > 0 || r.id === 'tasks')
 
   return (
@@ -44,7 +46,7 @@ export function StatsMatrix({ rows }: Props)
           </Text>
           <Text
             variant="bodyStrong"
-            color={colors.done}
+            color={accents.data}
             style={{ flex: 1, textAlign: 'right', fontSize: 16 }}
           >
             {row.done}

@@ -326,7 +326,7 @@ export default function SetupScreen()
                   kind="radio"
                   icon="sunny"
                   title="Clara"
-                  hint="Mais luz durante o dia"
+                  hint="Mais luz durante o dia."
                   selected={mode === 'light'}
                   onPress={() => setMode('light')}
                 />
@@ -334,7 +334,7 @@ export default function SetupScreen()
                   kind="radio"
                   icon="moon"
                   title="Escura"
-                  hint="Menos brilho, melhor à noite"
+                  hint="Menos brilho, melhor à noite."
                   selected={mode === 'dark'}
                   onPress={() => setMode('dark')}
                 />

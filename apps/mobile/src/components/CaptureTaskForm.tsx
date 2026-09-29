@@ -13,6 +13,7 @@ import {
 } from '@simply-life/shared'
 import { Text, Field, PrimaryButton, PressableScale } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
+import { useAccents } from '../theme/useAccents'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
 import { useDataStore } from '../store/dataStore'
 
@@ -84,21 +85,23 @@ export function SelectChip({
 })
 {
   const { colors } = useTheme()
-  const accent = tone === 'danger' ? colors.danger : colors.axel
-  const fill = tone === 'danger' ? `${colors.danger}33` : colors.axelMuted
+  const accents = useAccents()
+  // seleção em petróleo/menta; coral fica para ação. Perigo continua vermelho.
+  const accent = tone === 'danger' ? colors.danger : accents.selectInk
+  const fill = tone === 'danger' ? `${colors.danger}33` : colors.brandMuted
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       style={{
-        minHeight: 44,
-        paddingHorizontal: 14,
+        minHeight: 36,
+        paddingHorizontal: 12,
         borderRadius: 999,
         justifyContent: 'center',
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 8,
         backgroundColor: active ? fill : colors.hairline,
         borderWidth: 1,
         borderColor: active ? accent : colors.hairline,
@@ -115,8 +118,8 @@ export function SelectChip({
         />
       ) : null}
       <Text
-        variant="caption"
-        style={{ fontWeight: '600', color: active ? colors.ink : colors.inkMuted }}
+        variant="label"
+        style={{ fontFamily: 'Lexend_600SemiBold', color: active ? colors.ink : colors.inkMuted }}
       >
         {label}
       </Text>

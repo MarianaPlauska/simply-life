@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import { consecutiveActivity, taskActivityByDay, taskActivityGrid, type MobileTask } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useAccents } from '../../theme/useAccents'
 
 const DAY_LETTERS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
 const WEEKS = 12
@@ -13,6 +14,7 @@ type Props = { tasks: MobileTask[] }
 export function KanbanActivityComplex({ tasks }: Props)
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const series = useMemo(() => taskActivityGrid(tasks, WEEKS), [tasks])
   const week = useMemo(() => taskActivityByDay(tasks, 7).slice().reverse(), [tasks])
   const peak = Math.max(...week.map((d) => d.count), 1)
@@ -39,9 +41,10 @@ export function KanbanActivityComplex({ tasks }: Props)
   function cellColor(count: number): string
   {
     if (count <= 0) return empty
-    if (count === 1) return 'rgba(232, 115, 74, 0.35)'
-    if (count === 2) return 'rgba(232, 115, 74, 0.62)'
-    return colors.axel
+    // teal da paleta em três intensidades (coral fica só para ação)
+    if (count === 1) return `${accents.data}59`
+    if (count === 2) return `${accents.data}9E`
+    return accents.data
   }
 
   return (
@@ -106,7 +109,7 @@ export function KanbanActivityComplex({ tasks }: Props)
                 flex: 1,
                 height: ht,
                 borderRadius: 8,
-                backgroundColor: today ? colors.axelFill : idle,
+                backgroundColor: today ? accents.data : idle,
               }}
             />
           )

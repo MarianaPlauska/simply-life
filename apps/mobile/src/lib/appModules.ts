@@ -38,19 +38,19 @@ export const APP_MODULE_GROUPS: { id: AppModuleGroup; label: string; hint: strin
 ]
 
 export const APP_MODULES: AppModuleDef[] = [
-  { id: 'tasks', group: 'tarefas', label: 'Tarefas', hint: 'Lista do dia, prazos, pastas e relatórios', icon: 'checkbox-outline' },
-  { id: 'routine', group: 'tarefas', label: 'Rotina e hábitos', hint: 'Check diário e sequência da semana', icon: 'repeat' },
-  { id: 'mood', group: 'saude', label: 'Diário de humor', hint: 'Como você está e o que escreveu', icon: 'happy-outline' },
-  { id: 'water', group: 'saude', label: 'Água', hint: 'Copos do dia e meta', icon: 'water-outline' },
-  { id: 'sleep', group: 'saude', label: 'Sono', hint: 'Horas da noite e semana', icon: 'moon-outline' },
-  { id: 'food', group: 'saude', label: 'Alimentação', hint: 'Proteína e o que comeu', icon: 'restaurant-outline' },
-  { id: 'gym', group: 'saude', label: 'Academia', hint: 'Treino da semana, séries e cargas', icon: 'barbell-outline' },
-  { id: 'meds', group: 'saude', label: 'Medicamentos', hint: 'Doses e horários', icon: 'medical-outline' },
-  { id: 'support', group: 'saude', label: 'Apoio emocional', hint: 'Acalmar, foco e exercícios de TCC', icon: 'heart-outline' },
-  { id: 'spend', group: 'carteira', label: 'Gastos', hint: 'Saldo, extrato e análise do mês', icon: 'wallet-outline' },
-  { id: 'cards', group: 'carteira', label: 'Cartões', hint: 'Fatura, limite e vencimento', icon: 'card-outline' },
-  { id: 'bills', group: 'carteira', label: 'Contas fixas', hint: 'Aluguel, internet e assinaturas', icon: 'calendar-outline' },
-  { id: 'goals', group: 'carteira', label: 'Metas', hint: 'Guardar para algo', icon: 'flag-outline' },
+  { id: 'tasks', group: 'tarefas', label: 'Tarefas', hint: 'Lista do dia, prazos, pastas e relatórios.', icon: 'checkbox-outline' },
+  { id: 'routine', group: 'tarefas', label: 'Rotina e hábitos', hint: 'Check diário e sequência da semana.', icon: 'repeat' },
+  { id: 'mood', group: 'saude', label: 'Diário de humor', hint: 'Como você está e o que escreveu.', icon: 'happy-outline' },
+  { id: 'water', group: 'saude', label: 'Água', hint: 'Copos do dia e meta.', icon: 'water-outline' },
+  { id: 'sleep', group: 'saude', label: 'Sono', hint: 'Horas da noite e semana.', icon: 'moon-outline' },
+  { id: 'food', group: 'saude', label: 'Alimentação', hint: 'Proteína e o que comeu.', icon: 'restaurant-outline' },
+  { id: 'gym', group: 'saude', label: 'Academia', hint: 'Treino da semana, séries e cargas.', icon: 'barbell-outline' },
+  { id: 'meds', group: 'saude', label: 'Medicamentos', hint: 'Doses e horários.', icon: 'medical-outline' },
+  { id: 'support', group: 'saude', label: 'Apoio emocional', hint: 'Acalmar, foco e exercícios de TCC.', icon: 'heart-outline' },
+  { id: 'spend', group: 'carteira', label: 'Gastos', hint: 'Saldo, extrato e análise do mês.', icon: 'wallet-outline' },
+  { id: 'cards', group: 'carteira', label: 'Cartões', hint: 'Fatura, limite e vencimento.', icon: 'card-outline' },
+  { id: 'bills', group: 'carteira', label: 'Contas fixas', hint: 'Aluguel, internet e assinaturas.', icon: 'calendar-outline' },
+  { id: 'goals', group: 'carteira', label: 'Metas', hint: 'Guardar para algo.', icon: 'flag-outline' },
 ]
 
 export const ALL_APP_MODULES: AppModuleId[] = APP_MODULES.map((m) => m.id)

@@ -37,7 +37,7 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
             {moodHeadline}
           </Text>
           <Text variant="caption" muted>
-            Pode atualizar se o sentimento mudar
+            Pode atualizar se o sentimento mudar.
           </Text>
         </View>
         <MoodFaceRow

@@ -114,7 +114,7 @@ export function CaptureExpenseFields({
 
       <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
-          Pasta: gastos da mesma história ficam juntos
+          Pasta: gastos da mesma história ficam juntos.
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -220,7 +220,7 @@ export function CaptureExpenseFields({
             <View style={{ flexDirection: 'row', gap: 12 }}>
               {cards.length === 0 ? (
                 <Text variant="caption" muted>
-                  Cadastre um cartão em Contas → Cartões
+                  Cadastre um cartão em Contas → Cartões.
                 </Text>
               ) : (
                 cards.map((c) => (
@@ -376,7 +376,7 @@ export function CaptureExpenseFields({
           </Text>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {([
-              { id: 'pessoal' as const, label: 'Pessoal', hint: 'Só você' },
+              { id: 'pessoal' as const, label: 'Pessoal', hint: 'Só você.' },
               {
                 id: 'casal' as const,
                 label: 'Casal',

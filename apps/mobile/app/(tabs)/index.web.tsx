@@ -353,7 +353,7 @@ export default function DashboardScreenWeb()
           {prefsLoaded && !prefs.home_metrics_configured_at ? (
             <Pressable onPress={() => router.push('/personalizar-inicio')} style={{ paddingVertical: 4 }}>
               <Text variant="caption" muted>
-                Quando quiser, personalize seu Início
+                Quando quiser, personalize seu Início.
               </Text>
             </Pressable>
           ) : null}

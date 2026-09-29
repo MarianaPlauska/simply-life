@@ -176,8 +176,8 @@ export const COLOR_DARK: ColorTokens = {
   navBg: BRAND.petroleo,
   navBorder: 'transparent',
   navInk: BRAND.menta,
-  /** Petróleo profundo (mesmo do heroBgDeep): a aba ativa afunda na barra, sem bloco claro */
-  navActiveBg: '#152B2D',
+  /** Sem caixa: a aba ativa é ícone cheio, rótulo em negrito e o pontinho coral */
+  navActiveBg: 'transparent',
   navActiveInk: '#EEF2F0',
   navActiveDot: BRAND.coral,
   featureBg: '#232C2B',
@@ -231,8 +231,8 @@ export const COLOR_LIGHT: ColorTokens = {
   navBorder: 'rgba(31, 58, 61, 0.10)',
   /** 5,6:1 no branco */
   navInk: '#5E6B69',
-  /** Tinta petróleo suave: o coral fica só no botão + */
-  navActiveBg: '#E3ECE9',
+  /** Sem caixa, igual ao escuro: ícone cheio, rótulo em negrito e o pontinho coral */
+  navActiveBg: 'transparent',
   /** 10,1:1 no navActiveBg */
   navActiveInk: BRAND.petroleo,
   navActiveDot: BRAND.coral,

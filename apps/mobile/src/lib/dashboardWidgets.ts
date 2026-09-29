@@ -15,11 +15,11 @@ export const DASHBOARD_WIDGET_CATALOG: {
   label: string
   hint: string
 }[] = [
-  { id: 'wellbeing', label: 'Humor', hint: 'Check-in rápido' },
-  { id: 'water', label: 'Água', hint: 'Copos do dia' },
-  { id: 'medicamentos', label: 'Medicamentos', hint: 'Doses de hoje' },
-  { id: 'critical_tasks', label: 'Tarefas', hint: 'Críticas de hoje' },
-  { id: 'finance_brief', label: 'Finanças', hint: 'Resumo do mês' },
+  { id: 'wellbeing', label: 'Humor', hint: 'Check-in rápido.' },
+  { id: 'water', label: 'Água', hint: 'Copos do dia.' },
+  { id: 'medicamentos', label: 'Medicamentos', hint: 'Doses de hoje.' },
+  { id: 'critical_tasks', label: 'Tarefas', hint: 'Críticas de hoje.' },
+  { id: 'finance_brief', label: 'Finanças', hint: 'Resumo do mês.' },
 ]
 
 function normalizeWidgetIds(widgets: DashboardWidgetId[]): DashboardWidgetId[]

@@ -97,14 +97,14 @@ export type SharedGoalMetricaSpec = {
 }
 
 export const SHARED_GOAL_METRICAS: readonly SharedGoalMetricaSpec[] = [
-  { key: 'agua', label: 'Água', unidade: 'L', hint: 'Conta a água que cada um anota', alvoSemana: 14, step: 1, maxPorDia: 15 },
-  { key: 'treino', label: 'Treino', unidade: 'treinos', hint: 'Conta os treinos anotados', alvoSemana: 3, step: 1, maxPorDia: 5 },
-  { key: 'proteina', label: 'Proteína', unidade: 'g', hint: 'Conta a proteína anotada', alvoSemana: 700, step: 50, maxPorDia: 600 },
-  { key: 'sono', label: 'Sono', unidade: 'h', hint: 'Conta as horas de sono anotadas', alvoSemana: 49, step: 1, maxPorDia: 24 },
-  { key: 'foco', label: 'Foco', unidade: 'min', hint: 'Conta os minutos de foco', alvoSemana: 150, step: 25, maxPorDia: 1440 },
-  { key: 'tarefas', label: 'Tarefas', unidade: 'tarefas', hint: 'Conta as tarefas concluídas', alvoSemana: 10, step: 1, maxPorDia: 100 },
-  { key: 'humor', label: 'Humor', unidade: 'dias', hint: 'Conta os dias com humor registrado', alvoSemana: 5, step: 1, maxPorDia: 1 },
-  { key: 'livre', label: 'Algo livre', unidade: '', hint: 'Cada um registra o próprio dia na meta', alvoSemana: 7, step: 1, maxPorDia: 100000 },
+  { key: 'agua', label: 'Água', unidade: 'L', hint: 'Conta a água que cada um anota.', alvoSemana: 14, step: 1, maxPorDia: 15 },
+  { key: 'treino', label: 'Treino', unidade: 'treinos', hint: 'Conta os treinos anotados.', alvoSemana: 3, step: 1, maxPorDia: 5 },
+  { key: 'proteina', label: 'Proteína', unidade: 'g', hint: 'Conta a proteína anotada.', alvoSemana: 700, step: 50, maxPorDia: 600 },
+  { key: 'sono', label: 'Sono', unidade: 'h', hint: 'Conta as horas de sono anotadas.', alvoSemana: 49, step: 1, maxPorDia: 24 },
+  { key: 'foco', label: 'Foco', unidade: 'min', hint: 'Conta os minutos de foco.', alvoSemana: 150, step: 25, maxPorDia: 1440 },
+  { key: 'tarefas', label: 'Tarefas', unidade: 'tarefas', hint: 'Conta as tarefas concluídas.', alvoSemana: 10, step: 1, maxPorDia: 100 },
+  { key: 'humor', label: 'Humor', unidade: 'dias', hint: 'Conta os dias com humor registrado.', alvoSemana: 5, step: 1, maxPorDia: 1 },
+  { key: 'livre', label: 'Algo livre', unidade: '', hint: 'Cada um registra o próprio dia na meta.', alvoSemana: 7, step: 1, maxPorDia: 100000 },
 ] as const
 
 export function sharedGoalMetricaSpec(key: SharedGoalMetrica): SharedGoalMetricaSpec

@@ -678,7 +678,8 @@ export function CaptureSheet()
                 ) : null}
                 {saved ? (
                   <PrimaryButton label={savedLabel ?? 'Salvo'} variant="success" disabled />
-                ) : (
+                ) : promptMode && promptIncluded === 0 ? null : (
+                  // no modo Descrever, o botão da vez é "Organizar com Axel": Salvar só depois
                   actionRow
                 )}
               </>

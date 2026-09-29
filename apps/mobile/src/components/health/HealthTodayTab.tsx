@@ -163,7 +163,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
           </Text>
           {!humorHoje ? (
             <Text variant="caption" muted>
-              Toque se quiser registrar
+              Toque se quiser registrar.
             </Text>
           ) : null}
         </View>

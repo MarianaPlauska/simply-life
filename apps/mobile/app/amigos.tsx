@@ -156,7 +156,7 @@ export default function AmigosScreen()
           <View style={{ flex: 1 }}>
             <Text variant="bodyStrong">Metas juntos</Text>
             <Text variant="caption" muted>
-              Água, treino, foco ou o que quiserem, sem ver o número de ninguém
+              Água, treino, foco ou o que quiserem, sem ver o número de ninguém.
             </Text>
           </View>
           <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
@@ -184,7 +184,7 @@ export default function AmigosScreen()
                   </Text>
                   {f.muted ? (
                     <Text variant="caption" muted>
-                      Silenciado: o apoio chega sem aviso
+                      Silenciado: o apoio chega sem aviso.
                     </Text>
                   ) : null}
                 </View>

@@ -26,19 +26,21 @@ import { KanbanFoldersPane } from '../../src/components/kanban/KanbanFoldersPane
 import { KanbanReportsPane } from '../../src/components/kanban/KanbanReportsPane'
 import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
 import { KanbanRoutinePane } from '../../src/components/kanban/KanbanRoutinePane'
+import { WeeklyReviewPane } from '../../src/components/kanban/reports/WeeklyReviewPane'
+import { RitmoInsights } from '../../src/components/kanban/reports/RitmoInsights'
 import { authedApi } from '../../src/lib/integrationsApi'
 import { fetchDecisionEvents } from '../../src/lib/sync/decisionLog'
 import { useBoardReplanStore } from '../../src/store/boardReplanStore'
 
 type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'gantt' | 'relatorios'
-type ReportMode = 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
+type ReportMode = 'semana' | 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
 
 export default function KanbanScreen()
 {
   const { space } = useTheme()
   const modules = useModules()
   const [hub, setHub] = useState<Hub>(() => (modules.on('tasks') ? 'lista' : 'rotina'))
-  const [report, setReport] = useState<ReportMode>('desempenho')
+  const [report, setReport] = useState<ReportMode>('semana')
   const [logOpen, setLogOpen] = useState(false)
   const [syncMsg, setSyncMsg] = useState('')
   const tasks = useDataStore((s) => s.tasks) ?? []
@@ -144,6 +146,7 @@ export default function KanbanScreen()
             <SubNavTabs
               accent="axel"
               tabs={[
+                { id: 'semana', label: 'Semana' },
                 { id: 'desempenho', label: 'Desempenho' },
                 { id: 'overview', label: 'Visão geral' },
                 { id: 'calendario', label: 'Calendário' },
@@ -157,7 +160,7 @@ export default function KanbanScreen()
             <View style={{ flexDirection: 'row', gap: space.md, flexWrap: 'wrap', alignItems: 'center' }}>
               <PrimaryButton
                 label="Histórico de decisões"
-                icon="list"
+                icon="reload-outline"
                 variant="link"
                 size="sm"
                 onPress={() => setLogOpen(true)}
@@ -212,7 +215,13 @@ export default function KanbanScreen()
           {hub === 'relatorios' && report === 'overview' ? <KanbanOverviewPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'timeline' ? <KanbanTimelinePane tasks={tasks} /> : null}
-          {hub === 'relatorios' && report === 'ritmo' ? <KanbanActivityComplex tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'semana' ? <WeeklyReviewPane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'ritmo' ? (
+            <View style={{ gap: space.md }}>
+              <KanbanActivityComplex tasks={tasks} />
+              <RitmoInsights tasks={tasks} />
+            </View>
+          ) : null}
         </View>
       </TabShell>
       <KanbanDecisionLogSheet

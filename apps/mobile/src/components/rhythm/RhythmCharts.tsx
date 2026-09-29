@@ -3,6 +3,7 @@ import { Pressable, View, useWindowDimensions } from 'react-native'
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useAccents } from '../../theme/useAccents'
 
 /**
  * Gráficos do "Meu ritmo". Regras (dataviz): uma cor de dado por gráfico
@@ -55,6 +56,7 @@ type ColumnsProps = {
 export function RhythmColumns({ data, formatTick = (v) => String(v), legend, accessibilityLabel }: ColumnsProps)
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const { width: winW } = useWindowDimensions()
   const [selected, setSelected] = useState<number | null>(null)
   const [table, setTable] = useState(false)
@@ -68,7 +70,7 @@ export function RhythmColumns({ data, formatTick = (v) => String(v), legend, acc
 
   return (
     <View style={{ gap: 12 }}>
-      {legend ? <Legend items={[{ label: legend.value, color: colors.axel }, { label: legend.track, color: colors.hairlineStrong }]} /> : null}
+      {legend ? <Legend items={[{ label: legend.value, color: accents.data }, { label: legend.track, color: colors.hairlineStrong }]} /> : null}
       <Text variant="caption" muted style={{ minHeight: 18 }}>
         {selected != null ? data[selected]?.detail : 'Toque numa barra para ver o valor'}
       </Text>
@@ -97,7 +99,7 @@ export function RhythmColumns({ data, formatTick = (v) => String(v), legend, acc
                   {d.value > 0 ? (
                     <Path
                       d={columnPath(x, y(d.value), barW, PLOT_H - y(d.value))}
-                      fill={colors.axel}
+                      fill={accents.data}
                       opacity={selected == null || active ? 1 : 0.45}
                     />
                   ) : null}
@@ -132,6 +134,7 @@ export type LineDatum = { label: string; value: number | null; detail: string }
 export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; accessibilityLabel: string })
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const { width: winW } = useWindowDimensions()
   const [selected, setSelected] = useState<number | null>(null)
   const [table, setTable] = useState(false)
@@ -173,7 +176,7 @@ export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; ac
                 {t}
               </SvgText>
             ))}
-            {d ? <Path d={d} stroke={colors.axel} strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" /> : null}
+            {d ? <Path d={d} stroke={accents.data} strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" /> : null}
             {data.map((p, i) => (
               <G key={`${p.label}-${i}`}>
                 {p.value != null ? (
@@ -181,7 +184,7 @@ export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; ac
                     cx={x(i)}
                     cy={y(p.value)}
                     r={selected === i ? 6 : 4.5}
-                    fill={colors.axel}
+                    fill={accents.data}
                     stroke={colors.elevated}
                     strokeWidth={2}
                   />
