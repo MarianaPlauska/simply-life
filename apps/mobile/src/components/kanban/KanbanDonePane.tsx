@@ -9,7 +9,7 @@ import {
   type LifeCategoryId,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, Chip, EmptyState } from '../../ui'
+import { Text, Chip, EmptyState, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -73,14 +73,11 @@ export function KanbanDonePane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
-        <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-          Histórico
-        </Text>
-        <Text variant="caption" muted>
-          {done.length} feita{done.length === 1 ? '' : 's'} · check devolve à Lista. Excluir não apaga este histórico.
-        </Text>
-      </View>
+      {/* Título igual ao nome da aba */}
+      <PaneTitle
+        title="Feitas"
+        subtitle={`${done.length} feita${done.length === 1 ? '' : 's'} · o check devolve à Lista. Excluir não apaga daqui.`}
+      />
 
       <ScrollView
         horizontal

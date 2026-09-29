@@ -6,6 +6,9 @@ export type ConfirmRequest = {
   /** Texto do botão que confirma (padrão: Excluir) */
   confirmLabel?: string
   onConfirm: () => void
+  /** neutral = decisão reversível (ex.: ligar ou tirar um módulo), sem lixeira nem vermelho */
+  tone?: 'danger' | 'neutral'
+  icon?: import('../ui/Icon').IconName
 }
 
 /** Pedido de confirmação aberto no diálogo do app (ConfirmDialogHost), no lugar do alert do navegador. */

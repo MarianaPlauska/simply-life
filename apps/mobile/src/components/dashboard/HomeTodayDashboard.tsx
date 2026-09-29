@@ -5,7 +5,6 @@ import { MagnifyingGlassIcon } from 'phosphor-react-native/src/icons/MagnifyingG
 import { useRouter } from 'expo-router'
 import {
   consecutiveActivity,
-  findHabit,
   searchHomeItems,
   uniqueIsoDates,
   type FinanceTx,
@@ -38,9 +37,7 @@ export function HomeTodayDashboard({
   const { colors, elevation } = useTheme()
   const router = useRouter()
   const humor = useDataStore((s) => s.humor) ?? []
-  const habits = useDataStore((s) => s.habits) ?? []
   const streak = useGamificationStore((s) => s.streak)
-  const agua = findHabit(habits, 'agua')
   const [query, setQuery] = useState('')
   const [goalOpen, setGoalOpen] = useState(false)
 
@@ -52,8 +49,6 @@ export function HomeTodayDashboard({
     const moodDays = humor.map((h) => h.data)
     return consecutiveActivity(uniqueIsoDates([...taskDays, ...moodDays]))
   }, [tasks, humor])
-
-  const habitOk = agua ? agua.progressoAtual : 0
 
   const hits = useMemo(
     () => searchHomeItems(query, tasks, finance, 16),
@@ -216,38 +211,7 @@ export function HomeTodayDashboard({
             </View>
           </View>
 
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            {(
-              [
-                { label: 'Pendentes', value: String(pending), icon: 'time-outline' as const, color: colors.axel, href: '/(tabs)/kanban' },
-                { label: 'Feitas', value: String(doneToday), icon: 'checkmark-circle-outline' as const, color: colors.health, href: '/(tabs)/kanban' },
-                { label: 'Hábitos', value: String(habitOk), icon: 'star-outline' as const, color: colors.axel, href: '/(tabs)/saude' },
-              ]
-            ).map((g) => (
-              <Pressable
-                key={g.label}
-                onPress={() => router.push(g.href as never)}
-                style={{
-                  flex: 1,
-                  minHeight: 88,
-                  borderRadius: 20,
-                  backgroundColor: colors.elevated,
-                  padding: 16,
-                  gap: 12,
-                  ...elevation.card,
-                }}
-              >
-                <Icon name={g.icon} size={18} color={g.color} />
-                <Text variant="title" style={{ fontSize: 22 }}>
-                  {g.value}
-                </Text>
-                <Text variant="micro" muted>
-                  {g.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
+          {/* Os três quadradinhos (pendentes, feitas, hábitos) saíram: repetiam o progresso acima. */}
           {ritualSlot}
         </>
       )}

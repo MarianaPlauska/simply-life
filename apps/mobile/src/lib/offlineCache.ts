@@ -32,6 +32,18 @@ export type OfflineBundle = {
   tasksJson: string
   /** Hábitos (água ml/meta) — convidado neste aparelho */
   habitsJson?: string
+  /**
+   * Convidado que montou os próprios dados nas boas-vindas: a partir daqui o
+   * aparelho guarda tudo e os dados de exemplo não voltam.
+   */
+  ownData?: boolean
+  financeJson?: string
+  medsJson?: string
+  cardsJson?: string
+  fixasJson?: string
+  billsJson?: string
+  goalsJson?: string
+  cashJson?: string
 }
 
 export async function loadOfflineBundle(): Promise<OfflineBundle | null>

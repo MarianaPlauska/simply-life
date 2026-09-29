@@ -6,7 +6,7 @@ import {
   type MobileTask,
   type TaskStatus,
 } from '@simply-life/shared'
-import { Text, Chip, PrimaryButton, EmptyState } from '../../ui'
+import { Text, Chip, PrimaryButton, EmptyState, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useAuthStore } from '../../store/authStore'
@@ -47,7 +47,7 @@ function BoardColumn({
   return (
     <View style={width ? { width, gap: 12 } : { gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 16 }}>
+        <Text variant="bodyStrong">
           {group.label}
         </Text>
         <Text variant="caption" muted>
@@ -109,14 +109,7 @@ export function DueBucketColumns({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 6 }}>
-        <Text variant="section" style={{ fontSize: 18 }}>
-          Por prazo
-        </Text>
-        <Text variant="caption" muted>
-          Tarefas abertas agrupadas por quando vencem. Alterne para ver por status.
-        </Text>
-      </View>
+      <PaneTitle title="Prazos" subtitle="Tarefas abertas agrupadas por quando vencem. Alterne para ver por status." />
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
         <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />

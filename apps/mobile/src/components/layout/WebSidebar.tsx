@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
+import { useModules } from '../../hooks/useModules'
 import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { BrandMark } from '../BrandMark'
@@ -31,6 +32,12 @@ export function WebSidebar()
   const { space, colors } = useTheme()
   const { isTablet, isDesktop } = useWorkspace()
   const router = useRouter()
+  const modules = useModules()
+  const navVisible = (match: string) =>
+    match === 'kanban' ? modules.group('tarefas')
+      : match === 'saude' ? modules.group('saude')
+        : match === 'financeiro' ? modules.group('carteira')
+          : true
   const pathname = usePathname()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const email = useAuthStore((s) => s.sessionEmail)
@@ -128,7 +135,7 @@ export function WebSidebar()
         </View>
 
         <View style={{ gap: 2, alignItems: 'stretch' }}>
-          {NAV.map((item) =>
+          {NAV.filter((item) => navVisible(item.match)).map((item) =>
           {
             const active = isActive(item)
             return (

@@ -3,11 +3,11 @@ import { View } from 'react-native'
 import { syncGmailNow, type AxelDecisionEvent } from '@simply-life/shared'
 import {
   Screen,
-  PillTabs,
   PrimaryButton,
   SubNavTabs,
 } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
+import { useModules } from '../../src/hooks/useModules'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
 import { useGamificationStore } from '../../src/store/gamificationStore'
@@ -36,7 +36,8 @@ type ReportMode = 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo
 export default function KanbanScreen()
 {
   const { space } = useTheme()
-  const [hub, setHub] = useState<Hub>('lista')
+  const modules = useModules()
+  const [hub, setHub] = useState<Hub>(() => (modules.on('tasks') ? 'lista' : 'rotina'))
   const [report, setReport] = useState<ReportMode>('desempenho')
   const [logOpen, setLogOpen] = useState(false)
   const [syncMsg, setSyncMsg] = useState('')
@@ -100,6 +101,23 @@ export default function KanbanScreen()
     ? [...remoteEvents, ...localEvents]
     : [...localBatchEvents, ...localEvents]
 
+  // Rotina só com o módulo Rotina; o resto é do módulo Tarefas
+  const hubTabs = ([
+    { id: 'lista', label: 'Lista' },
+    { id: 'feitas', label: 'Feitas', count: doneCount },
+    { id: 'rotina', label: 'Rotina' },
+    { id: 'pastas', label: 'Pastas' },
+    { id: 'board', label: 'Prazos', count: openCount },
+    { id: 'gantt', label: 'Gantt' },
+    { id: 'relatorios', label: 'Relatórios' },
+  ] as { id: Hub; label: string; count?: number }[]).filter((t) =>
+    t.id === 'rotina' ? modules.on('routine') : modules.on('tasks'))
+  const hubShown = hubTabs.some((t) => t.id === hub) ? hub : (hubTabs[0]?.id ?? hub)
+  useEffect(() =>
+  {
+    if (hubShown !== hub) setHub(hubShown)
+  }, [hubShown, hub])
+
   return (
     <Screen
       scroll
@@ -107,7 +125,7 @@ export default function KanbanScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title="Tarefas" subtitle="Lista, rotina, pastas e Gantt. O mesmo trabalho em visões diferentes." />
+        <ScreenIntro title="Tarefas" subtitle="Uma coisa de cada vez, no seu ritmo." />
 
         {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
           <KanbanOrchestratorBar tasks={tasks} />
@@ -115,25 +133,19 @@ export default function KanbanScreen()
 
         <SubNavTabs
           accent="axel"
-          tabs={[
-            { id: 'lista', label: 'Lista' },
-            { id: 'feitas', label: 'Feitas', count: doneCount },
-            { id: 'rotina', label: 'Rotina' },
-            { id: 'pastas', label: 'Pastas' },
-            { id: 'board', label: 'Prazos', count: openCount },
-            { id: 'gantt', label: 'Gantt' },
-            { id: 'relatorios', label: 'Relatórios' },
-          ]}
+          tabs={hubTabs}
           value={hub}
           onChange={setHub}
         />
 
         {hub === 'relatorios' ? (
-          <View style={{ marginTop: space.sm, gap: space.sm }}>
-            <PillTabs
+          <View style={{ gap: space.xs }}>
+            {/* sub-abas no mesmo sublinhado do resto do app, sem pílula escura */}
+            <SubNavTabs
+              accent="axel"
               tabs={[
                 { id: 'desempenho', label: 'Desempenho' },
-                { id: 'overview', label: 'Overview' },
+                { id: 'overview', label: 'Visão geral' },
                 { id: 'calendario', label: 'Calendário' },
                 { id: 'timeline', label: 'Timeline' },
                 { id: 'ritmo', label: 'Ritmo' },
@@ -141,18 +153,21 @@ export default function KanbanScreen()
               value={report}
               onChange={setReport}
             />
-            <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
+            {/* ações secundárias como links, numa linha só; Gmail só aparece com conta */}
+            <View style={{ flexDirection: 'row', gap: space.md, flexWrap: 'wrap', alignItems: 'center' }}>
               <PrimaryButton
-                label="Decision log"
-                variant="ghost"
+                label="Histórico de decisões"
+                icon="list"
+                variant="link"
                 size="sm"
                 onPress={() => setLogOpen(true)}
               />
+              {!isGuest ? (
               <PrimaryButton
                 label="Sincronizar Gmail"
-                variant="ghost"
+                icon="mail-outline"
+                variant="link"
                 size="sm"
-                disabled={isGuest}
                 onPress={() =>
                 {
                   void (async () =>
@@ -176,6 +191,7 @@ export default function KanbanScreen()
                   })()
                 }}
               />
+              ) : null}
             </View>
             {syncMsg ? (
               <PrimaryButton label={syncMsg} variant="link" onPress={() => setSyncMsg('')} />

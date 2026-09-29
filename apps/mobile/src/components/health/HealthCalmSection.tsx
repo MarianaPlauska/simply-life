@@ -17,7 +17,7 @@ export function HealthCalmSection()
     <Card tone="elevated" style={{ gap: space.md }}>
       <SectionHeader
         title="Acalmar agora"
-        subtitle="Escolha um guia. Não é prova e não substitui o CVV 188."
+        subtitle="Escolha um guia. Não é prova, é só um apoio curto."
       />
       {CALM_EXERCISES.map((ex) => (
         <PressableScale

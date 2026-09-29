@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { View, Pressable, ScrollView, StyleSheet } from 'react-native'
 import { minutesToLabel, type MobileTask } from '@simply-life/shared'
-import { Text, EmptyState, Chip } from '../../ui'
+import { Text, EmptyState, Chip, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -73,15 +73,15 @@ export function KanbanCalendarPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 16, textTransform: 'capitalize' }}>
-          {selected.month}
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Chip label="Dia" active onPress={() => setView('dia')} />
-          <Chip label="Mês" onPress={() => setView('mes')} />
-        </View>
-      </View>
+      <PaneTitle
+        title={selected.month.charAt(0).toUpperCase() + selected.month.slice(1)}
+        action={
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <Chip label="Dia" active onPress={() => setView('dia')} />
+            <Chip label="Mês" onPress={() => setView('mes')} />
+          </View>
+        }
+      />
 
       <ScrollView
         horizontal

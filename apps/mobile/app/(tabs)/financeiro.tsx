@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { useFocusEffect } from 'expo-router'
 import { formatBRL, cashExpenseTotal, monthIncomeTotal } from '@simply-life/shared'
@@ -14,13 +14,14 @@ import { FinanceMovimentosTab } from '../../src/components/finance/FinanceMovime
 import { FinanceContasTab } from '../../src/components/finance/FinanceContasTab'
 import { FinanceAnaliseTab } from '../../src/components/finance/FinanceAnaliseTab'
 import {
-  FINANCE_MAIN_TABS,
   type FinanceMainTab,
   type MovimentosSubTab,
   type ContasSubTab,
   type AnaliseSubTab,
 } from '../../src/components/finance/financeNav'
 import { useFinanceFocusStore } from '../../src/store/financeFocusStore'
+import { useModules } from '../../src/hooks/useModules'
+import { visibleFinanceTabs } from '../../src/components/finance/financeNav'
 
 export default function FinanceiroScreen()
 {
@@ -34,6 +35,13 @@ export default function FinanceiroScreen()
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const modules = useModules()
+  const mainTabs = visibleFinanceTabs(modules.on)
+  const tabShown = mainTabs.some((t) => t.id === tab) ? tab : (mainTabs[0]?.id ?? tab)
+  useEffect(() =>
+  {
+    if (tabShown !== tab) setTab(tabShown)
+  }, [tabShown, tab])
 
   useFocusEffect(
     useCallback(() =>
@@ -62,29 +70,10 @@ export default function FinanceiroScreen()
           <ScreenIntro title="Carteira" subtitle="Saldo, cartões, extrato e relatórios." />
         )}
 
-        {/* Na Início o saldo tipográfico vive no FinanceHomeTab — KPIs só nas outras abas. */}
-        {tab !== 'inicio' && (
-          <MetricCards
-            items={[
-              {
-                label: 'Saiu da conta',
-                value: formatBRL(despesas),
-                color: colors.finance,
-              },
-              {
-                label: 'Saldo do mês',
-                value: formatBRL(saldo),
-                color: saldo >= 0 ? colors.health : colors.finance,
-                hint: `Entradas ${formatBRL(receitas)}`,
-              },
-            ]}
-          />
-        )}
-
         {!(tab === 'inicio' && cardsFocus) && (
           <SubNavTabs
             accent="finance"
-            tabs={FINANCE_MAIN_TABS.map((t) => ({
+            tabs={mainTabs.map((t) => ({
               ...t,
               count: t.id === 'movimentos' ? movCount : undefined,
             }))}
@@ -120,8 +109,29 @@ export default function FinanceiroScreen()
               }}
             />
           )}
+          {/* KPIs só no Extrato: Carteira, Contas e Análise já mostram entradas e saídas nos próprios cartões. */}
           {tab === 'movimentos' && (
-            <FinanceMovimentosTab subTab={movSub} onSubTabChange={setMovSub} />
+            <FinanceMovimentosTab
+              subTab={movSub}
+              onSubTabChange={setMovSub}
+              summary={
+                <MetricCards
+                  items={[
+                    {
+                      label: 'Saiu da conta',
+                      value: formatBRL(despesas),
+                      color: colors.finance,
+                    },
+                    {
+                      label: 'Saldo do mês',
+                      value: formatBRL(saldo),
+                      color: saldo >= 0 ? colors.health : colors.finance,
+                      hint: `Entradas ${formatBRL(receitas)}`,
+                    },
+                  ]}
+                />
+              }
+            />
           )}
           {tab === 'contas' && (
             <FinanceContasTab

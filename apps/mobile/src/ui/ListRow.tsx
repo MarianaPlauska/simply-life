@@ -1,12 +1,14 @@
 import { Pressable, View, StyleSheet } from 'react-native'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
+import { Icon, type IconName } from './Icon'
 import { useTheme } from '../theme/ThemeProvider'
 
 export function ListRow({
   title,
   subtitle,
   right,
+  rightIcon,
   onPress,
   progress,
   showSeparator,
@@ -14,6 +16,8 @@ export function ListRow({
   title: string
   subtitle?: string
   right?: string
+  /** Ícone à direita (no lugar ou ao lado do texto `right`) */
+  rightIcon?: IconName
   onPress?: () => void
   progress?: number
   showSeparator?: boolean
@@ -55,6 +59,7 @@ export function ListRow({
               {right}
             </Text>
           ) : null}
+          {rightIcon ? <Icon name={rightIcon} size={20} color={colors.inkMuted} /> : null}
         </View>
         {typeof progress === 'number' ? (
           <View

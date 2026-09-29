@@ -13,7 +13,7 @@ import {
   type LifeCategoryId,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, Chip, EmptyState, PressableScale } from '../../ui'
+import { Text, Chip, EmptyState, PressableScale, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import type { ColorTokens } from '@simply-life/ui-tokens'
 import { useWorkspace } from '../../layout/useWorkspace'
@@ -138,18 +138,16 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
   {
     return (
       <View style={{ gap: space.md }}>
-        <View style={{ gap: 4 }}>
-          <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-            Hoje
-          </Text>
-          <Text variant="caption" muted>
-            {dayCount} em aberto · {dateTitle}
-          </Text>
-          <Text variant="caption" muted>
-            A caixinha conclui e guarda em Feitas.
-          </Text>
-        </View>
+        <PaneTitle title="Hoje" subtitle={`${dayCount} em aberto · ${dateTitle}`}>
+          {dayCount > 0 ? (
+            <Text variant="caption" muted>
+              A caixinha conclui e guarda em Feitas.
+            </Text>
+          ) : null}
+        </PaneTitle>
 
+        {/* filtros e dias: um grupo só, perto um do outro, com mais espaço em volta */}
+        <View style={{ gap: 12, marginVertical: space.sm }}>
         <ScrollView
           horizontal
           nestedScrollEnabled
@@ -224,6 +222,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
         ) : null}
 
         <KanbanDateStrip days={days} selectedIso={dayIso} onSelect={setDayIso} />
+        </View>
 
         {hasNow ? (
           <Text variant="caption" muted>

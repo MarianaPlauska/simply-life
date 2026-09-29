@@ -12,6 +12,7 @@ import {
   normalizeHomeMetrics,
   type HomeMetricId,
 } from '../homeMetrics'
+import { normalizeModules, type AppModuleId } from '../appModules'
 
 export type WorkspacePrefs = {
   display_name: string
@@ -61,6 +62,10 @@ export type WorkspacePrefs = {
   mood_report_dismissed_week?: string | null
   /** Wizard Montar seu AXEL concluído */
   setup_completed_at?: string | null
+  /** O que a pessoa usa no app. Ausente = tudo ligado (contas de antes das boas-vindas). */
+  enabled_modules?: AppModuleId[]
+  /** Metas que não têm coluna própria no hábito local: sono (h) e proteína (g). */
+  habit_goals?: { sono?: number; proteina?: number }
 }
 
 export const DEFAULT_WORKSPACE_PREFS: WorkspacePrefs = {
@@ -249,6 +254,8 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
     life_goal: raw?.life_goal ?? null,
     mood_report_dismissed_week: raw?.mood_report_dismissed_week ?? null,
     color_scheme: scheme,
+    enabled_modules: normalizeModules(raw?.enabled_modules),
+    habit_goals: raw?.habit_goals && typeof raw.habit_goals === 'object' ? raw.habit_goals : undefined,
   }
 }
 

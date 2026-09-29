@@ -55,7 +55,8 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
         </Pressable>
       ) : null}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      {/* ações do quadro: quando quebram de linha, ficam coladas (rowGap menor) e seguem parecendo um grupo */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 20, rowGap: 0, flexWrap: 'wrap' }}>
         <Pressable
           onPress={() => void run('manual')}
           disabled={running}

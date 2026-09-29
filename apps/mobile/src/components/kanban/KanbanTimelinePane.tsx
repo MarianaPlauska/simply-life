@@ -7,7 +7,7 @@ import {
   minutesToLabel,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, EmptyState } from '../../ui'
+import { Text, EmptyState, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 
@@ -58,9 +58,7 @@ export function KanbanTimelinePane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <Text variant="section" style={{ textTransform: 'capitalize' }}>
-        {monthLabel}
-      </Text>
+      <PaneTitle title={monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)} />
       <KanbanDateStrip days={days} selectedIso={dayIso} onSelect={setDayIso} />
       <Text variant="section">Timeline</Text>
 

@@ -9,7 +9,7 @@ import {
   stripTaskDisplayNotes,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, EmptyState, PressableScale, PrimaryButton } from '../../ui'
+import { Text, EmptyState, PressableScale, PrimaryButton, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { FolderGlyph } from './FolderGlyph'
@@ -70,14 +70,7 @@ export function KanbanFoldersPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 6 }}>
-        <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-          Pastas
-        </Text>
-        <Text variant="caption" muted>
-          Organize por escopo e leia as anotações de cada tarefa
-        </Text>
-      </View>
+      <PaneTitle title="Pastas" subtitle="Organize por escopo e leia as anotações de cada tarefa." />
 
       <View
         style={{
@@ -101,7 +94,7 @@ export function KanbanFoldersPane({ tasks }: Props)
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text variant="section" style={{ fontSize: 18 }}>
+        <Text variant="section">
           Minhas pastas
         </Text>
         <Text variant="caption" muted>
@@ -165,7 +158,7 @@ export function KanbanFoldersPane({ tasks }: Props)
 
       {lifeScopes.length > 0 ? (
         <View style={{ gap: 12 }}>
-          <Text variant="section" style={{ fontSize: 18 }}>
+          <Text variant="section">
             Pilares
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
@@ -211,7 +204,7 @@ export function KanbanFoldersPane({ tasks }: Props)
       ) : null}
 
       <View style={{ gap: 12 }}>
-        <Text variant="section" style={{ fontSize: 18 }}>
+        <Text variant="section">
           Anotações
         </Text>
         {notes.length === 0 ? (

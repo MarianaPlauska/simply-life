@@ -7,6 +7,8 @@ import { PressableScale, Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 import { useCaptureStore, captureForTab, captureFabLabel } from '../store/captureStore'
 import { hapticLight } from '../lib/haptics'
+import { useModules } from '../hooks/useModules'
+import type { AppModuleGroup } from '../lib/appModules'
 
 const ICONS: Record<string, keyof typeof Icon.glyphMap> = {
   index: 'home-outline',
@@ -22,6 +24,12 @@ const LABELS: Record<string, string> = {
   financeiro: 'Carteira',
 }
 
+const ROUTE_GROUP: Record<string, AppModuleGroup | undefined> = {
+  kanban: 'tarefas',
+  saude: 'saude',
+  financeiro: 'carteira',
+}
+
 /** Barra compacta + Captura sempre elevada (FAB) */
 const BAR_H = 58
 const FAB = 54
@@ -33,14 +41,22 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
   const insets = useSafeAreaInsets()
   const { width: vw } = useWindowDimensions()
   const openCapture = useCaptureStore((s) => s.openCapture)
-  const routes = state.routes
-  const activeIndex = Math.max(0, state.index)
-  const activeName = routes[activeIndex]?.name ?? 'index'
+  const modules = useModules()
+  const activeName = state.routes[Math.max(0, state.index)]?.name ?? 'index'
+  // Aba de um grupo que a pessoa não usa não aparece (volta em Preferências)
+  const routes = state.routes.filter((r) =>
+  {
+    const g = ROUTE_GROUP[r.name]
+    return !g || modules.group(g) || r.name === activeName
+  })
   const capture = captureForTab(activeName)
-  const left = routes.slice(0, 2)
-  const right = routes.slice(2)
+  // o + fica no meio: com número ímpar de abas, um espaço vazio equilibra os lados
+  const half = Math.ceil(routes.length / 2)
+  const left = routes.slice(0, half)
+  const right = routes.slice(half)
+  const pad = left.length - right.length
 
-  // Escuro: barra petróleo e aba ativa coral. Claro: barra branca, aba ativa em tinta petróleo.
+  // Escuro: barra petróleo, aba ativa em petróleo profundo. Claro: barra branca, aba ativa em tinta petróleo. Coral só no + e no pontinho.
   const barBg = colors.navBg
   const idleFg = colors.navInk
   const activeBg = colors.navActiveBg
@@ -49,7 +65,7 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
 
   const renderTab = (route: (typeof routes)[number], i: number) =>
   {
-    const focused = i === activeIndex
+    const focused = route.name === activeName
     const outline = ICONS[route.name] ?? 'ellipse-outline'
     const filled = outline.replace('-outline', '') as keyof typeof Icon.glyphMap
     const label = LABELS[route.name] ?? route.name
@@ -93,6 +109,9 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
           >
             {label}
           </Text>
+          {focused ? (
+            <View style={{ width: 4, height: 4, borderRadius: 2, marginTop: 2, backgroundColor: colors.navActiveDot }} />
+          ) : null}
         </View>
       </PressableScale>
     )
@@ -119,6 +138,7 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
           {left.map((route, i) => renderTab(route, i))}
           <View style={styles.fabGap} />
           {right.map((route, i) => renderTab(route, i + left.length))}
+          {Array.from({ length: pad }).map((_, i) => <View key={`pad-${i}`} style={styles.slot} />)}
         </View>
 
         {/* Captura sempre elevada */}

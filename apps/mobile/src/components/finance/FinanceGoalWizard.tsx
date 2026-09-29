@@ -4,13 +4,22 @@ import { Card, Text, PrimaryButton, Field } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 
-export function FinanceGoalWizard()
+/** `collapsed`: começa como um botão, o formulário abre ao tocar (quando já há metas). */
+export function FinanceGoalWizard({ collapsed = false }: { collapsed?: boolean } = {})
 {
   const { space, colors } = useTheme()
   const addFinanceGoal = useDataStore((s) => s.addFinanceGoal)
   const [titulo, setTitulo] = useState('')
   const [meta, setMeta] = useState('')
   const [msg, setMsg] = useState('')
+  const [open, setOpen] = useState(!collapsed)
+
+  if (!open)
+  {
+    return (
+      <PrimaryButton label="Nova meta" variant="secondary" icon="add" onPress={() => setOpen(true)} />
+    )
+  }
 
   return (
     <Card tone="elevated" style={{ gap: space.md }}>
@@ -37,8 +46,12 @@ export function FinanceGoalWizard()
           setTitulo('')
           setMeta('')
           setMsg('Meta criada')
+          if (collapsed) setOpen(false)
         }}
       />
+      {collapsed ? (
+        <PrimaryButton label="Cancelar" variant="ghost" onPress={() => { setOpen(false); setMsg('') }} />
+      ) : null}
       {msg ? (
         <Text variant="caption" color={colors.axel}>
           {msg}

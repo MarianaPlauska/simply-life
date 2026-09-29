@@ -18,6 +18,18 @@ export async function fetchCashAccount(): Promise<CashAccount>
   return { saldoInicial: Number(data?.saldo_inicial) || 0 }
 }
 
+/** Grava o saldo inicial da conta corrente (a tabela tem uma linha por usuário). */
+export async function upsertCashAccount(saldoInicial: number): Promise<void>
+{
+  const { data: auth } = await supabase.auth.getUser()
+  const uid = auth.user?.id
+  if (!uid) throw new Error('Não autenticado')
+  const { error } = await supabase
+    .from('fin_conta_corrente')
+    .upsert({ user_id: uid, saldo_inicial: saldoInicial, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+  if (error) throw new Error(error.message)
+}
+
 export async function fetchFinanceCards(): Promise<FinanceCard[]>
 {
   const { data, error } = await supabase

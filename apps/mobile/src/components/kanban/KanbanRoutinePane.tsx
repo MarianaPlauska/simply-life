@@ -15,7 +15,7 @@ import {
   waterRoutineGate,
   type RoutineHabit,
 } from '@simply-life/shared'
-import { Text, PrimaryButton, PressableScale, EmptyState, PillTabs } from '../../ui'
+import { Text, PrimaryButton, PressableScale, EmptyState, PillTabs, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useRoutineStore } from '../../store/routineStore'
 import { useDataStore } from '../../store/dataStore'
@@ -141,24 +141,14 @@ export function KanbanRoutinePane()
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-            Rotina
-          </Text>
-          <Text variant="caption" muted>
-            Hábitos constantes: check e sequência da semana
-          </Text>
+      <PaneTitle title="Rotina" subtitle="Marque o que fez hoje. A semana mostra a sequência." />
+      {/* criar fica num lugar só, no topo */}
+      {view === 'hoje' ? (
+        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap', marginTop: -4 }}>
+          <PrimaryButton label="Novo hábito" size="sm" variant="secondary" onPress={() => openCreate('habit')} />
+          <PrimaryButton label="Nova rotina" size="sm" variant="ghost" onPress={() => openCreate('routine')} />
         </View>
-        {view === 'hoje' ? (
-          <PrimaryButton
-            label="Novo hábito"
-            size="sm"
-            variant="secondary"
-            onPress={() => openCreate('habit')}
-          />
-        ) : null}
-      </View>
+      ) : null}
 
       <PillTabs
         tabs={[
@@ -193,8 +183,8 @@ export function KanbanRoutinePane()
             <Icon name="chevron-back" size={18} color={colors.inkMuted} />
           </PressableScale>
           <View style={{ flex: 1, alignItems: 'center', gap: 4 }}>
-            <Text variant="bodyStrong" style={{ textTransform: 'capitalize' }}>
-              {weekTitle}
+            <Text variant="bodyStrong" style={{ textAlign: 'center' }}>
+              {weekTitle.charAt(0).toUpperCase() + weekTitle.slice(1)}
             </Text>
             {weekOffset !== 0 ? (
               <PressableScale
@@ -244,17 +234,9 @@ export function KanbanRoutinePane()
 
       {view === 'hoje' ? (
       <View style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 18 }}>
-          {dayLabel}
-        </Text>
-        <PrimaryButton
-          label="Nova rotina"
-          size="sm"
-          variant="ghost"
-          onPress={() => openCreate('routine')}
-        />
-      </View>
+      <Text variant="section">
+        {dayLabel}
+      </Text>
 
       {roots.length === 0 ? (
         <EmptyState
@@ -277,7 +259,6 @@ export function KanbanRoutinePane()
               {...waterCardProps(item)}
               onToggle={() => onLeaf(item)}
               onEdit={() => openEdit(item)}
-              onDelete={() => confirmRemove(item)}
             />
           )
         }
@@ -297,7 +278,6 @@ export function KanbanRoutinePane()
               checked={allDone}
               onExpand={() => setOpenGroups((s) => ({ ...s, [item.id]: !expanded }))}
               onEdit={() => openEdit(item)}
-              onDelete={() => confirmRemove(item, kids.length)}
               onToggle={() =>
               {
                 if (allDone)
@@ -340,7 +320,6 @@ export function KanbanRoutinePane()
                     {...waterCardProps(kid)}
                     onToggle={() => onLeaf(kid)}
                     onEdit={() => openEdit(kid)}
-                    onDelete={() => confirmRemove(kid)}
                   />
                 ))}
                 <PressableScale
@@ -364,6 +343,7 @@ export function KanbanRoutinePane()
         mode={editor === 'routine' ? 'routine' : 'habit'}
         editing={editing}
         onClose={closeEditor}
+        onDelete={editing ? () => confirmRemove(editing, editing.isGroup ? childrenOf(items, editing.id).length : 0) : undefined}
         onSave={(payload) =>
         {
           if (editing)

@@ -11,12 +11,13 @@ import { HealthCuidadosTab } from '../../src/components/health/HealthCuidadosTab
 import { HealthDiaryTab } from '../../src/components/health/HealthDiaryTab'
 import { HealthApoioTab } from '../../src/components/health/HealthApoioTab'
 import {
-  HEALTH_MAIN_TABS,
   HEALTH_SECTION_INTRO,
   type HealthSection,
   type CuidadosTab,
 } from '../../src/components/health/healthNav'
 import { useTheme } from '../../src/theme/ThemeProvider'
+import { useModules } from '../../src/hooks/useModules'
+import { visibleHealthTabs, visibleCuidadosTabs } from '../../src/components/health/healthNav'
 
 export default function SaudeScreen()
 {
@@ -28,6 +29,16 @@ export default function SaudeScreen()
   const isGuest = useAuthStore((s) => s.isGuest)
   const { space } = useTheme()
   const intro = HEALTH_SECTION_INTRO[section]
+  const modules = useModules()
+  const mainTabs = visibleHealthTabs(modules.on)
+  const careTabs = visibleCuidadosTabs(modules.on)
+
+  // aba escolhida que ficou escondida: vai para a primeira que aparece
+  useEffect(() =>
+  {
+    if (mainTabs.length && !mainTabs.some((t) => t.id === section)) setSection(mainTabs[0].id)
+    if (careTabs.length && !careTabs.some((t) => t.id === cuidadosTab)) setCuidadosTab(careTabs[0].id)
+  }, [mainTabs, careTabs, section, cuidadosTab])
 
   useEffect(() =>
   {
@@ -64,16 +75,17 @@ export default function SaudeScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title={intro.title} subtitle={intro.subtitle} />
+        {/* Título fixo "Saúde": a aba interna já diz Diário/Hoje/Cuidados/Apoio. */}
+        <ScreenIntro title="Saúde" subtitle={intro.subtitle} />
 
         <SubNavTabs
           accent="health"
-          tabs={HEALTH_MAIN_TABS}
+          tabs={mainTabs}
           value={section}
           onChange={setSection}
         />
 
-        <View style={{ marginTop: space.sm }}>
+        <View style={{ marginTop: space.xs }}>
           {section === 'hoje' && (
             <HealthTodayTab
               onGoCuidados={goCuidados}
@@ -82,7 +94,7 @@ export default function SaudeScreen()
             />
           )}
           {section === 'cuidados' && (
-            <HealthCuidadosTab tab={cuidadosTab} onChange={setCuidadosTab} />
+            <HealthCuidadosTab tab={cuidadosTab} onChange={setCuidadosTab} tabs={careTabs} />
           )}
           {section === 'diario' && <HealthDiaryTab />}
           {section === 'apoio' && <HealthApoioTab />}

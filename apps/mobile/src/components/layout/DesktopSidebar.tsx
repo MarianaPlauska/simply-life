@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View, Pressable, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
+import { useModules } from '../../hooks/useModules'
 import { Icon } from '../../ui/Icon'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { Text } from '../../ui'
@@ -33,6 +34,12 @@ export function DesktopSidebar()
   const { space, colors } = useTheme()
   const { isTablet, isDesktop } = useWorkspace()
   const router = useRouter()
+  const modules = useModules()
+  const navVisible = (match: string) =>
+    match === 'kanban' ? modules.group('tarefas')
+      : match === 'saude' ? modules.group('saude')
+        : match === 'financeiro' ? modules.group('carteira')
+          : true
   const pathname = usePathname()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const email = useAuthStore((s) => s.sessionEmail)
@@ -161,7 +168,7 @@ export function DesktopSidebar()
         ) : null}
 
         <View style={{ gap: 4, alignItems: collapsed ? 'center' : 'stretch' }}>
-          {NAV.map((item) =>
+          {NAV.filter((item) => navVisible(item.match)).map((item) =>
           {
             const active = isActive(item)
             return (

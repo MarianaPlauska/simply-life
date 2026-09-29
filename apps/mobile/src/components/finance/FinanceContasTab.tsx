@@ -3,6 +3,7 @@ import { View } from 'react-native'
 import {
   computeSaldoDisponivel,
   formatBRL,
+  todayIso,
   formatSaldo,
   seriesColor,
 } from '@simply-life/shared'
@@ -12,7 +13,8 @@ import { useDataStore } from '../../store/dataStore'
 import { useFixaMetaStore } from '../../store/fixaMetaStore'
 import { FIXA_URGENCIA_LABELS } from '../../lib/fixaMeta'
 import { FinanceIcon } from '../../lib/financeIcons'
-import { CONTAS_SUB_TABS, type ContasSubTab } from './financeNav'
+import { visibleContasTabs, type ContasSubTab } from './financeNav'
+import { useModules } from '../../hooks/useModules'
 import { FinanceCardsHub } from './FinanceCardsHub'
 import { InvitePartnerCard } from './InvitePartnerCard'
 import { FinanceCategoriesSheet } from './FinanceCategoriesSheet'
@@ -23,6 +25,14 @@ type Props = {
   subTab: ContasSubTab
   onSubTabChange: (tab: ContasSubTab) => void
   onGoMovimentos?: () => void
+}
+
+/** Vencimento em texto: paga, venceu (em aberto e atrasada) ou vence. */
+function billSubtitle(status: 'aberta' | 'paga', iso: string): string
+{
+  const day = new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })
+  if (status === 'paga') return `Paga, vencia ${day}`
+  return iso < todayIso() ? `Venceu ${day}` : `Vence ${day}`
 }
 
 export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Props)
@@ -39,6 +49,12 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
   const hydrateFixas = useFixaMetaStore((s) => s.hydrate)
   const resolveFixa = useFixaMetaStore((s) => s.resolve)
   const fixaMap = useFixaMetaStore((s) => s.map)
+  const subTabs = visibleContasTabs(useModules().on)
+  const shown = subTabs.some((t) => t.id === subTab) ? subTab : (subTabs[0]?.id ?? subTab)
+  useEffect(() =>
+  {
+    if (shown !== subTab) onSubTabChange(shown)
+  }, [shown, subTab, onSubTabChange])
 
   useEffect(() =>
   {
@@ -48,7 +64,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
   return (
     <View style={{ gap: space.md }}>
       <SubNavTabs
-        tabs={CONTAS_SUB_TABS.map((t) => ({
+        tabs={subTabs.map((t) => ({
           ...t,
           count:
             t.id === 'cartoes'
@@ -97,7 +113,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
           <Card tone="elevated" style={{ gap: space.sm }}>
             <SectionHeader
               title="Categorias"
-              subtitle="Nome, ícone e cor dos gastos"
+              subtitle="Nome, ícone e cor de cada gasto"
               action={
                 <PrimaryButton
                   label="Editar"
@@ -107,9 +123,6 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                 />
               }
             />
-            <Text variant="caption" muted>
-              Personalize Moradia, Alimentação e as demais no seletor de captura.
-            </Text>
           </Card>
           <FinanceCategoriesSheet visible={catsOpen} onClose={() => setCatsOpen(false)} />
         </>
@@ -130,15 +143,20 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
           {bills.length === 0 ? (
             <EmptyState title="Nada a pagar" body="Contas e faturas aparecem aqui." />
           ) : (
-            bills.map((bill, i) => (
-              <ListRow
-                key={bill.id}
-                title={bill.titulo}
-                subtitle={`Vence ${bill.vencimento}`}
-                right={formatBRL(bill.valor)}
-                showSeparator={i < bills.length - 1}
-              />
-            ))
+            // em aberto primeiro, por vencimento; pagas no fim, marcadas como pagas
+            [...bills]
+              .sort((a, b) =>
+                (a.status === b.status ? 0 : a.status === 'aberta' ? -1 : 1)
+                || a.vencimento.localeCompare(b.vencimento))
+              .map((bill, i, arr) => (
+                <ListRow
+                  key={bill.id}
+                  title={bill.titulo}
+                  subtitle={billSubtitle(bill.status, bill.vencimento.slice(0, 10))}
+                  right={formatBRL(bill.valor)}
+                  showSeparator={i < arr.length - 1}
+                />
+              ))
           )}
         </Card>
       )}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { type ReactNode, useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { formatBRL } from '@simply-life/shared'
 import {
@@ -22,9 +22,11 @@ import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 type Props = {
   subTab: MovimentosSubTab
   onSubTabChange: (tab: MovimentosSubTab) => void
+  /** Resumo do mês (KPIs), logo abaixo das sub-abas */
+  summary?: ReactNode
 }
 
-export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
+export function FinanceMovimentosTab({ subTab, onSubTabChange, summary }: Props)
 {
   const { space } = useTheme()
   const openCapture = useCaptureStore((s) => s.openCapture)
@@ -35,16 +37,18 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
   return (
     <View style={{ gap: space.md }}>
       <SubNavTabs
-        tabs={MOVIMENTOS_SUB_TABS.map((t) => ({ ...t, count: t.id === 'diario' ? rows.length : undefined }))}
+        tabs={MOVIMENTOS_SUB_TABS}
         value={subTab}
         onChange={onSubTabChange}
         accent="finance"
       />
 
+      {summary}
+
       <SectionHeader
         title={
-          subTab === 'diario'
-            ? 'Diário'
+          subTab === 'diario' || subTab === 'lista'
+            ? 'Lançamentos'
             : subTab === 'planilha'
               ? 'Planilha'
               : subTab === 'pastas'
@@ -89,7 +93,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange }: Props)
               key={t.id}
               title={t.titulo}
               subtitle={financeTxSubtitle(t)}
-              right={formatBRL(t.valor)}
+              right={`${t.tipo === 'receita' ? '+' : '-'}${formatBRL(t.valor)}`}
               onPress={() => setEditingTx(t.id)}
               showSeparator={i < arr.length - 1}
             />

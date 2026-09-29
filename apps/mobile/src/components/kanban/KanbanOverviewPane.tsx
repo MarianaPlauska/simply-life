@@ -140,9 +140,9 @@ export function KanbanOverviewPane({ tasks }: Props)
         </View>
         <View style={{ flex: 1, gap: 4 }}>
           <Text variant="caption" muted>
-            Welcome
+            Olá,
           </Text>
-          <Text variant="section" style={{ fontSize: 18 }}>
+          <Text variant="bodyStrong">
             {displayName}
           </Text>
         </View>
@@ -165,8 +165,8 @@ export function KanbanOverviewPane({ tasks }: Props)
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 20, letterSpacing: -0.3 }}>
-          Overview
+        <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.25 }}>
+          Visão geral
         </Text>
         <View
           style={{
@@ -226,7 +226,7 @@ export function KanbanOverviewPane({ tasks }: Props)
       {/* Projetos / pilares */}
       <View style={{ gap: space.sm }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text variant="section" style={{ fontSize: 17 }}>
+          <Text variant="section">
             Projetos
           </Text>
           <Text variant="caption" muted>
@@ -276,7 +276,7 @@ export function KanbanOverviewPane({ tasks }: Props)
       {/* Today's tasks */}
       <View style={{ gap: space.sm }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text variant="section" style={{ fontSize: 17 }}>
+          <Text variant="section">
             Tarefas de hoje
           </Text>
           <PressableScale

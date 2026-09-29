@@ -43,7 +43,7 @@ export function RoutineReportPane({ items, logs, weekOffset }: Props)
   return (
     <View style={{ gap: space.md }}>
       <View style={{ gap: 6 }}>
-        <Text variant="section" style={{ fontSize: 18 }}>
+        <Text variant="section">
           Relatório
         </Text>
         <Text variant="caption" muted style={{ textTransform: 'capitalize' }}>

@@ -35,7 +35,7 @@ export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
             }}
           >
             <ScrollView style={{ flexGrow: 0, maxHeight: 400 }} contentContainerStyle={{ gap: space.md }}>
-            <Text variant="section">Decision log</Text>
+            <Text variant="section">Histórico de decisões</Text>
             {groups.length === 0 ? (
               <EmptyState
                 title="Sem decisões ainda"

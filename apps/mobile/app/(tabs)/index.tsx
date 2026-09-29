@@ -51,6 +51,7 @@ import { usePrefsStore } from '../../src/store/prefsStore'
 import { normalizeHomeMetrics } from '../../src/lib/homeMetrics'
 import { resolveAxelName } from '../../src/lib/axelName'
 import type { DashboardPriority } from '../../src/lib/dashboardWidgets'
+import { filterMetrics, filterPriorities } from '../../src/lib/appModules'
 
 function greetingForHour(h: number): string
 {
@@ -99,7 +100,7 @@ export default function DashboardScreen()
   const waterLabel = agua
     ? `${agua.progressoAtual}/${agua.metaDiaria ?? AGUA_META_COPOS}`
     : '-'
-  const homeMetrics = normalizeHomeMetrics(prefs.home_metric_cards)
+  const homeMetrics = filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards))
   const waterOnHome = homeMetrics.includes('water')
   const humorOnHome = homeMetrics.includes('humor')
   const sleepOnHome = homeMetrics.includes('sleep')
@@ -115,7 +116,7 @@ export default function DashboardScreen()
   const rpgMode = prefs.gamification_mode === 'rpg'
   const [axelTick, setAxelTick] = useState(0)
   const showAxel = humorOnHome && moodDone && Date.now() < axelUntil
-  const moduleOrder = prefs.home_module_order ?? ['tasks', 'health', 'finance']
+  const moduleOrder = filterPriorities(prefs.enabled_modules, prefs.home_module_order ?? ['tasks', 'health', 'finance'])
 
   const kpiItems = useMemo(() =>
   {
@@ -300,8 +301,6 @@ export default function DashboardScreen()
 
             {rpgMode ? <HomeRpgStrip /> : null}
 
-            <HomeDayTimeline tasks={today} />
-
             {showAxel || waterOnHome ? (
               (isTablet) && waterOnHome ? (
                 <View style={{ flexDirection: 'row', gap: 16, alignItems: 'stretch' }}>
@@ -320,19 +319,14 @@ export default function DashboardScreen()
               )
             ) : null}
 
-            <View style={{ gap: 16 }}>
-              <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
-                Seu dia
-              </Text>
-              <HomeKpiSquares items={kpiItems} />
-            </View>
-
-            <View style={{ gap: 16 }}>
-              <Text variant="section" style={{ fontSize: 17 }}>
-                Atalhos
-              </Text>
-              <HomeMetricShortcuts />
-            </View>
+            {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
+            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, resumo e atalhos" pill="abrir" defaultOpen={false}>
+              <View style={{ gap: 24, paddingTop: 8 }}>
+                <HomeDayTimeline tasks={today} />
+                <HomeKpiSquares items={kpiItems} />
+                <HomeMetricShortcuts />
+              </View>
+            </HomeCollapsible>
           </>
         )}
 
@@ -505,6 +499,15 @@ export default function DashboardScreen()
                 Conta, personalização e atalhos
               </Text>
             </View>
+            {/* Tema no topo: é o ajuste mais usado e aparece sem rolar */}
+            <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
+              <ListRow
+                title={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+                subtitle={mode === 'dark' ? 'Agora no tema escuro' : 'Agora no tema claro'}
+                rightIcon={mode === 'dark' ? 'sunny' : 'moon'}
+                onPress={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+              />
+            </Card>
             <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
               {(
                 [
@@ -512,7 +515,7 @@ export default function DashboardScreen()
                   { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
                   { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
                   { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
-                  { label: 'Preferências', subtitle: 'Notificações e hábitos', href: '/preferencias' },
+                  { label: 'Preferências', subtitle: 'O que eu uso, metas e alertas', href: '/preferencias' },
                   { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                   { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                   { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
@@ -535,16 +538,6 @@ export default function DashboardScreen()
               ))}
             </Card>
             <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
-              <ListRow
-                title={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-                subtitle="Aparência do app"
-                onPress={() =>
-                {
-                  const next = mode === 'dark' ? 'light' : 'dark'
-                  setMode(next)
-                }}
-                showSeparator
-              />
               <ListRow
                 title="Sair"
                 subtitle="Encerrar sessão neste aparelho"

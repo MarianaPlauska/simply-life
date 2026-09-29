@@ -12,16 +12,18 @@ import { useTheme } from '../../theme/ThemeProvider'
 type Props = {
   tab: CuidadosTab
   onChange: (tab: CuidadosTab) => void
+  /** Só os cuidados que a pessoa usa */
+  tabs?: typeof CUIDADOS_SUB_TABS
 }
 
-export function HealthCuidadosTab({ tab, onChange }: Props)
+export function HealthCuidadosTab({ tab, onChange, tabs = CUIDADOS_SUB_TABS }: Props)
 {
   const { space } = useTheme()
 
   return (
     <View style={{ gap: space.md }}>
       <SubNavTabs
-        tabs={CUIDADOS_SUB_TABS}
+        tabs={tabs}
         value={tab}
         onChange={onChange}
         accent="health"

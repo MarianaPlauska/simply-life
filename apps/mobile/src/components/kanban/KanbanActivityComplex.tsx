@@ -50,7 +50,7 @@ export function KanbanActivityComplex({ tasks }: Props)
         <Text variant="caption" muted style={{ fontWeight: '700', letterSpacing: 0.6 }}>
           CONSTÂNCIA
         </Text>
-        <Text variant="section" style={{ fontSize: 17, marginTop: 4 }}>
+        <Text variant="section" style={{ marginTop: 4 }}>
           {streak.current} dias de ritmo
         </Text>
         <Text variant="caption" muted>

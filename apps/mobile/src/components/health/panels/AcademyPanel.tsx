@@ -99,12 +99,15 @@ export function AcademyPanel()
           onPress={() => setEditorOpen(true)}
           style={pillBtn}
         />
-        <PrimaryButton
-          label={sessionDone ? 'Desmarcar sessão do dia' : 'Encerrar sessão'}
-          variant="ghost"
-          onPress={() => void toggleTreinoDone(isGuest)}
-          style={pillBtn}
-        />
+        {/* no dia de folga não há sessão para encerrar; só aparece para desfazer se marcou */}
+        {!restDay || sessionDone ? (
+          <PrimaryButton
+            label={sessionDone ? 'Desmarcar sessão do dia' : 'Encerrar sessão'}
+            variant="ghost"
+            onPress={() => void toggleTreinoDone(isGuest)}
+            style={pillBtn}
+          />
+        ) : null}
       </HealthScreenSection>
       <AcademyPlanSheet
         visible={editorOpen}

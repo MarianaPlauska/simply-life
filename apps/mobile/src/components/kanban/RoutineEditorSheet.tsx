@@ -16,10 +16,12 @@ type Props = {
     dailyTarget: number
     weeklyTarget: number
   }) => void
+  /** Excluir fica aqui, dentro de Editar, e não em cada card da lista */
+  onDelete?: () => void
 }
 
 /** Criar ou editar hábito avulso ou rotina-mãe. */
-export function RoutineEditorSheet({ visible, mode, editing, onClose, onSave }: Props)
+export function RoutineEditorSheet({ visible, mode, editing, onClose, onSave, onDelete }: Props)
 {
   const { colors, space, radius } = useTheme()
   const insets = useSafeAreaInsets()
@@ -149,6 +151,17 @@ export function RoutineEditorSheet({ visible, mode, editing, onClose, onSave }: 
                 }}
               />
               <PrimaryButton label="Cancelar" variant="ghost" onPress={onClose} />
+              {isEdit && onDelete ? (
+                <PrimaryButton
+                  label={mode === 'routine' ? 'Excluir rotina' : 'Excluir hábito'}
+                  variant="link"
+                  onPress={() =>
+                  {
+                    onClose()
+                    onDelete()
+                  }}
+                />
+              ) : null}
             </View>
           </ScrollView>
         </View>

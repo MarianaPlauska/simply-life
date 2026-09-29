@@ -12,6 +12,7 @@ import { usePrefsStore } from '../../../store/prefsStore'
 import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '../../../lib/homeMetrics'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { filterMetrics } from '../../../lib/appModules'
 
 function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
 {
@@ -32,7 +33,10 @@ export function WebShortcutsBar()
   const isGuest = useAuthStore((s) => s.isGuest)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const prefs = usePrefsStore((s) => s.prefs)
-  const ids = useMemo(() => normalizeHomeMetrics(prefs.home_metric_cards), [prefs.home_metric_cards])
+  const ids = useMemo(
+    () => filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards)),
+    [prefs.home_metric_cards, prefs.enabled_modules],
+  )
   const humor = useDataStore((s) => s.humor) ?? []
   const habits = useDataStore((s) => s.habits) ?? []
   const tasks = useDataStore((s) => s.tasks) ?? []

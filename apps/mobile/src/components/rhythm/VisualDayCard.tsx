@@ -39,7 +39,9 @@ export function VisualDayCard()
   const nowMin = now.getHours() * 60 + now.getMinutes()
 
   const nothing = !day.blocks.length && !day.allDay.length && !day.unplaced.length
-  if (nothing && source) return null
+  // sem nada no dia, o card só aparece para convidar a conectar a agenda; com agenda
+  // conectada ou depois de "Conectar depois", ele some em vez de mostrar um card vazio
+  if (nothing && !showAgendaPrompt) return null
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>

@@ -155,10 +155,11 @@ export function FinanceMonthReport()
         <Card
           tone="elevated"
           style={{
-            flex: 1,
+            flex: isDesktop ? 1 : undefined,
             alignItems: 'center',
             gap: space.md,
-            minHeight: 260,
+            // no celular o card abraça o donut; a altura mínima só alinha com o Ranking lado a lado
+            minHeight: isDesktop ? 260 : undefined,
           }}
         >
           <Text variant="caption" muted>
@@ -177,7 +178,7 @@ export function FinanceMonthReport()
           )}
         </Card>
 
-        <Card tone="elevated" style={{ flex: 1, gap: space.md }}>
+        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.md }}>
           <SectionHeader title="Ranking" subtitle="Maiores categorias" />
           {ranking.length === 0 ? (
             <EmptyState title="Sem categorias" body="Os gráficos aparecem com o primeiro gasto." />

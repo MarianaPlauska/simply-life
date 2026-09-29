@@ -118,6 +118,8 @@ export type ColorTokens = {
   navActiveBg: string
   /** Ícone e rótulo da aba ativa */
   navActiveInk: string
+  /** Pontinho sob a aba ativa (detalhe coral, não bloco) */
+  navActiveDot: string
   /** Cartão de destaque (progresso de hoje, painel de saúde, busca) */
   featureBg: string
   featureInk: string
@@ -174,8 +176,10 @@ export const COLOR_DARK: ColorTokens = {
   navBg: BRAND.petroleo,
   navBorder: 'transparent',
   navInk: BRAND.menta,
-  navActiveBg: BRAND.coral,
-  navActiveInk: BRAND.carvao,
+  /** Petróleo profundo (mesmo do heroBgDeep): a aba ativa afunda na barra, sem bloco claro */
+  navActiveBg: '#152B2D',
+  navActiveInk: '#EEF2F0',
+  navActiveDot: BRAND.coral,
   featureBg: '#232C2B',
   featureInk: '#EEF2F0',
   featureMuted: '#9FB0AC',
@@ -231,6 +235,7 @@ export const COLOR_LIGHT: ColorTokens = {
   navActiveBg: '#E3ECE9',
   /** 10,1:1 no navActiveBg */
   navActiveInk: BRAND.petroleo,
+  navActiveDot: BRAND.coral,
   featureBg: '#E4EDEA',
   /** 10,2:1 */
   featureInk: BRAND.petroleo,
