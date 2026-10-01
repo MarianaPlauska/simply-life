@@ -134,7 +134,7 @@ export default function OfensivaScreen()
         </Pressable>
       </View>
       <Text variant="hero" style={{ fontSize: 32, letterSpacing: -0.8, marginBottom: 12 }}>
-        Pique
+        Elo
       </Text>
 
       <PillTabs

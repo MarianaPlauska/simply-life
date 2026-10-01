@@ -62,14 +62,14 @@ export function GlassHeader() {
   }, [isProfileOpen, isNotifOpen]);
 
   return (
-    <header className="shrink-0 w-full bg-black border-b border-zinc-900 relative z-50">
+    <header className="shrink-0 w-full bg-fundo border-b border-zinc-900 relative z-50">
       <div className="px-6 h-14 flex items-center justify-between gap-4">
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-[13px] text-zinc-500">Simply-Life</span>
           <span className="text-zinc-700">/</span>
-          <span className="text-[14px] font-semibold text-white">{VIEW_LABELS[activeView] || activeView}</span>
+          <span className="text-[14px] font-semibold text-ink">{VIEW_LABELS[activeView] || activeView}</span>
         </div>
 
         {/* Pinned Tabs (center) */}
@@ -83,8 +83,8 @@ export function GlassHeader() {
                   onClick={() => navigate(VIEW_TO_PATH[moduleId] || '/')}
                   className={`relative px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
                     isActive
-                      ? 'text-white bg-card border border-zinc-900'
-                      : 'text-zinc-400 hover:text-white hover:bg-card'
+                      ? 'text-ink bg-card border border-zinc-900'
+                      : 'text-zinc-400 hover:text-ink hover:bg-card'
                   }`}
                 >
                   {VIEW_LABELS[moduleId] || moduleId}

@@ -170,7 +170,7 @@ export function SetupQuestsSection()
                 <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-violet-400 animate-pulse" />
               </div>
               <div>
-                <h3 className="text-[14px] font-semibold text-white flex items-center gap-2">
+                <h3 className="text-[14px] font-semibold text-ink flex items-center gap-2">
                   Setup do Simply-Life
                   <span className="text-[11px] font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
                     +{quests.reduce((sum, q) =>

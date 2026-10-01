@@ -73,7 +73,7 @@ function SectionHeader({ icon: Icon, title, subtitle, iconColor = 'text-ia' }: {
 }) {
   return (
     <div className="mb-5">
-      <h3 className="text-[15px] font-semibold text-white flex items-center gap-2.5">
+      <h3 className="text-[15px] font-semibold text-ink flex items-center gap-2.5">
         <div className="w-8 h-8 rounded-lg bg-zinc-800/60 flex items-center justify-center">
           <Icon className={`w-4 h-4 ${iconColor}`} />
         </div>
@@ -279,7 +279,7 @@ export function PreferencesView() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-[13px] font-medium ${active ? 'text-white' : 'text-zinc-400'}`}>{label}</span>
+                    <span className={`text-[13px] font-medium ${active ? 'text-ink' : 'text-zinc-400'}`}>{label}</span>
                     <ToggleSwitch active={active} onChange={() => toggleModulo(id)} size="sm" />
                   </div>
                   <p className="text-[11px] text-zinc-600 mt-0.5">{desc}</p>
@@ -299,7 +299,7 @@ export function PreferencesView() {
         />
         <div className="flex items-center gap-2 rounded-xl border border-violet-500/20 bg-violet-500/5 px-3 py-2 mb-3">
           <span className="font-mono text-[10px] uppercase text-zinc-500">Fixo</span>
-          <span className="text-[13px] font-medium text-white">Home</span>
+          <span className="text-[13px] font-medium text-ink">Home</span>
         </div>
         <p className="font-mono text-[10px] uppercase text-zinc-500 mb-3">
           {mobileNavModules.filter((m) => m !== MOBILE_NAV_HOME_ID).length}/{MAX_MOBILE_NAV_OPTIONAL} módulos
@@ -322,7 +322,7 @@ export function PreferencesView() {
                     : 'bg-zinc-800/20 border-zinc-800/40 hover:border-zinc-700/50'
                 } ${full ? 'opacity-40 cursor-not-allowed' : ''}`}
               >
-                <span className={`text-[13px] font-medium ${active ? 'text-white' : 'text-zinc-400'}`}>
+                <span className={`text-[13px] font-medium ${active ? 'text-ink' : 'text-zinc-400'}`}>
                   {opt.label}
                 </span>
                 <p className="text-[11px] text-zinc-600 mt-0.5">{opt.hint}</p>
@@ -339,7 +339,7 @@ export function PreferencesView() {
             <select
               value={timerConfig.pomodoroTime}
               onChange={(e) => setTimerConfig('pomodoroTime', Number(e.target.value))}
-              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30"
+              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-ink outline-none focus:ring-2 focus:ring-ia/30"
             >
               <option value={25}>25 min</option>
               <option value={30}>30 min</option>
@@ -351,7 +351,7 @@ export function PreferencesView() {
             <select
               value={timerConfig.shortBreak}
               onChange={(e) => setTimerConfig('shortBreak', Number(e.target.value))}
-              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30"
+              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-ink outline-none focus:ring-2 focus:ring-ia/30"
             >
               <option value={5}>5 min</option>
               <option value={10}>10 min</option>
@@ -391,13 +391,13 @@ export function PreferencesView() {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
               placeholder="urgente, vaga, boleto, contrato..."
-              className="flex-1 min-w-[120px] bg-transparent text-[13px] text-white placeholder:text-zinc-600 outline-none"
+              className="flex-1 min-w-[120px] bg-transparent text-[13px] text-ink placeholder:text-zinc-600 outline-none"
             />
           </div>
           <button
             onClick={handleAddClick}
             disabled={!inputValue.trim()}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-ia hover:bg-ia/90 text-white text-[12px] font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-ia hover:bg-ia/90 text-ink text-[12px] font-semibold transition-colors disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
             <Plus className="w-3.5 h-3.5" />
             Adicionar
@@ -429,7 +429,7 @@ export function PreferencesView() {
                 value={keywordFilter}
                 onChange={(e) => setKeywordFilter(e.target.value)}
                 placeholder="Filtrar palavras..."
-                className="flex-1 bg-transparent text-[12px] text-white placeholder:text-zinc-600 outline-none"
+                className="flex-1 bg-transparent text-[12px] text-ink placeholder:text-zinc-600 outline-none"
               />
               {keywordFilter && (
                 <button onClick={() => setKeywordFilter('')} className="p-0.5 rounded hover:bg-zinc-700 transition-colors">
@@ -516,7 +516,7 @@ export function PreferencesView() {
               }`}
             >
               <t.icon className={`w-5 h-5 ${accessibility.colorScheme === t.id ? 'text-ia' : 'text-zinc-500'}`} />
-              <span className={`text-[12px] font-medium ${accessibility.colorScheme === t.id ? 'text-white' : 'text-zinc-400'}`}>{t.label}</span>
+              <span className={`text-[12px] font-medium ${accessibility.colorScheme === t.id ? 'text-ink' : 'text-zinc-400'}`}>{t.label}</span>
               <span className="text-[10px] text-zinc-600">{t.desc}</span>
             </button>
           ))}
@@ -579,12 +579,12 @@ export function PreferencesView() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setAccessibility('fontSize', Math.max(12, accessibility.fontSize - 1))}
-                className="w-7 h-7 rounded-lg bg-zinc-800/50 border border-zinc-700/40 text-zinc-400 hover:text-white transition-colors flex items-center justify-center text-[13px] font-bold"
+                className="w-7 h-7 rounded-lg bg-zinc-800/50 border border-zinc-700/40 text-zinc-400 hover:text-ink transition-colors flex items-center justify-center text-[13px] font-bold"
               >−</button>
               <span className="text-[12px] text-zinc-300 w-8 text-center font-mono">{accessibility.fontSize}</span>
               <button
                 onClick={() => setAccessibility('fontSize', Math.min(22, accessibility.fontSize + 1))}
-                className="w-7 h-7 rounded-lg bg-zinc-800/50 border border-zinc-700/40 text-zinc-400 hover:text-white transition-colors flex items-center justify-center text-[13px] font-bold"
+                className="w-7 h-7 rounded-lg bg-zinc-800/50 border border-zinc-700/40 text-zinc-400 hover:text-ink transition-colors flex items-center justify-center text-[13px] font-bold"
               >+</button>
             </div>
           </SettingRow>
@@ -659,7 +659,7 @@ export function PreferencesView() {
             <select
               value={sessionTimeout}
               onChange={(e) => setSessionTimeout(Number(e.target.value))}
-              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-white outline-none focus:ring-2 focus:ring-ia/30"
+              className="bg-zinc-800/50 border border-zinc-700/40 rounded-lg px-3 py-1.5 text-[12px] text-ink outline-none focus:ring-2 focus:ring-ia/30"
             >
               <option value={1}>1 hora</option>
               <option value={8}>8 horas</option>
@@ -724,7 +724,7 @@ export function PreferencesView() {
     <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-16`}>
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Preferências</h1>
+        <h1 className="text-2xl font-bold text-ink tracking-tight">Preferências</h1>
         <p className="text-sm text-zinc-500 mt-1">Configure sua experiência no Simply-Life</p>
       </div>
 
@@ -745,7 +745,7 @@ export function PreferencesView() {
               >
                 <tab.icon className={`w-[18px] h-[18px] ${active ? 'text-ia' : 'text-zinc-500'}`} />
                 <div className="min-w-0">
-                  <p className={`text-[13px] font-medium ${active ? 'text-white' : 'text-zinc-400'}`}>{tab.label}</p>
+                  <p className={`text-[13px] font-medium ${active ? 'text-ink' : 'text-zinc-400'}`}>{tab.label}</p>
                   <p className="text-[10px] text-zinc-600 truncate">{tab.description}</p>
                 </div>
               </button>
@@ -756,7 +756,7 @@ export function PreferencesView() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full flex items-center justify-center gap-2 bg-ia hover:bg-ia/90 text-white rounded-xl px-4 py-2.5 text-[13px] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 bg-ia hover:bg-ia/90 text-ink rounded-xl px-4 py-2.5 text-[13px] font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               {saving ? 'Salvando...' : 'Salvar'}

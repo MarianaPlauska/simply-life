@@ -41,7 +41,7 @@ export const GAMIFICATION_MODE_OPTIONS: {
   {
     id: 'calm',
     label: 'Discreto',
-    hint: 'XP e pique ficam em segundo plano. Sem elementos de jogo na tela inicial.',
+    hint: 'XP e elo ficam em segundo plano. Sem elementos de jogo na tela inicial.',
   },
   {
     id: 'rpg',

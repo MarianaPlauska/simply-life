@@ -123,7 +123,7 @@ export function GmailImapSection()
             <Mail className="w-5 h-5 text-violet-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-[15px] font-semibold text-white">Gmail - plano gratuito</h3>
+            <h3 className="text-[15px] font-semibold text-ink">Gmail - plano gratuito</h3>
             <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
               Sem Google Cloud e sem cartão. Use uma senha de app do Gmail; o AXEL tria com Groq e
               cria tarefas urgentes no Kanban.
@@ -162,7 +162,7 @@ export function GmailImapSection()
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="voce@gmail.com"
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white outline-none focus:border-violet-500/50"
+              className="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-ink outline-none focus:border-violet-500/50"
             />
           </label>
           <label className="block">
@@ -172,7 +172,7 @@ export function GmailImapSection()
               value={appPassword}
               onChange={(e) => setAppPassword(e.target.value)}
               placeholder={configured ? '••••••••••••••••' : 'xxxx xxxx xxxx xxxx'}
-              className="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white outline-none focus:border-violet-500/50"
+              className="mt-1 w-full px-3 py-2 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-ink outline-none focus:border-violet-500/50"
             />
           </label>
         </div>
@@ -184,7 +184,7 @@ export function GmailImapSection()
             value={folder}
             onChange={(e) => setFolder(e.target.value)}
             placeholder="INBOX ou Simply-Life"
-            className="mt-1 w-full px-3 py-2 min-h-11 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-white outline-none focus:border-violet-500/50"
+            className="mt-1 w-full px-3 py-2 min-h-11 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-ink outline-none focus:border-violet-500/50"
           />
           <span className="mt-1 block text-[11px] text-zinc-500">
             Se a pasta não existir, o sync usa a Inbox. Crie o rótulo Simply-Life no Gmail para filtrar newsletters.

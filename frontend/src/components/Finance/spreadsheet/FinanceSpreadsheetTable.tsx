@@ -17,7 +17,7 @@ const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
 const HEAD =
-  'px-2 py-2 font-mono text-[9px] uppercase tracking-wide text-white whitespace-nowrap'
+  'px-2 py-2 font-mono text-[9px] uppercase tracking-wide text-ink whitespace-nowrap'
 
 interface FinanceSpreadsheetTableProps
 {

@@ -43,9 +43,9 @@ export function ResetPasswordView ()
   const handleSubmit = async (e: React.FormEvent) =>
   {
     e.preventDefault()
-    if (!senha.trim() || senha.length < 6)
+    if (!senha.trim() || senha.length < 8)
     {
-      toast.error('A senha precisa ter no mínimo 6 caracteres')
+      toast.error('A senha precisa ter no mínimo 8 caracteres')
       return
     }
     if (senha !== confirmar)
@@ -89,7 +89,7 @@ export function ResetPasswordView ()
       <div className="flex items-center justify-center h-screen bg-zinc-950">
         <div className="text-center space-y-4">
           <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
-          <h2 className="text-xl font-bold text-white">Senha atualizada!</h2>
+          <h2 className="text-xl font-bold text-ink">Senha atualizada!</h2>
           <p className="text-sm text-zinc-400">Redirecionando para o login...</p>
         </div>
       </div>
@@ -112,7 +112,7 @@ export function ResetPasswordView ()
         {/* logo */}
         <div className="flex flex-col items-center mb-10">
           <SimplyLifeMark variant="lockup" className="mb-5" />
-          <h1 className="text-[26px] font-bold text-white tracking-tight">Redefinir Senha</h1>
+          <h1 className="text-[26px] font-bold text-ink tracking-tight">Redefinir Senha</h1>
           <p className="text-[13px] text-zinc-500 mt-1.5 tracking-wide">
             {hasSession ? 'Escolha uma nova senha para sua conta' : 'Link inválido ou expirado'}
           </p>
@@ -130,10 +130,10 @@ export function ResetPasswordView ()
                     type={showPassword ? 'text' : 'password'}
                     value={senha}
                     onChange={(e) => setSenha(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
+                    placeholder="Mínimo 8 caracteres"
                     autoFocus
                     className="w-full bg-zinc-800/50 border border-zinc-700/40 rounded-xl pl-10 pr-10 py-3
-                               text-[13px] text-white placeholder:text-zinc-600
+                               text-[13px] text-ink placeholder:text-zinc-600
                                focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/10 focus:outline-none
                                transition-all"
                   />
@@ -158,7 +158,7 @@ export function ResetPasswordView ()
                     onChange={(e) => setConfirmar(e.target.value)}
                     placeholder="Repita a senha"
                     className="w-full bg-zinc-800/50 border border-zinc-700/40 rounded-xl pl-10 pr-4 py-3
-                               text-[13px] text-white placeholder:text-zinc-600
+                               text-[13px] text-ink placeholder:text-zinc-600
                                focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/10 focus:outline-none
                                transition-all"
                   />

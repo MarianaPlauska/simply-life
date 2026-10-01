@@ -32,7 +32,7 @@ export function HomeRpgStrip()
             <Text variant="bodyStrong">Nível {level} · {gold} moedas</Text>
           </View>
           <Text variant="caption" muted>
-            Pique {streak}
+            Elo {streak}
           </Text>
         </View>
         <View

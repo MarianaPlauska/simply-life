@@ -40,7 +40,7 @@ export function FinanceMoodMascot({
       >
         {billAlertCount > 0 && (
           <motion.span
-            className="absolute -top-0.5 -right-0.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-urgente px-1 text-[9px] font-bold text-white shadow-sm"
+            className="absolute -top-0.5 -right-0.5 z-10 flex h-4 min-w-4 items-center justify-center rounded-full bg-urgente px-1 text-[9px] font-bold text-ink shadow-sm"
             animate={{ scale: [1, 1.12, 1] }}
             transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
             aria-label={`${billAlertCount} conta${billAlertCount > 1 ? 's' : ''} vence${billAlertCount > 1 ? 'm' : ''} em 48 horas`}

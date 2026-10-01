@@ -8,81 +8,84 @@
  * Princípio: o laranja é a voz do AXEL. Módulos de dados têm cor própria.
  */
 
-export const IDENTITY_VERSION = '2026.09-bloco-i-true-black'
+export const IDENTITY_VERSION = '2026.10-petroleo-coral'
 export const PREMIUM_TOKENS_PATH = '@simply-life/ui-tokens'
 
-/* ── Superfícies escuro (preto profundo tipo Cryptora) ─ */
+/* ── Escuro em petróleo (igual ao app mobile, COLOR_DARK) ─ */
 
 export const COLOR = {
-  canvas: '#000000',
-  chrome: '#141414',
-  surface: '#141414',
-  voice: '#1C1C1E',
-  elevated: '#1C1C1E',
+  canvas: '#151A1A',
+  chrome: '#1C2322',
+  surface: '#1C2322',
+  voice: '#232C2B',
+  elevated: '#232C2B',
 
-  ink: '#F5F1EC',
-  inkMuted: '#A8A29E',
-  inkFaint: 'rgba(168, 162, 158, 0.72)',
+  ink: '#EEF2F0',
+  inkMuted: '#9FB0AC',
+  inkFaint: '#7F8E8B',
 
-  hairline: '#2A2A2C',
-  hairlineStrong: 'rgba(232, 115, 74, 0.55)',
+  hairline: '#2C3836',
+  hairlineStrong: 'rgba(238, 242, 240, 0.22)',
 
   /** Voz do AXEL */
   axel: '#E8734A',
   axelHover: '#C45A32',
-  axelMuted: 'rgba(232, 115, 74, 0.22)',
-  axelOnFill: '#FFFFFF',
+  axelMuted: 'rgba(232, 115, 74, 0.18)',
+  axelOnFill: '#1E1C1A',
 
-  health: '#7BC9A0',
-  healthMuted: 'rgba(123, 201, 160, 0.16)',
-  healthOnFill: '#0B0B0B',
+  health: '#6CC79B',
+  healthMuted: 'rgba(108, 199, 155, 0.16)',
+  healthOnFill: '#151A1A',
 
-  finance: '#F5F1EC',
-  financeMuted: 'rgba(245, 241, 236, 0.12)',
-  financeOnFill: '#0B0B0B',
+  finance: '#D7B793',
+  financeMuted: 'rgba(215, 183, 147, 0.16)',
+  financeOnFill: '#151A1A',
 
-  tasks: '#F5F1EC',
-  tasksMuted: 'rgba(245, 241, 236, 0.10)',
-  tasksOnFill: '#0B0B0B',
+  tasks: '#8DB2D6',
+  tasksMuted: 'rgba(141, 178, 214, 0.16)',
+  tasksOnFill: '#151A1A',
 
-  danger: '#E07A6A',
-  dangerMuted: 'rgba(224, 122, 106, 0.14)',
-  done: '#7BC9A0',
-  attention: '#E8734A',
+  danger: '#EC5B73',
+  dangerMuted: 'rgba(236, 91, 115, 0.16)',
+  done: '#6CC79B',
+  attention: '#E8B04B',
 } as const
 
-/* ── Claro (creme quente Bloco H) ──────── */
+/* ── Claro (Petróleo e Coral, COLOR_LIGHT do app mobile) ──────── */
 
 export const COLOR_LIGHT = {
-  canvas: '#F6EEE3',
-  chrome: '#FDF9F3',
-  surface: '#FDF9F3',
-  voice: '#E8DDC9',
+  canvas: '#F4F2EE',
+  chrome: '#FFFFFF',
+  surface: '#FAF9F6',
+  voice: '#E4EDEA',
   elevated: '#FFFFFF',
-  ink: '#2A2622',
-  inkMuted: '#8C8275',
-  inkFaint: 'rgba(140, 130, 117, 0.72)',
-  hairline: '#E8DDC9',
-  hairlineStrong: 'rgba(232, 115, 74, 0.45)',
+  ink: '#1F2A2A',
+  inkMuted: '#5E6B69',
+  inkFaint: '#7D8987',
+  hairline: '#DCE2DF',
+  hairlineStrong: 'rgba(31, 58, 61, 0.28)',
   axel: '#E8734A',
-  health: '#3D8F6A',
-  finance: '#B8956B',
-  tasks: '#4A5560',
-  danger: '#C44B4B',
-  attention: '#E8734A',
-  done: '#3D8F6A',
-  axelOnFill: '#FFFFFF',
+  health: '#2B7454',
+  finance: '#7F6134',
+  tasks: '#44617D',
+  danger: '#B3304A',
+  attention: '#8A5E0E',
+  done: '#2B7454',
+  axelOnFill: '#1E1C1A',
   healthOnFill: '#FFFFFF',
   financeOnFill: '#FFFFFF',
   tasksOnFill: '#FFFFFF',
-  sand: '#B8956B',
-  tortilla: '#F6EEE3',
+  sand: '#B9CFCA',
+  tortilla: '#F4F2EE',
   terracotta: '#E8734A',
-  semanticWarm: '#F6EEE3',
-  semanticRose: '#E5B8B8',
-  semanticMint: '#B8D4C8',
-  semanticSky: '#B8C8D4',
-  semanticButter: '#FDF9F3',
+  semanticWarm: '#F4F2EE',
+  semanticRose: '#F2D3D9',
+  semanticMint: '#B9CFCA',
+  semanticSky: '#C9D9E7',
+  semanticButter: '#FAF9F6',
+  petroleo: '#1F3A3D',
+  menta: '#B9CFCA',
+  coralText: '#A84B27',
 } as const
 
 /* ── WCAG 2.2 AA - pares que a UI pode usar ─────────────────
@@ -121,10 +124,10 @@ export const TYPE = {
   voice: '"Fraunces", "Iowan Old Style", Georgia, serif',
   /**
    * UI, números, botões.
-   * Manrope: humanista e redonda o suficiente para não parecer
+   * Lexend: legível e calma (pensada para leitura fácil), igual ao app mobile.
    * dashboard SaaS (Inter/DM Sans). Tabular nums no CSS, sem mono.
    */
-  ui: '"Manrope", system-ui, sans-serif',
+  ui: '"Lexend", system-ui, sans-serif',
   /**
    * Mono só para códigos (TOTP, IDs). Nunca em título de página
    * (“Centro de comando”) nem label de card.
@@ -137,13 +140,13 @@ export const TYPE_ROLE = {
   axelGreeting: { family: 'voice', sizePx: 24, weight: 500, lineHeight: 1.2 },
   /** Fraunces 15 / 400. Frase de recomendação */
   axelSpeech: { family: 'voice', sizePx: 15, weight: 400, lineHeight: 1.4 },
-  /** Manrope 11 / 600 uppercase tracking - nome do módulo, não o herói */
+  /** Lexend 11 / 600 uppercase tracking - nome do módulo, não o herói */
   moduleKicker: { family: 'ui', sizePx: 11, weight: 600, lineHeight: 1.2, trackingEm: 0.06 },
-  /** Manrope 32-40 / 500 tabular - o número É o card */
+  /** Lexend 32-40 / 500 tabular - o número É o card */
   metric: { family: 'ui', sizePx: 28, weight: 500, lineHeight: 1.05, tabular: true },
-  /** Manrope 15-16 / 400 - corpo */
+  /** Lexend 15-16 / 400 - corpo */
   body: { family: 'ui', sizePx: 16, weight: 400, lineHeight: 1.5 },
-  /** Manrope 14 / 600 - botão, ação */
+  /** Lexend 14 / 600 - botão, ação */
   action: { family: 'ui', sizePx: 14, weight: 600, lineHeight: 1.2 },
   pageTitle: { family: 'voice', sizePx: 24, weight: 500, lineHeight: 1.2 },
 } as const
@@ -278,7 +281,7 @@ export const MIGRATION = {
   firstScreen: 'home-centro-de-comando',
   loadFonts: [
     'Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600',
-    'Manrope:wght@400;500;600;700',
+    'Lexend:wght@400;500;600;700',
   ],
   dropFromUiTitles: ['DM Mono', 'JetBrains Mono', 'font-mono em h1/h2'],
 } as const

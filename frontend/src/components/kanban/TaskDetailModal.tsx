@@ -403,12 +403,12 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                     if ( e.key === 'Enter' ) saveTitle(); 
                     if ( e.key === 'Escape' ) setEditingTitle(false); 
                   }}
-                  className="w-full bg-zinc-900/50 border border-violet-500/30 rounded-xl px-4 py-2 text-2xl font-bold text-white outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
+                  className="w-full bg-zinc-900/50 border border-violet-500/30 rounded-xl px-4 py-2 text-2xl font-bold text-ink outline-none focus:ring-2 focus:ring-violet-500/20 transition-all duration-200"
                 />
               ) : (
                 <h1
                   onClick={() => { setTitleDraft(tarefaAtual.titulo); setEditingTitle(true); }}
-                  className="text-2xl font-bold text-white tracking-tight cursor-pointer hover:bg-zinc-900/30 rounded-xl px-4 py-2 -mx-4 transition-all duration-200 flex items-center gap-2 group/title"
+                  className="text-2xl font-bold text-ink tracking-tight cursor-pointer hover:bg-zinc-900/30 rounded-xl px-4 py-2 -mx-4 transition-all duration-200 flex items-center gap-2 group/title"
                 >
                   <span>{tarefaAtual.titulo}</span>
                   <Pencil className="w-4 h-4 text-zinc-500 opacity-0 group-hover/title:opacity-100 transition-opacity duration-200 shrink-0" />
@@ -577,7 +577,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                       onKeyDown={(e) => { if ( e.key === 'Enter' ) handleAddSubtask(); }}
                       placeholder="Adicionar nova subtarefa..."
                       className="flex-1 bg-zinc-900/30 border border-zinc-800/60 rounded-xl px-4 py-2
-                                 text-[13px] text-white placeholder:text-zinc-650
+                                 text-[13px] text-ink placeholder:text-zinc-650
                                  outline-none focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200"
                     />
                     <button
@@ -614,7 +614,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                         onChange={(e) => setNotesDraft(e.target.value)}
                         rows={4}
                         className="w-full bg-zinc-900/30 border border-zinc-800/60 rounded-xl px-4 py-3
-                                   text-[13px] text-white placeholder:text-zinc-650
+                                   text-[13px] text-ink placeholder:text-zinc-650
                                    outline-none focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/10 transition-all duration-200 resize-none"
                         placeholder="Digite anotações ou observações específicas sobre esta tarefa..."
                         autoFocus
@@ -847,7 +847,7 @@ export function TaskDetailModal ({ tarefa, onClose }: TaskDetailModalProps)
                 </div>
                 {tempo ? (
                   <div className="bg-zinc-900/20 border border-zinc-850 rounded-xl p-3">
-                    <p className="text-[13px] font-extrabold text-white">
+                    <p className="text-[13px] font-extrabold text-ink">
                       {tempo.total_minutos >= 60
                         ? `${Math.floor(tempo.total_minutos / 60)}h ${tempo.total_minutos % 60}m`
                         : `${tempo.total_minutos}m`}

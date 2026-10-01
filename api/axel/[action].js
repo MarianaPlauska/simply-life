@@ -21,25 +21,26 @@ import parseTaskPrompt from '../_lib/handlers/axel/parse-task-prompt.js';
 import classifyDump from '../_lib/handlers/axel/classify-dump.js';
 import sharedGoalCheer from '../_lib/handlers/axel/shared-goal-cheer.js';
 import leaguePot from '../_lib/handlers/axel/league-pot.js';
+import { withUser } from '../_lib/withUser.js';
 
 const ROUTES = {
-  'morning-brief': morningBrief,
+  'morning-brief': withUser(morningBrief, { route: 'morning-brief', limit: 60 }),
   'orchestrate-tasks': orchestrateTasks,
-  'task-estimate': taskEstimate,
+  'task-estimate': withUser(taskEstimate, { route: 'task-estimate', limit: 120 }),
   'ingest-email': ingestEmail,
   'ingest-tasks': ingestTasks,
-  'estimate-protein': estimateProtein,
+  'estimate-protein': withUser(estimateProtein, { route: 'estimate-protein', limit: 60 }),
   'estimate-food-kcal': estimateFoodKcal,
-  'process-event': processEvent,
-  'finance-coach': financeCoach,
-  'finance-purchase-check': financePurchaseCheck,
+  'process-event': withUser(processEvent, { route: 'process-event', limit: 120 }),
+  'finance-coach': withUser(financeCoach, { route: 'finance-coach', limit: 40 }),
+  'finance-purchase-check': withUser(financePurchaseCheck, { route: 'finance-purchase-check', limit: 40 }),
   'fetch-news': fetchNews,
-  'generate-greeting': generateGreeting,
+  'generate-greeting': withUser(generateGreeting, { route: 'generate-greeting', limit: 30 }),
   'admin-users': adminUsers,
-  'today-verdict': todayVerdict,
+  'today-verdict': withUser(todayVerdict, { route: 'today-verdict', limit: 40 }),
   'weekly-digest-test': weeklyDigestTest,
   'account-delete': accountDelete,
-  'mood-week-report': moodWeekReport,
+  'mood-week-report': withUser(moodWeekReport, { route: 'mood-week-report', limit: 20 }),
   'parse-task-prompt': parseTaskPrompt,
   'classify-dump': classifyDump,
   'shared-goal-cheer': sharedGoalCheer,

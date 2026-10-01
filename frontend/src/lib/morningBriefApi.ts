@@ -1,5 +1,6 @@
 import { buildMorningBrief, type MorningBrief } from './morningBrief'
 import type { TarefaUnificada } from '../types'
+import { supabaseAuthHeaders } from './supabaseAuthHeaders'
 
 export interface MorningBriefContext
 {
@@ -30,7 +31,7 @@ export async function fetchMorningBrief(
 
   try
   {
-    const res = await fetch(`/api/morning-brief?${params.toString()}`)
+    const res = await fetch(`/api/morning-brief?${params.toString()}`, { headers: await supabaseAuthHeaders() })
     if (!res.ok) return local
     const data = await res.json()
     return {

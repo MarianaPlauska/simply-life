@@ -100,7 +100,7 @@ export function EmptyStateCard({
           className={`
             px-5 py-2.5 rounded-xl text-[12px] font-semibold
             bg-gradient-to-r ${colors.glow}
-            text-white shadow-lg shadow-black/20
+            text-ink shadow-lg shadow-black/20
             border ${colors.border}
             transition-all duration-300
           `}

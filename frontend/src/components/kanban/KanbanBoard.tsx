@@ -464,7 +464,7 @@ export function KanbanBoard() {
         <div className="mb-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+              <h1 className="text-2xl font-bold text-ink tracking-tight flex items-center gap-2.5">
                 Tarefas
                 <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 normal-case">
                   <Radio className="w-3.5 h-3.5" />
@@ -491,7 +491,7 @@ export function KanbanBoard() {
                 <button
                   onClick={() => setTab('active')}
                   className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
-                    tab === 'active' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
+                    tab === 'active' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'
                   }`}
                 >
                   Ativas
@@ -499,7 +499,7 @@ export function KanbanBoard() {
                 <button
                   onClick={() => setTab('arquivo')}
                   className={`flex items-center gap-1 px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
-                    tab === 'arquivo' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
+                    tab === 'arquivo' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'
                   }`}
                 >
                   <Archive className="w-3.5 h-3.5" />
@@ -510,19 +510,19 @@ export function KanbanBoard() {
               {/* seletor de modo de visualização */}
               {tab === 'active' && (
                 <div className="flex items-center gap-0.5 border border-zinc-900 rounded p-0.5">
-                  <button onClick={() => setViewMode('board')} className={`p-1.5 rounded transition-colors ${viewMode === 'board' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Quadro">
+                  <button onClick={() => setViewMode('board')} className={`p-1.5 rounded transition-colors ${viewMode === 'board' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'}`} title="Quadro">
                     <LayoutGrid className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => setViewMode('list')} className={`p-1.5 rounded transition-colors ${viewMode === 'list' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Lista">
+                  <button onClick={() => setViewMode('list')} className={`p-1.5 rounded transition-colors ${viewMode === 'list' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'}`} title="Lista">
                     <List className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => setViewMode('week')} className={`p-1.5 rounded transition-colors ${viewMode === 'week' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Semanal">
+                  <button onClick={() => setViewMode('week')} className={`p-1.5 rounded transition-colors ${viewMode === 'week' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'}`} title="Semanal">
                     <CalendarRange className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => setViewMode('month')} className={`p-1.5 rounded transition-colors ${viewMode === 'month' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Mensal">
+                  <button onClick={() => setViewMode('month')} className={`p-1.5 rounded transition-colors ${viewMode === 'month' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'}`} title="Mensal">
                     <Calendar className="w-3.5 h-3.5" />
                   </button>
-                  <button onClick={() => setViewMode('gantt')} className={`p-1.5 rounded transition-colors ${viewMode === 'gantt' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'}`} title="Gantt">
+                  <button onClick={() => setViewMode('gantt')} className={`p-1.5 rounded transition-colors ${viewMode === 'gantt' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'}`} title="Gantt">
                     <CalendarDays className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -534,7 +534,7 @@ export function KanbanBoard() {
                   <button
                     onClick={() => persistBoardStyle('classico')}
                     className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
-                      boardStyle === 'classico' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
+                      boardStyle === 'classico' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'
                     }`}
                   >
                     Clássico
@@ -542,7 +542,7 @@ export function KanbanBoard() {
                   <button
                     onClick={() => persistBoardStyle('temporal')}
                     className={`px-2.5 py-1 text-[12px] font-medium rounded transition-colors ${
-                      boardStyle === 'temporal' ? 'bg-card text-white' : 'text-zinc-500 hover:text-zinc-200'
+                      boardStyle === 'temporal' ? 'bg-card text-ink' : 'text-zinc-500 hover:text-zinc-200'
                     }`}
                   >
                     Temporal

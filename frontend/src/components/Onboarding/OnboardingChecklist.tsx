@@ -96,7 +96,7 @@ function OnboardingHeader ({ completedCount, totalSteps, collapsed, onToggle, on
     <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.04]">
       <div className="flex items-center gap-2">
         <Sparkles className="w-4 h-4 text-violet-400" />
-        <span className="text-[13px] font-semibold text-white">Primeiros Passos</span>
+        <span className="text-[13px] font-semibold text-ink">Primeiros Passos</span>
         <span className="text-[10px] text-zinc-500 font-medium ml-1">
           {completedCount}/{totalSteps}
         </span>

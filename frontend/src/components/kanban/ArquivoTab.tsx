@@ -41,7 +41,7 @@ export function ArquivoTab()
             className="flex items-center justify-between py-3.5 hover:bg-white/[0.01] -mx-3 px-3 rounded-lg group transition-all duration-150"
           >
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] text-zinc-300 font-medium group-hover:text-white transition-colors truncate">
+              <p className="text-[13px] text-zinc-300 font-medium group-hover:text-ink transition-colors truncate">
                 {t.titulo}
               </p>
               <div className="flex items-center gap-2.5 mt-1 text-[10px] text-zinc-600">

@@ -27,7 +27,7 @@ export function GamificationPanel()
         </Text>
         <Text variant="hero">Nível {level}</Text>
         <Text variant="caption" muted>
-          {xpInLevel}/{xpToNext} XP neste nível · {gold} moedas · pique de {streak} dia{streak === 1 ? '' : 's'}
+          {xpInLevel}/{xpToNext} XP neste nível · {gold} moedas · elo de {streak} dia{streak === 1 ? '' : 's'}
         </Text>
         <View
           style={{

@@ -211,7 +211,7 @@ export default function JuntosScreen()
         void reloadGoals()
       }}
     >
-      <StackHeader title="Juntos" subtitle="Seu pique, metas juntos e o que espera por alguém" />
+      <StackHeader title="Juntos" subtitle="Seu elo, metas juntos e o que espera por alguém" />
 
       <View style={{ gap: space.md }}>
         <Pressable onPress={() => router.push('/ofensiva' as never)} accessibilityRole="button">
@@ -220,8 +220,8 @@ export default function JuntosScreen()
             <View style={{ flex: 1, gap: 2 }}>
               <Text variant="bodyStrong">
                 {streak.current > 0
-                  ? `Pique de ${streak.current} dia${streak.current === 1 ? '' : 's'}`
-                  : 'Um registro hoje começa o seu pique'}
+                  ? `Elo de ${streak.current} dia${streak.current === 1 ? '' : 's'}`
+                  : 'Um registro hoje começa o seu elo'}
               </Text>
               <Text variant="caption" muted>
                 {streak.weekLogged} dia{streak.weekLogged === 1 ? '' : 's'} ativos nesta semana · recorde {streak.record}

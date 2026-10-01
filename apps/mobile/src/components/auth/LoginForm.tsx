@@ -83,7 +83,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
     if (mode === 'register' && !nome.trim()) next.nome = 'Informe seu nome'
     if (!email.trim()) next.email = 'Informe o email'
     if (!password) next.password = 'Informe a senha'
-    else if (mode === 'register' && password.length < 6) next.password = 'Mínimo de 6 caracteres'
+    else if (mode === 'register' && password.length < 8) next.password = 'Mínimo de 8 caracteres'
     if (mode === 'register')
     {
       if (!confirm) next.confirm = 'Confirme a senha'

@@ -49,7 +49,9 @@ export async function generateGreetingIA(params: {
     if (v !== undefined && v !== null) query.set(k, String(v))
   })
 
-  const res = await fetch(`${API_BASE}/generate-greeting?${query.toString()}`)
+  const res = await fetch(`${API_BASE}/generate-greeting?${query.toString()}`, {
+    headers: await supabaseAuthHeaders(),
+  })
   if (!res.ok) throw new Error(`generate-greeting: ${res.status}`)
   return res.json()
 }
@@ -148,7 +150,7 @@ export async function fetchFinancePurchaseCheckIA(params: {
 {
   const res = await fetch(`${API_BASE}/finance-purchase-check`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await supabaseAuthHeaders(),
     body: JSON.stringify({
       context: params.context,
       localVerdict: params.localVerdict,
@@ -168,7 +170,7 @@ export async function fetchAxelTodayVerdictIA(params: {
 {
   const res = await fetch(`${API_BASE}/today-verdict`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await supabaseAuthHeaders(),
     body: JSON.stringify({
       context: params.context,
       localVerdict: params.localVerdict,
@@ -189,7 +191,7 @@ export async function fetchFinanceCoachIA(params: {
 {
   const res = await fetch(`${API_BASE}/finance-coach`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await supabaseAuthHeaders(),
     body: JSON.stringify({
       context: params.context,
       localAdvice: params.localAdvice,
@@ -244,7 +246,7 @@ export async function fetchTaskEstimateIA(params: {
 {
   const res = await fetch(`${API_BASE}/task-estimate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await supabaseAuthHeaders(),
     body: JSON.stringify(params),
   })
 

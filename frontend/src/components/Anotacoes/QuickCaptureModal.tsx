@@ -67,7 +67,7 @@ export function QuickCaptureModal()
 
       <div className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-semibold text-white">Captura rápida</h2>
+          <h2 className="text-lg font-semibold text-ink">Captura rápida</h2>
           <button
             onClick={handleClose}
             className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"
@@ -105,7 +105,7 @@ export function QuickCaptureModal()
             placeholder={tipo === 'lembrete' ? 'Título da tarefa (opcional)' : 'Título (opcional)'}
             value={titulo}
             onChange={(e) => setTitulo(e.target.value)}
-            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-ink placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition"
           />
           <textarea
             placeholder={
@@ -119,7 +119,7 @@ export function QuickCaptureModal()
             onChange={(e) => setConteudo(e.target.value)}
             rows={4}
             autoFocus
-            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition resize-none"
+            className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-ink placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-white/20 transition resize-none"
           />
         </div>
 

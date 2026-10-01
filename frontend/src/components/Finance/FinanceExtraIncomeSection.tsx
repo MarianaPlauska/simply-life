@@ -334,7 +334,7 @@ export function FinanceExtraIncomeSection({ onPatch, somenteAgora = false }: Fin
             type="button"
             onClick={applyOvertime}
             disabled={!overtimePreview}
-            className="w-full py-2 rounded-sl bg-concluido/90 hover:bg-concluido text-white font-mono text-[10px] uppercase disabled:opacity-40"
+            className="w-full py-2 rounded-sl bg-concluido/90 hover:bg-concluido text-ink font-mono text-[10px] uppercase disabled:opacity-40"
           >
             Confirmar valor e preencher lançamento
           </button>

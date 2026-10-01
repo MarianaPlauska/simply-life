@@ -64,7 +64,7 @@ export function CategoryDeleteDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className={`flex-1 min-h-[44px] px-4 py-2.5 font-mono text-[10px] uppercase bg-urgente hover:bg-urgente/90 text-white rounded-sl`}
+            className={`flex-1 min-h-[44px] px-4 py-2.5 font-mono text-[10px] uppercase bg-urgente hover:bg-urgente/90 text-ink rounded-sl`}
           >
             Excluir categoria
           </button>

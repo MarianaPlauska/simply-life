@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Lexend:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,7 @@
    · Claro = Tortilla / Gold Leaf / Terracotta
    · Escuro = Chinese Black → Antique Brass
    · Acento só na voz do AXEL (--sl-axel)
-   · Fraunces = fala · Manrope = dados/ações
+   · Fraunces = fala · Lexend = dados/ações
 */
 
 html {
@@ -21,70 +21,94 @@ body {
 }
 
 :root {
-  /* Bloco H - modo claro (creme quente) */
-  --bg-canvas: #F6EEE3;
-  --bg-surface: #FDF9F3;
+  /* Identidade Simply-Life (mesmos tokens do app mobile, packages/ui-tokens):
+     Petróleo e Coral, claro sem blocos escuros */
+  --bg-canvas: #F4F2EE;
+  --bg-surface: #FAF9F6;
   --bg-elevated: #FFFFFF;
-  --border-hairline: #E8DDC9;
-  --text-primary: #2A2622;
-  --text-muted: #8C8275;
+  --border-hairline: #DCE2DF;
+  --text-primary: #1F2A2A;
+  --text-muted: #5E6B69;
   --accent: #E8734A;
   --accent-pressed: #C45A32;
+  --brand: #1F3A3D;
+  --brand-ink: #1F3A3D;
+  --brand-muted: #E3ECE9;
+  --menta: #B9CFCA;
+  /* coral como texto no claro: 5:1 sobre o fundo */
+  --accent-text: #A84B27;
 
   --sl-canvas: var(--bg-canvas);
-  --sl-chrome: var(--bg-surface);
+  --sl-chrome: #FFFFFF;
   --sl-surface: var(--bg-surface);
-  --sl-voice: #E8DDC9;
+  --sl-voice: #E4EDEA;
   --sl-elevated: var(--bg-elevated);
   --sl-text: var(--text-primary);
   --sl-text-muted: var(--text-muted);
-  --sl-text-faint: rgba(140, 130, 117, 0.72);
+  --sl-text-faint: #7D8987;
   --sl-border: var(--border-hairline);
   --sl-border-subtle: rgba(232, 115, 74, 0.40);
   --sl-accent: var(--accent);
   --sl-accent-hover: var(--accent-pressed);
-  --sl-accent-muted: rgba(232, 115, 74, 0.14);
+  --sl-accent-muted: rgba(232, 115, 74, 0.16);
   --sl-axel: var(--accent);
   --sl-axel-hover: var(--accent-pressed);
-  --sl-axel-muted: rgba(232, 115, 74, 0.14);
-  --sl-axel-on-fill: #FFFFFF;
-  --sl-health: #3D8F6A;
-  --sl-health-muted: rgba(61, 143, 106, 0.12);
-  --sl-finance: #B8956B;
-  --sl-finance-muted: rgba(184, 149, 107, 0.14);
-  --sl-tasks: #4A5560;
-  --sl-tasks-muted: rgba(74, 85, 96, 0.12);
-  --sl-urgent: #C44B4B;
-  --sl-attention: var(--accent);
-  --sl-success: #3D8F6A;
-  --sl-sand: #C6A17E;
+  --sl-axel-muted: rgba(232, 115, 74, 0.16);
+  --sl-axel-on-fill: #1E1C1A;
+  --sl-health: #2B7454;
+  --sl-health-muted: rgba(43, 116, 84, 0.12);
+  --sl-finance: #7F6134;
+  --sl-finance-muted: rgba(127, 97, 52, 0.12);
+  --sl-tasks: #44617D;
+  --sl-tasks-muted: rgba(68, 97, 125, 0.12);
+  --sl-urgent: #B3304A;
+  --sl-attention: #8A5E0E;
+  --sl-success: #2B7454;
+  --sl-sand: #B9CFCA;
   --sl-radius-sm: 16px;
   --sl-radius: 24px;
   --sl-radius-control: 16px;
   --sl-radius-lg: 28px;
   --sl-radius-pill: 9999px;
-  --sl-shadow: 0 10px 28px rgba(42, 38, 34, 0.06);
-  --sl-shadow-lg: 0 16px 48px rgba(12, 21, 25, 0.08);
-  --sl-shadow-voice: 0 0 0 1px rgba(160, 92, 61, 0.22), 0 12px 40px rgba(160, 92, 61, 0.08);
-  --sl-chart-meta: #FFFCFA;
-  --sl-chart-meta-border: rgba(12, 21, 25, 0.10);
-  --sl-chart-real-a: #7A6540;
-  --sl-chart-real-b: #A05C3D;
-  --sl-chart-real-c: #3F6B5A;
+  --sl-shadow: 0 10px 28px rgba(31, 58, 61, 0.06);
+  --sl-shadow-lg: 0 16px 48px rgba(31, 58, 61, 0.10);
+  --sl-shadow-voice: 0 0 0 1px rgba(31, 58, 61, 0.16), 0 12px 40px rgba(31, 58, 61, 0.08);
+  --sl-chart-meta: #FFFFFF;
+  --sl-chart-meta-border: rgba(31, 58, 61, 0.10);
+  --sl-chart-real-a: #1F3A3D;
+  --sl-chart-real-b: #E8734A;
+  --sl-chart-real-c: #2B7454;
   --sl-water-fill: #3F6B5A;
-  --sl-water-fill-end: #B8D4C8;
+  --sl-water-fill-end: #B9CFCA;
+  /* cinzas do tema: claro inverte a escala (900 = superfície clara) */
+  --g-950: 255 255 255;
+  --g-900: 250 249 246;
+  --g-800: 238 241 239;
+  --g-700: 220 226 223;
+  --g-600: 174 184 181;
+  --g-500: 125 137 135;
+  --g-400: 94 107 105;
+  --g-300: 62 76 75;
+  --g-200: 43 56 55;
+  --g-100: 31 42 42;
+  --g-50: 31 42 42;
 }
 
 .dark {
-  /* Preto profundo tipo Cryptora / Card Balance */
-    --bg-canvas: #000000;
-  --bg-surface: #141414;
-  --bg-elevated: #1C1C1E;
-  --border-hairline: #2A2A2C;
-  --text-primary: #F5F1EC;
-  --text-muted: #A8A29E;
+  /* Escuro em petróleo (não preto puro), igual ao app mobile */
+  --bg-canvas: #151A1A;
+  --bg-surface: #1C2322;
+  --bg-elevated: #232C2B;
+  --border-hairline: #2C3836;
+  --text-primary: #EEF2F0;
+  --text-muted: #9FB0AC;
   --accent: #E8734A;
   --accent-pressed: #C45A32;
+  --brand: #1F3A3D;
+  --brand-ink: #B9CFCA;
+  --brand-muted: #1F3A3D;
+  --menta: #B9CFCA;
+  --accent-text: #F0936F;
 
   --sl-canvas: var(--bg-canvas);
   --sl-chrome: var(--bg-surface);
@@ -93,35 +117,46 @@ body {
   --sl-elevated: var(--bg-elevated);
   --sl-text: var(--text-primary);
   --sl-text-muted: var(--text-muted);
-  --sl-text-faint: rgba(168, 162, 158, 0.72);
+  --sl-text-faint: #7F8E8B;
   --sl-border: var(--border-hairline);
   --sl-border-subtle: rgba(232, 115, 74, 0.55);
   --sl-accent: var(--accent);
   --sl-accent-hover: var(--accent-pressed);
-  --sl-accent-muted: rgba(232, 115, 74, 0.22);
+  --sl-accent-muted: rgba(232, 115, 74, 0.18);
   --sl-axel: var(--accent);
   --sl-axel-hover: var(--accent-pressed);
-  --sl-axel-muted: rgba(232, 115, 74, 0.22);
-  --sl-axel-on-fill: #FFFFFF;
-  --sl-health: #7BC9A0;
-  --sl-health-muted: rgba(123, 201, 160, 0.16);
-  --sl-finance: #D4B896;
-  --sl-finance-muted: rgba(212, 184, 150, 0.16);
-  --sl-tasks: #9AA8B5;
-  --sl-tasks-muted: rgba(154, 168, 181, 0.14);
-  --sl-urgent: #E07A6A;
-  --sl-attention: var(--accent);
-  --sl-success: #7BC9A0;
+  --sl-axel-muted: rgba(232, 115, 74, 0.18);
+  --sl-axel-on-fill: #1E1C1A;
+  --sl-health: #6CC79B;
+  --sl-health-muted: rgba(108, 199, 155, 0.16);
+  --sl-finance: #D7B793;
+  --sl-finance-muted: rgba(215, 183, 147, 0.16);
+  --sl-tasks: #8DB2D6;
+  --sl-tasks-muted: rgba(141, 178, 214, 0.16);
+  --sl-urgent: #EC5B73;
+  --sl-attention: #E8B04B;
+  --sl-success: #6CC79B;
   --sl-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  --sl-shadow-lg: 0 16px 48px rgba(55, 53, 57, 0.72);
-  --sl-shadow-voice: 0 0 0 1px rgba(232, 115, 74, 0.36), 0 12px 40px rgba(232, 115, 74, 0.16);
+  --sl-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --sl-shadow-voice: 0 0 0 1px rgba(185, 207, 202, 0.24), 0 12px 40px rgba(0, 0, 0, 0.3);
   --sl-chart-meta: var(--bg-surface);
-  --sl-chart-meta-border: rgba(245, 241, 236, 0.12);
-  --sl-chart-real-a: var(--accent);
-  --sl-chart-real-b: var(--text-primary);
-  --sl-chart-real-c: #7BC9A0;
-  --sl-water-fill: #7BC9A0;
-  --sl-water-fill-end: #3D8F6A;
+  --sl-chart-meta-border: rgba(238, 242, 240, 0.12);
+  --sl-chart-real-a: #B9CFCA;
+  --sl-chart-real-b: var(--accent);
+  --sl-chart-real-c: #6CC79B;
+  --sl-water-fill: #6CC79B;
+  --sl-water-fill-end: #2B7454;
+  --g-950: 16 20 20;
+  --g-900: 21 26 26;
+  --g-800: 35 44 43;
+  --g-700: 44 56 54;
+  --g-600: 74 88 86;
+  --g-500: 127 142 139;
+  --g-400: 159 176 172;
+  --g-300: 196 208 205;
+  --g-200: 220 228 225;
+  --g-100: 238 242 240;
+  --g-50: 246 248 247;
 }
 
 @keyframes sl-shimmer {
@@ -286,7 +321,7 @@ body {
 
   /* Escopo Dashboard - spec premium SaaS */
   .sl-dashboard-scope .sl-page-title {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.25rem;
     font-weight: 600;
     line-height: 1.25;
@@ -301,7 +336,7 @@ body {
 
   /* Tier 1 - um por tela (28px desktop / 24px mobile) */
   .sl-screen-hero {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.5rem;
     font-weight: 600;
     line-height: 1.1;
@@ -318,7 +353,7 @@ body {
 
   /* Tier 2 - KPI com contexto (22-24px) */
   .sl-module-highlight {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.375rem;
     font-weight: 600;
     line-height: 1.1;
@@ -335,7 +370,7 @@ body {
 
   /** @deprecated prefer sl-screen-hero ou sl-module-highlight */
   .sl-hero-metric {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 1.375rem;
     font-weight: 600;
     line-height: 1.1;
@@ -351,7 +386,7 @@ body {
   }
 
   .sl-module-metric {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 1rem;
     font-weight: 500;
     line-height: 1.2;
@@ -359,7 +394,7 @@ body {
   }
 
   .sl-body {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.5;
@@ -367,7 +402,7 @@ body {
   }
 
   .sl-body-muted {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.5;
@@ -425,7 +460,7 @@ body {
     gap: 0.5rem;
     min-height: 2.75rem;
     padding-inline: 1rem;
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 0.875rem;
     font-weight: 500;
     line-height: 1;
@@ -460,7 +495,7 @@ body {
   }
 
   .sl-section-label {
-    font-family: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    font-family: "Lexend", ui-sans-serif, system-ui, sans-serif;
     font-size: 0.8125rem;
     font-weight: 500;
     line-height: 1.3;
@@ -604,6 +639,70 @@ body {
 
   .sl-login-vignette {
     background: radial-gradient(ellipse 70% 60% at 50% 40%, transparent 30%, var(--sl-canvas) 100%);
+  }
+
+  /* Login: identidade Petróleo e Coral (mesmos tokens do app mobile) */
+  .sl-login {
+    --lg-canvas: #F4F2EE;
+    --lg-surface: #FAF9F6;
+    --lg-card: #FFFFFF;
+    --lg-screen: #F4F2EE;
+    --lg-ink: #1F2A2A;
+    --lg-muted: #5E6B69;
+    --lg-line: #DCE2DF;
+    --lg-brand: #1F3A3D;
+    --lg-brand-ink: #1F3A3D;
+    --lg-menta: #B9CFCA;
+    --lg-coral: #E8734A;
+    --lg-coral-text: #A84B27;
+    --lg-amber: #E8B04B;
+    --lg-amber-muted: rgba(232, 176, 75, 0.2);
+    --lg-amber-text: #8A5A12;
+    --lg-water: #3F6B5A;
+    --lg-bezel: #2B3A3B;
+    --lg-base: #C9D2CF;
+    --lg-glow-menta: rgba(185, 207, 202, 0.55);
+    --lg-glow-coral: rgba(232, 115, 74, 0.16);
+    /* o formulário segue a identidade, não o creme do app web */
+    --bg-canvas: #F4F2EE;
+    --bg-surface: #FAF9F6;
+    --bg-elevated: #FFFFFF;
+    --border-hairline: #DCE2DF;
+    --sl-canvas: #F4F2EE;
+    --sl-chrome: #EEF1EF;
+    --sl-surface: #FAF9F6;
+    --sl-text: #1F2A2A;
+    --sl-text-muted: #5E6B69;
+    --sl-border: #DCE2DF;
+    background: var(--lg-canvas);
+  }
+  .dark .sl-login {
+    --lg-canvas: #151A1A;
+    --lg-surface: #1C2322;
+    --lg-card: #232C2B;
+    --lg-screen: #151A1A;
+    --lg-ink: #EEF2F0;
+    --lg-muted: #9FB0AC;
+    --lg-line: #2C3836;
+    --lg-brand: #B9CFCA;
+    --lg-brand-ink: #EEF2F0;
+    --lg-coral-text: #F0936F;
+    --lg-amber-text: #F2C877;
+    --lg-water: #7FB8A0;
+    --lg-bezel: #0F1414;
+    --lg-base: #2C3836;
+    --lg-glow-menta: rgba(185, 207, 202, 0.12);
+    --lg-glow-coral: rgba(232, 115, 74, 0.14);
+    --bg-canvas: #151A1A;
+    --bg-surface: #1C2322;
+    --bg-elevated: #232C2B;
+    --border-hairline: #2C3836;
+    --sl-canvas: #151A1A;
+    --sl-chrome: #1C2322;
+    --sl-surface: #1C2322;
+    --sl-text: #EEF2F0;
+    --sl-text-muted: #9FB0AC;
+    --sl-border: #2C3836;
   }
 
   /* Kanban - canvas limpo */

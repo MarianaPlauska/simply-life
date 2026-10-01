@@ -196,6 +196,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       password,
       options: {
         data: nome?.trim() ? { full_name: nome.trim() } : undefined,
+        emailRedirectTo: buildAuthCallbackUrl(appOrigin(), '/auth/callback'),
       },
     })
     if (error) return { error: error.message }

@@ -431,7 +431,7 @@ export function GanttView({ tarefas, onSelectTarefa }: GanttViewProps)
                               style={{ width: `${Math.max(6, Math.round(progress * 100))}%` }}
                             />
                             {barWidth > 120 && (
-                              <span className="relative z-[1] flex items-center h-full px-2.5 text-[10px] font-medium text-white truncate drop-shadow-sm pointer-events-none">
+                              <span className="relative z-[1] flex items-center h-full px-2.5 text-[10px] font-medium text-ink truncate drop-shadow-sm pointer-events-none">
                                 {title}
                               </span>
                             )}

@@ -32,15 +32,15 @@ export function SimplyLifeMark({ variant = 'icon', className = '' }: SimplyLifeM
       aria-hidden
       focusable="false"
     >
-      <rect width="32" height="32" rx="7.2" fill="#1E1E1E" />
+      <rect width="32" height="32" rx="7.2" fill="#1F3A3D" />
       <text
         x="16"
         y="20.5"
         textAnchor="middle"
-        fontFamily="Manrope, Segoe UI, system-ui, sans-serif"
+        fontFamily="Lexend, Segoe UI, system-ui, sans-serif"
         fontSize="13"
         fontWeight="700"
-        fill="#D4D4D4"
+        fill="#EEF2F0"
       >
         SL
       </text>

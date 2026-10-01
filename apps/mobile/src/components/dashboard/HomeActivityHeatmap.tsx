@@ -68,7 +68,7 @@ export function HomeActivityHeatmap({ tasks }: Props)
         </View>
       </View>
       <PressableScale
-        accessibilityLabel="Ver pique"
+        accessibilityLabel="Ver elo"
         onPress={() => router.push('/ofensiva')}
         style={{
           alignSelf: 'stretch',
@@ -80,7 +80,7 @@ export function HomeActivityHeatmap({ tasks }: Props)
         }}
       >
         <Text variant="label" style={{ color: colors.axelOnFill, fontWeight: '700' }}>
-          Ver pique
+          Ver elo
         </Text>
       </PressableScale>
     </View>

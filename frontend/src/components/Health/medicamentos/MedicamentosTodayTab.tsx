@@ -53,7 +53,7 @@ function DoseAgendaList({
                 'w-5 h-5 rounded-sl border-2 flex items-center justify-center shrink-0',
                 tomado ? 'bg-health border-health' : 'border-line',
               ].join(' ')}>
-                {tomado && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+                {tomado && <Check className="w-3 h-3 text-ink" strokeWidth={3} />}
               </span>
             )}
           />

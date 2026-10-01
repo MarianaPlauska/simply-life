@@ -1,0 +1,13 @@
+// Presença: mesma regra de packages/shared/src/presence.ts (app mobile).
+// O frontend é um projeto separado no CI (npm ci só em frontend/), então não
+// importa @simply-life/shared: a regra fica copiada aqui. Mudou lá, muda aqui.
+const PRESENCE_ONLINE_MS = 3 * 60 * 1000
+
+/** App aberto nos últimos 3 minutos. */
+export function isUserConnected(lastSeenIso: string | null | undefined): boolean
+{
+  if (!lastSeenIso) return false
+  const t = new Date(lastSeenIso).getTime()
+  if (Number.isNaN(t)) return false
+  return Date.now() - t < PRESENCE_ONLINE_MS
+}

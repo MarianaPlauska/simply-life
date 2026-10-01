@@ -143,19 +143,19 @@ export function WeekView ({ tarefas, onSelectTarefa, onCreateTarefa }: WeekViewP
         <div className="flex items-center gap-3">
           <button
             onClick={() => setWeekOffset((o) => o - 1)}
-            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all"
+            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-ink hover:border-zinc-600 transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <div className="text-center">
-            <h3 className="text-[15px] font-semibold text-white">{weekLabel}</h3>
+            <h3 className="text-[15px] font-semibold text-ink">{weekLabel}</h3>
             <p className="text-[11px] text-zinc-500 mt-0.5">
               {weekTotal} tarefa{weekTotal !== 1 ? 's' : ''} nesta semana
             </p>
           </div>
           <button
             onClick={() => setWeekOffset((o) => o + 1)}
-            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all"
+            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-ink hover:border-zinc-600 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
