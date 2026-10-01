@@ -164,6 +164,8 @@ export function rankCategoriesBySpend(
   txs: FinanceTx[],
   colors?: Partial<Record<FinanceCategory, string>>,
   palette: ChartPalette = CHART_LIGHT,
+  /** nomes das categorias criadas pela pessoa (sem isso, aparece o id) */
+  labels?: Record<string, string>,
 ): CategorySpend[]
 {
   const despesas = txs.filter((t) => t.tipo === 'despesa')
@@ -179,7 +181,7 @@ export function rankCategoriesBySpend(
     .sort((a, b) => b[1] - a[1])
     .map(([categoria, total], i) => ({
       categoria,
-      label: FINANCE_CATEGORY_LABELS[categoria as keyof typeof FINANCE_CATEGORY_LABELS] ?? categoria,
+      label: labels?.[categoria] ?? FINANCE_CATEGORY_LABELS[categoria as keyof typeof FINANCE_CATEGORY_LABELS] ?? categoria,
       total,
       pct: sum > 0 ? Math.round((total / sum) * 100) : 0,
       color: financeCategoryColor(colors?.[categoria], palette, categoria, i),

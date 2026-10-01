@@ -29,9 +29,11 @@ export type FoodItem = {
   /** "2", "1 copo", "200 g"; null quando não disse */
   quantidade: string | null
   kcal?: number | null
-  /** de onde veio o dado de caloria ('openfoodfacts' | 'manual') */
+  /** de onde veio o dado de caloria: 'pessoal' | 'openfoodfacts' | 'ia' | 'estimativa_local' | 'manual' */
   fonte?: string | null
   barcode?: string | null
+  /** porção considerada na estimativa ("1 concha"); só no aparelho, não vai para a nuvem */
+  porcao?: string | null
 }
 
 export type FoodLogParse = {
@@ -846,17 +848,20 @@ export type FoodKcalDay = {
   /** itens com caloria conhecida */
   comKcal: number
   semKcal: number
+  /** dos itens com caloria, quantos são estimativa (IA ou tabela local) */
+  estimadas: number
 }
 
-/** Soma as calorias conhecidas do dia; itens sem dado não contam nem viram estimativa. */
+/** Soma as calorias do dia; itens sem dado não contam. `estimadas` diz quantos são aproximados. */
 export function foodKcalOfDay(
-  meals: { data: string; itens: { kcal?: number | null }[] }[],
+  meals: { data: string; itens: { kcal?: number | null; fonte?: string | null }[] }[],
   iso: string,
 ): FoodKcalDay
 {
   let total = 0
   let comKcal = 0
   let semKcal = 0
+  let estimadas = 0
   for (const m of meals)
   {
     if (m.data !== iso) continue
@@ -866,11 +871,12 @@ export function foodKcalOfDay(
       {
         total += it.kcal
         comKcal += 1
+        if (it.fonte === 'ia' || it.fonte === 'estimativa_local') estimadas += 1
       }
       else semKcal += 1
     }
   }
-  return { total: Math.round(total), comKcal, semKcal }
+  return { total: Math.round(total), comKcal, semKcal, estimadas }
 }
 
 /** 1450 → "1.450 kcal" */

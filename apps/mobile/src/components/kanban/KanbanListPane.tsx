@@ -11,7 +11,7 @@ import {
   type LifeCategoryId,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, Chip, EmptyState, PressableScale } from '../../ui'
+import { Text, Chip, EmptyState, PressableScale, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import type { ColorTokens } from '@simply-life/ui-tokens'
 import { useAuthStore } from '../../store/authStore'
@@ -122,18 +122,16 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 2 }}>
-        <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-          Hoje
-        </Text>
-        <Text variant="caption" muted>
-          {dayCount} em aberto · {dateTitle}
-        </Text>
-        <Text variant="caption" muted>
-          A caixinha conclui e guarda em Feitas.
-        </Text>
-      </View>
+      <PaneTitle title="Hoje" subtitle={`${dayCount} em aberto · ${dateTitle}`}>
+        {dayCount > 0 ? (
+          <Text variant="caption" muted>
+            A caixinha conclui e guarda em Feitas.
+          </Text>
+        ) : null}
+      </PaneTitle>
 
+      {/* filtros e dias: um grupo só, perto um do outro, com mais espaço em volta */}
+      <View style={{ gap: 12, marginVertical: space.sm }}>
       <ScrollView
         horizontal
         nestedScrollEnabled
@@ -141,7 +139,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
         contentContainerStyle={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
+          gap: 12,
           paddingRight: 8,
         }}
       >
@@ -167,7 +165,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
       </ScrollView>
 
       {naming ? (
-        <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
           <TextInput
             value={draft}
             onChangeText={setDraft}
@@ -208,6 +206,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
       ) : null}
 
       <KanbanDateStrip days={days} selectedIso={dayIso} onSelect={setDayIso} />
+      </View>
 
       {hasNow ? (
         <Text variant="caption" muted>
@@ -269,7 +268,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: 8,
+            gap: 12,
           }}
         >
           <Text variant="caption" muted>
@@ -297,8 +296,8 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
         const list = open.filter((t) => t.prioridade === p.id)
         if (list.length === 0) return null
         return (
-          <View key={p.id} style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View key={p.id} style={{ gap: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View
                 style={{
                   paddingHorizontal: 12,

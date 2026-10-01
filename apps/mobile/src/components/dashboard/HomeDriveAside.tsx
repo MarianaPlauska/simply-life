@@ -76,10 +76,10 @@ export function AxelDayBrief()
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
         accessibilityLabel={open ? 'Fechar AXEL' : 'Abrir AXEL'}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 48 }}
       >
         <IconBadge name="sparkles" color={accent} size={40} iconSize={20} />
-        <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
+        <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
           <Text variant="caption" color={accent} style={{ fontWeight: '700', fontSize: 11 }}>
             AXEL
           </Text>
@@ -101,7 +101,7 @@ export function AxelDayBrief()
           {primaryStep ? (
             <View
               style={{
-                gap: 4,
+                gap: 6,
                 padding: space.md,
                 borderRadius: 14,
                 backgroundColor: colors.surface,
@@ -125,7 +125,7 @@ export function AxelDayBrief()
           {details ? (
             <View style={{ gap: space.md }}>
               {brief.gaps.length > 0 ? (
-                <View style={{ gap: 6 }}>
+                <View style={{ gap: 8 }}>
                   <Text variant="caption" color={accent} style={{ fontWeight: '700' }}>
                     Olho nisso
                   </Text>
@@ -136,7 +136,7 @@ export function AxelDayBrief()
                   ))}
                 </View>
               ) : null}
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                 <PrimaryButton
                   label="Prioridades"
                   variant="secondary"
@@ -178,7 +178,7 @@ export function ProgressPanel()
   const router = useRouter()
 
   return (
-    <Card tone="elevated" style={{ gap: space.sm, borderRadius: 14, padding: 10 }}>
+    <Card tone="elevated" style={{ gap: space.sm, borderRadius: 14, padding: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text variant="section" style={{ fontSize: 15 }}>
           Hidratação

@@ -31,13 +31,13 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
       <HealthAxelStrip message="Hoje pesa. Está tudo bem ir devagar. Só o que couber agora." />
 
       <HealthScreenSection dividerTop>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="caption" muted>Check-in</Text>
           <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
             {moodHeadline}
           </Text>
           <Text variant="caption" muted>
-            Pode atualizar se o sentimento mudar
+            Pode atualizar se o sentimento mudar.
           </Text>
         </View>
         <MoodFaceRow
@@ -66,7 +66,7 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
             >
               <View
                 style={{
-                  gap: 4,
+                  gap: 6,
                   paddingVertical: 12,
                   borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
                   borderBottomColor: colors.hairline,

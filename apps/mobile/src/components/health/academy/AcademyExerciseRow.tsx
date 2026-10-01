@@ -18,8 +18,8 @@ export function AcademyExerciseRow({ exercise, onChange, onRemove }: Props)
   return (
     <View
       style={{
-        gap: 10,
-        padding: 12,
+        gap: 12,
+        padding: 16,
         borderRadius: radius.card,
         backgroundColor: colors.elevated,
       }}
@@ -30,7 +30,7 @@ export function AcademyExerciseRow({ exercise, onChange, onRemove }: Props)
         onChangeText={(name) => patch({ name })}
         placeholder="Agachamento"
       />
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <View style={{ flex: 1 }}>
           <Field
             label="Séries"

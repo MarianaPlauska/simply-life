@@ -13,8 +13,8 @@ import { MoodFaceRow } from '../../MoodFace'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useWorkspace } from '../../../layout/useWorkspace'
 import { DiarySection } from './DiarySection'
-import { DIARY_DIVIDER } from './diaryStyles'
 import { MoodTrendChart, MoodYearGrid } from './MoodCharts'
+import { HomeCollapsible } from '../../dashboard/HomeCollapsible'
 
 type WeekReview = {
   avg: number
@@ -51,18 +51,18 @@ type Props = {
 
 function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; total: number })
 {
-  const { radius } = useTheme()
+  const { radius, colors } = useTheme()
   if (total === 0) return null
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <View
         style={{
           height: 12,
           borderRadius: radius.pill,
           flexDirection: 'row',
           overflow: 'hidden',
-          backgroundColor: 'rgba(238, 242, 240, 0.08)',
+          backgroundColor: colors.featureTrack,
         }}
       >
         {([1, 2, 3, 4, 5] as const).map((m) =>
@@ -83,14 +83,14 @@ function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; tota
           )
         })}
       </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
         {([1, 2, 3, 4, 5] as const).map((m) =>
         {
           const slice = slices.find((s) => s.mood === m)
           const count = slice?.value ?? 0
           if (count <= 0) return null
           return (
-            <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <View key={m} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <View
                 style={{
                   width: 8,
@@ -99,7 +99,7 @@ function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; tota
                   backgroundColor: moodColor(m),
                 }}
               />
-              <Text variant="micro" style={{ color: 'rgba(238, 242, 240, 0.72)', fontSize: 11 }}>
+              <Text variant="micro" style={{ color: colors.featureMuted, fontSize: 11 }}>
                 {moodLabel(m)} {Math.round((count / total) * 100)}%
               </Text>
             </View>
@@ -157,11 +157,14 @@ export function HealthDiaryStudio(props: Props)
         multiline
         tone="widget"
       />
-      <PrimaryButton
-        label={canSave ? 'Salvar nota' : 'Escreva algo para salvar a nota'}
-        disabled={!canSave}
-        onPress={onSaveNote}
-      />
+      {/* Botão só quando há texto: sem instrução fixa desabilitada na tela */}
+      {nota.trim() ? (
+        <PrimaryButton
+          label={canSave ? 'Salvar nota' : 'Escolha um humor para salvar a nota'}
+          disabled={!canSave}
+          onPress={onSaveNote}
+        />
+      ) : null}
       <Pressable
         onPress={onOpenNotes}
         accessibilityRole="button"
@@ -177,7 +180,7 @@ export function HealthDiaryStudio(props: Props)
   const patternsBlock = (
     <View style={{ gap: space.md }}>
       {total === 0 ? (
-        <Text variant="body" style={{ color: colors.widgetMuted, lineHeight: 22 }}>
+        <Text variant="body" style={{ color: colors.featureMuted, lineHeight: 22 }}>
           Depois de alguns check-ins, você vê aqui como o humor se distribui e evolui.
         </Text>
       ) : (
@@ -188,17 +191,17 @@ export function HealthDiaryStudio(props: Props)
         </>
       )}
       {habits ? (
-        <View style={{ gap: 8, paddingTop: 4 }}>
-          <Text variant="caption" style={{ color: colors.widgetMuted, fontWeight: '600' }}>
+        <View style={{ gap: 12, paddingTop: 4 }}>
+          <Text variant="caption" style={{ color: colors.featureMuted, fontWeight: '600' }}>
             Sono e água
           </Text>
           {habits.sleep.good != null && habits.sleep.bad != null ? (
-            <Text variant="caption" style={{ color: 'rgba(238, 242, 240, 0.78)', lineHeight: 20 }}>
+            <Text variant="caption" style={{ color: colors.featureInk, lineHeight: 20 }}>
               Sono: {moodLabel(habits.sleep.good)} quando dormiu bem · {moodLabel(habits.sleep.bad)} quando não
             </Text>
           ) : null}
           {habits.water.good != null && habits.water.bad != null ? (
-            <Text variant="caption" style={{ color: 'rgba(238, 242, 240, 0.78)', lineHeight: 20 }}>
+            <Text variant="caption" style={{ color: colors.featureInk, lineHeight: 20 }}>
               Água: {moodLabel(habits.water.good)} na meta · {moodLabel(habits.water.bad)} abaixo
             </Text>
           ) : null}
@@ -209,24 +212,58 @@ export function HealthDiaryStudio(props: Props)
 
   const moodHeadline = last ? moodLabel(last.humor) : 'Como você está hoje?'
 
+  const notesBlock = comNota.length > 0 ? (
+    <View>
+      {comNota.map((h, i) =>
+      {
+        const iso = (h.data || '').slice(0, 10)
+        if (!iso) return null
+        return (
+          <View
+            key={h.id}
+            style={{
+              gap: 4,
+              paddingVertical: 12,
+              borderBottomWidth: i < comNota.length - 1 ? StyleSheet.hairlineWidth : 0,
+              borderBottomColor: colors.hairline,
+            }}
+          >
+            <Text variant="caption" muted>
+              {formatDayPt(iso)} · {moodLabel(h.humor)}
+            </Text>
+            <Text variant="body" style={{ lineHeight: 22 }}>
+              {h.nota}
+            </Text>
+          </View>
+        )
+      })}
+    </View>
+  ) : null
+
+  const subTitleFor = [
+    daySlot ? 'seu dia' : null,
+    !showRail ? 'padrões' : null,
+    notesBlock ? 'notas' : null,
+  ].filter(Boolean).join(', ')
+
   return (
-    <View style={{ gap: space.md }}>
+    <View style={{ gap: space.lg }}>
       {alertSlot ? <View style={{ gap: space.sm }}>{alertSlot}</View> : null}
 
-      <View style={{ gap: 2 }}>
-        <Text variant="caption" muted>
-          {dateLine}
-        </Text>
-        <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-          {moodHeadline}
-        </Text>
-        <Text variant="caption" muted>
-          {weekLine}
-          {total > 0 ? ` · ${total} registros no total` : ''}
-        </Text>
-      </View>
+      {/* 1. Agora: pergunta + registrar, no mesmo grupo */}
+      <View style={{ gap: space.md }}>
+        <View style={{ gap: 4 }}>
+          <Text variant="caption" muted>
+            {dateLine}
+          </Text>
+          <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.4 }}>
+            {moodHeadline}
+          </Text>
+          <Text variant="caption" muted>
+            {weekLine}
+          </Text>
+        </View>
 
-      <DiarySection title="Registrar" dividerTop>
         {showRail ? (
           <View style={{ flexDirection: 'row', gap: 24, alignItems: 'flex-start' }}>
             <View style={{ flex: 1, minWidth: 0, gap: space.md }}>{registerBlock}</View>
@@ -238,48 +275,34 @@ export function HealthDiaryStudio(props: Props)
             </View>
           </View>
         ) : (
-          registerBlock
+          <View style={{ gap: space.md }}>{registerBlock}</View>
         )}
-      </DiarySection>
+      </View>
 
-      {daySlot ? (
-        <DiarySection title="Seu dia" dividerTop>
-          {daySlot}
-        </DiarySection>
-      ) : null}
-
-      {!showRail ? (
-        <DiarySection title="Padrões" dividerTop>
-          {patternsBlock}
-        </DiarySection>
-      ) : null}
-
-      {comNota.length > 0 ? (
-        <DiarySection title="O que você escreveu" dividerTop>
-          {comNota.map((h, i) =>
-          {
-            const iso = (h.data || '').slice(0, 10)
-            if (!iso) return null
-            return (
-              <View
-                key={h.id}
-                style={{
-                  gap: 4,
-                  paddingVertical: 10,
-                  borderBottomWidth: i < comNota.length - 1 ? StyleSheet.hairlineWidth : 0,
-                  borderBottomColor: DIARY_DIVIDER,
-                }}
-              >
-                <Text variant="caption" muted>
-                  {formatDayPt(iso)} · {moodLabel(h.humor)}
-                </Text>
-                <Text variant="body" style={{ lineHeight: 22 }}>
-                  {h.nota}
-                </Text>
-              </View>
-            )
-          })}
-        </DiarySection>
+      {/* 2. Consulta: tudo num só bloco recolhido */}
+      {subTitleFor ? (
+        <HomeCollapsible
+          title="Mais do seu diário"
+          subtitle={subTitleFor.charAt(0).toUpperCase() + subTitleFor.slice(1)}
+          pill="abrir"
+          pillColor={colors.health}
+        >
+          <View style={{ gap: space.lg, paddingTop: space.sm }}>
+            {daySlot ? (
+              <DiarySection title="Seu dia">{daySlot}</DiarySection>
+            ) : null}
+            {!showRail ? (
+              <DiarySection title="Padrões" dividerTop={Boolean(daySlot)}>
+                {patternsBlock}
+              </DiarySection>
+            ) : null}
+            {notesBlock ? (
+              <DiarySection title="O que você escreveu" dividerTop>
+                {notesBlock}
+              </DiarySection>
+            ) : null}
+          </View>
+        </HomeCollapsible>
       ) : null}
     </View>
   )

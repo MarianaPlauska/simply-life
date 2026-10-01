@@ -38,7 +38,7 @@ export function WebKanbanRow({
       style={(hovered) => webStyle({
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
         paddingHorizontal: 16,
         paddingVertical: 10,
         backgroundColor: hovered ? colors.surface : 'transparent',

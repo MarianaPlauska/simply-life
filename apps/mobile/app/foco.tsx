@@ -16,7 +16,7 @@ import {
   XP_FOCUS_SESSION,
   type TimerMilestone,
 } from '@simply-life/shared'
-import { Text, PressableScale, Chip } from '../src/ui'
+import { Text, PressableScale, Chip, CloseButton } from '../src/ui'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { useFocusStore } from '../src/store/focusStore'
@@ -26,6 +26,7 @@ import { useGamificationStore } from '../src/store/gamificationStore'
 import { ExecuteTimerFace } from '../src/components/timer/ExecuteTimerFace'
 import { useNeuroStore } from '../src/store/neuroStore'
 import { useCalendarStore } from '../src/store/calendarStore'
+import { useActionableTasks } from '../src/hooks/useActionableTasks'
 import { cancelFocusEnd, scheduleFocusEnd } from '../src/lib/pushNotifications'
 import { hapticLight } from '../src/lib/haptics'
 import { useTimeLearning } from '../src/lib/timeLearning'
@@ -68,7 +69,8 @@ export default function FocoScreen()
   const prevElapsed = useRef(0)
 
   const lastAwarded = useRef(0)
-  const priority = useMemo(() => priorityTodayTasks(tasks, new Date(), 8), [tasks])
+  const actionable = useActionableTasks(tasks)
+  const priority = useMemo(() => priorityTodayTasks(actionable, new Date(), 8), [actionable])
   const currentTask = useMemo(() =>
   {
     if (targetTaskId)
@@ -179,19 +181,7 @@ export default function FocoScreen()
         showsVerticalScrollIndicator={false}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Pressable
-            onPress={() => router.back()}
-            accessibilityLabel="Fechar"
-            style={{
-              width: 44,
-              height: 44,
-              borderRadius: 999,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Icon name="close" size={22} color={colors.ink} />
-          </Pressable>
+          <CloseButton onPress={() => router.back()} size={44} />
           <View style={{ flex: 1 }} />
         </View>
 
@@ -269,7 +259,7 @@ export default function FocoScreen()
           >
             <Icon name={milestone === 'hiperfoco' ? 'cafe-outline' : 'time-outline'} size={18} color={colors.axel} />
             <Text variant="body" style={{ flex: 1, fontSize: 14 }}>{TIMER_MILESTONE_COPY[milestone]}</Text>
-            <Icon name="close" size={16} color={colors.inkMuted} />
+            <Icon name="close" size={16} color={colors.dismiss} />
           </Pressable>
         ) : null}
 

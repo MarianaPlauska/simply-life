@@ -13,7 +13,9 @@ type Props = {
 
 export function Chip({ label, active, onPress, dotColor, count }: Props)
 {
-  const { colors, radius } = useTheme()
+  const { colors, radius, mode } = useTheme()
+  // escolhido: fundo petróleo suave e contorno na tinta da marca (petróleo no claro, menta no escuro)
+  const ink = mode === 'dark' ? colors.brandInk : colors.brand
   const text = typeof count === 'number' ? `${label} · ${count}` : label
 
   return (
@@ -30,8 +32,9 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
         alignItems: 'center',
         flexShrink: 0,
         gap: 6,
-        backgroundColor: active ? colors.surface : colors.elevated,
-        borderWidth: 0,
+        backgroundColor: active ? colors.brandMuted : colors.elevated,
+        borderWidth: 1,
+        borderColor: active ? ink : 'transparent',
       }}
     >
       {dotColor ? (
@@ -40,7 +43,7 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
             width: 8,
             height: 8,
             borderRadius: 999,
-            backgroundColor: active ? colors.ink : dotColor,
+            backgroundColor: dotColor,
           }}
         />
       ) : null}

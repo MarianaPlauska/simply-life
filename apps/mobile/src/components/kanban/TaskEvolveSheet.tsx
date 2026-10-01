@@ -8,6 +8,7 @@ import {
   hasReviewLater,
   minutesToLabel,
   nearestEvoStep,
+  openWaitFor,
   parseEvoNotes,
   stampEvoNote,
   stampEvoPct,
@@ -23,6 +24,8 @@ import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
 import { openFocusForTask } from '../../lib/openFocus'
+import { useTaskWaitStore } from '../../store/taskWaitStore'
+import { TaskHandBack, TaskPlannedHelpers, TaskWaitOpenCard } from './TaskWaitPanel'
 
 /** Sheet arredondado: edição leve + evolução em marcos com nota para o eu do futuro. */
 export function TaskEvolveSheet()
@@ -36,9 +39,16 @@ export function TaskEvolveSheet()
   const patchTask = useDataStore((s) => s.patchTask)
   const removeTask = useDataStore((s) => s.removeTask)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const waits = useTaskWaitStore((s) => s.waits)
+  const hydrateWaits = useTaskWaitStore((s) => s.hydrate)
   const [title, setTitle] = useState('')
   const [note, setNote] = useState('')
   const [step, setStep] = useState<EvoStep>(0)
+
+  useEffect(() =>
+  {
+    void hydrateWaits()
+  }, [hydrateWaits])
 
   useEffect(() =>
   {
@@ -92,6 +102,8 @@ export function TaskEvolveSheet()
 
   if (!taskId || !task) return null
 
+  const openWait = task.status === 'done' ? null : openWaitFor(waits, task.id)
+
   const when =
     task.horaMinutos != null
       ? minutesToLabel(task.horaMinutos)
@@ -137,7 +149,7 @@ export function TaskEvolveSheet()
             <Text variant="hero" style={{ fontSize: 42, letterSpacing: -1.2 }}>
               {step}%
             </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {EVO_STEPS.map((pct) => (
                 <Chip
                   key={pct}
@@ -157,6 +169,22 @@ export function TaskEvolveSheet()
                 style={{ minHeight: 96, textAlignVertical: 'top', paddingTop: 14 }}
               />
             </ScrollView>
+            {openWait ? <TaskWaitOpenCard wait={openWait} task={task} compact /> : null}
+            {task.status !== 'done' && !openWait ? <TaskHandBack task={task} /> : null}
+            {task.status !== 'done' ? <TaskPlannedHelpers task={task} /> : null}
+            {task.status !== 'done' && !openWait ? (
+              <PrimaryButton
+                label="Estou esperando alguém"
+                variant="ghost"
+                icon="people-outline"
+                onPress={() =>
+                {
+                  void persist(step, note, title)
+                  close()
+                  router.push(`/task/${task.id}?aba=espera`)
+                }}
+              />
+            ) : null}
             <PrimaryButton
               label={hasReviewLater(task.anotacao) ? 'Tirar ver depois' : 'Ver depois'}
               variant={hasReviewLater(task.anotacao) ? 'secondary' : 'ghost'}

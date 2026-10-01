@@ -38,7 +38,7 @@ export function HomeDesktopStage({
           </View>
         </View>
       </View>
-      <View style={{ gap: 12 }}>
+      <View style={{ gap: 16 }}>
         <Text variant="section" style={{ fontSize: 18, letterSpacing: -0.3 }}>
           {dayLabel}
         </Text>

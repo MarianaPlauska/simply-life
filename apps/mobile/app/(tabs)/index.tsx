@@ -48,9 +48,11 @@ import { HomeDesktopStage } from '../../src/components/dashboard/HomeDesktopStag
 import { TabShell } from '../../src/components/dashboard/TabShell'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { usePrefsStore } from '../../src/store/prefsStore'
+import { useActionableTasks } from '../../src/hooks/useActionableTasks'
 import { normalizeHomeMetrics } from '../../src/lib/homeMetrics'
 import { resolveAxelName } from '../../src/lib/axelName'
 import type { DashboardPriority } from '../../src/lib/dashboardWidgets'
+import { filterMetrics, filterPriorities } from '../../src/lib/appModules'
 
 function greetingForHour(h: number): string
 {
@@ -90,16 +92,17 @@ export default function DashboardScreen()
     [tasks, todayIso],
   )
   const gastosMes = monthExpenseTotal(finance) ?? 0
+  const actionable = useActionableTasks(tasks)
   const focusTask = useMemo(
-    () => priorityTodayTasks(tasks, new Date(), 1)[0]?.task ?? null,
-    [tasks],
+    () => priorityTodayTasks(actionable, new Date(), 1)[0]?.task ?? null,
+    [actionable],
   )
   const agua = findHabit(habits, 'agua')
   const sono = findHabit(habits, 'sono')
   const waterLabel = agua
     ? `${agua.progressoAtual}/${agua.metaDiaria ?? AGUA_META_COPOS}`
     : '-'
-  const homeMetrics = normalizeHomeMetrics(prefs.home_metric_cards)
+  const homeMetrics = filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards))
   const waterOnHome = homeMetrics.includes('water')
   const humorOnHome = homeMetrics.includes('humor')
   const sleepOnHome = homeMetrics.includes('sleep')
@@ -115,7 +118,7 @@ export default function DashboardScreen()
   const rpgMode = prefs.gamification_mode === 'rpg'
   const [axelTick, setAxelTick] = useState(0)
   const showAxel = humorOnHome && moodDone && Date.now() < axelUntil
-  const moduleOrder = prefs.home_module_order ?? ['tasks', 'health', 'finance']
+  const moduleOrder = filterPriorities(prefs.enabled_modules, prefs.home_module_order ?? ['tasks', 'health', 'finance'])
 
   const kpiItems = useMemo(() =>
   {
@@ -262,7 +265,7 @@ export default function DashboardScreen()
                 <DayPlanHomeCard />
                 <VisualDayCard />
                 <MoodWeekReportGate humor={humor} />
-                <View style={{ gap: 10 }}>
+                <View style={{ gap: 12 }}>
                   <Text variant="section" style={{ fontSize: 16 }}>
                     Atalhos
                   </Text>
@@ -300,12 +303,10 @@ export default function DashboardScreen()
 
             {rpgMode ? <HomeRpgStrip /> : null}
 
-            <HomeDayTimeline tasks={today} />
-
             {showAxel || waterOnHome ? (
               (isTablet) && waterOnHome ? (
-                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'stretch' }}>
-                  <View style={{ flex: 1, minWidth: 0, gap: 12 }}>
+                <View style={{ flexDirection: 'row', gap: 16, alignItems: 'stretch' }}>
+                  <View style={{ flex: 1, minWidth: 0, gap: 16 }}>
                     {showAxel ? <AxelDayBrief /> : null}
                   </View>
                   <View style={{ flex: 1, minWidth: 0 }}>
@@ -320,19 +321,14 @@ export default function DashboardScreen()
               )
             ) : null}
 
-            <View style={{ gap: 12 }}>
-              <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
-                Seu dia
-              </Text>
-              <HomeKpiSquares items={kpiItems} />
-            </View>
-
-            <View style={{ gap: 12 }}>
-              <Text variant="section" style={{ fontSize: 17 }}>
-                Atalhos
-              </Text>
-              <HomeMetricShortcuts />
-            </View>
+            {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
+            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, resumo e atalhos" pill="abrir" defaultOpen={false}>
+              <View style={{ gap: 24, paddingTop: 8 }}>
+                <HomeDayTimeline tasks={today} />
+                <HomeKpiSquares items={kpiItems} />
+                <HomeMetricShortcuts />
+              </View>
+            </HomeCollapsible>
           </>
         )}
 
@@ -342,7 +338,7 @@ export default function DashboardScreen()
             style={{ paddingVertical: 4 }}
           >
             <Text variant="caption" muted>
-              Quando quiser, personalize seu Início
+              Quando quiser, personalize seu Início.
             </Text>
           </Pressable>
         ) : null}
@@ -364,7 +360,7 @@ export default function DashboardScreen()
               <View style={{ gap: space.sm, paddingTop: space.xs }}>
                 <PersonalSummaryGrid />
                 {!statsOnHome ? <LifeSummaryReport variant="compact" /> : null}
-                <View style={{ gap: 10 }}>
+                <View style={{ gap: 12 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Text variant="section">Em seguida</Text>
                     <Pressable
@@ -388,7 +384,7 @@ export default function DashboardScreen()
                         style={{
                           borderRadius: 14,
                           backgroundColor: colors.elevated,
-                          padding: 14,
+                          padding: 16,
                           minHeight: 52,
                           justifyContent: 'center',
                         }}
@@ -499,12 +495,21 @@ export default function DashboardScreen()
             }}
             contentContainerStyle={{ padding: space.lg, paddingBottom: space.xl, gap: space.md }}
           >
-            <View style={{ gap: 4 }}>
+            <View style={{ gap: 6 }}>
               <Text variant="section">Mais</Text>
               <Text variant="caption" muted>
                 Conta, personalização e atalhos
               </Text>
             </View>
+            {/* Tema no topo: é o ajuste mais usado e aparece sem rolar */}
+            <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
+              <ListRow
+                title={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+                subtitle={mode === 'dark' ? 'Agora no tema escuro' : 'Agora no tema claro'}
+                rightIcon={mode === 'dark' ? 'sunny' : 'moon'}
+                onPress={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+              />
+            </Card>
             <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
               {(
                 [
@@ -512,11 +517,11 @@ export default function DashboardScreen()
                   { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
                   { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
                   { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
-                  { label: 'Preferências', subtitle: 'Notificações e hábitos', href: '/preferencias' },
+                  { label: 'Preferências', subtitle: 'O que eu uso, metas e alertas', href: '/preferencias' },
                   { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                   { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                   { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                  { label: 'Ofensiva', subtitle: 'Dias no app e no plano', href: '/ofensiva' },
+                  { label: 'Pique', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
                   { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
                 ] as const
               ).map((item, i, arr) => (
@@ -535,16 +540,6 @@ export default function DashboardScreen()
               ))}
             </Card>
             <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
-              <ListRow
-                title={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-                subtitle="Aparência do app"
-                onPress={() =>
-                {
-                  const next = mode === 'dark' ? 'light' : 'dark'
-                  setMode(next)
-                }}
-                showSeparator
-              />
               <ListRow
                 title="Sair"
                 subtitle="Encerrar sessão neste aparelho"

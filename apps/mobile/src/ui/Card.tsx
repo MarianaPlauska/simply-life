@@ -28,7 +28,7 @@ export function Card({ children, style, tone = 'default', accentTop, ...rest }: 
   const dark = mode === 'dark'
 
   const bg = widget
-    ? colors.widget
+    ? colors.featureBg
     : inset
       ? colors.canvas
       : elevated || hero

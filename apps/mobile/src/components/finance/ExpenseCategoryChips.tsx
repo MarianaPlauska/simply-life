@@ -32,7 +32,7 @@ export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Prop
   }, [hydrate])
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text variant="caption" muted>
           Categoria
@@ -49,7 +49,7 @@ export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Prop
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+        contentContainerStyle={{ gap: 12, paddingVertical: 2 }}
       >
         {ids.map((id) =>
         {
@@ -71,7 +71,7 @@ export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Prop
                 borderRadius: 999,
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 8,
+                gap: 12,
                 backgroundColor: active ? `${accent}38` : colors.elevated,
                 borderWidth: 1,
                 borderColor: active ? accent : colors.hairline,
@@ -132,7 +132,7 @@ export function ExpenseFixasChips({
   }, [hydrate])
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Text variant="caption" muted>
           Contas fixas
@@ -154,7 +154,7 @@ export function ExpenseFixasChips({
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+          contentContainerStyle={{ gap: 12, paddingVertical: 2 }}
         >
           {fixas.slice(0, 12).map((f) =>
           {
@@ -172,7 +172,7 @@ export function ExpenseFixasChips({
                   borderRadius: 14,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 12,
                   backgroundColor: `${accent}22`,
                   borderWidth: 1,
                   borderColor: accent,

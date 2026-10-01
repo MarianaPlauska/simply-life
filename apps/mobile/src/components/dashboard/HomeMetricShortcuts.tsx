@@ -13,6 +13,7 @@ import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '../../lib/homeMetrics'
 import { HomeQuickActions, type HomeShortcut } from './HomeQuickActions'
+import { filterMetrics } from '../../lib/appModules'
 
 function iconFor(id: HomeMetricId): HomeShortcut['icon']
 {
@@ -49,9 +50,10 @@ export function HomeMetricShortcuts()
   const isGuest = useAuthStore((s) => s.isGuest)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const prefs = usePrefsStore((s) => s.prefs)
+  // só atalhos de módulos que a pessoa usa
   const ids = useMemo(
-    () => normalizeHomeMetrics(prefs.home_metric_cards),
-    [prefs.home_metric_cards],
+    () => filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards)),
+    [prefs.home_metric_cards, prefs.enabled_modules],
   )
   const humor = useDataStore((s) => s.humor) ?? []
   const habits = useDataStore((s) => s.habits) ?? []

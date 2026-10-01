@@ -95,12 +95,23 @@ Inspirada no que o Hevy oferece de graça, sem os limites dos planos pagos:
 | 5 | Calorias opcionais e código de barras | feito (precisa de build nativo novo por causa do expo-camera) |
 | 6 | Nota fiscal (NFC-e) | depois |
 
+### Calorias para comida escrita à mão
+
+Só aparecem com "Mostrar calorias" ligado. Ordem de preferência para preencher cada item:
+
+1. valor digitado pela pessoa neste item
+2. valor que a pessoa já corrigiu antes para esse alimento (o app lembra; tabela `alimentos_pessoais`, migração 068)
+3. código de barras (Open Food Facts)
+4. estimativa da IA (rota `/api/axel/estimate-food-kcal`)
+5. tabela local de porções típicas, escrita pelo próprio projeto (sem TACO ou TBCA), para convidado, offline ou falha da IA
+
+Estimativas aparecem como "≈ 320 kcal" com a marca "estimativa". Tocar no valor corrige, e a correção vira o valor lembrado. Pendente: pedir autorização da TACO (nepa@unicamp.br) para trocar a tabela local.
+
 ### Ficou para depois
 
 * Links de convite abrindo direto no app (Android App Links e universal links) e rota `/meta/CODIGO` no site antigo. Hoje o convite funciona pelo link dentro do app ou digitando o código.
 * Resumo de fim de período por push e ofensiva do grupo contada em semanas.
 * Remover amigo pela versão web do perfil.
-* Calorias para itens escritos à mão (hoje só vêm do código de barras).
 * A sessão guiada antiga (`/academia/sessao`) ainda não grava em `sessoes_treino`.
 
 ### Privacidade: detalhe de implementação

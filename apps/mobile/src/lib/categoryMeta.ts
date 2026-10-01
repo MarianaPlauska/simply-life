@@ -89,6 +89,14 @@ export function nextFreeCategorySeries(map: CategoryMetaMap): ChartSeries
   return CHART_SERIES.find((k) => !used.has(k)) ?? defaultFolderSeries(ids.length)
 }
 
+/** Nome de cada categoria (embutidas e criadas), para rankings e relatórios. */
+export function labelMapFromMeta(map: CategoryMetaMap): Record<string, string>
+{
+  const out: Record<string, string> = {}
+  for (const id of allCategoryIds(map)) out[id] = resolveCategoryMeta(id, map).label
+  return out
+}
+
 /** Valor guardado (chave) por categoria, embutidas e criadas pela pessoa. */
 export function colorMapFromMeta(
   map: CategoryMetaMap,
@@ -114,6 +122,29 @@ export function slugCategoryId(label: string): string
     .replace(/^-|-$/g, '')
     .slice(0, 24)
   return `c-${base || 'cat'}`
+}
+
+/**
+ * Categorias que já vêm prontas além das 8 do sistema. Entram como "criadas"
+ * (mesmo caminho das da pessoa), então podem ser editadas e excluídas.
+ */
+export const STARTER_CATEGORIES: { id: string; label: string; icon: FinanceIconName; color: ChartSeries }[] = [
+  { id: 'c-contas', label: 'Contas', icon: 'zap', color: 'amber' },
+  { id: 'c-mercado', label: 'Mercado', icon: 'store', color: 'green' },
+  { id: 'c-restaurante', label: 'Restaurante', icon: 'pizza', color: 'clay' },
+  { id: 'c-assinaturas', label: 'Assinaturas', icon: 'tv', color: 'violet' },
+  { id: 'c-pets', label: 'Pets', icon: 'paw-print', color: 'teal' },
+  { id: 'c-beleza', label: 'Beleza e cuidados', icon: 'scissors', color: 'plum' },
+  { id: 'c-viagem', label: 'Viagem', icon: 'plane', color: 'blue' },
+  { id: 'c-presentes', label: 'Presentes', icon: 'gift', color: 'clay' },
+  { id: 'c-investimento', label: 'Investimento', icon: 'piggy-bank', color: 'teal' },
+]
+
+/** Todas as categorias, inclusive as excluídas da lista (para reativar). */
+export function allCategoryIds(map: CategoryMetaMap): string[]
+{
+  const customs = Object.keys(map).filter((id) => map[id]?.custom)
+  return [...BUILTIN_FINANCE_CATEGORIES, ...customs]
 }
 
 export function visibleCategoryIds(map: CategoryMetaMap): string[]

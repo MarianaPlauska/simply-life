@@ -12,6 +12,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { MetricTrack } from '../metrics/MetricTrack'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
+import { TaskWaitBadge } from './TaskWaitPanel'
 
 const CAT_ICON: Record<string, keyof typeof Icon.glyphMap> = {
   importante: 'flag-outline',
@@ -82,7 +83,7 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
       >
         <Icon name={icon} size={18} color={accent} />
       </View>
-      <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
+      <View style={{ flex: 1, minWidth: 0, gap: 8 }}>
         <Text
           variant="bodyStrong"
           numberOfLines={2}
@@ -99,6 +100,7 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
             {detail}
           </Text>
         ) : null}
+        <TaskWaitBadge task={task} />
         <MetricTrack
           pct={taskProgressPct(task)}
           currentLabel={`${taskProgressPct(task)}%`}

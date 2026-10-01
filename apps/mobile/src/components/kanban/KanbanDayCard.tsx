@@ -59,7 +59,7 @@ export function KanbanDayCard({ task, onToggle }: Props)
       }}
     >
       <View style={{ width: 5, backgroundColor: mark }} />
-      <View style={{ flex: 1, padding: 12, gap: 10 }}>
+      <View style={{ flex: 1, padding: 16, gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <Text variant="micro" style={{ fontWeight: '700', color: colors.inkMuted }}>
             {statusLabel(task)}
@@ -85,7 +85,7 @@ export function KanbanDayCard({ task, onToggle }: Props)
             }}
           />
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <PressableScale
             accessibilityLabel={task.status === 'done' ? 'Reabrir' : 'Concluir'}
             onPress={onToggle}
@@ -100,7 +100,7 @@ export function KanbanDayCard({ task, onToggle }: Props)
           >
             <Icon name={task.status === 'done' ? 'checkmark' : icon} size={16} color={colors.ink} />
           </PressableScale>
-          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
             <Text variant="bodyStrong" numberOfLines={2} style={{ fontSize: 14 }}>
               {task.titulo}
             </Text>

@@ -57,8 +57,8 @@ export function FinanceExportBar({ txs, title }: Props)
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
       <SectionHeader title={title} subtitle="Histórico desta pasta" />
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <View style={{ flex: 1, gap: 2 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant="caption" muted>
             Receita
           </Text>
@@ -66,7 +66,7 @@ export function FinanceExportBar({ txs, title }: Props)
             {formatBRL(receitas)}
           </Text>
         </View>
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant="caption" muted>
             Saiu da conta
           </Text>
@@ -74,7 +74,7 @@ export function FinanceExportBar({ txs, title }: Props)
             {formatBRL(naConta)}
           </Text>
         </View>
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant="caption" muted>
             No cartão
           </Text>
@@ -85,7 +85,7 @@ export function FinanceExportBar({ txs, title }: Props)
         Total lançado {formatBRL(gastos)}
         {top ? ` · mais em ${top.label}` : ''}
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         <PrimaryButton label="PDF" size="sm" variant="secondary" onPress={() => void run('pdf')} />
         <PrimaryButton label="Excel" size="sm" variant="secondary" onPress={() => void run('xls')} />
         <PrimaryButton label="CSV" size="sm" variant="ghost" onPress={() => void run('csv')} />

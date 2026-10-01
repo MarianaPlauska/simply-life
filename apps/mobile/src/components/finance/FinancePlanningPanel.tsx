@@ -137,7 +137,7 @@ export function FinancePlanningPanel()
           />
         </View>
 
-        <View style={{ gap: 6 }}>
+        <View style={{ gap: 8 }}>
           <Text variant="caption" muted>
             Orçamento geral
           </Text>
@@ -180,7 +180,7 @@ export function FinancePlanningPanel()
               borderColor: colors.axel,
               backgroundColor: colors.axelMuted,
               padding: space.md,
-              gap: 4,
+              gap: 6,
             }}
           >
             <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
@@ -224,8 +224,8 @@ export function FinancePlanningPanel()
               : financeCategoryColor(r.cor, chart, null, i)
             const pct = r.limite > 0 ? Math.min(100, (r.gasto / r.limite) * 100) : 0
             return (
-              <View key={r.id} style={{ gap: 6 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              <View key={r.id} style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
                   <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
                     {r.nome}
                   </Text>
@@ -256,7 +256,7 @@ export function FinancePlanningPanel()
                   />
                 </View>
                 {editingId === r.id ? (
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
                     <View style={{ flex: 1 }}>
                       <Field
                         label={`Limite por mês em ${r.nome}`}

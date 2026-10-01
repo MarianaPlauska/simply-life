@@ -12,6 +12,7 @@ import {
   toggleHomeMetric,
   type HomeMetricId,
 } from '../src/lib/homeMetrics'
+import { metricAllowed } from '../src/lib/appModules'
 
 export default function PersonalizarInicioScreen()
 {
@@ -57,7 +58,7 @@ export default function PersonalizarInicioScreen()
         </Text>
 
         <Card tone="elevated" style={{ gap: 0, borderRadius: 14, overflow: 'hidden' }}>
-          {HOME_METRIC_CATALOG.map((item, i) =>
+          {HOME_METRIC_CATALOG.filter((m) => metricAllowed(prefs.enabled_modules, m.id)).map((item, i) =>
           {
             const on = selected.includes(item.id)
             return (

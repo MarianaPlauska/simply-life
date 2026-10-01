@@ -8,11 +8,11 @@ export type Achievement = {
 }
 
 export const STARTER_ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_task', title: 'Primeira entrega', description: 'Conclua uma tarefa', xpReward: 20 },
-  { id: 'water_day', title: 'Hidratado', description: 'Bata a meta de água', xpReward: 15 },
-  { id: 'mood_check', title: 'Check-in', description: 'Registre o humor', xpReward: 10 },
-  { id: 'streak_3', title: 'Ofensiva 3', description: '3 dias seguidos ativos', xpReward: 40 },
-  { id: 'finance_log', title: 'Controle', description: 'Lance um gasto', xpReward: 15 },
+  { id: 'first_task', title: 'Primeira entrega', description: 'Conclua uma tarefa.', xpReward: 20 },
+  { id: 'water_day', title: 'Hidratado', description: 'Bata a meta de água.', xpReward: 15 },
+  { id: 'mood_check', title: 'Check-in', description: 'Registre o humor.', xpReward: 10 },
+  { id: 'streak_3', title: 'Pique de 3 dias', description: '3 dias seguidos ativos.', xpReward: 40 },
+  { id: 'finance_log', title: 'Controle', description: 'Lance um gasto.', xpReward: 15 },
 ]
 
 export type ShopItem = {

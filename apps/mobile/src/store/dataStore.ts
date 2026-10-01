@@ -31,6 +31,7 @@ import {
   type ContaAPagar,
   findHabit,
   ensureSonoHabit,
+  computeSaldoDisponivel,
   aguaMlPorCopo,
   currentWeekIsos,
   isDemoHumorRow,
@@ -94,11 +95,14 @@ import {
   insertFinanceGoal,
   updateFinanceGoalRow,
   deleteFinanceGoal,
+  upsertCashAccount,
 } from '../lib/sync/financeAccounts'
 import { useAuthStore } from './authStore'
+import { usePrefsStore } from './prefsStore'
 import { loadOfflineBundle, saveOfflineBundle } from '../lib/offlineCache'
 import { supabaseConfigured } from '../lib/supabase'
 import { hapticLight } from '../lib/haptics'
+import { rewardTaskDone } from '../lib/taskReward'
 import { useGamificationStore } from './gamificationStore'
 import { useWaterLogStore } from './waterLogStore'
 import { useBodyWeekStore } from './bodyWeekStore'
@@ -147,6 +151,8 @@ type DataState = {
   loading: boolean
   error: string | null
   source: 'remote' | 'demo' | 'idle'
+  /** Convidado que montou os próprios dados nas boas-vindas (sem dados de exemplo). */
+  guestOwnData: boolean
   humor: HumorRegistro[]
   tasks: MobileTask[]
   finance: FinanceTx[]
@@ -286,19 +292,76 @@ type DataState = {
     numeroMascarado?: string
   }) => FinanceCard
   removeFinanceCard: (cardId: string) => void
+  /** Meta de sono (h) ou proteína (g). Fica também nas preferências, que sincronizam. */
+  setHabitGoal: (tipo: 'sono' | 'proteina', meta: number, isGuest?: boolean) => Promise<void>
+  /** "Quanto tem na conta hoje": ajusta o saldo inicial para o disponível bater. */
+  setCurrentBalance: (saldoAtual: number, isGuest?: boolean) => Promise<{ ok: boolean; error?: string }>
+  /** Convidado sai dos dados de exemplo e passa a guardar os próprios neste aparelho. */
+  startGuestOwnData: () => Promise<void>
 }
 
-async function writeOffline(state: {
+type OfflineState = {
   humor: HumorRegistro[]
   tasks: MobileTask[]
   habits: HabitoDiario[]
-}): Promise<void>
+  guestOwnData?: boolean
+  finance?: FinanceTx[]
+  medicamentos?: Medicamento[]
+  financeCards?: FinanceCard[]
+  contasFixas?: ContaFixa[]
+  contasAPagar?: ContaAPagar[]
+  financeGoals?: FinanceGoal[]
+  cashAccount?: CashAccount
+}
+
+async function writeOffline(state: OfflineState): Promise<void>
 {
+  const own = Boolean(state.guestOwnData)
   await saveOfflineBundle({
     updatedAt: new Date().toISOString(),
     humorJson: JSON.stringify(state.humor.filter((h) => !isDemoHumorRow(h))),
     tasksJson: JSON.stringify(state.tasks),
     habitsJson: JSON.stringify(state.habits),
+    // Convidado com dados próprios: o aparelho guarda tudo, não só humor/tarefas/hábitos
+    ...(own
+      ? {
+          ownData: true,
+          financeJson: JSON.stringify(state.finance ?? []),
+          medsJson: JSON.stringify(state.medicamentos ?? []),
+          cardsJson: JSON.stringify(state.financeCards ?? []),
+          fixasJson: JSON.stringify(state.contasFixas ?? []),
+          billsJson: JSON.stringify(state.contasAPagar ?? []),
+          goalsJson: JSON.stringify(state.financeGoals ?? []),
+          cashJson: JSON.stringify(state.cashAccount ?? emptyCashAccount()),
+        }
+      : {}),
+  })
+}
+
+function parseJsonList<T>(raw: string | undefined): T[]
+{
+  if (!raw) return []
+  try
+  {
+    const v = JSON.parse(raw) as unknown
+    return Array.isArray(v) ? (v as T[]) : []
+  }
+  catch
+  {
+    return []
+  }
+}
+
+/** Metas de sono/proteína escolhidas nas boas-vindas ou em Preferências valem sobre o padrão. */
+function applyHabitGoals(habits: HabitoDiario[]): HabitoDiario[]
+{
+  const goals = usePrefsStore.getState().prefs.habit_goals
+  if (!goals) return habits
+  return habits.map((h) =>
+  {
+    if (h.tipo === 'sono' && goals.sono) return { ...h, metaDiaria: goals.sono }
+    if (h.tipo === 'proteina' && goals.proteina) return { ...h, metaDiaria: goals.proteina }
+    return h
   })
 }
 
@@ -361,6 +424,7 @@ export const useDataStore = create<DataState>((set, get) => ({
   loading: false,
   error: null,
   source: 'idle',
+  guestOwnData: false,
   humor: [],
   tasks: [],
   finance: [],
@@ -389,6 +453,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       financeGoals: [],
       lastAxelCare: null,
       source: 'idle',
+      guestOwnData: false,
       error: null,
       loading: false,
     })
@@ -423,6 +488,41 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     try
     {
+      if (useLocal(isGuest) && cached?.ownData)
+      {
+        // Dados do próprio convidado: nada de exemplo, tudo vem do aparelho
+        const habits = applyHabitGoals(ensureSonoHabit(
+          get().habits.length ? get().habits : parseCachedHabits(cached.habitsJson),
+        ))
+        const keep = get().guestOwnData
+        let cash = emptyCashAccount()
+        try
+        {
+          cash = cached.cashJson ? (JSON.parse(cached.cashJson) as CashAccount) : cash
+        }
+        catch
+        {
+          /* cache inválido */
+        }
+        set({
+          humor: keep ? get().humor : parseJsonList<HumorRegistro>(cached.humorJson),
+          tasks: keep ? get().tasks : parseJsonList<MobileTask>(cached.tasksJson),
+          finance: keep ? get().finance : parseJsonList<FinanceTx>(cached.financeJson),
+          habits,
+          medicamentos: keep ? get().medicamentos : parseJsonList<Medicamento>(cached.medsJson),
+          cashAccount: keep ? get().cashAccount : cash,
+          financeCards: keep ? get().financeCards : parseJsonList<FinanceCard>(cached.cardsJson),
+          contasFixas: keep ? get().contasFixas : parseJsonList<ContaFixa>(cached.fixasJson),
+          contasAPagar: keep ? get().contasAPagar : parseJsonList<ContaAPagar>(cached.billsJson),
+          financeGoals: keep ? get().financeGoals : parseJsonList<FinanceGoal>(cached.goalsJson),
+          guestOwnData: true,
+          source: 'demo',
+          loading: false,
+        })
+        useBodyWeekStore.getState().hydrate()
+        return
+      }
+
       if (useLocal(isGuest))
       {
         const cachedHumor = (() =>
@@ -448,6 +548,12 @@ export const useDataStore = create<DataState>((set, get) => ({
           ...real,
           ...demo.filter((d) => !real.some((r) => r.data === d.data)),
         ]
+        // a pessoa começou os próprios dados enquanto isto carregava: não sobrescreve com exemplo
+        if (get().guestOwnData)
+        {
+          set({ loading: false })
+          return
+        }
         const cachedHabits = parseCachedHabits(cached?.habitsJson)
         const keepHabits = get().habits.length > 0
           ? get().habits
@@ -512,7 +618,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         remoteHabits.length ? remoteHabits : starterHabits(),
         today,
       )
-      let habits = ensureSonoHabit(merged)
+      let habits = applyHabitGoals(ensureSonoHabit(merged))
 
       for (const h of remoteHabits)
       {
@@ -622,6 +728,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         })),
         anotacao: notas || '',
         prioridade,
+        criadoEm: new Date().toISOString(),
       }
       set({ tasks: [t, ...get().tasks] })
       return
@@ -850,9 +957,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     if (done)
     {
       void cancelTaskReminder(taskId).catch(() => undefined)
-      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
-      useGamificationStore.getState().unlockIf('first_task')
-      useActivityStore.getState().markAction('task')
+      rewardTaskDone(current.titulo)
     }
 
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
@@ -883,9 +988,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     if (status === 'done' && current.status !== 'done')
     {
-      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
-      useGamificationStore.getState().unlockIf('first_task')
-      useActivityStore.getState().markAction('task')
+      rewardTaskDone(current.titulo)
     }
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
     await persistTaskStatus(taskId, status)
@@ -1595,9 +1698,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     if (next.status === 'done' && current.status !== 'done')
     {
-      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
-      useGamificationStore.getState().unlockIf('first_task')
-      useActivityStore.getState().markAction('task')
+      rewardTaskDone(current.titulo)
     }
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
 
@@ -1708,4 +1809,85 @@ export const useDataStore = create<DataState>((set, get) => ({
       /* local já atualizado */
     }
   },
+
+  setHabitGoal: async (tipo, meta, isGuest) =>
+  {
+    const value = tipo === 'sono' ? Math.min(14, Math.max(4, meta)) : Math.min(400, Math.max(10, Math.round(meta)))
+    const prefs = usePrefsStore.getState()
+    await prefs.patch({ habit_goals: { ...(prefs.prefs.habit_goals ?? {}), [tipo]: value } })
+    const habits = tipo === 'sono' ? ensureSonoHabit(get().habits) : get().habits
+    const habit = findHabit(habits, tipo)
+    set({ habits: habits.map((h) => (habit && h.id === habit.id ? { ...h, metaDiaria: value } : h)) })
+    if (habit && !useLocal(isGuest) && !isLocalHabitId(habit.id))
+    {
+      await patchHabitoAgua(habit.id, { metaDiaria: value }).catch(() => null)
+    }
+    await writeOffline(get())
+  },
+
+  setCurrentBalance: async (saldoAtual, isGuest) =>
+  {
+    // disponível = saldoInicial + receitas - despesas do mês; resolve o saldoInicial
+    const semInicial = computeSaldoDisponivel({ saldoInicial: 0 }, get().finance, get().contasFixas).disponivel
+    const saldoInicial = Math.round((saldoAtual - semInicial) * 100) / 100
+    const before = get().cashAccount
+    set({ cashAccount: { ...before, saldoInicial } })
+    if (useLocal(isGuest))
+    {
+      await writeOffline(get())
+      return { ok: true }
+    }
+    try
+    {
+      await upsertCashAccount(saldoInicial)
+      return { ok: true }
+    }
+    catch (e)
+    {
+      set({ cashAccount: before })
+      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar o saldo' }
+    }
+  },
+
+  startGuestOwnData: async () =>
+  {
+    const today = localTodayIso()
+    const habits = ensureSonoHabit(demoHabits()).map((h) => ({
+      ...h,
+      progressoAtual: 0,
+      config: { ...(h.config ?? {}), ultima_data: today, registros_ml: [] },
+    }))
+    // exemplo de humor: só 1 a cada 3 tem a nota de demo, então compara com a semente inteira
+    const demo = demoHumor()
+    const isDemo = (h: HumorRegistro) => isDemoHumorRow(h) || demo.some((d) => d.id === h.id && d.data === h.data)
+    set({
+      humor: get().humor.filter((h) => !isDemo(h)),
+      tasks: [],
+      finance: [],
+      habits: applyHabitGoals(habits),
+      medicamentos: [],
+      cashAccount: emptyCashAccount(),
+      financeCards: [],
+      contasFixas: [],
+      contasAPagar: [],
+      financeGoals: [],
+      guestOwnData: true,
+      source: 'demo',
+    })
+    await writeOffline(get())
+  },
 }))
+
+// Convidado com dados próprios: qualquer mudança vai para o aparelho (remédios,
+// cartões e contas não tinham onde ficar). Espera um instante para juntar mudanças.
+let offlineTimer: ReturnType<typeof setTimeout> | null = null
+useDataStore.subscribe((state, prev) =>
+{
+  if (!state.guestOwnData || state === prev) return
+  if (offlineTimer) clearTimeout(offlineTimer)
+  offlineTimer = setTimeout(() =>
+  {
+    offlineTimer = null
+    void writeOffline(useDataStore.getState())
+  }, 400)
+})

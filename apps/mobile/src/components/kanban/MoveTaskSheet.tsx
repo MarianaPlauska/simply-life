@@ -31,7 +31,7 @@ export function MoveTaskSheet({ visible, onClose, onPick }: Props)
         <Pressable onPress={(e) => e.stopPropagation()}>
           <Card tone="elevated" style={{ gap: space.md }}>
             <Text variant="section">Mover para</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {ACTIVE_DUE_BUCKETS.map((id) => (
                 <Chip
                   key={id}

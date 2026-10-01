@@ -61,7 +61,7 @@ export function FoodSpendCard({ embedded = false, limit = 5 }: { embedded?: bool
             {`${formatBrlShort(total)} neste mês, em ${rows.length} ${rows.length === 1 ? 'item' : 'itens'}`}
           </Text>
           {rows.slice(0, limit).map((r) => (
-            <View key={r.key} style={{ gap: 4 }}>
+            <View key={r.key} style={{ gap: 6 }}>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm }}>
                 <Text variant="bodyStrong" style={{ flex: 1 }} numberOfLines={1}>
                   {r.nome}

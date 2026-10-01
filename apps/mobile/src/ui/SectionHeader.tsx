@@ -20,16 +20,16 @@ export function SectionHeader({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: space.xs,
-        gap: space.xs,
+        marginBottom: space.md - 4,
+        gap: space.sm,
       }}
     >
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <Text variant="section" style={{ fontSize: 15 }}>
+      <View style={{ flex: 1, minWidth: 0, gap: space.xs }}>
+        <Text variant="section">
           {title}
         </Text>
         {subtitle ? (
-          <Text variant="caption" muted style={{ marginTop: 1, fontSize: 11 }}>
+          <Text variant="caption" muted>
             {subtitle}
           </Text>
         ) : null}

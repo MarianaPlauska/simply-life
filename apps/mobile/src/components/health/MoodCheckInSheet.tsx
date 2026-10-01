@@ -115,7 +115,7 @@ export function MoodCheckInSheet()
               minHeight: 88,
               textAlignVertical: 'top',
               borderRadius: radius.control,
-              padding: 12,
+              padding: 16,
               fontSize: 16,
               color: colors.ink,
               backgroundColor: colors.elevated,

@@ -7,7 +7,7 @@ import {
   taskListId,
   type MobileTask,
 } from '@simply-life/shared'
-import { Card, Text, EmptyState, PillTabs } from '../../ui'
+import { Card, Text, EmptyState, PillTabs, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 
@@ -123,21 +123,25 @@ export function KanbanGanttPane({ tasks }: Props)
   if (withDue.length === 0)
   {
     return (
-      <Card tone="elevated" style={{ borderRadius: 14 }}>
-        <EmptyState
-          title="Nenhuma tarefa com prazo"
-          body="Defina datas nas tarefas para ver o Gantt."
-        />
-      </Card>
+      <View style={{ gap: space.md }}>
+        <PaneTitle title="Gantt" subtitle="Duração de cada tarefa na linha do tempo." />
+        <Card tone="elevated" style={{ borderRadius: 14 }}>
+          <EmptyState
+            title="Nenhuma tarefa com prazo"
+            body="Defina datas nas tarefas para ver o Gantt."
+          />
+        </Card>
+      </View>
     )
   }
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 8 }}>
-        <Text variant="caption" muted>
-          {withDue.length} com prazo
-        </Text>
+      <View style={{ gap: 12 }}>
+        <PaneTitle
+          title="Gantt"
+          subtitle={`${withDue.length} com prazo · duração de cada tarefa na linha do tempo.`}
+        />
         <PillTabs
           tabs={[
             { id: '7', label: '7d' },
@@ -169,7 +173,7 @@ export function KanbanGanttPane({ tasks }: Props)
                 backgroundColor: colors.surface,
               }}
             >
-              <View style={{ width: LABEL_W, padding: 10, justifyContent: 'center' }}>
+              <View style={{ width: LABEL_W, padding: 12, justifyContent: 'center' }}>
                 <Text variant="micro" muted>
                   TAREFA
                 </Text>

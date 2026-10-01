@@ -6,6 +6,7 @@ import taskEstimate from '../_lib/handlers/axel/task-estimate.js';
 import ingestEmail from '../_lib/handlers/axel/ingest-email.js';
 import ingestTasks from '../_lib/handlers/axel/ingest-tasks.js';
 import estimateProtein from '../_lib/handlers/axel/estimate-protein.js';
+import estimateFoodKcal from '../_lib/handlers/axel/estimate-food-kcal.js';
 import processEvent from '../_lib/handlers/axel/process-event.js';
 import financeCoach from '../_lib/handlers/axel/finance-coach.js';
 import financePurchaseCheck from '../_lib/handlers/axel/finance-purchase-check.js';
@@ -19,6 +20,7 @@ import moodWeekReport from '../_lib/handlers/axel/mood-week-report.js';
 import parseTaskPrompt from '../_lib/handlers/axel/parse-task-prompt.js';
 import classifyDump from '../_lib/handlers/axel/classify-dump.js';
 import sharedGoalCheer from '../_lib/handlers/axel/shared-goal-cheer.js';
+import leaguePot from '../_lib/handlers/axel/league-pot.js';
 
 const ROUTES = {
   'morning-brief': morningBrief,
@@ -27,6 +29,7 @@ const ROUTES = {
   'ingest-email': ingestEmail,
   'ingest-tasks': ingestTasks,
   'estimate-protein': estimateProtein,
+  'estimate-food-kcal': estimateFoodKcal,
   'process-event': processEvent,
   'finance-coach': financeCoach,
   'finance-purchase-check': financePurchaseCheck,
@@ -40,6 +43,7 @@ const ROUTES = {
   'parse-task-prompt': parseTaskPrompt,
   'classify-dump': classifyDump,
   'shared-goal-cheer': sharedGoalCheer,
+  'league-pot': leaguePot,
 };
 
 function pickQuery(value)

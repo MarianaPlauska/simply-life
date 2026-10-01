@@ -37,7 +37,7 @@ export function StreakMonthCard({ label, cells, todayIso, onPrev, onNext }: Prop
       style={{
         borderRadius: 20,
         padding: space.lg,
-        gap: 12,
+        gap: 16,
         backgroundColor: colors.elevated,
       }}
     >

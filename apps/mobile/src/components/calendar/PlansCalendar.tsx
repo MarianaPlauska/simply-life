@@ -99,10 +99,10 @@ export function PlansCalendar({ tasks }: Props)
 
   return (
     <View style={{ gap: space.lg }}>
-      {/* Destaque em petróleo (os 30%) */}
+      {/* Faixa de destaque (petróleo no escuro, tinta petróleo no claro) */}
       <View
         style={{
-          backgroundColor: colors.brand,
+          backgroundColor: colors.heroBg,
           borderRadius: radius.card,
           paddingTop: space.lg,
           paddingHorizontal: space.md,
@@ -112,24 +112,24 @@ export function PlansCalendar({ tasks }: Props)
       >
         <Text
           variant="hero"
-          style={{ fontSize: 26, color: colors.onBrand, letterSpacing: -0.6, lineHeight: 32 }}
+          style={{ fontSize: 26, color: colors.heroInk, letterSpacing: -0.6, lineHeight: 32 }}
         >
           Organize sua Vida{'\n'}Acompanhe o Progresso
         </Text>
-        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 6,
-              backgroundColor: `${colors.brandInk}29`,
+              gap: 8,
+              backgroundColor: `${colors.heroMuted}29`,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 999,
             }}
           >
-            <Icon name="medal" size={16} color={colors.brandInk} />
-            <Text variant="label" style={{ color: colors.onBrand, fontWeight: '700' }}>
+            <Icon name="medal" size={16} color={colors.heroMuted} />
+            <Text variant="label" style={{ color: colors.heroInk, fontWeight: '700' }}>
               {gold} ouro
             </Text>
           </View>
@@ -137,15 +137,15 @@ export function PlansCalendar({ tasks }: Props)
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 6,
-              backgroundColor: `${colors.brandInk}29`,
+              gap: 8,
+              backgroundColor: `${colors.heroMuted}29`,
               paddingHorizontal: 12,
               paddingVertical: 6,
               borderRadius: 999,
             }}
           >
             <Icon name="flame" size={16} color={colors.axelFill} />
-            <Text variant="label" style={{ color: colors.onBrand, fontWeight: '700' }}>
+            <Text variant="label" style={{ color: colors.heroInk, fontWeight: '700' }}>
               {streak} dias
             </Text>
           </View>
@@ -255,7 +255,7 @@ export function PlansCalendar({ tasks }: Props)
         </View>
 
         {/* Lista de categorias */}
-        <View style={{ gap: 4, marginTop: space.sm }}>
+        <View style={{ gap: 6, marginTop: space.sm }}>
           {LIFE_CATEGORIES.map((cat) =>
           {
             const active = category === cat.id
@@ -268,7 +268,7 @@ export function PlansCalendar({ tasks }: Props)
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 12,
+                  gap: 16,
                   minHeight: 52,
                   paddingHorizontal: 8,
                   borderRadius: radius.control,

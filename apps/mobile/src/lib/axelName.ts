@@ -6,13 +6,12 @@ export function resolveAxelName(input: {
   email?: string | null
 }): string
 {
-  if (input.isGuest) return 'convidado'
-
+  // convidado que disse o nome nas boas-vindas também é chamado por ele
   const chosen = (input.callsYou || input.displayName || '').trim()
   if (chosen && !chosen.includes('@'))
   {
     return chosen
   }
 
-  return 'você'
+  return input.isGuest ? 'convidado' : 'você'
 }

@@ -128,7 +128,7 @@ export function FinanceSalaryPane()
           <Text variant="caption" muted>Nenhuma hora extra neste período.</Text>
         ) : (
           periodEntries.map((e) => (
-            <View key={String(e.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View key={String(e.id)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
                 {describeDayPt(e.data)} · {formatMinutesPt(e.minutos)} · {KIND_LABEL[e.tipo]}
               </Text>
@@ -141,7 +141,7 @@ export function FinanceSalaryPane()
       </Card>
 
       {confirmations.length ? (
-        <Card tone="elevated" style={{ gap: 6 }}>
+        <Card tone="elevated" style={{ gap: 8 }}>
           <Text variant="section">O que caiu</Text>
           {confirmations.slice(0, 6).map((c) => (
             <Row
@@ -164,7 +164,7 @@ export function FinanceSalaryPane()
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean })
 {
   return (
-    <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+    <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
       <Text variant={strong ? 'bodyStrong' : 'body'} style={{ flex: 1, fontSize: 14 }}>{label}</Text>
       <Text variant={strong ? 'bodyStrong' : 'body'} style={{ fontSize: 14 }}>{value}</Text>
     </View>
@@ -227,15 +227,15 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
       <Field label="Salário base, sem horas extras (bruto)" placeholder="Ex.: 3500" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
 
       <Text variant="caption" muted>Seu horário</Text>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <View style={{ flex: 1 }}><Field label="Entrada" placeholder="08:00" value={f.entrada} onChangeText={(v) => patch({ entrada: v })} /></View>
         <View style={{ flex: 1 }}><Field label="Saída" placeholder="17:00" value={f.saida} onChangeText={(v) => patch({ saida: v })} /></View>
       </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <View style={{ flex: 1 }}><Field label="Almoço (min)" keyboardType="number-pad" value={f.intervalo} onChangeText={(v) => patch({ intervalo: v })} /></View>
         <View style={{ flex: 1 }}><Field label="Dias por semana" keyboardType="number-pad" value={f.dias} onChangeText={(v) => patch({ dias: v })} /></View>
       </View>
-      <View style={{ padding: 10, borderRadius: 12, backgroundColor: colors.hairline }}>
+      <View style={{ padding: 12, borderRadius: 12, backgroundColor: colors.hairline }}>
         <Text variant="bodyStrong" style={{ fontSize: 14 }}>
           {sched.semanais != null
             ? `${sched.semanais}h por semana → divisor ${sched.divisor}${sched.valorHora ? ` · sua hora vale ${formatBRL(sched.valorHora)}` : ''}`
@@ -245,20 +245,20 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
       </View>
 
       <Text variant="caption" muted>Adicional de hora extra em dia útil</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {[50, 60, 70, 100].map((p) => <SelectChip key={p} label={`${p}%`} active={f.heUtil === p} onPress={() => patch({ heUtil: p })} />)}
       </View>
       <Text variant="caption" muted>Em domingo e feriado</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {[100, 150].map((p) => <SelectChip key={p} label={`${p}%`} active={f.heFolga === p} onPress={() => patch({ heFolga: p })} />)}
       </View>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         <SelectChip label={f.noturno ? 'Adicional noturno 20%' : 'Sem adicional noturno'} active={Boolean(f.noturno)} onPress={() => patch({ noturno: f.noturno ? null : 20 })} />
         <SelectChip label={f.dsr ? 'Com DSR sobre HE' : 'Sem DSR sobre HE'} active={f.dsr} onPress={() => patch({ dsr: !f.dsr })} />
       </View>
 
       <Text variant="caption" muted>Quando o salário cai</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         <SelectChip label="5º dia útil" active={f.quinto} onPress={() => patch({ quinto: true })} />
         <SelectChip label="Dia fixo" active={!f.quinto} onPress={() => patch({ quinto: false })} />
       </View>

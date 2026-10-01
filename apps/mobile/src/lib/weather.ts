@@ -118,46 +118,46 @@ export function interpretWeatherCode(code: number): {
 {
   if (code === 0)
   {
-    return { label: 'Céu limpo', hint: 'Dia aberto por aí', icon: 'sunny-outline', severe: false }
+    return { label: 'Céu limpo', hint: 'Dia aberto por aí.', icon: 'sunny-outline', severe: false }
   }
   if (code <= 3)
   {
-    return { label: 'Parcial', hint: 'Nuvens leves no céu', icon: 'partly-sunny-outline', severe: false }
+    return { label: 'Parcial', hint: 'Nuvens leves no céu.', icon: 'partly-sunny-outline', severe: false }
   }
   if (code <= 48)
   {
-    return { label: 'Nublado', hint: 'Céu fechado, sem pressa', icon: 'cloudy-outline', severe: false }
+    return { label: 'Nublado', hint: 'Céu fechado, sem pressa.', icon: 'cloudy-outline', severe: false }
   }
   if (code <= 57)
   {
-    return { label: 'Garoa', hint: 'Pode molhar um pouco', icon: 'rainy-outline', severe: false }
+    return { label: 'Garoa', hint: 'Pode molhar um pouco.', icon: 'rainy-outline', severe: false }
   }
   if (code <= 67)
   {
-    return { label: 'Chuva', hint: 'Vai chover à tarde', icon: 'rainy-outline', severe: false }
+    return { label: 'Chuva', hint: 'Vai chover à tarde.', icon: 'rainy-outline', severe: false }
   }
   if (code <= 77)
   {
-    return { label: 'Neve', hint: 'Frio e branco lá fora', icon: 'snow-outline', severe: false }
+    return { label: 'Neve', hint: 'Frio e branco lá fora.', icon: 'snow-outline', severe: false }
   }
   if (code <= 82)
   {
-    return { label: 'Pancadas', hint: 'Chuva em momentos', icon: 'rainy-outline', severe: false }
+    return { label: 'Pancadas', hint: 'Chuva em momentos.', icon: 'rainy-outline', severe: false }
   }
   if (code <= 86)
   {
-    return { label: 'Neve', hint: 'Flocos no ar', icon: 'snow-outline', severe: false }
+    return { label: 'Neve', hint: 'Flocos no ar.', icon: 'snow-outline', severe: false }
   }
   if (code <= 99)
   {
     return {
       label: 'Tempestade',
-      hint: 'Melhor ficar em casa um pouco',
+      hint: 'Melhor ficar em casa um pouco.',
       icon: 'thunderstorm-outline',
       severe: true,
     }
   }
-  return { label: 'Clima', hint: 'Tempo estável', icon: 'partly-sunny-outline', severe: false }
+  return { label: 'Clima', hint: 'Tempo estável.', icon: 'partly-sunny-outline', severe: false }
 }
 
 /**

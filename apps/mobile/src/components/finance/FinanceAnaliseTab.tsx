@@ -19,7 +19,8 @@ import { FinanceCoachCards } from './FinanceCoachCards'
 import { FinancePlanningPanel } from './FinancePlanningPanel'
 import { FinanceMonthReport } from './FinanceMonthReport'
 import { FoodSpendCard } from '../food/FoodSpendCard'
-import { ANALISE_SUB_TABS, type AnaliseSubTab } from './financeNav'
+import { visibleAnaliseTabs, type AnaliseSubTab } from './financeNav'
+import { useModules } from '../../hooks/useModules'
 
 type Props = {
   subTab: AnaliseSubTab
@@ -43,6 +44,12 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
     if (res.ok) setGoalInput({ ...goalInput, [id]: '' })
   }
   const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
+  const subTabs = visibleAnaliseTabs(useModules().on)
+  const shown = subTabs.some((t) => t.id === subTab) ? subTab : (subTabs[0]?.id ?? subTab)
+  useEffect(() =>
+  {
+    if (shown !== subTab) onSubTabChange(shown)
+  }, [shown, subTab, onSubTabChange])
 
   useEffect(() =>
   {
@@ -52,7 +59,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
   return (
     <View style={{ gap: space.md }}>
       <SubNavTabs
-        tabs={ANALISE_SUB_TABS}
+        tabs={subTabs}
         value={subTab}
         onChange={onSubTabChange}
         accent="finance"
@@ -67,13 +74,13 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
         <Card tone="elevated" style={{ gap: space.md }}>
           <SectionHeader title="Metas financeiras" />
           {goals.length === 0 ? (
-            <EmptyState title="Sem metas" body="Crie uma meta no wizard abaixo." />
+            <EmptyState title="Sem metas" body="Crie a primeira meta logo abaixo." />
           ) : (
             goals.map((goal) =>
             {
               const pct = goal.meta > 0 ? Math.min(100, Math.round((goal.atual / goal.meta) * 100)) : 0
               return (
-                <View key={goal.id} style={{ gap: 6 }}>
+                <View key={goal.id} style={{ gap: 8 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text variant="bodyStrong">{goal.titulo}</Text>
                     <Text variant="caption" muted>
@@ -96,7 +103,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
                       }}
                     />
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+                  <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
                     <View style={{ flex: 1 }}>
                       <Field
                         label="Valor"
@@ -123,7 +130,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
         </Card>
       )}
 
-      {subTab === 'metas' ? <FinanceGoalWizard /> : null}
+      {subTab === 'metas' ? <FinanceGoalWizard collapsed={goals.length > 0} /> : null}
 
       {subTab === 'coach' && <FinanceCoachCards />}
     </View>

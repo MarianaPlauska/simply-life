@@ -10,6 +10,8 @@ export function ConfirmDialogHost()
   const { colors, space, radius, elevation } = useTheme()
   const request = useConfirmStore((s) => s.request)
   const close = useConfirmStore((s) => s.close)
+  const neutral = request?.tone === 'neutral'
+  const tint = neutral ? colors.ink : colors.danger
 
   const confirm = () =>
   {
@@ -52,12 +54,12 @@ export function ConfirmDialogHost()
               width: 48,
               height: 48,
               borderRadius: 999,
-              backgroundColor: `${colors.danger}1F`,
+              backgroundColor: neutral ? colors.brandMuted : `${colors.danger}1F`,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Icon name="trash-outline" size={24} color={colors.danger} weight="duotone" />
+            <Icon name={request?.icon ?? 'trash-outline'} size={24} color={tint} weight="duotone" />
           </View>
           <View style={{ gap: 6 }}>
             <Text variant="section">{request?.title ?? ''}</Text>
@@ -67,7 +69,7 @@ export function ConfirmDialogHost()
             <PrimaryButton label="Cancelar" variant="ghost" onPress={close} style={{ flex: 1 }} />
             <PrimaryButton
               label={request?.confirmLabel ?? 'Excluir'}
-              variant="danger"
+              variant={neutral ? 'primary' : 'danger'}
               onPress={confirm}
               style={{ flex: 1 }}
             />

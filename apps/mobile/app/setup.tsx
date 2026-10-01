@@ -1,19 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import {
   CARE_PACE_OPTIONS,
   NOTIFY_CADENCE_OPTIONS,
   GAMIFICATION_MODE_OPTIONS,
-  LIFE_GOAL_TEMPLATES,
-  localTodayIso,
+  formatSleepHours,
   type CarePace,
   type NotifyCadence,
   type GamificationMode,
-  type LifeGoalCadence,
-  type LifeGoalCategory,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, Field, PressableScale, Chip, Icon } from '../src/ui'
+import { Screen, Text, PrimaryButton, Field } from '../src/ui'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -26,12 +23,17 @@ import {
   toggleHomeMetric,
   type HomeMetricId,
 } from '../src/lib/homeMetrics'
+import { SETUP_PRIORITY } from '../src/lib/setupOnboarding'
 import {
-  SETUP_PRIORITY,
-  SETUP_STEPS,
-  SETUP_STEP_COUNT,
-  setupStepTitle,
-} from '../src/lib/setupOnboarding'
+  ALL_APP_MODULES,
+  filterMetrics,
+  filterPriorities,
+  isModuleOn,
+  metricAllowed,
+  moduleLabel,
+  modulesOfGroup,
+  type AppModuleId,
+} from '../src/lib/appModules'
 import { CreditCardVisual } from '../src/components/finance/CreditCardVisual'
 import {
   FinanceCardForm,
@@ -40,121 +42,137 @@ import {
   validateCardDraft,
   type CardDraft,
 } from '../src/components/finance/FinanceCardForm'
+import { OnbStep, OnbBlock } from '../src/components/onboarding/OnbStep'
+import { OnbChoice } from '../src/components/onboarding/OnbChoice'
+import { ModulePicker } from '../src/components/onboarding/ModulePicker'
+import { HealthStartForm } from '../src/components/onboarding/HealthStartForm'
+import { TasksStartForm } from '../src/components/onboarding/TasksStartForm'
+import { FinanceStartForm } from '../src/components/onboarding/FinanceStartForm'
+import {
+  EMPTY_FINANCE_DRAFT,
+  EMPTY_TASKS_DRAFT,
+  applyFinanceDraft,
+  applyHealthDraft,
+  applyTasksDraft,
+  healthDraftFrom,
+  type FinanceDraft,
+  type HealthDraft,
+  type TasksDraft,
+} from '../src/components/onboarding/startDrafts'
 
-function ChoiceCard({
-  title,
-  body,
-  active,
-  onPress,
-}: {
-  title: string
-  body: string
-  active: boolean
-  onPress: () => void
-})
-{
-  const { colors, space, radius } = useTheme()
-  return (
-    <PressableScale
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      style={{
-        minHeight: 56,
-        padding: space.md,
-        borderRadius: radius.control,
-        gap: 4,
-        backgroundColor: active ? colors.axelMuted : colors.elevated,
-        borderWidth: 1,
-        borderColor: active ? colors.axel : colors.hairline,
-      }}
-    >
-      <Text variant="bodyStrong">{title}</Text>
-      <Text variant="caption" muted>
-        {body}
-      </Text>
-    </PressableScale>
-  )
+type StepId =
+  | 'welcome'
+  | 'name'
+  | 'modules'
+  | 'tasks'
+  | 'health'
+  | 'finance'
+  | 'cards'
+  | 'rhythm'
+  | 'home'
+  | 'summary'
+
+const PRIORITY_MODULES: Record<DashboardPriority, AppModuleId[]> = {
+  tasks: ['tasks', 'routine'],
+  health: ['mood', 'water', 'sleep', 'food', 'gym', 'meds', 'support'],
+  finance: ['spend', 'cards', 'bills', 'goals'],
 }
 
-/** Onboarding: poucos passos, cada um com uma decisão. Tudo pode ser mudado depois. */
+/**
+ * Boas-vindas: tema, nome, o que usar e perguntas só dos módulos escolhidos.
+ * As respostas viram dados reais (metas, tarefas, rotina, saldo, contas).
+ * Tudo pode ser pulado e mudado depois em Preferências.
+ */
 export default function SetupScreen()
 {
-  const { colors, space, radius, setMode } = useTheme()
+  const { colors, space, mode, setMode } = useTheme()
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
+  const isGuest = useAuthStore((s) => s.isGuest)
   const prefs = usePrefsStore((s) => s.prefs)
   const loaded = usePrefsStore((s) => s.loaded)
   const hydrate = usePrefsStore((s) => s.hydrate)
   const patch = usePrefsStore((s) => s.patch)
+  const habits = useDataStore((s) => s.habits)
   const cards = useDataStore((s) => s.financeCards)
   const addCard = useDataStore((s) => s.addFinanceCard)
   const updateCard = useDataStore((s) => s.updateFinanceCard)
+  const refreshAll = useDataStore((s) => s.refreshAll)
+  const startGuestOwnData = useDataStore((s) => s.startGuestOwnData)
+  const guestOwnData = useDataStore((s) => s.guestOwnData)
   const logEvent = useGamificationStore((s) => s.logEvent)
   const grantXp = useGamificationStore((s) => s.grantXp)
+
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
-  const [moduleOrder, setModuleOrder] = useState<DashboardPriority[]>(
-    prefs.home_module_order?.length ? prefs.home_module_order : [],
-  )
+  const [modules, setModules] = useState<AppModuleId[]>(prefs.enabled_modules ?? ALL_APP_MODULES)
+  const [tasksDraft, setTasksDraft] = useState<TasksDraft>(EMPTY_TASKS_DRAFT)
+  const [healthDraft, setHealthDraft] = useState<HealthDraft>(() => healthDraftFrom(habits))
+  const [healthTouched, setHealthTouched] = useState(false)
+  const [financeDraft, setFinanceDraft] = useState<FinanceDraft>(EMPTY_FINANCE_DRAFT)
+  const [moduleOrder, setModuleOrder] = useState<DashboardPriority[]>(prefs.home_module_order ?? [])
   const [metrics, setMetrics] = useState<HomeMetricId[]>(() => normalizeHomeMetrics(prefs.home_metric_cards))
-  const [goalCategory, setGoalCategory] = useState<LifeGoalCategory>('custom')
-  const [goalTitle, setGoalTitle] = useState(prefs.life_goal?.title ?? '')
-  const [goalCadence, setGoalCadence] = useState<LifeGoalCadence>(
-    prefs.life_goal?.cadence ?? 'week',
-  )
   const [pace, setPace] = useState<CarePace>(prefs.care_pace || 'balanced')
-  const [scheme, setScheme] = useState<'light' | 'dark'>(prefs.color_scheme || 'light')
-  const [notifyCadence, setNotifyCadence] = useState<NotifyCadence>('off')
-  const [adhdSupport, setAdhdSupport] = useState(false)
-  const [gamificationMode, setGamificationMode] = useState<GamificationMode>('calm')
+  const [notifyCadence, setNotifyCadence] = useState<NotifyCadence>(prefs.notify_cadence || 'off')
+  const [adhdSupport, setAdhdSupport] = useState(Boolean(prefs.adhd_support))
+  const [gamificationMode, setGamificationMode] = useState<GamificationMode>(prefs.gamification_mode || 'calm')
   const [cardFormOpen, setCardFormOpen] = useState(false)
   const [cardDraft, setCardDraft] = useState<CardDraft>(emptyCardDraft)
   const [cardMsg, setCardMsg] = useState('')
   const [saving, setSaving] = useState(false)
+  const [problems, setProblems] = useState<string[]>([])
 
   useEffect(() =>
   {
     void hydrate()
-  }, [hydrate])
+    // convidado entra direto aqui: carrega os hábitos para as metas partirem do que existe
+    void refreshAll({ isGuest })
+  }, [hydrate, refreshAll, isGuest])
 
   useEffect(() =>
   {
-    if (prefs.axel_calls_you) setName(prefs.axel_calls_you)
-    if (prefs.home_module_order?.length) setModuleOrder(prefs.home_module_order)
-    if (prefs.life_goal?.title) setGoalTitle(prefs.life_goal.title)
-    if (prefs.life_goal?.category) setGoalCategory(prefs.life_goal.category)
-    if (prefs.life_goal?.cadence) setGoalCadence(prefs.life_goal.cadence)
-    if (prefs.care_pace) setPace(prefs.care_pace)
-    if (prefs.color_scheme === 'dark' || prefs.color_scheme === 'light')
-    {
-      setScheme(prefs.color_scheme)
-    }
-    if (prefs.home_metric_cards?.length) setMetrics(normalizeHomeMetrics(prefs.home_metric_cards))
-    if (prefs.notify_cadence) setNotifyCadence(prefs.notify_cadence)
-    if (prefs.adhd_support) setAdhdSupport(true)
-    if (prefs.gamification_mode === 'rpg') setGamificationMode('rpg')
-  }, [
-    prefs.axel_calls_you,
-    prefs.home_module_order,
-    prefs.life_goal,
-    prefs.care_pace,
-    prefs.color_scheme,
-    prefs.home_metric_cards,
-    prefs.notify_cadence,
-    prefs.adhd_support,
-    prefs.gamification_mode,
-  ])
+    if (prefs.axel_calls_you) setName((n) => n || prefs.axel_calls_you)
+  }, [prefs.axel_calls_you])
+
+  // metas partem dos hábitos carregados, até a pessoa mexer nelas
+  useEffect(() =>
+  {
+    if (!healthTouched && habits.length) setHealthDraft((d) => ({ ...healthDraftFrom(habits), meds: d.meds }))
+  }, [habits, healthTouched])
+
+  const on = (id: AppModuleId) => isModuleOn(modules, id)
+  const steps = useMemo<StepId[]>(() =>
+  {
+    const list: StepId[] = ['welcome', 'name', 'modules']
+    if (on('tasks') || on('routine')) list.push('tasks')
+    if (on('water') || on('sleep') || on('food') || on('gym') || on('meds')) list.push('health')
+    if (on('spend') || on('bills') || on('goals')) list.push('finance')
+    if (on('cards')) list.push('cards')
+    list.push('rhythm', 'home', 'summary')
+    return list
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modules])
 
   if (!userId) return <Redirect href="/login" />
-  if (loaded && prefs.setup_completed_at)
+  if (loaded && prefs.setup_completed_at && !saving && !problems.length) return <Redirect href="/(tabs)" />
+
+  const current = steps[Math.min(step, steps.length - 1)]
+  const total = steps.length
+  const goTo = (id: StepId) => setStep(Math.max(0, steps.indexOf(id)))
+  const next = () => setStep((s) => Math.min(total - 1, s + 1))
+  const back = () => setStep((s) => Math.max(0, s - 1))
+
+  const toggleModule = (id: AppModuleId) =>
+    setModules((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  const setGroup = (group: 'tarefas' | 'saude' | 'carteira', value: boolean) =>
   {
-    return <Redirect href="/(tabs)" />
+    const ids = modulesOfGroup(group).map((m) => m.id)
+    setModules((prev) => (value ? [...new Set([...prev, ...ids])] : prev.filter((x) => !ids.includes(x))))
   }
 
-  const current = SETUP_STEPS[step]
-  const back = () => setStep((s) => Math.max(0, s - 1))
-  const next = () => setStep((s) => Math.min(SETUP_STEP_COUNT - 1, s + 1))
+  const priorities = SETUP_PRIORITY.filter((p) => PRIORITY_MODULES[p.id].some((m) => on(m)))
+  const order = filterPriorities(modules, moduleOrder.length ? moduleOrder : priorities.map((p) => p.id))
+  const homeMetrics = filterMetrics(modules, metrics)
 
   const saveCard = () =>
   {
@@ -172,324 +190,252 @@ export default function SetupScreen()
     setCardFormOpen(false)
   }
 
-  const finish = async () =>
+  /** Convidado que só quer olhar: fica com os dados de exemplo e tudo ligado. */
+  const exploreDemo = async () =>
   {
     setSaving(true)
-    const order: DashboardPriority[] = moduleOrder.length
-      ? moduleOrder
-      : ['tasks', 'health', 'finance']
-    const primary = order[0] ?? 'tasks'
-    const trimmedGoal = goalTitle.trim()
-    await patch({
-      axel_calls_you: name.trim(),
-      display_name: name.trim(),
-      dashboard_priority: primary,
-      home_module_order: order,
-      dashboard_quick_widgets: widgetsForModuleOrder(order),
-      life_goal: trimmedGoal
-        ? {
-            title: trimmedGoal,
-            category: goalCategory,
-            cadence: goalCadence,
-            periodStart: localTodayIso(),
-          }
-        : null,
-      care_pace: pace,
-      notify_cadence: notifyCadence,
-      adhd_support: adhdSupport,
-      gamification_mode: gamificationMode,
-      color_scheme: scheme,
-      home_metric_cards: normalizeHomeMetrics(metrics),
-      home_metrics_configured_at: new Date().toISOString(),
-      setup_completed_at: new Date().toISOString(),
-    })
-    setMode(scheme)
-    logEvent('setup', 'AXEL configurado', name.trim() || 'setup')
-    grantXp(15, 'Configuração concluída', 'Onboarding')
+    await patch({ color_scheme: mode, setup_completed_at: new Date().toISOString() })
     setSaving(false)
     router.replace('/(tabs)')
   }
 
-  const nav = (canContinue: boolean, onContinue: () => void, label?: string) => (
-    <View style={{ gap: space.sm }}>
-      <PrimaryButton
-        label={label ?? (step === SETUP_STEP_COUNT - 1 ? 'Entrar no aplicativo' : 'Continuar')}
-        disabled={!canContinue}
-        loading={saving}
-        onPress={onContinue}
-      />
-      {step > 0 ? (
-        <PrimaryButton label="Voltar" variant="ghost" onPress={back} />
-      ) : null}
-    </View>
-  )
+  const startOwn = async () =>
+  {
+    // só na primeira vez: voltar e tocar de novo não apaga o que já foi cadastrado
+    if (isGuest && !guestOwnData) await startGuestOwnData()
+    next()
+  }
+
+  const finish = async () =>
+  {
+    setSaving(true)
+    const finalOrder: DashboardPriority[] = order.length ? order : ['tasks', 'health', 'finance']
+    const trimmed = name.trim()
+    await patch({
+      axel_calls_you: trimmed,
+      display_name: trimmed,
+      color_scheme: mode,
+      enabled_modules: modules,
+      dashboard_priority: finalOrder[0] ?? 'tasks',
+      home_module_order: finalOrder,
+      dashboard_quick_widgets: widgetsForModuleOrder(finalOrder),
+      home_metric_cards: normalizeHomeMetrics(homeMetrics.length ? homeMetrics : metrics),
+      home_metrics_configured_at: new Date().toISOString(),
+      care_pace: pace,
+      notify_cadence: notifyCadence,
+      adhd_support: adhdSupport,
+      gamification_mode: adhdSupport ? gamificationMode : 'calm',
+    })
+    await applyHealthDraft(healthDraft, modules, isGuest)
+    await applyTasksDraft(tasksDraft, modules, isGuest)
+    const issues = await applyFinanceDraft(financeDraft, modules, isGuest)
+    await patch({ setup_completed_at: new Date().toISOString() })
+    logEvent('setup', 'Boas-vindas concluídas', trimmed || 'setup')
+    grantXp(15, 'Configuração concluída', 'Onboarding')
+    setSaving(false)
+    if (issues.length)
+    {
+      // não trava a entrada: mostra o que falhou e deixa seguir
+      setProblems(issues)
+      return
+    }
+    router.replace('/(tabs)')
+  }
+
+  const stepProps = {
+    step: Math.min(step, total - 1),
+    total,
+    onBack: step > 0 ? back : undefined,
+  }
+
+  const summaryRows: { label: string; value: string; step: StepId }[] = [
+    { label: 'Nome', value: name.trim() || 'Não informado', step: 'name' },
+    { label: 'Aparência', value: mode === 'dark' ? 'Escura' : 'Clara', step: 'welcome' },
+    { label: 'O que você usa', value: modules.map(moduleLabel).join(', ') || 'Nada escolhido', step: 'modules' },
+    ...(on('tasks') || on('routine')
+      ? [{
+          label: 'Tarefas e rotina',
+          value: [
+            `${tasksDraft.week.filter((t) => t.trim()).length} tarefa(s)`,
+            `${tasksDraft.habits.length} hábito(s)`,
+          ].join(', '),
+          step: 'tasks' as StepId,
+        }]
+      : []),
+    ...(steps.includes('health')
+      ? [{
+          label: 'Saúde',
+          value: [
+            on('water') ? `${healthDraft.waterGoal} copos` : '',
+            on('sleep') ? formatSleepHours(healthDraft.sleepGoal) : '',
+            on('food') ? `${healthDraft.proteinGoal} g proteína` : '',
+            on('gym') ? `${healthDraft.gymDays.length} dia(s) de treino` : '',
+            on('meds') ? `${healthDraft.meds.length} remédio(s)` : '',
+          ].filter(Boolean).join(', '),
+          step: 'health' as StepId,
+        }]
+      : []),
+    ...(steps.includes('finance')
+      ? [{
+          label: 'Carteira',
+          value: [
+            financeDraft.balance.trim() ? `saldo R$ ${financeDraft.balance.trim()}` : '',
+            financeDraft.salary.trim() ? `salário R$ ${financeDraft.salary.trim()}` : '',
+            financeDraft.fixas.length ? `${financeDraft.fixas.length} conta(s) fixa(s)` : '',
+            financeDraft.goalTitle.trim() ? `meta: ${financeDraft.goalTitle.trim()}` : '',
+          ].filter(Boolean).join(', ') || 'Nada por enquanto',
+          step: 'finance' as StepId,
+        }]
+      : []),
+    ...(on('cards')
+      ? [{ label: 'Cartões', value: cards.length ? cards.map((c) => c.nome).join(', ') : 'Nenhum por enquanto', step: 'cards' as StepId }]
+      : []),
+    {
+      label: 'Ritmo',
+      value: [
+        CARE_PACE_OPTIONS.find((p) => p.id === pace)?.label ?? '',
+        adhdSupport ? 'apoio para foco' : '',
+        NOTIFY_CADENCE_OPTIONS.find((p) => p.id === notifyCadence)?.label ?? '',
+      ].filter(Boolean).join(', '),
+      step: 'rhythm',
+    },
+    {
+      label: 'Início',
+      value: homeMetrics.map((id) => HOME_METRIC_CATALOG.find((m) => m.id === id)?.label).join(', ') || 'Padrão',
+      step: 'home',
+    },
+  ]
 
   return (
     <Screen scroll tabBarInset={false}>
-      <View style={{ gap: space.lg, paddingTop: space.xl, maxWidth: 480, alignSelf: 'center', width: '100%' }}>
-        <Text variant="caption" muted>
-          Passo {step + 1} de {SETUP_STEP_COUNT}
-        </Text>
-        <View
-          style={{ flexDirection: 'row', gap: 4 }}
-          accessibilityRole="progressbar"
-          accessibilityValue={{ now: step + 1, min: 1, max: SETUP_STEP_COUNT }}
-        >
-          {SETUP_STEPS.map((id, i) => (
-            <View
-              key={id}
-              style={{
-                flex: 1,
-                height: 4,
-                borderRadius: radius.pill,
-                backgroundColor: i <= step ? colors.axelFill : colors.hairline,
-              }}
-            />
-          ))}
-        </View>
-        <Text variant="hero">{setupStepTitle(step)}</Text>
-
+      <View style={{ paddingTop: space.xl, paddingBottom: space.xl, maxWidth: 520, alignSelf: 'center', width: '100%' }}>
         {current === 'welcome' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body">
-              Simply Life reúne tarefas, saúde e finanças. O AXEL apoia, prioriza e registra o que
-              você faz, para o dia caber em uma tela.
-            </Text>
-            {[
-              { icon: 'home-outline', title: 'Início', body: 'O dia de hoje, do jeito que você escolher no próximo passo.' },
-              { icon: 'checkbox-outline', title: 'Tarefas', body: 'Lista, pastas, rotina e prazos. Contas perto do vencimento entram sozinhas.' },
-              { icon: 'heart-outline', title: 'Saúde', body: 'Água, sono, treino, medicamentos e diário. Na aba Apoio: TDAH, TCC e CVV.' },
-              { icon: 'wallet-outline', title: 'Finanças', body: 'Saldo, cartões, extrato e relatórios. O botão + registra um gasto ou uma tarefa.' },
-            ].map((a) => (
-              <View key={a.title} style={{ flexDirection: 'row', gap: space.md, alignItems: 'flex-start' }}>
-                <View
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 999,
-                    backgroundColor: colors.brandMuted,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Icon name={a.icon as 'home-outline'} size={18} color={colors.ink} />
-                </View>
-                <View style={{ flex: 1, gap: 2 }}>
-                  <Text variant="bodyStrong">{a.title}</Text>
-                  <Text variant="caption" muted>{a.body}</Text>
-                </View>
+          <OnbStep
+            {...stepProps}
+            onBack={undefined}
+            title="Bem-vindo ao Simply Life"
+            subtitle="Tarefas, saúde e dinheiro num lugar só. Você escolhe o que usar e o app se monta com os seus dados."
+            nextLabel="Começar"
+            onNext={() => void startOwn()}
+            onSkip={isGuest ? () => void exploreDemo() : undefined}
+            skipLabel="Só explorar com dados de exemplo"
+          >
+            <OnbBlock title="Aparência" hint="Dá para trocar depois, no menu Mais.">
+              <View style={{ gap: space.sm }}>
+                <OnbChoice
+                  kind="radio"
+                  icon="sunny"
+                  title="Clara"
+                  hint="Mais luz durante o dia."
+                  selected={mode === 'light'}
+                  onPress={() => setMode('light')}
+                />
+                <OnbChoice
+                  kind="radio"
+                  icon="moon"
+                  title="Escura"
+                  hint="Menos brilho, melhor à noite."
+                  selected={mode === 'dark'}
+                  onPress={() => setMode('dark')}
+                />
               </View>
-            ))}
+            </OnbBlock>
             <Text variant="caption" muted>
-              Este aplicativo organiza a rotina. Não substitui psicoterapia, psiquiatria nem
-              diagnóstico. Em sofrimento intenso, procure um profissional de saúde ou o CVV (188).
+              O app organiza a rotina. Não substitui psicoterapia, psiquiatria nem diagnóstico. Em
+              sofrimento intenso, procure um profissional ou o CVV (188).
             </Text>
-            {nav(true, next, 'Começar')}
-          </Card>
+          </OnbStep>
         ) : null}
 
         {current === 'name' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Esse nome aparece só para você, na tela inicial. Não é público.
-            </Text>
+          <OnbStep
+            {...stepProps}
+            title="Como quer ser chamado?"
+            subtitle="Aparece só para você, na tela inicial e nas mensagens do AXEL."
+            onNext={next}
+            canNext={Boolean(name.trim())}
+          >
             <Field
-              label="Nome ou como prefere ser chamado"
+              label="Nome ou apelido"
               value={name}
               onChangeText={setName}
               placeholder="Seu nome"
               autoCapitalize="words"
             />
-            {nav(Boolean(name.trim()), next)}
-          </Card>
+          </OnbStep>
         ) : null}
 
-        {current === 'pace' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Escolha o ritmo das mensagens. Em dias pesados, o aplicativo mostra um único passo.
-            </Text>
-            {CARE_PACE_OPTIONS.map((opt) => (
-              <ChoiceCard
-                key={opt.id}
-                title={opt.label}
-                body={opt.hint}
-                active={pace === opt.id}
-                onPress={() => setPace(opt.id)}
-              />
-            ))}
-            <Text variant="bodyStrong">Aparência</Text>
-            <View style={{ flexDirection: 'row', gap: space.sm }}>
-              <View style={{ flex: 1 }}>
-                <ChoiceCard
-                  title="Clara"
-                  body="Mais luz durante o dia."
-                  active={scheme === 'light'}
-                  onPress={() =>
-                  {
-                    setScheme('light')
-                    setMode('light')
-                  }}
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <ChoiceCard
-                  title="Escura"
-                  body="Menos brilho, melhor à noite."
-                  active={scheme === 'dark'}
-                  onPress={() =>
-                  {
-                    setScheme('dark')
-                    setMode('dark')
-                  }}
-                />
-              </View>
-            </View>
-            {nav(true, next)}
-          </Card>
+        {current === 'modules' ? (
+          <OnbStep
+            {...stepProps}
+            title="O que você quer usar?"
+            subtitle="Não precisa usar tudo. O que ficar de fora some do app, e você liga de novo em Preferências quando quiser."
+            onNext={next}
+            canNext={modules.length > 0}
+            nextLabel={modules.length ? `Continuar com ${modules.length}` : 'Escolha pelo menos um'}
+          >
+            <ModulePicker value={modules} onToggle={toggleModule} onGroup={setGroup} />
+          </OnbStep>
         ) : null}
 
-        {current === 'focus' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Isto não é diagnóstico. Serve para ajustar quebra de tarefas, linha do dia e
-              gamificação opcional. Depois você altera em Saúde → Apoio.
-            </Text>
-            <ChoiceCard
-              title="Quero apoio para foco / TDAH"
-              body="Sugestão de passos menores ao capturar tarefas e linha do dia mais visível."
-              active={adhdSupport}
-              onPress={() => setAdhdSupport(true)}
-            />
-            <ChoiceCard
-              title="Prefiro o modo padrão"
-              body="Sem ênfase extra. Você pode mudar depois em Preferências."
-              active={!adhdSupport}
-              onPress={() =>
+        {current === 'tasks' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Tarefas"
+            title="Sua semana"
+            subtitle="O que já está na sua cabeça. Tirar daqui e pôr no app alivia."
+            onNext={next}
+            onSkip={next}
+          >
+            <TasksStartForm value={tasksDraft} onChange={setTasksDraft} enabled={modules} />
+          </OnbStep>
+        ) : null}
+
+        {current === 'health' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Saúde"
+            title="Suas metas de cuidado"
+            subtitle="Pontos de partida, não cobrança. O app mostra o quanto falta, sem sequência obrigatória."
+            onNext={next}
+            onSkip={next}
+          >
+            <HealthStartForm
+              value={healthDraft}
+              onChange={(d) =>
               {
-                setAdhdSupport(false)
-                setGamificationMode('calm')
+                setHealthTouched(true)
+                setHealthDraft(d)
               }}
+              enabled={modules}
             />
-            {adhdSupport ? (
-              <>
-                <Text variant="bodyStrong">Motivação</Text>
-                {GAMIFICATION_MODE_OPTIONS.map((opt) => (
-                  <ChoiceCard
-                    key={opt.id}
-                    title={opt.label}
-                    body={opt.hint}
-                    active={gamificationMode === opt.id}
-                    onPress={() => setGamificationMode(opt.id)}
-                  />
-                ))}
-              </>
-            ) : null}
-            {nav(true, next)}
-          </Card>
+          </OnbStep>
         ) : null}
 
-        {current === 'home' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="bodyStrong">O que vem primeiro</Text>
-            <Text variant="caption" muted style={{ marginTop: -space.sm }}>
-              Toque na ordem de importância. Ela define os atalhos e o resumo do dia.
-            </Text>
-            {SETUP_PRIORITY.map((p) =>
-            {
-              const pos = moduleOrder.indexOf(p.id)
-              const active = pos >= 0
-              return (
-                <PressableScale
-                  key={p.id}
-                  onPress={() =>
-                    setModuleOrder((prev) => (prev.includes(p.id) ? prev.filter((x) => x !== p.id) : [...prev, p.id]))}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected: active }}
-                  style={{
-                    minHeight: 56,
-                    padding: space.md,
-                    borderRadius: radius.control,
-                    gap: 4,
-                    backgroundColor: active ? colors.axelMuted : colors.elevated,
-                    borderWidth: 1,
-                    borderColor: active ? colors.axel : colors.hairline,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <View style={{ flex: 1, gap: 4 }}>
-                    <Text variant="bodyStrong">{p.label}</Text>
-                    <Text variant="caption" muted>{p.hint}</Text>
-                  </View>
-                  {active ? (
-                    <View
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 999,
-                        backgroundColor: colors.axelFill,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Text variant="label" color={colors.axelOnFill}>{pos + 1}</Text>
-                    </View>
-                  ) : null}
-                </PressableScale>
-              )
-            })}
-
-            <Text variant="bodyStrong" style={{ marginTop: space.sm }}>Resumo no topo do Início</Text>
-            <Text variant="caption" muted style={{ marginTop: -space.sm }}>
-              Escolha os números que você quer ver ao abrir o app. Humor é opcional e nunca é diagnóstico.
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
-              {HOME_METRIC_CATALOG.map((m) =>
-              {
-                const on = metrics.includes(m.id)
-                return (
-                  <PressableScale
-                    key={m.id}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: on }}
-                    onPress={() => setMetrics((prev) => toggleHomeMetric(prev, m.id))}
-                    style={{
-                      width: '48%',
-                      flexGrow: 1,
-                      minHeight: 64,
-                      padding: space.sm + 2,
-                      borderRadius: radius.control,
-                      backgroundColor: on ? colors.brandMuted : colors.elevated,
-                      borderWidth: 1,
-                      borderColor: on ? colors.brand : colors.hairline,
-                      gap: 2,
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text variant="bodyStrong">{m.label}</Text>
-                      <Icon name={on ? 'checkmark-circle' : 'ellipse-outline'} size={18} color={on ? colors.health : colors.inkFaint} />
-                    </View>
-                    <Text variant="micro" muted>{m.hint}</Text>
-                  </PressableScale>
-                )
-              })}
-            </View>
-            <Text variant="caption" muted>
-              {metrics.length} {metrics.length === 1 ? 'item escolhido' : 'itens escolhidos'}. Dá para mudar em Mais → Personalizar Início.
-            </Text>
-            {nav(moduleOrder.length > 0, next)}
-          </Card>
+        {current === 'finance' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Carteira"
+            title="Seu dinheiro hoje"
+            subtitle="Com o saldo e as contas fixas, o app já diz quanto sobra no fim do mês."
+            onNext={next}
+            onSkip={next}
+          >
+            <FinanceStartForm value={financeDraft} onChange={setFinanceDraft} enabled={modules} />
+          </OnbStep>
         ) : null}
 
         {current === 'cards' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Cadastre seus cartões de crédito para acompanhar limite, fatura e vencimento. Gastos no
-              débito ou PIX saem do saldo na hora; no crédito, só quando você paga a fatura.
-            </Text>
-
+          <OnbStep
+            {...stepProps}
+            kicker="Carteira"
+            title="Seus cartões"
+            subtitle="Débito e PIX saem do saldo na hora. No crédito, só quando você paga a fatura."
+            onNext={next}
+            onSkip={cardFormOpen ? undefined : next}
+            nextLabel={cards.length ? 'Continuar' : 'Pular por agora'}
+            canNext={!cardFormOpen}
+          >
             {cards.length > 0 ? (
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
                 {cards.map((c) => (
@@ -497,10 +443,7 @@ export default function SetupScreen()
                 ))}
               </ScrollView>
             ) : null}
-            {cardMsg && !cardFormOpen ? (
-              <Text variant="caption" color={colors.health}>{cardMsg}</Text>
-            ) : null}
-
+            {cardMsg && !cardFormOpen ? <Text variant="caption" color={colors.health}>{cardMsg}</Text> : null}
             {cardFormOpen ? (
               <View style={{ gap: space.md }}>
                 <FinanceCardForm value={cardDraft} onChange={setCardDraft} previewWidth={300} />
@@ -516,7 +459,7 @@ export default function SetupScreen()
                       setCardMsg('')
                     }}
                   />
-                  <PrimaryButton label="Salvar cartão" style={{ flex: 1 }} onPress={saveCard} />
+                  <PrimaryButton label="Salvar cartão" variant="secondary" style={{ flex: 1 }} onPress={saveCard} />
                 </View>
               </View>
             ) : (
@@ -531,103 +474,159 @@ export default function SetupScreen()
                 }}
               />
             )}
-
-            {cardFormOpen ? null : nav(true, next, cards.length ? 'Continuar' : 'Pular por agora')}
-          </Card>
+          </OnbStep>
         ) : null}
 
-        {current === 'goal' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Uma meta por semana ou por mês: gastos, sono, saúde mental, tarefa ou o que você
-              escolher. Semanal renova todo domingo; mensal, no próximo mês. É opcional.
-            </Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-              {LIFE_GOAL_TEMPLATES.map((t) => (
-                <Chip
-                  key={t.id}
-                  label={t.label}
-                  active={goalCategory === t.id}
-                  onPress={() =>
-                  {
-                    setGoalCategory(t.id)
-                    if (!goalTitle.trim()) setGoalTitle(t.example)
-                  }}
+        {current === 'rhythm' ? (
+          <OnbStep
+            {...stepProps}
+            title="Seu ritmo"
+            subtitle="Como o AXEL fala com você e quantos avisos chegam no celular."
+            onNext={next}
+          >
+            <OnbBlock title="Tom das mensagens">
+              {CARE_PACE_OPTIONS.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={pace === opt.id}
+                  onPress={() => setPace(opt.id)}
                 />
               ))}
-            </View>
-            <Field
-              label="Sua meta"
-              placeholder="O que você quer alcançar?"
-              value={goalTitle}
-              onChangeText={setGoalTitle}
-              multiline
-              style={{ minHeight: 72, textAlignVertical: 'top', paddingTop: 14 }}
-            />
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <Chip label="Semana" active={goalCadence === 'week'} onPress={() => setGoalCadence('week')} />
-              <Chip label="Mês" active={goalCadence === 'month'} onPress={() => setGoalCadence('month')} />
-            </View>
-            {nav(true, next, goalTitle.trim() ? 'Continuar' : 'Pular por agora')}
-          </Card>
+            </OnbBlock>
+            <OnbBlock title="Foco e TDAH" hint="Não é diagnóstico. Deixa as tarefas em passos menores e a linha do dia mais visível.">
+              <OnbChoice
+                kind="radio"
+                title="Quero esse apoio"
+                selected={adhdSupport}
+                onPress={() => setAdhdSupport(true)}
+              />
+              <OnbChoice
+                kind="radio"
+                title="Prefiro o modo padrão"
+                selected={!adhdSupport}
+                onPress={() => setAdhdSupport(false)}
+              />
+              {adhdSupport
+                ? GAMIFICATION_MODE_OPTIONS.map((opt) => (
+                    <OnbChoice
+                      key={opt.id}
+                      kind="radio"
+                      title={opt.label}
+                      hint={opt.hint}
+                      selected={gamificationMode === opt.id}
+                      onPress={() => setGamificationMode(opt.id)}
+                    />
+                  ))
+                : null}
+            </OnbBlock>
+            <OnbBlock title="Avisos no celular" hint="Nunca à noite: silêncio das 22h às 8h.">
+              {NOTIFY_CADENCE_OPTIONS.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={notifyCadence === opt.id}
+                  onPress={() => setNotifyCadence(opt.id)}
+                />
+              ))}
+            </OnbBlock>
+          </OnbStep>
         ) : null}
 
-        {current === 'alerts' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            <Text variant="body" muted>
-              Alertas frequentes aumentam tensão. O aplicativo não cobra sequência e não envia
-              urgência à noite. Medicamentos continuam podendo lembrar, se você cadastrar horários.
-            </Text>
-            {NOTIFY_CADENCE_OPTIONS.map((opt) => (
-              <ChoiceCard
-                key={opt.id}
-                title={opt.label}
-                body={opt.hint}
-                active={notifyCadence === opt.id}
-                onPress={() => setNotifyCadence(opt.id)}
-              />
-            ))}
-            <Text variant="caption" muted>
-              Horário silencioso: 22h às 8h. Três leituras por dia: 9h, 15h e 21h. Você pode mudar isso em Preferências.
-            </Text>
-            {nav(true, next)}
-          </Card>
+        {current === 'home' ? (
+          <OnbStep
+            {...stepProps}
+            title="Sua tela inicial"
+            subtitle="A ordem define o que aparece primeiro. Os atalhos são os números que você vê ao abrir o app."
+            onNext={next}
+          >
+            {priorities.length > 1 ? (
+              <OnbBlock title="O que vem primeiro" hint="Toque na ordem de importância.">
+                {priorities.map((p) =>
+                {
+                  const pos = moduleOrder.indexOf(p.id)
+                  return (
+                    <OnbChoice
+                      key={p.id}
+                      title={pos >= 0 ? `${pos + 1}. ${p.label}` : p.label}
+                      hint={p.hint}
+                      selected={pos >= 0}
+                      onPress={() =>
+                        setModuleOrder((prev) => (prev.includes(p.id) ? prev.filter((x) => x !== p.id) : [...prev, p.id]))}
+                    />
+                  )
+                })}
+              </OnbBlock>
+            ) : null}
+            <OnbBlock title="Atalhos do Início" hint="Só aparecem os dos módulos que você escolheu.">
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+                {HOME_METRIC_CATALOG.filter((m) => metricAllowed(modules, m.id)).map((m) => (
+                  <OnbChoice
+                    key={m.id}
+                    half
+                    title={m.label}
+                    hint={m.hint}
+                    selected={metrics.includes(m.id)}
+                    onPress={() => setMetrics((prev) => toggleHomeMetric(prev, m.id))}
+                  />
+                ))}
+              </View>
+            </OnbBlock>
+          </OnbStep>
         ) : null}
 
         {current === 'summary' ? (
-          <Card tone="elevated" style={{ gap: space.md }}>
-            {[
-              ['Nome', name.trim() || 'Não informado'],
-              ['Ritmo', CARE_PACE_OPTIONS.find((p) => p.id === pace)?.label ?? ''],
-              ['Aparência', scheme === 'dark' ? 'Escura' : 'Clara'],
-              ['Ordem no Início', moduleOrder.map((id) => SETUP_PRIORITY.find((p) => p.id === id)?.label).join(', ') || 'Padrão'],
-              ['Resumo do Início', metrics.map((id) => HOME_METRIC_CATALOG.find((m) => m.id === id)?.label).join(', ')],
-              ['Cartões', cards.length ? cards.map((c) => c.nome).join(', ') : 'Nenhum por enquanto'],
-              ['Meta', goalTitle.trim() ? `${goalTitle.trim()} (${goalCadence === 'week' ? 'semana' : 'mês'})` : 'Sem meta por enquanto'],
-              ['Apoio foco/TDAH', adhdSupport ? 'Sim' : 'Não'],
-              ['Alertas', NOTIFY_CADENCE_OPTIONS.find((p) => p.id === notifyCadence)?.label ?? ''],
-            ].map(([k, v], i) => (
-              <View
-                key={k}
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  gap: space.md,
-                  paddingTop: i === 0 ? 0 : space.sm,
-                  borderTopWidth: i === 0 ? 0 : 1,
-                  borderTopColor: colors.hairline,
-                }}
-              >
-                <Text variant="caption" muted>{k}</Text>
-                <Text variant="label" style={{ flexShrink: 1, textAlign: 'right' }}>{v}</Text>
+          <OnbStep
+            {...stepProps}
+            title="Tudo pronto"
+            subtitle="Confira antes de começar. Toque em Editar para voltar a qualquer passo."
+            nextLabel={problems.length ? 'Entrar mesmo assim' : 'Começar'}
+            loading={saving}
+            onNext={() => (problems.length ? router.replace('/(tabs)') : void finish())}
+          >
+            <View
+              style={{
+                borderRadius: 20,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.hairline,
+                paddingHorizontal: space.md,
+              }}
+            >
+              {summaryRows.map((row, i) => (
+                <View
+                  key={row.label}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: space.md,
+                    paddingVertical: 12,
+                    borderTopWidth: i === 0 ? 0 : 1,
+                    borderTopColor: colors.hairline,
+                  }}
+                >
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Text variant="caption" muted>{row.label}</Text>
+                    <Text variant="body">{row.value}</Text>
+                  </View>
+                  <PrimaryButton label="Editar" variant="link" size="sm" onPress={() => goTo(row.step)} />
+                </View>
+              ))}
+            </View>
+            {problems.length ? (
+              <View style={{ gap: 4 }}>
+                <Text variant="bodyStrong" color={colors.danger}>Algumas coisas não foram salvas</Text>
+                {problems.map((p) => (
+                  <Text key={p} variant="caption" color={colors.danger}>{p}</Text>
+                ))}
+                <Text variant="caption" muted>Você pode completar depois em Preferências.</Text>
               </View>
-            ))}
-            <Text variant="caption" muted>
-              Tudo isso pode ser alterado em Perfil e Preferências. Se o dia pesar, um único
-              passo já basta. Cuidado profissional continua sendo o caminho para saúde mental.
-            </Text>
-            {nav(true, () => void finish())}
-          </Card>
+            ) : null}
+          </OnbStep>
         ) : null}
       </View>
     </Screen>

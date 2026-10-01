@@ -32,3 +32,23 @@ export async function pingPresence(): Promise<void>
     last_seen_at: now,
   })
 }
+
+/**
+ * Foco junto: grava até quando estou focando (ou null ao parar) no cartão
+ * público. Só roda com a preferência ligada. Sem a migração 072, falha calada.
+ */
+export async function setFocusingUntil(untilIso: string | null): Promise<void>
+{
+  if (!supabaseConfigured) return
+  try
+  {
+    const { data } = await supabase.auth.getUser()
+    const uid = data.user?.id
+    if (!uid) return
+    await supabase.from('user_public_cards').update({ focando_ate: untilIso }).eq('user_id', uid)
+  }
+  catch
+  {
+    /* offline ou 072 pendente */
+  }
+}

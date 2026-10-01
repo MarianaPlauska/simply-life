@@ -30,10 +30,10 @@ export function HealthPanelHero({
   return (
     <View style={{ flexDirection: 'row', gap: space.md, alignItems: 'flex-start' }}>
       <IconBadge name={icon} color={tint} size={40} iconSize={20} />
-      <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
-        <View style={{ gap: 2 }}>
+      <View style={{ flex: 1, gap: 12, minWidth: 0 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="caption" muted>{kicker}</Text>
-          <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
+          <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.4 }}>
             {headline}
           </Text>
           {detail ? (

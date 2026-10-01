@@ -17,6 +17,8 @@ export interface MobileTask
   prioridade: 1 | 2 | 3
   /** quando foi concluída (ISO). Banco: concluido_em (migração 059) */
   concluidoEm?: string | null
+  /** quando foi criada (ISO). Banco: created_at */
+  criadoEm?: string | null
 }
 
 export type DueBucket = 'vencido' | 'hoje' | 'esta_semana' | 'proxima_semana' | 'sem_prazo' | 'concluido'

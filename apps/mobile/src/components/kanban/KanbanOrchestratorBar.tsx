@@ -6,6 +6,7 @@ import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useBoardReplanStore } from '../../store/boardReplanStore'
 import { useOrchestratorPrefsStore } from '../../store/orchestratorPrefsStore'
+import { useActionableTasks } from '../../hooks/useActionableTasks'
 
 type Props = { tasks: MobileTask[] }
 
@@ -18,7 +19,9 @@ export function KanbanOrchestratorBar({ tasks }: Props)
   const run = useBoardReplanStore((s) => s.run)
   const autoReplan = useOrchestratorPrefsStore((s) => s.autoReplan)
   const patchPrefs = useOrchestratorPrefsStore((s) => s.patch)
-  const top = buildOrchestrationHints(tasks)[0]
+  // próxima ação nunca é algo que está esperando outra pessoa
+  const actionable = useActionableTasks(tasks)
+  const top = buildOrchestrationHints(actionable)[0]
   const hasOpen = tasks.some((t) => t.status !== 'done')
   if (!top && !hasOpen) return null
 
@@ -27,7 +30,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
   ).length
 
   return (
-    <View style={{ gap: 2 }}>
+    <View style={{ gap: 4 }}>
       {top ? (
         <Pressable
           onPress={() => router.push(`/task/${top.taskId}`)}
@@ -35,7 +38,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
+            gap: 12,
             minHeight: 44,
             paddingVertical: 4,
           }}
@@ -55,14 +58,15 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
         </Pressable>
       ) : null}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      {/* ações do quadro: quando quebram de linha, ficam coladas (rowGap menor) e seguem parecendo um grupo */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 20, rowGap: 0, flexWrap: 'wrap' }}>
         <Pressable
           onPress={() => void run('manual')}
           disabled={running}
           accessibilityRole="button"
           accessibilityLabel="Reorganizar o quadro com o Axel"
           hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, opacity: running ? 0.5 : 1 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36, opacity: running ? 0.5 : 1 }}
         >
           <Icon name="sparkles-outline" size={15} color={colors.axel} />
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
@@ -74,7 +78,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           accessibilityRole="button"
           accessibilityLabel="Planejar amanhã"
           hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 }}
         >
           <Icon name="moon-outline" size={15} color={colors.axel} />
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
@@ -87,7 +91,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           accessibilityState={{ checked: autoReplan }}
           accessibilityLabel="Reorganizar automaticamente"
           hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 }}
         >
           <Icon
             name={autoReplan ? 'checkmark-circle' : 'ellipse-outline'}

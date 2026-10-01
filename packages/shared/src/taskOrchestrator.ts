@@ -21,11 +21,11 @@ import {
 export type OrchestratorStyle = 'equilibrado' | 'antecipar' | 'no_prazo' | 'leveza' | 'financeiro'
 
 export const ORCHESTRATOR_STYLES: { id: OrchestratorStyle; label: string; hint: string }[] = [
-  { id: 'equilibrado', label: 'Equilibrado', hint: 'Mistura prazo, carga do dia e energia.' },
-  { id: 'antecipar', label: 'Adiantar', hint: 'Faz o quanto antes, enquanto há espaço.' },
-  { id: 'no_prazo', label: 'No prazo', hint: 'Deixa para perto do prazo, com folga.' },
-  { id: 'leveza', label: 'Leveza', hint: 'Dias leves, tarefas grandes em passos.' },
-  { id: 'financeiro', label: 'Dinheiro', hint: 'Gastos no melhor dia para o saldo.' },
+  { id: 'equilibrado', label: 'Equilibrado', hint: 'Pesa o prazo, o quanto o dia já está cheio e o seu humor.' },
+  { id: 'antecipar', label: 'Adiantar', hint: 'Põe o quanto antes, enquanto a agenda tem espaço.' },
+  { id: 'no_prazo', label: 'Perto do prazo', hint: 'Deixa para os dias antes do vencimento, com um dia de folga.' },
+  { id: 'leveza', label: 'Dias leves', hint: 'Espalha a carga e quebra tarefas grandes em passos.' },
+  { id: 'financeiro', label: 'Pensando no saldo', hint: 'O que tem gasto vai para o dia em que o saldo aguenta.' },
 ]
 
 export type PlacementStrategy =

@@ -14,11 +14,11 @@ export function FinanceIconPicker({ value, onChange }: Props)
   const { colors } = useTheme()
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="caption" muted>
         Ícone
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {FINANCE_ICON_NAMES.map((name) =>
         {
           const active = value === name

@@ -24,11 +24,11 @@ export function WaterGoalEditor()
   const litrosAtuais = (meta * ml) / 1000
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="caption" muted>
         Tamanho do copo
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {AGUA_ML_OPTIONS.map((opt) =>
         {
           const active = ml === opt
@@ -64,7 +64,7 @@ export function WaterGoalEditor()
       <Text variant="caption" muted>
         Meta do dia
       </Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {AGUA_LITROS_OPTIONS.map((l) =>
         {
           const active = Math.abs(litrosAtuais - l) < 0.05

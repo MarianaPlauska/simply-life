@@ -80,7 +80,7 @@ export function HomeMedsStudio()
             color={colors.health}
             centerLabel={`${weekPct}`}
           />
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: 6 }}>
             <Text variant="title" color={colors.health} style={{ fontSize: 20 }}>
               {weekPct}% na semana
             </Text>

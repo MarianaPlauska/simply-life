@@ -129,7 +129,7 @@ export function FinanceTxEditSheet({ txId, onClose }: Props)
           <ScrollView contentContainerStyle={{ gap: space.md }} keyboardShouldPersistTaps="handled">
             <Text variant="section">Editar lançamento</Text>
             {group ? (
-              <View style={{ gap: 6, padding: 12, borderRadius: 14, backgroundColor: colors.hairline }}>
+              <View style={{ gap: 8, padding: 16, borderRadius: 14, backgroundColor: colors.hairline }}>
                 <Text variant="bodyStrong" style={{ fontSize: 14 }}>
                   Compra parcelada · parcela {group.atual} de {group.total}
                 </Text>
@@ -148,7 +148,7 @@ export function FinanceTxEditSheet({ txId, onClose }: Props)
                 ) : null}
               </View>
             ) : null}
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
               <SelectChip label="Gasto" active={tipo === 'despesa'} onPress={() => setTipo('despesa')} />
               <SelectChip label="Receita" active={tipo === 'receita'} onPress={() => setTipo('receita')} />
             </View>
@@ -156,7 +156,7 @@ export function FinanceTxEditSheet({ txId, onClose }: Props)
             <Field label="Valor (R$)" keyboardType="decimal-pad" value={valor} onChangeText={setValor} />
             <Field label="Data (AAAA-MM-DD)" value={data} onChangeText={setData} autoCapitalize="none" />
             <Text variant="caption" muted>Categoria</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {categorias.map((c) => (
                 <SelectChip key={c.id} label={c.label} active={categoria === c.id} onPress={() => setCategoria(c.id)} />
               ))}

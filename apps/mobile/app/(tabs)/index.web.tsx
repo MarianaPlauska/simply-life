@@ -25,6 +25,7 @@ import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricSh
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
+import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
 import { LifeGoalMicroLine, LifeGoalSheet } from '../../src/components/dashboard/LifeGoalSheet'
 import { TabShell, DESKTOP_CONTENT_MAX } from '../../src/components/dashboard/TabShell'
 import { WebStatRow, type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
@@ -39,6 +40,7 @@ import { useWorkspace } from '../../src/layout/useWorkspace'
 import { usePrefsStore } from '../../src/store/prefsStore'
 import { normalizeHomeMetrics } from '../../src/lib/homeMetrics'
 import { resolveAxelName } from '../../src/lib/axelName'
+import { filterMetrics } from '../../src/lib/appModules'
 
 function greetingForHour(h: number): string
 {
@@ -54,7 +56,7 @@ function greetingForHour(h: number): string
  */
 export default function DashboardScreenWeb()
 {
-  const { colors, space } = useTheme()
+  const { colors, space, mode, setMode } = useTheme()
   const { isDesktop } = useWorkspace()
   const router = useRouter()
   const email = useAuthStore((s) => s.sessionEmail)
@@ -87,7 +89,7 @@ export default function DashboardScreenWeb()
   const agua = findHabit(habits, 'agua')
   const sono = findHabit(habits, 'sono')
   const waterLabel = agua ? `${agua.progressoAtual}/${agua.metaDiaria ?? AGUA_META_COPOS}` : '-'
-  const homeMetrics = normalizeHomeMetrics(prefs.home_metric_cards)
+  const homeMetrics = filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards))
   const waterOnHome = homeMetrics.includes('water')
   const humorOnHome = homeMetrics.includes('humor')
   const sleepOnHome = homeMetrics.includes('sleep')
@@ -188,12 +190,21 @@ export default function DashboardScreenWeb()
           }}
           contentContainerStyle={{ padding: space.lg, paddingBottom: space.xl, gap: space.md }}
         >
-          <View style={{ gap: 4 }}>
+          <View style={{ gap: 6 }}>
             <Text variant="section">Mais</Text>
             <Text variant="caption" muted>
               Conta, personalização e atalhos
             </Text>
           </View>
+          {/* Tema no topo: é o ajuste mais usado e aparece sem rolar */}
+          <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
+            <ListRow
+              title={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+              subtitle={mode === 'dark' ? 'Agora no tema escuro' : 'Agora no tema claro'}
+              rightIcon={mode === 'dark' ? 'sunny' : 'moon'}
+              onPress={() => setMode(mode === 'dark' ? 'light' : 'dark')}
+            />
+          </Card>
           <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
             {(
               [
@@ -201,11 +212,11 @@ export default function DashboardScreenWeb()
                 { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
                 { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
                 { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
-                { label: 'Preferências', subtitle: 'Notificações e hábitos', href: '/preferencias' },
+                { label: 'Preferências', subtitle: 'O que eu uso, metas e alertas', href: '/preferencias' },
                 { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                 { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                 { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                { label: 'Ofensiva', subtitle: 'Dias no app e no plano', href: '/ofensiva' },
+                { label: 'Pique', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
                 { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
               ] as const
             ).map((item, i, arr) => (
@@ -264,29 +275,24 @@ export default function DashboardScreenWeb()
           <VisualDayCard />
 
           <MoodWeekReportGate humor={humor} />
-          <HomeDayTimeline tasks={today} />
           {waterOnHome ? <HomeWaterProgressCard /> : null}
-          <View style={{ gap: 12 }}>
-            <Text variant="section" style={{ fontSize: 22, letterSpacing: -0.4 }}>
-              Seu dia
-            </Text>
-            <HomeKpiSquares
-              items={statItems.slice(0, 4).map((s) => ({
-                id: s.id,
-                label: s.label,
-                value: s.value,
-                icon: s.icon,
-                color: s.color,
-                onPress: s.onPress,
-              }))}
-            />
-          </View>
-          <View style={{ gap: 12 }}>
-            <Text variant="section" style={{ fontSize: 17 }}>
-              Atalhos
-            </Text>
-            <HomeMetricShortcuts />
-          </View>
+          {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
+          <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, resumo e atalhos" pill="abrir" defaultOpen={false}>
+            <View style={{ gap: 24, paddingTop: 8 }}>
+              <HomeDayTimeline tasks={today} />
+              <HomeKpiSquares
+                items={statItems.slice(0, 4).map((s) => ({
+                  id: s.id,
+                  label: s.label,
+                  value: s.value,
+                  icon: s.icon,
+                  color: s.color,
+                  onPress: s.onPress,
+                }))}
+              />
+              <HomeMetricShortcuts />
+            </View>
+          </HomeCollapsible>
         </TabShell>
         {accountMenu}
       </Screen>
@@ -298,7 +304,7 @@ export default function DashboardScreenWeb()
       <LifeGoalSheet visible={goalOpen} onClose={() => setGoalOpen(false)} />
       <TabShell>
         <View style={{ maxWidth: DESKTOP_CONTENT_MAX, width: '100%', alignSelf: 'center', gap: 28 }}>
-          <View style={{ gap: 8 }}>
+          <View style={{ gap: 12 }}>
             <HomeFitnessHero
               greet={greet}
               name={name}
@@ -347,7 +353,7 @@ export default function DashboardScreenWeb()
           {prefsLoaded && !prefs.home_metrics_configured_at ? (
             <Pressable onPress={() => router.push('/personalizar-inicio')} style={{ paddingVertical: 4 }}>
               <Text variant="caption" muted>
-                Quando quiser, personalize seu Início
+                Quando quiser, personalize seu Início.
               </Text>
             </Pressable>
           ) : null}

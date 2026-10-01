@@ -83,7 +83,7 @@ export function FinanceSpreadsheetPane()
           </Text>
         ) : null}
       </Card>
-      <Card tone="elevated" style={{ gap: 8 }}>
+      <Card tone="elevated" style={{ gap: 12 }}>
         <Text variant="section">Lançamentos</Text>
         {txs.slice(0, 40).map((t) => (
           <View
@@ -91,7 +91,7 @@ export function FinanceSpreadsheetPane()
             style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
-              gap: 8,
+              gap: 12,
               paddingVertical: 8,
               borderBottomWidth: 1,
               borderBottomColor: colors.hairline,

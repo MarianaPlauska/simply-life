@@ -102,7 +102,7 @@ export function HomeHealthStudio()
       summary={
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <ProgressRing progress={pct} size={56} strokeWidth={5} color={colors.health} />
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: 6 }}>
             <Text variant="title" color={colors.health} style={{ fontSize: 22 }}>
               {mlAtual} ml
             </Text>
@@ -128,7 +128,7 @@ export function HomeHealthStudio()
               flexGrow: 1,
               flexBasis: '46%',
               minWidth: 140,
-              gap: 8,
+              gap: 12,
               padding: space.md,
               borderRadius: 14,
               backgroundColor: colors.surface,
@@ -173,7 +173,7 @@ export function HomeHealthStudio()
           </Text>
           <StatusPill label={`${atual} de ${meta}`} color={colors.health} />
         </View>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {Array.from({ length: meta }).map((_, i) =>
           {
             const filled = i < atual
@@ -224,7 +224,7 @@ export function HomeHealthStudio()
         </View>
       </View>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         <PrimaryButton
           label="Abrir Saúde"
           size="sm"

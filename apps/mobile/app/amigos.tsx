@@ -156,7 +156,7 @@ export default function AmigosScreen()
           <View style={{ flex: 1 }}>
             <Text variant="bodyStrong">Metas juntos</Text>
             <Text variant="caption" muted>
-              Água, treino, foco ou o que quiserem, sem ver o número de ninguém
+              Água, treino, foco ou o que quiserem, sem ver o número de ninguém.
             </Text>
           </View>
           <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
@@ -177,14 +177,14 @@ export default function AmigosScreen()
           ) : (
             friends.map((f) => (
               <Card key={f.userId} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-                <PersonAvatar name={f.displayName} accent={f.accent} />
+                <PersonAvatar name={f.displayName} accent={f.accent} avatarStyle={f.avatarStyle} />
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text variant="bodyStrong" numberOfLines={1}>
                     {f.displayName}
                   </Text>
                   {f.muted ? (
                     <Text variant="caption" muted>
-                      Silenciado: o apoio chega sem aviso
+                      Silenciado: o apoio chega sem aviso.
                     </Text>
                   ) : null}
                 </View>

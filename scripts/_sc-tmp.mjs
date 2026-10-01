@@ -1,0 +1,41 @@
+import { chromium } from '@playwright/test'
+import { join } from 'node:path'
+const out = process.env.SHOT_DIR
+const b = await chromium.launch({ channel: 'chrome' })
+const full = async (p, name) =>
+{
+  await p.setViewportSize({ width: 390, height: 2200 }); await p.waitForTimeout(700)
+  await p.screenshot({ path: join(out, name) })
+  await p.setViewportSize({ width: 390, height: 844 }); await p.waitForTimeout(300)
+}
+// boas-vindas até o passo da Carteira
+let p = await b.newPage({ viewport: { width: 390, height: 844 } })
+await p.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 90000 })
+await p.waitForTimeout(1500)
+const t = p.getByLabel('Usar tema escuro'); if (await t.count()) await t.first().click()
+await p.getByText('Continuar como convidado').first().click()
+await p.getByText('Bem-vindo ao Simply Life').waitFor({ timeout: 30000 })
+await p.getByText('Começar', { exact: true }).last().click({ force: true }); await p.waitForTimeout(1500)
+await p.locator('input[placeholder="Seu nome"]:visible').first().fill('Mari', { force: true })
+await p.getByText('Continuar', { exact: true }).last().click({ force: true }); await p.waitForTimeout(900)
+await p.getByText(/^Continuar com/).last().click({ force: true }); await p.waitForTimeout(900)
+await p.getByText('Pular', { exact: true }).last().click({ force: true }); await p.waitForTimeout(900)
+await p.getByText('Pular', { exact: true }).last().click({ force: true }); await p.waitForTimeout(1500)
+await full(p, 'onb-carteira.png')
+await p.close()
+// categorias e cor do cartão (dados de exemplo)
+p = await b.newPage({ viewport: { width: 390, height: 844 } })
+await p.goto('http://localhost:8082/login', { waitUntil: 'networkidle', timeout: 90000 })
+await p.waitForTimeout(1500)
+const t2 = p.getByLabel('Usar tema escuro'); if (await t2.count()) await t2.first().click()
+await p.getByText('Continuar como convidado').first().click()
+await p.getByText('Só explorar com dados de exemplo').first().click({ force: true })
+await p.getByText('Progresso de hoje').first().waitFor({ timeout: 30000 }); await p.waitForTimeout(1200)
+await p.getByRole('button', { name: 'Carteira', exact: true }).last().click({ force: true })
+await p.getByText('Saldo da conta').first().waitFor({ timeout: 20000 })
+await p.getByText('Contas', { exact: true }).first().click({ force: true }); await p.waitForTimeout(1200)
+await p.getByLabel('Editar').first().click({ force: true }).catch(async () => p.getByText('Editar', { exact: true }).first().click({ force: true }))
+await p.waitForTimeout(1500)
+await p.screenshot({ path: join(out, 'categorias.png') })
+await p.close()
+await b.close()

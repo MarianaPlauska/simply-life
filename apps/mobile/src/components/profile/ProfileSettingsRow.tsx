@@ -35,7 +35,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 16,
         minHeight: 52,
         paddingVertical: 10,
         paddingHorizontal: 4,
@@ -87,7 +87,7 @@ export function ProfileSection({
         borderRadius: 20,
         paddingHorizontal: space.md,
         paddingVertical: space.sm,
-        gap: 2,
+        gap: 4,
         shadowColor: colors.ink,
         shadowOpacity: 0.06,
         shadowRadius: 12,

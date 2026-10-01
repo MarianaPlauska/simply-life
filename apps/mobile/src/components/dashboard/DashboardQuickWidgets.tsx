@@ -16,6 +16,7 @@ import { usePrefsStore } from '../../store/prefsStore'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { MoodFaceRow } from '../MoodFace'
 import { resolveDashboardWidgets, type DashboardWidgetId } from '../../lib/dashboardWidgets'
+import { filterWidgets } from '../../lib/appModules'
 
 function WellbeingWidget()
 {
@@ -50,7 +51,7 @@ function WaterWidget()
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <View style={{ gap: 2 }}>
+        <View style={{ gap: 4 }}>
           <Text variant="caption" muted>
             Água
           </Text>
@@ -215,11 +216,11 @@ export function DashboardQuickWidgets()
   const { space } = useTheme()
   const { showRail } = useWorkspace()
   const prefs = usePrefsStore((s) => s.prefs)
-  const ids = resolveDashboardWidgets(
+  const ids = filterWidgets(prefs.enabled_modules, resolveDashboardWidgets(
     prefs.dashboard_quick_widgets,
     prefs.dashboard_priority,
     prefs.home_module_order,
-  )
+  ))
 
   if (ids.length === 0) return null
 

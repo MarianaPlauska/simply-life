@@ -13,7 +13,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
-import { colorMapFromMeta } from '../../lib/categoryMeta'
+import { colorMapFromMeta, labelMapFromMeta } from '../../lib/categoryMeta'
 
 /** Gráficos e panorama abaixo da dobra - Início não fica “vazio”. */
 export function HomePanorama()
@@ -27,7 +27,7 @@ export function HomePanorama()
   const gastos = monthExpenseTotal(finance)
   const series = useMemo(() => monthDailyExpenseSeries(finance), [finance])
   const ranking = useMemo(
-    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap), chart).slice(0, 5),
+    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)).slice(0, 5),
     [finance, catMap, chart],
   )
 
@@ -52,7 +52,7 @@ export function HomePanorama()
         style={{ alignSelf: 'flex-start', borderRadius: 999 }}
       />
 
-      <Card tone="elevated" style={{ gap: space.xs, borderRadius: 14, padding: 10 }}>
+      <Card tone="elevated" style={{ gap: space.xs, borderRadius: 14, padding: 12 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <Text variant="caption" muted>
             Evolução de gastos
@@ -79,7 +79,7 @@ export function HomePanorama()
             gap: space.xs,
             borderRadius: 14,
             minHeight: 180,
-            padding: 10,
+            padding: 12,
           }}
         >
           <Text variant="caption" muted>
@@ -87,7 +87,7 @@ export function HomePanorama()
           </Text>
           {ranking.length === 0 ? (
             <Text variant="caption" muted>
-              Sem gastos no mês ainda
+              Sem gastos no mês ainda.
             </Text>
           ) : (
             <FinanceDonut
@@ -100,7 +100,7 @@ export function HomePanorama()
           )}
         </Card>
 
-        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.sm, borderRadius: 14, padding: 10 }}>
+        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.sm, borderRadius: 14, padding: 12 }}>
           <Text variant="caption" muted>
             Ranking do mês
           </Text>
@@ -110,8 +110,8 @@ export function HomePanorama()
             </Text>
           ) : (
             ranking.map((row) => (
-              <View key={row.categoria} style={{ gap: 6 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+              <View key={row.categoria} style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
                   <Text variant="bodyStrong">{row.label}</Text>
                   <Text variant="caption" muted>
                     {formatBRL(row.total)} · {row.pct}%

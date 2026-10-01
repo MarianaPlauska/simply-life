@@ -20,7 +20,7 @@ export function HealthAxelStrip({ message }: { message: string })
       }}
     >
       <IconBadge name="sparkles" color={colors.axel} size={40} iconSize={20} />
-      <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
+      <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
         <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
           AXEL
         </Text>

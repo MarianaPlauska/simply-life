@@ -20,6 +20,8 @@ import { HealthSoftModeView } from './HealthSoftModeView'
 import { HealthScreenSection } from './HealthScreenSection'
 import { HealthAxelStrip } from './HealthAxelStrip'
 import { useCalmFabSuppressStore } from '../../store/calmFabSuppressStore'
+import { useModules } from '../../hooks/useModules'
+import { CARE_MODULE, CUIDADOS_SUB_TABS } from './healthNav'
 
 type Props = {
   onGoCuidados: (tab: CuidadosTab) => void
@@ -42,6 +44,8 @@ const TILES: {
 /** Aba Hoje: entrada calma, layout integrado na tela (sem painéis com borda). */
 export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
 {
+  const modules = useModules()
+  const anyCare = modules.any('water', 'food', 'sleep', 'gym', 'meds')
   const { colors, space } = useTheme()
   const habits = useDataStore((s) => s.habits)
   const medicamentos = useDataStore((s) => s.medicamentos)
@@ -75,6 +79,8 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   {
     return TILES.filter((tile) =>
     {
+      // só cuidados que a pessoa usa
+      if (!modules.on(CARE_MODULE[tile.id])) return false
       if (tile.id === 'hidratacao')
       {
         return !agua || agua.progressoAtual < agua.metaDiaria
@@ -93,7 +99,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
       }
       return medicamentos.length === 0 || medsDone < medicamentos.length
     })
-  }, [agua, proteina, sono, treino, medicamentos.length, medsDone])
+  }, [agua, proteina, sono, treino, medicamentos.length, medsDone, modules])
 
   if (isSoftMoodDay(humor))
   {
@@ -141,24 +147,23 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   }
 
   const moodHeadline = humorHoje ? moodLabel(humorHoje.humor) : 'Como você está?'
+  const firstCare = CUIDADOS_SUB_TABS.find((t) => modules.on(CARE_MODULE[t.id]))?.id ?? 'hidratacao'
 
   return (
-    <View style={{ gap: space.md }}>
-      <HealthAxelStrip
-        message={lastAxelCare || 'Sem pressa. Um passo de cada vez já conta.'}
-      />
-
-      <HealthScreenSection dividerTop>
-        <View style={{ gap: 2 }}>
+    <View style={{ gap: space.lg }}>
+      {/* 1. Agora: check-in de humor (ação principal), se usa o diário */}
+      {modules.on('mood') ? (
+      <HealthScreenSection>
+        <View style={{ gap: 4 }}>
           <Text variant="caption" muted>
             {humorHoje ? 'Humor de hoje' : 'Check-in rápido'}
           </Text>
-          <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
+          <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.4 }}>
             {moodHeadline}
           </Text>
           {!humorHoje ? (
             <Text variant="caption" muted>
-              Toque se quiser registrar
+              Toque se quiser registrar.
             </Text>
           ) : null}
         </View>
@@ -172,7 +177,9 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
           </Text>
         </PressableScale>
       </HealthScreenSection>
+      ) : null}
 
+      {/* 2. Registros pendentes, só o que falta */}
       {pendingTiles.length > 0 ? (
         <HealthScreenSection
           dividerTop
@@ -201,7 +208,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
                     size={40}
                     iconSize={20}
                   />
-                  <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
+                  <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
                     <Text variant="bodyStrong">{tile.label}</Text>
                     <StatusPill
                       label={pillLabel}
@@ -223,9 +230,14 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
         </HealthScreenSection>
       )}
 
+      {/* 3. Referência: mensagem do AXEL, todos os cuidados e apoio */}
       <HealthScreenSection dividerTop>
+        <HealthAxelStrip
+          message={lastAxelCare || 'Sem pressa. Um passo de cada vez já conta.'}
+        />
+        {anyCare ? (
         <PressableScale
-          onPress={() => onGoCuidados('hidratacao')}
+          onPress={() => onGoCuidados(firstCare)}
           accessibilityRole="button"
           style={{
             minHeight: 48,
@@ -237,7 +249,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: 8,
+            gap: 12,
           }}
         >
           <Icon name="leaf-outline" size={18} color={colors.health} />
@@ -245,12 +257,19 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
             Ver todos os cuidados
           </Text>
         </PressableScale>
+        ) : null}
 
-        <PressableScale onPress={onGoApoio} accessibilityRole="button">
+        {modules.on('support') ? (
+          <PressableScale onPress={onGoApoio} accessibilityRole="button">
+            <Text variant="caption" muted style={{ textAlign: 'center' }}>
+              Precisa de apoio? CVV, TCC e foco estão na aba Apoio.
+            </Text>
+          </PressableScale>
+        ) : (
           <Text variant="caption" muted style={{ textAlign: 'center' }}>
-            Precisa de apoio? CVV, TCC e foco estão na aba Apoio.
+            Em sofrimento intenso, ligue para o CVV: 188, de graça, 24 horas.
           </Text>
-        </PressableScale>
+        )}
       </HealthScreenSection>
     </View>
   )

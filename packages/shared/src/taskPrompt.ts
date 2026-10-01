@@ -911,7 +911,8 @@ export function mergeTaskPromptParse(
 const COST_TAG_RE = /#custo:(\d+(?:\.\d{1,2})?):([^\s:]+)(?::(fx\d+|cd[^\s]+))?/i
 const ENERGY_TAG_RE = /#energia:(baixa|media|alta)/i
 const RIGID_TAG_RE = /#prazo:firme/i
-export const TASK_SIDECAR_TAGS_RE = /#(?:custo:\S+|energia:(?:baixa|media|alta)|prazo:firme)/gi
+// com: etapa planejada com outra pessoa (taskWaits.ts)
+export const TASK_SIDECAR_TAGS_RE = /#(?:custo:\S+|energia:(?:baixa|media|alta)|prazo:firme|com:\S+)/gi
 
 export type TaskCostMeta = {
   valor: number

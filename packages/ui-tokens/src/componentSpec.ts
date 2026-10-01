@@ -4,24 +4,38 @@
 
 export const COMPONENT_SPEC = {
   Screen: {
-    paddingHorizontal: 14,
+    /** Gutter de tela; 16 em telefones estreitos (< 360) */
+    paddingHorizontal: 20,
+    paddingHorizontalNarrow: 16,
+    /** Título da tela ao primeiro conteúdo */
+    titleGap: 24,
+    /** Entre seções */
+    sectionGap: 32,
     paddingBottom: 88,
     background: 'canvas',
   },
   Card: {
     radius: 20,
-    padding: 16,
+    padding: 20,
+    /** Cards compactos (grade de números, chips grandes) */
+    paddingCompact: 16,
+    /** Entre cards vizinhos */
+    gap: 16,
+    /** Título do card ao corpo */
+    titleGap: 8,
     background: 'surface',
     elevation: 'card',
   },
   SectionHeader: {
     titleRole: 'section',
     captionRole: 'caption',
-    gap: 2,
-    marginBottom: 4,
+    gap: 4,
+    /** Mais ar acima do que abaixo (proximidade) */
+    marginTop: 32,
+    marginBottom: 12,
   },
   PillTabs: {
-    height: 34,
+    height: 44,
     radius: 999,
     activeBg: 'axelMuted',
     activeFg: 'axel',
@@ -29,14 +43,16 @@ export const COMPONENT_SPEC = {
     gap: 4,
   },
   ListRow: {
-    minHeight: 42,
-    paddingVertical: 7,
-    paddingHorizontal: 8,
+    /** Uma linha 56, duas linhas 72 */
+    minHeight: 56,
+    minHeightTwoLine: 72,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     titleRole: 'bodyStrong',
     subtitleRole: 'caption',
   },
   PrimaryButton: {
-    minHeight: 44,
+    minHeight: 48,
     radius: 999,
     background: 'axel',
     foreground: 'axelOnFill',
@@ -52,14 +68,14 @@ export const COMPONENT_SPEC = {
   },
   ChartCard: {
     radius: 20,
-    padding: 14,
+    padding: 20,
     chartMinHeight: 110,
   },
   EmptyState: {
     iconSize: 22,
     titleRole: 'section',
     bodyRole: 'body',
-    padding: 12,
+    padding: 20,
   },
 } as const
 

@@ -6,7 +6,8 @@ import {
   type MobileTask,
   type TaskStatus,
 } from '@simply-life/shared'
-import { Text, Chip, PrimaryButton, EmptyState } from '../../ui'
+import { Text, Chip, PrimaryButton, EmptyState, PaneTitle } from '../../ui'
+import { AgendaLoadPane } from './reports/AgendaLoadPane'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useAuthStore } from '../../store/authStore'
@@ -20,7 +21,7 @@ type Props = {
   tasks: MobileTask[]
 }
 
-type BoardKind = 'prazo' | 'status'
+type BoardKind = 'prazo' | 'status' | 'agenda'
 
 const STATUS_COLS: { id: TaskStatus; label: string }[] = [
   { id: 'todo', label: 'A fazer' },
@@ -45,9 +46,9 @@ function BoardColumn({
 })
 {
   return (
-    <View style={width ? { width, gap: 10 } : { gap: 10 }}>
+    <View style={width ? { width, gap: 12 } : { gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 16 }}>
+        <Text variant="bodyStrong">
           {group.label}
         </Text>
         <Text variant="caption" muted>
@@ -96,7 +97,7 @@ export function DueBucketColumns({ tasks }: Props)
       })),
     [tasks],
   )
-  const groups = (kind === 'prazo' ? prazoGroups : statusGroups) as Group[]
+  const groups = (kind === 'status' ? statusGroups : prazoGroups) as Group[]
   const filled = groups.filter((g) => g.tasks.length > 0)
   const empty = groups.filter((g) => g.tasks.length === 0)
   const colW = Math.min(winW - 48, 340)
@@ -109,18 +110,22 @@ export function DueBucketColumns({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
-        <Text variant="section" style={{ fontSize: 18 }}>
-          Por prazo
-        </Text>
-        <Text variant="caption" muted>
-          Tarefas abertas agrupadas por quando vencem. Alterne para ver por status.
-        </Text>
-      </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <PaneTitle
+        title="Prazos"
+        subtitle={kind === 'agenda'
+          ? 'Compromissos e tarefas contra o tempo livre, das 8h às 18h.'
+          : 'Tarefas abertas agrupadas por quando vencem. Alterne para ver por status ou pela agenda.'}
+      />
+      <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
         <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
         <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />
+        <Chip label="Agenda" active={kind === 'agenda'} onPress={() => setKind('agenda')} />
       </View>
+
+      {/* Agenda: carga da semana e prazos em risco, perto de onde os prazos moram */}
+      {kind === 'agenda' ? <AgendaLoadPane tasks={tasks} embedded /> : null}
+      {kind === 'agenda' ? null : (
+      <>
 
       {openCount === 0 ? (
         <EmptyState
@@ -131,7 +136,7 @@ export function DueBucketColumns({ tasks }: Props)
       ) : null}
 
       {isMobile ? (
-        <View style={{ gap: 22 }}>
+        <View style={{ gap: 24 }}>
           {filled.map((g) => (
             <BoardColumn
               key={g.id}
@@ -142,11 +147,11 @@ export function DueBucketColumns({ tasks }: Props)
             />
           ))}
           {empty.length > 0 && filled.length > 0 ? (
-            <View style={{ gap: 8 }}>
+            <View style={{ gap: 12 }}>
               <Text variant="caption" muted>
                 Colunas vazias
               </Text>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                 {empty.map((g) => (
                   <Chip key={g.id} label={`${g.label} · 0`} onPress={add} />
                 ))}
@@ -196,6 +201,8 @@ export function DueBucketColumns({ tasks }: Props)
             if (moveId) void setTaskStatus(moveId, status, isGuest)
           }}
         />
+      )}
+      </>
       )}
     </View>
   )

@@ -9,6 +9,8 @@ export type FriendCard = {
   accent: string
   avatarStyle: string
   muted: boolean
+  /** foco junto: até quando o amigo está focando (só se ele compartilha) */
+  focandoAte: string | null
 }
 
 export type PendingFriendInvite = {
@@ -40,13 +42,15 @@ export async function fetchFriends(): Promise<FriendCard[]>
   const ids = (links ?? []).map((l) => (l.user_a === uid ? String(l.user_b) : String(l.user_a)))
   if (ids.length === 0) return []
 
-  const [{ data: cards }, { data: mutes }] = await Promise.all([
-    supabase
-      .from('user_public_cards')
-      .select('user_id, display_name, axel_calls_you, accent, avatar_style')
-      .in('user_id', ids),
+  const cols = 'user_id, display_name, axel_calls_you, accent, avatar_style'
+  const [cardsRes, { data: mutes }] = await Promise.all([
+    supabase.from('user_public_cards').select(`${cols}, focando_ate`).in('user_id', ids),
     supabase.from('friend_mutes').select('friend_id').eq('user_id', uid),
   ])
+  // 072 pendente: lê sem a coluna do foco junto
+  const cards = cardsRes.error
+    ? (await supabase.from('user_public_cards').select(cols).in('user_id', ids)).data
+    : cardsRes.data
 
   const muted = new Set((mutes ?? []).map((m) => String(m.friend_id)))
   const byId = new Map((cards ?? []).map((c) => [String(c.user_id), c]))
@@ -62,6 +66,7 @@ export async function fetchFriends(): Promise<FriendCard[]>
         accent: String(c?.accent ?? 'copper'),
         avatarStyle: String(c?.avatar_style ?? 'initials'),
         muted: muted.has(id),
+        focandoAte: (c as { focando_ate?: string | null } | undefined)?.focando_ate ?? null,
       }
     })
     .sort((a, b) => a.displayName.localeCompare(b.displayName, 'pt-BR'))

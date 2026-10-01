@@ -84,7 +84,7 @@ export function SettingsToggleRow({
       >
         <Icon name={icon} size={20} color={colors.axel} />
       </View>
-      <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
         <Text variant="bodyStrong" style={{ fontSize: 15 }}>
           {title}
         </Text>
@@ -103,7 +103,7 @@ export function SettingsToggleRow({
   const rowStyle = {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 14,
+    gap: 16,
     minHeight: 72,
     paddingVertical: 14,
     paddingHorizontal: 16,

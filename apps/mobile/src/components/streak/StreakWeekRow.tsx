@@ -23,13 +23,13 @@ export function StreakWeekRow({ cells }: Props)
   const { colors } = useTheme()
 
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 4 }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 6 }}>
       {cells.map((cell) =>
       {
         const g = glyph(cell.kind, colors)
         const future = cell.kind === 'future'
         return (
-          <View key={cell.iso} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
+          <View key={cell.iso} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
             <Text variant="caption" muted style={{ fontSize: 11 }}>
               {cell.label}
             </Text>

@@ -70,8 +70,8 @@ export function PersonalSummaryGrid()
   const ink = colors.ink
 
   return (
-    <View style={{ gap: 10 }}>
-      <View style={{ gap: 2 }}>
+    <View style={{ gap: 12 }}>
+      <View style={{ gap: 4 }}>
         <Text variant="section" style={{ fontSize: 17 }}>
           Seu resumo
         </Text>
@@ -79,7 +79,7 @@ export function PersonalSummaryGrid()
           Corpo na semana. Toque em um card para registrar.
         </Text>
       </View>
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <MetricCard
           label="Proteína"
           icon="flame"
@@ -119,7 +119,7 @@ export function PersonalSummaryGrid()
           }
         />
       </View>
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <MetricCard
           label="Sono"
           icon="moon"
@@ -185,10 +185,10 @@ function MetricCard({
         flex: 1,
         minHeight: 148,
         borderRadius: 20,
-        padding: 14,
+        padding: 16,
         backgroundColor: washBg,
         justifyContent: 'space-between',
-        gap: 10,
+        gap: 12,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -197,16 +197,15 @@ function MetricCard({
           {label}
         </Text>
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6 }}>
-        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-          <Text variant="hero" style={{ fontSize: 22, lineHeight: 26, letterSpacing: -0.6 }} numberOfLines={1}>
-            {value}
-          </Text>
-          <Text variant="micro" muted>
-            {unit}
-          </Text>
-        </View>
-        {viz}
+      {/* gráfico numa linha própria: o valor ("7h 12min") fica com a largura toda do card */}
+      <View style={{ alignItems: 'flex-end' }}>{viz}</View>
+      <View style={{ gap: 4 }}>
+        <Text variant="hero" style={{ fontSize: 20, lineHeight: 28 }} numberOfLines={1}>
+          {value}
+        </Text>
+        <Text variant="micro" muted>
+          {unit}
+        </Text>
       </View>
     </PressableScale>
   )

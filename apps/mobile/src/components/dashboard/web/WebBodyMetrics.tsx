@@ -122,7 +122,7 @@ export function WebBodyMetrics()
   ]
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="section" style={{ fontSize: 16 }}>
         Corpo na semana
       </Text>
@@ -135,7 +135,7 @@ export function WebBodyMetrics()
             style={(hovered) => webStyle({
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 12,
+              gap: 16,
               paddingHorizontal: 18,
               paddingVertical: 12,
               borderTopWidth: i === 0 ? 0 : 1,
@@ -148,7 +148,7 @@ export function WebBodyMetrics()
             <Text variant="body" style={{ width: 76, fontSize: 13 }}>
               {row.label}
             </Text>
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 4 }}>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
               <Text variant="bodyStrong" style={{ fontSize: 15 }}>
                 {row.value}
               </Text>

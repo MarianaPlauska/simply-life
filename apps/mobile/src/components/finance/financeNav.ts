@@ -6,6 +6,32 @@ export type ContasSubTab = 'conta' | 'salario' | 'cartoes' | 'faturas' | 'contas
 
 export type AnaliseSubTab = 'visao-geral' | 'orcamentos' | 'metas' | 'coach'
 
+import type { AppModuleId } from '../../lib/appModules'
+
+type On = (id: AppModuleId) => boolean
+
+/** Carteira, Extrato e Análise são de Gastos; Contas junta conta, cartões e fixas. */
+export function visibleFinanceTabs(on: On)
+{
+  return FINANCE_MAIN_TABS.filter((t) =>
+    t.id === 'contas' ? on('spend') || on('cards') || on('bills')
+      : t.id === 'analise' ? on('spend') || on('goals')
+        : on('spend'))
+}
+
+export function visibleContasTabs(on: On)
+{
+  return CONTAS_SUB_TABS.filter((t) =>
+    t.id === 'cartoes' ? on('cards')
+      : t.id === 'faturas' || t.id === 'contas-fixas' ? on('bills')
+        : on('spend'))
+}
+
+export function visibleAnaliseTabs(on: On)
+{
+  return ANALISE_SUB_TABS.filter((t) => (t.id === 'metas' ? on('goals') : on('spend')))
+}
+
 export const FINANCE_MAIN_TABS = [
   { id: 'inicio' as const, label: 'Carteira' },
   { id: 'movimentos' as const, label: 'Extrato' },

@@ -111,7 +111,7 @@ function AcademySessionInner()
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.canvas }} edges={['top', 'bottom']}>
       <StatusBar hidden style="light" />
-      <View style={{ flex: 1, padding: 24, gap: 18, justifyContent: 'space-between' }}>
+      <View style={{ flex: 1, padding: 24, gap: 24, justifyContent: 'space-between' }}>
         <AcademySessionStage
           phase={phase}
           step={step}
@@ -123,7 +123,7 @@ function AcademySessionInner()
           plan={plan}
           dayLabel={academyDayLabel(academyWeekKey())}
         />
-        <View style={{ gap: 10 }}>
+        <View style={{ gap: 12 }}>
           {phase === 'ready' && !restDay ? <PrimaryButton label="Começar" onPress={start} /> : null}
           {phase === 'work' && !timedHold ? (
             <PrimaryButton label="Terminei esta série" onPress={completeSet} />

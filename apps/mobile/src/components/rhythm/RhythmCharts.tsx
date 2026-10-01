@@ -3,6 +3,7 @@ import { Pressable, View, useWindowDimensions } from 'react-native'
 import Svg, { Circle, G, Line, Path, Rect, Text as SvgText } from 'react-native-svg'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useAccents } from '../../theme/useAccents'
 
 /**
  * Gráficos do "Meu ritmo". Regras (dataviz): uma cor de dado por gráfico
@@ -55,6 +56,7 @@ type ColumnsProps = {
 export function RhythmColumns({ data, formatTick = (v) => String(v), legend, accessibilityLabel }: ColumnsProps)
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const { width: winW } = useWindowDimensions()
   const [selected, setSelected] = useState<number | null>(null)
   const [table, setTable] = useState(false)
@@ -67,8 +69,8 @@ export function RhythmColumns({ data, formatTick = (v) => String(v), legend, acc
   const showEvery = data.length > 14 ? Math.ceil(data.length / 7) : 1
 
   return (
-    <View style={{ gap: 8 }}>
-      {legend ? <Legend items={[{ label: legend.value, color: colors.axel }, { label: legend.track, color: colors.hairlineStrong }]} /> : null}
+    <View style={{ gap: 12 }}>
+      {legend ? <Legend items={[{ label: legend.value, color: accents.data }, { label: legend.track, color: colors.hairlineStrong }]} /> : null}
       <Text variant="caption" muted style={{ minHeight: 18 }}>
         {selected != null ? data[selected]?.detail : 'Toque numa barra para ver o valor'}
       </Text>
@@ -97,7 +99,7 @@ export function RhythmColumns({ data, formatTick = (v) => String(v), legend, acc
                   {d.value > 0 ? (
                     <Path
                       d={columnPath(x, y(d.value), barW, PLOT_H - y(d.value))}
-                      fill={colors.axel}
+                      fill={accents.data}
                       opacity={selected == null || active ? 1 : 0.45}
                     />
                   ) : null}
@@ -132,6 +134,7 @@ export type LineDatum = { label: string; value: number | null; detail: string }
 export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; accessibilityLabel: string })
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const { width: winW } = useWindowDimensions()
   const [selected, setSelected] = useState<number | null>(null)
   const [table, setTable] = useState(false)
@@ -156,7 +159,7 @@ export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; ac
   })
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="caption" muted style={{ minHeight: 18 }}>
         {selected != null ? data[selected]?.detail : 'Toque num ponto para ver o dia'}
       </Text>
@@ -173,7 +176,7 @@ export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; ac
                 {t}
               </SvgText>
             ))}
-            {d ? <Path d={d} stroke={colors.axel} strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" /> : null}
+            {d ? <Path d={d} stroke={accents.data} strokeWidth={2} fill="none" strokeLinejoin="round" strokeLinecap="round" /> : null}
             {data.map((p, i) => (
               <G key={`${p.label}-${i}`}>
                 {p.value != null ? (
@@ -181,7 +184,7 @@ export function RhythmLine({ data, accessibilityLabel }: { data: LineDatum[]; ac
                     cx={x(i)}
                     cy={y(p.value)}
                     r={selected === i ? 6 : 4.5}
-                    fill={colors.axel}
+                    fill={accents.data}
                     stroke={colors.elevated}
                     strokeWidth={2}
                   />
@@ -214,7 +217,7 @@ function Legend({ items }: { items: { label: string; color: string }[] })
   return (
     <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
       {items.map((it) => (
-        <View key={it.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <View key={it.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: it.color }} />
           <Text variant="caption" muted>{it.label}</Text>
         </View>
@@ -241,7 +244,7 @@ function DataTable({ rows }: { rows: [string, string][] })
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: colors.hairline }}>
       {rows.map(([a, b], i) => (
-        <View key={`${a}-${i}`} style={{ flexDirection: 'row', gap: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
+        <View key={`${a}-${i}`} style={{ flexDirection: 'row', gap: 16, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
           <Text variant="caption" style={{ width: 52 }}>{a}</Text>
           <Text variant="caption" muted style={{ flex: 1 }}>{b}</Text>
         </View>
@@ -259,10 +262,10 @@ export function StatTile({ label, value, sub }: { label: string; value: string; 
       style={{
         flexGrow: 1,
         flexBasis: '45%',
-        padding: 12,
+        padding: 16,
         borderRadius: 14,
         backgroundColor: colors.hairline,
-        gap: 2,
+        gap: 4,
       }}
     >
       <Text variant="caption" muted>{label}</Text>

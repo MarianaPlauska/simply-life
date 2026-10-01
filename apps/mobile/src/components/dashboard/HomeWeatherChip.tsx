@@ -172,14 +172,14 @@ export function HomeWeatherChip({ compact = false }: Props)
           <Icon name={snap?.icon ?? 'partly-sunny-outline'} size={22} color={badgeColor} />
         </Pressable>
       ) : (
-      <Card tone="elevated" style={{ gap: 14, padding: 18 }}>
+      <Card tone="elevated" style={{ gap: 16, padding: 20 }}>
         <Pressable
           onPress={openPicker}
           accessibilityLabel="Clima"
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 12,
+            gap: 16,
             minHeight: 44,
           }}
         >
@@ -189,7 +189,7 @@ export function HomeWeatherChip({ compact = false }: Props)
             size={40}
             iconSize={20}
           />
-          <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+          <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
             {snap ? (
               <>
                 <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 16 }}>
@@ -215,7 +215,7 @@ export function HomeWeatherChip({ compact = false }: Props)
         </Pressable>
 
         {hours.length > 0 ? (
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 36 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 36 }}>
             {hours.map((h, i) =>
             {
               const ht = 8 + Math.round((h.tempC / peak) * 28)
@@ -259,17 +259,17 @@ export function HomeWeatherChip({ compact = false }: Props)
               maxHeight: '82%',
             }}
           >
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 8 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingBottom: 8 }}>
               {sheet === 'detail' && snap ? (
                 <>
                   <Text variant="caption" muted>
                     {snap.city ?? 'Agora'}
                   </Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 16 }}>
                     <Text variant="hero" style={{ fontSize: 48, lineHeight: 52, letterSpacing: -1.5 }}>
                       {snap.tempC}°
                     </Text>
-                    <View style={{ paddingBottom: 8, gap: 2, flex: 1 }}>
+                    <View style={{ paddingBottom: 8, gap: 4, flex: 1 }}>
                       <Text variant="bodyStrong">{snap.label}</Text>
                       <Text variant="caption" muted>
                         {loading ? 'Atualizando…' : snap.hint}
@@ -277,7 +277,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                     </View>
                     <Icon name={snap.icon} size={28} color={badgeColor} />
                   </View>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                     {[
                       snap.feelsLikeC != null ? `Sensação ${snap.feelsLikeC}°` : null,
                       snap.maxC != null && snap.minC != null ? `Máx ${snap.maxC}° · Mín ${snap.minC}°` : null,
@@ -301,17 +301,17 @@ export function HomeWeatherChip({ compact = false }: Props)
                       ))}
                   </View>
                   {(snap.hourly?.length ?? 0) > 0 ? (
-                    <View style={{ gap: 8 }}>
+                    <View style={{ gap: 12 }}>
                       <Text variant="caption" muted>
                         Próximas horas
                       </Text>
-                      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 72 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 72 }}>
                         {snap.hourly!.map((h) =>
                         {
                           const peak = Math.max(...snap.hourly!.map((x) => x.tempC), snap.tempC)
                           const bar = Math.max(10, Math.round(((h.tempC + 5) / (peak + 8)) * 48))
                           return (
-                            <View key={h.hour} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
+                            <View key={h.hour} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
                               <Text variant="micro" muted>
                                 {h.tempC}°
                               </Text>

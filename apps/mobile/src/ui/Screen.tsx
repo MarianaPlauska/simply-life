@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react'
 import {
   ScrollView,
   View,
   RefreshControl,
   type ViewProps,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
@@ -19,6 +21,8 @@ type ScreenProps = ViewProps & {
   tabBarInset?: boolean
   refreshing?: boolean
   onRefresh?: () => void
+  /** Camada de fundo atrás do conteúdo (ex.: fundo do quadro desbloqueado) */
+  backdrop?: ReactNode
 }
 
 export function Screen({
@@ -28,6 +32,7 @@ export function Screen({
   tabBarInset = true,
   refreshing,
   onRefresh,
+  backdrop,
   style,
   ...rest
 }: ScreenProps)
@@ -35,13 +40,18 @@ export function Screen({
   const { colors } = useTheme()
   const { showRail } = useWorkspace()
   const insets = useSafeAreaInsets()
+  const { width: vw } = useWindowDimensions()
   // Desktop com sidebar: sem padding da tab bar mobile
   const useTabPad = tabBarInset && !showRail
   const bottom = useTabPad
     ? tabBarScreenPadding(insets.bottom)
     : Math.max(insets.bottom, 16)
   // Desktop: padding vem do TabShell; Screen só reserva o fundo
-  const hPad = showRail ? 0 : COMPONENT_SPEC.Screen.paddingHorizontal
+  const hPad = showRail
+    ? 0
+    : vw < 360
+      ? COMPONENT_SPEC.Screen.paddingHorizontalNarrow
+      : COMPONENT_SPEC.Screen.paddingHorizontal
 
   const pad = padded
     ? {
@@ -68,6 +78,7 @@ export function Screen({
     return (
       <View style={frame}>
         <AtmosphereWash />
+      {backdrop}
         <SafeAreaView style={[styles.flex, { backgroundColor: 'transparent' }]} edges={['top']}>
           <ScrollView
             contentContainerStyle={[pad, style]}
@@ -86,6 +97,7 @@ export function Screen({
   return (
     <View style={frame}>
       <AtmosphereWash />
+      {backdrop}
       <SafeAreaView style={[styles.flex, { backgroundColor: 'transparent' }]} edges={['top']}>
         <View style={[styles.flex, pad, style]} {...rest}>
           {children}

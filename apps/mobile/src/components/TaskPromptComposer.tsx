@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { View, ScrollView, Pressable } from 'react-native'
+import { useRouter } from 'expo-router'
 import { Icon } from '../ui/Icon'
 import {
   applyTaskMeta,
@@ -29,6 +30,7 @@ import { useDataStore } from '../store/dataStore'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
 import { useAuthStore } from '../store/authStore'
 import { useOrchestratorPrefsStore } from '../store/orchestratorPrefsStore'
+import { useCaptureStore } from '../store/captureStore'
 import { readTaskPromptLocally, refineTaskPromptWithAi, type TaskPromptResult } from '../lib/taskPromptApi'
 import { SelectChip } from './CaptureTaskForm'
 import { buildOrchestratorContext, type FullOrchestratorContext } from '../lib/orchestratorContext'
@@ -78,7 +80,6 @@ export type TaskPromptSaveItem = {
   }
 }
 
-const CAPACITY_CHOICES = [120, 240, 360, 480]
 const EFFORT_CHOICES = [5, 15, 30, 60, 90, 120, 180]
 const ENERGY_LABEL: Record<TaskEnergy, string> = { baixa: 'Leve', media: 'Média', alta: 'Pesada' }
 const WEEKDAY_LETTERS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
@@ -179,10 +180,12 @@ function sourceLabel(result: TaskPromptResult): string
 type Props = {
   state: TaskPromptState
   onChange: (next: TaskPromptState) => void
+  /** A ficha mostra "Organizar com Axel" no rodapé (zona do polegar) e chama por aqui */
+  organizeRef?: MutableRefObject<(() => void) | null>
 }
 
 /** Captura por prompt solto: o Axel interpreta, propõe alternativas e sinaliza parâmetros. */
-export function TaskPromptComposer({ state, onChange }: Props)
+export function TaskPromptComposer({ state, onChange, organizeRef }: Props)
 {
   const { colors } = useTheme()
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -233,6 +236,8 @@ export function TaskPromptComposer({ state, onChange }: Props)
   })
 
   /** 1) leitura local na hora · 2) IA refina em segundo plano */
+  // a ficha chama pelo rodapé; a função só roda no toque, depois de declarada abaixo
+  if (organizeRef) organizeRef.current = () => void organize()
   const organize = async () =>
   {
     const prompt = state.prompt.trim()
@@ -271,7 +276,8 @@ export function TaskPromptComposer({ state, onChange }: Props)
     })
   }
 
-  const styleHint = ORCHESTRATOR_STYLES.find((s) => s.id === style)?.hint
+  const styleLabel = ORCHESTRATOR_STYLES.find((s) => s.id === style)?.label ?? 'Equilibrado'
+  const router = useRouter()
 
   return (
     <View style={{ gap: 14 }}>
@@ -285,55 +291,32 @@ export function TaskPromptComposer({ state, onChange }: Props)
         style={{ minHeight: 110, textAlignVertical: 'top', paddingTop: 14 }}
       />
 
-      <View style={{ gap: 8 }}>
-        <Text variant="caption" muted>
-          Como o Axel organiza
+      {/* jeito de organizar e tempo por dia são ajustes, não perguntas a cada tarefa */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <Text variant="caption" muted style={{ flex: 1, minWidth: 180 }}>
+          Organiza no modo {styleLabel.toLowerCase()}, com {formatMinutesPt(capacityMinutes)} por dia para tarefas.
         </Text>
-        <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            {ORCHESTRATOR_STYLES.map((s) => (
-              <SelectChip
-                key={s.id}
-                label={s.label}
-                active={style === s.id}
-                onPress={() =>
-                {
-                  patchPrefs({ style: s.id })
-                  // troca de estilo recalcula a recomendação de todas
-                  onChange({ ...state, chosen: {} })
-                }}
-              />
-            ))}
-          </View>
-        </ScrollView>
-        {styleHint ? (
-          <Text variant="caption" muted>
-            {styleHint}
-          </Text>
-        ) : null}
+        <PrimaryButton
+          label="Mudar"
+          variant="link"
+          size="sm"
+          onPress={() =>
+          {
+            useCaptureStore.getState().closeCapture()
+            router.push('/preferencias?tab=geral' as never)
+          }}
+        />
       </View>
 
-      <View style={{ gap: 8 }}>
-        <Text variant="caption" muted>
-          Tempo livre para tarefas por dia
-        </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-          {CAPACITY_CHOICES.map((m) => (
-            <SelectChip
-              key={m}
-              label={formatMinutesPt(m)}
-              active={capacityMinutes === m}
-              onPress={() => patchPrefs({ capacityMinutes: m })}
-            />
-          ))}
-        </View>
-      </View>
-
-      <PrimaryButton
-        label={state.drafts.length ? 'Reorganizar com Axel' : 'Organizar com Axel'}
-        disabled={state.prompt.trim().length < 2}
-        onPress={() => void organize()}
-      />
+      {/* com a ficha no controle, o primeiro "Organizar" fica no rodapé; aqui só o de refazer */}
+      {!organizeRef || state.drafts.length ? (
+        <PrimaryButton
+          label={state.drafts.length ? 'Reorganizar com Axel' : 'Organizar com Axel'}
+          variant={organizeRef ? 'secondary' : 'primary'}
+          disabled={state.prompt.trim().length < 2}
+          onPress={() => void organize()}
+        />
+      ) : null}
 
       {state.result ? (
         <View style={{ gap: 12 }}>

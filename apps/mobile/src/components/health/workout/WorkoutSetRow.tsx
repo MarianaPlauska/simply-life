@@ -36,7 +36,7 @@ export function WorkoutSetRow({ index, set, previous, bodyweight, onChange, onTo
         backgroundColor: set.done ? colors.healthMuted : 'transparent',
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Pressable
           onPress={() => setOpen((v) => !v)}
           accessibilityRole="button"
@@ -45,7 +45,7 @@ export function WorkoutSetRow({ index, set, previous, bodyweight, onChange, onTo
         >
           <Text variant="bodyStrong" color={colors.inkMuted}>{index + 1}</Text>
         </Pressable>
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
           <WorkoutStepper
             label={bodyweight ? 'carga extra em kg' : 'carga em kg'}
             value={set.cargaKg}
@@ -91,7 +91,7 @@ export function WorkoutSetRow({ index, set, previous, bodyweight, onChange, onTo
         </Text>
       ) : null}
       {open ? (
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 6, marginLeft: 34 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginLeft: 34 }}>
           <Text variant="micro" muted>Esforço (RPE)</Text>
           {RPE_OPTIONS.map((r) => (
             <Pressable

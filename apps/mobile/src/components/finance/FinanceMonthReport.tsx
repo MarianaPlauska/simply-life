@@ -24,7 +24,7 @@ import { ExpenseSparkline } from '../../ui/ExpenseSparkline'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
-import { colorMapFromMeta } from '../../lib/categoryMeta'
+import { colorMapFromMeta, labelMapFromMeta } from '../../lib/categoryMeta'
 import { useWorkspace } from '../../layout/useWorkspace'
 
 const MONTH_OFFSETS = [0, 1, 2, 3, 4, 5]
@@ -54,7 +54,7 @@ export function FinanceMonthReport()
   const series = useMemo(() => monthDailyExpenseSeries(monthTxs, ref), [monthTxs, ref])
   const incomeSeries = useMemo(() => monthDailyIncomeSeries(monthTxs, ref), [monthTxs, ref])
   const ranking = useMemo(
-    () => rankCategoriesBySpend(monthTxs, colorMapFromMeta(catMap), chart),
+    () => rankCategoriesBySpend(monthTxs, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)),
     [monthTxs, catMap, chart],
   )
   const max = ranking[0]?.total ?? 1
@@ -69,7 +69,7 @@ export function FinanceMonthReport()
   return (
     <View style={{ gap: space.md }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           {MONTH_OFFSETS.map((n) => (
             <Chip
               key={n}
@@ -84,7 +84,7 @@ export function FinanceMonthReport()
       <Card tone="elevated" style={{ gap: space.sm }}>
         <SectionHeader title="Relatório do mês" subtitle={monthTitle} />
         <View style={{ flexDirection: 'row', gap: space.sm }}>
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" muted>
               Receitas
             </Text>
@@ -92,7 +92,7 @@ export function FinanceMonthReport()
               {formatBRL(receitas)}
             </Text>
           </View>
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: 6 }}>
             <Text variant="caption" muted>
               Saiu do saldo
             </Text>
@@ -100,7 +100,7 @@ export function FinanceMonthReport()
               {formatBRL(naConta)}
             </Text>
           </View>
-          <View style={{ flex: 1, gap: 4, alignItems: 'flex-end' }}>
+          <View style={{ flex: 1, gap: 6, alignItems: 'flex-end' }}>
             <Text variant="caption" muted>
               No cartão
             </Text>
@@ -155,10 +155,11 @@ export function FinanceMonthReport()
         <Card
           tone="elevated"
           style={{
-            flex: 1,
+            flex: isDesktop ? 1 : undefined,
             alignItems: 'center',
             gap: space.md,
-            minHeight: 260,
+            // no celular o card abraça o donut; a altura mínima só alinha com o Ranking lado a lado
+            minHeight: isDesktop ? 260 : undefined,
           }}
         >
           <Text variant="caption" muted>
@@ -177,15 +178,15 @@ export function FinanceMonthReport()
           )}
         </Card>
 
-        <Card tone="elevated" style={{ flex: 1, gap: space.md }}>
+        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.md }}>
           <SectionHeader title="Ranking" subtitle="Maiores categorias" />
           {ranking.length === 0 ? (
             <EmptyState title="Sem categorias" body="Os gráficos aparecem com o primeiro gasto." />
           ) : (
             ranking.map((row) => (
-              <View key={row.categoria} style={{ gap: 6 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 }}>
+              <View key={row.categoria} style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 }}>
                     <View
                       style={{
                         width: 10,

@@ -33,9 +33,12 @@ export function lifeCategoryAccent(id: LifeCategoryId, palette: ChartPalette): s
   return chartColor(palette, def?.series ?? 'blue')
 }
 
-/** Filtros visíveis no Kanban (sem pilares genéricos de inferência). */
+/**
+ * Filtros visíveis no Kanban (sem pilares genéricos de inferência).
+ * Saúde fica de fora: tem aba própria; a categoria continua valendo para cor e relatórios.
+ */
 export const KANBAN_LIFE_FILTERS = LIFE_CATEGORIES.filter(
-  (c) => c.id !== 'crescimento' && c.id !== 'carreira',
+  (c) => c.id !== 'crescimento' && c.id !== 'carreira' && c.id !== 'saude',
 )
 
 const SAUDE_RE = /sa[uú]de|agua|água|treino|academia|medic|sono|humor|prote[ií]na|caminh|yoga/i

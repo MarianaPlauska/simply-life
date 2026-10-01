@@ -16,7 +16,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
   const { colors } = useTheme()
 
   return (
-    <View style={{ flexDirection: 'row', gap: 6 }}>
+    <View style={{ flexDirection: 'row', gap: 8 }}>
       {cells.map((cell) =>
       {
         const selected = cell.iso === selectedIso
@@ -43,7 +43,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
               borderRadius: 14,
               paddingVertical: 8,
               alignItems: 'center',
-              gap: 4,
+              gap: 6,
               backgroundColor: bg,
               borderWidth: selected || cell.tone === 'today' ? 1 : 0,
               borderColor: colors.axel,
@@ -56,9 +56,9 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
             <Text variant="micro" muted style={{ fontSize: 11, lineHeight: 14 }}>
               {new Date(`${cell.iso}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}
             </Text>
-            <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
               {cell.done > 0 ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Icon name="checkmark" size={11} color={colors.health} />
                   <Text variant="micro" style={{ color: colors.health }}>
                     {cell.done}
@@ -66,7 +66,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
                 </View>
               ) : null}
               {cell.miss > 0 ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Icon name="close" size={11} color={colors.danger} />
                   <Text variant="micro" style={{ color: colors.danger }}>
                     {cell.miss}

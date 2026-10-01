@@ -104,14 +104,16 @@ export function AxelSetupWizard()
     }
   }, [workspacePrefsLoaded, fetchWorkspacePrefs])
 
+  // hooks antes de qualquer return: a ordem precisa ser a mesma em todo render
+  const level = userStats?.level ?? 1
+  const privilegeCtx = useMemo(() => ({ level, streakCount: 0 }), [level])
+
   // /setup?edit=1 permite remontar o AXEL depois do primeiro setup
   if (workspacePrefsLoaded && isSetupComplete(workspacePrefs) && !isEdit)
   {
     return <Navigate to="/" replace />
   }
 
-  const level = userStats?.level ?? 1
-  const privilegeCtx = useMemo(() => ({ level, streakCount: 0 }), [level])
   const scheme = accessibility.colorScheme === 'light' ? 'light' : 'dark'
   const initials = iniciaisDe(displayName)
 

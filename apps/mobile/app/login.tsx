@@ -137,7 +137,7 @@ export default function LoginScreen()
             <Icon
               name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
               size={18}
-              color={colors.widgetInk}
+              color={colors.onBrand}
             />
           </Pressable>
         </View>

@@ -6,16 +6,15 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { usePrefsStore } from '../../store/prefsStore'
 import { GAMIFICATION_MODE_OPTIONS, type GamificationMode } from '@simply-life/shared'
 
-/** Apoio foco / TDAH — preferências sincronizadas na conta. */
-export function HealthNeuroFocusPanel()
+/** Apoio foco / TDAH, preferências sincronizadas na conta. `bare`: sem Card próprio (dentro de bloco recolhível). */
+export function HealthNeuroFocusPanel({ bare = false }: { bare?: boolean } = {})
 {
   const { space } = useTheme()
   const prefs = usePrefsStore((s) => s.prefs)
   const patch = usePrefsStore((s) => s.patch)
   const router = useRouter()
-
-  return (
-    <Card tone="elevated" style={{ gap: space.sm }}>
+  const body = (
+    <>
       <Text variant="section">Foco e neurodivergência</Text>
       <Text variant="caption" muted>
         Não é diagnóstico. Ajusta quebra de tarefas, linha do dia na Home e gamificação
@@ -45,7 +44,7 @@ export function HealthNeuroFocusPanel()
           <Text variant="caption" muted>
             Modo de motivação na Home
           </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {GAMIFICATION_MODE_OPTIONS.map((opt) =>
             {
               const active = (prefs.gamification_mode || 'calm') === opt.id
@@ -66,6 +65,10 @@ export function HealthNeuroFocusPanel()
           </Text>
         </View>
       ) : null}
-    </Card>
+    </>
   )
+
+  return bare
+    ? <View style={{ gap: space.sm }}>{body}</View>
+    : <Card tone="elevated" style={{ gap: space.sm }}>{body}</Card>
 }

@@ -385,7 +385,7 @@ describe('calorias', () =>
       { data: '2026-09-28', itens: [{ kcal: 330.4 }] },
       { data: '2026-09-27', itens: [{ kcal: 999 }] },
     ], '2026-09-28')
-    expect(day).toEqual({ total: 450, comKcal: 2, semKcal: 2 })
+    expect(day).toEqual({ total: 450, comKcal: 2, semKcal: 2, estimadas: 0 })
     expect(formatKcal(1450)).toBe('1.450 kcal')
   })
 })

@@ -5,19 +5,18 @@ import { useAuthStore } from '../../store/authStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { useTheme } from '../../theme/ThemeProvider'
 
-/** Envia para /setup até o wizard AXEL estar completo (convidado pulado). */
+/** Envia para /setup (boas-vindas) até ser concluído. Convidado também passa por elas. */
 export function SetupGuard({ children }: { children: ReactNode })
 {
   const { colors } = useTheme()
   const pathname = usePathname()
-  const isGuest = useAuthStore((s) => s.isGuest)
   const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
   const loaded = usePrefsStore((s) => s.loaded)
   const setupAt = usePrefsStore((s) => s.prefs.setup_completed_at)
 
   if (mfaPending) return <Redirect href="/login" />
 
-  if (!isGuest && !loaded)
+  if (!loaded)
   {
     return (
       <View
@@ -33,12 +32,7 @@ export function SetupGuard({ children }: { children: ReactNode })
     )
   }
 
-  if (
-    !isGuest &&
-    loaded &&
-    !setupAt &&
-    pathname !== '/setup'
-  )
+  if (loaded && !setupAt && pathname !== '/setup')
   {
     return <Redirect href="/setup" />
   }

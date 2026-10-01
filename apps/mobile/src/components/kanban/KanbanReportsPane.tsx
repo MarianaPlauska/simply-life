@@ -5,7 +5,7 @@ import {
   buildUserScopeSnapshots,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text } from '../../ui'
+import { Text, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { LifeSummaryReport } from '../metrics/LifeSummaryReport'
@@ -38,18 +38,11 @@ export function KanbanReportsPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 4 }}>
-        <Text variant="hero" style={{ fontSize: 26, letterSpacing: -0.6 }}>
-          Desempenho
-        </Text>
-        <Text variant="caption" muted>
-          O que foi feito, o que ficou e o ritmo da semana.
-        </Text>
-      </View>
+      <PaneTitle title="Desempenho" subtitle="O que foi feito, o que ficou e o ritmo da semana." />
       <LifeSummaryReport variant="tasks" snapshots={snapshots} />
       {open.length > 0 ? (
-        <View style={{ gap: 10 }}>
-          <Text variant="section" style={{ fontSize: 16 }}>
+        <View style={{ gap: 12 }}>
+          <Text variant="section">
             Pastas em andamento
           </Text>
           {open.map((scope) => (

@@ -1,12 +1,14 @@
 import { Pressable, View, StyleSheet } from 'react-native'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
+import { Icon, type IconName } from './Icon'
 import { useTheme } from '../theme/ThemeProvider'
 
 export function ListRow({
   title,
   subtitle,
   right,
+  rightIcon,
   onPress,
   progress,
   showSeparator,
@@ -14,6 +16,8 @@ export function ListRow({
   title: string
   subtitle?: string
   right?: string
+  /** Ícone à direita (no lugar ou ao lado do texto `right`) */
+  rightIcon?: IconName
   onPress?: () => void
   progress?: number
   showSeparator?: boolean
@@ -28,18 +32,19 @@ export function ListRow({
         onPress={onPress}
         disabled={!onPress}
         style={({ pressed }) => ({
-          minHeight: spec.minHeight,
           paddingVertical: spec.paddingVertical,
-          paddingHorizontal: space.sm,
+          minHeight: subtitle ? spec.minHeightTwoLine : spec.minHeight,
+          paddingHorizontal: spec.paddingHorizontal,
           borderRadius: radius.control,
           backgroundColor: pressed ? colors.elevated : 'transparent',
           opacity: pressed ? 0.88 : 1,
           transform: [{ scale: pressed && onPress ? 0.97 : 1 }],
-          gap: 6,
+          justifyContent: 'center',
+          gap: space.sm,
         })}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <View style={{ flex: 1, minWidth: 0 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
             <Text variant="bodyStrong" numberOfLines={1}>
               {title}
             </Text>
@@ -54,6 +59,7 @@ export function ListRow({
               {right}
             </Text>
           ) : null}
+          {rightIcon ? <Icon name={rightIcon} size={20} color={colors.inkMuted} /> : null}
         </View>
         {typeof progress === 'number' ? (
           <View

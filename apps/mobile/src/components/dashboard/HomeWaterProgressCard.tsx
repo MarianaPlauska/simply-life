@@ -74,8 +74,8 @@ export function HomeWaterProgressCard({ compact }: Props)
         backgroundColor: colors.healthMuted,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+        <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
           <Text variant="caption" muted>
             Hidratação
           </Text>
@@ -102,7 +102,7 @@ export function HomeWaterProgressCard({ compact }: Props)
       </View>
 
       {!compact ? (
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
           {(
             [
               { icon: 'flame-outline' as const, label: `${streak}d sequência` },
@@ -113,7 +113,7 @@ export function HomeWaterProgressCard({ compact }: Props)
               },
             ]
           ).map((row) => (
-            <View key={row.label} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <View key={row.label} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name={row.icon} size={13} color={colors.axel} />
               <Text variant="micro" muted style={{ fontSize: 11 }} numberOfLines={1}>
                 {row.label}
@@ -124,7 +124,7 @@ export function HomeWaterProgressCard({ compact }: Props)
       ) : null}
 
       {!compact ? (
-        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 52 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 52 }}>
           {week.map((iso) =>
           {
             const isToday = iso === todayIso
@@ -132,7 +132,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             const cups = isFuture ? 0 : (isToday ? atual : (waterWeekDays[iso] ?? 0))
             const h = isFuture ? 4 : Math.max(6, Math.round((cups / maxBar) * 44))
             return (
-              <View key={iso} style={{ flex: 1, alignItems: 'center', gap: 4 }}>
+              <View key={iso} style={{ flex: 1, alignItems: 'center', gap: 6 }}>
                 <View
                   style={{
                     width: '70%',
@@ -168,7 +168,7 @@ export function HomeWaterProgressCard({ compact }: Props)
         </View>
       ) : null}
 
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <PressableScale
           accessibilityLabel="Remover copo"
           disabled={atual <= 0}
@@ -197,7 +197,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             alignItems: 'center',
             justifyContent: 'center',
             flexDirection: 'row',
-            gap: 6,
+            gap: 8,
           }}
         >
           <Icon name="water" size={16} color={colors.canvas} />

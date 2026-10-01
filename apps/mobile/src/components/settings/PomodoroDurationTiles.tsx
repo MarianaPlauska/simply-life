@@ -47,10 +47,10 @@ export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }
   ] as const
 
   return (
-    <View style={{ gap: 12 }}>
-      <View style={{ flexDirection: 'row', gap: 10 }}>
+    <View style={{ gap: 16 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         {tiles.map((t) => (
-          <View key={t.key} style={{ flex: 1, gap: 8, alignItems: 'center' }}>
+          <View key={t.key} style={{ flex: 1, gap: 12, alignItems: 'center' }}>
             <Text variant="caption" muted>
               {t.label}
             </Text>
@@ -77,9 +77,9 @@ export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }
       <Text variant="caption" muted>
         Toque no número para ciclar o tempo, em minutos.
       </Text>
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="label">Foco</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {FOCUS_OPTS.map((n) => (
             <Chip
               key={`f-${n}`}
@@ -90,7 +90,7 @@ export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }
           ))}
         </View>
         <Text variant="label">Pausa curta</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {SHORT_OPTS.map((n) => (
             <Chip
               key={`s-${n}`}
@@ -101,7 +101,7 @@ export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }
           ))}
         </View>
         <Text variant="label">Pausa longa</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {LONG_OPTS.map((n) => (
             <Chip
               key={`l-${n}`}

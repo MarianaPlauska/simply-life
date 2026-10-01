@@ -185,7 +185,7 @@ export function FinanceCardDetailSheet({
                   accessibilityLabel={a.label}
                   onPress={a.onPress}
                   disabled={!a.onPress}
-                  style={{ alignItems: 'center', gap: 6, minWidth: 64 }}
+                  style={{ alignItems: 'center', gap: 8, minWidth: 64 }}
                 >
                   <View
                     style={{
@@ -266,7 +266,7 @@ export function FinanceCardDetailSheet({
                   backgroundColor: colors.elevated,
                   borderRadius: 20,
                   padding: space.md,
-                  gap: 4,
+                  gap: 6,
                 }}
               >
                 <Text variant="caption" muted style={{ marginBottom: 4, fontWeight: '700' }}>
@@ -289,7 +289,7 @@ export function FinanceCardDetailSheet({
                 backgroundColor: colors.elevated,
                 borderRadius: 20,
                 padding: space.md,
-                gap: 4,
+                gap: 6,
               }}
             >
               <Text variant="caption" muted style={{ marginBottom: 4, fontWeight: '700' }}>

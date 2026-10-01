@@ -61,12 +61,12 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
   }
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <Text variant="micro" muted numberOfLines={1} style={{ textTransform: 'capitalize', fontSize: 11 }}>
           {monthLabel}
         </Text>
-        <View style={{ flexDirection: 'row', gap: 2 }}>
+        <View style={{ flexDirection: 'row', gap: 4 }}>
           <WebHoverable
             onPress={() => shiftWeek(-1)}
             accessibilityLabel="Semana anterior"
@@ -105,7 +105,7 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
               style={webStyle({
                 flex: 1,
                 alignItems: 'center',
-                gap: 4,
+                gap: 6,
                 paddingVertical: 8,
                 cursor: 'pointer',
               })}

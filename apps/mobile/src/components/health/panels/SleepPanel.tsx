@@ -71,7 +71,7 @@ export function SleepPanel()
         Semana: a barra mais escura é hoje.
       </Text>
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         {QUICK.map((h) => (
           <Chip
             key={h}
@@ -81,7 +81,7 @@ export function SleepPanel()
           />
         ))}
       </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         <PrimaryButton
           label="-30 min"
           variant="secondary"

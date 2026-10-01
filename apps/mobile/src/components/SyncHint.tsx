@@ -9,11 +9,13 @@ export function SyncHint({ color }: { color?: string })
   const source = useDataStore((s) => s.source)
   const error = useDataStore((s) => s.error)
   const loading = useDataStore((s) => s.loading)
+  const guestOwnData = useDataStore((s) => s.guestOwnData)
   const isGuest = useAuthStore((s) => s.isGuest)
 
   let label = ''
   if (loading && source === 'idle') label = 'Sincronizando…'
   else if (error) label = error
+  else if (guestOwnData) label = 'Salvo neste aparelho'
   else if (isGuest || source === 'demo') label = 'Modo demonstração'
 
   if (!label) return null

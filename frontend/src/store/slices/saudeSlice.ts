@@ -233,6 +233,13 @@ async function cleanupMedPhantoms(uid: string, medId: number): Promise<void>
   await cleanupResolvedPhantoms(uid, 'saude', medId)
 }
 
+/** Partes de outros slices usadas aqui (a store junta todos os slices). */
+type SaudeCrossSlice = {
+  addXP?: (modulo: string, xp: number) => Promise<unknown>
+  incrementQuestProgress?: (titulo: string, valor: number) => Promise<void>
+  userStats?: ({ streak_saude?: number | null } & Record<string, unknown>) | null
+}
+
 export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (set, get) => ({
   medicamentos: [],
   medicamentoTomadas: [],
@@ -589,7 +596,7 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
           await cleanupResolvedPhantoms(uid, 'saude', id)
 
           // Gamificação
-          const anyGet = get() as any
+          const anyGet = get() as unknown as SaudeCrossSlice
           if (anyGet.addXP)
           {
             const stats = anyGet.userStats
@@ -617,7 +624,9 @@ export const createSaudeSlice: StateCreator<SaudeSlice, [], [], SaudeSlice> = (s
 
             // atualiza streak_saude no Supabase
             await supabase.from('user_stats').update({ streak_saude: newStreak }).eq('id', uid);
-            (set as any)((s: any) => ({ userStats: s.userStats ? { ...s.userStats, streak_saude: newStreak } : null }))
+            (set as unknown as (fn: (s: SaudeCrossSlice) => Partial<SaudeCrossSlice>) => void)(
+              (s) => ({ userStats: s.userStats ? { ...s.userStats, streak_saude: newStreak } : null }),
+            )
           }
 
           // Progresso de Quests

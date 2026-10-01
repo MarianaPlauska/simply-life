@@ -38,10 +38,10 @@ export function CaptureNoteFields({ text, onTextChange }: Props)
     <View style={{ gap: space.md }}>
       <View
         style={{
-          padding: 12,
+          padding: 16,
           borderRadius: radius.control,
           backgroundColor: colors.axelMuted,
-          gap: 4,
+          gap: 6,
         }}
       >
         <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>

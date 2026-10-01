@@ -46,7 +46,7 @@ export function MoodGoalAlertCard({ humor, goal, inline = false }: Props)
             No período da sua meta. Isso não é diagnóstico. Serve para perceber padrões e buscar
             apoio se precisar.
           </Text>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
             <MiniBarChart
               values={stats.byDay.length ? stats.byDay : [0]}
               color={tone}

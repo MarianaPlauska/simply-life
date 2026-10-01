@@ -94,11 +94,11 @@ export function CaptureExpenseFields({
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Tipo
         </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           <ChoiceChip
             label="Gasto"
             active={!isReceita}
@@ -112,12 +112,12 @@ export function CaptureExpenseFields({
         </View>
       </View>
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
-          Pasta: gastos da mesma história ficam juntos
+          Pasta: gastos da mesma história ficam juntos.
         </Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <ChoiceChip
               label="Sem pasta"
               active={!folderId}
@@ -134,7 +134,7 @@ export function CaptureExpenseFields({
           </View>
         </ScrollView>
         {onCreateFolder ? (
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'flex-end' }}>
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
             <View style={{ flex: 1 }}>
               <Field
                 tone="sand"
@@ -193,11 +193,11 @@ export function CaptureExpenseFields({
         }}
       />
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Forma de pagamento
         </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           <ChoiceChip
             label="Conta"
             active={pagamento === 'conta'}
@@ -212,15 +212,15 @@ export function CaptureExpenseFields({
       </View>
 
       {pagamento === 'cartao' ? (
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 12 }}>
           <Text variant="caption" muted>
             Cartão
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
               {cards.length === 0 ? (
                 <Text variant="caption" muted>
-                  Cadastre um cartão em Contas → Cartões
+                  Cadastre um cartão em Contas → Cartões.
                 </Text>
               ) : (
                 cards.map((c) => (
@@ -238,7 +238,7 @@ export function CaptureExpenseFields({
             Parcelar
           </Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
               {([1, 2, 3, 4, 6] as const).map((n) => (
                 <ChoiceChip
                   key={n}
@@ -257,11 +257,11 @@ export function CaptureExpenseFields({
         </View>
       ) : null}
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Recorrência
         </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           <ChoiceChip
             label="Única"
             active={recorrencia === 'nenhuma'}
@@ -282,11 +282,11 @@ export function CaptureExpenseFields({
       </>
       ) : null}
 
-      <View style={{ gap: 8 }}>
+      <View style={{ gap: 12 }}>
         <Text variant="caption" muted>
           Quando aconteceu (ou vai acontecer)
         </Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           <ChoiceChip
             label="Hoje"
             active={expenseDate === todayIso()}
@@ -320,7 +320,7 @@ export function CaptureExpenseFields({
         style={{
           flexDirection: 'row',
           alignItems: 'flex-start',
-          gap: 10,
+          gap: 12,
           minHeight: 48,
           paddingVertical: 8,
           paddingHorizontal: 12,
@@ -348,7 +348,7 @@ export function CaptureExpenseFields({
             </Text>
           ) : null}
         </View>
-        <View style={{ flex: 1, gap: 2 }}>
+        <View style={{ flex: 1, gap: 4 }}>
           <Text variant="bodyStrong" style={{ fontSize: 13 }}>
             Adicionar em Contas fixas
           </Text>
@@ -374,9 +374,9 @@ export function CaptureExpenseFields({
           <Text variant="caption" muted>
             Escopo do gasto
           </Text>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             {([
-              { id: 'pessoal' as const, label: 'Pessoal', hint: 'Só você' },
+              { id: 'pessoal' as const, label: 'Pessoal', hint: 'Só você.' },
               {
                 id: 'casal' as const,
                 label: 'Casal',
@@ -420,7 +420,7 @@ export function CaptureExpenseFields({
               style={{
                 flexDirection: 'row',
                 alignItems: 'flex-start',
-                gap: 10,
+                gap: 12,
                 minHeight: 48,
                 paddingVertical: 8,
                 paddingHorizontal: 12,
@@ -448,7 +448,7 @@ export function CaptureExpenseFields({
                   </Text>
                 ) : null}
               </View>
-              <View style={{ flex: 1, gap: 2 }}>
+              <View style={{ flex: 1, gap: 4 }}>
                 <Text variant="bodyStrong" style={{ fontSize: 13 }}>
                   Pago na conta do casal
                 </Text>

@@ -29,11 +29,11 @@ export function MetricCards({ items }: { items: MetricItem[] })
             flexGrow: 1,
             flexBasis: showRail ? 200 : 0,
             flex: showRail ? undefined : 1,
-            gap: 4,
+            gap: 6,
             minHeight: minH,
             justifyContent: 'center',
             borderRadius: 14,
-            padding: 10,
+            padding: 12,
           }}
         >
           <Text variant="caption" muted>

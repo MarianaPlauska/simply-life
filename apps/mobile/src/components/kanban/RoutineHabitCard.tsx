@@ -83,20 +83,20 @@ export function RoutineHabitCard({
   return (
     <View
       style={{
-        padding: 14,
+        padding: 16,
         borderRadius: 20,
         backgroundColor: colors.elevated,
-        gap: 12,
+        gap: 16,
         borderWidth: nested || groupHeader ? 1 : 0,
         borderColor: colors.hairline,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1 }}>
           {habit.title}
         </Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Icon name="flame" size={14} color={streak > 0 ? accent : colors.inkFaint} />
             <Text variant="caption" style={{ color: streak > 0 ? accent : colors.inkMuted, fontWeight: '700' }}>
               {streak}
@@ -169,14 +169,14 @@ export function RoutineHabitCard({
         </Text>
       ) : null}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <PressableScale
           accessibilityRole="checkbox"
           accessibilityState={{ checked: done, disabled: checkDisabled }}
           accessibilityLabel={done ? 'Desmarcar' : markLabel}
           disabled={checkDisabled}
           onPress={onToggle}
-          style={{ alignItems: 'center', gap: 4, minWidth: 56, opacity: checkDisabled ? 0.55 : 1 }}
+          style={{ alignItems: 'center', gap: 6, minWidth: 56, opacity: checkDisabled ? 0.55 : 1 }}
         >
           <View
             style={{

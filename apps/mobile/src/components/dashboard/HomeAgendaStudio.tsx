@@ -19,6 +19,7 @@ import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
+import { useActionableTasks } from '../../hooks/useActionableTasks'
 import { ExpandableSection } from './ExpandableSection'
 
 type Props = {
@@ -58,7 +59,8 @@ export function HomeAgendaStudio({ tasks }: Props)
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<DayMode>('dia')
 
-  const priority = useMemo(() => priorityTodayTasks(tasks, new Date(), 6), [tasks])
+  const actionable = useActionableTasks(tasks)
+  const priority = useMemo(() => priorityTodayTasks(actionable, new Date(), 6), [actionable])
   const timeline = useMemo(() => partitionTodayTimeline(tasks), [tasks])
   const pending = priority.length
 
@@ -90,7 +92,7 @@ export function HomeAgendaStudio({ tasks }: Props)
       expanded={open}
       onToggle={() => setOpen((v) => !v)}
       summary={
-        <View style={{ gap: 6 }}>
+        <View style={{ gap: 8 }}>
           {summaryList.length === 0 ? (
             <Text variant="caption" muted>
               Dia leve. Expanda para ver a semana.
@@ -102,7 +104,7 @@ export function HomeAgendaStudio({ tasks }: Props)
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 12,
                   paddingVertical: 4,
                 }}
               >
@@ -130,7 +132,7 @@ export function HomeAgendaStudio({ tasks }: Props)
       <View
         style={{
           flexDirection: 'row',
-          gap: 8,
+          gap: 12,
           padding: 4,
           borderRadius: 999,
           backgroundColor: colors.surface,
@@ -184,7 +186,7 @@ export function HomeAgendaStudio({ tasks }: Props)
                   onPress={() => router.push(`/task/${task.id}`)}
                   style={{
                     flexDirection: 'row',
-                    gap: 10,
+                    gap: 12,
                     padding: space.md,
                     borderRadius: 14,
                     backgroundColor: bg,
@@ -202,9 +204,9 @@ export function HomeAgendaStudio({ tasks }: Props)
                       backgroundColor: color,
                     }}
                   />
-                  <View style={{ flex: 1, gap: 4 }}>
+                  <View style={{ flex: 1, gap: 6 }}>
                     <Text variant="bodyStrong">{task.titulo}</Text>
-                    <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                    <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
                       <StatusPill
                         label={
                           task.horaMinutos != null
@@ -258,7 +260,7 @@ export function HomeAgendaStudio({ tasks }: Props)
             <View
               key={day.iso}
               style={{
-                gap: 8,
+                gap: 12,
                 padding: space.sm,
                 borderRadius: 14,
                 backgroundColor: day.offset === 0 ? colors.axelMuted : colors.surface,
@@ -280,7 +282,7 @@ export function HomeAgendaStudio({ tasks }: Props)
                   -
                 </Text>
               ) : (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                   {day.dayTasks.slice(0, 4).map((t) =>
                   {
                     const bucket = classifyDueBucket(t.dataVencimento, t.status)
@@ -313,7 +315,7 @@ export function HomeAgendaStudio({ tasks }: Props)
         </View>
       )}
 
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
         <PrimaryButton
           label="Abrir Kanban"
           size="sm"

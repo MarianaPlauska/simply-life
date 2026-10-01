@@ -7,7 +7,7 @@ import {
   minutesToLabel,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, EmptyState } from '../../ui'
+import { Text, EmptyState, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { KanbanDateStrip, buildDayRange } from './KanbanDateStrip'
 
@@ -58,18 +58,16 @@ export function KanbanTimelinePane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <Text variant="section" style={{ textTransform: 'capitalize' }}>
-        {monthLabel}
-      </Text>
+      <PaneTitle title={monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1)} />
       <KanbanDateStrip days={days} selectedIso={dayIso} onSelect={setDayIso} />
       <Text variant="section">Timeline</Text>
 
       {dayTasks.length === 0 ? (
         <EmptyState title="Sem blocos neste dia" body="Abra a lista para capturar um prazo." icon="time-outline" />
       ) : (
-        <View style={{ gap: 12 }}>
+        <View style={{ gap: 16 }}>
           {isToday ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ flex: 1, height: 2, backgroundColor: colors.axelFill, borderRadius: 999 }} />
               <View
                 style={{
@@ -99,7 +97,7 @@ export function KanbanTimelinePane({ tasks }: Props)
                 onPress={() => router.push(`/task/${t.id}`)}
                 style={{
                   flexDirection: 'row',
-                  gap: 10,
+                  gap: 12,
                   minHeight: 88,
                 }}
               >
@@ -113,12 +111,12 @@ export function KanbanTimelinePane({ tasks }: Props)
                     flex: 1,
                     borderRadius: 20,
                     backgroundColor: bg,
-                    padding: 14,
-                    gap: 8,
+                    padding: 16,
+                    gap: 12,
                     opacity: t.status === 'done' ? 0.7 : 1,
                   }}
                 >
-                  <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+                  <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
                     <View
                       style={{
                         paddingHorizontal: 8,

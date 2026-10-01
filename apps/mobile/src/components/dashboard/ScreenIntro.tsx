@@ -15,12 +15,12 @@ export function ScreenIntro({
   const { space } = useTheme()
 
   return (
-    <View style={{ gap: 4 }}>
-      <Text variant="hero" style={{ letterSpacing: -0.4 }}>
+    <View style={{ gap: space.sm }}>
+      <Text variant="hero">
         {title}
       </Text>
       {subtitle ? (
-        <Text variant="body" muted style={{ marginTop: 2 }}>
+        <Text variant="body" muted style={{ maxWidth: 600 }}>
           {subtitle}
         </Text>
       ) : null}

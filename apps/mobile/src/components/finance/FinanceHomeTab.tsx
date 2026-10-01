@@ -25,7 +25,8 @@ import { useAuthStore } from '../../store/authStore'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { resolveAxelName } from '../../lib/axelName'
-import { colorMapFromMeta } from '../../lib/categoryMeta'
+import { colorMapFromMeta, labelMapFromMeta, resolveCategoryMeta } from '../../lib/categoryMeta'
+import { FinanceIcon } from '../../lib/financeIcons'
 import { tabBarScreenPadding } from '../../ui/chrome'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { financeTxSubtitle } from '../../lib/financeTxLabel'
@@ -36,8 +37,7 @@ import { FinanceCardEditSheet } from './FinanceCardEditSheet'
 import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
 import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 import { MonthProjectionCard, SalaryConfirmCard } from './FinanceForecastCards'
-import { saldoToneForMonth } from './saldoTone'
-import { BalanceCardFace } from './BalanceCardFace'
+import { FinanceBalancePanel } from './FinanceBalancePanel'
 
 type Props = {
   onGoMovimentos: () => void
@@ -81,8 +81,6 @@ export function FinanceHomeTab({
   const catMap = useCategoryMetaStore((s) => s.map)
   const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
   const pos = computeSaldoDisponivel(cash, txs, fixas)
-  const saldoCaixa = pos.receitas - pos.despesas
-  const tone = saldoToneForMonth(saldoCaixa)
   const fabClearance = showRail ? space.md : tabBarScreenPadding(insets.bottom) + space.md
   const primaryCard = cards.find((c) => c.id === visibleCardId) ?? cards[0]
   const detailCard = cards.find((c) => c.id === detailId) ?? null
@@ -98,29 +96,16 @@ export function FinanceHomeTab({
     [txs],
   )
   const ranking = useMemo(
-    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap), chart).slice(0, 4),
+    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)).slice(0, 4),
     [txs, catMap, chart],
   )
-  const budgets = ranking.slice(0, 2)
 
   useEffect(() =>
   {
     void hydrateCats()
   }, [hydrateCats])
 
-  const CAT_ICONS: Record<string, keyof typeof Icon.glyphMap> = {
-    alimentacao: 'restaurant-outline',
-    transporte: 'car-outline',
-    habitacao: 'home-outline',
-    compras: 'cart-outline',
-    lazer: 'game-controller-outline',
-    saude: 'medkit-outline',
-    educacao: 'school-outline',
-    outros: 'ellipse-outline',
-  }
 
-  const deltaPct =
-    pos.receitas > 0 ? Math.round((saldoCaixa / pos.receitas) * 1000) / 10 : 0
 
   const quickIcons: {
     id: string
@@ -222,7 +207,7 @@ export function FinanceHomeTab({
             onPress={() => onCardsFocusChange(false)}
           />
           <Text variant="section">Cartões</Text>
-          <View style={{ flexDirection: 'row', gap: 4 }}>
+          <View style={{ flexDirection: 'row', gap: 6 }}>
             <PressableScale
               accessibilityLabel="Personalizar cartão"
               onPress={openEditPrimary}
@@ -272,7 +257,7 @@ export function FinanceHomeTab({
               onVisibleChange={setVisibleCardId}
             />
             <Text variant="caption" muted style={{ textAlign: 'center' }}>
-              Toque no cartão para ver os detalhes
+              Toque no cartão para ver os detalhes.
             </Text>
             {onGoCartoes ? (
               <PrimaryButton
@@ -305,37 +290,18 @@ export function FinanceHomeTab({
         </Text>
       </View>
 
-      <CardCarousel
-        cards={cards}
-        selectedId={null}
-        onSelect={(id) =>
-        {
-          setVisibleCardId(id)
-          setDetailId(id)
-        }}
-        onVisibleChange={setVisibleCardId}
-        onAdd={() => setCreateOpen(true)}
-        leading={
-          <BalanceCardFace
-            tone={tone}
-            disponivel={pos.disponivel}
-            deltaPct={deltaPct}
-            entradas={pos.receitas}
-            saidas={pos.despesas}
-            onAddExpense={() => openCapture('expense')}
-          />
-        }
-      />
+      {/* saldo da conta separado: a área de cartões mostra só cartões de crédito */}
+      <FinanceBalancePanel />
 
       {/* Ações leves */}
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
         {quickIcons.map((a) => (
           <PressableScale
             key={a.id}
             onPress={a.onPress}
             accessibilityRole="button"
             accessibilityLabel={a.label}
-            style={{ flex: 1, alignItems: 'center', gap: 4 }}
+            style={{ flex: 1, alignItems: 'center', gap: 6 }}
           >
             <View
               style={{
@@ -349,38 +315,32 @@ export function FinanceHomeTab({
             >
               <Icon name={a.icon} size={16} color={colors.ink} />
             </View>
-            <Text variant="micro" muted style={{ fontWeight: '600', fontSize: 11 }}>
+            <Text variant="micro" muted style={{ fontWeight: '600' }}>
               {a.label}
             </Text>
           </PressableScale>
         ))}
       </View>
 
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
-          <Text variant="micro" muted>
-            Receita
-          </Text>
-          <Text variant="bodyStrong" color={colors.health} style={{ fontSize: 13 }}>
-            {formatBRL(pos.receitas)}
-          </Text>
-        </Card>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
-          <Text variant="micro" muted>
-            Saiu da conta
-          </Text>
-          <Text variant="bodyStrong" color={colors.finance} style={{ fontSize: 13 }}>
-            {formatBRL(pos.despesas)}
-          </Text>
-        </Card>
-        <Card tone="elevated" style={{ flex: 1, padding: 10, gap: 2, borderRadius: 14 }}>
-          <Text variant="micro" muted>
-            No cartão
-          </Text>
-          <Text variant="bodyStrong" style={{ fontSize: 13 }}>
-            {formatBRL(cards.reduce((a, c) => a + cardFaturaAbertaDisplay(c, txs), 0))}
-          </Text>
-        </Card>
+      {/* Cartões de crédito: fatura, disponível e vencimento de cada um */}
+      <View style={{ gap: space.sm }}>
+        <SectionHeader
+          title="Cartões"
+          action={cards.length ? (
+            <PrimaryButton label="Ver todos" variant="link" size="sm" onPress={() => onCardsFocusChange(true)} />
+          ) : undefined}
+        />
+        <CardCarousel
+          cards={cards}
+          selectedId={null}
+          onSelect={(id) =>
+          {
+            setVisibleCardId(id)
+            setDetailId(id)
+          }}
+          onVisibleChange={setVisibleCardId}
+          onAdd={() => setCreateOpen(true)}
+        />
       </View>
 
       {/* Etapa 2: salário a confirmar + quanto sobra no fim do mês */}
@@ -400,7 +360,7 @@ export function FinanceHomeTab({
             />
           }
         />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
           {(ranking.length
             ? ranking
             : [
@@ -422,8 +382,8 @@ export function FinanceHomeTab({
                 backgroundColor: colors.surface,
                 borderWidth: StyleSheet.hairlineWidth,
                 borderColor: colors.hairline,
-                padding: 10,
-                gap: 4,
+                padding: 12,
+                gap: 6,
               }}
             >
               <View
@@ -436,11 +396,7 @@ export function FinanceHomeTab({
                   justifyContent: 'center',
                 }}
               >
-                <Icon
-                  name={CAT_ICONS[row.categoria] ?? 'ellipse-outline'}
-                  size={13}
-                  color={row.color}
-                />
+                <FinanceIcon name={String(resolveCategoryMeta(row.categoria, catMap).icon)} size={13} color={row.color} />
               </View>
               <Text variant="caption" muted style={{ fontSize: 11 }} numberOfLines={1}>
                 {row.label}
@@ -453,90 +409,7 @@ export function FinanceHomeTab({
         </View>
       </View>
 
-      {/* Orçamentos slim */}
-      {budgets.length > 0 ? (
-        <View style={{ gap: space.sm }}>
-          <SectionHeader
-            title="Orçamentos"
-            action={
-              <PrimaryButton
-                label="Ver tudo"
-                variant="link"
-                size="sm"
-                onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
-              />
-            }
-          />
-          <View style={{ gap: 8 }}>
-            {budgets.map((b) =>
-            {
-              const meta = Math.max(b.total * 1.25, 1)
-              const pct = Math.min(100, Math.round((b.total / meta) * 100))
-              return (
-                <Card
-                  key={b.categoria}
-                  tone="elevated"
-                  style={{
-                    padding: 10,
-                    borderRadius: 14,
-                    gap: 6,
-                    backgroundColor: `${b.color}14`,
-                    borderWidth: 0,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <View
-                      style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: 999,
-                        backgroundColor: colors.surface,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <Icon
-                        name={CAT_ICONS[b.categoria] ?? 'ellipse-outline'}
-                        size={14}
-                        color={b.color}
-                      />
-                    </View>
-                    <View style={{ flex: 1, gap: 1 }}>
-                      <Text variant="bodyStrong" style={{ fontSize: 12 }}>
-                        {b.label}
-                      </Text>
-                      <Text variant="micro" muted style={{ fontSize: 11 }}>
-                        {formatBRL(b.total)} / {formatBRL(meta)}
-                      </Text>
-                    </View>
-                    <Text variant="caption" muted style={{ fontWeight: '700', fontSize: 11 }}>
-                      {pct}%
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      height: 3,
-                      borderRadius: 999,
-                      backgroundColor: colors.hairline,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: `${pct}%`,
-                        height: '100%',
-                        backgroundColor: b.color,
-                        borderRadius: 999,
-                      }}
-                    />
-                  </View>
-                </Card>
-              )
-            })}
-          </View>
-        </View>
-      ) : null}
-
+      {/* Orçamentos saiu daqui: repetia as 2 primeiras categorias com meta estimada. Os reais ficam em Análise. */}
       {/* Transações compactas */}
       <View style={{ gap: space.sm }}>
         <SectionHeader

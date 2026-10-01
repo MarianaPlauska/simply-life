@@ -12,6 +12,7 @@ import { usePrefsStore } from '../../../store/prefsStore'
 import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '../../../lib/homeMetrics'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { filterMetrics } from '../../../lib/appModules'
 
 function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
 {
@@ -32,7 +33,10 @@ export function WebShortcutsBar()
   const isGuest = useAuthStore((s) => s.isGuest)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const prefs = usePrefsStore((s) => s.prefs)
-  const ids = useMemo(() => normalizeHomeMetrics(prefs.home_metric_cards), [prefs.home_metric_cards])
+  const ids = useMemo(
+    () => filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards)),
+    [prefs.home_metric_cards, prefs.enabled_modules],
+  )
   const humor = useDataStore((s) => s.humor) ?? []
   const habits = useDataStore((s) => s.habits) ?? []
   const tasks = useDataStore((s) => s.tasks) ?? []
@@ -81,7 +85,7 @@ export function WebShortcutsBar()
   if (rows.length === 0) return null
 
   return (
-    <View style={{ gap: 10 }}>
+    <View style={{ gap: 12 }}>
       <Text variant="section" style={{ fontSize: 16 }}>
         Atalhos
       </Text>
@@ -94,7 +98,7 @@ export function WebShortcutsBar()
             style={(hovered) => webStyle({
               flexDirection: 'row',
               alignItems: 'center',
-              gap: 12,
+              gap: 16,
               paddingHorizontal: 18,
               paddingVertical: 11,
               borderTopWidth: i === 0 ? 0 : 1,

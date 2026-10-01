@@ -6,7 +6,18 @@ export interface CashAccount
   saldoInicial: number
 }
 
-export type FinanceCardGradient = 'purple' | 'obsidian' | 'sunset' | 'ocean' | 'mint' | 'copper'
+export type FinanceCardGradient =
+  | 'purple'
+  | 'obsidian'
+  | 'sunset'
+  | 'ocean'
+  | 'mint'
+  | 'copper'
+  | 'wine'
+  | 'green'
+  | 'blue'
+  | 'violet'
+  | 'rose'
 
 export interface FinanceCard
 {

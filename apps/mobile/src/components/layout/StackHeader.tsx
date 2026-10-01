@@ -17,15 +17,16 @@ export function StackHeader({
   const router = useRouter()
 
   return (
-    <View style={{ gap: 4, marginBottom: space.md }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+    // respiro no topo: no navegador e em aparelhos sem notch a área segura é zero
+    <View style={{ gap: space.xs, paddingTop: space.lg, marginBottom: space.xl }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <Pressable
           onPress={() => router.back()}
           accessibilityRole="button"
           accessibilityLabel="Voltar"
           style={{
-            width: 44,
-            height: 44,
+            width: 48,
+            height: 48,
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
@@ -34,12 +35,12 @@ export function StackHeader({
         >
           <Icon name="chevron-back" size={22} color={colors.ink} />
         </Pressable>
-        <View style={{ flex: 1, minWidth: 0 }}>
+        <View style={{ flex: 1, minWidth: 0, gap: space.xs }}>
           <Text variant="title" numberOfLines={1}>
             {title}
           </Text>
           {subtitle ? (
-            <Text variant="caption" muted numberOfLines={1}>
+            <Text variant="caption" muted numberOfLines={2}>
               {subtitle}
             </Text>
           ) : null}

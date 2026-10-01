@@ -79,15 +79,15 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
   }
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 16, gap: 14 }}>
+    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 }}>
       {showSleep ? (
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             <Text variant="caption" style={{ fontWeight: '700' }}>
               Sono · meta {meta}h
             </Text>
           </View>
-          <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {QUICK_HOURS.map((h) => (
               <WebHoverable
                 key={h}
@@ -121,11 +121,11 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
       ) : null}
 
       {showMood ? (
-        <View style={{ gap: 8 }}>
+        <View style={{ gap: 12 }}>
           <Text variant="caption" style={{ fontWeight: '700' }}>
             Como você está agora?
           </Text>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
             {[1, 2, 3, 4, 5].map((m) =>
             {
               const selected = (mood ?? hoje?.humor) === m
@@ -145,7 +145,7 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexDirection: 'row',
-                    gap: 6,
+                    gap: 8,
                     backgroundColor: selected ? `${moodColor(m)}22` : colors.surface,
                     borderWidth: 1,
                     borderColor: selected ? moodColor(m) : colors.hairline,

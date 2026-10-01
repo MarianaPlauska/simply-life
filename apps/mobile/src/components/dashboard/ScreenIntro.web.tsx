@@ -23,18 +23,18 @@ export function ScreenIntro({
   const { showRail } = useWorkspace()
 
   return (
-    <View style={{ gap: 4 }}>
+    <View style={{ gap: space.sm }}>
       {showRail ? (
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, letterSpacing: -0.4 }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, letterSpacing: -0.4 }}>
           {title}
         </Text>
       ) : (
-        <Text variant="hero" style={{ letterSpacing: -0.4 }}>
+        <Text variant="hero">
           {title}
         </Text>
       )}
       {subtitle ? (
-        <Text variant="body" muted style={{ marginTop: 2 }}>
+        <Text variant="body" muted style={{ maxWidth: 600 }}>
           {subtitle}
         </Text>
       ) : null}

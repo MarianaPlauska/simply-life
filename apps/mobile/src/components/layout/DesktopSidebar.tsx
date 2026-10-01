@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { View, Pressable, Platform } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
+import { useModules } from '../../hooks/useModules'
 import { Icon } from '../../ui/Icon'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { Text } from '../../ui'
@@ -33,6 +34,12 @@ export function DesktopSidebar()
   const { space, colors } = useTheme()
   const { isTablet, isDesktop } = useWorkspace()
   const router = useRouter()
+  const modules = useModules()
+  const navVisible = (match: string) =>
+    match === 'kanban' ? modules.group('tarefas')
+      : match === 'saude' ? modules.group('saude')
+        : match === 'financeiro' ? modules.group('carteira')
+          : true
   const pathname = usePathname()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const email = useAuthStore((s) => s.sessionEmail)
@@ -52,16 +59,16 @@ export function DesktopSidebar()
   const collapsed = isTablet && !isDesktop ? !tabletExpanded : prefsCollapsed
 
   const width = collapsed ? DESKTOP_SIDEBAR_COLLAPSED : DESKTOP_SIDEBAR_WIDTH
-  // Navegação é o 30%: barra em petróleo; o item ativo "encaixa" na página (mesma cor do fundo)
+  // Escuro: barra petróleo. Claro: barra branca com contorno. O item ativo "encaixa" na página (mesma cor do fundo)
   const ORANGE = colors.axel
-  const CREAM = colors.onBrand
-  const sidebarBg = colors.brand
+  const CREAM = colors.heroInk
+  const sidebarBg = colors.navBg
   const activePill = colors.canvas
-  const inkOnBrand = `${colors.onBrand}E0`
-  const inkMutedOnBrand = colors.brandInk
-  const pressedBg = `${colors.brandInk}1A`
-  const divider = `${colors.brandInk}29`
-  const avatarBg = `${colors.brandInk}29`
+  const inkOnBrand = `${colors.heroInk}E0`
+  const inkMutedOnBrand = colors.navInk
+  const pressedBg = `${colors.navInk}1A`
+  const divider = `${colors.navInk}29`
+  const avatarBg = `${colors.navInk}29`
   const ctaBg = colors.axelFill
   const ctaFg = colors.axelOnFill
 
@@ -161,7 +168,7 @@ export function DesktopSidebar()
         ) : null}
 
         <View style={{ gap: 4, alignItems: collapsed ? 'center' : 'stretch' }}>
-          {NAV.map((item) =>
+          {NAV.filter((item) => navVisible(item.match)).map((item) =>
           {
             const active = isActive(item)
             return (

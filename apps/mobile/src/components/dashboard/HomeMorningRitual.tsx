@@ -191,8 +191,8 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
     || (showSleepStep ? hours == null : moodSelected == null || moodUnchanged)
 
   return (
-    <Card tone="elevated" accentTop="health" style={{ gap: space.md, padding: 16 }}>
-      <View style={{ gap: 6 }}>
+    <Card tone="elevated" accentTop="health" style={{ gap: space.md, padding: 20 }}>
+      <View style={{ gap: 8 }}>
         <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
           Ritual da manhã
         </Text>
@@ -200,7 +200,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
           {showSleepStep ? 'Como foi a noite?' : 'Como você está agora?'}
         </Text>
         {needSleep && needMood ? (
-          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
             <StepPill
               label="Sono"
               done={sleepLogged}
@@ -228,7 +228,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
           <Text variant="caption" muted>
             Um toque basta. Meta sugerida: {meta}h.
           </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {QUICK_HOURS.map((h) => (
               <Chip
                 key={h}
@@ -242,9 +242,9 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
               />
             ))}
           </View>
-          <View style={{ gap: 6 }}>
+          <View style={{ gap: 8 }}>
             <Text variant="caption" muted>Descanso (opcional)</Text>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 12 }}>
               {QUALITY.map((q) => (
                 <Chip
                   key={q.id}
@@ -281,7 +281,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
               minHeight: 52,
               textAlignVertical: 'top',
               borderRadius: radius.control,
-              padding: 12,
+              padding: 16,
               fontSize: 15,
               color: colors.ink,
               backgroundColor: colors.canvas,

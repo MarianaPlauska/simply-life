@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { View, Pressable, ScrollView, StyleSheet } from 'react-native'
 import { minutesToLabel, type MobileTask } from '@simply-life/shared'
-import { Text, EmptyState, Chip } from '../../ui'
+import { Text, EmptyState, Chip, PaneTitle } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -62,7 +62,7 @@ export function KanbanCalendarPane({ tasks }: Props)
   {
     return (
       <View style={{ gap: space.sm }}>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
           <Chip label="Dia" onPress={() => setView('dia')} />
           <Chip label="Mês" active onPress={() => setView('mes')} />
         </View>
@@ -73,20 +73,20 @@ export function KanbanCalendarPane({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 16, textTransform: 'capitalize' }}>
-          {selected.month}
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <Chip label="Dia" active onPress={() => setView('dia')} />
-          <Chip label="Mês" onPress={() => setView('mes')} />
-        </View>
-      </View>
+      <PaneTitle
+        title={selected.month.charAt(0).toUpperCase() + selected.month.slice(1)}
+        action={
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <Chip label="Dia" active onPress={() => setView('dia')} />
+            <Chip label="Mês" onPress={() => setView('mes')} />
+          </View>
+        }
+      />
 
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingVertical: 2 }}
+        contentContainerStyle={{ gap: 12, paddingVertical: 2 }}
       >
         {strip.map((d) =>
         {
@@ -102,7 +102,7 @@ export function KanbanCalendarPane({ tasks }: Props)
                 borderRadius: 14,
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 4,
+                gap: 6,
                 paddingVertical: 8,
                 backgroundColor: active ? colors.axelFill : colors.elevated,
               }}
@@ -142,7 +142,7 @@ export function KanbanCalendarPane({ tasks }: Props)
           {
             const last = i === dayTasks.length - 1
             return (
-              <View key={t.id} style={{ flexDirection: 'row', gap: 10, minHeight: 88 }}>
+              <View key={t.id} style={{ flexDirection: 'row', gap: 12, minHeight: 88 }}>
                 <View style={{ width: 46, alignItems: 'center' }}>
                   <Text variant="micro" muted style={{ fontWeight: '700' }}>
                     {t.horaMinutos != null ? minutesToLabel(t.horaMinutos) : '--'}
