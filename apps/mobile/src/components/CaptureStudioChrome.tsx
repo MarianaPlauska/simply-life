@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Icon, PressableScale, Text } from '../ui'
+import { Icon, PressableScale, Text, CloseButton } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 
 type Props = {
@@ -179,23 +179,7 @@ export function CaptureStudioChrome({
                   {subtitle}
                 </Text>
               </View>
-              <PressableScale
-                accessibilityRole="button"
-                accessibilityLabel="Fechar"
-                onPress={onClose}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 999,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: colors.elevated,
-                  borderWidth: 1,
-                  borderColor: colors.hairline,
-                }}
-              >
-                <Icon name="close" size={18} color={colors.ink} />
-              </PressableScale>
+              <CloseButton onPress={onClose} />
             </View>
           </View>
           <ScrollView

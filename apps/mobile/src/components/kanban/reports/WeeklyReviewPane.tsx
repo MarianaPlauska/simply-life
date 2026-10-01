@@ -104,7 +104,7 @@ export function WeeklyReviewPane({ tasks }: { tasks: MobileTask[] })
         </ReportCard>
       ) : null}
 
-      <ReportCard title="Guardar a semana" hint="Um resumo seu, para reler no domingo ou mandar para quem acompanha você.">
+      <ReportCard title="Guardar a semana" hint="O resumo desta semana em texto ou PDF, para você reler quando quiser.">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
           <PrimaryButton
             label="Compartilhar texto"

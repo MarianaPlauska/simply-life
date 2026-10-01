@@ -7,8 +7,8 @@ export const RADIUS = {
   bar: 24,
 } as const
 
-/** Altura útil da navbar flutuante (barra + FAB elevado) */
-export const TAB_BAR_CONTENT_HEIGHT = 94
+/** Altura da barra de abas encaixada na base, acima da área segura (4 de respiro + 58 da barra) */
+export const TAB_BAR_CONTENT_HEIGHT = 62
 
 /**
  * Grade de 4pt, não linear (Material 3, Refactoring UI).

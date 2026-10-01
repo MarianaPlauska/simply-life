@@ -17,6 +17,7 @@ import { useDataStore } from '../../store/dataStore'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
 import { openFocusForTask } from '../../lib/openFocus'
+import { TaskWaitBadge } from './TaskWaitPanel'
 
 type Props = {
   task: MobileTask
@@ -99,6 +100,7 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
             {stripTaskDisplayNotes(task.anotacao)}
           </Text>
         ) : null}
+        <TaskWaitBadge task={task} />
       </View>
       {!done ? (
         <PressableScale

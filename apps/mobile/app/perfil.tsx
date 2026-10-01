@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View, Switch, Modal, Pressable } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
-import { Icon } from '../src/ui/Icon'
+import { Icon, type IconName } from '../src/ui/Icon'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { Screen, Text, Card, PrimaryButton, Field } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
@@ -9,6 +9,7 @@ import { MfaEnrollPanel } from '../src/components/auth/MfaEnrollPanel'
 import { AdminUsersPanel } from '../src/components/auth/AdminUsersPanel'
 import { GamificationPanel } from '../src/components/dashboard/GamificationPanel'
 import { PersonalSummaryGrid } from '../src/components/dashboard/PersonalSummaryGrid'
+import { ChamaAlbumCard, PersonalDivisionCard, WalletRow } from '../src/components/rewards/TrilhaCards'
 import {
   ProfileSection,
   ProfileSettingsRow,
@@ -112,9 +113,13 @@ export default function PerfilScreen()
                   justifyContent: 'center',
                 }}
               >
-                <Text variant="hero" style={{ fontSize: 36, color: avatarTint }}>
-                  {initial}
-                </Text>
+                {prefs.profile_avatar_icon && prefs.profile_avatar_icon !== 'initials' ? (
+                  <Icon name={prefs.profile_avatar_icon as IconName} size={48} color={avatarTint} />
+                ) : (
+                  <Text variant="hero" style={{ fontSize: 36, color: avatarTint }}>
+                    {initial}
+                  </Text>
+                )}
               </View>
             </View>
             <Pressable
@@ -156,6 +161,11 @@ export default function PerfilScreen()
         </View>
 
         <PersonalSummaryGrid />
+
+        {/* trilha: divisão da semana, álbum e histórico */}
+        <WalletRow />
+        <PersonalDivisionCard />
+        <ChamaAlbumCard />
 
         {/* Dados - prontos para sync nuvem */}
         <ProfileSection title="Dados">

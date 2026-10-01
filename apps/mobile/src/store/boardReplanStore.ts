@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import {
+  actionableTasks,
   addDaysIso,
   localTodayIso,
   replanBoard,
@@ -10,6 +11,7 @@ import { readLocalJson, writeLocalJson } from '../lib/localJsonStore'
 import { orchestratorContextNow } from '../lib/orchestratorContext'
 import { insertDecisionEvents, markBatchUndone } from '../lib/sync/decisionLog'
 import { useDataStore } from './dataStore'
+import { useTaskWaitStore } from './taskWaitStore'
 import { useAuthStore } from './authStore'
 import { useNeuroStore } from './neuroStore'
 
@@ -183,7 +185,9 @@ export const useBoardReplanStore = create<State>((set, get) => ({
     try
     {
       const mem = reconcile(get())
-      const tasks = useDataStore.getState().tasks ?? []
+      // tarefa esperando outra pessoa não se move nem pesa na carga do dia
+      await useTaskWaitStore.getState().hydrate()
+      const tasks = actionableTasks(useDataStore.getState().tasks ?? [], useTaskWaitStore.getState().waits)
       const ctx = orchestratorContextNow()
       const dayAgo = Date.now() - 86400000
       const result = replanBoard(tasks, ctx, {

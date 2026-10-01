@@ -6,12 +6,12 @@ import {
   formatBRL,
   monthExpenseTotal,
   monthIncomeTotal,
-  rule503020,
 } from '@simply-life/shared'
 import { Card, Text, SectionHeader, StatusPill } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useMonthProjection } from './FinanceForecastCards'
+import { BudgetRuleCard } from './BudgetRuleCard'
 
 export function FinanceCoachCards()
 {
@@ -23,7 +23,6 @@ export function FinanceCoachCards()
   const pos = computeSaldoDisponivel(cash, txs, fixas)
   const income = monthIncomeTotal(txs)
   const spent = monthExpenseTotal(txs)
-  const rule = rule503020(txs)
   // mesma conta da Carteira: fixas a vencer, faturas, salário previsto e gasto do dia a dia
   const projection = useMonthProjection()
   const tips = buildFinanceCoachTips({
@@ -76,42 +75,8 @@ export function FinanceCoachCards()
         </Text>
       </Card>
 
-      <Card tone="elevated" style={{ gap: space.sm }}>
-        <Text variant="section">50 / 30 / 20</Text>
-        <Text variant="caption" muted>
-          Necessidades {formatBRL(rule.needsBudget)} · desejos {formatBRL(rule.wantsBudget)} ·
-          reserva {formatBRL(rule.savingsBudget)}
-        </Text>
-        {[
-          { label: 'Necessidades 50%', used: rule.needs, cap: rule.needsBudget },
-          { label: 'Desejos 30%', used: rule.wants, cap: rule.wantsBudget },
-          { label: 'Reserva 20%', used: rule.savings, cap: rule.savingsBudget },
-        ].map((row) =>
-        {
-          const pct = row.cap > 0 ? Math.min(100, Math.round((row.used / row.cap) * 100)) : 0
-          return (
-            <View key={row.label} style={{ gap: 6 }}>
-              <Text variant="caption">{row.label}</Text>
-              <View
-                style={{
-                  height: 8,
-                  borderRadius: radius.pill,
-                  backgroundColor: colors.hairline,
-                  overflow: 'hidden',
-                }}
-              >
-                <View
-                  style={{
-                    width: `${pct}%`,
-                    height: '100%',
-                    backgroundColor: colors.finance,
-                  }}
-                />
-              </View>
-            </View>
-          )
-        })}
-      </Card>
+      {/* regra de orçamento sobre as categorias reais, com percentuais da pessoa */}
+      <BudgetRuleCard />
     </View>
   )
 }

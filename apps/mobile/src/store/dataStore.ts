@@ -102,6 +102,7 @@ import { usePrefsStore } from './prefsStore'
 import { loadOfflineBundle, saveOfflineBundle } from '../lib/offlineCache'
 import { supabaseConfigured } from '../lib/supabase'
 import { hapticLight } from '../lib/haptics'
+import { rewardTaskDone } from '../lib/taskReward'
 import { useGamificationStore } from './gamificationStore'
 import { useWaterLogStore } from './waterLogStore'
 import { useBodyWeekStore } from './bodyWeekStore'
@@ -727,6 +728,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         })),
         anotacao: notas || '',
         prioridade,
+        criadoEm: new Date().toISOString(),
       }
       set({ tasks: [t, ...get().tasks] })
       return
@@ -955,9 +957,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     if (done)
     {
       void cancelTaskReminder(taskId).catch(() => undefined)
-      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
-      useGamificationStore.getState().unlockIf('first_task')
-      useActivityStore.getState().markAction('task')
+      rewardTaskDone(current.titulo)
     }
 
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
@@ -988,9 +988,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     if (status === 'done' && current.status !== 'done')
     {
-      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
-      useGamificationStore.getState().unlockIf('first_task')
-      useActivityStore.getState().markAction('task')
+      rewardTaskDone(current.titulo)
     }
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
     await persistTaskStatus(taskId, status)
@@ -1700,9 +1698,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     if (next.status === 'done' && current.status !== 'done')
     {
-      useGamificationStore.getState().grantXp(12, 'Tarefa concluída', current.titulo)
-      useGamificationStore.getState().unlockIf('first_task')
-      useActivityStore.getState().markAction('task')
+      rewardTaskDone(current.titulo)
     }
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
 

@@ -123,6 +123,94 @@ import { WatchIcon } from 'phosphor-react-native/src/icons/Watch'
 import { WrenchIcon } from 'phosphor-react-native/src/icons/Wrench'
 import { XIcon } from 'phosphor-react-native/src/icons/X'
 import { XCircleIcon } from 'phosphor-react-native/src/icons/XCircle'
+// coleções e avatares (packages/shared/src/chamaRewards.ts, unlocks.ts)
+import { AlienIcon } from 'phosphor-react-native/src/icons/Alien'
+import { AtomIcon } from 'phosphor-react-native/src/icons/Atom'
+import { BrainIcon } from 'phosphor-react-native/src/icons/Brain'
+import { BugBeetleIcon } from 'phosphor-react-native/src/icons/BugBeetle'
+import { CampfireIcon } from 'phosphor-react-native/src/icons/Campfire'
+import { CowIcon } from 'phosphor-react-native/src/icons/Cow'
+import { DetectiveIcon } from 'phosphor-react-native/src/icons/Detective'
+import { DiceFiveIcon } from 'phosphor-react-native/src/icons/DiceFive'
+import { FlaskIcon } from 'phosphor-react-native/src/icons/Flask'
+import { GhostIcon } from 'phosphor-react-native/src/icons/Ghost'
+import { HamburgerIcon } from 'phosphor-react-native/src/icons/Hamburger'
+import { JoystickIcon } from 'phosphor-react-native/src/icons/Joystick'
+import { LightbulbIcon } from 'phosphor-react-native/src/icons/Lightbulb'
+import { MagicWandIcon } from 'phosphor-react-native/src/icons/MagicWand'
+import { MicrophoneIcon } from 'phosphor-react-native/src/icons/Microphone'
+import { MoonStarsIcon } from 'phosphor-react-native/src/icons/MoonStars'
+import { PianoKeysIcon } from 'phosphor-react-native/src/icons/PianoKeys'
+import { PopsicleIcon } from 'phosphor-react-native/src/icons/Popsicle'
+import { RobotIcon } from 'phosphor-react-native/src/icons/Robot'
+import { ShieldIcon } from 'phosphor-react-native/src/icons/Shield'
+import { ShootingStarIcon } from 'phosphor-react-native/src/icons/ShootingStar'
+import { ShrimpIcon } from 'phosphor-react-native/src/icons/Shrimp'
+import { SmileyWinkIcon } from 'phosphor-react-native/src/icons/SmileyWink'
+import { SunHorizonIcon } from 'phosphor-react-native/src/icons/SunHorizon'
+import { SwordIcon } from 'phosphor-react-native/src/icons/Sword'
+import { TennisBallIcon } from 'phosphor-react-native/src/icons/TennisBall'
+import { TreePalmIcon } from 'phosphor-react-native/src/icons/TreePalm'
+import { TreeEvergreenIcon } from 'phosphor-react-native/src/icons/TreeEvergreen'
+import { UmbrellaIcon } from 'phosphor-react-native/src/icons/Umbrella'
+import { VinylRecordIcon } from 'phosphor-react-native/src/icons/VinylRecord'
+import { YinYangIcon } from 'phosphor-react-native/src/icons/YinYang'
+import { BooksIcon } from 'phosphor-react-native/src/icons/Books'
+import { StudentIcon } from 'phosphor-react-native/src/icons/Student'
+import { FishIcon } from 'phosphor-react-native/src/icons/Fish'
+import { TreeIcon } from 'phosphor-react-native/src/icons/Tree'
+import { FlowerIcon } from 'phosphor-react-native/src/icons/Flower'
+import { FlowerTulipIcon } from 'phosphor-react-native/src/icons/FlowerTulip'
+import { FlowerLotusIcon } from 'phosphor-react-native/src/icons/FlowerLotus'
+import { CatIcon } from 'phosphor-react-native/src/icons/Cat'
+import { DogIcon } from 'phosphor-react-native/src/icons/Dog'
+import { BirdIcon } from 'phosphor-react-native/src/icons/Bird'
+import { ButterflyIcon } from 'phosphor-react-native/src/icons/Butterfly'
+import { RabbitIcon } from 'phosphor-react-native/src/icons/Rabbit'
+import { HorseIcon } from 'phosphor-react-native/src/icons/Horse'
+import { BugIcon } from 'phosphor-react-native/src/icons/Bug'
+import { MountainsIcon } from 'phosphor-react-native/src/icons/Mountains'
+import { TentIcon } from 'phosphor-react-native/src/icons/Tent'
+import { CompassIcon } from 'phosphor-react-native/src/icons/Compass'
+import { BicycleIcon } from 'phosphor-react-native/src/icons/Bicycle'
+import { PersonSimpleRunIcon } from 'phosphor-react-native/src/icons/PersonSimpleRun'
+import { RocketIcon } from 'phosphor-react-native/src/icons/Rocket'
+import { PlanetIcon } from 'phosphor-react-native/src/icons/Planet'
+import { FireIcon } from 'phosphor-react-native/src/icons/Fire'
+import { AnchorIcon } from 'phosphor-react-native/src/icons/Anchor'
+import { SailboatIcon } from 'phosphor-react-native/src/icons/Sailboat'
+import { LighthouseIcon } from 'phosphor-react-native/src/icons/Lighthouse'
+import { IslandIcon } from 'phosphor-react-native/src/icons/Island'
+import { WavesIcon } from 'phosphor-react-native/src/icons/Waves'
+import { GuitarIcon } from 'phosphor-react-native/src/icons/Guitar'
+import { HeadphonesIcon } from 'phosphor-react-native/src/icons/Headphones'
+import { MusicNoteIcon } from 'phosphor-react-native/src/icons/MusicNote'
+import { PaintBrushIcon } from 'phosphor-react-native/src/icons/PaintBrush'
+import { CameraIcon } from 'phosphor-react-native/src/icons/Camera'
+import { CardsIcon } from 'phosphor-react-native/src/icons/Cards'
+import { PuzzlePieceIcon } from 'phosphor-react-native/src/icons/PuzzlePiece'
+import { CrownIcon } from 'phosphor-react-native/src/icons/Crown'
+import { DiamondIcon } from 'phosphor-react-native/src/icons/Diamond'
+import { SoccerBallIcon } from 'phosphor-react-native/src/icons/SoccerBall'
+import { BasketballIcon } from 'phosphor-react-native/src/icons/Basketball'
+import { EggIcon } from 'phosphor-react-native/src/icons/Egg'
+import { BreadIcon } from 'phosphor-react-native/src/icons/Bread'
+import { AvocadoIcon } from 'phosphor-react-native/src/icons/Avocado'
+import { PepperIcon } from 'phosphor-react-native/src/icons/Pepper'
+import { OrangeIcon } from 'phosphor-react-native/src/icons/Orange'
+import { CherriesIcon } from 'phosphor-react-native/src/icons/Cherries'
+import { PizzaIcon } from 'phosphor-react-native/src/icons/Pizza'
+import { CakeIcon } from 'phosphor-react-native/src/icons/Cake'
+import { CookieIcon } from 'phosphor-react-native/src/icons/Cookie'
+import { PopcornIcon } from 'phosphor-react-native/src/icons/Popcorn'
+import { PottedPlantIcon } from 'phosphor-react-native/src/icons/PottedPlant'
+import { CactusIcon } from 'phosphor-react-native/src/icons/Cactus'
+import { AcornIcon } from 'phosphor-react-native/src/icons/Acorn'
+import { RainbowIcon } from 'phosphor-react-native/src/icons/Rainbow'
+import { BalloonIcon } from 'phosphor-react-native/src/icons/Balloon'
+import { ConfettiIcon } from 'phosphor-react-native/src/icons/Confetti'
+import { FeatherIcon } from 'phosphor-react-native/src/icons/Feather'
+import { BookBookmarkIcon } from 'phosphor-react-native/src/icons/BookBookmark'
 
 /**
  * Ícone único do app (Phosphor). Aceita os nomes do Ionicons que o código já usa:
@@ -132,6 +220,93 @@ import { XCircleIcon } from 'phosphor-react-native/src/icons/XCircle'
  * Nome sem equivalente desenha um ponto de interrogação neutro e avisa em dev.
  */
 const BY_NAME: Record<string, ComponentType<IconProps>> = {
+  'col-alien': AlienIcon,
+  'col-atom': AtomIcon,
+  'col-brain': BrainIcon,
+  'col-bug-beetle': BugBeetleIcon,
+  'col-campfire': CampfireIcon,
+  'col-cow': CowIcon,
+  'col-detective': DetectiveIcon,
+  'col-dice-five': DiceFiveIcon,
+  'col-flask': FlaskIcon,
+  'col-ghost': GhostIcon,
+  'col-hamburger': HamburgerIcon,
+  'col-joystick': JoystickIcon,
+  'col-lightbulb': LightbulbIcon,
+  'col-magic-wand': MagicWandIcon,
+  'col-microphone': MicrophoneIcon,
+  'col-moon-stars': MoonStarsIcon,
+  'col-piano-keys': PianoKeysIcon,
+  'col-popsicle': PopsicleIcon,
+  'col-robot': RobotIcon,
+  'col-shield': ShieldIcon,
+  'col-shooting-star': ShootingStarIcon,
+  'col-shrimp': ShrimpIcon,
+  'col-smiley-wink': SmileyWinkIcon,
+  'col-sun-horizon': SunHorizonIcon,
+  'col-sword': SwordIcon,
+  'col-tennis-ball': TennisBallIcon,
+  'col-tree-palm': TreePalmIcon,
+  'col-tree-evergreen': TreeEvergreenIcon,
+  'col-umbrella': UmbrellaIcon,
+  'col-vinyl-record': VinylRecordIcon,
+  'col-yin-yang': YinYangIcon,
+  'col-books': BooksIcon,
+  'col-student': StudentIcon,
+  'col-fish': FishIcon,
+  'col-tree': TreeIcon,
+  'col-flower': FlowerIcon,
+  'col-flower-tulip': FlowerTulipIcon,
+  'col-flower-lotus': FlowerLotusIcon,
+  'col-cat': CatIcon,
+  'col-dog': DogIcon,
+  'col-bird': BirdIcon,
+  'col-butterfly': ButterflyIcon,
+  'col-rabbit': RabbitIcon,
+  'col-horse': HorseIcon,
+  'col-bug': BugIcon,
+  'col-mountains': MountainsIcon,
+  'col-tent': TentIcon,
+  'col-compass': CompassIcon,
+  'col-bicycle': BicycleIcon,
+  'col-person-simple-run': PersonSimpleRunIcon,
+  'col-rocket': RocketIcon,
+  'col-planet': PlanetIcon,
+  'col-fire': FireIcon,
+  'col-anchor': AnchorIcon,
+  'col-sailboat': SailboatIcon,
+  'col-lighthouse': LighthouseIcon,
+  'col-island': IslandIcon,
+  'col-waves': WavesIcon,
+  'col-guitar': GuitarIcon,
+  'col-headphones': HeadphonesIcon,
+  'col-music-note': MusicNoteIcon,
+  'col-paint-brush': PaintBrushIcon,
+  'col-camera': CameraIcon,
+  'col-cards': CardsIcon,
+  'col-puzzle-piece': PuzzlePieceIcon,
+  'col-crown': CrownIcon,
+  'col-diamond': DiamondIcon,
+  'col-soccer-ball': SoccerBallIcon,
+  'col-basketball': BasketballIcon,
+  'col-egg': EggIcon,
+  'col-bread': BreadIcon,
+  'col-avocado': AvocadoIcon,
+  'col-pepper': PepperIcon,
+  'col-orange': OrangeIcon,
+  'col-cherries': CherriesIcon,
+  'col-pizza': PizzaIcon,
+  'col-cake': CakeIcon,
+  'col-cookie': CookieIcon,
+  'col-popcorn': PopcornIcon,
+  'col-potted-plant': PottedPlantIcon,
+  'col-cactus': CactusIcon,
+  'col-acorn': AcornIcon,
+  'col-rainbow': RainbowIcon,
+  'col-balloon': BalloonIcon,
+  'col-confetti': ConfettiIcon,
+  'col-feather': FeatherIcon,
+  'col-book-bookmark': BookBookmarkIcon,
   accessibility: PersonArmsSpreadIcon,
   add: PlusIcon,
   airplane: AirplaneIcon,

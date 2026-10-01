@@ -9,7 +9,7 @@ import {
   type FoodItem,
   type OffProduct,
 } from '@simply-life/shared'
-import { Field, PrimaryButton, Text } from '../../ui'
+import { Field, PrimaryButton, Text, CloseButton } from '../../ui'
 import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
 import { lookupBarcode } from '../../lib/openFoodFactsApi'
@@ -119,9 +119,7 @@ export function BarcodeSheet({ visible, showCalories, onClose, onAdd }: Props)
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
           <Icon name="barcode-outline" size={20} color={colors.brand} />
           <Text variant="section" style={{ flex: 1 }}>Código de barras</Text>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Fechar" hitSlop={10}>
-            <Icon name="close" size={20} color={colors.inkMuted} />
-          </Pressable>
+          <CloseButton onPress={onClose} size={36} />
         </View>
 
         {canScan && !product ? (

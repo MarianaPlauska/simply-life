@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { Modal, Pressable, View } from 'react-native'
-import { useRouter } from 'expo-router'
+import { usePathname, useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TAB_BAR_CONTENT_HEIGHT, chartColor } from '@simply-life/ui-tokens'
-import { Card, Text, PressableScale } from '../../ui'
+import { Card, Text, PressableScale, CloseButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCaptureStore } from '../../store/captureStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
@@ -19,6 +19,7 @@ export function CalmQuickFab()
   const calmTint = chartColor(chart, 'teal')
   const insets = useSafeAreaInsets()
   const router = useRouter()
+  const pathname = usePathname()
   const captureOpen = useCaptureStore((s) => s.open)
   const evolveOpen = useTaskEvolveStore((s) => Boolean(s.taskId))
   const fabSuppressed = useCalmFabSuppressStore((s) => s.count > 0)
@@ -29,7 +30,9 @@ export function CalmQuickFab()
     if (captureOpen || evolveOpen) setSheet(false)
   }, [captureOpen, evolveOpen])
 
-  if (captureOpen || evolveOpen || fabSuppressed) return null
+  // na Saúde o Apoio já tem os mesmos guias: o atalho some em todas as abas dela
+  const onHealth = pathname.includes('saude')
+  if (captureOpen || evolveOpen || fabSuppressed || onHealth) return null
 
   const bottom = TAB_BAR_CONTENT_HEIGHT + Math.max(insets.bottom, 8) + 8
 
@@ -86,23 +89,7 @@ export function CalmQuickFab()
                     Escolha um guia curto. Não substitui o CVV 188.
                   </Text>
                 </View>
-                <PressableScale
-                  accessibilityRole="button"
-                  accessibilityLabel="Fechar"
-                  onPress={() => setSheet(false)}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 999,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.hairline,
-                  }}
-                >
-                  <Icon name="close" size={18} color={colors.ink} />
-                </PressableScale>
+                <CloseButton onPress={() => setSheet(false)} />
               </View>
               <CalmExerciseList
                 onPick={(route) =>

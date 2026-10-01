@@ -6,6 +6,8 @@ import { SyncHint } from '../SyncHint'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { HomeWeatherChip } from './HomeWeatherChip'
+import { CircleCornerButton } from '../social/CircleCornerButton'
+import { ProfileAvatarBadge } from '../social/ProfileAvatarBadge'
 import { WEB_DISPLAY_FONT } from './web/webTypography'
 
 type Props = {
@@ -76,6 +78,8 @@ export function HomeFitnessHero({
             </Text>
           ) : null}
         </View>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <CircleCornerButton size={SIDE} />
         <PressableScale
           onPress={onAccount}
           accessibilityLabel={isAdmin ? 'Conta, administradora' : 'Conta'}
@@ -90,12 +94,13 @@ export function HomeFitnessHero({
             borderColor: colors.hairline,
           }}
         >
-          <Icon
-            name={isAdmin ? 'shield-checkmark' : 'person-outline'}
-            size={16}
-            color={isAdmin ? colors.axel : colors.ink}
-          />
+          {isAdmin ? (
+            <Icon name="shield-checkmark" size={16} color={colors.axel} />
+          ) : (
+            <ProfileAvatarBadge size={SIDE} />
+          )}
         </PressableScale>
+        </View>
       </View>
     )
   }
@@ -121,6 +126,8 @@ export function HomeFitnessHero({
             </Text>
           ) : null}
         </View>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <CircleCornerButton />
         <PressableScale
           onPress={onAccount}
           accessibilityLabel={isAdmin ? 'Conta, administradora' : 'Conta'}
@@ -134,12 +141,13 @@ export function HomeFitnessHero({
             ...elevation.card,
           }}
         >
-          <Icon
-            name={isAdmin ? 'shield-checkmark' : 'person-outline'}
-            size={18}
-            color={isAdmin ? colors.axel : colors.ink}
-          />
+          {isAdmin ? (
+            <Icon name="shield-checkmark" size={18} color={colors.axel} />
+          ) : (
+            <ProfileAvatarBadge size={44} />
+          )}
         </PressableScale>
+        </View>
       </View>
       <SyncHint />
     </View>

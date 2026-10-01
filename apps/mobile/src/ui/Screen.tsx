@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   ScrollView,
   View,
@@ -20,6 +21,8 @@ type ScreenProps = ViewProps & {
   tabBarInset?: boolean
   refreshing?: boolean
   onRefresh?: () => void
+  /** Camada de fundo atrás do conteúdo (ex.: fundo do quadro desbloqueado) */
+  backdrop?: ReactNode
 }
 
 export function Screen({
@@ -29,6 +32,7 @@ export function Screen({
   tabBarInset = true,
   refreshing,
   onRefresh,
+  backdrop,
   style,
   ...rest
 }: ScreenProps)
@@ -74,6 +78,7 @@ export function Screen({
     return (
       <View style={frame}>
         <AtmosphereWash />
+      {backdrop}
         <SafeAreaView style={[styles.flex, { backgroundColor: 'transparent' }]} edges={['top']}>
           <ScrollView
             contentContainerStyle={[pad, style]}
@@ -92,6 +97,7 @@ export function Screen({
   return (
     <View style={frame}>
       <AtmosphereWash />
+      {backdrop}
       <SafeAreaView style={[styles.flex, { backgroundColor: 'transparent' }]} edges={['top']}>
         <View style={[styles.flex, pad, style]} {...rest}>
           {children}

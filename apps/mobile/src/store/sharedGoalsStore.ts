@@ -30,6 +30,8 @@ type State = {
   /** Recarrega uma meta: progresso, pessoas e apoios */
   loadDetail: (goalId: string) => Promise<void>
   refreshProgress: (goalId: string) => Promise<void>
+  /** Só as pessoas de cada meta (cantinho do Círculo agrupa metas por amigo) */
+  loadMembers: (goalIds: string[]) => Promise<void>
   setMuted: (goalId: string, muted: boolean) => Promise<boolean>
   leave: (goalId: string) => Promise<boolean>
   reset: () => void
@@ -90,6 +92,15 @@ export const useSharedGoalsStore = create<State>((set, get) => ({
       members: { ...get().members, [goalId]: members },
       cheers: { ...get().cheers, [goalId]: cheers },
     })
+  },
+
+  loadMembers: async (goalIds) =>
+  {
+    if (!canUseRemote() || goalIds.length === 0) return
+    const pairs = await Promise.all(
+      goalIds.map(async (id) => [id, await fetchGoalMembers(id).catch(() => [])] as const),
+    )
+    set({ members: { ...get().members, ...Object.fromEntries(pairs) } })
   },
 
   refreshProgress: async (goalId) =>

@@ -11,6 +11,7 @@ import { useBoardAutoReplan } from '../../src/hooks/useBoardAutoReplan'
 import { useTaskCompletionLog } from '../../src/hooks/useTaskCompletionLog'
 import { useDayCompanion } from '../../src/hooks/useTodayVisualDay'
 import { useSharedGoalContributions } from '../../src/hooks/useSharedGoalContributions'
+import { useLeagueXpSync } from '../../src/hooks/useLeagueXpSync'
 import { BoardReplanToast } from '../../src/components/kanban/BoardReplanToast'
 import { useAuthStore } from '../../src/store/authStore'
 import { SetupGuard } from '../../src/components/auth/SetupGuard'
@@ -26,6 +27,7 @@ export default function TabsLayout()
   useTaskCompletionLog()
   useDayCompanion()
   useSharedGoalContributions()
+  useLeagueXpSync()
 
   if (!userId || mfaPending)
   {

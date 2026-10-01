@@ -24,7 +24,7 @@ import { ExpenseSparkline } from '../../ui/ExpenseSparkline'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
-import { colorMapFromMeta } from '../../lib/categoryMeta'
+import { colorMapFromMeta, labelMapFromMeta } from '../../lib/categoryMeta'
 import { useWorkspace } from '../../layout/useWorkspace'
 
 const MONTH_OFFSETS = [0, 1, 2, 3, 4, 5]
@@ -54,7 +54,7 @@ export function FinanceMonthReport()
   const series = useMemo(() => monthDailyExpenseSeries(monthTxs, ref), [monthTxs, ref])
   const incomeSeries = useMemo(() => monthDailyIncomeSeries(monthTxs, ref), [monthTxs, ref])
   const ranking = useMemo(
-    () => rankCategoriesBySpend(monthTxs, colorMapFromMeta(catMap), chart),
+    () => rankCategoriesBySpend(monthTxs, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)),
     [monthTxs, catMap, chart],
   )
   const max = ranking[0]?.total ?? 1

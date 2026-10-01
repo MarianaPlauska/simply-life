@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { View } from 'react-native'
+import { useLocalSearchParams } from 'expo-router'
 import { syncGmailNow, type AxelDecisionEvent } from '@simply-life/shared'
 import {
   Screen,
@@ -23,24 +24,28 @@ import { KanbanOrchestratorBar } from '../../src/components/kanban/KanbanOrchest
 import { KanbanDecisionLogSheet } from '../../src/components/kanban/KanbanDecisionLogSheet'
 import { KanbanActivityComplex } from '../../src/components/kanban/KanbanActivityComplex'
 import { KanbanFoldersPane } from '../../src/components/kanban/KanbanFoldersPane'
+import { KanbanBackdrop } from '../../src/components/kanban/KanbanBackdrop'
 import { KanbanReportsPane } from '../../src/components/kanban/KanbanReportsPane'
 import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
 import { KanbanRoutinePane } from '../../src/components/kanban/KanbanRoutinePane'
 import { WeeklyReviewPane } from '../../src/components/kanban/reports/WeeklyReviewPane'
 import { RitmoInsights } from '../../src/components/kanban/reports/RitmoInsights'
+import { WaitingReportPane } from '../../src/components/kanban/reports/WaitingReportPane'
 import { authedApi } from '../../src/lib/integrationsApi'
 import { fetchDecisionEvents } from '../../src/lib/sync/decisionLog'
 import { useBoardReplanStore } from '../../src/store/boardReplanStore'
 
 type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'gantt' | 'relatorios'
-type ReportMode = 'semana' | 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
+type ReportMode = 'semana' | 'esperas' | 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
 
 export default function KanbanScreen()
 {
+  const { relatorio } = useLocalSearchParams<{ relatorio?: string }>()
   const { space } = useTheme()
   const modules = useModules()
-  const [hub, setHub] = useState<Hub>(() => (modules.on('tasks') ? 'lista' : 'rotina'))
-  const [report, setReport] = useState<ReportMode>('semana')
+  const [hub, setHub] = useState<Hub>(() =>
+    relatorio === 'esperas' ? 'relatorios' : modules.on('tasks') ? 'lista' : 'rotina')
+  const [report, setReport] = useState<ReportMode>(relatorio === 'esperas' ? 'esperas' : 'semana')
   const [logOpen, setLogOpen] = useState(false)
   const [syncMsg, setSyncMsg] = useState('')
   const tasks = useDataStore((s) => s.tasks) ?? []
@@ -123,6 +128,7 @@ export default function KanbanScreen()
   return (
     <Screen
       scroll
+      backdrop={<KanbanBackdrop />}
       refreshing={loading}
       onRefresh={() => void refreshAll({ isGuest })}
     >
@@ -147,6 +153,7 @@ export default function KanbanScreen()
               accent="axel"
               tabs={[
                 { id: 'semana', label: 'Semana' },
+                { id: 'esperas', label: 'Esperas' },
                 { id: 'desempenho', label: 'Desempenho' },
                 { id: 'overview', label: 'Visão geral' },
                 { id: 'calendario', label: 'Calendário' },
@@ -216,6 +223,7 @@ export default function KanbanScreen()
           {hub === 'relatorios' && report === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'timeline' ? <KanbanTimelinePane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'semana' ? <WeeklyReviewPane tasks={tasks} /> : null}
+          {hub === 'relatorios' && report === 'esperas' ? <WaitingReportPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'ritmo' ? (
             <View style={{ gap: space.md }}>
               <KanbanActivityComplex tasks={tasks} />

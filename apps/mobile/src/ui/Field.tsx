@@ -13,7 +13,9 @@ type Props = TextInputProps & {
 /** Campo com label - focus ring AXEL */
 export function Field({ label, error, tone = 'default', style, onFocus, onBlur, ...rest }: Props)
 {
-  const { colors, radius } = useTheme()
+  const { colors, mode } = useTheme()
+  // foco na tinta da marca: petróleo (confiança, calma) é o complementar do coral das ações
+  const focusInk = mode === 'dark' ? colors.brandInk : colors.brand
   const [focused, setFocused] = useState(false)
   const fill =
     tone === 'widget'
@@ -24,10 +26,10 @@ export function Field({ label, error, tone = 'default', style, onFocus, onBlur, 
   const labelColor =
     tone === 'widget'
       ? focused
-        ? colors.health
+        ? focusInk
         : colors.featureMuted
       : focused
-        ? colors.axel
+        ? focusInk
         : colors.inkMuted
   const textColor = tone === 'widget' ? colors.featureInk : colors.ink
 
@@ -50,19 +52,25 @@ export function Field({ label, error, tone = 'default', style, onFocus, onBlur, 
         }}
         style={[
           {
-            minHeight: 52,
-            borderRadius: radius.control,
+            minHeight: rest.multiline ? 112 : 52,
+            // várias linhas: caixa mais alta e o texto com respiro, sem colar no topo
+            ...(rest.multiline
+              ? { paddingTop: 14, paddingBottom: 14, textAlignVertical: 'top' as const, lineHeight: 24 }
+              : null),
+            // caixa de texto um pouco mais reta que botões e pílulas
+            borderRadius: 10,
             paddingHorizontal: 16,
             fontSize: 16,
             fontFamily: 'Lexend_400Regular',
             color: textColor,
             backgroundColor: fill,
-            borderWidth: 0,
+            // borda sempre de 1px (transparente sem foco) para o texto não pular ao focar
+            borderWidth: 1,
             borderColor: error
               ? colors.danger
               : focused
-                ? colors.axel
-                : colors.hairline,
+                ? focusInk
+                : 'transparent',
           },
           style,
         ]}

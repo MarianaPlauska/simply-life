@@ -42,7 +42,7 @@ export async function fetchFinanceCards(): Promise<FinanceCard[]>
   {
     const r = row as Record<string, unknown>
     const gradRaw = String(r.tipo_gradiente || 'copper')
-    const gradients = new Set(['purple', 'obsidian', 'sunset', 'ocean', 'mint', 'copper'])
+    const gradients = new Set(['purple', 'obsidian', 'sunset', 'ocean', 'mint', 'copper', 'wine', 'green', 'blue', 'violet', 'rose'])
     const tipoGradiente: FinanceCardGradient = gradients.has(gradRaw)
       ? (gradRaw as FinanceCardGradient)
       : 'copper'

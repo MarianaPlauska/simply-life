@@ -8,7 +8,7 @@ import {
   withoutEmDash,
   type HumorRegistro,
 } from '@simply-life/shared'
-import { Card, Text, PressableScale } from '../../ui'
+import { Card, Text, PressableScale, CloseButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { usePrefsStore } from '../../store/prefsStore'
 import { useMoodWeekReportAi } from '../../hooks/useMoodWeekReportAi'
@@ -60,9 +60,7 @@ export function MoodWeekReportCard({ humor }: Props)
           </Text>
           <Text variant="micro" muted>{weekLabel}</Text>
         </View>
-        <Pressable onPress={dismiss} accessibilityLabel="Fechar relatório" hitSlop={8}>
-          <Icon name="close" size={20} color={colors.inkMuted} />
-        </Pressable>
+        <CloseButton onPress={dismiss} label="Fechar relatório" size={32} />
       </View>
 
       <View

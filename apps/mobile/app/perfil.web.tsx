@@ -11,6 +11,7 @@ import { AdminUsersPanel } from '../src/components/auth/AdminUsersPanel'
 import { ForgotPasswordSheet } from '../src/components/auth/ForgotPasswordSheet'
 import { GamificationPanel } from '../src/components/dashboard/GamificationPanel'
 import { PersonalSummaryGrid } from '../src/components/dashboard/PersonalSummaryGrid'
+import { ChamaAlbumCard, PersonalDivisionCard, WalletRow } from '../src/components/rewards/TrilhaCards'
 import {
   ProfileSection,
   ProfileSettingsRow,
@@ -177,6 +178,9 @@ export default function PerfilScreenWeb()
           </View>
 
           <PersonalSummaryGrid />
+          <WalletRow />
+          <PersonalDivisionCard />
+          <ChamaAlbumCard />
 
           <ProfileSection title="Dados">
             <ProfileSettingsRow icon="mail-outline" label="E-mail" value={email ?? '-'} accent={colors.tasks} />

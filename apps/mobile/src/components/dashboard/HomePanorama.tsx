@@ -13,7 +13,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
-import { colorMapFromMeta } from '../../lib/categoryMeta'
+import { colorMapFromMeta, labelMapFromMeta } from '../../lib/categoryMeta'
 
 /** Gráficos e panorama abaixo da dobra - Início não fica “vazio”. */
 export function HomePanorama()
@@ -27,7 +27,7 @@ export function HomePanorama()
   const gastos = monthExpenseTotal(finance)
   const series = useMemo(() => monthDailyExpenseSeries(finance), [finance])
   const ranking = useMemo(
-    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap), chart).slice(0, 5),
+    () => rankCategoriesBySpend(finance, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)).slice(0, 5),
     [finance, catMap, chart],
   )
 

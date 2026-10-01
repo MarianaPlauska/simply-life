@@ -32,7 +32,7 @@ export function HomeRpgStrip()
             <Text variant="bodyStrong">Nível {level} · {gold} moedas</Text>
           </View>
           <Text variant="caption" muted>
-            Ofensiva {streak}
+            Pique {streak}
           </Text>
         </View>
         <View

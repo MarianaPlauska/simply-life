@@ -4,6 +4,7 @@ import { Text, Chip, Field, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { isModuleOn, type AppModuleId } from '../../lib/appModules'
 import { OnbBlock } from './OnbStep'
+import { FinanceCategoryPicker } from './FinanceCategoryPicker'
 import { FIXA_PRESETS, type FinanceDraft } from './startDrafts'
 
 type Props = {
@@ -60,6 +61,8 @@ export function FinanceStartForm({ value, onChange, enabled, compact }: Props)
           ) : null}
         </OnbBlock>
       ) : null}
+
+      {on('spend') && !compact ? <FinanceCategoryPicker /> : null}
 
       {on('bills') && !compact ? (
         <OnbBlock title="Contas fixas" hint="O que vence todo mês. Entram no saldo projetado.">

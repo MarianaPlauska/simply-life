@@ -20,9 +20,10 @@ import { useAuthStore } from '../../src/store/authStore'
 import { MoveTaskSheet } from '../../src/components/kanban/MoveTaskSheet'
 import { TaskDetailEditor } from '../../src/components/kanban/TaskDetailEditor'
 import { TaskTimerPanel } from '../../src/components/kanban/TaskTimerPanel'
+import { TaskClockCard, TaskWaitPanel } from '../../src/components/kanban/TaskWaitPanel'
 import { openFocusForTask } from '../../src/lib/openFocus'
 
-type DetailTab = 'analise' | 'status' | 'detalhes' | 'anotacoes'
+type DetailTab = 'analise' | 'status' | 'detalhes' | 'anotacoes' | 'espera'
 
 /** Anel pontilhado - ref dashboard 22% minimalista */
 function DottedProgressRing({
@@ -86,7 +87,7 @@ function daysUntil(iso: string | null): number | null
 
 export default function TaskDetailScreen()
 {
-  const { id } = useLocalSearchParams<{ id: string }>()
+  const { id, aba } = useLocalSearchParams<{ id: string; aba?: string }>()
   const router = useRouter()
   const { colors, space } = useTheme()
   const tasks = useDataStore((s) => s.tasks)
@@ -96,7 +97,7 @@ export default function TaskDetailScreen()
   const removeTask = useDataStore((s) => s.removeTask)
   const isGuest = useAuthStore((s) => s.isGuest)
   const task = useMemo(() => tasks.find((t) => t.id === id), [tasks, id])
-  const [tab, setTab] = useState<DetailTab>('detalhes')
+  const [tab, setTab] = useState<DetailTab>(aba === 'espera' ? 'espera' : 'detalhes')
   const [notes, setNotes] = useState('')
   const [moveOpen, setMoveOpen] = useState(false)
 
@@ -166,6 +167,7 @@ export default function TaskDetailScreen()
           tabs={[
             { id: 'detalhes', label: 'Detalhes' },
             { id: 'anotacoes', label: 'Notas' },
+            { id: 'espera', label: 'Espera' },
             { id: 'analise', label: 'Análise' },
             { id: 'status', label: 'Tempo' },
           ]}
@@ -302,7 +304,14 @@ export default function TaskDetailScreen()
           </View>
         ) : null}
 
-        {tab === 'status' ? <TaskTimerPanel taskId={task.id} /> : null}
+        {tab === 'status' ? (
+          <View style={{ gap: space.md }}>
+            <TaskClockCard task={task} />
+            <TaskTimerPanel taskId={task.id} />
+          </View>
+        ) : null}
+
+        {tab === 'espera' ? <TaskWaitPanel task={task} /> : null}
 
         {tab === 'detalhes' ? (
           <TaskDetailEditor task={task} isGuest={isGuest} />

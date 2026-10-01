@@ -58,6 +58,18 @@ export type WorkspacePrefs = {
   home_module_order?: DashboardPriority[]
   /** Meta semanal ou mensal escolhida pelo usuário. */
   life_goal?: import('@simply-life/shared').LifeGoal | null
+  /** Desbloqueios: ícone do avatar ('initials' ou nome do ícone) */
+  profile_avatar_icon?: string
+  /** Desbloqueios: estilo do anel do avatar */
+  profile_avatar_frame?: string
+  /** Desbloqueios: fundo do quadro de tarefas ('nenhum', 'cor:areia', 'padrao:pontos'...) */
+  kanban_fundo?: string
+  /** Foco junto: mostrar aos amigos do Círculo quando estou focando (padrão: não) */
+  share_focus_status?: boolean
+  /** Chama: coleção escolhida (uma peça por semana fechada) */
+  chama_colecao?: import('@simply-life/shared').ChamaCollection | null
+  /** Chama: prêmios reais escolhidos pela pessoa */
+  chama_premios?: import('@simply-life/shared').ChamaPrize[]
   /** Semana (domingo ISO) em que o relatório de humor foi dispensado. */
   mood_report_dismissed_week?: string | null
   /** Wizard Montar seu AXEL concluído */
@@ -66,6 +78,10 @@ export type WorkspacePrefs = {
   enabled_modules?: AppModuleId[]
   /** Metas que não têm coluna própria no hábito local: sono (h) e proteína (g). */
   habit_goals?: { sono?: number; proteina?: number }
+  /** Percentuais da regra de orçamento (necessidades/desejos/reserva). Ausente = 50/30/20. */
+  budget_rule?: import('@simply-life/shared').BudgetRule
+  /** Faixa escolhida pela pessoa para cada categoria, quando difere do padrão. */
+  budget_buckets?: Record<string, import('@simply-life/shared').BudgetBucket>
 }
 
 export const DEFAULT_WORKSPACE_PREFS: WorkspacePrefs = {
@@ -252,6 +268,12 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
         ? raw.home_module_order
         : undefined,
     life_goal: raw?.life_goal ?? null,
+    chama_colecao: raw?.chama_colecao ?? null,
+    share_focus_status: raw?.share_focus_status === true,
+    profile_avatar_icon: typeof raw?.profile_avatar_icon === 'string' ? raw.profile_avatar_icon : 'initials',
+    profile_avatar_frame: typeof raw?.profile_avatar_frame === 'string' ? raw.profile_avatar_frame : 'lisa',
+    kanban_fundo: typeof raw?.kanban_fundo === 'string' ? raw.kanban_fundo : 'nenhum',
+    chama_premios: Array.isArray(raw?.chama_premios) ? raw.chama_premios : [],
     mood_report_dismissed_week: raw?.mood_report_dismissed_week ?? null,
     color_scheme: scheme,
     enabled_modules: normalizeModules(raw?.enabled_modules),
@@ -334,6 +356,11 @@ export async function saveWorkspacePrefs(patch: Partial<WorkspacePrefs>): Promis
         .update({
           display_name: merged.display_name.trim() || nome,
           axel_calls_you: merged.axel_calls_you.trim() || nome,
+          // desbloqueios: os amigos veem o avatar e a cor escolhidos
+          avatar_style: merged.profile_avatar_icon && merged.profile_avatar_icon !== 'initials'
+            ? `icon:${merged.profile_avatar_icon}`
+            : 'initials',
+          ...(merged.profile_avatar_tint ? { accent: merged.profile_avatar_tint } : null),
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', uid)

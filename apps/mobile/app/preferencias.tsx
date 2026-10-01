@@ -263,7 +263,7 @@ export default function PreferenciasScreen()
                 format={minutesLabel}
               />
               <Text variant="caption" muted>
-                O que sobra do dia depois de compromissos e rotina. O AXEL não enche um dia além disso.
+                Quanto do seu dia você quer para tarefas. Ao encaixar o que você descreve, o AXEL não passa disso num mesmo dia, nem do que a agenda deixa livre. O que não cabe vai para o dia seguinte.
               </Text>
             </OnbBlock>
 

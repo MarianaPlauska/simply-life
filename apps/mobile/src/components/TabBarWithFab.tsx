@@ -1,4 +1,4 @@
-import { View, StyleSheet, useWindowDimensions } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs'
 import { Icon } from '../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -32,14 +32,13 @@ const ROUTE_GROUP: Record<string, AppModuleGroup | undefined> = {
 
 /** Barra compacta + Captura sempre elevada (FAB) */
 const BAR_H = 58
-const FAB = 54
-const GLOW = 66
+const FAB = 52
+const RING = 66
 
 export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
 {
   const { colors, elevation } = useTheme()
   const insets = useSafeAreaInsets()
-  const { width: vw } = useWindowDimensions()
   const openCapture = useCaptureStore((s) => s.openCapture)
   const modules = useModules()
   const activeName = state.routes[Math.max(0, state.index)]?.name ?? 'index'
@@ -61,7 +60,6 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
   const idleFg = colors.navInk
   const activeBg = colors.navActiveBg
   const activeFg = colors.navActiveInk
-  const barW = Math.min(vw - 24, 420)
 
   const renderTab = (route: (typeof routes)[number], i: number) =>
   {
@@ -117,63 +115,47 @@ export function TabBarWithFab({ state, navigation }: BottomTabBarProps)
     )
   }
 
+  // + elevado num anel da cor da barra: sai um pouco acima da borda, como parte da barra
+  const fab = (
+    <View pointerEvents="box-none" style={styles.fabLayer}>
+      <PressableScale
+        accessibilityRole="button"
+        accessibilityLabel={captureFabLabel(capture.kind)}
+        onPress={() =>
+        {
+          hapticLight()
+          openCapture(capture.kind, null, { studio: capture.studio })
+        }}
+        style={[styles.ring, { backgroundColor: barBg }]}
+      >
+        <View style={[styles.fab, { backgroundColor: colors.axelFill, ...elevation.fab }]}>
+          <Icon name="add" size={TOUCH.icon + 2} color={colors.axelOnFill} />
+        </View>
+      </PressableScale>
+    </View>
+  )
+
+  // Barra encaixada na base: largura total, fundo até a borda de baixo e linha fina no topo.
+  // Ocupa o próprio espaço; nada do conteúdo aparece em volta dela. O + fica no meio da barra.
   return (
     <View
-      pointerEvents="box-none"
-      style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 8) }]}
+      style={[
+        styles.wrap,
+        {
+          backgroundColor: barBg,
+          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopColor: colors.hairline,
+          paddingBottom: Math.max(insets.bottom, 8),
+        },
+      ]}
     >
-      <View style={[styles.stage, { width: barW, alignSelf: 'center' }]}>
-        <View
-          style={[
-            styles.bar,
-            {
-              height: BAR_H,
-              backgroundColor: barBg,
-              borderWidth: StyleSheet.hairlineWidth,
-              borderColor: colors.navBorder,
-              ...elevation.bar,
-            },
-          ]}
-        >
-          {left.map((route, i) => renderTab(route, i))}
-          <View style={styles.fabGap} />
-          {right.map((route, i) => renderTab(route, i + left.length))}
-          {Array.from({ length: pad }).map((_, i) => <View key={`pad-${i}`} style={styles.slot} />)}
-        </View>
-
-        {/* Captura sempre elevada */}
-        <PressableScale
-          accessibilityRole="button"
-          accessibilityLabel={captureFabLabel(capture.kind)}
-          onPress={() =>
-          {
-            hapticLight()
-            openCapture(capture.kind, null, { studio: capture.studio })
-          }}
-          style={styles.fabHit}
-        >
-          <View
-            style={[
-              styles.glow,
-              {
-                backgroundColor: colors.canvas,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.fab,
-                {
-                  backgroundColor: colors.axelFill,
-                  ...elevation.fab,
-                },
-              ]}
-            >
-              <Icon name="add" size={TOUCH.icon + 2} color={colors.axelOnFill} />
-            </View>
-          </View>
-        </PressableScale>
+      <View style={[styles.bar, { height: BAR_H, maxWidth: 560, width: '100%', alignSelf: 'center' }]}>
+        {left.map((route, i) => renderTab(route, i))}
+        <View style={styles.fabGap} />
+        {right.map((route, i) => renderTab(route, i + left.length))}
+        {Array.from({ length: pad }).map((_, i) => <View key={`pad-${i}`} style={styles.slot} />)}
       </View>
+      {fab}
     </View>
   )
 }
@@ -184,47 +166,38 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    paddingHorizontal: 12,
-    backgroundColor: 'transparent',
-  },
-  stage: {
-    height: BAR_H + 22,
-    justifyContent: 'flex-end',
-    overflow: 'visible',
+    paddingTop: 4,
+    paddingHorizontal: 8,
   },
   bar: {
-    borderRadius: 999,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 4,
   },
   slot: {
     flex: 1,
-    minHeight: 44,
+    minHeight: 48,
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabInner: {
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 40,
+    minHeight: 44,
   },
   fabGap: {
-    width: GLOW,
+    width: RING,
   },
-  fabHit: {
+  fabLayer: {
     position: 'absolute',
-    alignSelf: 'center',
-    top: 0,
-    width: GLOW,
-    height: GLOW,
+    left: 0,
+    right: 0,
+    top: -(RING / 2) + 14,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  glow: {
-    width: GLOW,
-    height: GLOW,
-    borderRadius: GLOW / 2,
+  ring: {
+    width: RING,
+    height: RING,
+    borderRadius: RING / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },

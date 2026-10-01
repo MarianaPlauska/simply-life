@@ -4,6 +4,7 @@ import {
   resolveCategoryMeta,
   saveCategoryMeta,
   slugCategoryId,
+  STARTER_CATEGORIES,
   visibleCategoryIds,
   type CategoryMeta,
   type CategoryMetaMap,
@@ -37,6 +38,16 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
       const merged: CategoryMetaMap = { ...get().map, ...remote }
       set({ map: merged })
       await saveCategoryMeta(merged)
+    }
+    // categorias prontas: só as que ainda não existem (nem excluídas) neste aparelho ou no banco
+    const missing = STARTER_CATEGORIES.filter((c) => !get().map[c.id])
+    if (missing.length)
+    {
+      const map: CategoryMetaMap = { ...get().map }
+      for (const c of missing) map[c.id] = { label: c.label, icon: c.icon, color: c.color, custom: true }
+      set({ map })
+      await saveCategoryMeta(map)
+      for (const c of missing) void upsertCategoryMetaRemote(c.id, map[c.id] as CategoryMeta)
     }
   },
 
@@ -76,7 +87,9 @@ export const useCategoryMetaStore = create<State>((set, get) => ({
   remove: async (id) =>
   {
     const current = resolveCategoryMeta(id, get().map)
-    if (current.custom)
+    // categoria pronta não é apagada, só escondida: senão voltaria sozinha na próxima abertura
+    const starter = STARTER_CATEGORIES.some((c) => c.id === id)
+    if (current.custom && !starter)
     {
       const map = { ...get().map }
       delete map[id]

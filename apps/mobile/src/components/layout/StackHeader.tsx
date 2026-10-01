@@ -17,7 +17,8 @@ export function StackHeader({
   const router = useRouter()
 
   return (
-    <View style={{ gap: space.xs, marginBottom: space.xl }}>
+    // respiro no topo: no navegador e em aparelhos sem notch a área segura é zero
+    <View style={{ gap: space.xs, paddingTop: space.lg, marginBottom: space.xl }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <Pressable
           onPress={() => router.back()}

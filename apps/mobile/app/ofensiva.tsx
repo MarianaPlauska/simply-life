@@ -5,6 +5,7 @@ import { Icon } from '../src/ui/Icon'
 import {
   buildStreakMonth,
   buildStreakWeek,
+  CHAMA_WEEK_GOAL_DAYS,
   consecutiveLocalActivity,
   localTodayIso,
   nextStreakMilestone,
@@ -24,6 +25,7 @@ import {
   type LifeActionKind,
 } from '../src/store/activityStore'
 import { METAS_HREF } from '../src/lib/sharedGoalRoutes'
+import { PersonalDivisionCard } from '../src/components/rewards/TrilhaCards'
 
 type Tab = 'sequencia' | 'ativos'
 
@@ -132,7 +134,7 @@ export default function OfensivaScreen()
         </Pressable>
       </View>
       <Text variant="hero" style={{ fontSize: 32, letterSpacing: -0.8, marginBottom: 12 }}>
-        Ofensiva
+        Pique
       </Text>
 
       <PillTabs
@@ -196,7 +198,7 @@ export default function OfensivaScreen()
 
           <View style={{ alignSelf: 'stretch', gap: 8 }}>
             <Text variant="bodyStrong">
-              {todayOk ? 'Bom trabalho hoje.' : 'Ainda dá tempo de fechar o dia.'}
+              {todayOk ? 'Hoje já tem registro.' : 'Hoje ainda não tem registro.'}
             </Text>
             <Text variant="caption" muted>
               {todayOk
@@ -265,6 +267,37 @@ export default function OfensivaScreen()
         </View>
       )}
 
+      <View style={{ marginTop: space.lg }}>
+        <PersonalDivisionCard />
+      </View>
+
+      <Pressable
+        onPress={() => router.push('/colecao' as never)}
+        accessibilityRole="button"
+        accessibilityLabel="Álbum e prêmios"
+        style={({ pressed }) => ({
+          marginTop: space.lg,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 16,
+          padding: space.md,
+          borderRadius: 20,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.cardRim,
+          opacity: pressed ? 0.88 : 1,
+        })}
+      >
+        <Icon name="gift-outline" size={22} color={colors.ink} />
+        <View style={{ flex: 1 }}>
+          <Text variant="bodyStrong">Álbum e prêmios</Text>
+          <Text variant="caption" muted>
+            Cada semana com {CHAMA_WEEK_GOAL_DAYS} dias de registro vira uma peça e conta para o prêmio que você escolheu.
+          </Text>
+        </View>
+        <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
+      </Pressable>
+
       <Pressable
         onPress={() => router.push(METAS_HREF)}
         accessibilityRole="button"
@@ -316,7 +349,13 @@ export default function OfensivaScreen()
               Abrir o app marca o dia como em andamento. Concluir tarefa, anotar, registrar humor, lançar gasto, beber água ou fechar um timer fecha o dia com fogo.
             </Text>
             <Text variant="body" muted>
-              Um dia sem nada quebra a sequência. O calendário mostra verde-cobre nos dias feitos, âmbar se só abriu, e vermelho se passou em branco.
+              Um dia sem registro recomeça a contagem de dias seguidos. O recorde fica guardado e nada mais se perde.
+            </Text>
+            <Text variant="body" muted>
+              Semana fechada: 4 dias com registro entre segunda e domingo. Cada semana fechada adiciona uma peça à sua coleção e conta para os seus prêmios.
+            </Text>
+            <Text variant="body" muted>
+              O calendário mostra verde-cobre nos dias com registro, âmbar se só abriu o app, e vermelho nos dias sem nada.
             </Text>
             <PrimaryButton label="Entendi" onPress={() => setHelp(false)} />
           </Pressable>

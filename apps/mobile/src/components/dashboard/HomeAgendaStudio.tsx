@@ -19,6 +19,7 @@ import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
+import { useActionableTasks } from '../../hooks/useActionableTasks'
 import { ExpandableSection } from './ExpandableSection'
 
 type Props = {
@@ -58,7 +59,8 @@ export function HomeAgendaStudio({ tasks }: Props)
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<DayMode>('dia')
 
-  const priority = useMemo(() => priorityTodayTasks(tasks, new Date(), 6), [tasks])
+  const actionable = useActionableTasks(tasks)
+  const priority = useMemo(() => priorityTodayTasks(actionable, new Date(), 6), [actionable])
   const timeline = useMemo(() => partitionTodayTimeline(tasks), [tasks])
   const pending = priority.length
 

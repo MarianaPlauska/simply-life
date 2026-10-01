@@ -16,6 +16,7 @@ import { useTheme } from '../theme/ThemeProvider'
 import { useAccents } from '../theme/useAccents'
 import { useKanbanListsStore } from '../store/kanbanListsStore'
 import { useDataStore } from '../store/dataStore'
+import { TaskPeopleEditor, type DraftHelper } from './kanban/TaskPeopleEditor'
 
 export type CaptureTaskDraft = {
   titulo: string
@@ -28,6 +29,8 @@ export type CaptureTaskDraft = {
   listId: string | null
   checklist: string[]
   dependsOnId: string | null
+  /** outras pessoas na tarefa: quem, o que faz e se entra antes ou no meio */
+  pessoas: DraftHelper[]
 }
 
 const STATUS: { id: TaskStatus; label: string }[] = [
@@ -50,6 +53,7 @@ export function emptyCaptureTaskDraft(listId: string | null): CaptureTaskDraft
     listId,
     checklist: [],
     dependsOnId: null,
+    pessoas: [],
   }
 }
 
@@ -252,6 +256,13 @@ export function CaptureTaskForm({ draft, onChange }: Props)
           onPress={addTodo}
           style={{ backgroundColor: colors.hairline }}
         />
+      </View>
+
+      <View style={{ gap: 12 }}>
+        <Text variant="caption" muted>
+          Envolve outra pessoa?
+        </Text>
+        <TaskPeopleEditor value={draft.pessoas} onChange={(pessoas) => patch({ pessoas })} />
       </View>
 
       <View style={{ gap: 12 }}>

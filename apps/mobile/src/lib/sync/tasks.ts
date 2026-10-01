@@ -49,6 +49,7 @@ function mapTask(row: Record<string, unknown>): MobileTask
     status,
     dataVencimento: due ? due.slice(0, 10) : null,
     concluidoEm: row.concluido_em ? String(row.concluido_em) : null,
+    criadoEm: row.created_at ? String(row.created_at) : null,
     horaMinutos: parseHoraMinutos(due),
     estimativaMinutos: Number(row.estimativa_minutos) || 30,
     progresso,

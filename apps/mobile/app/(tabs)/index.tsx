@@ -48,6 +48,7 @@ import { HomeDesktopStage } from '../../src/components/dashboard/HomeDesktopStag
 import { TabShell } from '../../src/components/dashboard/TabShell'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { usePrefsStore } from '../../src/store/prefsStore'
+import { useActionableTasks } from '../../src/hooks/useActionableTasks'
 import { normalizeHomeMetrics } from '../../src/lib/homeMetrics'
 import { resolveAxelName } from '../../src/lib/axelName'
 import type { DashboardPriority } from '../../src/lib/dashboardWidgets'
@@ -91,9 +92,10 @@ export default function DashboardScreen()
     [tasks, todayIso],
   )
   const gastosMes = monthExpenseTotal(finance) ?? 0
+  const actionable = useActionableTasks(tasks)
   const focusTask = useMemo(
-    () => priorityTodayTasks(tasks, new Date(), 1)[0]?.task ?? null,
-    [tasks],
+    () => priorityTodayTasks(actionable, new Date(), 1)[0]?.task ?? null,
+    [actionable],
   )
   const agua = findHabit(habits, 'agua')
   const sono = findHabit(habits, 'sono')
@@ -519,7 +521,7 @@ export default function DashboardScreen()
                   { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                   { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                   { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                  { label: 'Ofensiva', subtitle: 'Dias no app e no plano', href: '/ofensiva' },
+                  { label: 'Pique', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
                   { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
                 ] as const
               ).map((item, i, arr) => (

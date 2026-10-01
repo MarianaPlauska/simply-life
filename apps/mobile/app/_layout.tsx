@@ -8,11 +8,13 @@ import { colorsFor } from '@simply-life/ui-tokens'
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { pingPresence } from '../src/lib/presence'
+import { useFocusPresence } from '../src/hooks/useFocusPresence'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { useActivityStore } from '../src/store/activityStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { readColorSchemeSync } from '../src/lib/sync/prefs'
 import { CelebrationOverlay } from '../src/components/dashboard/CelebrationOverlay'
+import { TaskRewardToast } from '../src/components/rewards/TaskRewardToast'
 import { TaskEvolveSheet } from '../src/components/kanban/TaskEvolveSheet'
 import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
@@ -42,6 +44,9 @@ function RootNavigator()
     if (!userId) return
     markOpen()
   }, [userId, markOpen])
+
+  // foco junto: avisa os amigos (se a pessoa permitiu) enquanto o foco roda
+  useFocusPresence()
 
   useEffect(() =>
   {
@@ -104,6 +109,9 @@ function RootNavigator()
           options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
         />
         <Stack.Screen name="ofensiva" />
+        <Stack.Screen name="juntos" />
+        <Stack.Screen name="colecao" />
+        <Stack.Screen name="desbloqueios" />
         <Stack.Screen name="calm/box-breathing" />
         <Stack.Screen name="calm/grounding" />
         <Stack.Screen name="tcc/thought-record" />
@@ -123,6 +131,7 @@ function RootNavigator()
         />
       </Stack>
       <CelebrationOverlay />
+      <TaskRewardToast />
       <TaskEvolveSheet />
       <ConfirmDialogHost />
     </>

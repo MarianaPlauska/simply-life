@@ -104,7 +104,7 @@ export function GoalMembersRow({ members, max = 5 }: { members: SharedGoalMember
     <View style={{ flexDirection: 'row' }}>
       {members.slice(0, max).map((m, i) => (
         <View key={m.userId} style={{ marginLeft: i === 0 ? 0 : -10 }}>
-          <PersonAvatar name={m.isMe ? 'Você' : m.displayName} accent={m.accent} size={36} ring />
+          <PersonAvatar name={m.isMe ? 'Você' : m.displayName} accent={m.accent} avatarStyle={m.avatarStyle} size={36} ring />
         </View>
       ))}
     </View>

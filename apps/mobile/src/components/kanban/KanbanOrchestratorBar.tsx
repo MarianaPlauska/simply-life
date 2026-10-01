@@ -6,6 +6,7 @@ import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useBoardReplanStore } from '../../store/boardReplanStore'
 import { useOrchestratorPrefsStore } from '../../store/orchestratorPrefsStore'
+import { useActionableTasks } from '../../hooks/useActionableTasks'
 
 type Props = { tasks: MobileTask[] }
 
@@ -18,7 +19,9 @@ export function KanbanOrchestratorBar({ tasks }: Props)
   const run = useBoardReplanStore((s) => s.run)
   const autoReplan = useOrchestratorPrefsStore((s) => s.autoReplan)
   const patchPrefs = useOrchestratorPrefsStore((s) => s.patch)
-  const top = buildOrchestrationHints(tasks)[0]
+  // próxima ação nunca é algo que está esperando outra pessoa
+  const actionable = useActionableTasks(tasks)
+  const top = buildOrchestrationHints(actionable)[0]
   const hasOpen = tasks.some((t) => t.status !== 'done')
   if (!top && !hasOpen) return null
 

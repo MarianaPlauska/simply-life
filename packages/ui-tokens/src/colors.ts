@@ -120,6 +120,12 @@ export type ColorTokens = {
   navActiveInk: string
   /** Pontinho sob a aba ativa (detalhe coral, não bloco) */
   navActiveDot: string
+  /**
+   * Fechar e dispensar: ameixa da paleta (plum). Complementar do petróleo
+   * (petróleo = escolher, ameixa = sair disso); não é coral (ação) nem rosa (apagar).
+   */
+  dismiss: string
+  dismissMuted: string
   /** Cartão de destaque (progresso de hoje, painel de saúde, busca) */
   featureBg: string
   featureInk: string
@@ -180,6 +186,8 @@ export const COLOR_DARK: ColorTokens = {
   navActiveBg: 'transparent',
   navActiveInk: '#EEF2F0',
   navActiveDot: BRAND.coral,
+  dismiss: '#C889BD',
+  dismissMuted: 'rgba(200, 137, 189, 0.16)',
   featureBg: '#232C2B',
   featureInk: '#EEF2F0',
   featureMuted: '#9FB0AC',
@@ -236,6 +244,8 @@ export const COLOR_LIGHT: ColorTokens = {
   /** 10,1:1 no navActiveBg */
   navActiveInk: BRAND.petroleo,
   navActiveDot: BRAND.coral,
+  dismiss: '#832E65',
+  dismissMuted: 'rgba(131, 46, 101, 0.10)',
   featureBg: '#E4EDEA',
   /** 10,2:1 */
   featureInk: BRAND.petroleo,

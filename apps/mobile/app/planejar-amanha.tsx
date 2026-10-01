@@ -35,6 +35,7 @@ import { useAuthStore } from '../src/store/authStore'
 import { useDataStore } from '../src/store/dataStore'
 import { usePlanLogStore } from '../src/store/planLogStore'
 import { useCalendarStore } from '../src/store/calendarStore'
+import { useActionableTasks } from '../src/hooks/useActionableTasks'
 import { useOrchestratorContext } from '../src/components/TaskPromptComposer'
 import { readTaskPromptLocally, refineTaskPromptWithAi } from '../src/lib/taskPromptApi'
 import { insertDecisionEvents } from '../src/lib/sync/decisionLog'
@@ -101,14 +102,16 @@ export default function PlanTomorrowScreen()
   }, [hydrateLog, source, refreshAll, isGuest])
 
   const mode = planModeFor(checkin)
-  const carryList = useMemo(() => carryOverTasks(tasks), [tasks])
+  // o que está esperando outra pessoa não entra no plano de amanhã
+  const actionable = useActionableTasks(tasks)
+  const carryList = useMemo(() => carryOverTasks(actionable), [actionable])
   const alreadyTomorrow = useMemo(
     () => tasks.filter((t) => t.status !== 'done' && t.dataVencimento?.slice(0, 10) === tomorrow),
     [tasks, tomorrow],
   )
   const plan = useMemo(
-    () => buildTomorrowPlan({ tasks, drafts, carry, checkin, ctx, lighter, events: calendarEvents }),
-    [tasks, drafts, carry, checkin, ctx, lighter, calendarEvents],
+    () => buildTomorrowPlan({ tasks: actionable, drafts, carry, checkin, ctx, lighter, events: calendarEvents }),
+    [actionable, drafts, carry, checkin, ctx, lighter, calendarEvents],
   )
 
   const addFromPrompt = async () =>

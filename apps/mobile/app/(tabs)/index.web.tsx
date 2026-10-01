@@ -216,7 +216,7 @@ export default function DashboardScreenWeb()
                 { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                 { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                 { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                { label: 'Ofensiva', subtitle: 'Dias no app e no plano', href: '/ofensiva' },
+                { label: 'Pique', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
                 { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
               ] as const
             ).map((item, i, arr) => (

@@ -4,7 +4,7 @@ import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TAB_BAR_CONTENT_HEIGHT } from '@simply-life/ui-tokens'
 import { BOARD_MOVE_LABEL, describeDayPt, replanHeadline, type BoardMove } from '@simply-life/shared'
-import { Text, PrimaryButton } from '../../ui'
+import { Text, PrimaryButton, CloseButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useBoardReplanStore } from '../../store/boardReplanStore'
 import { useWorkspace } from '../../layout/useWorkspace'
@@ -115,9 +115,7 @@ export function BoardReplanToast()
               </Pressable>
             </>
           ) : null}
-          <Pressable onPress={dismiss} accessibilityRole="button" accessibilityLabel="Fechar aviso" hitSlop={8}>
-            <Icon name="close" size={18} color={colors.inkMuted} />
-          </Pressable>
+          <CloseButton onPress={dismiss} label="Fechar aviso" size={32} />
         </View>
       </View>
       {sheetOpen ? <MovesSheet onClose={() => setSheetOpen(false)} /> : null}
@@ -254,9 +252,7 @@ function ProposalBanner({ bottom }: { bottom: number })
           <Pressable onPress={() => setOpen(true)} accessibilityRole="button" accessibilityLabel="Ver sugestões do Axel" hitSlop={8}>
             <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>Ver</Text>
           </Pressable>
-          <Pressable onPress={dismissProposal} accessibilityRole="button" accessibilityLabel="Deixar como está" hitSlop={8}>
-            <Icon name="close" size={18} color={colors.inkMuted} />
-          </Pressable>
+          <CloseButton onPress={dismissProposal} label="Deixar como está" size={32} />
         </View>
       </View>
       {open ? (

@@ -177,7 +177,7 @@ export default function AmigosScreen()
           ) : (
             friends.map((f) => (
               <Card key={f.userId} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-                <PersonAvatar name={f.displayName} accent={f.accent} />
+                <PersonAvatar name={f.displayName} accent={f.accent} avatarStyle={f.avatarStyle} />
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text variant="bodyStrong" numberOfLines={1}>
                     {f.displayName}

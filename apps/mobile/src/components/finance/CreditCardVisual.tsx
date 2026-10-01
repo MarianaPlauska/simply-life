@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ContactlessPaymentIcon } from 'phosphor-react-native/src/icons/ContactlessPayment'
-import { formatBRL, type FinanceCard, type FinanceCardGradient } from '@simply-life/shared'
+import { cardFaturaAbertaDisplay, formatBRL, type FinanceCard, type FinanceCardGradient } from '@simply-life/shared'
+import { useDataStore } from '../../store/dataStore'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -19,9 +20,17 @@ export const CARD_SKINS: Record<FinanceCardGradient, { label: string; from: stri
   sunset: { label: 'Âmbar', from: '#8A5E0E', to: '#40300A' },
   purple: { label: 'Ameixa', from: '#5B3A5E', to: '#2A1B2C' },
   obsidian: { label: 'Carvão', from: '#3A3F3F', to: '#151A1A' },
+  // cores mais vivas, para quem quer o cartão parecido com o do banco (também 4,5:1 com branco)
+  wine: { label: 'Vermelho', from: '#A3283F', to: '#4E1220' },
+  green: { label: 'Verde', from: '#23794F', to: '#0F3A25' },
+  blue: { label: 'Azul', from: '#2F5DA3', to: '#142B52' },
+  violet: { label: 'Roxo', from: '#5E44A8', to: '#2A1E54' },
+  rose: { label: 'Rosa', from: '#A33A6E', to: '#4E1A35' },
 }
 
-export const CARD_SKIN_ORDER: FinanceCardGradient[] = ['copper', 'ocean', 'mint', 'sunset', 'purple', 'obsidian']
+export const CARD_SKIN_ORDER: FinanceCardGradient[] = [
+  'copper', 'wine', 'rose', 'sunset', 'mint', 'green', 'ocean', 'blue', 'violet', 'purple', 'obsidian',
+]
 
 const INK = '#FFFFFF'
 const INK_SOFT = 'rgba(255,255,255,0.86)'
@@ -33,13 +42,31 @@ type Props = {
   onPress?: () => void
 }
 
+/** Dias até o próximo dia `day` do mês (0 = hoje). Meses curtos usam o último dia. */
+function daysUntilDay(day: number, ref = new Date()): number
+{
+  const today = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate())
+  const clampDay = (y: number, m: number) => Math.min(day, new Date(y, m + 1, 0).getDate())
+  let target = new Date(today.getFullYear(), today.getMonth(), clampDay(today.getFullYear(), today.getMonth()))
+  if (target < today)
+  {
+    const y = today.getMonth() === 11 ? today.getFullYear() + 1 : today.getFullYear()
+    const m = (today.getMonth() + 1) % 12
+    target = new Date(y, m, clampDay(y, m))
+  }
+  return Math.round((target.getTime() - today.getTime()) / 86_400_000)
+}
+
 /** Cartão de crédito com cara de cartão: nome, chip, disponível, fatura, vencimento, finais e validade. */
 export function CreditCardVisual({ card, width, selected, onPress }: Props)
 {
   const { colors } = useTheme()
+  const txs = useDataStore((s) => s.finance)
   const skin = CARD_SKINS[card.tipoGradiente ?? 'copper'] ?? CARD_SKINS.copper
-  const fatura = card.faturaAberta ?? 0
+  // fatura pelas compras do cartão no mês; sem gasto, o disponível é o limite cheio
+  const fatura = cardFaturaAbertaDisplay(card, txs)
   const disponivel = Math.max(0, card.limite - fatura)
+  const dueIn = daysUntilDay(card.diaVencimento)
   const usage = card.limite > 0 ? Math.min(100, (fatura / card.limite) * 100) : 0
   const blocked = card.status === 'bloqueado'
   const digits = (card.numeroMascarado || '').replace(/\D/g, '').slice(-4) || '0000'
@@ -129,7 +156,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
               Fatura {formatBRL(fatura)}
             </Text>
             <Text variant="micro" style={{ color: INK, fontWeight: '700' }}>
-              Vence dia {card.diaVencimento}
+              Vence dia {card.diaVencimento}{dueIn === 0 ? ', hoje' : dueIn === 1 ? ', amanhã' : `, em ${dueIn} dias`}
             </Text>
           </View>
         </View>

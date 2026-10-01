@@ -54,6 +54,18 @@ export default function FinanceiroScreen()
     }, []),
   )
 
+  // pedido de abrir uma aba feito de dentro da própria Carteira (ex.: "Cadastrar salário")
+  useEffect(() =>
+    useFinanceFocusStore.subscribe((st) =>
+    {
+      if (!st.pending) return
+      const hit = useFinanceFocusStore.getState().consume()
+      if (!hit) return
+      setCardsFocus(false)
+      setTab(hit.tab)
+      setContasSub(hit.contasSub)
+    }), [])
+
   const despesas = cashExpenseTotal(txs)
   const receitas = monthIncomeTotal(txs)
   const saldo = receitas - despesas

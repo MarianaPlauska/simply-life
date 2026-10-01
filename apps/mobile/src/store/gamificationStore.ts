@@ -9,6 +9,8 @@ import {
   appendHistory,
   nextMilestone,
   localTodayIso,
+  weekStartIso,
+  xpAreaFromTitle,
   type AxelHistoryEvent,
   type Achievement,
 } from '@simply-life/shared'
@@ -20,9 +22,39 @@ const OWNED_KEY = 'simply-life-shop-owned'
 const HIST_KEY = 'simply-life-axel-history'
 const STREAK_KEY = 'simply-life-streak'
 const STREAK_DAY_KEY = 'simply-life-streak-day'
+/** XP por semana (segunda ISO → XP): base da divisão contra você mesmo */
+const WEEK_XP_KEY = 'simply-life-xp-weeks'
+const WEEK_XP_AREA_KEY = 'simply-life-xp-weeks-area'
 
 const storage = persistStorage
 let loaded = false
+
+function readWeekXp(): Record<string, number>
+{
+  try
+  {
+    const raw = storage.getItem(WEEK_XP_KEY)
+    const parsed = raw ? (JSON.parse(raw) as Record<string, number>) : {}
+    return parsed && typeof parsed === 'object' ? parsed : {}
+  }
+  catch
+  {
+    return {}
+  }
+}
+
+function readWeekXpArea(): Record<string, Partial<Record<'tarefas' | 'foco' | 'treino', number>>>
+{
+  try
+  {
+    const raw = storage.getItem(WEEK_XP_AREA_KEY)
+    return raw ? JSON.parse(raw) : {}
+  }
+  catch
+  {
+    return {}
+  }
+}
 
 function readNum(key: string, fallback = 0): number
 {
@@ -66,6 +98,10 @@ type GamificationState = {
   owned: string[]
   history: AxelHistoryEvent[]
   streak: number
+  /** XP ganho em cada semana (chave = segunda-feira ISO) */
+  weekXp: Record<string, number>
+  /** XP por semana e área temática (tarefas, foco, treino): base das ligas temáticas */
+  weekXpArea: Record<string, Partial<Record<'tarefas' | 'foco' | 'treino', number>>>
   celebration: Celebration
   hydrate: () => void
   grantXp: (amount: number, title: string, detail?: string) => number
@@ -83,6 +119,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   owned: [],
   history: [],
   streak: 0,
+  weekXp: {},
+  weekXpArea: {},
   celebration: null,
 
   hydrate: () =>
@@ -100,6 +138,8 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       owned: readList(OWNED_KEY),
       history: readHistory(),
       streak: readNum(STREAK_KEY),
+      weekXp: readWeekXp(),
+      weekXpArea: readWeekXpArea(),
     })
   },
 
@@ -119,10 +159,23 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       detail: detail ?? `+${granted} XP`,
     })
     storage.setItem(HIST_KEY, JSON.stringify(history))
+    const wk = weekStartIso(localTodayIso())
+    const weekXp = { ...get().weekXp, [wk]: (get().weekXp[wk] ?? 0) + granted }
+    storage.setItem(WEEK_XP_KEY, JSON.stringify(weekXp))
+    const area = xpAreaFromTitle(title)
+    let weekXpArea = get().weekXpArea
+    if (area)
+    {
+      const cur = weekXpArea[wk] ?? {}
+      weekXpArea = { ...weekXpArea, [wk]: { ...cur, [area]: (cur[area] ?? 0) + granted } }
+      storage.setItem(WEEK_XP_AREA_KEY, JSON.stringify(weekXpArea))
+    }
     set({
       totalXp,
       gold,
       history,
+      weekXp,
+      weekXpArea,
     })
     return granted
   },

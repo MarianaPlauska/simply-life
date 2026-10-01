@@ -8,13 +8,14 @@ import {
   useWindowDimensions,
 } from 'react-native'
 import { Icon } from '../ui/Icon'
-import { useEffect, useState, Fragment } from 'react'
+import { useEffect, useState, Fragment, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Text, PrimaryButton, PillTabs, Field } from '../ui'
+import { Text, PrimaryButton, PillTabs, Field, CloseButton } from '../ui'
 import { useTheme, ThemeProvider } from '../theme/ThemeProvider'
 import { useCaptureStore, type CaptureKind } from '../store/captureStore'
 import { useAuthStore } from '../store/authStore'
 import { useDataStore } from '../store/dataStore'
+import { useTaskWaitStore } from '../store/taskWaitStore'
 import { hapticLight } from '../lib/haptics'
 import { MoodFaceRow } from './MoodFace'
 import {
@@ -23,6 +24,7 @@ import {
 } from '../lib/partnerWorkspace'
 import {
   applyTaskMeta,
+  stampPlannedHelpers,
   planTaskDrafts,
   monthPaidKey,
   todayIso,
@@ -177,6 +179,7 @@ export function CaptureSheet()
   const [parcelas, setParcelas] = useState(1)
   const [taskDraft, setTaskDraft] = useState<CaptureTaskDraft>(() => emptyCaptureTaskDraft(null))
   const [promptState, setPromptState] = useState<TaskPromptState>(() => emptyTaskPromptState())
+  const organizeRef = useRef<(() => void) | null>(null)
   /** null = escrevendo; lista = revisando o que o app entendeu */
   const [dumpItems, setDumpItems] = useState<DumpItem[] | null>(null)
   const [dumpReading, setDumpReading] = useState(false)
@@ -373,7 +376,12 @@ export function CaptureSheet()
       }
       else if (kind === 'task')
       {
-        const notas = applyTaskMeta(taskDraft.descricao, taskDraft.listId, taskDraft.dependsOnId)
+        // pessoas "no meio" ficam planejadas nas notas; quem entra "antes" abre a espera já na criação
+        const notas = stampPlannedHelpers(
+          applyTaskMeta(taskDraft.descricao, taskDraft.listId, taskDraft.dependsOnId),
+          taskDraft.pessoas.filter((p) => p.quando === 'meio'),
+        )
+        const first = taskDraft.pessoas.find((p) => p.quando === 'antes')
         const n = Number(taskDraft.estimativa)
         await addTask(taskDraft.titulo.trim(), isGuest, notas, {
           dataVencimento: taskDraft.due.trim() || null,
@@ -383,6 +391,17 @@ export function CaptureSheet()
           status: taskDraft.status,
           checklist: taskDraft.checklist,
         })
+        const created = useDataStore.getState().tasks[0]
+        if (first && created && created.titulo === taskDraft.titulo.trim())
+        {
+          useTaskWaitStore.getState().start({
+            taskId: created.id,
+            pessoa: first.pessoa,
+            amigoId: first.amigoId,
+            motivo: first.motivo,
+            canal: null,
+          })
+        }
       }
       else if (kind === 'expense')
       {
@@ -582,6 +601,15 @@ export function CaptureSheet()
     </View>
   )
 
+  // "Organizar com Axel" no rodapé da ficha, na zona do polegar
+  const organizeButton = (
+    <PrimaryButton
+      label="Organizar com Axel"
+      disabled={promptState.prompt.trim().length < 2}
+      onPress={() => organizeRef.current?.()}
+    />
+  )
+
   const primaryAction = (
     <PrimaryButton
       label={saveLabel}
@@ -633,7 +661,7 @@ export function CaptureSheet()
         />
       </View>
       {captureMode === 'prompt' ? (
-        <TaskPromptComposer state={promptState} onChange={setPromptState} />
+        <TaskPromptComposer state={promptState} onChange={setPromptState} organizeRef={organizeRef} />
       ) : (
         <CaptureTaskForm draft={taskDraft} onChange={setTaskDraft} />
       )}
@@ -678,7 +706,7 @@ export function CaptureSheet()
                 ) : null}
                 {saved ? (
                   <PrimaryButton label={savedLabel ?? 'Salvo'} variant="success" disabled />
-                ) : promptMode && promptIncluded === 0 ? null : (
+                ) : promptMode && promptIncluded === 0 ? organizeButton : (
                   // no modo Descrever, o botão da vez é "Organizar com Axel": Salvar só depois
                   actionRow
                 )}
@@ -766,22 +794,7 @@ export function CaptureSheet()
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <Text variant="section">Captura rápida</Text>
-              <Pressable
-                onPress={resetAndClose}
-                accessibilityRole="button"
-                accessibilityLabel="Fechar captura"
-                hitSlop={10}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 12,
-                  backgroundColor: colors.elevated,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Icon name="close" size={20} color={colors.inkMuted} />
-              </Pressable>
+              <CloseButton onPress={resetAndClose} label="Fechar captura" />
             </View>
             <PillTabs
               tabs={TABS}
@@ -880,7 +893,7 @@ export function CaptureSheet()
                   {savedLabel ?? 'Salvo'}
                 </Text>
               </View>
-            ) : (
+            ) : promptMode && promptIncluded === 0 ? organizeButton : (
               actionRow
             )}
           </Pressable>

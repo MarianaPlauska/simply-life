@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { View, ScrollView, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../ui/Icon'
@@ -180,10 +180,12 @@ function sourceLabel(result: TaskPromptResult): string
 type Props = {
   state: TaskPromptState
   onChange: (next: TaskPromptState) => void
+  /** A ficha mostra "Organizar com Axel" no rodapé (zona do polegar) e chama por aqui */
+  organizeRef?: MutableRefObject<(() => void) | null>
 }
 
 /** Captura por prompt solto: o Axel interpreta, propõe alternativas e sinaliza parâmetros. */
-export function TaskPromptComposer({ state, onChange }: Props)
+export function TaskPromptComposer({ state, onChange, organizeRef }: Props)
 {
   const { colors } = useTheme()
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -234,6 +236,8 @@ export function TaskPromptComposer({ state, onChange }: Props)
   })
 
   /** 1) leitura local na hora · 2) IA refina em segundo plano */
+  // a ficha chama pelo rodapé; a função só roda no toque, depois de declarada abaixo
+  if (organizeRef) organizeRef.current = () => void organize()
   const organize = async () =>
   {
     const prompt = state.prompt.trim()
@@ -304,11 +308,15 @@ export function TaskPromptComposer({ state, onChange }: Props)
         />
       </View>
 
-      <PrimaryButton
-        label={state.drafts.length ? 'Reorganizar com Axel' : 'Organizar com Axel'}
-        disabled={state.prompt.trim().length < 2}
-        onPress={() => void organize()}
-      />
+      {/* com a ficha no controle, o primeiro "Organizar" fica no rodapé; aqui só o de refazer */}
+      {!organizeRef || state.drafts.length ? (
+        <PrimaryButton
+          label={state.drafts.length ? 'Reorganizar com Axel' : 'Organizar com Axel'}
+          variant={organizeRef ? 'secondary' : 'primary'}
+          disabled={state.prompt.trim().length < 2}
+          onPress={() => void organize()}
+        />
+      ) : null}
 
       {state.result ? (
         <View style={{ gap: 12 }}>

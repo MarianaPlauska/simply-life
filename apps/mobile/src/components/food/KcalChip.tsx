@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, View } from 'react-native'
 import { clampItemKcal, formatItemKcal, isEstimatedKcalSource, type FoodItem } from '@simply-life/shared'
-import { Field, PrimaryButton, Text } from '../../ui'
+import { Field, PrimaryButton, Text, CloseButton } from '../../ui'
 import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
 
@@ -88,9 +88,7 @@ export function KcalEditSheet({ item, onClose, onSave }: SheetProps)
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
           <Icon name="flame-outline" size={20} color={colors.brand} />
           <Text variant="section" style={{ flex: 1 }}>{`Calorias de ${item.nome}`}</Text>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Fechar" hitSlop={10}>
-            <Icon name="close" size={20} color={colors.inkMuted} />
-          </Pressable>
+          <CloseButton onPress={onClose} size={36} />
         </View>
         {estimated ? (
           <Text variant="caption" muted>
