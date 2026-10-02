@@ -1,42 +1,28 @@
-import { useMemo } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
-import {
-  consecutiveLocalActivity,
-  streakPhrase,
-  uniqueIsoDates,
-  type MobileTask,
-} from '@simply-life/shared'
+import { eloFrase, type MobileTask } from '@simply-life/shared'
 import { Text, ProgressRing, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
-import { useDataStore } from '../../store/dataStore'
-import { actionIsos, useActivityStore } from '../../store/activityStore'
+import { useAccents } from '../../theme/useAccents'
+import { useElo } from '../../hooks/useElo'
 
 type Props = {
-  tasks: MobileTask[]
+  /** mantido por compatibilidade; o elo vem de useElo (tarefas entram pela conclusão) */
+  tasks?: MobileTask[]
 }
 
 /** Card de insight — fundo suave, CTA, sem caixa dentro de caixa. */
-export function HomeActivityHeatmap({ tasks }: Props)
+export function HomeActivityHeatmap(_props: Props)
 {
   const { colors } = useTheme()
+  const accents = useAccents()
   const router = useRouter()
-  const humor = useDataStore((s) => s.humor) ?? []
-  const days = useActivityStore((s) => s.days)
-
-  const { current, record, weekLogged } = useMemo(() =>
-  {
-    const taskDays = tasks
-      .filter((t) => t.status === 'done')
-      .map((t) => t.dataVencimento)
-    const moodDays = humor.map((h) => h.data)
-    return consecutiveLocalActivity(
-      uniqueIsoDates([...taskDays, ...moodDays, ...actionIsos(days)]),
-    )
-  }, [tasks, humor, days])
+  const elo = useElo()
+  const current = elo.atual
+  const record = elo.recorde
 
   const ringPct = Math.min(100, Math.round((current / 30) * 100))
-  const phrase = streakPhrase(current, weekLogged)
+  const phrase = eloFrase(elo)
 
   return (
     <View
@@ -44,7 +30,7 @@ export function HomeActivityHeatmap({ tasks }: Props)
         borderRadius: 20,
         padding: 20,
         gap: 16,
-        backgroundColor: colors.axelMuted,
+        backgroundColor: colors.elevated,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
@@ -52,18 +38,18 @@ export function HomeActivityHeatmap({ tasks }: Props)
           progress={ringPct}
           size={64}
           strokeWidth={5}
-          color={colors.axel}
+          color={accents.data}
           centerLabel={String(current)}
         />
         <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
           <Text variant="caption" muted>
-            Sequência
+            Elo
           </Text>
           <Text variant="bodyStrong" style={{ fontSize: 17 }}>
-            {current} dias de ritmo
+            {current} dia{current === 1 ? '' : 's'} cumprido{current === 1 ? '' : 's'}
           </Text>
           <Text variant="caption" muted style={{ lineHeight: 18 }}>
-            {phrase} Recorde: {record} dias.
+            {phrase} Recorde: {record} dia{record === 1 ? '' : 's'}.
           </Text>
         </View>
       </View>

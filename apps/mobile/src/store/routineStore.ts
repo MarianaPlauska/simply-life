@@ -112,7 +112,8 @@ export const useRoutineStore = create<State>((set, get) => ({
     }
     set({ logs })
     void saveRoutineLogs(logs)
-    useActivityStore.getState().markAction('task')
+    // marca o dia da rotina (pode ser um dia passado), não necessariamente hoje
+    useActivityStore.getState().markAction('task', day)
   },
 
   untick: (id, iso) =>
@@ -140,6 +141,6 @@ export const useRoutineStore = create<State>((set, get) => ({
     }
     set({ logs })
     void saveRoutineLogs(logs)
-    useActivityStore.getState().markAction('task')
+    useActivityStore.getState().markAction('task', day)
   },
 }))

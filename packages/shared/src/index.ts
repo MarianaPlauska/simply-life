@@ -1,5 +1,6 @@
 export * from './dates'
 export * from './activityStreak'
+export * from './elo'
 export * from './mood'
 export * from './tasks'
 export * from './taskBreakdown'

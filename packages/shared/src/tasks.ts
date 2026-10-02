@@ -1,4 +1,4 @@
-import { isoDaysAgo, startOfDay } from './dates'
+import { localIsoDaysAgo, localTodayIso, mondayOfLocalWeek, startOfDay } from './dates'
 
 export type TaskStatus = 'todo' | 'doing' | 'done'
 
@@ -96,7 +96,7 @@ export function classifyDueBucket(
 
 export function partitionTodayTimeline(tasks: MobileTask[], ref = new Date()): MobileTask[]
 {
-  const iso = ref.toISOString().slice(0, 10)
+  const iso = localTodayIso(ref)
   return tasks
     .filter((t) => t.status !== 'done')
     .filter((t) =>
@@ -175,53 +175,67 @@ export function dueDateForBucket(bucket: DueBucket, ref = new Date()): string | 
   return d.toISOString().slice(0, 10)
 }
 
-/** Contagem de tarefas com prazo em cada dia (constância tipo GitHub). */
+/**
+ * Tarefas concluídas em cada dia LOCAL da conclusão (concluido_em do banco ou
+ * o registro do aparelho em `doneOn`). Nunca usa o vencimento: concluir hoje
+ * uma tarefa atrasada conta hoje, não no dia do prazo.
+ */
+function doneCountByDay(
+  tasks: MobileTask[] | null | undefined,
+  doneOn?: Map<string, string>,
+): Map<string, number>
+{
+  const byTask = new Map<string, string>(doneOn ?? [])
+  for (const t of tasks ?? [])
+  {
+    if (t.status !== 'done' || !t.concluidoEm) continue
+    const d = new Date(t.concluidoEm)
+    if (!Number.isNaN(d.getTime())) byTask.set(t.id, localTodayIso(d))
+  }
+  const done = new Set((tasks ?? []).filter((t) => t.status === 'done').map((t) => t.id))
+  const map = new Map<string, number>()
+  for (const [id, iso] of byTask)
+  {
+    if (tasks && !done.has(id)) continue
+    map.set(iso, (map.get(iso) ?? 0) + 1)
+  }
+  return map
+}
+
+/** Tarefas concluídas por dia (local), dos últimos `days` dias. */
 export function taskActivityByDay(
   tasks: MobileTask[] | null | undefined,
   days: number,
   ref = new Date(),
+  doneOn?: Map<string, string>,
 ): { iso: string; count: number }[]
 {
-  const map = new Map<string, number>()
-  for (const t of tasks ?? [])
-  {
-    const iso = t.dataVencimento?.slice(0, 10)
-    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) continue
-    map.set(iso, (map.get(iso) ?? 0) + 1)
-  }
+  const map = doneCountByDay(tasks, doneOn)
   const out: { iso: string; count: number }[] = []
   for (let i = days - 1; i >= 0; i -= 1)
   {
-    const iso = isoDaysAgo(i, ref)
+    const iso = localIsoDaysAgo(i, ref)
     out.push({ iso, count: map.get(iso) ?? 0 })
   }
   return out
 }
 
-/** Grade alinhada ao domingo (colunas = semanas), para heatmap tipo GitHub. */
+/** Grade alinhada à segunda-feira (colunas = semanas), para heatmap tipo GitHub. */
 export function taskActivityGrid(
   tasks: MobileTask[] | null | undefined,
   weeks: number,
   ref = new Date(),
+  doneOn?: Map<string, string>,
 ): { iso: string; count: number }[]
 {
-  const map = new Map<string, number>()
-  for (const t of tasks ?? [])
-  {
-    const iso = t.dataVencimento?.slice(0, 10)
-    if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) continue
-    map.set(iso, (map.get(iso) ?? 0) + 1)
-  }
-  const start = new Date(ref)
-  start.setHours(12, 0, 0, 0)
-  start.setDate(start.getDate() - start.getDay() - (weeks - 1) * 7)
-  const days = weeks * 7
+  const map = doneCountByDay(tasks, doneOn)
+  const start = mondayOfLocalWeek(ref)
+  start.setDate(start.getDate() - (weeks - 1) * 7)
   const out: { iso: string; count: number }[] = []
-  for (let i = 0; i < days; i += 1)
+  for (let i = 0; i < weeks * 7; i += 1)
   {
-    const d = new Date(start)
-    d.setDate(start.getDate() + i)
-    const iso = d.toISOString().slice(0, 10)
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i)
+    const iso = localTodayIso(d)
     out.push({ iso, count: map.get(iso) ?? 0 })
   }
   return out

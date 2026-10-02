@@ -1,4 +1,6 @@
-// POST /api/axel/estimate-food-kcal - calorias estimadas por item da refeição (Groq/Gemini)
+// POST /api/axel/estimate-food-kcal - calorias, proteína e açúcar estimados por item da refeição
+// (Gemini com pesquisa Google → Groq). Nome da rota mantido: apps antigos leem só kcal/porcao/confianca.
+// Resposta: { items: [{ kcal, proteina, acucar, porcao, confianca, fontes? }], source, iaDisponivel }
 // Exige JWT Supabase. Sem IA no servidor, responde source "local" e o app usa a tabela local.
 
 import { applyCors } from '../../cors.js'

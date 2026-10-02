@@ -29,8 +29,14 @@ export type FoodItem = {
   /** "2", "1 copo", "200 g"; null quando não disse */
   quantidade: string | null
   kcal?: number | null
-  /** de onde veio o dado de caloria: 'pessoal' | 'openfoodfacts' | 'ia' | 'estimativa_local' | 'manual' */
+  /** gramas de proteína na quantidade do item; null quando não se sabe */
+  proteina?: number | null
+  /** gramas de açúcares totais na quantidade do item; null quando não se sabe */
+  acucar?: number | null
+  /** de onde vieram os números (kcal, proteína e açúcar juntos): 'pessoal' | 'openfoodfacts' | 'ia' | 'estimativa_local' | 'manual' */
   fonte?: string | null
+  /** links usados pela IA na pesquisa na web (até 2) */
+  fontes?: string[] | null
   barcode?: string | null
   /** porção considerada na estimativa ("1 concha"); só no aparelho, não vai para a nuvem */
   porcao?: string | null
@@ -58,7 +64,7 @@ export type FoodLogContext = {
 export type FoodMealLike = {
   data: string
   tipo: FoodMealType
-  itens: { key: string; nome: string; kcal?: number | null }[]
+  itens: { key: string; nome: string; kcal?: number | null; proteina?: number | null; acucar?: number | null }[]
 }
 
 // ---------------------------------------------------------------------------
@@ -850,33 +856,175 @@ export type FoodKcalDay = {
   semKcal: number
   /** dos itens com caloria, quantos são estimativa (IA ou tabela local) */
   estimadas: number
+  /** gramas de proteína somadas (só itens com o dado) */
+  proteina: number
+  comProteina: number
+  /** gramas de açúcares somadas (só itens com o dado) */
+  acucar: number
+  comAcucar: number
 }
 
-/** Soma as calorias do dia; itens sem dado não contam. `estimadas` diz quantos são aproximados. */
-export function foodKcalOfDay(
-  meals: { data: string; itens: { kcal?: number | null; fonte?: string | null }[] }[],
-  iso: string,
-): FoodKcalDay
+function validNutrient(v: unknown): v is number
+{
+  return typeof v === 'number' && Number.isFinite(v) && v >= 0
+}
+
+/** Arredonda gramas: uma casa abaixo de 10 g, inteiro acima. */
+export function roundGrams(g: number): number
+{
+  return g < 10 ? Math.round(g * 10) / 10 : Math.round(g)
+}
+
+type NutrientMeal = {
+  data: string
+  itens: { kcal?: number | null; proteina?: number | null; acucar?: number | null; fonte?: string | null }[]
+}
+
+/**
+ * Soma calorias, proteína e açúcar do dia; itens sem dado não contam.
+ * `estimadas` diz quantos itens com caloria são aproximados.
+ */
+export function foodKcalOfDay(meals: NutrientMeal[], iso: string): FoodKcalDay
 {
   let total = 0
   let comKcal = 0
   let semKcal = 0
   let estimadas = 0
+  let proteina = 0
+  let comProteina = 0
+  let acucar = 0
+  let comAcucar = 0
   for (const m of meals)
   {
     if (m.data !== iso) continue
     for (const it of m.itens ?? [])
     {
-      if (typeof it.kcal === 'number' && Number.isFinite(it.kcal) && it.kcal >= 0)
+      if (validNutrient(it.kcal))
       {
         total += it.kcal
         comKcal += 1
         if (it.fonte === 'ia' || it.fonte === 'estimativa_local') estimadas += 1
       }
       else semKcal += 1
+      if (validNutrient(it.proteina))
+      {
+        proteina += it.proteina
+        comProteina += 1
+      }
+      if (validNutrient(it.acucar))
+      {
+        acucar += it.acucar
+        comAcucar += 1
+      }
     }
   }
-  return { total: Math.round(total), comKcal, semKcal, estimadas }
+  return {
+    total: Math.round(total),
+    comKcal,
+    semKcal,
+    estimadas,
+    proteina: roundGrams(proteina),
+    comProteina,
+    acucar: roundGrams(acucar),
+    comAcucar,
+  }
+}
+
+/** Gramas de proteína de uma refeição (itens sem dado contam 0). */
+export function mealProteinGrams(meal: { itens: { proteina?: number | null }[] }): number
+{
+  let g = 0
+  for (const it of meal.itens ?? []) if (validNutrient(it.proteina)) g += it.proteina
+  return roundGrams(g)
+}
+
+export type FoodNutrientAverage = {
+  /** média por dia, só entre os dias com o dado; null quando nenhum dia tem */
+  media: number | null
+  /** quantos dias entraram na média */
+  dias: number
+}
+
+export type FoodNutrientAverages = {
+  /** janela em dias (7, 30) */
+  janela: number
+  /** dias da janela com pelo menos uma refeição registrada */
+  diasComRefeicao: number
+  kcal: FoodNutrientAverage
+  proteina: FoodNutrientAverage
+  acucar: FoodNutrientAverage
+  /** algum número da janela veio de estimativa */
+  temEstimativa: boolean
+}
+
+function isoMinusDays(iso: string, n: number): string
+{
+  return addDaysIso(iso, -n)
+}
+
+/**
+ * Médias por dia dos últimos `janela` dias até `endIso` (inclusive).
+ * Só conta dias com refeição registrada e, em cada número, só os dias que têm esse dado;
+ * dia sem registro não puxa a média para baixo.
+ */
+export function foodNutrientAverages(meals: NutrientMeal[], endIso: string, janela: number): FoodNutrientAverages
+{
+  const n = Math.max(1, Math.floor(janela))
+  const from = isoMinusDays(endIso, n - 1)
+  const days = new Map<string, { kcal: number; k: boolean; prot: number; p: boolean; acu: number; a: boolean }>()
+  let temEstimativa = false
+  for (const m of meals)
+  {
+    if (m.data < from || m.data > endIso) continue
+    const d = days.get(m.data) ?? { kcal: 0, k: false, prot: 0, p: false, acu: 0, a: false }
+    for (const it of m.itens ?? [])
+    {
+      if (validNutrient(it.kcal))
+      {
+        d.kcal += it.kcal
+        d.k = true
+        if (it.fonte === 'ia' || it.fonte === 'estimativa_local') temEstimativa = true
+      }
+      if (validNutrient(it.proteina))
+      {
+        d.prot += it.proteina
+        d.p = true
+      }
+      if (validNutrient(it.acucar))
+      {
+        d.acu += it.acucar
+        d.a = true
+      }
+    }
+    days.set(m.data, d)
+  }
+  const avg = (pick: (d: { kcal: number; k: boolean; prot: number; p: boolean; acu: number; a: boolean }) => number | null, round: (v: number) => number): FoodNutrientAverage =>
+  {
+    let sum = 0
+    let count = 0
+    for (const d of days.values())
+    {
+      const v = pick(d)
+      if (v == null) continue
+      sum += v
+      count += 1
+    }
+    return { media: count ? round(sum / count) : null, dias: count }
+  }
+  return {
+    janela: n,
+    diasComRefeicao: days.size,
+    kcal: avg((d) => (d.k ? d.kcal : null), Math.round),
+    proteina: avg((d) => (d.p ? d.prot : null), roundGrams),
+    acucar: avg((d) => (d.a ? d.acu : null), roundGrams),
+    temEstimativa,
+  }
+}
+
+/** 18 → "18 g" · 4.5 → "4,5 g" */
+export function formatGrams(g: number): string
+{
+  return `${String(roundGrams(g)).replace('.', ',')} g`
 }
 
 /** 1450 → "1.450 kcal" */

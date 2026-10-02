@@ -1,71 +1,135 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, View } from 'react-native'
-import { clampItemKcal, formatItemKcal, isEstimatedKcalSource, type FoodItem } from '@simply-life/shared'
+import { Linking, Modal, Pressable, View } from 'react-native'
+import {
+  clampItemGrams,
+  clampItemKcal,
+  foodSourceLabel,
+  formatItemKcal,
+  formatItemNutrients,
+  isEstimatedKcalSource,
+  type FoodItem,
+} from '@simply-life/shared'
 import { Field, PrimaryButton, Text, CloseButton } from '../../ui'
 import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
 
 /**
- * Número de calorias de um item. Estimativa aparece com "≈" e o rótulo "estimativa";
- * valor da pessoa ou da embalagem aparece limpo. Tocar abre a correção.
+ * Números de um item: "≈ 320 kcal · 18 g prot · 4 g açúcar". Estimativa aparece com "≈" e o
+ * rótulo "estimativa"; valor da pessoa ou da embalagem aparece limpo. Tocar abre a correção.
  */
 export function KcalChip({ item, onPress }: { item: FoodItem; onPress: () => void })
 {
   const { colors, radius } = useTheme()
-  const has = typeof item.kcal === 'number'
-  const estimated = has && isEstimatedKcalSource(item.fonte)
+  const line = formatItemNutrients(item)
+  const estimated = line != null && isEstimatedKcalSource(item.fonte)
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={has
-        ? `${formatItemKcal(item.kcal as number, item.fonte)}${estimated ? ', estimativa' : ''}. Tocar para corrigir`
-        : `Informar calorias de ${item.nome}`}
+      accessibilityLabel={line
+        ? `${line}${estimated ? ', estimativa' : ''}. Tocar para corrigir`
+        : `Informar calorias e nutrientes de ${item.nome}`}
       hitSlop={6}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
+        flexWrap: 'wrap',
         gap: 6,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
+        minHeight: 32,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
         borderRadius: radius.pill,
         borderWidth: 1,
         borderColor: colors.hairline,
         backgroundColor: colors.surface,
+        flexShrink: 1,
       }}
     >
-      <Text variant="micro" color={colors.ink}>{has ? formatItemKcal(item.kcal as number, item.fonte) : 'kcal'}</Text>
+      <Text variant="micro" color={colors.ink}>{line ?? 'kcal'}</Text>
       {estimated ? <Text variant="micro" muted>estimativa</Text> : null}
-      {!has ? <Icon name="pencil-outline" size={12} color={colors.inkMuted} /> : null}
+      {!line ? <Icon name="pencil-outline" size={12} color={colors.inkMuted} /> : null}
     </Pressable>
   )
 }
 
+/** "Fonte: pesquisa na web" com até 2 links tocáveis; nada quando o item não tem número. */
+export function FoodSourceLine({ item }: { item: FoodItem })
+{
+  const { colors } = useTheme()
+  if (typeof item.kcal !== 'number') return null
+  const label = foodSourceLabel(item)
+  if (!label) return null
+  const links = item.fontes ?? []
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 8 }}>
+      <Text variant="micro" muted>{`Fonte: ${label}`}</Text>
+      {links.map((url, i) => (
+        <Pressable
+          key={url}
+          onPress={() => void Linking.openURL(url)}
+          accessibilityRole="link"
+          accessibilityLabel={`Abrir fonte ${i + 1} na web`}
+          hitSlop={10}
+          style={{ minHeight: 32, justifyContent: 'center' }}
+        >
+          <Text variant="micro" color={colors.brand} style={{ textDecorationLine: 'underline' }}>
+            {links.length > 1 ? `ver fonte ${i + 1}` : 'ver fonte'}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  )
+}
+
+export type KcalEditValues = { kcal: number; proteina: number | null; acucar: number | null }
+
 type SheetProps = {
   item: FoodItem | null
   onClose: () => void
-  onSave: (kcal: number) => void
+  onSave: (values: KcalEditValues) => void
 }
 
-/** Correção da caloria de um item (teclado numérico). O valor fica lembrado para o item. */
+function gramsText(v: number | null | undefined): string
+{
+  return typeof v === 'number' && Number.isFinite(v) ? String(v).replace('.', ',') : ''
+}
+
+/** Deixa só dígitos e uma vírgula, no máximo 3 dígitos inteiros e 1 decimal ("18", "4,5"). */
+function cleanGrams(t: string): string
+{
+  const s = t.replace('.', ',').replace(/[^\d,]/g, '')
+  const [int, ...rest] = s.split(',')
+  const dec = rest.join('').slice(0, 1)
+  return rest.length ? `${int.slice(0, 3)},${dec}` : int.slice(0, 3)
+}
+
+/**
+ * Correção de um item: kcal, proteína e açúcar (teclado numérico). Proteína e açúcar podem
+ * ficar vazios. Os valores ficam lembrados para o item.
+ */
 export function KcalEditSheet({ item, onClose, onSave }: SheetProps)
 {
   const { colors, space, radius } = useTheme()
-  const [value, setValue] = useState('')
+  const [kcal, setKcal] = useState('')
+  const [prot, setProt] = useState('')
+  const [acucar, setAcucar] = useState('')
 
   useEffect(() =>
   {
-    setValue(item && typeof item.kcal === 'number' ? String(Math.round(item.kcal)) : '')
+    setKcal(item && typeof item.kcal === 'number' ? String(Math.round(item.kcal)) : '')
+    setProt(gramsText(item?.proteina))
+    setAcucar(gramsText(item?.acucar))
   }, [item])
 
   if (!item) return null
-  const parsed = clampItemKcal(value.replace(/\D/g, '') || NaN)
-  const estimated = typeof item.kcal === 'number' && isEstimatedKcalSource(item.fonte)
+  const parsed = clampItemKcal(kcal.replace(/\D/g, '') || NaN)
+  const line = formatItemNutrients(item)
+  const estimated = line != null && isEstimatedKcalSource(item.fonte)
   const porcao = item.quantidade || item.porcao
   const save = () =>
   {
     if (parsed == null) return
-    onSave(parsed)
+    onSave({ kcal: parsed, proteina: clampItemGrams(prot), acucar: clampItemGrams(acucar) })
     onClose()
   }
 
@@ -86,28 +150,49 @@ export function KcalEditSheet({ item, onClose, onSave }: SheetProps)
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-          <Icon name="flame-outline" size={20} color={colors.brand} />
-          <Text variant="section" style={{ flex: 1 }}>{`Calorias de ${item.nome}`}</Text>
-          <CloseButton onPress={onClose} size={36} />
+          <Icon name="nutrition-outline" size={20} color={colors.brand} />
+          <Text variant="section" style={{ flex: 1 }}>{item.nome}</Text>
+          <CloseButton onPress={onClose} size={44} />
         </View>
-        {estimated ? (
+        {estimated && typeof item.kcal === 'number' ? (
           <Text variant="caption" muted>
-            {`${formatItemKcal(item.kcal as number, item.fonte)} é uma estimativa${porcao ? ` para ${porcao}` : ''}. Se souber o número, ajuste aqui.`}
+            {`${formatItemKcal(item.kcal, item.fonte)} é uma estimativa${porcao ? ` para ${porcao}` : ''}. Se souber os números, ajuste aqui.`}
           </Text>
         ) : porcao ? (
           <Text variant="caption" muted>{`Porção: ${porcao}`}</Text>
         ) : null}
         <Field
-          label="kcal"
-          value={value}
-          onChangeText={(t) => setValue(t.replace(/\D/g, '').slice(0, 4))}
+          label="Calorias (kcal)"
+          value={kcal}
+          onChangeText={(t) => setKcal(t.replace(/\D/g, '').slice(0, 4))}
           keyboardType="number-pad"
           placeholder="Ex: 320"
-          returnKeyType="done"
-          onSubmitEditing={save}
+          returnKeyType="next"
           autoFocus
         />
-        <Text variant="micro" muted>O app lembra desse valor para as próximas vezes que você registrar este item.</Text>
+        <View style={{ flexDirection: 'row', gap: space.sm }}>
+          <View style={{ flex: 1 }}>
+            <Field
+              label="Proteína (g)"
+              value={prot}
+              onChangeText={(t) => setProt(cleanGrams(t))}
+              keyboardType="decimal-pad"
+              placeholder="Opcional"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Field
+              label="Açúcar (g)"
+              value={acucar}
+              onChangeText={(t) => setAcucar(cleanGrams(t))}
+              keyboardType="decimal-pad"
+              placeholder="Opcional"
+              returnKeyType="done"
+              onSubmitEditing={save}
+            />
+          </View>
+        </View>
+        <Text variant="micro" muted>O app lembra desses números para as próximas vezes que você registrar este item.</Text>
         <PrimaryButton label="Salvar" disabled={parsed == null} onPress={save} />
       </View>
     </Modal>

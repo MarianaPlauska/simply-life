@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import {
+  SHARED_GOAL_BODY_PRESETS,
   SHARED_GOAL_DURATIONS,
   SHARED_GOAL_METRICAS,
   diffDaysIso,
@@ -15,12 +16,14 @@ import {
   type SharedGoalExibicao,
   type SharedGoalMetrica,
   type SharedGoalModo,
+  type SharedGoalPreset,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, Field, Icon } from '../../src/ui'
+import { Screen, Text, Card, PrimaryButton, Field, Icon, PressableScale } from '../../src/ui'
 import { StackHeader } from '../../src/components/layout/StackHeader'
 import { SelectPill } from '../../src/components/sharedGoals/SelectPill'
 import { GuestGoalsState } from '../../src/components/sharedGoals/GuestGoalsState'
 import { SHARED_GOAL_METRIC_ICON } from '../../src/components/sharedGoals/metricIcon'
+import { SugarLimitNote } from '../../src/components/sharedGoals/SugarLimitNote'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { useSharedGoalsStore } from '../../src/store/sharedGoalsStore'
@@ -48,17 +51,20 @@ function formatNumber(n: number): string
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10).replace('.', ',')
 }
 
-function suggestedAlvo(metrica: SharedGoalMetrica, days: number, modo: SharedGoalModo): number
+function suggestedAlvo(metrica: SharedGoalMetrica, days: number, modo: SharedGoalModo, preset?: SharedGoalPreset | null): number
 {
   const spec = sharedGoalMetricaSpec(metrica)
   const weeks = Math.max(1, Math.round(days / 7))
-  const base = spec.alvoSemana * weeks * (modo === 'pote' ? 2 : 1)
-  return spec.step >= 25 ? Math.round(base / spec.step) * spec.step : Math.round(base)
+  const people = modo === 'pote' ? 2 : 1
+  const base = preset ? preset.alvoSemana * weeks : spec.alvoSemana * weeks * people
+  // nunca mais do que cabe no período (ex.: 5 dias numa semana que só tem 4)
+  const capped = Math.min(base, days * spec.maxPorDia * people)
+  return spec.step >= 25 ? Math.max(spec.step, Math.round(capped / spec.step) * spec.step) : Math.max(1, Math.round(capped))
 }
 
 export default function NovaMetaScreen()
 {
-  const { colors, space, radius } = useTheme()
+  const { colors, space, radius, mode } = useTheme()
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -66,6 +72,7 @@ export default function NovaMetaScreen()
   const today = useMemo(() => localTodayIso(), [])
 
   const [metrica, setMetrica] = useState<SharedGoalMetrica>('agua')
+  const [presetKey, setPresetKey] = useState<string | null>(null)
   const [titulo, setTitulo] = useState('')
   const [unidade, setUnidade] = useState('')
   const [modo, setModo] = useState<SharedGoalModo>('pote')
@@ -86,10 +93,12 @@ export default function NovaMetaScreen()
     : undefined
   const period = sharedGoalDuration(duracao, today, custom && custom.fim ? { inicio: custom.inicio, fim: custom.fim } : undefined)
   const days = period.fim ? diffDaysIso(period.inicio, period.fim) + 1 : 7
-  const autoAlvo = suggestedAlvo(metrica, days, modo)
+  // o atalho vale enquanto a pessoa não troca a métrica ou o jeito de contar
+  const preset = SHARED_GOAL_BODY_PRESETS.find((p) => p.key === presetKey && p.metrica === metrica && p.modo === modo) ?? null
+  const autoAlvo = suggestedAlvo(metrica, days, modo, preset)
   const alvo = alvoTxt == null ? autoAlvo : Number(alvoTxt.replace(',', '.'))
   const unit = metrica === 'livre' ? unidade.trim() : spec.unidade
-  const nomeSugerido = metrica === 'livre' ? '' : `${spec.label} juntos`
+  const nomeSugerido = metrica === 'livre' ? '' : preset ? preset.label : `${spec.label} juntos`
 
   const draft: SharedGoalDraft = {
     titulo: titulo.trim() || nomeSugerido,
@@ -104,6 +113,16 @@ export default function NovaMetaScreen()
   }
 
   if (!userId) return <Redirect href="/login" />
+
+  const applyPreset = (p: SharedGoalPreset) =>
+  {
+    setPresetKey(p.key)
+    setMetrica(p.metrica)
+    setModo(p.modo)
+    setExibicao(p.exibicao)
+    setAlvoTxt(null)
+    setErr(null)
+  }
 
   const bump = (dir: 1 | -1) =>
   {
@@ -153,6 +172,50 @@ export default function NovaMetaScreen()
 
       <View style={{ gap: space.md }}>
         <Card style={{ gap: space.sm }}>
+          <Text variant="section">Cuidar do corpo juntos</Text>
+          <Text variant="caption" muted>
+            Um toque e está pronto. Cada um conta pelo que já anota no app, e ninguém vê o número de ninguém.
+          </Text>
+          <View style={{ gap: space.sm }}>
+            {SHARED_GOAL_BODY_PRESETS.map((p) =>
+            {
+              const on = preset?.key === p.key
+              const fg = on ? (mode === 'dark' ? colors.chrome : colors.onBrand) : colors.ink
+              return (
+                <PressableScale
+                  key={p.key}
+                  onPress={() => applyPreset(p)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  accessibilityLabel={`${p.label}. ${p.hint}`}
+                  style={{
+                    minHeight: 56,
+                    paddingHorizontal: space.md,
+                    paddingVertical: space.sm,
+                    borderRadius: radius.control,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: space.md,
+                    backgroundColor: on ? (mode === 'dark' ? colors.brandInk : colors.brand) : colors.elevated,
+                  }}
+                >
+                  <Icon name={SHARED_GOAL_METRIC_ICON[p.metrica]} size={22} color={fg} />
+                  <View style={{ flex: 1 }}>
+                    <Text variant="label" color={fg}>
+                      {p.label}
+                    </Text>
+                    <Text variant="caption" color={on ? fg : colors.inkMuted}>
+                      {p.hint}
+                    </Text>
+                  </View>
+                  {on ? <Icon name="checkmark" size={18} color={fg} /> : null}
+                </PressableScale>
+              )
+            })}
+          </View>
+        </Card>
+
+        <Card style={{ gap: space.sm }}>
           <Text variant="section">O quê</Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
             {SHARED_GOAL_METRICAS.map((m) => (
@@ -164,6 +227,7 @@ export default function NovaMetaScreen()
                 onPress={() =>
                 {
                   setMetrica(m.key)
+                  setPresetKey(null)
                   setAlvoTxt(null)
                 }}
               />
@@ -172,6 +236,7 @@ export default function NovaMetaScreen()
           <Text variant="caption" muted>
             {spec.hint}
           </Text>
+          {metrica === 'acucar_ok' ? <SugarLimitNote /> : null}
           {metrica === 'livre' ? (
             <Field
               label="O que vão contar"

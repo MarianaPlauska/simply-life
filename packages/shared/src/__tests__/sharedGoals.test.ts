@@ -1,4 +1,5 @@
 import {
+  SHARED_GOAL_BODY_PRESETS,
   SHARED_GOAL_CHEERS,
   SHARED_GOAL_FAIXA_LABELS,
   SHARED_GOAL_METRICAS,
@@ -9,11 +10,15 @@ import {
   ritmoFromRatio,
   sharedGoalAlvoLabel,
   sharedGoalBackfillDays,
+  sharedGoalBodyCareOfDay,
   sharedGoalCycle,
   sharedGoalDuration,
   sharedGoalEndSummary,
   sharedGoalHeadline,
+  sharedGoalMealsOfDay,
+  sharedGoalMetricaSpec,
   sharedGoalProgressFromRpc,
+  sharedGoalSugarOkOfDay,
   sharedGoalValueFromHabit,
   suggestNextAlvo,
   validateSharedGoalDraft,
@@ -217,7 +222,8 @@ describe('valores e textos', () =>
       ...SHARED_GOAL_CHEERS.map((c) => c.label),
       ...Object.values(SHARED_GOAL_FAIXA_LABELS),
       ...Object.values(SHARED_GOAL_RITMO_LABELS),
-      ...SHARED_GOAL_METRICAS.flatMap((m) => [m.label, m.hint]),
+      ...SHARED_GOAL_METRICAS.flatMap((m) => [m.label, m.hint, m.unidade]),
+      ...SHARED_GOAL_BODY_PRESETS.flatMap((p) => [p.label, p.hint]),
     ]
     for (const s of all) expect(s).not.toMatch(DASHES)
   })
@@ -231,5 +237,73 @@ describe('valores e textos', () =>
       'Um passo de cada vez',
       'Descansa hoje, amanhã tem mais',
     ])
+  })
+})
+
+describe('cuidar do corpo juntos', () =>
+{
+  const meal = (data: string, acucar: (number | null)[]) => ({
+    data,
+    itens: acucar.map((a) => ({ kcal: 100, proteina: 5, acucar: a })),
+  })
+
+  it('métricas novas com unidade, teto e alvo da semana', () =>
+  {
+    expect(sharedGoalMetricaSpec('refeicoes')).toMatchObject({ label: 'Refeições', unidade: 'refeições', maxPorDia: 6, alvoSemana: 14 })
+    expect(sharedGoalMetricaSpec('acucar_ok')).toMatchObject({ label: 'Açúcar no limite', unidade: 'dias', maxPorDia: 1, alvoSemana: 5 })
+    expect(sharedGoalMetricaSpec('corpo')).toMatchObject({ label: 'Cuidar do corpo', unidade: 'dias', maxPorDia: 1, alvoSemana: 5 })
+    // "livre" segue por último (é o padrão de quem não é reconhecido)
+    expect(SHARED_GOAL_METRICAS[SHARED_GOAL_METRICAS.length - 1]!.key).toBe('livre')
+    expect(sharedGoalAlvoLabel({ alvo: 5, unidade: 'dias', modo: 'cada_um', ciclo: 'semanal', metrica: 'corpo' })).toBe('5 dias cada um por semana')
+  })
+
+  it('refeições do dia param no teto', () =>
+  {
+    const meals = [meal('2026-10-01', [1]), meal('2026-10-01', [1]), meal('2026-10-02', [1])]
+    expect(sharedGoalMealsOfDay(meals, '2026-10-01')).toBe(2)
+    expect(sharedGoalMealsOfDay(meals, '2026-09-30')).toBe(0)
+    const many = Array.from({ length: 9 }, () => meal('2026-10-01', [1]))
+    expect(sharedGoalMealsOfDay(many, '2026-10-01')).toBe(6)
+  })
+
+  it('açúcar no limite usa o limite da própria pessoa', () =>
+  {
+    const meals = [meal('2026-10-01', [10, 15]), meal('2026-10-02', [40, null])]
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-01', 30)).toBe(1)
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-01', 25)).toBe(1)
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-01', 20)).toBe(0)
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-02', 30)).toBe(0)
+    // sem refeição no dia não conta
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-03', 30)).toBe(0)
+    // sem nenhuma estimativa de açúcar não conta
+    expect(sharedGoalSugarOkOfDay([meal('2026-10-04', [null])], '2026-10-04', 30)).toBe(0)
+    // sem limite definido a métrica não conta nada
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-01', null)).toBeNull()
+    expect(sharedGoalSugarOkOfDay(meals, '2026-10-01', 0)).toBeNull()
+  })
+
+  it('cuidar do corpo vale com qualquer cuidado do dia', () =>
+  {
+    expect(sharedGoalBodyCareOfDay({})).toBe(0)
+    expect(sharedGoalBodyCareOfDay({ refeicoes: 0, agua: 0, treino: 0, sono: 0, proteina: 0 })).toBe(0)
+    expect(sharedGoalBodyCareOfDay({ refeicoes: 1 })).toBe(1)
+    expect(sharedGoalBodyCareOfDay({ agua: 0.25 })).toBe(1)
+    expect(sharedGoalBodyCareOfDay({ treino: 1 })).toBe(1)
+    expect(sharedGoalBodyCareOfDay({ sono: 7 })).toBe(1)
+    expect(sharedGoalBodyCareOfDay({ proteina: 20 })).toBe(1)
+    expect(sharedGoalBodyCareOfDay({ agua: Number.NaN, sono: -1 })).toBe(0)
+  })
+
+  it('atalhos criam metas válidas', () =>
+  {
+    expect(SHARED_GOAL_BODY_PRESETS.map((p) => p.metrica)).toEqual(['corpo', 'refeicoes', 'proteina', 'acucar_ok'])
+    for (const p of SHARED_GOAL_BODY_PRESETS)
+    {
+      const spec = sharedGoalMetricaSpec(p.metrica)
+      expect(spec.key).toBe(p.metrica)
+      expect(p.alvoSemana).toBeGreaterThan(0)
+      // "cada um" por dia nunca pede mais do que cabe na semana
+      if (p.modo === 'cada_um') expect(p.alvoSemana).toBeLessThanOrEqual(spec.maxPorDia * 7)
+    }
   })
 })

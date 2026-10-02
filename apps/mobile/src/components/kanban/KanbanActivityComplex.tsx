@@ -1,11 +1,14 @@
 import { useMemo } from 'react'
 import { View } from 'react-native'
-import { consecutiveActivity, taskActivityByDay, taskActivityGrid, type MobileTask } from '@simply-life/shared'
+import { completionDays, taskActivityByDay, taskActivityGrid, type MobileTask } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAccents } from '../../theme/useAccents'
+import { useElo } from '../../hooks/useElo'
+import { usePlanLogStore } from '../../store/planLogStore'
 
-const DAY_LETTERS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
+/** segunda a domingo, como o mapa de dias do elo */
+const DAY_LETTERS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
 const WEEKS = 12
 
 type Props = { tasks: MobileTask[] }
@@ -15,16 +18,16 @@ export function KanbanActivityComplex({ tasks }: Props)
 {
   const { colors } = useTheme()
   const accents = useAccents()
-  const series = useMemo(() => taskActivityGrid(tasks, WEEKS), [tasks])
-  const week = useMemo(() => taskActivityByDay(tasks, 7).slice().reverse(), [tasks])
+  const completions = usePlanLogStore((s) => s.completions)
+  // tarefas CONCLUÍDAS no dia local da conclusão (não as que vencem no dia)
+  const doneOn = useMemo(() => completionDays(tasks, completions, false), [tasks, completions])
+  const series = useMemo(() => taskActivityGrid(tasks, WEEKS, new Date(), doneOn), [tasks, doneOn])
+  const week = useMemo(() => taskActivityByDay(tasks, 7, new Date(), doneOn).slice().reverse(), [tasks, doneOn])
   const peak = Math.max(...week.map((d) => d.count), 1)
   const idle = colors.hairline
   const empty = colors.hairline
   const cardBg = colors.surface
-  const streak = useMemo(
-    () => consecutiveActivity(series.filter((d) => d.count > 0).map((d) => d.iso)),
-    [series],
-  )
+  const elo = useElo()
   const from = series[0]?.iso
   const to = series[series.length - 1]?.iso
   const range =
@@ -54,21 +57,21 @@ export function KanbanActivityComplex({ tasks }: Props)
           CONSTÂNCIA
         </Text>
         <Text variant="section" style={{ marginTop: 4 }}>
-          {streak.current} dias de ritmo
+          Elo de {elo.atual} dia{elo.atual === 1 ? '' : 's'}
         </Text>
         <Text variant="caption" muted>
-          Recorde {streak.record} · {streak.weekLogged}/7 nesta semana
+          Recorde {elo.recorde} · {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} cumprido{elo.cumpridosNaSemana === 1 ? '' : 's'} nesta semana
         </Text>
       </View>
 
       <View style={{ flexDirection: 'row', gap: 6 }}>
-        <View style={{ gap: 4, paddingTop: 2, paddingRight: 4 }}>
+        <View style={{ gap: 4, paddingRight: 4 }}>
           {DAY_LETTERS.map((l, i) => (
             <Text
               key={`${l}-${i}`}
               variant="micro"
               muted
-              style={{ height: 11, fontSize: 8, lineHeight: 11 }}
+              style={{ height: 16 }}
             >
               {i % 2 === 0 ? l : ''}
             </Text>
@@ -82,8 +85,8 @@ export function KanbanActivityComplex({ tasks }: Props)
                   key={d.iso}
                   style={{
                     width: '100%',
-                    height: 11,
-                    borderRadius: 3,
+                    height: 16,
+                    borderRadius: 4,
                     backgroundColor: cellColor(d.count),
                   }}
                 />

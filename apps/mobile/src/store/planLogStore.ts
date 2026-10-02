@@ -1,12 +1,14 @@
 import { create } from 'zustand'
-import type { CompletionEntry, PlanRecord } from '@simply-life/shared'
+import { localIsoDaysAgo, type CompletionEntry, type PlanRecord } from '@simply-life/shared'
 import { readLocalJson, writeLocalJson } from '../lib/localJsonStore'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { cancelEveningPlanReminder, scheduleEveningPlanReminder } from '../lib/pushNotifications'
 import { useAuthStore } from './authStore'
 
 const KEY = 'simply-life-plan-log-v1'
-const MAX_PLANS = 90
+/** cobre o mapa de dias da tela do elo (26 semanas) com folga */
+const MAX_PLANS = 200
+const REMOTE_PLAN_DAYS = 190
 const MAX_COMPLETIONS = 800
 const MAX_WORRIES = 120
 
@@ -105,7 +107,7 @@ async function fetchRemotePlans(): Promise<PlanRecord[]>
   if (!supabaseConfigured || useAuthStore.getState().isGuest) return []
   try
   {
-    const since = new Date(Date.now() - 60 * 86400000).toISOString().slice(0, 10)
+    const since = localIsoDaysAgo(REMOTE_PLAN_DAYS)
     const { data, error } = await supabase
       .from('daily_plans')
       .select('*')

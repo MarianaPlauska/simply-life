@@ -4,12 +4,19 @@
  * Água, proteína, sono e treino: habitDailyTotals (histórico por dia).
  * Foco: sessões do focusLogStore. Tarefas: concluídas (banco e log local).
  * Humor: dia com registro. "livre": registro manual na tela da meta.
+ * Corpo (cuidar do corpo juntos): refeições da Comida (foodLogStore), açúcar no
+ * limite que a própria pessoa escolheu e "dia cuidando do corpo" (refeição, água,
+ * treino, sono ou proteína). Proteína já inclui a das refeições, que o
+ * foodLogStore soma no hábito (lib/mealProtein).
  */
 import {
   aguaMlPorCopo,
   localTodayIso,
   sharedGoalBackfillDays,
+  sharedGoalBodyCareOfDay,
   sharedGoalCycle,
+  sharedGoalMealsOfDay,
+  sharedGoalSugarOkOfDay,
   sharedGoalValueFromHabit,
   type SharedGoal,
 } from '@simply-life/shared'
@@ -17,6 +24,8 @@ import { habitDailyTotals, type HabitTipo } from './habitDailyTotals'
 import { useDataStore } from '../store/dataStore'
 import { useFocusLogStore } from '../store/focusLogStore'
 import { usePlanLogStore } from '../store/planLogStore'
+import { useAuthStore } from '../store/authStore'
+import { useFoodLogStore } from '../store/foodLogStore'
 
 const HABIT_METRICS: Record<string, HabitTipo> = {
   agua: 'agua',
@@ -29,6 +38,16 @@ function localDayOf(iso: string): string
 {
   const d = new Date(iso)
   return Number.isNaN(d.getTime()) ? iso.slice(0, 10) : localTodayIso(d)
+}
+
+/** Refeições e preferências da Comida da conta atual (carrega do aparelho se preciso). */
+async function foodState()
+{
+  const { userId, isGuest } = useAuthStore.getState()
+  const owner = isGuest || !userId ? 'guest' : userId
+  const st = useFoodLogStore.getState()
+  if (!st.loaded || st.owner !== owner) await st.hydrate({ userId, isGuest }).catch(() => undefined)
+  return useFoodLogStore.getState()
 }
 
 /** Valores por dia (unidade da meta) para os dias do ciclo atual até hoje. */
@@ -44,6 +63,50 @@ export async function computeMyGoalDays(
   const from = days[0]!
   const to = days[days.length - 1]!
   const out: Record<string, number> = Object.fromEntries(days.map((d) => [d, 0]))
+
+  if (goal.metrica === 'refeicoes')
+  {
+    const { meals } = await foodState()
+    for (const d of days) out[d] = sharedGoalMealsOfDay(meals, d)
+    return out
+  }
+
+  if (goal.metrica === 'acucar_ok')
+  {
+    const { meals, prefs } = await foodState()
+    // sem limite escolhido (ou com os nutrientes escondidos, sem estimativa de açúcar)
+    // a pessoa não contribui; a tela da meta explica só para ela
+    if (prefs.metaAcucar == null || !prefs.mostrarCalorias) return null
+    for (const d of days) out[d] = sharedGoalSugarOkOfDay(meals, d, prefs.metaAcucar) ?? 0
+    return out
+  }
+
+  if (goal.metrica === 'corpo')
+  {
+    const [{ meals }, agua, treino, sono, proteina] = await Promise.all([
+      foodState(),
+      habitDailyTotals('agua', from, to),
+      habitDailyTotals('treino', from, to),
+      habitDailyTotals('sono', from, to),
+      habitDailyTotals('proteina', from, to),
+    ])
+    const byDay = (rows: { data: string; valor: number }[]) => new Map(rows.map((r) => [r.data, r.valor]))
+    const a = byDay(agua)
+    const t = byDay(treino)
+    const s = byDay(sono)
+    const p = byDay(proteina)
+    for (const d of days)
+    {
+      out[d] = sharedGoalBodyCareOfDay({
+        refeicoes: sharedGoalMealsOfDay(meals, d),
+        agua: a.get(d),
+        treino: t.get(d),
+        sono: s.get(d),
+        proteina: p.get(d),
+      })
+    }
+    return out
+  }
 
   const tipo = HABIT_METRICS[goal.metrica]
   if (tipo)

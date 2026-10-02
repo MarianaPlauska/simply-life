@@ -19,6 +19,7 @@ import { StackHeader } from '../../src/components/layout/StackHeader'
 import { GoalMembersRow, GoalProgressVisual } from '../../src/components/sharedGoals/GoalVisual'
 import { GuestGoalsState } from '../../src/components/sharedGoals/GuestGoalsState'
 import { SHARED_GOAL_METRIC_ICON } from '../../src/components/sharedGoals/metricIcon'
+import { SugarLimitNote } from '../../src/components/sharedGoals/SugarLimitNote'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { useSharedGoalsStore } from '../../src/store/sharedGoalsStore'
@@ -35,6 +36,14 @@ function fmt(n: number): string
 {
   const r = Math.round(n * 10) / 10
   return Number.isInteger(r) ? String(r) : String(r).replace('.', ',')
+}
+
+/** De onde vem a parte de cada um nas metas de cuidar do corpo */
+const AUTO_SOURCE: Partial<Record<string, string>> = {
+  refeicoes: 'Conta sozinho as refeições que você registra em Comida.',
+  acucar_ok: 'Conta sozinho os dias com açúcar no seu limite, pelas refeições de Comida.',
+  corpo: 'Conta sozinho os dias em que você cuidou do corpo: refeição, água, treino, sono ou proteína.',
+  proteina: 'Conta sozinho a proteína do dia, somando as refeições de Comida e o que você anota na Saúde.',
 }
 
 function whenLabel(iso: string): string
@@ -296,11 +305,13 @@ export default function MetaDetailScreen()
           <Card tone="inset" style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
             <Icon name={SHARED_GOAL_METRIC_ICON[goal.metrica]} size={20} color={colors.inkMuted} />
             <Text variant="caption" muted style={{ flex: 1 }}>
-              Conta sozinho o que você já anota no app.
+              {AUTO_SOURCE[goal.metrica] ?? 'Conta sozinho o que você já anota no app.'}
               {myCycleTotal > 0 ? ` Sua parte ${goal.ciclo === 'semanal' ? 'nesta semana' : 'até aqui'}: ${fmt(myCycleTotal)} ${unit}. Só você vê.` : ''}
             </Text>
           </Card>
         )}
+
+        {goal.metrica === 'acucar_ok' && active ? <SugarLimitNote /> : null}
 
         {members.length > 1 ? (
           <Card style={{ gap: space.sm }}>

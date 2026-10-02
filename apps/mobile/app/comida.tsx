@@ -15,6 +15,8 @@ import {
   foodKcalOfDay,
   foodMealTypeFromTime,
   foodMealsPerType,
+  foodNutrientAverages,
+  formatGrams,
   formatKcal,
   itemWantsAiKcal,
   localTodayIso,
@@ -31,9 +33,10 @@ import { SelectChip } from '../src/components/CaptureTaskForm'
 import { SettingsToggleRow } from '../src/components/settings/SettingsToggleRow'
 import { FoodSpendCard } from '../src/components/food/FoodSpendCard'
 import { BarcodeSheet } from '../src/components/food/BarcodeSheet'
-import { KcalChip, KcalEditSheet } from '../src/components/food/KcalChip'
+import { FoodSourceLine, KcalChip, KcalEditSheet, type KcalEditValues } from '../src/components/food/KcalChip'
 import { estimateKcalWithAi } from '../src/lib/foodKcalApi'
 import { useTheme } from '../src/theme/ThemeProvider'
+import { useAccents } from '../src/theme/useAccents'
 import { useAuthStore } from '../src/store/authStore'
 import { useDataStore } from '../src/store/dataStore'
 import { useFoodLogStore } from '../src/store/foodLogStore'
@@ -65,10 +68,18 @@ function aiKey(it: FoodItem): string
   return `${it.key}|${it.quantidade ?? ''}`
 }
 
+/** "120" → 120 · "" → null (meta opcional) */
+function readMeta(input: string): number | null
+{
+  const n = Number(input.replace(/\D/g, ''))
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
 /** Comida: registro por texto, frequência do mês e quanto custou. Sem contar pontos. */
 export default function ComidaScreen()
 {
   const { colors, space, radius } = useTheme()
+  const accents = useAccents()
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -85,6 +96,10 @@ export default function ComidaScreen()
   const rememberKcal = useFoodLogStore((s) => s.rememberKcal)
   const setItemKcal = useFoodLogStore((s) => s.setItemKcal)
   const fillMissingKcal = useFoodLogStore((s) => s.fillMissingKcal)
+  const syncMealProtein = useFoodLogStore((s) => s.syncMealProtein)
+  const proteinHabit = useDataStore((s) => s.habits.find((h) => h.tipo === 'proteina'))
+  const proteinHabitId = proteinHabit?.id
+  const proteinHabitGoal = proteinHabit && proteinHabit.metaDiaria > 0 ? proteinHabit.metaDiaria : null
 
   const [text, setText] = useState('')
   const [tipoOverride, setTipoOverride] = useState<FoodMealType | null>(null)
@@ -95,10 +110,13 @@ export default function ComidaScreen()
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [showAll, setShowAll] = useState(false)
   const [metaInput, setMetaInput] = useState(prefs.metaKcal ? String(prefs.metaKcal) : '')
+  const [metaProtInput, setMetaProtInput] = useState(prefs.metaProteina ? String(prefs.metaProteina) : '')
+  const [metaAcucarInput, setMetaAcucarInput] = useState(prefs.metaAcucar ? String(prefs.metaAcucar) : '')
+  const [avgWindow, setAvgWindow] = useState<7 | 30>(7)
   /** estimativas da IA na revisão, por item e quantidade */
   const [aiByKey, setAiByKey] = useState<Record<string, FoodKcalCandidate | null>>({})
-  /** o que a pessoa digitou na revisão, por item */
-  const [manualKcal, setManualKcal] = useState<Record<string, number>>({})
+  /** o que a pessoa digitou na revisão, por item (kcal, proteína e açúcar juntos) */
+  const [manualKcal, setManualKcal] = useState<Record<string, KcalEditValues>>({})
   /** item sendo corrigido: na revisão (draftKey) ou já salvo (mealId + índice) */
   const [editing, setEditing] = useState<{ item: FoodItem; draftKey?: string; mealId?: string; index?: number } | null>(null)
   const aiAsked = useRef<Set<string>>(new Set())
@@ -113,6 +131,22 @@ export default function ComidaScreen()
   {
     setMetaInput(prefs.metaKcal ? String(prefs.metaKcal) : '')
   }, [prefs.metaKcal])
+
+  useEffect(() =>
+  {
+    setMetaProtInput(prefs.metaProteina ? String(prefs.metaProteina) : '')
+  }, [prefs.metaProteina])
+
+  useEffect(() =>
+  {
+    setMetaAcucarInput(prefs.metaAcucar ? String(prefs.metaAcucar) : '')
+  }, [prefs.metaAcucar])
+
+  // proteína das refeições entra no hábito quando ele já carregou (idempotente)
+  useEffect(() =>
+  {
+    if (loaded && proteinHabitId && prefs.mostrarCalorias) void syncMealProtein()
+  }, [loaded, proteinHabitId, prefs.mostrarCalorias, syncMealProtein])
 
   const today = localTodayIso()
   const month = today.slice(0, 7)
@@ -133,7 +167,10 @@ export default function ComidaScreen()
   {
     if (!showKcal) return previewItems
     const withManual = previewItems.map((it) =>
-      (manualKcal[it.key] != null ? { ...it, kcal: manualKcal[it.key], fonte: 'manual' } : it))
+    {
+      const m = manualKcal[it.key]
+      return m ? { ...it, kcal: m.kcal, proteina: m.proteina, acucar: m.acucar, fonte: 'manual', fontes: null } : it
+    })
     return applyFoodKcal(withManual, { personal, ai: withManual.map((it) => aiByKey[aiKey(it)] ?? null) })
   }, [showKcal, previewItems, manualKcal, personal, aiByKey])
 
@@ -193,7 +230,10 @@ export default function ComidaScreen()
     await addMeal({ data, hora: hhmm(horaMin), tipo, texto: text.trim() || previewItems.map((i) => i.nome).join(', '), itens })
     for (const it of itens)
     {
-      if (it.fonte === 'manual' && typeof it.kcal === 'number') void rememberKcal(it.key, it.kcal, it.quantidade ?? it.porcao ?? null)
+      if (it.fonte === 'manual' && typeof it.kcal === 'number')
+      {
+        void rememberKcal(it.key, it.kcal, it.quantidade ?? it.porcao ?? null, { proteina: it.proteina ?? null, acucar: it.acucar ?? null })
+      }
     }
     setSaving(false)
     setSavedMsg(`${FOOD_MEAL_LABELS[tipo]} registrado`)
@@ -209,7 +249,26 @@ export default function ComidaScreen()
     todayMeals.some((m) => m.itens.some((i) => i.fonte === OFF_SOURCE))
     || previewItems.some((i) => i.fonte === OFF_SOURCE)
   )
-  const kcalTotalLabel = `${kcalToday.estimadas > 0 ? '≈ ' : ''}${formatKcal(kcalToday.total)}`
+  const approx = kcalToday.estimadas > 0 ? '≈ ' : ''
+  const kcalTotalLabel = `${approx}${formatKcal(kcalToday.total)}`
+  const metaProteina = prefs.metaProteina ?? proteinHabitGoal
+  const todayTotals = [
+    kcalToday.comKcal > 0
+      ? prefs.metaKcal ? `${kcalTotalLabel} de ${formatKcal(prefs.metaKcal)}` : kcalTotalLabel
+      : null,
+    kcalToday.comProteina > 0
+      ? `${approx}${formatGrams(kcalToday.proteina)} de proteína${metaProteina ? ` de ${formatGrams(metaProteina)}` : ''}`
+      : null,
+    kcalToday.comAcucar > 0
+      ? `${approx}${formatGrams(kcalToday.acucar)} de açúcar${prefs.metaAcucar ? `, limite ${formatGrams(prefs.metaAcucar)}` : ''}`
+      : null,
+  ].filter((x): x is string => Boolean(x))
+  const averages = useMemo(() => foodNutrientAverages(meals, today, avgWindow), [meals, today, avgWindow])
+  const avgRows = [
+    { key: 'kcal', label: 'Calorias', color: accents.data, avg: averages.kcal, fmt: (v: number) => formatKcal(v) },
+    { key: 'prot', label: 'Proteína', color: accents.data2, avg: averages.proteina, fmt: formatGrams },
+    { key: 'acucar', label: 'Açúcar', color: accents.data3, avg: averages.acucar, fmt: formatGrams },
+  ]
 
   const trendChip = (t: FoodTrend) => (
     <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: colors.brandMuted }}>
@@ -219,8 +278,15 @@ export default function ComidaScreen()
 
   const saveMeta = () =>
   {
-    const n = Number(metaInput.replace(/\D/g, ''))
-    void setPrefs({ metaKcal: Number.isFinite(n) && n > 0 ? n : null })
+    void setPrefs({ metaKcal: readMeta(metaInput) })
+  }
+  const saveMetaProt = () =>
+  {
+    void setPrefs({ metaProteina: readMeta(metaProtInput) })
+  }
+  const saveMetaAcucar = () =>
+  {
+    void setPrefs({ metaAcucar: readMeta(metaAcucarInput) })
   }
 
   return (
@@ -330,14 +396,16 @@ export default function ComidaScreen()
 
         {/* hoje */}
         <Card tone="elevated" style={{ gap: space.sm }}>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm }}>
-            <Text variant="section" style={{ flex: 1 }}>Hoje</Text>
-            {showKcal && kcalToday.comKcal > 0 ? (
-              <Text variant="caption" muted>
-                {prefs.metaKcal ? `${kcalTotalLabel} de ${formatKcal(prefs.metaKcal)}` : kcalTotalLabel}
-              </Text>
-            ) : null}
-          </View>
+          <Text variant="section">Hoje</Text>
+          {showKcal && todayTotals.length ? (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {todayTotals.map((t) => (
+                <View key={t} style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: colors.hairline }}>
+                  <Text variant="micro">{t}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
           {todayMeals.length === 0 ? (
             <Text variant="body" muted>Nada registrado ainda hoje. Quando quiser, é só escrever acima.</Text>
           ) : (
@@ -348,9 +416,12 @@ export default function ComidaScreen()
                   {showKcal ? (
                     <View style={{ gap: 6, marginTop: 2 }}>
                       {m.itens.map((it, index) => (
-                        <View key={`${it.key}-${index}`} style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-                          <Text variant="caption" muted style={{ flex: 1 }}>{itemName(it)}</Text>
-                          <KcalChip item={it} onPress={() => setEditing({ item: it, mealId: m.id, index })} />
+                        <View key={`${it.key}-${index}`} style={{ gap: 2 }}>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+                            <Text variant="caption" muted style={{ flex: 1 }}>{itemName(it)}</Text>
+                            <KcalChip item={it} onPress={() => setEditing({ item: it, mealId: m.id, index })} />
+                          </View>
+                          <FoodSourceLine item={it} />
                         </View>
                       ))}
                     </View>
@@ -363,7 +434,7 @@ export default function ComidaScreen()
                   accessibilityRole="button"
                   accessibilityLabel={`Apagar ${FOOD_MEAL_LABELS[m.tipo]}`}
                   hitSlop={8}
-                  style={{ padding: 4 }}
+                  style={{ padding: 13 }}
                 >
                   <Icon name="trash-outline" size={18} color={colors.inkMuted} />
                 </Pressable>
@@ -376,6 +447,42 @@ export default function ComidaScreen()
             </Text>
           ) : null}
         </Card>
+
+        {/* médias, só com os números ligados */}
+        {showKcal ? (
+          <Card tone="elevated" style={{ gap: space.sm }}>
+            <Text variant="section">Médias</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <SelectChip label="7 dias" active={avgWindow === 7} onPress={() => setAvgWindow(7)} />
+              <SelectChip label="30 dias" active={avgWindow === 30} onPress={() => setAvgWindow(30)} />
+            </View>
+            {averages.diasComRefeicao === 0 || averages.kcal.dias === 0 ? (
+              <Text variant="body" muted>
+                {`Quando houver refeições com números nos últimos ${avgWindow} dias, a média por dia aparece aqui.`}
+              </Text>
+            ) : (
+              <>
+                {avgRows.map((r) => (
+                  <View key={r.key} style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 32 }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: r.color }} />
+                    <Text variant="body" style={{ flex: 1 }}>{`${r.label} por dia`}</Text>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text variant="bodyStrong">
+                        {r.avg.media != null ? `${averages.temEstimativa ? '≈ ' : ''}${r.fmt(r.avg.media)}` : 'sem dado'}
+                      </Text>
+                      {r.avg.media != null && r.avg.dias < averages.diasComRefeicao ? (
+                        <Text variant="micro" muted>{`em ${r.avg.dias} ${r.avg.dias === 1 ? 'dia' : 'dias'} com o dado`}</Text>
+                      ) : null}
+                    </View>
+                  </View>
+                ))}
+                <Text variant="micro" muted>
+                  {`Média de ${averages.diasComRefeicao} ${averages.diasComRefeicao === 1 ? 'dia' : 'dias'} com refeição registrada nos últimos ${avgWindow}. Dias sem registro não entram na conta.`}
+                </Text>
+              </>
+            )}
+          </Card>
+        ) : null}
 
         {/* frequência do mês */}
         <Card tone="elevated" style={{ gap: space.sm }}>
@@ -424,15 +531,15 @@ export default function ComidaScreen()
         {/* calorias */}
         <SettingsToggleRow
           icon="flame-outline"
-          title="Mostrar calorias"
-          subtitle="Desligado por padrão. Estimativas aparecem com ≈ e você pode ajustar."
+          title="Mostrar calorias e nutrientes"
+          subtitle="Desligado por padrão. Calorias, proteína e açúcar por item; estimativas aparecem com ≈ e você pode ajustar."
           value={prefs.mostrarCalorias}
           onValueChange={(v) => void setPrefs({ mostrarCalorias: v })}
         />
         {prefs.mostrarCalorias ? (
           <Card tone="inset" style={{ gap: space.sm }}>
             <Field
-              label="Meta diária (opcional)"
+              label="Calorias por dia (opcional)"
               value={metaInput}
               onChangeText={setMetaInput}
               onBlur={saveMeta}
@@ -440,7 +547,27 @@ export default function ComidaScreen()
               keyboardType="number-pad"
               placeholder="Sem meta"
             />
-            <Text variant="micro" muted>Deixe vazio para não ter meta. O número é só uma referência.</Text>
+            <Field
+              label="Proteína por dia, em gramas (opcional)"
+              value={metaProtInput}
+              onChangeText={setMetaProtInput}
+              onBlur={saveMetaProt}
+              onSubmitEditing={saveMetaProt}
+              keyboardType="number-pad"
+              placeholder={proteinHabitGoal ? `Igual ao hábito: ${proteinHabitGoal} g` : 'Sem meta'}
+            />
+            <Field
+              label="Limite de açúcar por dia, em gramas (opcional)"
+              value={metaAcucarInput}
+              onChangeText={setMetaAcucarInput}
+              onBlur={saveMetaAcucar}
+              onSubmitEditing={saveMetaAcucar}
+              keyboardType="number-pad"
+              placeholder="Sem limite"
+            />
+            <Text variant="micro" muted>
+              Deixe vazio para não ter meta. Os números são só uma referência, sem certo ou errado. A proteína das refeições também soma no hábito de proteína do dia.
+            </Text>
           </Card>
         ) : null}
 
@@ -456,21 +583,27 @@ export default function ComidaScreen()
         onAdd={(item) =>
         {
           setExtra((cur) => [...cur.filter((c) => c.key !== item.key), item])
-          if (typeof item.kcal === 'number') void rememberKcal(item.key, item.kcal, item.quantidade ?? null)
+          if (typeof item.kcal === 'number')
+          {
+            void rememberKcal(item.key, item.kcal, item.quantidade ?? null, { proteina: item.proteina ?? null, acucar: item.acucar ?? null })
+          }
         }}
       />
 
       <KcalEditSheet
         item={editing?.item ?? null}
         onClose={() => setEditing(null)}
-        onSave={(kcal) =>
+        onSave={(values) =>
         {
           if (!editing) return
-          if (editing.mealId != null && editing.index != null) void setItemKcal(editing.mealId, editing.index, kcal)
+          if (editing.mealId != null && editing.index != null)
+          {
+            void setItemKcal(editing.mealId, editing.index, values.kcal, { proteina: values.proteina, acucar: values.acucar })
+          }
           else if (editing.draftKey)
           {
             const key = editing.draftKey
-            setManualKcal((cur) => ({ ...cur, [key]: kcal }))
+            setManualKcal((cur) => ({ ...cur, [key]: values }))
           }
         }}
       />

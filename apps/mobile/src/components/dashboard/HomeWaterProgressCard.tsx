@@ -13,7 +13,7 @@ import { Text, ProgressRing, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
-import { useGamificationStore } from '../../store/gamificationStore'
+import { useElo } from '../../hooks/useElo'
 import { minutesSinceSip, useWaterLogStore } from '../../store/waterLogStore'
 import { WaterBottleMark } from './WaterBottleMark'
 import { WaterGoalEditor } from './WaterGoalEditor'
@@ -41,7 +41,7 @@ export function HomeWaterProgressCard({ compact }: Props)
   const habits = useDataStore((s) => s.habits) ?? []
   const addWaterCup = useDataStore((s) => s.addWaterCup)
   const removeWaterCup = useDataStore((s) => s.removeWaterCup)
-  const streak = useGamificationStore((s) => s.streak)
+  const elo = useElo()
   const lastSipAt = useWaterLogStore((s) => s.lastSipAt)
   const waterWeekDays = useDataStore((s) => s.waterWeekDays)
   const hydrateLog = useWaterLogStore((s) => s.hydrate)
@@ -105,7 +105,7 @@ export function HomeWaterProgressCard({ compact }: Props)
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
           {(
             [
-              { icon: 'flame-outline' as const, label: `${streak}d sequência` },
+              { icon: 'flame-outline' as const, label: `${elo.atual}d de elo` },
               { icon: 'checkmark-circle-outline' as const, label: `${atual} tomados` },
               {
                 icon: 'time-outline' as const,

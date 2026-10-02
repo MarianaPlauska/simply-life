@@ -20,11 +20,29 @@ const GOLD_KEY = 'simply-life-gold'
 const UNLOCK_KEY = 'simply-life-achievements'
 const OWNED_KEY = 'simply-life-shop-owned'
 const HIST_KEY = 'simply-life-axel-history'
+/**
+ * Contador antigo que nunca zerava (na prática, total de dias ativos). Não é
+ * mais lido nem mostrado: o elo vem de calcularElo (shared/elo.ts). As chaves
+ * ficam listadas só para a limpeza no "Sair".
+ */
 const STREAK_KEY = 'simply-life-streak'
 const STREAK_DAY_KEY = 'simply-life-streak-day'
 /** XP por semana (segunda ISO → XP): base da divisão contra você mesmo */
 const WEEK_XP_KEY = 'simply-life-xp-weeks'
 const WEEK_XP_AREA_KEY = 'simply-life-xp-weeks-area'
+
+/** Chaves por conta: saem no "Sair" (ver lib/userLocalData). */
+export const GAMIFICATION_LOCAL_KEYS = [
+  XP_KEY,
+  GOLD_KEY,
+  UNLOCK_KEY,
+  OWNED_KEY,
+  HIST_KEY,
+  STREAK_KEY,
+  STREAK_DAY_KEY,
+  WEEK_XP_KEY,
+  WEEK_XP_AREA_KEY,
+] as const
 
 const storage = persistStorage
 let loaded = false
@@ -97,6 +115,7 @@ type GamificationState = {
   unlocked: string[]
   owned: string[]
   history: AxelHistoryEvent[]
+  /** elo atual, espelho de calcularElo (useEloSync grava aqui) */
   streak: number
   /** XP ganho em cada semana (chave = segunda-feira ISO) */
   weekXp: Record<string, number>
@@ -107,7 +126,10 @@ type GamificationState = {
   grantXp: (amount: number, title: string, detail?: string) => number
   unlockIf: (id: string) => void
   buyItem: (id: string, cost: number) => { ok: boolean; message: string }
-  bumpStreak: () => void
+  /** recebe o elo canônico; desbloqueia streak_3 com 3 dias seguidos de verdade */
+  setEloStreak: (atual: number) => void
+  /** apaga XP, moedas e conquistas deste aparelho (Sair da conta) */
+  reset: () => void
   dismissCelebration: () => void
   logEvent: (kind: AxelHistoryEvent['kind'], title: string, detail?: string) => void
 }
@@ -137,7 +159,6 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       unlocked: readList(UNLOCK_KEY),
       owned: readList(OWNED_KEY),
       history: readHistory(),
-      streak: readNum(STREAK_KEY),
       weekXp: readWeekXp(),
       weekXpArea: readWeekXpArea(),
     })
@@ -211,16 +232,27 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
     return { ok: true, message: 'Comprado' }
   },
 
-  bumpStreak: () =>
+  setEloStreak: (atual) =>
   {
-    if (!runHydrated(() => loaded, () => get().hydrate(), () => get().bumpStreak())) return
-    const today = localTodayIso()
-    if (storage.getItem(STREAK_DAY_KEY) === today) return
-    const streak = get().streak + 1
-    storage.setItem(STREAK_KEY, String(streak))
-    storage.setItem(STREAK_DAY_KEY, today)
-    set({ streak })
-    if (streak >= 3) get().unlockIf('streak_3')
+    const n = Math.max(0, Math.floor(atual))
+    if (n !== get().streak) set({ streak: n })
+    if (n >= 3) get().unlockIf('streak_3')
+  },
+
+  reset: () =>
+  {
+    for (const key of GAMIFICATION_LOCAL_KEYS) storage.removeItem(key)
+    set({
+      totalXp: 0,
+      gold: 0,
+      unlocked: [],
+      owned: [],
+      history: [],
+      streak: 0,
+      weekXp: {},
+      weekXpArea: {},
+      celebration: null,
+    })
   },
 
   dismissCelebration: () => set({ celebration: null }),

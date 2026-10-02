@@ -42,6 +42,7 @@ import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeRpgStrip } from '../../src/components/dashboard/HomeRpgStrip'
+import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
 import { PersonalSummaryGrid } from '../../src/components/dashboard/PersonalSummaryGrid'
 import { LifeSummaryReport } from '../../src/components/metrics/LifeSummaryReport'
 import { HomeDesktopStage } from '../../src/components/dashboard/HomeDesktopStage'
@@ -114,10 +115,7 @@ export default function DashboardScreen()
   const moodDone = humorHoje != null
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
-  const [axelUntil, setAxelUntil] = useState(0)
   const rpgMode = prefs.gamification_mode === 'rpg'
-  const [axelTick, setAxelTick] = useState(0)
-  const showAxel = humorOnHome && moodDone && Date.now() < axelUntil
   const moduleOrder = filterPriorities(prefs.enabled_modules, prefs.home_module_order ?? ['tasks', 'health', 'finance'])
 
   const kpiItems = useMemo(() =>
@@ -188,14 +186,6 @@ export default function DashboardScreen()
     router,
   ])
 
-  useEffect(() =>
-  {
-    const left = axelUntil - Date.now()
-    if (left <= 0) return
-    const id = setTimeout(() => setAxelTick((n) => n + 1), left)
-    return () => clearTimeout(id)
-  }, [axelUntil, axelTick])
-
   const [menuOpen, setMenuOpen] = useState(false)
   const [inviteDismissed, setInviteDismissed] = useState(false)
   const name = resolveAxelName({
@@ -248,7 +238,6 @@ export default function DashboardScreen()
                       <HomeMorningRitual
                         needSleep={showSleepForm}
                         needMood={showMoodForm}
-                        onMoodRegistered={() => setAxelUntil(Date.now() + 60_000)}
                       />
                     ) : null
                   }
@@ -258,13 +247,14 @@ export default function DashboardScreen()
             )}
             side={(
               <>
+                <AxelDayBrief />
                 <HomeDayTimeline tasks={today} fill />
                 {waterOnHome ? <HomeWaterProgressCard compact /> : null}
-                {showAxel ? <AxelDayBrief /> : null}
                 <SalaryConfirmCard />
                 <DayPlanHomeCard />
                 <VisualDayCard />
                 <MoodWeekReportGate humor={humor} />
+                <EloHeatmap semanas={12} compact />
                 <View style={{ gap: 12 }}>
                   <Text variant="section" style={{ fontSize: 16 }}>
                     Atalhos
@@ -287,11 +277,27 @@ export default function DashboardScreen()
                   <HomeMorningRitual
                     needSleep={showSleepForm}
                     needMood={showMoodForm}
-                    onMoodRegistered={() => setAxelUntil(Date.now() + 60_000)}
                   />
                 ) : null
               }
             />
+
+            {/* Axel sempre presente: o próximo passo, logo abaixo do progresso */}
+            {isTablet && waterOnHome ? (
+              <View style={{ flexDirection: 'row', gap: 16, alignItems: 'stretch' }}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <AxelDayBrief />
+                </View>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <HomeWaterProgressCard />
+                </View>
+              </View>
+            ) : (
+              <>
+                <AxelDayBrief />
+                {waterOnHome ? <HomeWaterProgressCard /> : null}
+              </>
+            )}
 
             <SalaryConfirmCard />
 
@@ -303,29 +309,13 @@ export default function DashboardScreen()
 
             {rpgMode ? <HomeRpgStrip /> : null}
 
-            {showAxel || waterOnHome ? (
-              (isTablet) && waterOnHome ? (
-                <View style={{ flexDirection: 'row', gap: 16, alignItems: 'stretch' }}>
-                  <View style={{ flex: 1, minWidth: 0, gap: 16 }}>
-                    {showAxel ? <AxelDayBrief /> : null}
-                  </View>
-                  <View style={{ flex: 1, minWidth: 0 }}>
-                    <HomeWaterProgressCard />
-                  </View>
-                </View>
-              ) : (
-                <>
-                  {showAxel ? <AxelDayBrief /> : null}
-                  {waterOnHome ? <HomeWaterProgressCard /> : null}
-                </>
-              )
-            ) : null}
 
             {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, resumo e atalhos" pill="abrir" defaultOpen={false}>
+            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" pill="abrir" defaultOpen={false}>
               <View style={{ gap: 24, paddingTop: 8 }}>
                 <HomeDayTimeline tasks={today} />
                 <HomeKpiSquares items={kpiItems} />
+                <EloHeatmap semanas={12} compact />
                 <HomeMetricShortcuts />
               </View>
             </HomeCollapsible>

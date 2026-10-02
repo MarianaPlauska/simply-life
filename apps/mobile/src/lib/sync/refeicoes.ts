@@ -22,6 +22,10 @@ type RowItem = {
   nome: string
   quantidade: string | null
   kcal: number | string | null
+  /** só existem depois da migração 077 */
+  proteina?: number | string | null
+  acucar?: number | string | null
+  fontes?: string[] | null
   fonte: string | null
   barcode: string | null
 }
@@ -34,6 +38,38 @@ type Row = {
   texto: string | null
   created_at: string
   refeicao_itens: RowItem[] | null
+}
+
+/**
+ * Colunas da migração 077 (proteina, acucar, fontes). Começa otimista; se o servidor ainda não
+ * tem, volta a ler e gravar sem elas nesta sessão e avisa uma vez no log.
+ */
+let nutrientColumns = true
+let warned = false
+
+/** Erro de coluna que não existe (Postgres 42703, cache do PostgREST PGRST204). */
+export function isMissingColumnError(error: { code?: string; message?: string } | null | undefined): boolean
+{
+  if (!error) return false
+  if (error.code === '42703' || error.code === 'PGRST204') return true
+  return /column .* does not exist|could not find the .* column/i.test(error.message ?? '')
+}
+
+function disableNutrientColumns(): void
+{
+  nutrientColumns = false
+  if (!warned)
+  {
+    warned = true
+    console.warn('[refeicoes] servidor sem as colunas de proteína e açúcar (migração 077); seguindo só com kcal')
+  }
+}
+
+function numOrNull(v: number | string | null | undefined): number | null
+{
+  if (v == null || v === '') return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
 }
 
 async function uid(): Promise<string | null>
@@ -51,6 +87,10 @@ function fromRow(r: Row): Refeicao
       nome: i.nome,
       quantidade: i.quantidade,
       kcal: i.kcal == null ? null : Number(i.kcal),
+      // sem as colunas (antes da 077) fica ausente: o app sabe que ainda não perguntou
+      ...('proteina' in i ? { proteina: numOrNull(i.proteina) } : {}),
+      ...('acucar' in i ? { acucar: numOrNull(i.acucar) } : {}),
+      ...(Array.isArray(i.fontes) && i.fontes.length ? { fontes: i.fontes.slice(0, 2) } : {}),
       fonte: i.fonte,
       barcode: i.barcode,
     }))
@@ -70,15 +110,24 @@ export async function fetchRefeicoes(sinceIso: string): Promise<Refeicao[] | nul
 {
   const user = await uid()
   if (!user) return null
-  const { data, error } = await supabase
+  const cols = (withNutrients: boolean) => (withNutrients
+    ? 'id, data, hora, tipo, texto, created_at, refeicao_itens(posicao, item_key, nome, quantidade, kcal, proteina, acucar, fontes, fonte, barcode)'
+    : 'id, data, hora, tipo, texto, created_at, refeicao_itens(posicao, item_key, nome, quantidade, kcal, fonte, barcode)')
+  const run = (withNutrients: boolean) => supabase
     .from('refeicoes')
-    .select('id, data, hora, tipo, texto, created_at, refeicao_itens(posicao, item_key, nome, quantidade, kcal, fonte, barcode)')
+    .select(cols(withNutrients))
     .eq('user_id', user)
     .gte('data', sinceIso)
     .order('data', { ascending: false })
     .order('hora', { ascending: false })
-  if (error) return null
-  return ((data ?? []) as unknown as Row[]).map(fromRow)
+  let res = await run(nutrientColumns)
+  if (res.error && nutrientColumns && isMissingColumnError(res.error))
+  {
+    disableNutrientColumns()
+    res = await run(false)
+  }
+  if (res.error) return null
+  return ((res.data ?? []) as unknown as Row[]).map(fromRow)
 }
 
 /** Grava a refeição (upsert pelo id) e troca os itens. */
@@ -99,18 +148,25 @@ export async function upsertRefeicao(r: Refeicao): Promise<boolean>
   const del = await supabase.from('refeicao_itens').delete().eq('refeicao_id', r.id)
   if (del.error) return false
   if (!r.itens.length) return true
-  const ins = await supabase.from('refeicao_itens').insert(
-    r.itens.map((i, posicao) => ({
-      refeicao_id: r.id,
-      posicao,
-      item_key: i.key,
-      nome: i.nome,
-      quantidade: i.quantidade ?? null,
-      kcal: i.kcal ?? null,
-      fonte: i.fonte ?? null,
-      barcode: i.barcode ?? null,
-    })),
-  )
+  const rows = (withNutrients: boolean) => r.itens.map((i, posicao) => ({
+    refeicao_id: r.id,
+    posicao,
+    item_key: i.key,
+    nome: i.nome,
+    quantidade: i.quantidade ?? null,
+    kcal: i.kcal ?? null,
+    ...(withNutrients
+      ? { proteina: i.proteina ?? null, acucar: i.acucar ?? null, fontes: i.fontes?.length ? i.fontes.slice(0, 2) : null }
+      : {}),
+    fonte: i.fonte ?? null,
+    barcode: i.barcode ?? null,
+  }))
+  let ins = await supabase.from('refeicao_itens').insert(rows(nutrientColumns))
+  if (ins.error && nutrientColumns && isMissingColumnError(ins.error))
+  {
+    disableNutrientColumns()
+    ins = await supabase.from('refeicao_itens').insert(rows(false))
+  }
   return !ins.error
 }
 

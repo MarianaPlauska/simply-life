@@ -4,16 +4,13 @@ import { Icon } from '../../ui/Icon'
 import { MagnifyingGlassIcon } from 'phosphor-react-native/src/icons/MagnifyingGlass'
 import { useRouter } from 'expo-router'
 import {
-  consecutiveActivity,
   searchHomeItems,
-  uniqueIsoDates,
   type FinanceTx,
   type MobileTask,
 } from '@simply-life/shared'
 import { Text, ProgressRing } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
-import { useDataStore } from '../../store/dataStore'
-import { useGamificationStore } from '../../store/gamificationStore'
+import { useElo } from '../../hooks/useElo'
 import { LifeGoalMicroLine, LifeGoalSheet } from './LifeGoalSheet'
 
 type Props = {
@@ -36,19 +33,12 @@ export function HomeTodayDashboard({
 {
   const { colors, elevation } = useTheme()
   const router = useRouter()
-  const humor = useDataStore((s) => s.humor) ?? []
-  const streak = useGamificationStore((s) => s.streak)
+  const elo = useElo()
   const [query, setQuery] = useState('')
   const [goalOpen, setGoalOpen] = useState(false)
 
   const todayTotal = pending + doneToday
   const pct = todayTotal > 0 ? Math.round((doneToday / todayTotal) * 100) : 0
-  const { weekLogged } = useMemo(() =>
-  {
-    const taskDays = tasks.filter((t) => t.status === 'done').map((t) => t.dataVencimento)
-    const moodDays = humor.map((h) => h.data)
-    return consecutiveActivity(uniqueIsoDates([...taskDays, ...moodDays]))
-  }, [tasks, humor])
 
   const hits = useMemo(
     () => searchHomeItems(query, tasks, finance, 16),
@@ -201,10 +191,10 @@ export function HomeTodayDashboard({
             <View style={{ gap: 12 }}>
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
                 <Text variant="micro" style={{ color: colors.featureMuted }}>
-                  {streak}d sequência
+                  Elo de {elo.atual} dia{elo.atual === 1 ? '' : 's'}
                 </Text>
                 <Text variant="micro" style={{ color: colors.featureMuted }}>
-                  {weekLogged}/7 dias com registro
+                  {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} cumprido{elo.cumpridosNaSemana === 1 ? '' : 's'} nesta semana
                 </Text>
               </View>
               <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />

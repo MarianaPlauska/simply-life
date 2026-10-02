@@ -1,4 +1,5 @@
 /** Economia de XP - progressão lenta (portado do PWA, storage injetável) */
+import { localTodayIso } from '../dates'
 
 export const XP_PER_LEVEL = 500
 export const DAILY_XP_CAP = 90
@@ -9,9 +10,10 @@ export type XpStorage = {
   setItem: (key: string, value: string) => void
 }
 
+/** Teto diário pelo dia LOCAL: em UTC ele zerava às 21h no Brasil (quase o dobro de XP por dia). */
 function todayKey(): string
 {
-  return new Date().toISOString().slice(0, 10)
+  return localTodayIso()
 }
 
 function dailyStorageKey(): string

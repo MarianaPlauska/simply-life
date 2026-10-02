@@ -76,8 +76,15 @@ function avg(values: number[]): number | null
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : null
 }
 
-/** Quando cada tarefa foi concluída: banco (concluido_em) ou registro local do aparelho. */
-export function completionDays(tasks: MobileTask[], log: CompletionEntry[]): Map<string, string>
+/**
+ * Quando cada tarefa foi concluída: banco (concluido_em) ou registro local do aparelho.
+ * `fallbackDue` = false não usa o vencimento como aproximação (elo e mapa de dias).
+ */
+export function completionDays(
+  tasks: MobileTask[],
+  log: CompletionEntry[],
+  fallbackDue = true,
+): Map<string, string>
 {
   const out = new Map<string, string>()
   for (const e of log) out.set(e.taskId, isoOfInstant(e.at))
@@ -85,6 +92,7 @@ export function completionDays(tasks: MobileTask[], log: CompletionEntry[]): Map
   {
     if (t.status === 'done' && t.concluidoEm) out.set(t.id, isoOfInstant(t.concluidoEm))
   }
+  if (!fallbackDue) return out
   // sem registro nenhum: usa o vencimento como aproximação para tarefas concluídas
   for (const t of tasks)
   {

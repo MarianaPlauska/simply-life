@@ -1,62 +1,40 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Modal, Pressable, View } from 'react-native'
+import { Modal, Pressable, ScrollView, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import { Icon } from '../src/ui/Icon'
 import {
-  buildStreakMonth,
   buildStreakWeek,
   CHAMA_WEEK_GOAL_DAYS,
-  consecutiveLocalActivity,
-  localTodayIso,
+  ELO_ACAO_LABEL,
+  isEloAcao,
   nextStreakMilestone,
 } from '@simply-life/shared'
 import { Screen, Text, PillTabs, PrimaryButton } from '../src/ui'
 import { StreakWeekRow } from '../src/components/streak/StreakWeekRow'
-import { StreakMonthCard } from '../src/components/streak/StreakMonthCard'
+import { EloHeatmap } from '../src/components/streak/EloHeatmap'
 import { useTheme } from '../src/theme/ThemeProvider'
+import { useAccents } from '../src/theme/useAccents'
 import { useAuthStore } from '../src/store/authStore'
-import { useDataStore } from '../src/store/dataStore'
-import { useNotesStore } from '../src/store/notesStore'
-import { useWaterLogStore } from '../src/store/waterLogStore'
-import {
-  actionIsos,
-  openIsos,
-  useActivityStore,
-  type LifeActionKind,
-} from '../src/store/activityStore'
+import { actionIsos, openIsos, useActivityStore } from '../src/store/activityStore'
+import { useElo } from '../src/hooks/useElo'
 import { METAS_HREF } from '../src/lib/sharedGoalRoutes'
 import { PersonalDivisionCard } from '../src/components/rewards/TrilhaCards'
 
 type Tab = 'sequencia' | 'ativos'
 
-const ACTION_LABEL: Record<LifeActionKind, string> = {
-  task: 'tarefas',
-  note: 'anotações',
-  mood: 'humor',
-  finance: 'gastos',
-  water: 'água',
-  focus: 'foco',
-}
-
 export default function OfensivaScreen()
 {
   const { colors, space } = useTheme()
+  const accents = useAccents()
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
-  const tasks = useDataStore((s) => s.tasks) ?? []
-  const humor = useDataStore((s) => s.humor) ?? []
-  const finance = useDataStore((s) => s.finance) ?? []
-  const notes = useNotesStore((s) => s.items)
-  const waterDays = useWaterLogStore((s) => s.days)
   const days = useActivityStore((s) => s.days)
   const hydrate = useActivityStore((s) => s.hydrate)
-  const seedDates = useActivityStore((s) => s.seedDates)
   const markOpen = useActivityStore((s) => s.markOpen)
+  const elo = useElo()
 
   const [tab, setTab] = useState<Tab>('sequencia')
   const [help, setHelp] = useState(false)
-  const [cursor, setCursor] = useState(() => new Date())
-  const today = localTodayIso()
 
   useEffect(() =>
   {
@@ -64,39 +42,32 @@ export default function OfensivaScreen()
     markOpen()
   }, [hydrate, markOpen])
 
-  useEffect(() =>
-  {
-    seedDates(
-      tasks.filter((t) => t.status === 'done').map((t) => t.dataVencimento ?? ''),
-      'task',
-    )
-    seedDates(humor.map((h) => h.data), 'mood')
-    seedDates(finance.map((t) => t.data), 'finance')
-    seedDates(Object.keys(waterDays).filter((iso) => (waterDays[iso] ?? 0) > 0), 'water')
-    void notes
-  }, [tasks, humor, finance, waterDays, notes, seedDates])
+  // Tarefas entram pelo dia local da conclusão (useEloSync), nunca pelo vencimento.
 
   const actions = useMemo(() => actionIsos(days), [days])
   const opens = useMemo(() => openIsos(days), [days])
-  const stats = useMemo(() => consecutiveLocalActivity(actions), [actions])
-  const week = useMemo(() => buildStreakWeek(actions, opens), [actions, opens])
-  const monthCells = useMemo(
-    () => buildStreakMonth(cursor.getFullYear(), cursor.getMonth(), actions, opens),
-    [cursor, actions, opens],
+  const rests = useMemo(
+    () => Object.keys(elo.dias).filter((iso) => elo.dias[iso] === 'descanso'),
+    [elo.dias],
   )
-  const monthLabel = cursor.toLocaleDateString('pt-BR', { month: 'long' })
-  const next = nextStreakMilestone(stats.current)
-  const barPct = next ? Math.min(100, Math.round((stats.current / next) * 100)) : 100
-  const todayLog = days[today]
-  const todayOk = (todayLog?.actions.length ?? 0) > 0
+  const week = useMemo(() => buildStreakWeek(actions, opens, new Date(), rests), [actions, opens, rests])
+  const next = nextStreakMilestone(elo.atual)
+  const barPct = next ? Math.min(100, Math.round((elo.atual / next) * 100)) : 100
 
   const recent = useMemo(() =>
   {
     return [...actions]
       .sort((a, b) => b.localeCompare(a))
       .slice(0, 14)
-      .map((iso) => ({ iso, kinds: days[iso]?.actions ?? [] }))
+      .map((iso) => ({ iso, kinds: (days[iso]?.actions ?? []).filter(isEloAcao) }))
   }, [actions, days])
+
+  const hojeTitulo = elo.cumpridoHoje ? 'Hoje está cumprido.' : 'Hoje ainda está aberto.'
+  const hojeTexto = elo.cumpridoHoje
+    ? 'Volte amanhã, ou continue no seu ritmo agora.'
+    : elo.emRisco
+      ? 'O descanso desta semana já foi usado. Uma ação pequena hoje segura o elo.'
+      : 'Uma ação pequena já cumpre o dia. Se não der, o descanso da semana cobre, sem castigo.'
 
   if (!userId) return <Redirect href="/login" />
 
@@ -140,7 +111,7 @@ export default function OfensivaScreen()
       <PillTabs
         tabs={[
           { id: 'sequencia', label: 'Sequência' },
-          { id: 'ativos', label: 'Dias ativos' },
+          { id: 'ativos', label: 'Dias cumpridos' },
         ]}
         value={tab}
         onChange={setTab}
@@ -161,14 +132,23 @@ export default function OfensivaScreen()
                 lineHeight: 60,
               }}
             >
-              {stats.current}
+              {elo.atual}
             </Text>
             <Text variant="caption" muted>
-              dias seguindo o plano
+              {elo.atual === 1 ? 'dia cumprido seguido' : 'dias cumpridos seguidos'}
             </Text>
             <Text variant="bodyStrong" style={{ marginTop: 8 }}>
-              Recorde pessoal: {stats.record}
+              Recorde pessoal: {elo.recorde}
             </Text>
+            <Text variant="caption" muted style={{ textAlign: 'center' }}>
+              {elo.descansoUsadoNestaSemana
+                ? 'Descanso desta semana já usado'
+                : 'Descanso desta semana disponível'}
+            </Text>
+          </View>
+
+          <View style={{ alignSelf: 'stretch' }}>
+            <EloHeatmap semanas={26} />
           </View>
 
           <View style={{ alignSelf: 'stretch', gap: 12 }}>
@@ -184,7 +164,7 @@ export default function OfensivaScreen()
                 style={{
                   width: `${barPct}%`,
                   height: '100%',
-                  backgroundColor: colors.axelFill,
+                  backgroundColor: accents.data,
                   borderRadius: 999,
                 }}
               />
@@ -197,28 +177,10 @@ export default function OfensivaScreen()
           </View>
 
           <View style={{ alignSelf: 'stretch', gap: 8 }}>
-            <Text variant="bodyStrong">
-              {todayOk ? 'Hoje já tem registro.' : 'Hoje ainda não tem registro.'}
-            </Text>
+            <Text variant="bodyStrong">{hojeTitulo}</Text>
             <Text variant="caption" muted>
-              {todayOk
-                ? 'Volte amanhã, ou continue anotando e concluindo agora.'
-                : 'Abra o app, anote, conclua uma tarefa ou registre o humor.'}
+              {hojeTexto}
             </Text>
-          </View>
-
-          <View style={{ alignSelf: 'stretch' }}>
-            <StreakMonthCard
-              label={monthLabel}
-              cells={monthCells}
-              todayIso={today}
-              onPrev={() =>
-                setCursor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
-              }
-              onNext={() =>
-                setCursor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
-              }
-            />
           </View>
 
           <PrimaryButton
@@ -230,10 +192,10 @@ export default function OfensivaScreen()
       ) : (
         <View style={{ gap: 16, paddingTop: 12 }}>
           <Text variant="caption" muted>
-            Dias em que você fez algo: tarefa, nota, humor, gasto, água ou foco.
+            Dias com pelo menos uma ação: tarefa ou rotina, foco terminado, humor, água, refeição, gasto ou anotação.
           </Text>
           {recent.length === 0 ? (
-            <Text variant="body">Nenhum dia ativo ainda. Um registro já acende o fogo.</Text>
+            <Text variant="body">Nenhum dia cumprido ainda. Uma ação pequena já acende o fogo.</Text>
           ) : (
             recent.map((row) => (
               <View
@@ -258,7 +220,7 @@ export default function OfensivaScreen()
                     })}
                   </Text>
                   <Text variant="caption" muted numberOfLines={1}>
-                    {row.kinds.map((k) => ACTION_LABEL[k]).join(' · ')}
+                    {row.kinds.map((k) => ELO_ACAO_LABEL[k]).join(' · ')}
                   </Text>
                 </View>
               </View>
@@ -345,18 +307,26 @@ export default function OfensivaScreen()
             }}
           >
             <Text variant="section">Como conta</Text>
-            <Text variant="body" muted>
-              Abrir o app marca o dia como em andamento. Concluir tarefa, anotar, registrar humor, lançar gasto, beber água ou fechar um timer fecha o dia com fogo.
-            </Text>
-            <Text variant="body" muted>
-              Um dia sem registro recomeça a contagem de dias seguidos. O recorde fica guardado e nada mais se perde.
-            </Text>
-            <Text variant="body" muted>
-              Semana fechada: 4 dias com registro entre segunda e domingo. Cada semana fechada adiciona uma peça à sua coleção e conta para os seus prêmios.
-            </Text>
-            <Text variant="body" muted>
-              O calendário mostra verde-cobre nos dias com registro, âmbar se só abriu o app, e vermelho nos dias sem nada.
-            </Text>
+            <ScrollView style={{ maxHeight: 420 }} contentContainerStyle={{ gap: 12 }}>
+              <Text variant="body" muted>
+                Um dia fica cumprido quando você faz pelo menos uma coisa de verdade: concluir uma tarefa, marcar uma rotina, terminar um foco, registrar humor, água, refeição ou gasto, ou escrever uma anotação. Só abrir o app não cumpre o dia.
+              </Text>
+              <Text variant="body" muted>
+                Descanso sem castigo: em cada semana, de segunda a domingo, o primeiro dia sem registro vira descanso e não quebra o elo. Se faltar mais um dia na mesma semana, o elo recomeça do zero, e tudo bem.
+              </Text>
+              <Text variant="body" muted>
+                Hoje fica em aberto até a meia-noite e nunca quebra o elo antes disso. O elo conta os dias cumpridos; o descanso segura a sequência, mas não soma.
+              </Text>
+              <Text variant="body" muted>
+                O recorde fica guardado para sempre, e os seus dias vão junto com a conta para qualquer aparelho.
+              </Text>
+              <Text variant="body" muted>
+                No mapa de dias, a cor mais forte mostra quanto do que você planejou foi feito, e os essenciais pesam mais. Sem plano, conta quantos tipos de registro o dia teve. O ponto marca o descanso.
+              </Text>
+              <Text variant="body" muted>
+                Semana fechada: {CHAMA_WEEK_GOAL_DAYS} dias com registro entre segunda e domingo. Cada semana fechada adiciona uma peça à sua coleção e conta para os seus prêmios.
+              </Text>
+            </ScrollView>
             <PrimaryButton label="Entendi" onPress={() => setHelp(false)} />
           </Pressable>
         </Pressable>

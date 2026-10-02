@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { View, ActivityIndicator } from 'react-native'
+import { View, ActivityIndicator, AppState } from 'react-native'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useFonts, Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold, Lexend_700Bold } from '@expo-google-fonts/lexend'
@@ -18,6 +18,7 @@ import { TaskRewardToast } from '../src/components/rewards/TaskRewardToast'
 import { TaskEvolveSheet } from '../src/components/kanban/TaskEvolveSheet'
 import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
+import { useEloSync } from '../src/hooks/useEloSync'
 
 function RootNavigator()
 {
@@ -43,7 +44,16 @@ function RootNavigator()
   {
     if (!userId) return
     markOpen()
+    // voltar ao app num dia novo (app ficou aberto de ontem) também marca a abertura
+    const sub = AppState.addEventListener('change', (state) =>
+    {
+      if (state === 'active') markOpen()
+    })
+    return () => sub.remove()
   }, [userId, markOpen])
+
+  // elo igual em todos os aparelhos, recorde e cartão público
+  useEloSync()
 
   // foco junto: avisa os amigos (se a pessoa permitiu) enquanto o foco roda
   useFocusPresence()
