@@ -67,7 +67,7 @@ export function GlassHeader() {
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 shrink-0">
-          <span className="text-[13px] text-zinc-500">Simply-Life</span>
+          <span className="text-[13px] text-zinc-500">SunFy</span>
           <span className="text-zinc-700">/</span>
           <span className="text-[14px] font-semibold text-ink">{VIEW_LABELS[activeView] || activeView}</span>
         </div>

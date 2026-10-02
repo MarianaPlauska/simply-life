@@ -88,7 +88,7 @@ export async function estimateProteinFromMeal({ texto, refeicao })
     }
   }
 
-  const systemInstruction = `Você é nutricionista do Simply-Life (AXEL). Estime proteína e calorias de uma refeição descrita em PT-BR.
+  const systemInstruction = `Você é nutricionista do SunFy (AXEL). Estime proteína e calorias de uma refeição descrita em PT-BR.
 Retorne APENAS JSON:
 {
   "gramas": número inteiro (5-120),

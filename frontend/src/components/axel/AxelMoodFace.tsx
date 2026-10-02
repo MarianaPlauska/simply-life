@@ -1,4 +1,5 @@
 import { AXEL_MOOD } from '../../design/identityTokens'
+import { AxelSun, type AxelSunMood } from '../brand/AxelSun'
 
 type MoodValue = 1 | 2 | 3 | 4 | 5
 
@@ -51,6 +52,13 @@ export function AxelMoodFace({
   const label = presence
     ? (presence === 'calmo' ? 'Calmo' : presence === 'atento' ? 'Atento' : 'Positivo')
     : (Object.values(AXEL_MOOD.states).find((s) => s.value === mood)?.label ?? 'Sereno')
+  // Voz do AXEL (com presença): o girassol de rosto amigo. Sem presença é o seletor de humor.
+  if (presence)
+  {
+    const sunMood: AxelSunMood = presence === 'positivo' ? 'happy' : presence === 'atento' ? 'care' : 'calm'
+    return <AxelSun size={size} mood={sunMood} className={className} title={title ?? `AXEL: ${label}`} />
+  }
+
   const eyeY = mood <= 2 ? 10.4 : 10
   const eyeR = mood === 1 ? 0.95 : 1.15
 

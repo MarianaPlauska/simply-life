@@ -99,7 +99,7 @@ export default async function handler(req, res)
     ? `\nTom de voz obrigatório: ${aiTone}`
     : '';
 
-  const systemInstruction = `Você é o AXEL, o melhor amigo financeiro do usuário no Simply-Life.
+  const systemInstruction = `Você é o AXEL, o melhor amigo financeiro do usuário no SunFy.
 Analise os dados reais de gastos e devolva um JSON exatamente neste formato:
 {
   "headline": "título curto em PT-BR (máx 6 palavras)",

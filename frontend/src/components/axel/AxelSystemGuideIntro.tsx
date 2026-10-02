@@ -37,7 +37,7 @@ export function AxelSystemGuideIntro()
       >
         <div className="sticky top-0 flex items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-3 border-b border-line bg-card">
           <p id="system-guide-title" className="font-mono text-[9px] sm:text-[10px] uppercase tracking-wide text-accent text-center flex-1 sm:text-left">
-            Bem-vindo ao Simply-Life
+            Bem-vindo ao SunFy
           </p>
           <button
             type="button"

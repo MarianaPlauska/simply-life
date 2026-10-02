@@ -13,7 +13,7 @@ const ISO_RE = /^\d{4}-\d{2}-\d{2}$/
 
 function buildSystemPrompt(ctx)
 {
-  return `Você é o AXEL, leitor da captura rápida (Dump) do Simply-Life (PT-BR).
+  return `Você é o AXEL, leitor da captura rápida (Dump) do SunFy (PT-BR).
 Cada linha é uma anotação solta. Diga o que cada linha é, sem inventar nada.
 
 Hoje é ${ctx.today} (${ctx.weekday}). Datas relativas ("quarta", "amanhã", "dia 11", "semana que vem") viram ISO YYYY-MM-DD a partir de hoje, sempre no futuro.

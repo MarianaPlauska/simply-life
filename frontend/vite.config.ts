@@ -56,8 +56,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'favicon.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512.png', 'og-image.png'],
       manifest: {
-        name: 'Simply-Life OS',
-        short_name: 'Simply-Life',
+        name: 'SunFy',
+        short_name: 'SunFy',
         description: 'Seu sistema operacional pessoal. Gerencie tarefas, finanças, saúde e produtividade em um só lugar.',
         lang: 'pt-BR',
         start_url: '/',
@@ -66,8 +66,8 @@ export default defineConfig({
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'portrait-primary',
-        theme_color: '#1E1E1E',
-        background_color: '#1E1E1E',
+        theme_color: '#1F3A3D',
+        background_color: '#1F3A3D',
         categories: ['productivity', 'lifestyle', 'finance'],
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

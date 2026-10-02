@@ -725,7 +725,7 @@ export function PreferencesView() {
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-ink tracking-tight">Preferências</h1>
-        <p className="text-sm text-zinc-500 mt-1">Configure sua experiência no Simply-Life</p>
+        <p className="text-sm text-zinc-500 mt-1">Configure sua experiência no SunFy</p>
       </div>
 
       <div className="flex gap-8">

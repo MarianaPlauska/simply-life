@@ -138,7 +138,7 @@ def _rate_limit_key(request: Request) -> str:
 
 limiter = Limiter(key_func=_rate_limit_key, default_limits=["120/minute"])
 
-app = FastAPI(title="API - Simply-Life OS", lifespan=lifespan)
+app = FastAPI(title="API - SunFy", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

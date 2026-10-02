@@ -183,11 +183,11 @@ export function GmailImapSection()
             type="text"
             value={folder}
             onChange={(e) => setFolder(e.target.value)}
-            placeholder="INBOX ou Simply-Life"
+            placeholder="INBOX ou SunFy"
             className="mt-1 w-full px-3 py-2 min-h-11 rounded-lg bg-zinc-900 border border-zinc-800 text-sm text-ink outline-none focus:border-violet-500/50"
           />
           <span className="mt-1 block text-[11px] text-zinc-500">
-            Se a pasta não existir, o sync usa a Inbox. Crie o rótulo Simply-Life no Gmail para filtrar newsletters.
+            Se a pasta não existir, o sync usa a Inbox. Crie o rótulo SunFy no Gmail para filtrar newsletters.
           </span>
         </label>
 

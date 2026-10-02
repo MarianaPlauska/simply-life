@@ -171,7 +171,7 @@ export function SetupQuestsSection()
               </div>
               <div>
                 <h3 className="text-[14px] font-semibold text-ink flex items-center gap-2">
-                  Setup do Simply-Life
+                  Setup do SunFy
                   <span className="text-[11px] font-bold text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full">
                     +{quests.reduce((sum, q) =>
                     {

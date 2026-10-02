@@ -49,7 +49,7 @@ export const DEFAULT_ACTIVE_COSMETICS: ActiveCosmetics = {
 
 export const AXEL_COSMETICS_CATALOG: CosmeticItem[] = [
   // Acentos
-  { id: 'accent_meridian', category: 'accent', label: 'Meridiano', description: 'Teal Simply-Life', unlock: { type: 'default' }, preview: '#38B2AC' },
+  { id: 'accent_meridian', category: 'accent', label: 'Meridiano', description: 'Teal SunFy', unlock: { type: 'default' }, preview: '#38B2AC' },
   { id: 'accent_copper', category: 'accent', label: 'Cobre', description: 'Laranja vivo / terracotta', unlock: { type: 'level', minLevel: 2 }, preview: '#FF6A2B' },
   { id: 'accent_sky', category: 'accent', label: 'Céu', description: 'Azul claro', unlock: { type: 'level', minLevel: 3 }, preview: '#38A3E8' },
   { id: 'accent_forest', category: 'accent', label: 'Floresta', description: 'Verde calmo', unlock: { type: 'level', minLevel: 3 }, preview: '#4A7C59' },

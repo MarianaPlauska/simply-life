@@ -101,7 +101,7 @@ export function PwaInstallBanner()
           <Download size={16} className="text-accent" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-ink">Instalar Simply-Life</p>
+          <p className="text-sm font-medium text-ink">Instalar SunFy</p>
           <p className="text-[11px] text-ink-muted mt-0.5 leading-relaxed">
             Adicione à tela inicial para abrir como app - alertas, finanças e tarefas na palma da mão.
           </p>

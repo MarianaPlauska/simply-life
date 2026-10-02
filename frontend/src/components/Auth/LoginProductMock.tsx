@@ -5,6 +5,7 @@
  * Sem imagem: fica nítido em qualquer tela e o texto nunca embaralha.
  */
 import type { ReactNode } from 'react'
+import { AxelSun } from '../brand/AxelSun'
 
 function Check({ done }: { done?: boolean })
 {
@@ -74,7 +75,7 @@ function Laptop()
         <div className="aspect-[16/10] overflow-hidden rounded-[8px] p-3 xl:p-4">
           {/* topo do app */}
           <div className="mb-3 flex items-center gap-3">
-            <span className="h-5 w-5 rounded-[6px]" style={{ background: 'var(--lg-brand)' }} />
+            <AxelSun size={20} />
             {['Hoje', 'Tarefas', 'Saúde', 'Finanças'].map((t, i) => (
               <span
                 key={t}
@@ -221,8 +222,8 @@ export function LoginProductMock()
         Tarefa concluída · +12 XP
       </FloatingChip>
       <FloatingChip className="right-[24%] top-[0%] hidden xl:flex">
-        <Flame className="h-3.5 w-3.5" />
-        Semana fechada
+        <AxelSun size={18} mood="happy" />
+        Bia te mandou um girassol
       </FloatingChip>
     </div>
   )

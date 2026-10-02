@@ -16,7 +16,7 @@ import { isLocalGuestUser } from '../../lib/authSession';
 import { demoLoginEmail, demoLoginPassword, resetDemoWorkspaceOnLogin } from '../../lib/demoWorkspace';
 import { LoginHero } from './LoginHero';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
-import { SimplyLifeMark } from '../brand/SimplyLifeMark';
+import { SimplyLifeMark, SunFyWordmark } from '../brand/SimplyLifeMark';
 import { getPendingTotpFactorId, verifyTotpCode } from '../../lib/mfaAssurance';
 
 function GoogleLogo({ className }: { className?: string })
@@ -373,7 +373,7 @@ export function LoginView()
           <div className="w-full max-w-none mx-auto lg:max-w-md -mt-3 lg:mt-0 rounded-t-[20px] lg:rounded-none bg-[var(--bg-surface)] lg:bg-transparent px-5 sm:px-6 lg:px-0 pt-6 pb-8 min-h-[calc(100dvh-248px)] lg:min-h-0">
             <div className="sl-panel sl-login-glow p-5 sm:p-6 lg:p-8 border-0 lg:border shadow-none lg:shadow bg-[var(--bg-surface)]">
               <div className="mb-5 lg:mb-6">
-                <h2 className="text-h1 md:text-h1-md lg:text-h1-lg font-display text-ink">{t('login.title')}</h2>
+                <h2 className="text-h1 md:text-h1-md lg:text-h1-lg font-display text-ink"><SunFyWordmark /></h2>
                 <p className="text-[13px] lg:text-[14px] text-ink-muted mt-1">{t('login.subtitle')}</p>
               </div>
 

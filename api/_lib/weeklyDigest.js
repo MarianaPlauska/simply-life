@@ -105,7 +105,7 @@ export async function buildWeeklyDigest(supabase, userId)
 
   const habitDays = (habitos || []).length
 
-  const title = 'Simply-Life · resumo da semana'
+  const title = 'SunFy · resumo da semana'
   const body = [
     axelCopy(counts),
     `${done} concluída(s) no quadro · ${hoje} ainda em HOJE.`,

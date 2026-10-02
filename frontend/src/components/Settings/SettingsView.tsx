@@ -299,7 +299,7 @@ export function SettingsView() {
     <div className={`${AXEL_PAGE_SHELL} px-3 sm:px-4 lg:px-6 xl:px-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-12`}>
       <div className="mb-6 sm:mb-8">
         <h1 className={S.title}>Configuracoes</h1>
-        <p className={S.subtitle}>Gerencie integracoes e preferencias do Simply-Life.</p>
+        <p className={S.subtitle}>Gerencie integracoes e preferencias do SunFy.</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 md:gap-8">
@@ -329,7 +329,7 @@ export function SettingsView() {
               <GmailImapSection />
               <div className="mb-6 mt-6">
                 <h2 className={S.sectionTitle}>Integracoes</h2>
-                <p className={S.sectionHint}>Conecte suas plataformas para o Simply-Life capturar dados automaticamente.</p>
+                <p className={S.sectionHint}>Conecte suas plataformas para o SunFy capturar dados automaticamente.</p>
               </div>
 
               {/* Google Calendar OAuth2 */}

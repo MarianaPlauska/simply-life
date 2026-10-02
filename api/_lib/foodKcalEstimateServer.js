@@ -25,7 +25,7 @@ export function sanitizeFoodKcalRequest(body)
 
 function buildSystemPrompt()
 {
-  return `Você estima calorias de itens de uma refeição no Brasil (PT-BR) para o app Simply-Life.
+  return `Você estima calorias de itens de uma refeição no Brasil (PT-BR) para o app SunFy.
 Responda APENAS JSON neste formato, com um objeto por item, na mesma ordem do pedido:
 {
   "items": [{ "kcal": número inteiro, "porcao": "porção considerada, curta", "confianca": 0 a 1 }]

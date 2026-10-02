@@ -1,7 +1,7 @@
 {
   "login": {
-    "title": "Simply-Life",
-    "subtitle": "Your personal operating system",
+    "title": "SunFy",
+    "subtitle": "Glad to have you here.",
     "tab_login": "Sign In",
     "tab_register": "Create Account",
     "name_label": "Name",
@@ -29,8 +29,8 @@
     "terms": "Terms of Service",
     "and": "and",
     "privacy": "Privacy Policy",
-    "success_register": "Account created! Welcome to Simply-Life!",
-    "success_login": "Welcome to Simply-Life!",
+    "success_register": "Account created! Welcome to SunFy!",
+    "success_login": "Welcome to SunFy!",
     "success_demo": "Demo workspace restored",
     "success_guest": "Entering as guest",
     "error_register": "Error creating account",
@@ -39,9 +39,9 @@
     "error_connection": "Connection error",
     "oauth_processing": "Connecting with Google…",
     "back_to_login": "Back to login",
-    "hero_title": "Organize.\nPlan.\nSimply.",
-    "hero_subtitle": "Your whole day in one screen.\nMood, training, tasks and bills.",
-    "hero_badge": "Personal OS",
+    "hero_title": "Small steps.\nUnhurried.\nNever alone.",
+    "hero_subtitle": "On cloudy days, sunflowers turn to face each other.\nSunFy is that sunflower for you.",
+    "hero_badge": "A sunflower for you",
     "hero_feature_1": "Kanban and focus for daily execution",
     "hero_feature_2": "Finances and goals with clear visibility",
     "hero_feature_3": "Google Calendar and Gmail integration"

@@ -1,8 +1,9 @@
-<h1 align="center">Simply Life</h1>
+<h1 align="center">SunFy</h1>
 
 <p align="center">
   Um app para organizar o dia sem pressão.<br />
-  Tarefas, humor, saúde e dinheiro no mesmo lugar.
+  Tarefas, humor, saúde e dinheiro no mesmo lugar.<br />
+  <sub>SunFy vem de <em>SUNflower</em> + <em>FY</em> (for you): um girassol pra você. Nos dias nublados, os girassóis se viram uns para os outros.</sub>
 </p>
 
 <p align="center">
@@ -11,23 +12,23 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/app/inicio.png" alt="Tela inicial do Simply Life" width="240" />
+  <img src="docs/images/app/inicio.png" alt="Tela inicial do SunFy" width="240" />
   <img src="docs/images/app/tarefas.png" alt="Tela de tarefas" width="240" />
   <img src="docs/images/app/financas.png" alt="Tela da carteira" width="240" />
 </p>
 
 ## Por que eu criei esse app
 
-Muita gente vive com ansiedade, depressão ou TDAH e tenta se organizar com apps de produtividade comuns. Na prática, esses apps costumam piorar as coisas. Mandam notificação o tempo todo, cobram sequência de dias, mostram listas enormes e fazem a pessoa se sentir culpada quando não dá conta.
+Assim como eu, muita gente vive com ansiedade, depressão ou TDAH e tenta se organizar com apps de produtividade comuns. Geralmente, a ideia é sempre trazer o usuário, montar seu diagnóstico ou pedir suas informações demais e desnecessárias. Na prática, esses apps costumam piorar as coisas. Mandam notificação o tempo todo, cobram sequência de dias, mostram listas enormes e fazem a pessoa se sentir culpada quando não dá conta.
 
-O Simply Life foi pensado para o dia difícil, não para o dia perfeito. A ideia é simples:
+O SunFy foi pensado para o dia difícil, não para o dia perfeito. A ideia é simples:
 
 * **Um passo de cada vez.** O app mostra o que importa agora, e não a lista inteira de uma vez.
 * **Sem castigo.** Se você passar dias sem abrir, nada é perdido e ninguém te cobra.
 * **Tudo junto.** Tarefa, humor, remédio, água, conta para pagar. É tudo parte do mesmo dia, então fica tudo na mesma tela.
-* **Uma ajuda que explica.** O Axel, o assistente do app, sugere a ordem das tarefas e diz o porquê. Se você discordar, é só mudar. A escolha final é sempre sua.
+* **Uma ajuda que explica.** O Axel, o assistente do app, sugere a ordem das tarefas e diz o porquê. Se você discordar, é só mudar. A escolha final é sempre sua. Com o Axel, você consegue manter uma constância dos seus gastos, rotinas, e em datas próximas ele sempre anotará e irá se lembrar das suas últimas decisões. Inteligência para gente. 
 
-> O Simply Life ajuda a organizar a rotina. Ele não faz diagnóstico e não substitui terapia ou médico. Se você estiver em crise, ligue para o CVV no **188**, de graça, a qualquer hora.
+> O SunFy ajuda a organizar a rotina. Ele não faz diagnóstico e não substitui terapia ou médico. Se você estiver em crise, ligue para o CVV no **188**, de graça, a qualquer hora.
 
 ## O que dá para fazer
 
@@ -95,7 +96,7 @@ Os prints acima são do app de verdade, no modo convidado, e não montagens.
 
 ## Instalar no celular Android (APK)
 
-O Simply Life é um app nativo de Android, não um site dentro de uma moldura. Ele é instalado por um arquivo **APK**, como qualquer outro app baixado fora da loja.
+O SunFy é um app nativo de Android, não um site dentro de uma moldura. Ele é instalado por um arquivo **APK**, como qualquer outro app baixado fora da loja.
 
 **Para instalar:**
 

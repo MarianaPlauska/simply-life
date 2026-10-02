@@ -152,7 +152,7 @@ export async function estimateTaskEffort(payload)
     }
   }
 
-  const systemInstruction = `Você é o AXEL, motor de produtividade do Simply-Life.
+  const systemInstruction = `Você é o AXEL, motor de produtividade do SunFy.
 Analise a demanda e devolva JSON exatamente neste formato:
 {
   "estimate_minutes": número inteiro entre 15 e 480,

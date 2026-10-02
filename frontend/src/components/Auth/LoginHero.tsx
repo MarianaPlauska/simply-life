@@ -1,4 +1,4 @@
-import { SimplyLifeMark } from '../brand/SimplyLifeMark'
+import { SimplyLifeMark, SunFyWordmark } from '../brand/SimplyLifeMark'
 import { LoginProductMock } from './LoginProductMock'
 import { useTranslation } from 'react-i18next'
 
@@ -24,9 +24,7 @@ export function LoginHero()
         <div className="flex items-center gap-2.5 mb-6">
           <SimplyLifeMark variant="icon" className="w-10 h-10" />
           <div className="flex flex-col leading-tight">
-            <span className="font-sans text-[15px] font-semibold tracking-tight" style={{ color: 'var(--lg-ink)' }}>
-              Simply-Life
-            </span>
+            <SunFyWordmark className="font-display text-[19px] font-semibold tracking-tight text-[color:var(--lg-ink)]" />
             <span className="font-sans text-[12px]" style={{ color: 'var(--lg-muted)' }}>
               {t('login.hero_badge')}
             </span>

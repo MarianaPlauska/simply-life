@@ -41,7 +41,7 @@ export function AxelSystemGuide({
         !wizard && (compact ? 'p-3' : 'p-4 sm:p-5'),
         wizard ? '' : 'space-y-3',
       ].join(' ')}
-      aria-label="Como funciona o Simply-Life"
+      aria-label="Como funciona o SunFy"
     >
       <div className={`flex items-center justify-between gap-2 ${wizard ? 'justify-center sm:justify-between' : ''}`}>
         <div className={`flex items-center gap-2 min-w-0 ${wizard ? 'justify-center sm:justify-start' : ''}`}>

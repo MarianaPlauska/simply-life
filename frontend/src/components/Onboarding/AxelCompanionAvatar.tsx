@@ -1,5 +1,6 @@
 import type { ReactNode, SVGProps } from 'react'
 import type { AvatarStyleId } from '../../lib/axelAvatarPresets'
+import { AxelSunShapes } from '../brand/AxelSun'
 
 type AvatarSize = number | 'sm' | 'md' | 'lg'
 
@@ -126,6 +127,18 @@ export function AxelCompanionAvatar({
 
 function renderCompanionSvg(style: AvatarStyleId, svgProps: SVGProps<SVGSVGElement>)
 {
+  if (style === 'companion_sun')
+  {
+    return (
+      <svg {...svgProps}>
+        <AvatarPlate />
+        <g transform="translate(5 5) scale(0.84)">
+          <AxelSunShapes />
+        </g>
+      </svg>
+    )
+  }
+
   if (style === 'companion_owl')
   {
     return (

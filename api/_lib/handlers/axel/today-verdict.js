@@ -56,7 +56,7 @@ export default async function handler(req, res)
     return res.status(200).json({ ...localVerdict, source: 'local', iaDisponivel: false })
   }
 
-  const systemInstruction = `Você é o AXEL, melhor amigo no Simply-Life.
+  const systemInstruction = `Você é o AXEL, melhor amigo no SunFy.
 O usuário pergunta se pode fazer algo HOJE. Responda em JSON:
 {
   "tone": "ok|caution|wait",
