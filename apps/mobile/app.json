@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Simply-Life",
+    "name": "SunFy",
     "slug": "simply-life",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#1A1816"
+      "backgroundColor": "#1F3A3D"
     },
     "ios": {
       "supportsTablet": true,
@@ -23,7 +23,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1A1816"
+        "backgroundColor": "#1F3A3D"
       },
       "package": "app.simplylife.os"
     },
@@ -39,7 +39,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "O Simply-Life usa a câmera só para ler o código de barras dos alimentos.",
+          "cameraPermission": "O SunFy usa a câmera só para ler o código de barras dos alimentos.",
           "recordAudioAndroid": false
         }
       ],

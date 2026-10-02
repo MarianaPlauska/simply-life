@@ -5,7 +5,7 @@ import { useModules } from '../../hooks/useModules'
 import { Icon } from '../../ui/Icon'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { Text } from '../../ui'
-import { BrandMark } from '../BrandMark'
+import { BrandMark, SunFyWordmark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useCaptureStore, captureForTab, captureFabLabel } from '../../store/captureStore'
@@ -120,13 +120,12 @@ export function DesktopSidebar()
         >
           <BrandMark size={collapsed ? 28 : 28} onFill />
           {!collapsed ? (
-            <Text
-              variant="bodyStrong"
-              style={{ color: CREAM, letterSpacing: -0.2, fontSize: 14, flex: 1 }}
-              numberOfLines={1}
-            >
-              Simply Life
-            </Text>
+            <View style={{ flex: 1 }}>
+              <SunFyWordmark
+                color={CREAM}
+                style={{ fontFamily: 'Fraunces_500Medium', fontSize: 15, lineHeight: 20, letterSpacing: -0.2 }}
+              />
+            </View>
           ) : null}
           <Pressable
             onPress={toggleCollapsed}

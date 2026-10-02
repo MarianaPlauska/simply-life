@@ -177,7 +177,7 @@ export default function JuntosScreen()
     try
     {
       await Share.share({
-        message: `${name}, bora focar junto agora? Eu abro o timer no Simply Life e a gente se fala no fim.`,
+        message: `${name}, bora focar junto agora? Eu abro o timer no SunFy e a gente se fala no fim.`,
       })
     }
     catch

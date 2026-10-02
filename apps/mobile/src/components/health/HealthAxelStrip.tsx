@@ -1,5 +1,6 @@
 import { View } from 'react-native'
-import { Text, IconBadge } from '../../ui'
+import { Text } from '../../ui'
+import { AxelSun } from '../AxelSun'
 import { useTheme } from '../../theme/ThemeProvider'
 
 /** Mensagem AXEL integrada na tela — faixa lateral, sem Card. */
@@ -19,7 +20,7 @@ export function HealthAxelStrip({ message }: { message: string })
         borderLeftColor: colors.axel,
       }}
     >
-      <IconBadge name="sparkles" color={colors.axel} size={40} iconSize={20} />
+      <AxelSun size={44} />
       <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
         <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
           AXEL

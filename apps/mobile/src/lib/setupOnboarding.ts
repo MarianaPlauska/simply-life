@@ -41,7 +41,7 @@ export const SETUP_PRIORITY: {
 ]
 
 const TITLES: Record<SetupStepId, string> = {
-  welcome: 'Bem-vindo ao Simply Life',
+  welcome: 'Boas-vindas ao SunFy',
   name: 'Como devemos te chamar',
   pace: 'Ritmo e aparência',
   focus: 'Foco e neurodivergência',

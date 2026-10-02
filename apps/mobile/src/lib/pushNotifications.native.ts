@@ -52,7 +52,7 @@ export async function setNativeAndroidChannel(): Promise<void>
 {
   if (Platform.OS !== 'android') return
   await Notifications.setNotificationChannelAsync('default', {
-    name: 'Simply-Life',
+    name: 'SunFy',
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
   })

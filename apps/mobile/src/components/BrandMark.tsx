@@ -1,10 +1,33 @@
-import { View } from 'react-native'
-import Svg, { Rect, Path, Text as SvgText } from 'react-native-svg'
-import { COLOR_DARK } from '@simply-life/ui-tokens'
+import { View, type TextStyle } from 'react-native'
+import Svg, { Rect } from 'react-native-svg'
+import { BRAND } from '@simply-life/ui-tokens'
 import { Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
+import { AxelSun } from './AxelSun'
 
-/** Marca SL - mesmo desenho do favicon.svg (web) */
+/**
+ * Nome SunFy: o "u" em coral é o sorriso da marca.
+ * SUNflower + FY (for you): um girassol pra você.
+ */
+export function SunFyWordmark({
+  style,
+  color,
+}: {
+  style?: TextStyle
+  color?: string
+})
+{
+  const { colors } = useTheme()
+  return (
+    <Text variant="hero" style={[{ color: color ?? colors.ink }, style]} accessibilityLabel="SunFy">
+      S
+      <Text variant="hero" style={[style, { color: colors.axelFill }]}>u</Text>
+      nFy
+    </Text>
+  )
+}
+
+/** Marca SunFy: o Axel, girassol de rosto amigo, sobre petróleo */
 export function BrandMark({
   size = 72,
   lockup,
@@ -12,38 +35,23 @@ export function BrandMark({
 }: {
   size?: number
   lockup?: boolean
-  /** Sobre fundo cobre - mantém contraste do favicon */
+  /** Sobre fundo petróleo: dispensa o quadrado de fundo */
   onFill?: boolean
 })
 {
   const { colors, space } = useTheme()
-  const rx = size * 0.225
-  const bg = onFill ? COLOR_DARK.canvas : colors.ink
-  const fg = onFill ? COLOR_DARK.ink : colors.canvas
-  const smile = colors.axel
 
-  const icon = (
-    <Svg width={size} height={size} viewBox="0 0 32 32">
-      <Rect width="32" height="32" rx={7.2 * (size / 32)} fill={bg} />
-      <SvgText
-        x="16"
-        y="20.5"
-        textAnchor="middle"
-        fontFamily="Lexend_700Bold"
-        fontSize="13"
-        fontWeight="700"
-        fill={fg}
-      >
-        SL
-      </SvgText>
-      <Path
-        d="M10.5 23.6c2.1 2.1 8.9 2.1 11 0"
-        fill="none"
-        stroke={smile}
-        strokeWidth="2.1"
-        strokeLinecap="round"
-      />
-    </Svg>
+  const icon = onFill ? (
+    <AxelSun size={size} label="SunFy" />
+  ) : (
+    <View style={{ width: size, height: size }}>
+      <Svg width={size} height={size} viewBox="0 0 32 32" style={{ position: 'absolute' }}>
+        <Rect width="32" height="32" rx="7.2" fill={BRAND.petroleo} />
+      </Svg>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <AxelSun size={size * 0.84} label="SunFy" />
+      </View>
+    </View>
   )
 
   if (!lockup) return icon
@@ -52,25 +60,19 @@ export function BrandMark({
     <View style={{ alignItems: 'center', gap: space.md }}>
       {icon}
       <View style={{ alignItems: 'center', gap: 4 }}>
-        <Text
-          variant="hero"
-          style={{
-            letterSpacing: -0.6,
-            textAlign: 'center',
-            color: onFill ? colors.axelOnFill : colors.ink,
-          }}
-        >
-          Simply-Life
-        </Text>
+        <SunFyWordmark
+          color={onFill ? colors.onBrand : colors.ink}
+          style={{ letterSpacing: -0.6, textAlign: 'center' }}
+        />
         <Text
           variant="caption"
           style={{
             letterSpacing: 0.3,
             textAlign: 'center',
-            color: onFill ? 'rgba(26,24,22,0.72)' : colors.inkMuted,
+            color: onFill ? colors.brandInk : colors.inkMuted,
           }}
         >
-          OS pessoal · AXEL
+          Um girassol pra você
         </Text>
       </View>
     </View>

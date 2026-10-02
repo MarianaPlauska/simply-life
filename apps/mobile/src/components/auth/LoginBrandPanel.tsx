@@ -1,11 +1,11 @@
 import { View, StyleSheet } from 'react-native'
 import Svg, { Defs, LinearGradient, RadialGradient, Stop, Rect, Circle } from 'react-native-svg'
-import { BrandMark } from '../BrandMark'
+import { BrandMark, SunFyWordmark } from '../BrandMark'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { LoginProductPreview } from './LoginProductPreview'
 
-/** Landing desktop: preto OLED, cobre AXEL, mock do produto. */
+/** Landing desktop: petróleo, o Axel girassol, manifesto SunFy e mock do produto. */
 export function LoginBrandPanel()
 {
   const { space, colors } = useTheme()
@@ -39,7 +39,10 @@ export function LoginBrandPanel()
           gap: space.md,
         }}
       >
-        <BrandMark size={48} onFill />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <BrandMark size={48} onFill />
+          <SunFyWordmark color={colors.onBrand} style={{ fontSize: 28, lineHeight: 34, letterSpacing: -0.6 }} />
+        </View>
         <View
           style={{
             alignSelf: 'flex-start',
@@ -53,7 +56,7 @@ export function LoginBrandPanel()
           }}
         >
           <Text variant="caption" style={{ color: colors.onBrand, fontWeight: '700' }}>
-            Organização sem pressão
+            Um girassol pra você
           </Text>
         </View>
         <Text
@@ -65,19 +68,19 @@ export function LoginBrandPanel()
             letterSpacing: -1.6,
           }}
         >
-          {'Organize.\nPlaneje.\n'}
+          {'Passos pequenos.\nSem pressa.\n'}
           <Text
             variant="hero"
             style={{ color: colors.axelFill, fontSize: 48, lineHeight: 52, letterSpacing: -1.6 }}
           >
-            Simply.
+            Nunca sozinho.
           </Text>
         </Text>
         <Text
           variant="body"
           style={{ color: `${colors.onBrand}C7`, maxWidth: 440, fontSize: 16, lineHeight: 24 }}
         >
-          {'Tire da cabeça.\nO resto a gente organiza.'}
+          {'Nos dias nublados, os girassóis se viram uns para os outros.\nO SunFy é esse girassol pra você.'}
         </Text>
         <LoginProductPreview />
       </View>

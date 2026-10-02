@@ -33,7 +33,7 @@ export function CrisisSupportCard({ compact = false }: { compact?: boolean })
       />
       <Text variant="body" muted>
         Se o momento está difícil, você pode ligar gratuitamente para o CVV ({CVV_NUMBER}).
-        O Simply Life organiza a rotina; não substitui atendimento profissional nem emergência
+        O SunFy organiza a rotina; não substitui atendimento profissional nem emergência
         médica (SAMU 192).
       </Text>
       {!compact ? (

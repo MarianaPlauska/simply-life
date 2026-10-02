@@ -114,7 +114,7 @@ export default function MetaDetailScreen()
     try
     {
       await Share.share({
-        message: `Bora fazer uma meta juntos no Simply Life? Ninguém vê o número de ninguém. ${r.url} (código ${r.code})`,
+        message: `Bora fazer uma meta juntos no SunFy? Ninguém vê o número de ninguém. ${r.url} (código ${r.code})`,
         url: r.url,
       })
     }

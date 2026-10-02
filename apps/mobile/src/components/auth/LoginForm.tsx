@@ -8,6 +8,20 @@ import { supabaseConfigured } from '../../lib/supabase'
 import { loadRememberedEmail, saveRememberedEmail } from '../../lib/rememberEmail'
 import { AuthField } from './AuthField'
 import { ForgotPasswordSheet } from './ForgotPasswordSheet'
+import Svg, { Path } from 'react-native-svg'
+
+/** Logo do Google nas cores oficiais (exigência da marca no botão de login). */
+function GoogleG({ size = 18 }: { size?: number })
+{
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1Z" fill="#4285F4" />
+      <Path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23Z" fill="#34A853" />
+      <Path d="M5.84 14.09A6.97 6.97 0 0 1 5.47 12c0-.72.13-1.43.37-2.09V7.07H2.18A11.96 11.96 0 0 0 .96 12c0 1.94.46 3.77 1.22 5.33l2.66-3.24Z" fill="#FBBC05" />
+      <Path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.99 14.97.96 12 .96 7.7.96 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53Z" fill="#EA4335" />
+    </Svg>
+  )
+}
 
 export type AuthMode = 'login' | 'register'
 
@@ -292,14 +306,14 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
                   height: 20,
                   borderRadius: 4,
                   borderWidth: remember ? 0 : 1.5,
-                  borderColor: colors.ink,
-                  backgroundColor: remember ? colors.ink : 'transparent',
+                  borderColor: colors.inkMuted,
+                  backgroundColor: remember ? colors.axelFill : 'transparent',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
                 {remember ? (
-                  <Icon name="checkmark" size={14} color={colors.canvas} />
+                  <Icon name="checkmark" size={14} color={colors.axelOnFill} />
                 ) : null}
               </View>
               <Text variant="caption" color={colors.ink}>
@@ -337,31 +351,47 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
           style={{ width: '100%', borderRadius: isWave ? 14 : 999, marginTop: space.sm }}
         />
 
-        <PrimaryButton
-          label="Continuar como convidado"
-          variant="ghost"
-          onPress={enterGuest}
-          style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
-        />
-
         {supabaseConfigured && mode === 'login' ? (
-          <PrimaryButton
-            label="Continuar com Google"
-            variant="secondary"
-            loading={googleLoading}
-            onPress={() =>
-            {
-              void (async () =>
+          <>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 4 }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.hairline }} />
+              <Text variant="caption" muted>
+                ou
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.hairline }} />
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Continuar com Google"
+              disabled={googleLoading}
+              onPress={() =>
               {
-                setGoogleLoading(true)
-                setError('')
-                const res = await signInWithGoogle()
-                if (res.error) setError(res.error)
-                setGoogleLoading(false)
-              })()
-            }}
-            style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
-          />
+                void (async () =>
+                {
+                  setGoogleLoading(true)
+                  setError('')
+                  const res = await signInWithGoogle()
+                  if (res.error) setError(res.error)
+                  setGoogleLoading(false)
+                })()
+              }}
+              style={({ pressed }) => ({
+                minHeight: 48,
+                borderRadius: isWave ? 14 : 999,
+                borderWidth: 1,
+                borderColor: colors.hairlineStrong,
+                backgroundColor: pressed ? colors.elevated : 'transparent',
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 10,
+                opacity: googleLoading ? 0.6 : 1,
+              })}
+            >
+              <GoogleG size={18} />
+              <Text variant="bodyStrong">{googleLoading ? 'Abrindo o Google...' : 'Continuar com Google'}</Text>
+            </Pressable>
+          </>
         ) : null}
           </>
         ) : null}
@@ -424,6 +454,19 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
           </Text>
         </Pressable>
       </View>
+
+      {mode === 'login' && !mfaPendingFactorId ? (
+        <Pressable
+          onPress={enterGuest}
+          accessibilityRole="button"
+          accessibilityLabel="Explorar sem conta"
+          style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text variant="label" color={colors.inkMuted}>
+            Só quero explorar, sem conta
+          </Text>
+        </Pressable>
+      ) : null}
 
       <ForgotPasswordSheet
         visible={forgotOpen}

@@ -62,7 +62,7 @@ export default function JoinFriendScreen()
               Faça login ou crie sua conta para aceitar o convite {String(code || '').toUpperCase()}.
             </Text>
             <PrimaryButton
-              label="Entrar no Simply-Life"
+              label="Entrar no SunFy"
               onPress={() => router.replace('/login')}
             />
           </>

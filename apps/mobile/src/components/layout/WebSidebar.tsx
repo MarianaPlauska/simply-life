@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'expo-router'
 import { useModules } from '../../hooks/useModules'
 import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
-import { BrandMark } from '../BrandMark'
+import { BrandMark, SunFyWordmark } from '../BrandMark'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useCaptureStore, captureForTab, captureFabLabel } from '../../store/captureStore'
@@ -110,17 +110,10 @@ export function WebSidebar()
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, minWidth: 0 }}>
             <BrandMark size={22} onFill />
             {!collapsed ? (
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontFamily: 'Fraunces_500Medium',
-                  color: CREAM,
-                  fontSize: 15,
-                  letterSpacing: -0.2,
-                }}
-              >
-                Simply Life
-              </Text>
+              <SunFyWordmark
+                color={CREAM}
+                style={{ fontFamily: 'Fraunces_500Medium', fontSize: 15, lineHeight: 20, letterSpacing: -0.2 }}
+              />
             ) : null}
           </View>
           {!collapsed ? (

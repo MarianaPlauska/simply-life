@@ -115,7 +115,7 @@ export default function LoginScreen()
       >
         <View style={{ position: 'relative' }}>
           <AuthHeader
-            welcomeLabel={authMode === 'register' ? 'Organize\na sua vida.\nSeja Simply.' : 'Organize.\nPlaneje.\nSimply.'}
+            welcomeLabel={authMode === 'register' ? 'Chega mais.\nAqui você\nnão está só.' : 'Passos pequenos.\nSem pressa.\nFeito pra você.'}
             compact={authMode === 'register'}
             width={vw}
           />
@@ -129,7 +129,7 @@ export default function LoginScreen()
               width: 40,
               height: 40,
               borderRadius: 999,
-              backgroundColor: 'rgba(0,0,0,0.22)',
+              backgroundColor: mode === 'dark' ? 'rgba(0,0,0,0.22)' : 'rgba(31,58,61,0.08)',
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -137,7 +137,7 @@ export default function LoginScreen()
             <Icon
               name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
               size={18}
-              color={colors.onBrand}
+              color={colors.heroInk}
             />
           </Pressable>
         </View>
@@ -150,15 +150,14 @@ export default function LoginScreen()
             paddingTop: space.lg,
             paddingBottom: Math.max(insets.bottom, space.lg),
             backgroundColor: colors.surface,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            marginTop: -12,
-            minHeight: winH * 0.62,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            borderTopWidth: 1,
+            borderColor: colors.hairline,
+            marginTop: -16,
+            minHeight: winH * 0.7,
           }}
         >
-          <Text variant="caption" muted style={{ marginBottom: space.sm }}>
-            {mode === 'dark' ? 'Modo escuro' : 'Modo claro'}
-          </Text>
           <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading variant="wave" />
         </KeyboardAvoidingView>
       </View>

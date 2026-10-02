@@ -8,11 +8,12 @@ import {
   humorDoDia,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, Card, PrimaryButton, IconBadge } from '../../ui'
+import { Text, Card, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { useWorkspace } from '../../layout/useWorkspace'
+import { AxelSun } from '../AxelSun'
 
 /**
  * AXEL compacto - fechado por padrão no mobile (só título + 1 frase + 1 passo).
@@ -78,7 +79,7 @@ export function AxelDayBrief()
         accessibilityLabel={open ? 'Fechar AXEL' : 'Abrir AXEL'}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 48 }}
       >
-        <IconBadge name="sparkles" color={accent} size={40} iconSize={20} />
+        <AxelSun size={44} mood={moodLevel != null && moodLevel <= 2 ? 'care' : moodLevel != null && moodLevel >= 4 ? 'happy' : 'calm'} />
         <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
           <Text variant="caption" color={accent} style={{ fontWeight: '700', fontSize: 11 }}>
             AXEL
