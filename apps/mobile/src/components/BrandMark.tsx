@@ -1,9 +1,7 @@
 import { View, type TextStyle } from 'react-native'
-import Svg, { Rect } from 'react-native-svg'
-import { BRAND } from '@simply-life/ui-tokens'
 import { Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
-import { AxelSun } from './AxelSun'
+import { SunFyMark } from './SunFyMark'
 
 /**
  * Nome SunFy: o "u" em coral é o sorriso da marca.
@@ -27,7 +25,7 @@ export function SunFyWordmark({
   )
 }
 
-/** Marca SunFy: o Axel, girassol de rosto amigo, sobre petróleo */
+/** Marca SunFy: o símbolo "tudo se volta pra você" (o Axel é o personagem, não a marca) */
 export function BrandMark({
   size = 72,
   lockup,
@@ -41,18 +39,7 @@ export function BrandMark({
 {
   const { colors, space } = useTheme()
 
-  const icon = onFill ? (
-    <AxelSun size={size} label="SunFy" />
-  ) : (
-    <View style={{ width: size, height: size }}>
-      <Svg width={size} height={size} viewBox="0 0 32 32" style={{ position: 'absolute' }}>
-        <Rect width="32" height="32" rx="7.2" fill={BRAND.petroleo} />
-      </Svg>
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <AxelSun size={size * 0.84} label="SunFy" />
-      </View>
-    </View>
-  )
+  const icon = onFill ? <SunFyMark size={size} /> : <SunFyMark size={size} tile />
 
   if (!lockup) return icon
 

@@ -6,6 +6,7 @@
  */
 import type { ReactNode } from 'react'
 import { AxelSun } from '../brand/AxelSun'
+import { SunFyMarkShapes } from '../brand/SunFyMark'
 
 function Check({ done }: { done?: boolean })
 {
@@ -75,7 +76,7 @@ function Laptop()
         <div className="aspect-[16/10] overflow-hidden rounded-[8px] p-3 xl:p-4">
           {/* topo do app */}
           <div className="mb-3 flex items-center gap-3">
-            <AxelSun size={20} />
+            <svg viewBox="0 0 64 64" className="h-5 w-5" aria-hidden><SunFyMarkShapes onLight /></svg>
             {['Hoje', 'Tarefas', 'Saúde', 'Finanças'].map((t, i) => (
               <span
                 key={t}

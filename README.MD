@@ -1,9 +1,13 @@
+<p align="center">
+  <img src="docs/images/brand/sunfy-icon.svg" width="56" alt="Símbolo do SunFy: oito pétalas viradas para o centro" />
+</p>
+
 <h1 align="center">SunFy</h1>
 
 <p align="center">
   Um app para organizar o dia sem pressão.<br />
   Tarefas, humor, saúde e dinheiro no mesmo lugar.<br />
-  <sub>SunFy vem de <em>SUNflower</em> + <em>FY</em> (for you): um girassol pra você. Nos dias nublados, os girassóis se viram uns para os outros.</sub>
+  <sub>SunFy vem de <em>SUNflower</em> + <em>FY</em> (for you): um girassol pra você. Nos dias nublados, os girassóis se viram uns para os outros: por isso as pétalas do símbolo se voltam para o centro, que é você.</sub>
 </p>
 
 <p align="center">

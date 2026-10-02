@@ -1,5 +1,6 @@
-// Marca SunFy: o Axel girassol sobre petróleo e o nome com o "u" em coral (o sorriso)
-import { AxelSunShapes } from './AxelSun'
+// Marca SunFy: o símbolo "tudo se volta pra você" sobre petróleo e o nome com o "u" em coral
+// O Axel é o personagem do app, não a marca
+import { SunFyMarkShapes } from './SunFyMark'
 
 type MarkVariant = 'icon' | 'lockup'
 
@@ -42,8 +43,8 @@ export function SimplyLifeMark({ variant = 'icon', className = '' }: SimplyLifeM
       focusable="false"
     >
       <rect width="32" height="32" rx="7.2" fill="#1F3A3D" />
-      <g transform="translate(2.6 2.6) scale(0.42)">
-        <AxelSunShapes />
+      <g transform="translate(2.88 2.88) scale(0.41)">
+        <SunFyMarkShapes />
       </g>
     </svg>
   )

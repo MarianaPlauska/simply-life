@@ -1,5 +1,5 @@
-// Gera favicon, ícones do PWA e og-image da marca SunFy (o Axel girassol).
-// Desenho igual ao de src/components/brand/AxelSun.tsx.
+// Gera favicon, ícones do PWA e og-image da marca SunFy (símbolo "tudo se volta pra você").
+// Desenho igual ao de src/components/brand/SunFyMark.tsx.
 // Uso: node scripts/gen-brand-icons.mjs  (precisa do Playwright e do Microsoft Edge instalados)
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -7,25 +7,21 @@ import { chromium } from 'playwright'
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url))
 const SOL = '#E8B04B'
-const LUZ = '#F6D58E'
-const BORDA = '#B9822A'
 const CORAL = '#E8734A'
-const INK = '#1E1C1A'
 const PETROLEO = '#1F3A3D'
 
+const MENTA = '#B9CFCA'
+const PETAL = 'M32 24 C24.5 18.5 24.5 6 32 6 C39.5 6 39.5 18.5 32 24 Z'
+
+/** Símbolo "tudo se volta pra você": oito pétalas viradas para o centro coral */
 function sunShapes()
 {
   let p = ''
-  for (let i = 0; i < 12; i++)
+  for (let i = 0; i < 8; i++)
   {
-    p += `<ellipse cx="32" cy="9.5" rx="5.6" ry="9" fill="${SOL}" stroke="${BORDA}" stroke-width="1" transform="rotate(${i * 30} 32 32)"/>`
+    p += `<path d="${PETAL}" fill="${i % 2 ? MENTA : SOL}" transform="rotate(${i * 45} 32 32)"/>`
   }
-  p += `<circle cx="32" cy="32" r="18.5" fill="${LUZ}" stroke="${BORDA}" stroke-width="1.4"/>`
-  p += `<circle cx="22.5" cy="37" r="3.2" fill="${CORAL}" opacity=".45"/><circle cx="41.5" cy="37" r="3.2" fill="${CORAL}" opacity=".45"/>`
-  p += `<circle cx="26.5" cy="30.5" r="2.3" fill="${INK}"/><circle cx="37.5" cy="30.5" r="2.3" fill="${INK}"/>`
-  p += `<circle cx="27.3" cy="29.7" r=".7" fill="#fff"/><circle cx="38.3" cy="29.7" r=".7" fill="#fff"/>`
-  p += `<path d="M26 37 q6 5.5 12 0" fill="none" stroke="${INK}" stroke-linecap="round" stroke-width="2.4"/>`
-  return p
+  return p + `<circle cx="32" cy="32" r="6.5" fill="${CORAL}"/>`
 }
 
 /** Ícone: girassol ocupando `scale` do quadro; fundo petróleo opcional com cantos `radius` (em unidades de 64) */
@@ -55,7 +51,7 @@ const OG_HTML = `<!doctype html><html><head>
   <div class="tag">Um girassol pra você</div>
   <div class="sub">Passos pequenos. Sem pressa. Nunca sozinho.</div>
 </div>
-${iconSvg(380, 1, { bg: null })}
+${iconSvg(360, 1, { bg: null })}
 </body></html>`
 
 /** ICO com imagens PNG dentro (aceito por todos os navegadores atuais) */
