@@ -3,6 +3,7 @@
 import { stripDashes } from '../../noDashes.js';
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js';
+import { geminiUrl } from '../../geminiModel.js'
 
 function parseJsonFromText(text)
 {
@@ -109,7 +110,7 @@ async function callGroq(apiKey, systemInstruction, userPrompt)
 async function callGemini(apiKey, systemInstruction, userPrompt)
 {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    geminiUrl(apiKey),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

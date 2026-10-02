@@ -1,6 +1,7 @@
 // Parser estruturado de e-mail - Groq/Gemini (score, prazo, intenção)
 
 import { applyHojeFloor, mapScoreToPrioridade } from './triageScore.js';
+import { geminiUrl } from './geminiModel.js'
 
 /**
  * @param {{ sender?: string, subject?: string, body?: string, userKeywords?: string[] }} email
@@ -61,7 +62,7 @@ Regras:
   if (keys.geminiKey)
   {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keys.geminiKey}`,
+      geminiUrl(keys.geminiKey),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

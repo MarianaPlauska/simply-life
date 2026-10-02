@@ -4,6 +4,7 @@
 import { stripDashes } from '../../noDashes.js';
 import { applyCors } from '../../cors.js';
 import { getUserFromBearer } from '../../supabaseUser.js';
+import { geminiUrl } from '../../geminiModel.js'
 
 export default async function handler(req, res)
 {
@@ -69,7 +70,7 @@ Assunto: ${subject || '(sem assunto)'}
 Corpo: ${(body || '').substring(0, 1000)}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: 'POST',
         headers: {

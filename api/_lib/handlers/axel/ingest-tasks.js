@@ -8,6 +8,7 @@ import { fetchUserKeywords, matchUserKeywords } from '../../keywordBoost.js'
 import { scoreFromItem } from '../../triageScore.js'
 import { insertTriagedTask } from '../../insertTriagedTask.js'
 import { resolveInfluenceWeight, DEFAULT_INFLUENCE_MAP } from '../../influenceMap.js'
+import { geminiUrl } from '../../geminiModel.js'
 
 const URGENCY_WORDS = ['urgente', 'urgent', 'asap', 'critico', 'crítico', 'p0', 'hotfix']
 const KEY_SENDER_WEIGHT = 0.85
@@ -44,7 +45,7 @@ async function triageWithGemini(item, apiKey)
     const sys = `Retorne APENAS JSON: {"titulo","snippet","is_urgent","is_vip","is_bug","is_noise","acao"}.`
 
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

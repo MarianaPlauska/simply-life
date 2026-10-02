@@ -1,4 +1,5 @@
 import { stripDashes } from './noDashes.js'
+import { geminiUrl } from './geminiModel.js'
 // Prompt solto → tarefas estruturadas (Groq → Gemini). A normalização final
 // (ids válidos, faixas, datas) acontece no app via normalizeAiTask (shared).
 
@@ -83,7 +84,7 @@ export async function callGroq(apiKey, system, user, opts = {})
 export async function callGemini(apiKey, system, user)
 {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    geminiUrl(apiKey),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

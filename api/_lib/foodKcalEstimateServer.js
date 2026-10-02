@@ -5,6 +5,7 @@
 // Nunca lança para o handler: tudo tem prazo e cai para o próximo.
 
 import { callGroq } from './taskPromptServer.js'
+import { geminiModel as sharedGeminiModel } from './geminiModel.js'
 import {
   MAX_GRAMS,
   MAX_KCAL,
@@ -70,8 +71,7 @@ export function buildFoodNutrientsUserPrompt(ctx)
 
 function geminiModel()
 {
-  const m = String(process.env.GEMINI_FOOD_MODEL || '').trim()
-  return /^[a-z0-9.\-]+$/i.test(m) ? m : 'gemini-2.0-flash'
+  return sharedGeminiModel(process.env.GEMINI_FOOD_MODEL)
 }
 
 /** Gemini com a ferramenta google_search; devolve o corpo JSON cru da API. */

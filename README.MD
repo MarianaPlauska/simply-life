@@ -16,9 +16,24 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/app/inicio.png" alt="Tela inicial do SunFy" width="240" />
-  <img src="docs/images/app/tarefas.png" alt="Tela de tarefas" width="240" />
-  <img src="docs/images/app/financas.png" alt="Tela da carteira" width="240" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/inicio-escuro.png" />
+    <img src="docs/images/app/inicio.png" alt="Tela inicial do SunFy" width="240" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/tarefas-escuro.png" />
+    <img src="docs/images/app/tarefas.png" alt="Tela de tarefas" width="240" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/financas-escuro.png" />
+    <img src="docs/images/app/financas.png" alt="Tela da carteira" width="240" />
+  </picture>
+</p>
+
+<p align="center">
+  <img src="docs/images/app/inicio.png" alt="Tela inicial no modo claro" width="200" />
+  <img src="docs/images/app/inicio-escuro.png" alt="Tela inicial no modo escuro" width="200" /><br />
+  <sub>Modo claro e modo escuro. As imagens acima seguem o tema que você usa no GitHub.</sub>
 </p>
 
 ## Por que eu criei esse app
@@ -45,8 +60,14 @@ O SunFy foi pensado para o dia difícil, não para o dia perfeito. A ideia é si
 | **Calendário** | Ver o mês inteiro e ligar sua agenda do Google, Outlook ou Teams |
 
 <p align="center">
-  <img src="docs/images/app/saude.png" alt="Diário de humor na tela de saúde" width="240" />
-  <img src="docs/images/app/login.png" alt="Tela de entrada" width="240" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/saude-escuro.png" />
+    <img src="docs/images/app/saude.png" alt="Diário de humor na tela de saúde" width="240" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/login-escuro.png" />
+    <img src="docs/images/app/login.png" alt="Tela de entrada" width="240" />
+  </picture>
 </p>
 
 ## Como funciona na prática

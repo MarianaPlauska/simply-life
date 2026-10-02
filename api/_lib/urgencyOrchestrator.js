@@ -3,6 +3,7 @@
 import { stripDashes } from './noDashes.js';
 import { calculateUrgency } from './relevanceEngine.js';
 import { parseEmailWithAI, heuristicEmailParse } from './emailGroqParser.js';
+import { geminiUrl } from './geminiModel.js'
 
 const PROJECT_TAGS = ['SST', 'FINALLY', 'HUB', 'CORE'];
 
@@ -170,7 +171,7 @@ Responda APENAS JSON: {"scores":[{"task_id":0,"score":number,"rationale":string}
   if (keys.geminiKey)
   {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keys.geminiKey}`,
+      geminiUrl(keys.geminiKey),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -298,7 +299,7 @@ async function fetchBatchUrgencyFromAI(tasks, keys)
   if (keys.geminiKey)
   {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keys.geminiKey}`,
+      geminiUrl(keys.geminiKey),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,4 +1,5 @@
 import { stripDashes } from '../../noDashes.js'
+import { geminiUrl } from '../../geminiModel.js'
 // GET /api/generate-greeting?lat=X&lon=Y
 // Gera saudação contextual JARVIS cruzando clima + dados do user via Google Gemini
 export default async function handler(req, res) {
@@ -73,7 +74,7 @@ Regras absolutas:
 - Próximo compromisso na agenda: ${proximoEvento || 'nenhum compromisso agendado'}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: 'POST',
         headers: {
