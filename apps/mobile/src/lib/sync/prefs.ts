@@ -58,6 +58,8 @@ export type WorkspacePrefs = {
   home_module_order?: DashboardPriority[]
   /** Meta semanal ou mensal escolhida pelo usuário. */
   life_goal?: import('@simply-life/shared').LifeGoal | null
+  /** várias metas ao mesmo tempo; `life_goal` segue como a principal (a primeira) */
+  life_goals?: import('@simply-life/shared').LifeGoal[]
   /** Desbloqueios: ícone do avatar ('initials' ou nome do ícone) */
   profile_avatar_icon?: string
   /** Desbloqueios: estilo do anel do avatar */
@@ -268,6 +270,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
         ? raw.home_module_order
         : undefined,
     life_goal: raw?.life_goal ?? null,
+    life_goals: Array.isArray(raw?.life_goals) ? raw.life_goals : [],
     chama_colecao: raw?.chama_colecao ?? null,
     share_focus_status: raw?.share_focus_status === true,
     profile_avatar_icon: typeof raw?.profile_avatar_icon === 'string' ? raw.profile_avatar_icon : 'initials',

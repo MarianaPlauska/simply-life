@@ -34,7 +34,8 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
         gap: 6,
         backgroundColor: active ? colors.brandMuted : colors.elevated,
         borderWidth: 1,
-        borderColor: active ? ink : 'transparent',
+        // não escolhida: contorno suave, senão some dentro de cartões da mesma cor
+        borderColor: active ? ink : colors.hairlineStrong,
       }}
     >
       {dotColor ? (
