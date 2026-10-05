@@ -118,7 +118,7 @@ export function DesktopSidebar()
             justifyContent: 'center',
           }}
         >
-          <BrandMark size={collapsed ? 28 : 28} onFill />
+          <BrandMark size={28} />
           {!collapsed ? (
             <View style={{ flex: 1 }}>
               <SunFyWordmark

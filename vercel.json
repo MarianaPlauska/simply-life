@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
-  "installCommand": "npm install --no-audit --no-fund && cd frontend && npm install --no-audit --no-fund",
-  "framework": "vite",
+  "buildCommand": "cd apps/mobile && node ./scripts/patch-expo-router-ctx.js && npx expo export -p web --output-dir dist",
+  "outputDirectory": "apps/mobile/dist",
+  "installCommand": "npm install --no-audit --no-fund",
+  "framework": null,
   "github": {
     "enabled": true,
     "silent": false,
@@ -12,8 +12,10 @@
   },
   "build": {
     "env": {
-      "VITE_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
-      "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8"
+      "EXPO_PUBLIC_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8",
+      "EXPO_PUBLIC_API_URL": "https://simply-life.vercel.app",
+      "EXPO_PUBLIC_APP_URL": "https://simply-life.vercel.app"
     }
   },
   "headers": [
@@ -22,7 +24,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://zuxkqmooxvnulgllduhr.supabase.co https://api.qrserver.com; connect-src 'self' https://zuxkqmooxvnulgllduhr.supabase.co wss://zuxkqmooxvnulgllduhr.supabase.co https://api.open-meteo.com https://api.bigdatacloud.net; worker-src 'self'; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://zuxkqmooxvnulgllduhr.supabase.co https://api.qrserver.com https://images.openfoodfacts.org; connect-src 'self' https://zuxkqmooxvnulgllduhr.supabase.co wss://zuxkqmooxvnulgllduhr.supabase.co https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.bigdatacloud.net https://world.openfoodfacts.org; worker-src 'self'; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
         },
         {
           "key": "Strict-Transport-Security",
@@ -42,7 +44,7 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=(self), payment=(), usb=(), interest-cohort=()"
+          "value": "camera=(self), microphone=(), geolocation=(self), payment=(), usb=(), interest-cohort=()"
         },
         {
           "key": "Cross-Origin-Opener-Policy",

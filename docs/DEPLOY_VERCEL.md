@@ -9,10 +9,12 @@ Em **Project → Settings → General**:
 | Campo | Valor correto |
 |-------|----------------|
 | **Root Directory** | *(vazio — raiz do repositório)* |
-| **Framework Preset** | Vite |
-| **Build Command** | `cd frontend && npm run build` |
-| **Output Directory** | `frontend/dist` |
-| **Install Command** | `npm install --no-audit --no-fund && cd frontend && npm install --no-audit --no-fund` |
+| **Framework Preset** | Other (o `vercel.json` define `"framework": null`) |
+| **Build Command** | `cd apps/mobile && node ./scripts/patch-expo-router-ctx.js && npx expo export -p web --output-dir dist` |
+| **Output Directory** | `apps/mobile/dist` |
+| **Install Command** | `npm install --no-audit --no-fund` |
+
+> Desde outubro de 2026 a Vercel publica a **versão web do app** (`apps/mobile`), não mais o site antigo em `frontend/`. Os valores acima já estão no `vercel.json` da raiz, que vale mais que o painel. O que essa versão faz e não faz no iPhone está em [IPHONE.md](IPHONE.md). Para voltar ao site antigo, restaure o `vercel.json` anterior pelo histórico do git.
 
 > Se **Root Directory** estiver como `frontend`, a pasta `api/` **não** sobe e o `vercel.json` da raiz é ignorado. Deixe vazio.
 
@@ -28,8 +30,9 @@ Se não estiver conectado: **Connect Git Repository** → GitHub → `simply-lif
 
 | Variável | Ambiente |
 |----------|----------|
-| `VITE_SUPABASE_URL` | Production + Preview |
-| `VITE_SUPABASE_ANON_KEY` | Production + Preview |
+| `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_APP_URL` | Já vêm do `vercel.json` (build.env); entram no bundle e são públicas |
+| `VITE_SUPABASE_URL` | Só para o site antigo (`frontend/`) |
+| `VITE_SUPABASE_ANON_KEY` | Só para o site antigo (`frontend/`) |
 | `GROQ_API_KEY` | Production + Preview (server) |
 | `ENCRYPTION_KEY` | Production (server) — 32 bytes em hex/base64 para AES-256-GCM das senhas IMAP |
 | `VAPID_PUBLIC_KEY` | Production (server) — chave pública Web Push |

@@ -2,12 +2,16 @@
 // Desenho igual ao de src/components/brand/SunFyMark.tsx.
 // Também gera os ícones do app (apps/mobile/assets): ícone, Android, abertura e favicon.
 // Uso: node scripts/gen-brand-icons.mjs  (precisa do Playwright e do Microsoft Edge instalados)
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url))
 const MOBILE = fileURLToPath(new URL('../../apps/mobile/assets/', import.meta.url))
+// site na Vercel = build web do app (apps/mobile/public vai junto no export)
+const WEB = fileURLToPath(new URL('../../apps/mobile/public/', import.meta.url))
+/** Mesmo girassol do ícone do app em todo lugar (favicon incluso) */
+const ICON_SCALE = 0.66
 // só cores do app: pétalas creme e menta, centro coral
 const CREME = '#EEF2F0'
 const CORAL = '#E8734A'
@@ -94,26 +98,39 @@ async function render(html, width, height, transparent = true)
 
 const bare = (svg) => `<html><body style="margin:0;background:transparent">${svg}</body></html>`
 
-writeFileSync(OUT + 'pwa-192x192.png', await render(bare(iconSvg(192, 0.8, { radius: 14 })), 192, 192))
-writeFileSync(OUT + 'pwa-512x512.png', await render(bare(iconSvg(512, 0.8, { radius: 14 })), 512, 512))
+// favicon, PWA e ícone do iPhone = o ícone do app (quadro petróleo, girassol creme e menta, centro coral)
+const pwa192 = await render(bare(iconSvg(192, ICON_SCALE, { radius: 14 })), 192, 192)
+const pwa512 = await render(bare(iconSvg(512, ICON_SCALE, { radius: 14 })), 512, 512)
 // maskable: fundo cheio e girassol dentro da zona segura (80% central)
-writeFileSync(OUT + 'pwa-maskable-512.png', await render(bare(iconSvg(512, 0.62)), 512, 512))
-
+const maskable = await render(bare(iconSvg(512, 0.6)), 512, 512)
+// iPhone arredonda sozinho e não aceita transparência
+const apple = await render(bare(iconSvg(180, ICON_SCALE)), 180, 180, false)
 const icoPngs = []
 for (const size of [16, 32, 48])
 {
-  icoPngs.push({ size, data: await render(bare(iconSvg(size, 0.9, { radius: 14 })), size, size) })
+  icoPngs.push({ size, data: await render(bare(iconSvg(size, ICON_SCALE, { radius: 14 })), size, size) })
 }
-writeFileSync(OUT + 'favicon.ico', pngsToIco(icoPngs))
+const ico = pngsToIco(icoPngs)
+const favSvg = iconSvg(32, ICON_SCALE, { radius: 14 }).replace('<svg ', '<svg role="img" aria-label="SunFy" ') + '\n'
+const og = await render(OG_HTML, 1200, 630, false)
 
-writeFileSync(OUT + 'favicon.svg', iconSvg(32, 0.88, { radius: 14 }).replace('<svg ', '<svg role="img" aria-label="SunFy" ') + '\n')
-writeFileSync(OUT + 'og-image.png', await render(OG_HTML, 1200, 630, false))
+for (const dir of [OUT, WEB])
+{
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(dir + 'pwa-192x192.png', pwa192)
+  writeFileSync(dir + 'pwa-512x512.png', pwa512)
+  writeFileSync(dir + 'pwa-maskable-512.png', maskable)
+  writeFileSync(dir + 'apple-touch-icon.png', apple)
+  writeFileSync(dir + 'favicon.ico', ico)
+  writeFileSync(dir + 'favicon.svg', favSvg)
+  writeFileSync(dir + 'og-image.png', og)
+}
 
 // app (Expo): ícone cheio sem cantos (o sistema arredonda); Android e abertura sem fundo, sobre o petróleo do app.json
-writeFileSync(MOBILE + 'icon.png', await render(bare(iconSvg(1024, 0.66)), 1024, 1024, false))
+writeFileSync(MOBILE + 'icon.png', await render(bare(iconSvg(1024, ICON_SCALE)), 1024, 1024, false))
 writeFileSync(MOBILE + 'adaptive-icon.png', await render(bare(iconSvg(1024, 0.52, { bg: null })), 1024, 1024))
 writeFileSync(MOBILE + 'splash-icon.png', await render(bare(iconSvg(1024, 0.8, { bg: null })), 1024, 1024))
-writeFileSync(MOBILE + 'favicon.png', await render(bare(iconSvg(48, 0.9, { radius: 14 })), 48, 48))
+writeFileSync(MOBILE + 'favicon.png', await render(bare(iconSvg(48, ICON_SCALE, { radius: 14 })), 48, 48))
 
 await browser.close()
-console.log('SunFy: favicon, PWA e og-image gerados em public/; ícones do app em apps/mobile/assets/')
+console.log('SunFy: ícones em frontend/public, apps/mobile/public e apps/mobile/assets')

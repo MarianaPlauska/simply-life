@@ -1,5 +1,7 @@
 # Destino do PWA legado (`frontend/`)
 
+> **Outubro de 2026:** a Opção A foi aplicada. A Vercel passou a publicar a versão web do app (`apps/mobile`); o `frontend/` não vai mais para o ar. Como isso chega ao iPhone e o que falta (service worker, notificação web): [IPHONE.md](IPHONE.md).
+
 ## Decisão (Fase 3)
 
 **Opção A (recomendada):** o produto principal passa a ser o app **Expo** (`apps/mobile`).  

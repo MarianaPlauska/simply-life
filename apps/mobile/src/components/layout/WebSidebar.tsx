@@ -108,7 +108,7 @@ export function WebSidebar()
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, minWidth: 0 }}>
-            <BrandMark size={22} onFill />
+            <BrandMark size={22} />
             {!collapsed ? (
               <SunFyWordmark
                 color={CREAM}
