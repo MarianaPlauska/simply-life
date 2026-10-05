@@ -1,7 +1,7 @@
 {
   "login": {
-    "title": "Simply-Life",
-    "subtitle": "Seu sistema operacional pessoal",
+    "title": "SunFy",
+    "subtitle": "Que bom ter você aqui.",
     "tab_login": "Entrar",
     "tab_register": "Criar Conta",
     "name_label": "Nome",
@@ -29,8 +29,8 @@
     "terms": "Termos de Uso",
     "and": "e",
     "privacy": "Política de Privacidade",
-    "success_register": "Conta criada! Bem-vindo ao Simply-Life!",
-    "success_login": "Bem-vindo ao Simply-Life!",
+    "success_register": "Conta criada! Bem-vindo ao SunFy!",
+    "success_login": "Bem-vindo ao SunFy!",
     "success_demo": "Workspace demo restaurado",
     "success_guest": "Entrando como convidado",
     "error_register": "Erro ao criar conta",
@@ -39,9 +39,9 @@
     "error_connection": "Erro de conexão",
     "oauth_processing": "Conectando com Google…",
     "back_to_login": "Voltar ao login",
-    "hero_title": "Organize.\nPlaneje.\nSimply.",
-    "hero_subtitle": "O essencial do seu dia, numa tela só.\nHumor, treino, tarefas e contas.",
-    "hero_badge": "OS pessoal",
+    "hero_title": "Passos pequenos.\nSem pressa.\nNunca sozinho.",
+    "hero_subtitle": "Nos dias nublados, os girassóis se viram uns para os outros.\nO SunFy é esse girassol pra você.",
+    "hero_badge": "Um girassol pra você",
     "hero_feature_1": "Kanban e foco para execução diária",
     "hero_feature_2": "Finanças e metas com visão clara",
     "hero_feature_3": "Integração com Google Calendar e Gmail"

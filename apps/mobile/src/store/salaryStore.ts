@@ -254,7 +254,8 @@ export const useSalaryStore = create<State>((set, get) =>
       }
       const confirmations = [conf, ...get().confirmations.filter((c) => c.competencia !== p.competencia)]
       // aprende o desconto real (INSS/IRRF etc.) para as próximas previsões
-      const taxa = learnDiscountRate(confirmations
+      // no modo simples (desconto zero) o valor digitado já é o líquido: nada a aprender
+      const taxa = s.taxaDesconto === 0 ? null : learnDiscountRate(confirmations
         .filter((c) => c.brutoPrevisto && c.valorReal)
         .map((c) => ({ bruto: c.brutoPrevisto!, real: c.valorReal! })))
       const salary = taxa != null ? { ...s, taxaDesconto: taxa } : s

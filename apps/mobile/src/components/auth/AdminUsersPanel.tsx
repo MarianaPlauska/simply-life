@@ -190,7 +190,7 @@ export function AdminUsersPanel()
                 </View>
               </View>
               <Text variant="micro" muted>
-                Nível {u.level ?? 1} · pique {u.streak_count ?? 0}
+                Nível {u.level ?? 1} · elo {u.streak_count ?? 0}
                 {u.created_at ? ` · desde ${whenLabel(u.created_at)}` : ''}
               </Text>
               <View style={{ flexDirection: 'row', gap: space.sm, flexWrap: 'wrap' }}>

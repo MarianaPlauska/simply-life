@@ -59,7 +59,7 @@ export function JoinPartnerView()
           to={`/login?parceiro=${code}`}
           className="px-4 py-2.5 rounded-sl bg-accent text-white text-sm min-h-11 inline-flex items-center"
         >
-          Entrar no Simply-Life
+          Entrar no SunFy
         </Link>
       </div>
     )

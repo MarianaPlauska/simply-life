@@ -42,7 +42,7 @@ export function MfaEnrollPanel()
     setError('')
     const { data, error: err } = await supabase.auth.mfa.enroll({
       factorType: 'totp',
-      friendlyName: 'Simply-Life',
+      friendlyName: 'SunFy',
     })
     setBusy(false)
     if (err || !data)

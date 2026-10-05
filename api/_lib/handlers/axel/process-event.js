@@ -4,6 +4,7 @@
 import { stripDashes } from '../../noDashes.js';
 import { applyCors } from '../../cors.js';
 import { getUserFromBearer } from '../../supabaseUser.js';
+import { geminiUrl } from '../../geminiModel.js'
 
 export default async function handler(req, res)
 {
@@ -45,7 +46,7 @@ export default async function handler(req, res)
 
     const keywordsList = (userKeywords || []).join(', ');
 
-    const systemInstruction = `Você é um assistente de triagem de e-mails do Simply-Life OS (um sistema JARVIS autônomo). Analise a mensagem recebida e retorne um JSON estruturado seguindo exatamente este formato:
+    const systemInstruction = `Você é um assistente de triagem de e-mails do SunFy (um sistema JARVIS autônomo). Analise a mensagem recebida e retorne um JSON estruturado seguindo exatamente este formato:
 {
   "resumo": "resumo em 1 frase em PT-BR informal e direto",
   "idioma_detectado": "código ISO do idioma original (en, pt, es, etc)",
@@ -69,7 +70,7 @@ Assunto: ${subject || '(sem assunto)'}
 Corpo: ${(body || '').substring(0, 1000)}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: 'POST',
         headers: {

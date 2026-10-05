@@ -17,7 +17,7 @@ export function AcademyRestOverlay({
 {
   return (
     <div
-      className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center px-6 text-white"
+      className="fixed inset-0 z-[100] bg-fundo flex flex-col items-center justify-center px-6 text-ink"
       role="dialog"
       aria-label="Descanso entre séries"
       aria-live="polite"
@@ -29,7 +29,7 @@ export function AcademyRestOverlay({
         {formatRestMmSs(secondsLeft)}
       </time>
       <p className="text-[13px] text-zinc-400 mt-6 text-center max-w-xs">
-        Próximo: <span className="text-white font-medium">{proximoExercicio}</span>
+        Próximo: <span className="text-ink font-medium">{proximoExercicio}</span>
       </p>
       <p className="text-[10px] text-zinc-600 mt-3 text-center">
         Tela mantida acesa durante o descanso

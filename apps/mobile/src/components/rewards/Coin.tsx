@@ -7,7 +7,7 @@ const FACE = '#E8B04B'
 const RIM = '#B9822A'
 const SHINE = '#F6D58E'
 
-/** Moeda do Simply Life: âmbar com borda e um brilho de quatro pontas no centro. */
+/** Moeda do SunFy: âmbar com borda e um brilho de quatro pontas no centro. */
 export function CoinIcon({ size = 18 }: { size?: number })
 {
   return (

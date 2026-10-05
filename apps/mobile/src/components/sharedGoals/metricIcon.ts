@@ -9,5 +9,8 @@ export const SHARED_GOAL_METRIC_ICON: Record<SharedGoalMetrica, IconName> = {
   foco: 'timer-outline',
   tarefas: 'checkbox-outline',
   humor: 'happy-outline',
+  refeicoes: 'restaurant-outline',
+  acucar_ok: 'ice-cream-outline',
+  corpo: 'leaf-outline',
   livre: 'star-outline',
 }

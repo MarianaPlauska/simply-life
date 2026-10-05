@@ -19,7 +19,7 @@ export type ProjectionLine = {
   label: string
   /** positivo entra, negativo sai */
   valor: number
-  kind: 'saldo' | 'fixa' | 'fatura' | 'receita' | 'variavel'
+  kind: 'saldo' | 'fixa' | 'fatura' | 'receita' | 'variavel' | 'agendado'
   /** dia previsto (ISO), quando faz sentido */
   data?: string
   /** id da conta fixa ou do cartão, para ações como "Já paguei" */
@@ -154,6 +154,14 @@ export function monthEndProjection(input: ProjectionInput): MonthProjection
   {
     if (r.data < today || r.data > fimDoMes || r.valor <= 0) continue
     lines.push({ label: r.label, valor: round2(r.valor), kind: 'receita', data: r.data })
+  }
+  // lançado com data futura neste mês (parcela de boleto, conta agendada): ainda não saiu do saldo
+  for (const t of input.txs)
+  {
+    const d = String(t.data || '').slice(0, 10)
+    if (d <= today || d > fimDoMes || !hitsCashBalance(t) || t.fixaId) continue
+    if (t.tipo === 'receita') lines.push({ label: t.titulo, valor: round2(t.valor), kind: 'receita', data: d })
+    else lines.push({ label: t.titulo, valor: -round2(t.valor), kind: 'agendado', data: d })
   }
   const mediaDiaria = dailyVariableSpend(input.txs, ref)
   if (mediaDiaria > 0)

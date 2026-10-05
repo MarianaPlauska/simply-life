@@ -1,4 +1,5 @@
 import { stripDashes } from '../../noDashes.js'
+import { geminiUrl } from '../../geminiModel.js'
 // POST /api/finance-purchase-check
 // Axel responde "posso comprar?" com contexto real do usuário
 
@@ -56,7 +57,7 @@ export default async function handler(req, res)
     return res.status(200).json({ ...localVerdict, source: 'local', iaDisponivel: false })
   }
 
-  const systemInstruction = `Você é o AXEL, melhor amigo financeiro no Simply-Life.
+  const systemInstruction = `Você é o AXEL, melhor amigo financeiro no SunFy.
 O usuário quer saber se pode fazer uma compra AGORA. Responda em JSON:
 {
   "tone": "ok|caution|wait",
@@ -89,7 +90,7 @@ ${JSON.stringify(localVerdict || {}, null, 2)}`
     else
     {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+        geminiUrl(geminiKey),
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

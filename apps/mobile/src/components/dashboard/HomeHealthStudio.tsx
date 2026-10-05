@@ -7,6 +7,8 @@ import {
   habitPct,
   medsTakenCount,
   AGUA_META_COPOS,
+  aguaMetaMl,
+  aguaMlPorCopo,
 } from '@simply-life/shared'
 import {
   Text,
@@ -20,8 +22,6 @@ import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { ExpandableSection } from './ExpandableSection'
 
-/** ml por copo - alinhado a apps de hidratação (2 L / 10 copos) */
-const ML_PER_CUP = 200
 
 /**
  * Saúde + Água na Home - estilo studio de hidratação (anel, copos, KPIs).
@@ -44,8 +44,8 @@ export function HomeHealthStudio()
   const meta = agua?.metaDiaria ?? AGUA_META_COPOS
   const atual = agua?.progressoAtual ?? 0
   const pct = habitPct(agua)
-  const mlAtual = atual * ML_PER_CUP
-  const mlMeta = meta * ML_PER_CUP
+  const mlAtual = atual * aguaMlPorCopo(agua)
+  const mlMeta = aguaMetaMl(agua)
   const medsDone = medsTakenCount(medicamentos)
   const medsTotal = medicamentos.length
   const humorHoje = useMemo(() =>

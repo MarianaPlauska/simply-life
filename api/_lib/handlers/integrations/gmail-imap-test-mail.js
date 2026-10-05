@@ -37,7 +37,7 @@ export default async function handler(req, res)
   }
 
   const result = await sendMailViaImapAccount(row, {
-    subject: 'Simply-Life · teste de e-mail',
+    subject: 'SunFy · teste de e-mail',
     text: 'SMTP da senha de app funcionou. O resumo semanal usa este mesmo canal.',
   })
 

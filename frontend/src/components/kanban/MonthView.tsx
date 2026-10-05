@@ -52,7 +52,7 @@ function MonthTaskChip ({ tarefa, onClick }: { tarefa: TarefaUnificada; onClick:
         ? <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
         : <Circle className="w-3 h-3 shrink-0" style={{ color: prioStyle.color.includes('red') ? '#ef4444' : prioStyle.color.includes('amber') ? '#f59e0b' : prioStyle.color.includes('violet') ? '#8b5cf6' : '#71717a' }} />
       }
-      <span className={`text-[10px] truncate ${isDone ? 'text-zinc-500 line-through' : 'text-zinc-300 group-hover:text-white'}`}>
+      <span className={`text-[10px] truncate ${isDone ? 'text-zinc-500 line-through' : 'text-zinc-300 group-hover:text-ink'}`}>
         {tarefa.titulo}
       </span>
     </button>
@@ -177,12 +177,12 @@ export function MonthView ({ tarefas, onSelectTarefa }: MonthViewProps)
         <div className="flex items-center gap-3">
           <button
             onClick={goToPrev}
-            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all"
+            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-ink hover:border-zinc-600 transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <div className="text-center min-w-[180px]">
-            <h3 className="text-[18px] font-bold text-white">
+            <h3 className="text-[18px] font-bold text-ink">
               {MESES[viewMonth]} {viewYear}
             </h3>
             <p className="text-[11px] text-zinc-500 mt-0.5">
@@ -192,7 +192,7 @@ export function MonthView ({ tarefas, onSelectTarefa }: MonthViewProps)
           </div>
           <button
             onClick={goToNext}
-            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-white hover:border-zinc-600 transition-all"
+            className="p-1.5 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-400 hover:text-ink hover:border-zinc-600 transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

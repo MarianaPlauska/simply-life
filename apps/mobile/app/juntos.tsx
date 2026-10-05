@@ -1,9 +1,8 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { Pressable, Share, Switch, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
   GOAL_CARE_LABEL,
-  consecutiveLocalActivity,
   formatDuration,
   formatWaitAge,
   sharedGoalHeadline,
@@ -17,7 +16,8 @@ import { PersonAvatar } from '../src/components/social/PersonAvatar'
 import { SHARED_GOAL_METRIC_ICON } from '../src/components/sharedGoals/metricIcon'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
-import { useActivityStore, actionIsos } from '../src/store/activityStore'
+import { useActivityStore } from '../src/store/activityStore'
+import { useElo } from '../src/hooks/useElo'
 import { useCircleStore } from '../src/store/circleStore'
 import { useSharedGoalsStore } from '../src/store/sharedGoalsStore'
 import { useTaskWaitStore } from '../src/store/taskWaitStore'
@@ -162,7 +162,7 @@ export default function JuntosScreen()
   const { colors, space } = useTheme()
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
-  const days = useActivityStore((s) => s.days)
+  const elo = useElo()
   const hydrateActivity = useActivityStore((s) => s.hydrate)
   const reloadFriends = useCircleStore((s) => s.load)
   const reloadGoals = useSharedGoalsStore((s) => s.load)
@@ -177,7 +177,7 @@ export default function JuntosScreen()
     try
     {
       await Share.share({
-        message: `${name}, bora focar junto agora? Eu abro o timer no Simply Life e a gente se fala no fim.`,
+        message: `${name}, bora focar junto agora? Eu abro o timer no SunFy e a gente se fala no fim.`,
       })
     }
     catch
@@ -197,7 +197,6 @@ export default function JuntosScreen()
     void reloadFriends(true)
   }, [reloadFriends])
 
-  const streak = useMemo(() => consecutiveLocalActivity(actionIsos(days)), [days])
   const waitingTotal = overview.friends.reduce((n, f) => n + f.waiting.length, 0)
 
   return (
@@ -211,7 +210,7 @@ export default function JuntosScreen()
         void reloadGoals()
       }}
     >
-      <StackHeader title="Juntos" subtitle="Seu pique, metas juntos e o que espera por alguém" />
+      <StackHeader title="Juntos" subtitle="Quem caminha com você e o que vocês fazem juntos" />
 
       <View style={{ gap: space.md }}>
         <Pressable onPress={() => router.push('/ofensiva' as never)} accessibilityRole="button">
@@ -219,12 +218,12 @@ export default function JuntosScreen()
             <Icon name="flame" size={24} color={colors.axel} />
             <View style={{ flex: 1, gap: 2 }}>
               <Text variant="bodyStrong">
-                {streak.current > 0
-                  ? `Pique de ${streak.current} dia${streak.current === 1 ? '' : 's'}`
-                  : 'Um registro hoje começa o seu pique'}
+                {elo.atual > 0
+                  ? `Elo de ${elo.atual} dia${elo.atual === 1 ? '' : 's'}`
+                  : 'Uma ação hoje começa o seu elo'}
               </Text>
               <Text variant="caption" muted>
-                {streak.weekLogged} dia{streak.weekLogged === 1 ? '' : 's'} ativos nesta semana · recorde {streak.record}
+                {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} cumprido{elo.cumpridosNaSemana === 1 ? '' : 's'} nesta semana · recorde {elo.recorde}
               </Text>
             </View>
             <Icon name="chevron-forward" size={16} color={colors.inkMuted} />

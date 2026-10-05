@@ -51,7 +51,7 @@ export function MedicamentosNotificationBanner({ compact = false }: Medicamentos
         <div>
           <p className={`text-[12px] font-medium ${AXEL_TEXT_PRIMARY}`}>Notificações bloqueadas</p>
           <p className={`text-[11px] mt-0.5 leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
-            No celular: Configurações do navegador → Simply-Life → permitir notificações.
+            No celular: Configurações do navegador → SunFy → permitir notificações.
           </p>
         </div>
       </section>

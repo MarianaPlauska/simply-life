@@ -1,4 +1,5 @@
 import { addDaysIso, diffDaysIso, weekdayOfIso } from './taskPrompt'
+import { foodKcalOfDay } from './foodLog'
 
 /**
  * Metas juntos: tipos, textos e regras puras (docs/METAS_JUNTOS.md).
@@ -16,6 +17,9 @@ export type SharedGoalMetrica =
   | 'foco'
   | 'tarefas'
   | 'humor'
+  | 'refeicoes'
+  | 'acucar_ok'
+  | 'corpo'
   | 'livre'
 
 export type SharedGoalModo = 'pote' | 'cada_um'
@@ -104,6 +108,9 @@ export const SHARED_GOAL_METRICAS: readonly SharedGoalMetricaSpec[] = [
   { key: 'foco', label: 'Foco', unidade: 'min', hint: 'Conta os minutos de foco.', alvoSemana: 150, step: 25, maxPorDia: 1440 },
   { key: 'tarefas', label: 'Tarefas', unidade: 'tarefas', hint: 'Conta as tarefas concluídas.', alvoSemana: 10, step: 1, maxPorDia: 100 },
   { key: 'humor', label: 'Humor', unidade: 'dias', hint: 'Conta os dias com humor registrado.', alvoSemana: 5, step: 1, maxPorDia: 1 },
+  { key: 'refeicoes', label: 'Refeições', unidade: 'refeições', hint: 'Conta as refeições que cada um registra em Comida.', alvoSemana: 14, step: 1, maxPorDia: 6 },
+  { key: 'acucar_ok', label: 'Açúcar no limite', unidade: 'dias', hint: 'Conta os dias com açúcar no seu limite. Cada um usa o próprio limite, definido em Comida.', alvoSemana: 5, step: 1, maxPorDia: 1 },
+  { key: 'corpo', label: 'Cuidar do corpo', unidade: 'dias', hint: 'Conta os dias em que você cuidou do corpo: refeição, água, treino, sono ou proteína.', alvoSemana: 5, step: 1, maxPorDia: 1 },
   { key: 'livre', label: 'Algo livre', unidade: '', hint: 'Cada um registra o próprio dia na meta.', alvoSemana: 7, step: 1, maxPorDia: 100000 },
 ] as const
 
@@ -123,6 +130,76 @@ export function sharedGoalValueFromHabit(metrica: SharedGoalMetrica, raw: number
   if (metrica === 'humor') return raw > 0 ? 1 : 0
   return Math.round(raw * 100) / 100
 }
+
+// ── Cuidar do corpo juntos ─────────────────────────────────────────
+// Valores do dia calculados no aparelho de cada pessoa. O banco só recebe
+// o número final (e limita por dia); o grupo continua vendo só faixa ou ritmo.
+
+/** Métricas que vêm das refeições anotadas em Comida */
+export const SHARED_GOAL_FOOD_METRICAS: readonly SharedGoalMetrica[] = ['refeicoes', 'acucar_ok', 'corpo'] as const
+
+type SharedGoalMealLike = {
+  data: string
+  itens: { kcal?: number | null; proteina?: number | null; acucar?: number | null; fonte?: string | null }[]
+}
+
+/** Refeições registradas no dia, até o teto da métrica. */
+export function sharedGoalMealsOfDay(meals: readonly { data: string }[], iso: string): number
+{
+  let n = 0
+  for (const m of meals) if (m.data === iso) n += 1
+  return Math.min(n, sharedGoalMetricaSpec('refeicoes').maxPorDia)
+}
+
+/**
+ * "Açúcar no limite": 1 quando o dia tem refeição registrada, alguma estimativa
+ * de açúcar e o total ficou dentro do limite que a própria pessoa escolheu.
+ * Sem limite definido devolve null: a métrica não conta nada para ela.
+ * Itens sem estimativa não pesam contra.
+ */
+export function sharedGoalSugarOkOfDay(meals: readonly SharedGoalMealLike[], iso: string, limite: number | null | undefined): 0 | 1 | null
+{
+  if (limite == null || !Number.isFinite(limite) || limite <= 0) return null
+  const doDia = meals.filter((m) => m.data === iso)
+  if (doDia.length === 0) return 0
+  const day = foodKcalOfDay(doDia as SharedGoalMealLike[], iso)
+  if (day.comAcucar === 0) return 0
+  return day.acucar <= limite ? 1 : 0
+}
+
+export type SharedGoalBodyDayInput = {
+  refeicoes?: number
+  agua?: number
+  treino?: number
+  sono?: number
+  proteina?: number
+}
+
+/** "Cuidar do corpo": 1 se o dia teve qualquer cuidado anotado. */
+export function sharedGoalBodyCareOfDay(i: SharedGoalBodyDayInput): 0 | 1
+{
+  const vals = [i.refeicoes, i.agua, i.treino, i.sono, i.proteina]
+  return vals.some((v) => typeof v === 'number' && Number.isFinite(v) && v > 0) ? 1 : 0
+}
+
+export type SharedGoalPreset = {
+  key: string
+  label: string
+  hint: string
+  metrica: SharedGoalMetrica
+  modo: SharedGoalModo
+  exibicao: SharedGoalExibicao
+  /** alvo por semana (cada um) ou do pote por semana */
+  alvoSemana: number
+}
+
+/** Atalhos de "Cuidar do corpo juntos" na tela de nova meta */
+export const SHARED_GOAL_BODY_PRESETS: readonly SharedGoalPreset[] = [
+  { key: 'corpo', label: 'Dias cuidando do corpo', hint: '5 dias por semana, cada um no seu ritmo', metrica: 'corpo', modo: 'cada_um', exibicao: 'ritmo', alvoSemana: 5 },
+  { key: 'refeicoes', label: 'Refeições registradas', hint: 'Um pote de refeições para o grupo', metrica: 'refeicoes', modo: 'pote', exibicao: 'faixas', alvoSemana: 28 },
+  { key: 'proteina', label: 'Proteína da semana', hint: 'Somando as refeições e o que anotam na Saúde', metrica: 'proteina', modo: 'pote', exibicao: 'faixas', alvoSemana: 1400 },
+  { key: 'acucar_ok', label: 'Açúcar no limite', hint: 'Cada um com o próprio limite, sem comparar', metrica: 'acucar_ok', modo: 'cada_um', exibicao: 'ritmo', alvoSemana: 4 },
+] as const
 
 export type SharedGoalCheerKey = 'to_contigo' | 'bora_juntos' | 'orgulho' | 'um_passo' | 'descansa'
 

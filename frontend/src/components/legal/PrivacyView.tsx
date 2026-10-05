@@ -6,11 +6,11 @@ export function PrivacyView()
   return (
     <article className={`${AXEL_PAGE_SHELL} max-w-2xl mx-auto py-10 px-5`}>
       <h1 className={`text-2xl font-semibold mb-2 ${AXEL_TEXT_PRIMARY}`}>Política de Privacidade</h1>
-      <p className={`text-[13px] mb-8 ${AXEL_TEXT_SECONDARY}`}>Simply-Life OS · produto pessoal · atualizado em agosto de 2026</p>
+      <p className={`text-[13px] mb-8 ${AXEL_TEXT_SECONDARY}`}>SunFy · produto pessoal · atualizado em agosto de 2026</p>
 
       <div className={`space-y-5 text-[14px] leading-relaxed ${AXEL_TEXT_SECONDARY}`}>
         <p>
-          O Simply-Life é um sistema operacional pessoal. Não vendemos dados, não fazemos anúncio
+          O SunFy é um sistema operacional pessoal. Não vendemos dados, não fazemos anúncio
           comportamental e não integramos Open Finance / bancos.
         </p>
         <h2 className={`text-[15px] font-semibold ${AXEL_TEXT_PRIMARY}`}>O que coletamos</h2>

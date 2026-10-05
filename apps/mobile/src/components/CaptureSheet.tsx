@@ -31,6 +31,10 @@ import {
   isoMonthsFrom,
   moodLabel,
   DUMP_LOW_CONFIDENCE,
+  formatBRL,
+  installmentPlan,
+  purchaseCheckMessage,
+  spendRoomHint,
   type DumpItem,
   type FinanceCategory,
   type FinanceEscopo,
@@ -61,6 +65,9 @@ import { useKanbanListsStore } from '../store/kanbanListsStore'
 import { useNotesStore } from '../store/notesStore'
 import { DumpReview, dumpItemsMissingValue, dumpSummary } from './DumpReview'
 import { readDumpLocally, refineDumpWithAi } from '../lib/dumpCaptureApi'
+import { evaluateSpend, guardSpend } from '../lib/spendGuard'
+import { useMonthProjection } from './finance/FinanceForecastCards'
+import { SpendGuardHost } from './finance/SpendGuardHost'
 
 const TABS: { id: CaptureKind; label: string }[] = [
   { id: 'dump', label: 'Dump' },
@@ -76,17 +83,8 @@ const PLACEHOLDERS: Record<CaptureKind, string> = {
   note: 'Escreva o que ficou do dia',
 }
 
-type Pagamento = 'conta' | 'cartao'
+type Pagamento = 'conta' | 'cartao' | 'boleto'
 type Recorrencia = 'nenhuma' | 'mensal' | 'semanal'
-
-function splitCents(total: number, n: number): number[]
-{
-  const parts = Math.max(1, Math.round(n))
-  const cents = Math.round(total * 100)
-  const base = Math.floor(cents / parts)
-  const rem = cents - base * parts
-  return Array.from({ length: parts }, (_, i) => (base + (i < rem ? 1 : 0)) / 100)
-}
 
 function studioCopy(
   kind: CaptureKind,
@@ -177,6 +175,8 @@ export function CaptureSheet()
   const [fixasOpen, setFixasOpen] = useState(false)
   const [expenseDate, setExpenseDate] = useState(() => todayIso())
   const [parcelas, setParcelas] = useState(1)
+  const [porParcela, setPorParcela] = useState(false)
+  const [parcelasPagas, setParcelasPagas] = useState(0)
   const [taskDraft, setTaskDraft] = useState<CaptureTaskDraft>(() => emptyCaptureTaskDraft(null))
   const [promptState, setPromptState] = useState<TaskPromptState>(() => emptyTaskPromptState())
   const organizeRef = useRef<(() => void) | null>(null)
@@ -229,6 +229,36 @@ export function CaptureSheet()
     }
   }, [open, listId, seedPrioridade, seedLancamento, kind])
 
+  /** Parcelas que o gasto vai criar (à vista = uma). Mesma conta para a dica, o aviso e o salvamento. */
+  const expensePlan = (valor: number, data: string) =>
+    installmentPlan({
+      valor,
+      parcelas: pagamento === 'conta' ? 1 : parcelas,
+      data,
+      porParcela,
+      pagas: parcelasPagas,
+    }).map((p) => ({ ...p, data: isoMonthsFrom(data, p.offset) }))
+
+  const projection = useMonthProjection()
+  const spendHint = (() =>
+  {
+    if (!open || kind !== 'expense' || lancamento !== 'despesa') return null
+    const parsed = parseExpenseQuick(text)
+    if (!parsed)
+    {
+      return { text: spendRoomHint(projection, formatBRL), tone: projection.sobra < 0 ? 'apertado' as const : 'ok' as const }
+    }
+    const check = evaluateSpend({
+      launches: expensePlan(parsed.valor, expenseIso(expenseDate)),
+      cardId: pagamento === 'cartao' ? cardId : null,
+    })
+    if (check.tom === 'sem-dados') return null
+    return {
+      text: purchaseCheckMessage(check, formatBRL).mensagem,
+      tone: check.tom === 'apertado' ? 'apertado' as const : check.tom === 'atencao' ? 'atencao' as const : 'ok' as const,
+    }
+  })()
+
   const resetAndClose = () =>
   {
     setText('')
@@ -245,6 +275,8 @@ export function CaptureSheet()
     setRecorrencia('nenhuma')
     setExpenseDate(todayIso())
     setParcelas(1)
+    setPorParcela(false)
+    setParcelasPagas(0)
     setLancamento('despesa')
     setTaskDraft(emptyCaptureTaskDraft(null))
     setPromptState(emptyTaskPromptState())
@@ -304,6 +336,10 @@ export function CaptureSheet()
     setError(null)
     try
     {
+      const gastos = dumpItems
+        .filter((i) => i.kind === 'gasto' && (i.valor ?? 0) > 0)
+        .map((i) => ({ valor: i.valor ?? 0, data: i.data ?? todayIso() }))
+      if (gastos.length && !(await guardSpend({ launches: gastos, host: 'capture' }))) return
       const res = await commitDumpItems(dumpItems, isGuest)
       if (!res.ok)
       {
@@ -436,56 +472,57 @@ export function CaptureSheet()
             return
           }
         }
-        else if (pagamento === 'cartao')
+        else
         {
-          if (!cardId)
+          if (pagamento === 'cartao' && !cardId)
           {
             setError('Escolha um cartão')
             setSaving(false)
             return
           }
-          const n = Math.max(1, Math.round(parcelas))
-          const valores = splitCents(parsed.valor, n)
-          // mesmo id em todas as parcelas: dá para editar/apagar a compra inteira depois
-          const grupoParcela = n > 1 ? `gp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}` : undefined
-          const baseDate = data
-          for (let i = 0; i < n; i += 1)
+          const plan = expensePlan(parsed.valor, data)
+          // antes de salvar: refaz a conta do mês com o gasto e avisa se apertar
+          const seguir = await guardSpend({ launches: plan, cardId: pagamento === 'cartao' ? cardId : null, host: 'capture' })
+          if (!seguir)
           {
-            const parcelaTitulo = n > 1 ? `${titulo} ${i + 1}/${n}` : titulo
-            const res = await addCardSpend(cardId, valores[i] ?? parsed.valor, parcelaTitulo, isGuest, {
-              data: isoMonthsFrom(baseDate, i),
-              categoria,
-              somarFatura: i === 0,
-              folderId: folderId ?? undefined,
-              grupoParcela,
-            })
+            setSaving(false)
+            return
+          }
+          // mesmo id em todas as parcelas: dá para editar/apagar a compra inteira depois
+          const grupoParcela = (plan[0]?.total ?? 1) > 1
+            ? `gp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+            : undefined
+          for (const p of plan)
+          {
+            const parcelaTitulo = p.total > 1 ? `${titulo} ${p.numero}/${p.total}` : titulo
+            const res = pagamento === 'cartao' && cardId
+              ? await addCardSpend(cardId, p.valor, parcelaTitulo, isGuest, {
+                data: p.data,
+                categoria,
+                somarFatura: p.offset === 0,
+                folderId: folderId ?? undefined,
+                grupoParcela,
+              })
+              : await addExpenseFromText(`${parcelaTitulo} ${p.valor}`, isGuest, {
+                lido: { titulo: parcelaTitulo, valor: p.valor },
+                categoria,
+                data: p.data,
+                formaPagamento: pagamento === 'boleto' ? 'boleto' : 'debito',
+                folderId: folderId ?? undefined,
+                grupoParcela,
+                escopo: partnerWs?.partnerUserId ? escopo : 'pessoal',
+                pagoContaCasal:
+                  Boolean(partnerWs?.partnerUserId)
+                  && escopo === 'pessoal'
+                  && pagoContaCasal,
+                partnerWorkspaceId: partnerWs?.workspaceId ?? null,
+              })
             if (!res.ok)
             {
-              setError(res.error || 'Não foi possível lançar no cartão')
+              setError(res.error || (pagamento === 'cartao' ? 'Não foi possível lançar no cartão' : 'Não foi possível salvar o gasto'))
               setSaving(false)
               return
             }
-          }
-        }
-        else
-        {
-          const res = await addExpenseFromText(`${titulo} ${parsed.valor}`, isGuest, {
-            categoria,
-            data,
-            formaPagamento: 'debito',
-            folderId: folderId ?? undefined,
-            escopo: partnerWs?.partnerUserId ? escopo : 'pessoal',
-            pagoContaCasal:
-              Boolean(partnerWs?.partnerUserId)
-              && escopo === 'pessoal'
-              && pagoContaCasal,
-            partnerWorkspaceId: partnerWs?.workspaceId ?? null,
-          })
-          if (!res.ok)
-          {
-            setError(res.error || 'Não foi possível salvar o gasto')
-            setSaving(false)
-            return
           }
         }
 
@@ -732,6 +769,8 @@ export function CaptureSheet()
                   recorrencia,
                   expenseDate,
                   parcelas,
+                  porParcela,
+                  parcelasPagas,
                   text,
                   escopo,
                   pagoContaCasal,
@@ -747,6 +786,8 @@ export function CaptureSheet()
                   if (partial.recorrencia != null) setRecorrencia(partial.recorrencia)
                   if (partial.expenseDate != null) setExpenseDate(partial.expenseDate)
                   if (partial.parcelas != null) setParcelas(partial.parcelas)
+                  if (partial.porParcela != null) setPorParcela(partial.porParcela)
+                  if (partial.parcelasPagas != null) setParcelasPagas(partial.parcelasPagas)
                   if (partial.text != null) setText(partial.text)
                   if (partial.escopo != null) setEscopo(partial.escopo)
                   if (partial.pagoContaCasal != null) setPagoContaCasal(partial.pagoContaCasal)
@@ -765,6 +806,7 @@ export function CaptureSheet()
                 partnerWs={partnerWs}
                 onEditCategories={() => setCatsOpen(true)}
                 onEditFixas={() => setFixasOpen(true)}
+                spendHint={spendHint}
               />
             ) : null}
             {kind === 'dump' ? dumpBody : null}
@@ -831,6 +873,8 @@ export function CaptureSheet()
                       recorrencia,
                       expenseDate,
                       parcelas,
+                      porParcela,
+                      parcelasPagas,
                       text,
                       escopo,
                       pagoContaCasal,
@@ -846,6 +890,8 @@ export function CaptureSheet()
                       if (partial.recorrencia != null) setRecorrencia(partial.recorrencia)
                       if (partial.expenseDate != null) setExpenseDate(partial.expenseDate)
                       if (partial.parcelas != null) setParcelas(partial.parcelas)
+                      if (partial.porParcela != null) setPorParcela(partial.porParcela)
+                      if (partial.parcelasPagas != null) setParcelasPagas(partial.parcelasPagas)
                       if (partial.text != null) setText(partial.text)
                       if (partial.escopo != null) setEscopo(partial.escopo)
                       if (partial.pagoContaCasal != null) setPagoContaCasal(partial.pagoContaCasal)
@@ -864,6 +910,7 @@ export function CaptureSheet()
                     partnerWs={partnerWs}
                     onEditCategories={() => setCatsOpen(true)}
                     onEditFixas={() => setFixasOpen(true)}
+                    spendHint={spendHint}
                   />
                 ) : null}
 
@@ -900,6 +947,7 @@ export function CaptureSheet()
         </Pressable>
       </KeyboardAvoidingView>
       )}
+      <SpendGuardHost host="capture" />
       </Modal>
       {extraSheets}
     </Fragment>

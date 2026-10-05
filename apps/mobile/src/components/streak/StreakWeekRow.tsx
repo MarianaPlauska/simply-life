@@ -8,16 +8,18 @@ type Props = { cells: StreakWeekCell[] }
 
 function glyph(
   kind: StreakWeekCell['kind'],
-  colors: { axel: string; danger: string; attention: string },
+  colors: { axel: string; attention: string; inkMuted: string },
 ): { name: keyof typeof Icon.glyphMap; color: string } | 'num'
 {
   if (kind === 'action') return { name: 'flame', color: colors.axel }
-  if (kind === 'missed') return { name: 'close-circle', color: colors.danger }
+  // descanso automático: lua, em tom neutro (não é falta)
+  if (kind === 'rest') return { name: 'moon', color: colors.inkMuted }
   if (kind === 'open' || kind === 'today') return { name: 'alert-circle', color: colors.attention }
+  // dia sem registro fica só com o número, sem marca de erro
   return 'num'
 }
 
-/** Fogo / falta / em andamento da semana atual. */
+/** Fogo, descanso ou em andamento na semana atual. */
 export function StreakWeekRow({ cells }: Props)
 {
   const { colors } = useTheme()

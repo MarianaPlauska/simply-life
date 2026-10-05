@@ -1,4 +1,5 @@
 import { stripDashes } from '../../noDashes.js'
+import { geminiUrl } from '../../geminiModel.js'
 // GET /api/generate-greeting?lat=X&lon=Y
 // Gera saudação contextual JARVIS cruzando clima + dados do user via Google Gemini
 export default async function handler(req, res) {
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
       throw new Error('Chave de API do Gemini não configurada. Configure GEMINI_API_KEY.');
     }
 
-    const systemInstruction = `Você é o JARVIS, o assistente pessoal proativo, ultra tecnológico e empático do Simply-Life OS.
+    const systemInstruction = `Você é o JARVIS, o assistente pessoal proativo, ultra tecnológico e empático do SunFy.
 Gere uma saudação curta e marcante de EXATAMENTE 2 frases em PT-BR informal e natural.
 
 Regras absolutas:
@@ -73,7 +74,7 @@ Regras absolutas:
 - Próximo compromisso na agenda: ${proximoEvento || 'nenhum compromisso agendado'}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: 'POST',
         headers: {
@@ -114,7 +115,7 @@ Regras absolutas:
     console.error('Greeting error with Gemini:', err);
     // fallback local sem IA
     const h = new Date().getHours();
-    const fallback = h < 12 ? 'Bom dia! O Simply-Life OS está online. Bora produzir? 💪' : h < 18 ? 'Boa tarde! Vamos manter o foco e a produtividade.' : 'Boa noite! Pronto para revisar o dia e relaxar?';
+    const fallback = h < 12 ? 'Bom dia! O SunFy está online. Bora produzir? 💪' : h < 18 ? 'Boa tarde! Vamos manter o foco e a produtividade.' : 'Boa noite! Pronto para revisar o dia e relaxar?';
     return res.status(200).json({ 
       greeting: fallback, 
       weather: null, 

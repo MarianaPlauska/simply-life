@@ -71,7 +71,7 @@ export default function AmigosScreen()
     try
     {
       await Share.share({
-        message: `Vem para o meu Círculo no Simply Life: ${url}`,
+        message: `Vem para o meu Círculo no SunFy: ${url}`,
         url,
       })
     }

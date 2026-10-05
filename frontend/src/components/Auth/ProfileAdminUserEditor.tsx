@@ -41,7 +41,7 @@ export function ProfileAdminUserEditor({ user, onUpdated, onDeleted }: ProfileAd
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [displayName, setDisplayName] = useState(user.display_name)
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('initials')
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('companion_sun')
   const [priority, setPriority] = useState<DashboardPriority>('tasks')
   const [widgets, setWidgets] = useState<DashboardWidgetId[]>([])
 
@@ -61,7 +61,7 @@ export function ProfileAdminUserEditor({ user, onUpdated, onDeleted }: ProfileAd
       {
         if (!ativo) return
         setDisplayName(prefs.display_name || user.display_name)
-        const style = prefs.avatar_style ?? 'initials'
+        const style = prefs.avatar_style ?? 'companion_sun'
         setAvatarStyle(allowedAvatars.includes(style) ? style : allowedAvatars[0])
         setPriority(prefs.dashboard_priority ?? 'tasks')
         setWidgets(
@@ -148,7 +148,7 @@ export function ProfileAdminUserEditor({ user, onUpdated, onDeleted }: ProfileAd
           aria-hidden
         >
           <AxelCompanionAvatar
-            style={(user.avatar_style as AvatarStyleId) || 'initials'}
+            style={(user.avatar_style as AvatarStyleId) || 'companion_sun'}
             initials={(user.display_name || '?').slice(0, 1).toUpperCase()}
             size="sm"
           />

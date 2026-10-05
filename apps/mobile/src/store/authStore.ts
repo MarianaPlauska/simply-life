@@ -10,6 +10,7 @@ import {
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { appOrigin } from '../lib/appOrigin'
 import { unregisterExpoPushAsync } from '../lib/pushRegister'
+import { stashAndClearUserLocal } from '../lib/userLocalData'
 
 type AuthState = {
   ready: boolean
@@ -196,6 +197,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       password,
       options: {
         data: nome?.trim() ? { full_name: nome.trim() } : undefined,
+        emailRedirectTo: buildAuthCallbackUrl(appOrigin(), '/auth/callback'),
       },
     })
     if (error) return { error: error.message }
@@ -322,6 +324,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   signOut: async () =>
   {
+    const saindo = get().isGuest ? null : get().userId
     if (supabaseConfigured)
     {
       try
@@ -334,6 +337,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       await supabase.auth.signOut()
     }
+    // conta logada: XP, elo e dias saem do aparelho (a próxima conta não herda).
+    // Convidado mantém, para seguir com tudo ao criar conta.
+    if (saindo) stashAndClearUserLocal(saindo)
     set({
       isGuest: false,
       userId: null,

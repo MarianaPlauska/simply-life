@@ -23,7 +23,7 @@ Uma meta vale para qualquer coisa, pelo tempo que o grupo quiser:
 
 | Campo | Exemplos |
 |---|---|
-| O quê | água, treino, proteína, sono, minutos de foco, tarefas concluídas, dias com humor registrado, ou algo livre ("ler 20 páginas") |
+| O quê | água, treino, proteína, sono, minutos de foco, tarefas concluídas, dias com humor registrado, refeições registradas, dias com açúcar no seu limite (cada um com o próprio limite de Comida), dias cuidando do corpo (refeição, água, treino, sono ou proteína; migração 078), ou algo livre ("ler 20 páginas") |
 | Quanto | 10 L, 3 treinos, 20 páginas |
 | Como conta | **Pote juntos**: todos somam para um total ("10 L juntos na semana"). **Cada um a sua**: cada pessoa tem a própria meta ("3 treinos cada um") |
 | Por quanto tempo | uma semana, um mês, 21 dias, datas livres, ou sem fim com ciclos semanais |

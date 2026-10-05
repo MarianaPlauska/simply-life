@@ -88,7 +88,7 @@ export function PreferenciasIA() {
           />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Motor de Triagem IA</h1>
+          <h1 className="text-2xl font-bold text-ink tracking-tight">Motor de Triagem IA</h1>
           <p className="text-sm text-zinc-400 mt-0.5">
             Configure palavras-chave para captura automática de tarefas críticas.
           </p>
@@ -102,7 +102,7 @@ export function PreferenciasIA() {
             <Zap className="w-4 h-4 text-amber-400" />
           </div>
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-white">Como funciona</p>
+            <p className="text-sm font-semibold text-ink">Como funciona</p>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Quando uma mensagem (e-mail, webhook) é recebida, o motor verifica se alguma
               das suas palavras-chave aparece no texto. Se sim, uma tarefa <span className="text-red-400 font-medium">critica</span> é criada
@@ -118,7 +118,7 @@ export function PreferenciasIA() {
           <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-violet-400" />
           </div>
-          <h2 className="text-sm font-semibold text-white">Adicionar palavra-chave</h2>
+          <h2 className="text-sm font-semibold text-ink">Adicionar palavra-chave</h2>
         </div>
 
         <div className="flex gap-3">
@@ -172,7 +172,7 @@ export function PreferenciasIA() {
             className="
               h-11 px-5 rounded-xl text-sm font-semibold
               bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed
-              text-white flex items-center gap-2 transition-all duration-200 shrink-0
+              text-ink flex items-center gap-2 transition-all duration-200 shrink-0
             "
           >
             <Plus className="w-4 h-4" />
@@ -247,7 +247,7 @@ export function PreferenciasIA() {
             <AlertTriangle className="w-4 h-4 text-emerald-400" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-white">Simulador de Triagem</h2>
+            <h2 className="text-sm font-semibold text-ink">Simulador de Triagem</h2>
             <p className="text-[11px] text-zinc-500">Teste como o motor processaria uma mensagem.</p>
           </div>
         </div>
@@ -282,7 +282,7 @@ export function PreferenciasIA() {
                 {testResult.status === 'match' ? (
                   <>
                     <Sparkles className="w-3.5 h-3.5" />
-                    Match! Termo detectado: <span className="text-white font-bold">"{testResult.termo}"</span>
+                    Match! Termo detectado: <span className="text-ink font-bold">"{testResult.termo}"</span>
                     - Tarefa criada com prioridade crítica.
                   </>
                 ) : (
@@ -303,7 +303,7 @@ export function PreferenciasIA() {
             className="
               shrink-0 h-9 px-4 rounded-xl text-xs font-semibold
               bg-emerald-600/80 hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed
-              text-white flex items-center gap-2 transition-all duration-200
+              text-ink flex items-center gap-2 transition-all duration-200
             "
           >
             <Zap className="w-3.5 h-3.5" />

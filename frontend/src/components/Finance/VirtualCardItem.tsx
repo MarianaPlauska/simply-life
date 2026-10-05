@@ -59,11 +59,11 @@ export function VirtualCardItem({ card, spent }: VirtualCardItemProps) {
         {/* Topo do Cartão: Título, Rede e Status */}
         <div className="flex justify-between items-start relative z-10">
           <div>
-            <p className="text-[12px] font-bold text-white tracking-wide truncate max-w-[180px]">{card.nome}</p>
+            <p className="text-[12px] font-bold text-ink tracking-wide truncate max-w-[180px]">{card.nome}</p>
             <p className="text-[8px] font-medium text-white/50 tracking-wider">CARTÃO VIRTUAL</p>
           </div>
           <div className="text-right">
-            <span className="text-[10px] font-black tracking-widest text-white italic">
+            <span className="text-[10px] font-black tracking-widest text-ink italic">
               {card.bandeira === 'visa' ? 'VISA' : 'Mastercard'}
             </span>
           </div>
@@ -90,7 +90,7 @@ export function VirtualCardItem({ card, spent }: VirtualCardItemProps) {
 
         {/* Parte Inferior: Número do Cartão */}
         <div className="relative z-10">
-          <p className="text-[15px] font-mono tracking-[0.2em] text-white text-center select-all">{card.numero}</p>
+          <p className="text-[15px] font-mono tracking-[0.2em] text-ink text-center select-all">{card.numero}</p>
         </div>
 
         {/* Barra de Progresso do Limite (Glassmorphic) */}
@@ -111,19 +111,19 @@ export function VirtualCardItem({ card, spent }: VirtualCardItemProps) {
         <div className="flex justify-between items-end relative z-10">
           <div>
             <p className="text-[7px] text-white/50 uppercase tracking-widest">Titular</p>
-            <p className="text-[9px] font-mono font-bold text-white truncate max-w-[160px]">{card.titular}</p>
+            <p className="text-[9px] font-mono font-bold text-ink truncate max-w-[160px]">{card.titular}</p>
           </div>
           <div className="flex gap-4">
             <div>
               <p className="text-[7px] text-white/50 uppercase tracking-widest">Validade</p>
-              <p className="text-[9px] font-mono font-semibold text-white">{card.validade}</p>
+              <p className="text-[9px] font-mono font-semibold text-ink">{card.validade}</p>
             </div>
             <div>
               <p className="text-[7px] text-white/50 uppercase tracking-widest">CVV</p>
               <button
                 type="button"
                 onClick={() => setRevealCVV(!revealCVV)}
-                className="flex items-center gap-1 text-[9px] font-mono font-semibold text-white hover:text-violet-200 transition-colors"
+                className="flex items-center gap-1 text-[9px] font-mono font-semibold text-ink hover:text-violet-200 transition-colors"
               >
                 {revealCVV ? card.cvv : '•••'}
                 {revealCVV ? <EyeOff className="w-2.5 h-2.5 opacity-60" /> : <Eye className="w-2.5 h-2.5 opacity-60" />}
@@ -146,7 +146,7 @@ export function VirtualCardItem({ card, spent }: VirtualCardItemProps) {
                     type="number"
                     value={newLimitVal}
                     onChange={(e) => setNewLimitVal(e.target.value)}
-                    className="w-16 bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-[10px] text-white font-mono outline-none"
+                    className="w-16 bg-zinc-900 border border-zinc-800 rounded px-1.5 py-0.5 text-[10px] text-ink font-mono outline-none"
                     placeholder="Lim"
                   />
                   <button

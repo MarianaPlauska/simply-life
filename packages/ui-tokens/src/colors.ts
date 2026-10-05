@@ -12,6 +12,8 @@ export const BRAND = {
   /** Coral legível como texto no modo claro (5:1 no fundo) */
   coralText: '#A84B27',
   carvao: '#1E1C1A',
+  /** Creme: pétalas do logo SunFy e rosto do Axel (o mesmo tom do texto sobre petróleo) */
+  creme: '#EEF2F0',
 } as const
 
 /**

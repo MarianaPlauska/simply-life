@@ -48,9 +48,9 @@ export async function sendMailViaImapAccount(row, { subject, text, html, to } = 
   try
   {
     await transporter.sendMail({
-      from: `"Simply-Life" <${row.email}>`,
+      from: `"SunFy" <${row.email}>`,
       to: dest,
-      subject: subject || 'Simply-Life',
+      subject: subject || 'SunFy',
       text: text || '',
       html: html || undefined,
     })

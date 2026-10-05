@@ -5,6 +5,7 @@ import {
   OFF_ATTRIBUTION,
   OFF_ATTRIBUTION_URL,
   OFF_SOURCE,
+  formatGrams,
   formatKcal,
   type FoodItem,
   type OffProduct,
@@ -77,13 +78,17 @@ export function BarcodeSheet({ visible, showCalories, onClose, onAdd }: Props)
   const add = () =>
   {
     if (!product) return
-    const kcal = product.kcalPorcao ?? product.kcal100g
-    const quantidade = product.kcalPorcao != null && product.porcao ? product.porcao : product.kcal100g != null ? '100 g' : product.porcao
+    // porção da embalagem quando há kcal por porção; senão 100 g. Proteína e açúcar na mesma base.
+    const byServing = product.kcalPorcao != null && Boolean(product.porcao)
+    const kcal = byServing ? product.kcalPorcao : product.kcal100g
+    const quantidade = byServing ? product.porcao : product.kcal100g != null ? '100 g' : product.porcao
     onAdd({
       key: product.key,
       nome: product.nome.toLowerCase(),
       quantidade: quantidade ?? null,
       kcal: kcal ?? null,
+      proteina: byServing ? product.proteinaPorcao : product.proteina100g,
+      acucar: byServing ? product.acucarPorcao : product.acucar100g,
       fonte: OFF_SOURCE,
       barcode: product.barcode,
     })
@@ -99,6 +104,13 @@ export function BarcodeSheet({ visible, showCalories, onClose, onAdd }: Props)
         ? `${formatKcal(product.kcal100g)} em 100 g`
         : 'Sem caloria informada para este produto'
     : ''
+  const byServing = Boolean(product && product.kcalPorcao != null && product.porcao)
+  const protG = product ? (byServing ? product.proteinaPorcao : product.proteina100g) : null
+  const acuG = product ? (byServing ? product.acucarPorcao : product.acucar100g) : null
+  const nutrientLine = [
+    protG != null ? `${formatGrams(protG)} de proteína` : null,
+    acuG != null ? `${formatGrams(acuG)} de açúcar` : null,
+  ].filter(Boolean).join(' · ')
 
   return (
     <Modal visible transparent animationType="slide" onRequestClose={onClose}>
@@ -164,6 +176,7 @@ export function BarcodeSheet({ visible, showCalories, onClose, onAdd }: Props)
             <Text variant="bodyStrong">{product.nome}</Text>
             {product.marca ? <Text variant="caption" muted>{product.marca}</Text> : null}
             {showCalories ? <Text variant="body">{kcalLine}</Text> : null}
+            {showCalories && nutrientLine ? <Text variant="caption" muted>{nutrientLine}</Text> : null}
             <View style={{ flexDirection: 'row', gap: space.sm }}>
               <View style={{ flex: 1 }}>
                 <PrimaryButton label="Adicionar" onPress={add} />

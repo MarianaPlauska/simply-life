@@ -1,6 +1,8 @@
 /**
- * Estimativa de calorias pela IA da Vercel (POST /api/axel/estimate-food-kcal).
+ * Estimativa de calorias, proteína e açúcar pela IA da Vercel (POST /api/axel/estimate-food-kcal).
+ * O servidor tenta o Gemini com pesquisa na web (devolve até 2 links por item) e depois o Groq.
  * Nunca falha: sem conta, sem rede ou sem IA, devolve só nulos e a tela usa a tabela local.
+ * Campos desconhecidos na resposta são ignorados (normalizeFoodKcalAiResponse).
  */
 import {
   FOOD_KCAL_AI_MAX_ITEMS,
@@ -13,7 +15,8 @@ import {
 import { apiFetch } from './apiBase'
 import { supabase, supabaseConfigured } from './supabase'
 
-const AI_TIMEOUT_MS = 12000
+/** o servidor desiste em ~14 s (pesquisa na web + reserva); aqui um pouco mais */
+const AI_TIMEOUT_MS = 18000
 
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T>
 {

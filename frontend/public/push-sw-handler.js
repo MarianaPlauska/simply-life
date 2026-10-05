@@ -98,7 +98,7 @@ async function showFeedback(title, body)
 self.addEventListener('push', (event) =>
 {
   let payload = {
-    title: 'Simply-Life',
+    title: 'SunFy',
     body: 'Você tem um lembrete',
     url: '/',
     tag: 'simply-life',
@@ -134,18 +134,18 @@ self.addEventListener('notificationclick', (event) =>
         const result = await handleActionClick(action, data);
         if (result?.ok)
         {
-          await showFeedback('Simply-Life', result.message || 'Pronto');
+          await showFeedback('SunFy', result.message || 'Pronto');
           await notifyClients({ type: 'push-action', action, data, result });
           return;
         }
 
         if (action === 'snooze' && data.clientOnly)
         {
-          await showFeedback('Simply-Life', 'Abra o app para adiar este lembrete');
+          await showFeedback('SunFy', 'Abra o app para adiar este lembrete');
         }
         else
         {
-          await showFeedback('Simply-Life', 'Não foi possível agir aqui - abra o app');
+          await showFeedback('SunFy', 'Não foi possível agir aqui - abra o app');
         }
 
         if (self.clients.openWindow)

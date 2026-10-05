@@ -1,5 +1,7 @@
 # PWA — Simply-Life
 
+> Este guia é do site antigo (`frontend/`, Vite com service worker). Desde outubro de 2026 a Vercel publica a versão web do app (`apps/mobile`), que ainda **não** tem service worker: sem modo offline e sem notificação na web. Ver [IPHONE.md](IPHONE.md).
+
 Tema e splash: `#1D2029` (HTML, VitePWA e `manifest.webmanifest`).
 
 Atalho **Rotina Guiada** abre `/kanban?foco=1` (o overlay de foco absoluto da demanda mais urgente em HOJE). `/foco` redireciona para o mesmo caminho.

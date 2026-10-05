@@ -1,7 +1,7 @@
 // Acesso administrativo - lista de usuários (cartões públicos) para contas admin
 import { supabase } from './supabase'
 import { supabaseAuthHeaders } from './supabaseAuthHeaders'
-import { isUserConnected } from '@simply-life/shared'
+import { isUserConnected } from './userPresence'
 import {
   DEFAULT_WORKSPACE_PREFS,
   type DashboardPriority,

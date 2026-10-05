@@ -21,6 +21,9 @@ const KIND_LABEL: Record<OvertimeKind, string> = {
   noturno: 'Noturna',
 }
 
+/** Modo simples: só o valor que cai e o dia, sem horas extras (desconto zero, base = líquido). */
+const isSimpleSalary = (s: StoredSalary) => s.taxaDesconto === 0
+
 const num = (t: string) => parseBrlNumber(t) ?? (Number(t.replace(',', '.')) || 0)
 
 /**
@@ -71,6 +74,25 @@ export function FinanceSalaryPane()
   }
 
   const sched = scheduleSummary(salary)
+  const simple = isSimpleSalary(salary) && entries.length === 0
+  const payLabel = salary.quintoDiaUtil ? 'cai no 5º dia útil' : `cai dia ${salary.diaRecebimento}`
+
+  if (simple)
+  {
+    return (
+      <Card tone="elevated" style={{ gap: space.sm }}>
+        <SectionHeader
+          title={salary.titulo}
+          subtitle={`${formatBRL(salary.base)} por mês · ${payLabel}`}
+          action={<PrimaryButton label="Editar" variant="link" size="sm" onPress={() => setEditing(true)} />}
+        />
+        <Text variant="caption" muted>
+          Entra previsto na conta do fim do mês e no aviso antes de gastar. No dia, o app pergunta se caiu.
+        </Text>
+        <Text variant="micro" muted>Faz hora extra? Em Editar, escolha "Com horas extras".</Text>
+      </Card>
+    )
+  }
 
   return (
     <View style={{ gap: space.md }}>
@@ -177,6 +199,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
   const save = useSalaryStore((s) => s.save)
   const saving = useSalaryStore((s) => s.saving)
   const error = useSalaryStore((s) => s.error)
+  const [simples, setSimples] = useState(() => !initial.base || isSimpleSalary(initial))
   const [f, setF] = useState(() => ({
     titulo: initial.titulo,
     base: initial.base ? String(initial.base).replace('.', ',') : '',
@@ -213,17 +236,46 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
     // líquido de um mês sem HE → taxa de desconto (substitui a aprendida só se preenchido)
     taxaDesconto: f.liquido.trim() && num(f.base) > 0
       ? Math.max(0, Math.min(0.6, 1 - num(f.liquido) / num(f.base)))
-      : initial.taxaDesconto,
+      : isSimpleSalary(initial) ? null : initial.taxaDesconto,
   }
   const sched = scheduleSummary(draft)
+  // simples: o valor digitado já é o que cai na conta
+  const simpleDraft: StoredSalary = { ...draft, taxaDesconto: 0, heUtilPct: initial.heUtilPct, noturnoPct: initial.noturnoPct, diaFechamento: null }
+
+  const payWhen = (
+    <>
+      <Text variant="caption" muted>Quando o salário cai</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        <SelectChip label="5º dia útil" active={f.quinto} onPress={() => patch({ quinto: true })} />
+        <SelectChip label="Dia fixo" active={!f.quinto} onPress={() => patch({ quinto: false })} />
+      </View>
+      {!f.quinto ? <Field label="Dia do mês" keyboardType="number-pad" value={f.diaPag} onChangeText={(v) => patch({ diaPag: v })} /> : null}
+    </>
+  )
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
       <Text variant="section">{canCancel ? 'Editar salário' : 'Cadastrar salário'}</Text>
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        <SelectChip label="Só o valor e o dia" active={simples} onPress={() => setSimples(true)} />
+        <SelectChip label="Com horas extras" active={!simples} onPress={() => setSimples(false)} />
+      </View>
       <Text variant="caption" muted>
-        O salário entra previsto todo mês. Você anota as horas extras e, no dia do pagamento, confirma o valor que caiu.
+        {simples
+          ? 'O salário entra previsto todo mês. No dia do pagamento, você confirma o valor que caiu.'
+          : 'O salário entra previsto todo mês. Você anota as horas extras e, no dia do pagamento, confirma o valor que caiu.'}
       </Text>
       <Field label="Nome" value={f.titulo} onChangeText={(v) => patch({ titulo: v })} />
+      {simples ? (
+        <>
+          <Field label="Quanto cai na conta por mês" placeholder="Ex.: 2980" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
+          {payWhen}
+          {error ? <Text variant="caption" color={colors.danger}>{error}</Text> : null}
+          <PrimaryButton label="Salvar salário" loading={saving} onPress={() => void save(simpleDraft).then((ok) => ok && onDone())} />
+          {canCancel ? <PrimaryButton label="Cancelar" variant="ghost" onPress={onDone} /> : null}
+        </>
+      ) : (
+      <>
       <Field label="Salário base, sem horas extras (bruto)" placeholder="Ex.: 3500" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
 
       <Text variant="caption" muted>Seu horário</Text>
@@ -257,12 +309,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
         <SelectChip label={f.dsr ? 'Com DSR sobre HE' : 'Sem DSR sobre HE'} active={f.dsr} onPress={() => patch({ dsr: !f.dsr })} />
       </View>
 
-      <Text variant="caption" muted>Quando o salário cai</Text>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-        <SelectChip label="5º dia útil" active={f.quinto} onPress={() => patch({ quinto: true })} />
-        <SelectChip label="Dia fixo" active={!f.quinto} onPress={() => patch({ quinto: false })} />
-      </View>
-      {!f.quinto ? <Field label="Dia do mês" keyboardType="number-pad" value={f.diaPag} onChangeText={(v) => patch({ diaPag: v })} /> : null}
+      {payWhen}
       <Field
         label="Fechamento do ponto (dia, opcional)"
         placeholder="Vazio = mês inteiro. Ex.: 20"
@@ -280,6 +327,8 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
       {error ? <Text variant="caption" color={colors.danger}>{error}</Text> : null}
       <PrimaryButton label="Salvar salário" loading={saving} onPress={() => void save(draft).then((ok) => ok && onDone())} />
       {canCancel ? <PrimaryButton label="Cancelar" variant="ghost" onPress={onDone} /> : null}
+      </>
+      )}
     </Card>
   )
 }

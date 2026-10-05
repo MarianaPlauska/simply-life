@@ -1,6 +1,10 @@
+/**
+ * Dia de hoje no calendário local do aparelho. Antes usava UTC e, no Brasil
+ * (UTC-3), "hoje" virava amanhã depois das 21h.
+ */
 export function todayIso(ref = new Date()): string
 {
-  return ref.toISOString().slice(0, 10)
+  return localTodayIso(ref)
 }
 
 /** Dia civil no fuso do aparelho — check-in e água não mudam à meia-noite UTC. */
@@ -12,11 +16,10 @@ export function localTodayIso(ref = new Date()): string
   return `${y}-${m}-${d}`
 }
 
+/** N dias atrás no calendário local (era UTC; ver todayIso). */
 export function isoDaysAgo(days: number, ref = new Date()): string
 {
-  const d = new Date(ref)
-  d.setDate(d.getDate() - days)
-  return d.toISOString().slice(0, 10)
+  return localIsoDaysAgo(days, ref)
 }
 
 /** Soma/subtrai dias no calendário local (ofensiva e água). */

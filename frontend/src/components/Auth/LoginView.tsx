@@ -16,7 +16,7 @@ import { isLocalGuestUser } from '../../lib/authSession';
 import { demoLoginEmail, demoLoginPassword, resetDemoWorkspaceOnLogin } from '../../lib/demoWorkspace';
 import { LoginHero } from './LoginHero';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
-import { SimplyLifeMark } from '../brand/SimplyLifeMark';
+import { SimplyLifeMark, SunFyWordmark } from '../brand/SimplyLifeMark';
 import { getPendingTotpFactorId, verifyTotpCode } from '../../lib/mfaAssurance';
 
 function GoogleLogo({ className }: { className?: string })
@@ -41,7 +41,7 @@ function translateAuthError(msg: string, t: (k: string) => string): string
   if (msg.includes('Invalid login credentials')) return t('login.error_login')
   if (msg.includes('Email not confirmed')) return 'Confirme seu email antes de fazer login'
   if (msg.includes('already registered') || msg.includes('already been registered')) return 'Este email já possui uma conta'
-  if (msg.includes('Password should be')) return 'A senha precisa ter no mínimo 6 caracteres'
+  if (msg.includes('Password should be')) return 'A senha precisa ter no mínimo 8 caracteres'
   return msg
 }
 
@@ -112,9 +112,9 @@ export function LoginView()
 
   const handleRegister = async () =>
   {
-    if (regSenha.length < 6)
+    if (regSenha.length < 8)
     {
-      setSenhaErro('A senha precisa ter no mínimo 6 caracteres');
+      setSenhaErro('A senha precisa ter no mínimo 8 caracteres');
       return;
     }
     if (regSenha !== regConfirm)
@@ -127,7 +127,10 @@ export function LoginView()
     const { data, error: err } = await supabase.auth.signUp({
       email: regEmail.trim(),
       password: regSenha,
-      options: { data: { nome_completo: regNome.trim() } },
+      options: {
+        data: { nome_completo: regNome.trim() },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
     if (err) throw new Error(err.message);
 
@@ -137,15 +140,10 @@ export function LoginView()
       return;
     }
 
-    const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
-      email: regEmail.trim(),
-      password: regSenha,
-    });
-    if (signInErr) throw new Error(signInErr.message);
-    if (signInData.session)
-    {
-      await finishAuth(signInData.session, regNome.trim(), 'login.success_register');
-    }
+    // Confirmação de e-mail ligada (migração 075): a sessão só nasce pelo link
+    setLoginEmail(regEmail.trim());
+    switchMode('login');
+    toast.success('Conta criada. Enviamos um link para o seu e-mail: confirme e depois entre.');
   };
 
   const handleLogin = async () =>
@@ -341,34 +339,32 @@ export function LoginView()
   const isRegisterDisabled = !regEmail.trim() || !regSenha.trim() || !regConfirm.trim() || !regNome.trim();
 
   return (
-    <div className="relative min-h-screen w-screen bg-fundo lg:bg-[#070605] overflow-hidden">
-      <div className="absolute inset-0 sl-login-vignette pointer-events-none hidden lg:block" />
-
-      {/* Mobile: landing OLED + cobre AXEL */}
-      <div className="lg:hidden relative h-[260px] w-full overflow-hidden bg-[#050403]">
+    <div className="sl-login relative min-h-screen w-screen overflow-hidden">
+      {/* Celular: topo claro na identidade, sem bloco escuro */}
+      <div className="lg:hidden relative w-full overflow-hidden px-5 pt-10 pb-8" style={{ background: 'var(--lg-surface)' }}>
         <div
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 55% 60% at 50% 42%, rgba(232,115,74,0.5) 0%, rgba(232,115,74,0.18) 42%, transparent 70%)',
+              'radial-gradient(ellipse 70% 60% at 15% 0%, var(--lg-glow-menta) 0%, transparent 70%), radial-gradient(ellipse 60% 50% at 100% 100%, var(--lg-glow-coral) 0%, transparent 70%)',
           }}
         />
-        <div className="absolute inset-0 flex flex-col items-start justify-end gap-2 px-5 pb-6">
+        <div className="relative flex flex-col items-start gap-3">
           <SimplyLifeMark variant="icon" className="w-10 h-10" />
-          <p className="text-[30px] leading-[1.05] font-display text-[#F7F3EE] tracking-tight">
+          <p className="text-[32px] leading-[1.05] font-display tracking-tight" style={{ color: 'var(--lg-brand-ink)' }}>
             {t('login.hero_title').split('\n').map((line, i, all) => (
-              <span key={line} className={`block ${i === all.length - 1 ? 'text-accent' : ''}`}>
+              <span key={line} className="block" style={i === all.length - 1 ? { color: 'var(--lg-coral-text)' } : undefined}>
                 {line}
               </span>
             ))}
           </p>
-          <p className="text-[13px] text-white/70 leading-snug max-w-[280px] whitespace-pre-line">
+          <p className="text-[15px] leading-[22px] max-w-[300px] whitespace-pre-line" style={{ color: 'var(--lg-muted)' }}>
             {t('login.hero_subtitle')}
           </p>
         </div>
       </div>
 
-      <div className="relative z-10 min-h-[calc(100dvh-260px)] lg:min-h-screen flex items-stretch lg:items-center justify-center px-0 lg:px-6 py-0 lg:py-10">
+      <div className="relative z-10 lg:min-h-screen flex items-stretch lg:items-center justify-center px-0 lg:px-6 py-0 lg:py-10">
         <div className="w-full max-w-7xl grid lg:grid-cols-[minmax(0,1.35fr)_380px] gap-0 lg:gap-8 xl:gap-10 items-stretch">
           <div className="hidden lg:block">
             <LoginHero />
@@ -377,7 +373,7 @@ export function LoginView()
           <div className="w-full max-w-none mx-auto lg:max-w-md -mt-3 lg:mt-0 rounded-t-[20px] lg:rounded-none bg-[var(--bg-surface)] lg:bg-transparent px-5 sm:px-6 lg:px-0 pt-6 pb-8 min-h-[calc(100dvh-248px)] lg:min-h-0">
             <div className="sl-panel sl-login-glow p-5 sm:p-6 lg:p-8 border-0 lg:border shadow-none lg:shadow bg-[var(--bg-surface)]">
               <div className="mb-5 lg:mb-6">
-                <h2 className="text-h1 md:text-h1-md lg:text-h1-lg font-display text-ink">{t('login.title')}</h2>
+                <h2 className="text-h1 md:text-h1-md lg:text-h1-lg font-display text-ink"><SunFyWordmark /></h2>
                 <p className="text-[13px] lg:text-[14px] text-ink-muted mt-1">{t('login.subtitle')}</p>
               </div>
 

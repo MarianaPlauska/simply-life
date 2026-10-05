@@ -34,7 +34,7 @@ export function BatchBar({ count, onMove, onDelete, onPriority, onClear }: Batch
           }}
           className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium 
                      bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-full 
-                     hover:bg-zinc-850 hover:text-white transition-colors outline-none"
+                     hover:bg-zinc-850 hover:text-ink transition-colors outline-none"
         >
           <ArrowRight className="w-3 h-3 text-zinc-400" />
           <span>Mover</span>
@@ -67,7 +67,7 @@ export function BatchBar({ count, onMove, onDelete, onPriority, onClear }: Batch
           }}
           className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-medium 
                      bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-full 
-                     hover:bg-zinc-850 hover:text-white transition-colors outline-none"
+                     hover:bg-zinc-850 hover:text-ink transition-colors outline-none"
         >
           <Zap className="w-3 h-3 text-zinc-400" />
           <span>Prioridade</span>

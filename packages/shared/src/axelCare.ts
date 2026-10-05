@@ -72,12 +72,12 @@ export const MOOD_CARE_BY_LEVEL: Record<MoodLevel, string[]> = {
 
 export const STREAK_CARE_MESSAGES: string[] = [
   'Dia salvo! Você cuidou de si. Isso importa muito.',
-  'Pique mantido mais um dia. Estou orgulhoso da sua constância gentil.',
+  'Mais um elo na corrente. Estou orgulhoso da sua constância gentil.',
   'Ritual feito. Seu futuro eu agradece esse gesto hoje.',
   'Você apareceu por si mesmo. Isso é ser cuidado de verdade.',
   'Mais um dia no caminho. Sigo aqui, no seu ritmo.',
   'Check-in completo. Prioridades ajustadas com carinho.',
-  'Pequena ação, grande cuidado. O pique segue firme.',
+  'Pequena ação, grande cuidado. A corrente segue firme.',
   'Você não está só nessa jornada. Registro honrado.',
   'Constância sem culpa: esse é o nosso combinado. Parabéns.',
   'Dia protegido. Descanse sabendo que fez o essencial.',

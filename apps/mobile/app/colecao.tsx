@@ -25,6 +25,7 @@ import { usePrefsStore } from '../src/store/prefsStore'
 import { useDataStore } from '../src/store/dataStore'
 import { actionIsos, useActivityStore, type LifeActionKind } from '../src/store/activityStore'
 import { confirmDestructive } from '../src/lib/confirmDestructive'
+import { guardSpend } from '../src/lib/spendGuard'
 import { hapticRestDone } from '../src/lib/haptics'
 import { gamificationLevel, useGamificationStore } from '../src/store/gamificationStore'
 import { useRouter } from 'expo-router'
@@ -389,12 +390,14 @@ export default function ColecaoScreen()
                         label="Lançar o gasto"
                         variant="secondary"
                         size="sm"
-                        onPress={() =>
+                        onPress={async () =>
                         {
-                          void addExpenseFromText('', isGuest, {
+                          if (!(await guardSpend({ launches: [{ valor: p.valor!, data: localTodayIso() }] }))) return
+                          const r = await addExpenseFromText('', isGuest, {
                             tipo: 'despesa',
                             lido: { titulo: `Prêmio: ${p.titulo}`, valor: p.valor! },
-                          }).then((r) => setMsg(r.ok ? 'Gasto lançado no Financeiro.' : r.error ?? 'Não deu para lançar agora'))
+                          })
+                          setMsg(r.ok ? 'Gasto lançado no Financeiro.' : r.error ?? 'Não deu para lançar agora')
                         }}
                       />
                     ) : null}

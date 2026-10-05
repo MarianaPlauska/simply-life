@@ -1,5 +1,6 @@
 /**
  * Open Food Facts (API v2), só leitura por código de barras.
+ * Do produto fica: nome, marca, porção, kcal, proteína e açúcares (por 100 g e por porção).
  * Licença ODbL: toda tela que mostra esse dado cita "Dados: Open Food Facts".
  * Aqui fica só a parte pura (URL, cabeçalho, leitura da resposta); a busca mora no app.
  */
@@ -40,6 +41,18 @@ export type OffProduct = {
   /** gramas ou ml da porção, quando dá para ler */
   porcaoGramas: number | null
   kcalPorcao: number | null
+  /** gramas de proteína em 100 g e na porção (null quando a embalagem não diz) */
+  proteina100g: number | null
+  proteinaPorcao: number | null
+  /** gramas de açúcares totais em 100 g e na porção */
+  acucar100g: number | null
+  acucarPorcao: number | null
+}
+
+/** Produto do cache já tem os campos de proteína e açúcar (mesmo que nulos)? Cache antigo não tem e é buscado de novo. */
+export function offProductHasNutrients(p: Partial<OffProduct> | null | undefined): boolean
+{
+  return Boolean(p) && 'proteina100g' in (p as object) && 'acucar100g' in (p as object)
 }
 
 /** "30 g" → 30 · "1 copo (200 ml)" → 200 · "1 unidade" → null */
@@ -57,8 +70,34 @@ export function parseServingGrams(serving: string | null | undefined): number | 
 
 function num(v: unknown): number | null
 {
+  if (v === '' || v == null) return null
   const n = typeof v === 'string' ? Number(v.replace(',', '.')) : typeof v === 'number' ? v : NaN
   return Number.isFinite(n) && n >= 0 ? n : null
+}
+
+function grams(v: number | null): number | null
+{
+  if (v == null) return null
+  const c = Math.min(300, v)
+  return c < 10 ? Math.round(c * 10) / 10 : Math.round(c)
+}
+
+/** Nutriente por 100 g e por porção: usa o valor da porção quando existe, senão calcula pelos gramas. */
+function nutrientPair(
+  nutr: Record<string, unknown>,
+  name: string,
+  porcaoGramas: number | null,
+): { per100: number | null; perServing: number | null }
+{
+  const raw100 = num(nutr[`${name}_100g`])
+  const per100 = raw100 != null && raw100 <= 100 ? raw100 : null
+  const serv = num(nutr[`${name}_serving`])
+  const perServing = serv != null
+    ? serv
+    : per100 != null && porcaoGramas != null
+      ? (per100 * porcaoGramas) / 100
+      : null
+  return { per100: grams(per100), perServing: grams(perServing) }
 }
 
 /** Lê a resposta da API; null quando o produto não existe ou veio sem nome. */
@@ -86,6 +125,8 @@ export function parseOffResponse(json: unknown, barcode: string): OffProduct | n
       ? Math.round((kcal100g * porcaoGramas) / 100)
       : null
   const marca = typeof p.brands === 'string' && p.brands.trim() ? p.brands.split(',')[0].trim() : null
+  const prot = nutrientPair(nutr, 'proteins', porcaoGramas)
+  const acu = nutrientPair(nutr, 'sugars', porcaoGramas)
   return {
     barcode,
     nome,
@@ -95,5 +136,9 @@ export function parseOffResponse(json: unknown, barcode: string): OffProduct | n
     porcao,
     porcaoGramas,
     kcalPorcao,
+    proteina100g: prot.per100,
+    proteinaPorcao: prot.perServing,
+    acucar100g: acu.per100,
+    acucarPorcao: acu.perServing,
   }
 }

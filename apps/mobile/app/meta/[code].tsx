@@ -80,7 +80,7 @@ export default function JoinGoalScreen()
                 ? 'Metas juntos precisam de uma conta. No modo convidado tudo fica só neste aparelho.'
                 : `Entre ou crie sua conta para ver o convite ${clean}.`}
             </Text>
-            <PrimaryButton label="Entrar no Simply Life" onPress={() => router.replace('/login')} />
+            <PrimaryButton label="Entrar no SunFy" onPress={() => router.replace('/login')} />
           </>
         ) : status === 'loading' ? (
           <ActivityIndicator color={colors.axel} />

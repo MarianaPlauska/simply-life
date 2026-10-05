@@ -1,4 +1,5 @@
 import { stripDashes } from '../../noDashes.js'
+import { geminiUrl } from '../../geminiModel.js'
 // GET/POST /api/morning-brief - resumo matinal com IA (Groq/Gemini) + fallback
 
 function buildFallbackBrief(ctx)
@@ -97,7 +98,7 @@ Carga percentual NÃO entra na headline. Sem emojis. Sem "atrasado", "crítico" 
   if (keys.geminiKey)
   {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keys.geminiKey}`,
+      geminiUrl(keys.geminiKey),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

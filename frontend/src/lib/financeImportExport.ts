@@ -21,7 +21,7 @@ export function exportTransactionsCsv(transactions: Transaction[], filename?: st
 
   const csv = [header.join(';'), ...rows.map((r) => r.join(';'))].join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' })
-  downloadBlob(blob, filename ?? `simply-life-${fmtDate(new Date().toISOString())}.csv`)
+  downloadBlob(blob, filename ?? `sunfy-${fmtDate(new Date().toISOString())}.csv`)
 }
 
 function escapeCsv(value: string): string
@@ -33,13 +33,24 @@ function escapeCsv(value: string): string
   return value
 }
 
+/** Texto do usuário entra no HTML de impressão só escapado (evita XSS). */
+export function escapeHtml(value: unknown): string
+{
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export function exportTransactionsPrintable(
   transactions: Transaction[],
   monthLabel: string,
 ): void
 {
   const rows = [...transactions].sort((a, b) => b.data.localeCompare(a.data))
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Simply-Life ${monthLabel}</title>
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SunFy ${escapeHtml(monthLabel)}</title>
 <style>
 body{font-family:system-ui,sans-serif;padding:24px;color:#111}
 h1{font-size:18px} table{width:100%;border-collapse:collapse;margin-top:16px;font-size:12px}
@@ -47,21 +58,23 @@ th,td{border-bottom:1px solid #ddd;padding:8px;text-align:left}
 th{font-size:10px;text-transform:uppercase;color:#666}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 </style></head><body>
-<h1>Simply-Life - ${monthLabel}</h1>
+<h1>SunFy · ${escapeHtml(monthLabel)}</h1>
 <p>${rows.length} lançamentos</p>
 <table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th class="num">Valor</th><th>Categoria</th></tr></thead><tbody>
 ${rows.map((t) => `<tr>
-<td>${fmtDate(t.data)}</td><td>${t.descricao}</td><td>${t.tipo}</td>
+<td>${escapeHtml(fmtDate(t.data))}</td><td>${escapeHtml(t.descricao)}</td><td>${escapeHtml(t.tipo)}</td>
 <td class="num">${t.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-<td>${t.categoria ?? ''}</td></tr>`).join('')}
+<td>${escapeHtml(t.categoria ?? '')}</td></tr>`).join('')}
 </tbody></table>
-<script>window.onload=()=>{window.print()}</script>
 </body></html>`
 
   const w = window.open('', '_blank')
   if (!w) return
   w.document.write(html)
   w.document.close()
+  // impressão pela janela de origem: sem script embutido (CSP sem unsafe-inline)
+  w.focus()
+  w.print()
 }
 
 export interface ImportedTransactionRow

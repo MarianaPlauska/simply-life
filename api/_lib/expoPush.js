@@ -29,7 +29,7 @@ export async function sendExpoPush(token, payload)
   const message = {
     to: token,
     sound: 'default',
-    title: body.title || 'Simply-Life',
+    title: body.title || 'SunFy',
     body: body.body || '',
     data: body,
     channelId: 'default',

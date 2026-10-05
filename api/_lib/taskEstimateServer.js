@@ -1,4 +1,5 @@
 // Estimativa de esforço - fallback local (espelha backend/logic/task_estimate.py)
+import { geminiUrl } from './geminiModel.js'
 
 const MIN_ESTIMATE = 20
 const MAX_ESTIMATE = 480
@@ -102,7 +103,7 @@ async function callGroq(apiKey, systemInstruction, userPrompt)
 async function callGemini(apiKey, systemInstruction, userPrompt)
 {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    geminiUrl(apiKey),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -152,7 +153,7 @@ export async function estimateTaskEffort(payload)
     }
   }
 
-  const systemInstruction = `Você é o AXEL, motor de produtividade do Simply-Life.
+  const systemInstruction = `Você é o AXEL, motor de produtividade do SunFy.
 Analise a demanda e devolva JSON exatamente neste formato:
 {
   "estimate_minutes": número inteiro entre 15 e 480,

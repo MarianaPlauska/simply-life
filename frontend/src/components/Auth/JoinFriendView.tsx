@@ -56,7 +56,7 @@ export function JoinFriendView()
           to={`/login?join=${code}`}
           className="px-4 py-2.5 rounded-sl bg-accent text-white text-sm"
         >
-          Entrar no Simply-Life
+          Entrar no SunFy
         </Link>
       </div>
     )

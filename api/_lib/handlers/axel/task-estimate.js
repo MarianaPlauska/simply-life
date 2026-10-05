@@ -2,17 +2,9 @@
 
 import { estimateTaskEffort } from '../../taskEstimateServer.js'
 
-function cors(res)
-{
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-}
-
 export default async function handler(req, res)
 {
-  cors(res)
-
+  // CORS, login e limite: withUser no roteador (api/axel/[action].js)
   if (req.method === 'OPTIONS')
   {
     return res.status(204).end()

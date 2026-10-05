@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import { countAccountableMissedDays } from '../../lib/weekendStreak'
+import { calcularEloSite, eloHoje, fetchEloDiasSite, registrarEloDiaSite, type EloAcao } from '../../lib/eloCanonico'
 import type { ProofOfWorkEvaluation } from '../../lib/proofOfWork'
 import {
   mergeOfensivaFromRow,
@@ -10,9 +10,8 @@ import {
 import { supabase } from '../../lib/supabase'
 import type { GamificacaoSlice } from './gamificacaoSlice'
 
-// Ofensiva diária + heatmap de foco + escudos (retenção estilo GitHub)
-
-const STREAK_FREEZE_COST = 500
+// Elo diário (mesma regra do app, lib/eloCanonico) + heatmap de foco.
+// Sem pausa, escudo ou fim de semana congelado: o número é só o que aconteceu.
 
 export interface AxelStreakSlice
 {
@@ -20,9 +19,9 @@ export interface AxelStreakSlice
   lastActiveDate: string | null
   hasCompletedTaskToday: boolean
   hasWellbeingToday: boolean
-  /** Abrir o resumo do dia já conta como check-in */
+  /** Abriu o resumo do dia (não cumpre o dia do elo) */
   hasDayCheckinToday: boolean
-  /** Ausência não zera - a sequência espera o próximo check-in */
+  /** Sempre false: o elo não pausa mais (campo mantido por compatibilidade) */
   streakPaused: boolean
   streakPulseNonce: number
   streakFreezes: number
@@ -45,19 +44,15 @@ export interface AxelStreakSlice
   canClaimMonthlyStreakFreeze: () => boolean
   claimMonthlyStreakFreeze: () => { ok: boolean; message: string }
   hydrateOfensivaFromServer: (row: OfensivaStatsRow) => void
+  /** lê os dias reais do elo (elo_dias) e recalcula a sequência */
+  loadEloDias: () => Promise<void>
   syncOfensivaToServer: () => Promise<void>
 }
 
+/** Dia local (antes era UTC: à noite no Brasil já virava o dia seguinte) */
 function todayIsoDate(): string
 {
-  return new Date().toISOString().slice(0, 10)
-}
-
-function yesterdayIsoDate(): string
-{
-  const d = new Date()
-  d.setDate(d.getDate() - 1)
-  return d.toISOString().slice(0, 10)
+  return eloHoje()
 }
 
 type StreakStore = AxelStreakSlice & Pick<GamificacaoSlice, 'userStats' | 'spendXp'>
@@ -69,20 +64,11 @@ interface StreakBumpResult
   streakQualified: boolean
 }
 
-function currentMonthKey(): string
+/** Recalcula a sequência só com os dias cumpridos de verdade. */
+function eloFromSavedDays(saved: Record<string, boolean>): { streakCount: number; lastActiveDate: string | null }
 {
-  return todayIsoDate().slice(0, 7)
-}
-
-function markStreakDaySaved(
-  set: (partial: Partial<AxelStreakSlice> | ((s: AxelStreakSlice) => Partial<AxelStreakSlice>)) => void,
-  get: () => AxelStreakSlice,
-  day: string,
-): void
-{
-  set({
-    streakSavedDays: { ...get().streakSavedDays, [day]: true },
-  })
+  const elo = calcularEloSite(Object.keys(saved).filter((d) => saved[d]))
+  return { streakCount: elo.atual, lastActiveDate: elo.ultimoDia }
 }
 
 function bumpDailyStreak(
@@ -94,59 +80,33 @@ function bumpDailyStreak(
 {
   get().syncStreakCalendarDay()
 
-  const today = todayIsoDate()
-  const yesterday = yesterdayIsoDate()
-  const alreadySafe =
-    get().hasCompletedTaskToday || get().hasWellbeingToday || get().hasDayCheckinToday
-
-  if (alreadySafe)
+  // só abrir o resumo do dia não cumpre o dia
+  if (flag === 'hasDayCheckinToday')
   {
-    set({ [flag]: true, streakPaused: false } as Partial<AxelStreakSlice>)
-    markStreakDaySaved(set, get, today)
-    onChanged?.()
-    return {
-      incremented: false,
-      streakCount: get().streakCount,
-      streakQualified: true,
-    }
+    set({ hasDayCheckinToday: true })
+    return { incremented: false, streakCount: get().streakCount, streakQualified: false }
   }
 
-  let nextStreak = 1
-  const last = get().lastActiveDate
-  const pausedCount = get().streakCount
-
-  if (last === yesterday)
-  {
-    nextStreak = pausedCount + 1
-  }
-  else if (last === today)
-  {
-    nextStreak = pausedCount
-  }
-  else if (pausedCount > 0)
-  {
-    // Pausa: retoma a sequência em vez de recomeçar do zero
-    nextStreak = pausedCount + 1
-  }
-  else
-  {
-    nextStreak = 1
-  }
+  const today = eloHoje()
+  const before = get().streakCount
+  const streakSavedDays = { ...get().streakSavedDays, [today]: true }
+  const next = eloFromSavedDays(streakSavedDays)
+  const acao: EloAcao = flag === 'hasCompletedTaskToday' ? 'task' : 'water'
+  const firstToday = !get().streakSavedDays[today]
 
   set({
-    streakCount: nextStreak,
-    lastActiveDate: today,
+    ...next,
+    streakSavedDays,
     streakPaused: false,
     [flag]: true,
-    streakPulseNonce: get().streakPulseNonce + 1,
-    streakSavedDays: { ...get().streakSavedDays, [today]: true },
+    ...(next.streakCount > before ? { streakPulseNonce: get().streakPulseNonce + 1 } : {}),
   } as Partial<AxelStreakSlice>)
-
+  if (firstToday) void registrarEloDiaSite(today, acao)
   onChanged?.()
 
   return {
-    incremented: true,
-    streakCount: nextStreak,
+    incremented: next.streakCount > before,
+    streakCount: next.streakCount,
     streakQualified: true,
   }
 }
@@ -174,6 +134,18 @@ export const createAxelStreakSlice: StateCreator<
     const merged = mergeOfensivaFromRow(get(), row)
     set(merged)
     get().syncStreakCalendarDay()
+    void get().loadEloDias()
+  },
+
+  loadEloDias: async () =>
+  {
+    const dias = await fetchEloDiasSite()
+    if (!dias) return
+    // os dias do servidor (app e site) mandam; o que só este navegador marcou também vale
+    const streakSavedDays: Record<string, boolean> = {}
+    for (const d of dias) streakSavedDays[d] = true
+    for (const [d, ok] of Object.entries(get().streakSavedDays)) if (ok) streakSavedDays[d] = true
+    set({ streakSavedDays, ...eloFromSavedDays(streakSavedDays), streakPaused: false })
   },
 
   syncOfensivaToServer: async () =>
@@ -214,69 +186,23 @@ export const createAxelStreakSlice: StateCreator<
       }
     }
 
-    if (!last)
-    {
-      return
-    }
-
-    if (last === today)
-    {
-      return
-    }
-
-    const yesterday = yesterdayIsoDate()
-    const accountableGap = countAccountableMissedDays(last, today)
-
-    if (accountableGap === 0)
-    {
-      if (last !== today)
-      {
-        set({
-          hasCompletedTaskToday: false,
-          hasWellbeingToday: false,
-          hasDayCheckinToday: false,
-        })
-      }
-      flush()
-      return
-    }
-
-    if (accountableGap === 1)
-    {
-      set({
-        hasCompletedTaskToday: false,
-        hasWellbeingToday: false,
-        hasDayCheckinToday: false,
-      })
-      flush()
-      return
-    }
-
-    if (get().streakFreezes > 0)
-    {
-      set({
-        streakFreezes: get().streakFreezes - 1,
-        lastActiveDate: yesterday,
-        hasCompletedTaskToday: false,
-        hasWellbeingToday: false,
-        hasDayCheckinToday: false,
-      })
-      flush()
-      return
-    }
-
+    // sempre recalcula só com dias de verdade (sem pausa, escudo ou fim de semana
+    // congelado); um número antigo salvo no servidor não fica na tela
+    const elo = eloFromSavedDays(get().streakSavedDays)
+    if (last === today && elo.streakCount === get().streakCount) return
     set({
-      streakPaused: true,
-      hasCompletedTaskToday: false,
-      hasWellbeingToday: false,
-      hasDayCheckinToday: false,
+      ...elo,
+      streakPaused: false,
+      // dia novo: as marcas de hoje recomeçam
+      ...(elo.lastActiveDate !== today
+        ? { hasCompletedTaskToday: false, hasWellbeingToday: false, hasDayCheckinToday: false }
+        : {}),
     })
-
     flush()
   },
 
   isStreakSafeToday: () =>
-    get().hasCompletedTaskToday || get().hasWellbeingToday || get().hasDayCheckinToday,
+    get().hasCompletedTaskToday || get().hasWellbeingToday,
 
   addDailyFocusMinutes: (minutes) =>
   {
@@ -329,46 +255,10 @@ export const createAxelStreakSlice: StateCreator<
     )
   },
 
-  purchaseStreakFreeze: async () =>
-  {
-    const total = get().getTotalXp()
-    if (total < STREAK_FREEZE_COST)
-    {
-      return {
-        ok: false,
-        message: `XP insuficiente (${total}/${STREAK_FREEZE_COST})`,
-      }
-    }
+  // escudos saíram: o elo já tem um descanso automático por semana e não se compra dia
+  purchaseStreakFreeze: async () => ({ ok: false, message: 'O elo já tem um descanso grátis por semana.' }),
 
-    const spent = await get().spendXp(STREAK_FREEZE_COST)
-    if (!spent)
-    {
-      return { ok: false, message: 'Não foi possível debitar XP' }
-    }
+  canClaimMonthlyStreakFreeze: () => false,
 
-    set({ streakFreezes: get().streakFreezes + 1 })
-    scheduleOfensivaPersist(() => get().syncOfensivaToServer())
-    return { ok: true, message: 'Escudo de Ofensiva adquirido' }
-  },
-
-  canClaimMonthlyStreakFreeze: () =>
-  {
-    return get().lastMonthlyFreezeClaim !== currentMonthKey()
-  },
-
-  claimMonthlyStreakFreeze: () =>
-  {
-    const month = currentMonthKey()
-    if (get().lastMonthlyFreezeClaim === month)
-    {
-      return { ok: false, message: 'Escudo grátis já resgatado neste mês' }
-    }
-
-    set({
-      streakFreezes: get().streakFreezes + 1,
-      lastMonthlyFreezeClaim: month,
-    })
-    scheduleOfensivaPersist(() => get().syncOfensivaToServer())
-    return { ok: true, message: 'Escudo grátis do mês na mochila!' }
-  },
+  claimMonthlyStreakFreeze: () => ({ ok: false, message: 'O elo já tem um descanso grátis por semana.' }),
 })

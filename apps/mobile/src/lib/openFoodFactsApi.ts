@@ -7,6 +7,7 @@ import { Platform } from 'react-native'
 import Constants from 'expo-constants'
 import {
   normalizeBarcode,
+  offProductHasNutrients,
   offProductUrl,
   offUserAgent,
   parseOffResponse,
@@ -25,7 +26,9 @@ export async function lookupBarcode(input: string): Promise<OffLookup>
 {
   const barcode = normalizeBarcode(input)
   if (!barcode) return { ok: false, reason: 'codigo' }
-  const cached = useFoodLogStore.getState().offCache[barcode]
+  // cache de antes de proteína e açúcar existirem não serve: busca de novo
+  const stored = useFoodLogStore.getState().offCache[barcode]
+  const cached = stored && offProductHasNutrients(stored) ? stored : undefined
   if (cached && Date.now() - new Date(cached.fetchedAt).getTime() < CACHE_MS)
   {
     return { ok: true, product: cached, fromCache: true }

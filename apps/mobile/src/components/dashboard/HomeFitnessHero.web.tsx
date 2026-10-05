@@ -16,7 +16,6 @@ type Props = {
   dateLabel: string
   onAccount: () => void
   isAdmin?: boolean
-  line?: string
 }
 
 const SIDE = 40
@@ -32,7 +31,6 @@ export function HomeFitnessHero({
   dateLabel,
   onAccount,
   isAdmin = false,
-  line = 'O essencial do seu dia, com calma.',
 }: Props)
 {
   const { colors, space, elevation } = useTheme()
@@ -72,11 +70,6 @@ export function HomeFitnessHero({
           >
             {title}
           </Text>
-          {line ? (
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 13, lineHeight: 19 }}>
-              {line}
-            </Text>
-          ) : null}
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
         <CircleCornerButton size={SIDE} />
@@ -105,8 +98,8 @@ export function HomeFitnessHero({
     )
   }
 
-  // Celular: leitura de cima para baixo, alinhada à esquerda. Data pequena, saudação grande
-  // e frase formam um grupo só (perto um do outro); a conta fica no canto, fora do grupo.
+  // Celular: leitura de cima para baixo, alinhada à esquerda. Data pequena e saudação
+  // formam um grupo só; a conta fica no canto, fora do grupo.
   return (
     <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
@@ -120,11 +113,6 @@ export function HomeFitnessHero({
           <Text variant="title" numberOfLines={2}>
             {title}
           </Text>
-          {line ? (
-            <Text variant="body" muted numberOfLines={2}>
-              {line}
-            </Text>
-          ) : null}
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
         <CircleCornerButton />

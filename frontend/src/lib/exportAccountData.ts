@@ -6,7 +6,7 @@ export function buildAccountExportPayload()
   const s = useTaskStore.getState()
   return {
     exported_at: new Date().toISOString(),
-    product: 'Simply-Life',
+    product: 'SunFy',
     profile: s.userProfile,
     tarefas: s.tarefas,
     transactions: s.transactions,
@@ -23,7 +23,7 @@ export function downloadAccountExport(): void
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `simply-life-dados-${payload.exported_at.slice(0, 10)}.json`
+  a.download = `sunfy-dados-${payload.exported_at.slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(url)
 }

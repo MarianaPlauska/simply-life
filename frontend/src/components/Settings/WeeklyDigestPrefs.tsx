@@ -142,7 +142,7 @@ export function WeeklyDigestPrefs()
             setWeekday(next)
             void persist({ weekday: next })
           }}
-          className="mt-1 w-full min-h-11 rounded-lg bg-zinc-800/50 border border-zinc-700/40 px-3 text-[13px] text-white"
+          className="mt-1 w-full min-h-11 rounded-lg bg-zinc-800/50 border border-zinc-700/40 px-3 text-[13px] text-ink"
         >
           {WEEKDAYS.map((d) => (
             <option key={d.value} value={d.value}>{d.label}</option>
@@ -160,7 +160,7 @@ export function WeeklyDigestPrefs()
             setChannel(next)
             void persist({ channel: next })
           }}
-          className="mt-1 w-full min-h-11 rounded-lg bg-zinc-800/50 border border-zinc-700/40 px-3 text-[13px] text-white"
+          className="mt-1 w-full min-h-11 rounded-lg bg-zinc-800/50 border border-zinc-700/40 px-3 text-[13px] text-ink"
         >
           <option value="both">E-mail (IMAP) e push</option>
           <option value="email">Só e-mail</option>

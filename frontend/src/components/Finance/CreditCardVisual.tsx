@@ -114,7 +114,7 @@ export function CreditCardVisual({
 
         <div className="relative z-10 flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="font-display text-sm text-white truncate">{card.nome}</p>
+            <p className="font-display text-sm text-ink truncate">{card.nome}</p>
             <p className="font-mono text-[9px] uppercase tracking-wider mt-0.5 text-white/60">
               {cardModalidadeLabel(card.modalidade)}
               {(card.modalidade ?? 'credito') === 'credito' || (card.modalidade ?? 'credito') === 'debito'
@@ -142,7 +142,7 @@ export function CreditCardVisual({
                 {faturaPaga ? 'Fatura paga' : temFatura ? 'Fatura aberta' : usaExtrato ? 'Extrato' : 'Usado'}
               </p>
               <p className={`font-display text-lg tabular-nums leading-none ${
-                faturaPaga ? 'text-concluido' : 'text-white'
+                faturaPaga ? 'text-concluido' : 'text-ink'
               }`}
               >
                 {fmt(invoiceTotal)}
@@ -150,7 +150,7 @@ export function CreditCardVisual({
             </div>
             <div className="text-right">
               <p className="font-mono text-[8px] uppercase text-white/55">Disponível</p>
-              <p className={`font-mono text-[11px] tabular-nums ${available <= 0 ? 'text-urgente' : 'text-white'}`}>
+              <p className={`font-mono text-[11px] tabular-nums ${available <= 0 ? 'text-urgente' : 'text-ink'}`}>
                 {fmt(available)}
               </p>
             </div>

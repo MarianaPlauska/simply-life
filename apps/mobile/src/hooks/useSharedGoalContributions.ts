@@ -4,6 +4,7 @@ import { localTodayIso, sharedGoalCycle, type SharedGoal } from '@simply-life/sh
 import { useAuthStore } from '../store/authStore'
 import { useDataStore } from '../store/dataStore'
 import { useFocusLogStore } from '../store/focusLogStore'
+import { useFoodLogStore } from '../store/foodLogStore'
 import { useSharedGoalsStore } from '../store/sharedGoalsStore'
 import { computeMyGoalDays } from '../lib/sharedGoalContributions'
 import { fetchMyEntries, upsertMyEntries } from '../lib/sync/sharedGoals'
@@ -57,6 +58,10 @@ export function useSharedGoalContributions(): void
   const tasks = useDataStore((s) => s.tasks)
   const humor = useDataStore((s) => s.humor)
   const focus = useFocusLogStore((s) => s.sessions)
+  // refeições e limite de açúcar alimentam as metas de cuidar do corpo
+  const meals = useFoodLogStore((s) => s.meals)
+  const metaAcucar = useFoodLogStore((s) => s.prefs.metaAcucar)
+  const nutrientes = useFoodLogStore((s) => s.prefs.mostrarCalorias)
   const known = useRef(new Map<string, Record<string, number>>())
   const running = useRef(false)
   const active = Boolean(userId) && !isGuest
@@ -109,5 +114,5 @@ export function useSharedGoalContributions(): void
       clearInterval(iv)
       sub.remove()
     }
-  }, [active, loaded, goals, habits, tasks, humor, focus])
+  }, [active, loaded, goals, habits, tasks, humor, focus, meals, metaAcucar, nutrientes])
 }

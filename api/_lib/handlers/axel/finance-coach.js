@@ -1,4 +1,5 @@
 import { stripDashes } from '../../noDashes.js'
+import { geminiUrl } from '../../geminiModel.js'
 // POST /api/finance-coach
 // Conselho financeiro personalizado via Groq/Gemini com contexto dos gastos do usuário
 
@@ -43,7 +44,7 @@ async function callGroq(apiKey, systemInstruction, userPrompt)
 async function callGemini(apiKey, systemInstruction, userPrompt)
 {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    geminiUrl(apiKey),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -99,7 +100,7 @@ export default async function handler(req, res)
     ? `\nTom de voz obrigatório: ${aiTone}`
     : '';
 
-  const systemInstruction = `Você é o AXEL, o melhor amigo financeiro do usuário no Simply-Life.
+  const systemInstruction = `Você é o AXEL, o melhor amigo financeiro do usuário no SunFy.
 Analise os dados reais de gastos e devolva um JSON exatamente neste formato:
 {
   "headline": "título curto em PT-BR (máx 6 palavras)",

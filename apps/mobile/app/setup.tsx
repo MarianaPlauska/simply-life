@@ -313,7 +313,7 @@ export default function SetupScreen()
           <OnbStep
             {...stepProps}
             onBack={undefined}
-            title="Bem-vindo ao Simply Life"
+            title="Boas-vindas ao SunFy"
             subtitle="Tarefas, saúde e dinheiro num lugar só. Você escolhe o que usar e o app se monta com os seus dados."
             nextLabel="Começar"
             onNext={() => void startOwn()}

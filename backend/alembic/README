@@ -1,1 +1,66 @@
-Generic single-database configuration.
+# Migrações do banco (Alembic)
+
+Este diretório guarda o **histórico de mudanças do Postgres** do SunFy. Cada arquivo em `versions/` é um passo: criar tabela, índice, coluna nova, ajuste de segurança (RLS), e assim por diante.
+
+Eu uso o [Alembic](https://alembic.sqlalchemy.org/) porque prefiro **migrações versionadas e reversíveis** em vez de editar o banco “na mão” e esquecer o que mudou. O app em produção (Supabase) e o que roda no seu computador precisam falar a mesma língua — literalmente o mesmo schema SQL.
+
+## Por que isso existe no SunFy
+
+O SunFy mistura coisas bem pessoais: humor, remédio, conta a pagar, tarefa do dia. Tudo isso vive no **mesmo banco**, com regra de que **cada pessoa só vê os próprios dados** (RLS no Supabase). Quando uma tela nova precisa de um campo ou de uma tabela, a mudança entra aqui primeiro — assim ninguém quebra o ambiente de outra pessoa sem perceber.
+
+## Linguagens nesta pasta (e por quê)
+
+| Peça | Linguagem | Motivo |
+|------|-----------|--------|
+| Scripts de migração | **Python** | O backend do SunFy já é FastAPI + SQLAlchemy; o Alembic nasce desse ecossistema. Um comando gera o arquivo, outro aplica. |
+| O que roda no banco | **SQL** (via Alembic `op.execute`, `op.create_table`, etc.) | Postgres é a fonte da verdade dos dados; a migração descreve o DDL de forma explícita. |
+| Modelos de referência | **Python** (`backend/models.py`) | O Alembic lê os models para autogenerate quando fizer sentido; a revisão humana continua obrigatória. |
+
+O app que você usa no celular é em **TypeScript**; o servidor de APIs na Vercel é em **Node**. Esta pasta é o terço **Python + SQL** do projeto: a parte que cuida do **formato do banco** e de rotinas que ficaram no FastAPI (priorização, analytics, testes de integração).
+
+Não é “mais uma linguagem por capricho”: cada uma ficou onde me dá **menos atrito** para aquela camada — UI compartilhada em TS, edge/API em Node, schema e lógica pesada de dados em Python.
+
+## Comandos do dia a dia
+
+Na pasta `backend/`, com `.env` apontando para o Postgres (local ou Supabase):
+
+```bash
+# Ver em qual revisão o banco está
+alembic current
+
+# Aplicar tudo que falta
+alembic upgrade head
+
+# Voltar um passo (cuidado em produção)
+alembic downgrade -1
+
+# Criar migração nova (revise o arquivo gerado antes de commitar)
+alembic revision -m "descricao_curta_em_snake_case"
+```
+
+Para autogenerate a partir dos models (quando configurado):
+
+```bash
+alembic revision --autogenerate -m "descricao"
+```
+
+**Sempre** leia o arquivo em `versions/` antes de subir. Autogenerate pode sugerir drop que você não quer.
+
+## Ordem e baseline
+
+A revisão `d1574881dec6_baseline_schema_completo` é o **chão** do schema atual. As migrations seguintes (sprints B–E, índices, RLS, templates, etc.) encaixam em cima dela.
+
+Se o banco foi criado pelo `supabase_schema.sql` do zero, a tabela `alembic_version` precisa estar alinhada com a revisão que você considera “atual” — senão o Alembic tenta reaplicar coisa que já existe.
+
+## O que não fazer
+
+- Não editar uma migration **já aplicada** em produção; crie uma nova revisão.
+- Não commitar credenciais no `alembic.ini`; use variáveis de ambiente (ver `env.py`).
+- Não assumir que “funcionou no meu Supabase” sem rodar os testes em `backend/tests/`.
+
+## Mais contexto
+
+- Schema de referência: `backend/supabase_schema.sql`
+- Configuração: `backend/alembic.ini` e `backend/alembic/env.py`
+- Visão geral do monorepo: [`docs/SISTEMA_REFERENCIA.md`](../../docs/SISTEMA_REFERENCIA.md)
+- README do produto (tom e stack para quem usa o app): [`README.MD`](../../README.MD) na raiz do repositório

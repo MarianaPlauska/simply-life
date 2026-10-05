@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- viewport-fit=cover: no iPhone instalado, o app ocupa a tela toda (o app já respeita a área segura) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>SunFy</title>
+    <meta name="description" content="Tarefas, saúde e dinheiro num lugar só. Passos pequenos, sem pressa, nunca sozinho." />
+
+    <!-- app instalável (Android, desktop) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#F4F2EE" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#151A1A" media="(prefers-color-scheme: dark)" />
+
+    <!-- iPhone: Compartilhar → Adicionar à Tela de Início abre como app, sem a barra do Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="SunFy" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- favicon = o ícone do app -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+
+    <!-- link compartilhado (WhatsApp, redes) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SunFy" />
+    <meta property="og:description" content="Um girassol pra você. Passos pequenos. Sem pressa. Nunca sozinho." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+    <!-- fundo e foco da marca (o +html.tsx só vale na saída estática; aqui é página única) -->
+    <style>
+      html, body { background-color: #F4F2EE; }
+      @media (prefers-color-scheme: dark) { html, body { background-color: #151A1A; } }
+      input:focus, textarea:focus { outline: 2px solid #E8734A; outline-offset: 1px; }
+      ::selection { background-color: rgba(232, 115, 74, 0.30); }
+    </style>
+  </head>
+
+  <body>
+    <noscript>
+      Para usar o SunFy, ative o JavaScript do navegador.
+    </noscript>
+    <div id="root"></div>
+  </body>
+</html>

@@ -43,19 +43,19 @@ export function DriveVaultView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Vault / Drive</h1>
+          <h1 className="text-2xl font-bold text-ink tracking-tight">Vault / Drive</h1>
           <p className="text-sm text-zinc-500 mt-1">Documentos seguros & acesso rápido</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setViewMode('grid')}
-            className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white'}`}
+            className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-zinc-800 text-ink' : 'text-zinc-500 hover:text-ink'}`}
           >
             <Grid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setViewMode('list')}
-            className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-white'}`}
+            className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-zinc-800 text-ink' : 'text-zinc-500 hover:text-ink'}`}
           >
             <List className="w-4 h-4" />
           </button>
@@ -70,7 +70,7 @@ export function DriveVaultView() {
           placeholder="Buscar arquivos…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-zinc-900/50 border border-zinc-800/60 rounded-2xl pl-11 pr-4 py-3 text-[13px] text-white placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-ia/20 focus:border-zinc-700/60 transition-all"
+          className="w-full bg-zinc-900/50 border border-zinc-800/60 rounded-2xl pl-11 pr-4 py-3 text-[13px] text-ink placeholder:text-zinc-500 outline-none focus:ring-2 focus:ring-ia/20 focus:border-zinc-700/60 transition-all"
         />
       </div>
 
@@ -79,7 +79,7 @@ export function DriveVaultView() {
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Pin className="w-4 h-4 text-ia" />
-            <h2 className="text-[14px] font-semibold text-white">Acesso Rápido</h2>
+            <h2 className="text-[14px] font-semibold text-ink">Acesso Rápido</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {pinnedFiles.map((file) => {
@@ -95,7 +95,7 @@ export function DriveVaultView() {
                       <FIcon className={`w-5 h-5 ${fi.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-white truncate">{file.nome}</p>
+                      <p className="text-[13px] font-semibold text-ink truncate">{file.nome}</p>
                       <p className="text-[11px] text-zinc-500">{file.tamanho} · {file.modificado}</p>
                     </div>
                     <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
@@ -129,7 +129,7 @@ export function DriveVaultView() {
       <section className="space-y-3">
         <div className="flex items-center gap-2">
           <Folder className="w-4 h-4 text-zinc-400" />
-          <h2 className="text-[14px] font-semibold text-white">
+          <h2 className="text-[14px] font-semibold text-ink">
             {search ? `Resultados para "${search}"` : 'Todos os Arquivos'}
           </h2>
           <span className="text-[11px] text-zinc-500 ml-auto">{filteredFiles.length} itens</span>
@@ -150,7 +150,7 @@ export function DriveVaultView() {
                       <FIcon className={`w-5 h-5 ${fi.color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-white truncate">{file.nome}</p>
+                      <p className="text-[13px] font-semibold text-ink truncate">{file.nome}</p>
                       <p className="text-[11px] text-zinc-500 mt-0.5">{file.tamanho} · {file.modificado}</p>
                     </div>
                     <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1">
@@ -174,7 +174,7 @@ export function DriveVaultView() {
                   <div className={`w-8 h-8 rounded-lg ${fi.bg} flex items-center justify-center shrink-0`}>
                     <FIcon className={`w-4 h-4 ${fi.color}`} />
                   </div>
-                  <p className="flex-1 text-[13px] font-medium text-white truncate">{file.nome}</p>
+                  <p className="flex-1 text-[13px] font-medium text-ink truncate">{file.nome}</p>
                   <span className="text-[11px] text-zinc-500 hidden sm:block">{file.tamanho}</span>
                   <span className="text-[11px] text-zinc-500 hidden sm:block w-16 text-right">{file.modificado}</span>
                   <button className="opacity-0 group-hover:opacity-100 transition-opacity p-1">

@@ -1,6 +1,6 @@
 {
-  "name": "Simply-Life OS",
-  "short_name": "Simply-Life",
+  "name": "SunFy",
+  "short_name": "SunFy",
   "description": "Seu sistema operacional pessoal. Gerencie tarefas, finanças, saúde e produtividade em um só lugar.",
   "lang": "pt-BR",
   "start_url": "/",
@@ -9,8 +9,8 @@
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait-primary",
-  "theme_color": "#1E1C18",
-  "background_color": "#1E1C18",
+  "theme_color": "#1F3A3D",
+  "background_color": "#1F3A3D",
   "categories": ["productivity", "lifestyle", "finance"],
   "icons": [
     { "src": "pwa-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },

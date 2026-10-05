@@ -5,7 +5,7 @@ import { PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCircleOverview } from '../../hooks/useCircleOverview'
 
-/** Marquinha Juntos ao lado do perfil: abre o pique, metas juntos e esperas por amigo. */
+/** Marquinha Juntos ao lado do perfil: abre o elo, metas juntos e esperas por amigo. */
 export function CircleCornerButton({ size = 44 }: { size?: number })
 {
   const { colors, elevation } = useTheme()
@@ -15,7 +15,7 @@ export function CircleCornerButton({ size = 44 }: { size?: number })
   return (
     <PressableScale
       onPress={() => router.push('/juntos' as never)}
-      accessibilityLabel={attention > 0 ? `Juntos, ${attention} pedindo atenção` : 'Juntos: pique e metas com amigos'}
+      accessibilityLabel={attention > 0 ? `Juntos, ${attention} pedindo atenção` : 'Juntos: amigos e metas juntos'}
       style={{
         width: size,
         height: size,

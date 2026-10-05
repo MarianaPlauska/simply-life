@@ -89,7 +89,7 @@ export function WebhookJarvisSection()
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
           <Code2 className="w-5 h-5 text-violet-400" />
           Webhooks Jarvis (M2M)
         </h2>
@@ -108,7 +108,7 @@ export function WebhookJarvisSection()
             <button
               type="button"
               onClick={() => copy(endpointUniversal, 'Endpoint universal')}
-              className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white"
+              className="p-2 rounded-lg border border-zinc-700 text-zinc-400 hover:text-ink"
             >
               <Copy className="w-4 h-4" />
             </button>

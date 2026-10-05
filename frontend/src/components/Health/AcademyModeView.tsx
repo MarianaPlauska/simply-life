@@ -216,7 +216,7 @@ export function AcademyModeView()
       )}
     <div
       data-academy-mode
-      className="min-h-[calc(100vh-2rem)] bg-black text-white flex flex-col px-4 py-6 max-w-lg mx-auto"
+      className="min-h-[calc(100vh-2rem)] bg-fundo text-ink flex flex-col px-4 py-6 max-w-lg mx-auto"
     >
       <header className="flex items-center justify-between mb-6">
         <p className="text-[11px] font-medium uppercase tracking-wide text-zinc-500">
@@ -225,7 +225,7 @@ export function AcademyModeView()
         <button
           type="button"
           onClick={() => navigate('/saude#hoje')}
-          className="text-[12px] text-zinc-500 hover:text-white tracking-tight"
+          className="text-[12px] text-zinc-500 hover:text-ink tracking-tight"
         >
           Sair
         </button>
@@ -237,7 +237,7 @@ export function AcademyModeView()
         </p>
         <time
           className={`font-mono text-[clamp(3.5rem,16vw,6.5rem)] font-medium tracking-tighter tabular-nums leading-none ${
-            session.phase === 'rest' ? 'text-emerald-400' : 'text-white'
+            session.phase === 'rest' ? 'text-emerald-400' : 'text-ink'
           }`}
         >
           {sessaoTreinoAtiva ? timerDisplay : '00:00'}
@@ -275,7 +275,7 @@ export function AcademyModeView()
               inputMode="decimal"
               value={session.pesoKg}
               onChange={(e) => session.setPesoKg(e.target.value)}
-              className="mt-1 w-full px-3 py-3 rounded-lg bg-white/5 border border-white/10 text-white text-lg font-mono"
+              className="mt-1 w-full px-3 py-3 rounded-lg bg-white/5 border border-white/10 text-ink text-lg font-mono"
             />
           </label>
           <label className="block">
@@ -285,7 +285,7 @@ export function AcademyModeView()
               inputMode="numeric"
               value={session.reps}
               onChange={(e) => session.setReps(e.target.value)}
-              className="mt-1 w-full px-3 py-3 rounded-lg bg-white/5 border border-white/10 text-white text-lg font-mono"
+              className="mt-1 w-full px-3 py-3 rounded-lg bg-white/5 border border-white/10 text-ink text-lg font-mono"
             />
           </label>
         </div>
@@ -328,7 +328,7 @@ export function AcademyModeView()
               <li
                 key={step.key}
                 className={`flex items-center gap-2 py-1.5 text-[12px] ${
-                  ativa ? 'text-white' : done ? 'text-zinc-600' : 'text-zinc-500'
+                  ativa ? 'text-ink' : done ? 'text-zinc-600' : 'text-zinc-500'
                 }`}
               >
                 <span className="w-4 shrink-0">

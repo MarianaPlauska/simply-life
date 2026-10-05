@@ -53,7 +53,7 @@ async function shareOrCopy(content: string, filename: string, mime: string): Pro
 export async function exportFinanceCsv(
   txs: FinanceTx[],
   lists: { id: string; name: string }[],
-  filename = 'simply-life-gastos.csv',
+  filename = 'sunfy-gastos.csv',
 ): Promise<string>
 {
   return shareOrCopy(csvOf(txs, lists), filename, 'text/csv;charset=utf-8')
@@ -62,7 +62,7 @@ export async function exportFinanceCsv(
 export async function exportFinanceExcel(
   txs: FinanceTx[],
   lists: { id: string; name: string }[],
-  filename = 'simply-life-gastos.xls',
+  filename = 'sunfy-gastos.xls',
 ): Promise<string>
 {
   const xml = buildFinanceExcelXml(financeTxsToExportRows(txs, folderNameLookup(lists)))
@@ -72,7 +72,7 @@ export async function exportFinanceExcel(
 export async function exportFinancePdf(
   txs: FinanceTx[],
   lists: { id: string; name: string }[],
-  title = 'Gastos · Simply Life',
+  title = 'Gastos · SunFy',
 ): Promise<string>
 {
   const html = buildFinancePdfHtml(financeTxsToExportRows(txs, folderNameLookup(lists)), title)
@@ -103,5 +103,5 @@ export async function exportFinancePdf(
   {
     /* expo-print opcional — cai no HTML */
   }
-  return shareOrCopy(html, 'simply-life-gastos.html', 'text/html')
+  return shareOrCopy(html, 'sunfy-gastos.html', 'text/html')
 }

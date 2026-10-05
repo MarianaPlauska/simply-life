@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
-  "installCommand": "npm install --no-audit --no-fund && cd frontend && npm install --no-audit --no-fund",
-  "framework": "vite",
+  "buildCommand": "cd apps/mobile && node ./scripts/patch-expo-router-ctx.js && npx expo export -p web --output-dir dist",
+  "outputDirectory": "apps/mobile/dist",
+  "installCommand": "npm install --no-audit --no-fund",
+  "framework": null,
   "github": {
     "enabled": true,
     "silent": false,
@@ -12,42 +12,149 @@
   },
   "build": {
     "env": {
-      "VITE_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
-      "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8"
+      "EXPO_PUBLIC_SUPABASE_URL": "https://zuxkqmooxvnulgllduhr.supabase.co",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1eGtxbW9veHZudWxnbGxkdWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNjkwMTQsImV4cCI6MjA5MTc0NTAxNH0.e2pB4ibInNosWSUvYoxT5NJpE1WlrIVbrGTpoB811i8",
+      "EXPO_PUBLIC_API_URL": "https://simply-life.vercel.app",
+      "EXPO_PUBLIC_APP_URL": "https://simply-life.vercel.app"
     }
   },
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://zuxkqmooxvnulgllduhr.supabase.co https://api.qrserver.com https://images.openfoodfacts.org; connect-src 'self' https://zuxkqmooxvnulgllduhr.supabase.co wss://zuxkqmooxvnulgllduhr.supabase.co https://api.open-meteo.com https://geocoding-api.open-meteo.com https://api.bigdatacloud.net https://world.openfoodfacts.org; worker-src 'self'; manifest-src 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(self), microphone=(), geolocation=(self), payment=(), usb=(), interest-cohort=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        }
+      ]
+    },
+    {
       "source": "/api/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store, must-revalidate" },
-        { "key": "CDN-Cache-Control", "value": "no-store" },
-        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store, must-revalidate"
+        },
+        {
+          "key": "CDN-Cache-Control",
+          "value": "no-store"
+        },
+        {
+          "key": "Vercel-CDN-Cache-Control",
+          "value": "no-store"
+        }
       ]
     }
   ],
   "rewrites": [
-    { "source": "/api/webhook-ingest", "destination": "/api/webhooks/m2m" },
-    { "source": "/api/push-subscribe", "destination": "/api/webhooks/push-subscribe" },
-    { "source": "/api/push-test", "destination": "/api/webhooks/push-test" },
-    { "source": "/api/push-action", "destination": "/api/webhooks/push-action" },
-    { "source": "/api/demo-login-reset", "destination": "/api/demo/login-reset" },
-    { "source": "/api/morning-brief", "destination": "/api/axel/morning-brief" },
-    { "source": "/api/orchestrate-tasks", "destination": "/api/axel/orchestrate-tasks" },
-    { "source": "/api/task-estimate", "destination": "/api/axel/task-estimate" },
-    { "source": "/api/ingest-email", "destination": "/api/axel/ingest-email" },
-    { "source": "/api/ingest-tasks", "destination": "/api/axel/ingest-tasks" },
-    { "source": "/api/estimate-protein", "destination": "/api/axel/estimate-protein" },
-    { "source": "/api/process-event", "destination": "/api/axel/process-event" },
-    { "source": "/api/finance-coach", "destination": "/api/axel/finance-coach" },
-    { "source": "/api/finance-purchase-check", "destination": "/api/axel/finance-purchase-check" },
-    { "source": "/api/fetch-news", "destination": "/api/axel/fetch-news" },
-    { "source": "/api/generate-greeting", "destination": "/api/axel/generate-greeting" },
-    { "source": "/api/today-verdict", "destination": "/api/axel/today-verdict" },
-    { "source": "/api/weekly-digest-test", "destination": "/api/axel/weekly-digest-test" },
-    { "source": "/api/account-delete", "destination": "/api/axel/account-delete" },
-    { "source": "/api/mood-week-report", "destination": "/api/axel/mood-week-report" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/api/webhook-ingest",
+      "destination": "/api/webhooks/m2m"
+    },
+    {
+      "source": "/api/push-subscribe",
+      "destination": "/api/webhooks/push-subscribe"
+    },
+    {
+      "source": "/api/push-test",
+      "destination": "/api/webhooks/push-test"
+    },
+    {
+      "source": "/api/push-action",
+      "destination": "/api/webhooks/push-action"
+    },
+    {
+      "source": "/api/demo-login-reset",
+      "destination": "/api/demo/login-reset"
+    },
+    {
+      "source": "/api/morning-brief",
+      "destination": "/api/axel/morning-brief"
+    },
+    {
+      "source": "/api/orchestrate-tasks",
+      "destination": "/api/axel/orchestrate-tasks"
+    },
+    {
+      "source": "/api/task-estimate",
+      "destination": "/api/axel/task-estimate"
+    },
+    {
+      "source": "/api/ingest-email",
+      "destination": "/api/axel/ingest-email"
+    },
+    {
+      "source": "/api/ingest-tasks",
+      "destination": "/api/axel/ingest-tasks"
+    },
+    {
+      "source": "/api/estimate-protein",
+      "destination": "/api/axel/estimate-protein"
+    },
+    {
+      "source": "/api/process-event",
+      "destination": "/api/axel/process-event"
+    },
+    {
+      "source": "/api/finance-coach",
+      "destination": "/api/axel/finance-coach"
+    },
+    {
+      "source": "/api/finance-purchase-check",
+      "destination": "/api/axel/finance-purchase-check"
+    },
+    {
+      "source": "/api/fetch-news",
+      "destination": "/api/axel/fetch-news"
+    },
+    {
+      "source": "/api/generate-greeting",
+      "destination": "/api/axel/generate-greeting"
+    },
+    {
+      "source": "/api/today-verdict",
+      "destination": "/api/axel/today-verdict"
+    },
+    {
+      "source": "/api/weekly-digest-test",
+      "destination": "/api/axel/weekly-digest-test"
+    },
+    {
+      "source": "/api/account-delete",
+      "destination": "/api/axel/account-delete"
+    },
+    {
+      "source": "/api/mood-week-report",
+      "destination": "/api/axel/mood-week-report"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ],
   "crons": [
     {

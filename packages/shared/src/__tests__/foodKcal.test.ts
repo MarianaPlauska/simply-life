@@ -89,7 +89,7 @@ describe('prioridade', () =>
 
   it('pessoal > código de barras > IA > local', () =>
   {
-    expect(pickFoodKcal({}, { personal, ai, local })).toEqual({ kcal: 310, fonte: 'pessoal', porcao: '1 prato' })
+    expect(pickFoodKcal({}, { personal, ai, local })).toEqual({ kcal: 310, proteina: null, acucar: null, fonte: 'pessoal', porcao: '1 prato', fontes: null })
     expect(pickFoodKcal({ kcal: 180, fonte: 'openfoodfacts' }, { personal, ai, local })!.fonte).toBe('pessoal')
     expect(pickFoodKcal({ kcal: 180, fonte: 'openfoodfacts' }, { ai, local })).toMatchObject({ kcal: 180, fonte: 'openfoodfacts' })
     expect(pickFoodKcal({}, { ai, local })).toMatchObject({ kcal: 250, fonte: 'ia' })
@@ -107,7 +107,9 @@ describe('prioridade', () =>
     expect(pickFoodKcal({ kcal: 200, fonte: 'estimativa_local' }, { ai })).toMatchObject({ kcal: 250, fonte: 'ia' })
     expect(pickFoodKcal({ kcal: 310, fonte: 'pessoal' }, { ai, local })).toMatchObject({ kcal: 310, fonte: 'pessoal' })
     expect(itemWantsAiKcal({ kcal: 200, fonte: 'estimativa_local' })).toBe(true)
-    expect(itemWantsAiKcal({ kcal: 250, fonte: 'ia' })).toBe(false)
+    // estimativa da IA de antes de proteína e açúcar (campos ausentes) pede de novo
+    expect(itemWantsAiKcal({ kcal: 250, fonte: 'ia' })).toBe(true)
+    expect(itemWantsAiKcal({ kcal: 250, fonte: 'ia', proteina: 12, acucar: null })).toBe(false)
     expect(itemWantsAiKcal({})).toBe(true)
   })
 
@@ -146,8 +148,8 @@ describe('IA e formato', () =>
         { kcal: 'abc' },
       ],
     }, 5)
-    expect(out[0]).toEqual({ kcal: 320, porcao: '1 prato raso', confianca: 0.8 })
-    expect(out[1]).toEqual({ kcal: 3000, porcao: '1 balde', confianca: 1 })
+    expect(out[0]).toEqual({ kcal: 320, proteina: null, acucar: null, porcao: '1 prato raso', confianca: 0.8 })
+    expect(out[1]).toEqual({ kcal: 3000, proteina: null, acucar: null, porcao: '1 balde', confianca: 1 })
     expect(out[2]).toBeNull()
     expect(out[3]).toBeNull()
     expect(out[4]).toBeNull()

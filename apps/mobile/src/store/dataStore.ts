@@ -215,7 +215,8 @@ type DataState = {
   setTaskStatus: (taskId: string, status: TaskStatus, isGuest?: boolean) => Promise<void>
   addWaterCup: (isGuest?: boolean) => Promise<void>
   removeWaterCup: (isGuest?: boolean) => Promise<void>
-  patchAguaHabit: (patch: { metaDiaria?: number; mlPorCopo?: number }, isGuest?: boolean) => Promise<void>
+  /** metaMl: meta escolhida em ml (fica em config.meta_ml, separada do tamanho do copo) */
+  patchAguaHabit: (patch: { metaDiaria?: number; mlPorCopo?: number; metaMl?: number }, isGuest?: boolean) => Promise<void>
   patchTreinoConfig: (config: Record<string, unknown>, isGuest?: boolean) => Promise<void>
   addProteinGrams: (grams: number, isGuest?: boolean) => Promise<void>
   setSleepHours: (hours: number, isGuest?: boolean) => Promise<void>
@@ -635,6 +636,17 @@ export const useDataStore = create<DataState>((set, get) => ({
       }
 
       const agua = findHabit(habits, 'agua')
+      // copo que ficou só no aparelho (servidor falhou antes): reenvia o valor do dia
+      const aguaRemote = agua ? remoteHabits.find((h) => h.id === agua.id) : undefined
+      if (
+        agua && aguaRemote && !isLocalHabitId(agua.id)
+        && agua.config?.ultima_data === today
+        && agua.progressoAtual > (aguaRemote.config?.ultima_data === today ? aguaRemote.progressoAtual : 0)
+      )
+      {
+        await syncAguaProgress(agua.id, agua.progressoAtual, agua.config ?? {}).catch(() => null)
+        void saveHabitDay('agua', agua.progressoAtual, { habitoId: agua.id, remote: true, iso: today })
+      }
       const waterWeekDays = agua ? await loadWaterWeekDays(agua, today) : {}
 
       // metas vêm do banco (antes: sempre [] e o que a pessoa criou sumia)
@@ -1022,14 +1034,19 @@ export const useDataStore = create<DataState>((set, get) => ({
     void saveHabitDay('agua', updated.progressoAtual, { habitoId: updated.id, remote: !useLocal(isGuest), iso: today })
     useActivityStore.getState().markAction('water')
 
-    if (useLocal(isGuest) || isLocalHabitId(updated.id))
-    {
-      await writeOffline(get())
-      return
-    }
-
-    await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
+    // aparelho primeiro: o copo nunca se perde se o servidor falhar
     await writeOffline(get())
+    if (useLocal(isGuest) || isLocalHabitId(updated.id)) return
+
+    try
+    {
+      await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
+    }
+    catch (e)
+    {
+      // fica salvo localmente; a próxima busca mantém o valor do dia (mergeHabitosAfterFetch)
+      console.warn('[agua] não sincronizou agora:', e instanceof Error ? e.message : e)
+    }
   },
 
   removeWaterCup: async (isGuest) =>
@@ -1046,14 +1063,19 @@ export const useDataStore = create<DataState>((set, get) => ({
     useWaterLogStore.getState().recordSip(updated.progressoAtual)
     void saveHabitDay('agua', updated.progressoAtual, { habitoId: updated.id, remote: !useLocal(isGuest), iso: today })
 
-    if (useLocal(isGuest) || isLocalHabitId(updated.id))
-    {
-      await writeOffline(get())
-      return
-    }
-
-    await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
+    // aparelho primeiro: o copo nunca se perde se o servidor falhar
     await writeOffline(get())
+    if (useLocal(isGuest) || isLocalHabitId(updated.id)) return
+
+    try
+    {
+      await syncAguaProgress(updated.id, updated.progressoAtual, updated.config ?? {})
+    }
+    catch (e)
+    {
+      // fica salvo localmente; a próxima busca mantém o valor do dia (mergeHabitosAfterFetch)
+      console.warn('[agua] não sincronizou agora:', e instanceof Error ? e.message : e)
+    }
   },
 
   patchAguaHabit: async (patch, isGuest) =>
@@ -1067,6 +1089,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       config: {
         ...(agua.config ?? {}),
         ...(patch.mlPorCopo != null ? { ml_por_copo: patch.mlPorCopo } : {}),
+        ...(patch.metaMl != null ? { meta_ml: patch.metaMl } : {}),
       },
     }
     set({

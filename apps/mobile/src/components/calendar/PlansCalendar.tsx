@@ -3,6 +3,7 @@ import { View, Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import {
+  localTodayIso,
   LIFE_CATEGORIES,
   countByLifeCategory,
   lifeCategoryAccent,
@@ -13,6 +14,7 @@ import {
 import { Text, EmptyState, ListRow, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useGamificationStore } from '../../store/gamificationStore'
+import { useElo } from '../../hooks/useElo'
 import { useCaptureStore } from '../../store/captureStore'
 
 
@@ -57,7 +59,7 @@ export function PlansCalendar({ tasks }: Props)
   const { colors, chart, space, radius } = useTheme()
   const router = useRouter()
   const gold = useGamificationStore((s) => s.gold)
-  const streak = useGamificationStore((s) => s.streak)
+  const streak = useElo().atual
   const openCapture = useCaptureStore((s) => s.openCapture)
   const [cursor, setCursor] = useState(() => new Date())
   const [selectedDay, setSelectedDay] = useState<number | null>(new Date().getDate())
@@ -65,7 +67,7 @@ export function PlansCalendar({ tasks }: Props)
 
   const { year, month, cells } = useMemo(() => monthMatrix(cursor), [cursor])
   const monthKey = `${year}-${String(month + 1).padStart(2, '0')}`
-  const todayIso = new Date().toISOString().slice(0, 10)
+  const todayIso = localTodayIso()
   const selectedIso =
     selectedDay != null
       ? `${monthKey}-${String(selectedDay).padStart(2, '0')}`

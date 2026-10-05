@@ -51,7 +51,7 @@ export function ProfileWorkspacePrefsPanel()
 
   const [displayName, setDisplayName] = useState('')
   const [axelCallsYou, setAxelCallsYou] = useState('')
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('initials')
+  const [avatarStyle, setAvatarStyle] = useState<AvatarStyleId>('companion_sun')
   const [accent, setAccent] = useState<AccentId>('copper')
   const [mascotMood, setMascotMood] = useState<MascotMoodPref>('calm')
   const [priority, setPriority] = useState<DashboardPriority>('tasks')
@@ -77,7 +77,7 @@ export function ProfileWorkspacePrefsPanel()
 
     setDisplayName(workspacePrefs.display_name)
     setAxelCallsYou(workspacePrefs.axel_calls_you)
-    const style = workspacePrefs.avatar_style ?? 'initials'
+    const style = workspacePrefs.avatar_style ?? 'companion_sun'
     setAvatarStyle(allowedAvatars.includes(style) ? style : allowedAvatars[0])
     setAccent(workspacePrefs.accent)
     setMascotMood(workspacePrefs.mascot_mood)

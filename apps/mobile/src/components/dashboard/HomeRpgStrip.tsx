@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import { Card, Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useGamificationStore, gamificationLevel } from '../../store/gamificationStore'
+import { useElo } from '../../hooks/useElo'
 
 /** Trilha RPG compacta na Home — opt-in no onboarding (TDAH). */
 export function HomeRpgStrip()
@@ -11,7 +12,7 @@ export function HomeRpgStrip()
   const router = useRouter()
   const totalXp = useGamificationStore((s) => s.totalXp)
   const gold = useGamificationStore((s) => s.gold)
-  const streak = useGamificationStore((s) => s.streak)
+  const streak = useElo().atual
   const { level, pct, xpInLevel, xpToNext, next } = gamificationLevel(totalXp)
 
   return (
@@ -32,7 +33,7 @@ export function HomeRpgStrip()
             <Text variant="bodyStrong">Nível {level} · {gold} moedas</Text>
           </View>
           <Text variant="caption" muted>
-            Pique {streak}
+            Elo {streak}
           </Text>
         </View>
         <View

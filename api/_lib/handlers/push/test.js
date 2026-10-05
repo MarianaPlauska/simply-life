@@ -52,7 +52,7 @@ export default async function handler(req, res)
   }
 
   const payload = enrichPushPayload({
-    title: 'Simply-Life · teste',
+    title: 'SunFy · teste',
     body: 'Push OK - web ou Expo. Toque para abrir o app.',
     url: '/kanban?foco=1',
     tag: 'simply-life-test',

@@ -54,7 +54,7 @@ export default function LigaScreen()
     }
     try
     {
-      await Share.share({ message: `Vem para a liga "${league?.nome ?? ''}" no Simply Life? A gente enche o pote da semana juntos: ${r.url}`, url: r.url })
+      await Share.share({ message: `Vem para a liga "${league?.nome ?? ''}" no SunFy? A gente enche o pote da semana juntos: ${r.url}`, url: r.url })
     }
     catch
     {

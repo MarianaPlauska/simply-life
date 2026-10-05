@@ -3,6 +3,7 @@
 import { stripDashes } from '../../noDashes.js';
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
 import { getUserFromBearer, corsJson } from '../../supabaseUser.js';
+import { geminiUrl } from '../../geminiModel.js'
 
 function parseJsonFromText(text)
 {
@@ -109,7 +110,7 @@ async function callGroq(apiKey, systemInstruction, userPrompt)
 async function callGemini(apiKey, systemInstruction, userPrompt)
 {
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    geminiUrl(apiKey),
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -219,7 +220,7 @@ export default async function handler(req, res)
     return res.status(200).json(localFallback);
   }
 
-  const systemInstruction = `Você é o AXEL no Simply-Life. Analise o humor da semana do usuário.
+  const systemInstruction = `Você é o AXEL no SunFy. Analise o humor da semana do usuário.
 Responda APENAS JSON neste formato:
 {
   "summary": "2 frases em PT-BR sobre a semana (cite percentuais do contexto)",

@@ -41,7 +41,7 @@ export function ActivityLog() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0 pt-0.5">
-                  <p className="text-[13px] text-zinc-300 group-hover:text-white transition-colors truncate">
+                  <p className="text-[13px] text-zinc-300 group-hover:text-ink transition-colors truncate">
                     {item.text}
                   </p>
                   <p className="text-[11px] text-zinc-600 mt-0.5">{item.time}</p>

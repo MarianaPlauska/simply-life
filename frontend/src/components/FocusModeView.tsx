@@ -201,7 +201,7 @@ export function FocusImmersiveOverlay() {
 
         <button
           onClick={() => setActiveView('foco')}
-          className="absolute top-6 right-6 flex items-center gap-2 text-ink-muted hover:text-white transition-colors text-[13px]"
+          className="absolute top-6 right-6 flex items-center gap-2 text-ink-muted hover:text-ink transition-colors text-[13px]"
         >
           <Minimize2 className="w-4 h-4" />
           Ir para Modo Foco
@@ -239,7 +239,7 @@ export function FocusImmersiveOverlay() {
               <AnimatePresence>
                 {lastXpGain > 0 && <XpPopup key="xp" xp={lastXpGain} />}
               </AnimatePresence>
-              <span className="text-4xl font-extralight tracking-widest text-white tabular-nums">{mins}:{secs}</span>
+              <span className="text-4xl font-extralight tracking-widest text-ink tabular-nums">{mins}:{secs}</span>
               <span className={`text-[10px] mt-1 uppercase tracking-widest ${phaseColor}`}>{phaseLabel}</span>
             </div>
           </div>
@@ -252,7 +252,7 @@ export function FocusImmersiveOverlay() {
               {isFocusModeActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {isFocusModeActive ? 'Pausar' : 'Continuar'}
             </button>
-            <button onClick={resetFocus} className="p-2.5 rounded-full border border-line text-ink-muted hover:text-white hover:border-line transition-colors">
+            <button onClick={resetFocus} className="p-2.5 rounded-full border border-line text-ink-muted hover:text-ink hover:border-line transition-colors">
               <RotateCcw className="w-4 h-4" />
             </button>
             <button
@@ -322,13 +322,13 @@ export function FocusModeView() {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-6 sl-panel px-6 py-3">
         <div className="flex items-center gap-2">
           <Zap className="w-4 h-4 text-amber-400" />
-          <span className="text-sm font-semibold text-white">{gamificacao.xp} XP</span>
+          <span className="text-sm font-semibold text-ink">{gamificacao.xp} XP</span>
           <span className="text-xs text-ink-muted">Nível {gamificacao.nivel}</span>
         </div>
         <div className="w-px h-5 bg-line" />
         <div className="flex items-center gap-2">
           <Flame className={`w-4 h-4 ${gamificacao.streak_days > 0 ? 'text-orange-400' : 'text-ink-faint'}`} />
-          <span className="text-sm font-medium text-white">{gamificacao.streak_days}d streak</span>
+          <span className="text-sm font-medium text-ink">{gamificacao.streak_days}d streak</span>
         </div>
         <div className="w-px h-5 bg-line" />
         <div className="flex items-center gap-2">
@@ -353,7 +353,7 @@ export function FocusModeView() {
           <AnimatePresence>
             {lastXpGain > 0 && <XpPopup key="xp" xp={lastXpGain} />}
           </AnimatePresence>
-          <span className="text-6xl font-extralight tracking-widest text-white tabular-nums">
+          <span className="text-6xl font-extralight tracking-widest text-ink tabular-nums">
             {phase === 'idle' ? `${String(timerConfig.pomodoroTime).padStart(2, '0')}:00` : `${mins}:${secs}`}
           </span>
           <span className={`text-xs mt-2 uppercase tracking-widest ${phaseColor}`}>{phaseLabel}</span>
@@ -419,7 +419,7 @@ export function FocusModeView() {
               {isFocusModeActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               {isFocusModeActive ? 'Pausar' : 'Continuar'}
             </motion.button>
-            <button onClick={resetFocus} className="p-3 rounded-full border border-line text-ink-muted hover:text-white hover:border-line transition-colors" title="Reiniciar">
+            <button onClick={resetFocus} className="p-3 rounded-full border border-line text-ink-muted hover:text-ink hover:border-line transition-colors" title="Reiniciar">
               <RotateCcw className="w-4 h-4" />
             </button>
           </>
@@ -440,7 +440,7 @@ export function FocusModeView() {
           className="sl-panel px-6 py-4 max-w-md w-full text-center"
         >
           <p className="text-[11px] uppercase tracking-widest text-ink-muted mb-1.5">Tarefa em foco</p>
-          <p className="text-sm font-medium text-white">{targetTask.titulo}</p>
+          <p className="text-sm font-medium text-ink">{targetTask.titulo}</p>
           <p className="text-xs text-ink-muted mt-1">Score: {targetTask.score_urgencia} · {targetTask.prioridade}</p>
         </motion.div>
       )}
@@ -452,7 +452,7 @@ export function FocusModeView() {
             className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl px-8 py-6 text-center max-w-md"
           >
             <Trophy className="w-8 h-8 text-emerald-400 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-white mb-1">Sessão Completa!</h3>
+            <h3 className="text-lg font-semibold text-ink mb-1">Sessão Completa!</h3>
             <p className="text-sm text-ink-muted">
               {sessionsCompleted} sessões hoje · {gamificacao.xp} XP total · Nível {gamificacao.nivel}
             </p>

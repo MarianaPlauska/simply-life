@@ -2,13 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
-  cardFaturaAbertaDisplay,
-  computeSaldoDisponivel,
   describeDayPt,
   formatBRL,
   futureCommitments,
   localTodayIso,
-  monthEndProjection,
   type MonthProjection,
   parseBrlNumber,
   projectionMessage,
@@ -20,6 +17,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useDuePaidStore } from '../../store/duePaidStore'
 import { useSalaryStore } from '../../store/salaryStore'
 import { useBillAnswersStore } from '../../store/billAnswersStore'
+import { currentMonthProjection } from '../../lib/monthProjection'
 
 const MONTHS_SHORT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
@@ -110,30 +108,8 @@ export function useMonthProjection(): MonthProjection
     void hydrateAnswers()
   }, [hydratePaid, hydrateSalary, hydrateAnswers])
 
-  return useMemo(() =>
-  {
-    const saldo = computeSaldoDisponivel(cash, txs, fixas).disponivel
-    const faturas = cards.map((c) => ({
-      cardId: c.id,
-      nome: c.nome,
-      valor: cardFaturaAbertaDisplay(c, txs),
-      diaVencimento: c.diaVencimento,
-    }))
-    // salário que ainda cai neste mês e não foi confirmado
-    const receitas: { label: string; valor: number; data: string }[] = []
-    if (salary)
-    {
-      const now = new Date()
-      const prevComp = `${now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()}-${String(now.getMonth() === 0 ? 12 : now.getMonth()).padStart(2, '0')}`
-      const f = forecastFn(prevComp)
-      if (f && !confirmations.some((c) => c.competencia === prevComp && c.confirmadoEm))
-      {
-        receitas.push({ label: `${salary.titulo} (previsto)`, valor: f.liquido ?? f.bruto, data: f.pagamento })
-      }
-    }
-    const ym = localTodayIso().slice(0, 7)
-    return monthEndProjection({ saldoDisponivel: saldo, txs, fixas, paidKeys, faturas, receitas, vencidasEmAberto: emAberto[ym] ?? [] })
-  }, [cash, txs, fixas, cards, paidKeys, salary, entries, confirmations, forecastFn, emAberto])
+  // os valores acima só assinam os stores: a conta lê o estado atual
+  return useMemo(() => currentMonthProjection(), [cash, txs, fixas, cards, paidKeys, salary, entries, confirmations, forecastFn, emAberto])
 }
 
 /** Fim do mês: um número calmo ("deve sobrar R$ X"), com a conta aberta ao tocar. */

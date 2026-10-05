@@ -17,6 +17,7 @@ import { useDataStore } from '../../src/store/dataStore'
 import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
 import { HomeWaterProgressCard } from '../../src/components/dashboard/HomeWaterProgressCard'
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
+import { AxelDayBrief } from '../../src/components/dashboard/HomeDriveAside'
 import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
@@ -26,6 +27,7 @@ import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
 import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
+import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
 import { LifeGoalMicroLine, LifeGoalSheet } from '../../src/components/dashboard/LifeGoalSheet'
 import { TabShell, DESKTOP_CONTENT_MAX } from '../../src/components/dashboard/TabShell'
 import { WebStatRow, type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
@@ -216,7 +218,8 @@ export default function DashboardScreenWeb()
                 { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                 { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                 { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                { label: 'Pique', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
+                { label: 'Elo', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
+                { label: 'Relatório', subtitle: 'Tudo de um período, em PDF', href: '/relatorio' },
                 { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
               ] as const
             ).map((item, i, arr) => (
@@ -268,6 +271,8 @@ export default function DashboardScreenWeb()
               ) : null
             }
           />
+          {/* Axel sempre presente: o próximo passo, logo abaixo do progresso */}
+          <AxelDayBrief />
           <SalaryConfirmCard />
 
           <DayPlanHomeCard />
@@ -277,7 +282,7 @@ export default function DashboardScreenWeb()
           <MoodWeekReportGate humor={humor} />
           {waterOnHome ? <HomeWaterProgressCard /> : null}
           {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-          <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, resumo e atalhos" pill="abrir" defaultOpen={false}>
+          <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" pill="abrir" defaultOpen={false}>
             <View style={{ gap: 24, paddingTop: 8 }}>
               <HomeDayTimeline tasks={today} />
               <HomeKpiSquares
@@ -290,6 +295,7 @@ export default function DashboardScreenWeb()
                   onPress: s.onPress,
                 }))}
               />
+              <EloHeatmap semanas={12} compact />
               <HomeMetricShortcuts />
             </View>
           </HomeCollapsible>
@@ -338,6 +344,7 @@ export default function DashboardScreenWeb()
             </View>
 
             <View style={{ gap: 16, minWidth: 0 }}>
+              <AxelDayBrief />
               <SalaryConfirmCard />
 
               <DayPlanHomeCard />
@@ -346,6 +353,7 @@ export default function DashboardScreenWeb()
 
               <MoodWeekReportGate humor={humor} />
               {waterOnHome ? <WebHydrationWidget /> : null}
+              <EloHeatmap semanas={12} compact />
               <WebShortcutsBar />
             </View>
           </View>

@@ -60,7 +60,7 @@ export default function JoinPartnerScreen()
               Faça login para aceitar o convite {String(code || '').toUpperCase()}.
             </Text>
             <PrimaryButton
-              label="Entrar no Simply-Life"
+              label="Entrar no SunFy"
               onPress={() => router.replace('/login')}
             />
           </>

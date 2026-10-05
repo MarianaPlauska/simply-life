@@ -1,5 +1,6 @@
 /**
- * Calorias por item da Comida, só quando a pessoa liga "Mostrar calorias".
+ * Calorias, proteína e açúcar por item da Comida, só quando a pessoa liga "Mostrar calorias e nutrientes".
+ * Os três números saem sempre juntos da mesma fonte.
  *
  * De onde vem o número (ordem de prioridade ao preencher):
  *   1. o que a pessoa digitou neste item ('manual')
@@ -49,6 +50,77 @@ export function clampItemKcal(v: unknown): number | null
   const n = typeof v === 'string' ? Number(v.replace(',', '.')) : typeof v === 'number' ? v : NaN
   if (!Number.isFinite(n) || n < 0) return null
   return Math.round(Math.min(FOOD_KCAL_MAX_ITEM, n))
+}
+
+/** Teto de proteína e de açúcar por item, em gramas (igual ao CHECK da migração 077). */
+export const FOOD_GRAMS_MAX_ITEM = 300
+
+/** Gramas de proteína ou açúcar: 0 a 300, uma casa abaixo de 10 g, inteiro acima. null quando não é número. */
+export function clampItemGrams(v: unknown): number | null
+{
+  if (v == null || v === '') return null
+  const n = typeof v === 'string' ? Number(v.replace(',', '.')) : typeof v === 'number' ? v : NaN
+  if (!Number.isFinite(n) || n < 0) return null
+  const c = Math.min(FOOD_GRAMS_MAX_ITEM, n)
+  return c < 10 ? Math.round(c * 10) / 10 : Math.round(c)
+}
+
+/** Só links http(s) curtos, sem repetir, até 2. */
+export function sanitizeFoodSourceUrls(v: unknown): string[]
+{
+  if (!Array.isArray(v)) return []
+  const out: string[] = []
+  for (const raw of v)
+  {
+    if (typeof raw !== 'string') continue
+    const u = raw.trim()
+    if (u.length > 500 || !/^https?:\/\/[^\s]+$/i.test(u)) continue
+    if (!out.includes(u)) out.push(u)
+    if (out.length >= 2) break
+  }
+  return out
+}
+
+function fmtGrams(g: number): string
+{
+  const r = g < 10 ? Math.round(g * 10) / 10 : Math.round(g)
+  return `${String(r).replace('.', ',')} g`
+}
+
+/**
+ * Linha curta do item: "≈ 320 kcal · 18 g prot · 4 g açúcar".
+ * Só entra o que existe; null quando não há nenhum número.
+ */
+export function formatItemNutrients(it: Pick<FoodItem, 'kcal' | 'proteina' | 'acucar' | 'fonte'>): string | null
+{
+  const parts: string[] = []
+  if (typeof it.kcal === 'number' && Number.isFinite(it.kcal)) parts.push(formatItemKcal(it.kcal, it.fonte))
+  else if (isEstimatedKcalSource(it.fonte)) parts.push('≈')
+  if (typeof it.proteina === 'number' && Number.isFinite(it.proteina)) parts.push(`${fmtGrams(it.proteina)} prot`)
+  if (typeof it.acucar === 'number' && Number.isFinite(it.acucar)) parts.push(`${fmtGrams(it.acucar)} açúcar`)
+  if (!parts.length || (parts.length === 1 && parts[0] === '≈')) return null
+  if (parts[0] === '≈') return `≈ ${parts.slice(1).join(' · ')}`
+  return parts.join(' · ')
+}
+
+/** De onde vieram os números, em palavras ("pesquisa na web", "Open Food Facts"). null sem fonte. */
+export function foodSourceLabel(it: Pick<FoodItem, 'fonte' | 'fontes'>): string | null
+{
+  switch (it.fonte)
+  {
+    case 'manual':
+      return 'você'
+    case 'pessoal':
+      return 'tabela pessoal'
+    case 'openfoodfacts':
+      return 'Open Food Facts'
+    case 'ia':
+      return it.fontes && it.fontes.length ? 'pesquisa na web' : 'estimativa da IA'
+    case 'estimativa_local':
+      return 'tabela do app'
+    default:
+      return null
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -246,10 +318,16 @@ function roundEstimate(kcal: number): number
 
 export type FoodKcalCandidate = {
   kcal: number
+  /** gramas de proteína na quantidade dita; null/ausente quando não se sabe */
+  proteina?: number | null
+  /** gramas de açúcares totais na quantidade dita; null/ausente quando não se sabe */
+  acucar?: number | null
   /** porção considerada ("1 concha", "200 g") */
   porcao: string | null
   /** 0 a 1 */
   confianca: number
+  /** links da pesquisa na web, quando a IA usou */
+  fontes?: string[]
 }
 
 /**
@@ -299,15 +377,25 @@ export function estimateFoodKcalLocal(item: { nome: string; key?: string; quanti
 /** O que a pessoa já corrigiu (ou leu no código de barras) para um item, por item_key. */
 export type FoodPersonalKcal = {
   kcal: number
+  /** gramas; ausente em valores antigos (antes da migração 077) */
+  proteina?: number | null
+  acucar?: number | null
   porcao: string | null
   updatedAt: string
 }
 
-export type FoodKcalPick = {
+/** Kcal, proteína e açúcar escolhidos juntos, da mesma fonte. */
+export type FoodNutrientPick = {
   kcal: number
+  proteina: number | null
+  acucar: number | null
   fonte: FoodKcalSource
   porcao: string | null
+  fontes: string[] | null
 }
+
+/** Nome antigo, mantido para quem só olha a caloria. */
+export type FoodKcalPick = FoodNutrientPick
 
 function rankOf(fonte: string | null | undefined): number
 {
@@ -316,38 +404,71 @@ function rankOf(fonte: string | null | undefined): number
   return SOURCE_RANK.openfoodfacts
 }
 
-/**
- * Escolhe a caloria do item. O que já está no item concorre com os candidatos pela
- * prioridade da fonte: manual > pessoal > código de barras > IA > tabela local.
- */
-export function pickFoodKcal(
-  item: Pick<FoodItem, 'kcal' | 'fonte'> & { porcao?: string | null },
-  c: { personal?: FoodPersonalKcal | null; ai?: FoodKcalCandidate | null; local?: FoodKcalCandidate | null },
-): FoodKcalPick | null
-{
-  const options: (FoodKcalPick & { rank: number })[] = []
-  const own = clampItemKcal(item.kcal)
-  if (own != null)
-  {
-    const fonte = (item.fonte && item.fonte in SOURCE_RANK ? item.fonte : 'openfoodfacts') as FoodKcalSource
-    options.push({ kcal: own, fonte, porcao: item.porcao ?? null, rank: rankOf(item.fonte) })
-  }
-  const pers = clampItemKcal(c.personal?.kcal)
-  if (pers != null) options.push({ kcal: pers, fonte: 'pessoal', porcao: c.personal?.porcao ?? null, rank: SOURCE_RANK.pessoal })
-  const ai = clampItemKcal(c.ai?.kcal)
-  if (ai != null) options.push({ kcal: ai, fonte: 'ia', porcao: c.ai?.porcao ?? null, rank: SOURCE_RANK.ia })
-  const loc = clampItemKcal(c.local?.kcal)
-  if (loc != null) options.push({ kcal: loc, fonte: 'estimativa_local', porcao: c.local?.porcao ?? null, rank: SOURCE_RANK.estimativa_local })
-  if (!options.length) return null
-  // estável: em empate fica o que já estava no item
-  let best = options[0]
-  for (const o of options) if (o.rank > best.rank) best = o
-  return { kcal: best.kcal, fonte: best.fonte, porcao: best.porcao }
+type NutrientSource = {
+  kcal?: number | null
+  proteina?: number | null
+  acucar?: number | null
+  porcao?: string | null
+  fontes?: string[] | null
 }
 
 /**
- * Preenche kcal/fonte/porção dos itens. `ai` vem alinhado pelo índice (null onde a IA
- * não soube). A tabela local entra sozinha quando nada melhor existe.
+ * Escolhe kcal, proteína e açúcar do item, sempre os três da mesma fonte (a caloria manda:
+ * fonte sem caloria não concorre). O que já está no item concorre com os candidatos pela
+ * prioridade: manual > pessoal > código de barras > IA > tabela local.
+ */
+export function pickFoodNutrients(
+  item: Pick<FoodItem, 'kcal' | 'fonte'> & { proteina?: number | null; acucar?: number | null; porcao?: string | null; fontes?: string[] | null },
+  c: { personal?: FoodPersonalKcal | null; ai?: FoodKcalCandidate | null; local?: FoodKcalCandidate | null },
+): FoodNutrientPick | null
+{
+  let best: (FoodNutrientPick & { rank: number }) | null = null
+  const consider = (src: NutrientSource | null | undefined, fonte: FoodKcalSource, rank: number) =>
+  {
+    const kcal = clampItemKcal(src?.kcal)
+    if (kcal == null) return
+    // estável: em empate fica o que já estava no item (vem primeiro)
+    if (best && rank <= best.rank) return
+    const fontes = sanitizeFoodSourceUrls(src?.fontes)
+    best = {
+      kcal,
+      proteina: clampItemGrams(src?.proteina),
+      acucar: clampItemGrams(src?.acucar),
+      fonte,
+      porcao: src?.porcao ?? null,
+      fontes: fontes.length ? fontes : null,
+      rank,
+    }
+  }
+  const ownFonte = (item.fonte && item.fonte in SOURCE_RANK ? item.fonte : 'openfoodfacts') as FoodKcalSource
+  consider(item, ownFonte, rankOf(item.fonte))
+  consider(c.personal, 'pessoal', SOURCE_RANK.pessoal)
+  consider(c.ai, 'ia', SOURCE_RANK.ia)
+  consider(c.local, 'estimativa_local', SOURCE_RANK.estimativa_local)
+  if (!best) return null
+  const b = best as FoodNutrientPick & { rank: number }
+  return { kcal: b.kcal, proteina: b.proteina, acucar: b.acucar, fonte: b.fonte, porcao: b.porcao, fontes: b.fontes }
+}
+
+/** Compatível com o nome antigo; devolve também proteína e açúcar. */
+export const pickFoodKcal = pickFoodNutrients
+
+function sameNumber(a: number | null | undefined, b: number | null | undefined): boolean
+{
+  return (a ?? null) === (b ?? null)
+}
+
+function sameList(a: string[] | null | undefined, b: string[] | null | undefined): boolean
+{
+  const x = a ?? []
+  const y = b ?? []
+  return x.length === y.length && x.every((v, i) => v === y[i])
+}
+
+/**
+ * Preenche kcal/proteína/açúcar/fonte/porção dos itens. `ai` vem alinhado pelo índice (null onde
+ * a IA não soube). A tabela local entra sozinha quando nada melhor existe.
+ * Item que não muda volta como o mesmo objeto (dá para comparar por referência).
  */
 export function applyFoodKcal<T extends FoodItem>(
   items: T[],
@@ -360,21 +481,39 @@ export function applyFoodKcal<T extends FoodItem>(
 {
   return items.map((it, i) =>
   {
-    const pick = pickFoodKcal(it, {
+    const pick = pickFoodNutrients(it, {
       personal: opts.personal?.[it.key] ?? null,
       ai: opts.ai?.[i] ?? null,
       local: opts.useLocal === false ? null : estimateFoodKcalLocal(it),
     })
     if (!pick) return it
-    if (pick.kcal === it.kcal && pick.fonte === it.fonte) return it
-    return { ...it, kcal: pick.kcal, fonte: pick.fonte, porcao: pick.porcao ?? it.porcao ?? null }
+    if (
+      pick.kcal === it.kcal
+      && pick.fonte === it.fonte
+      && sameNumber(pick.proteina, it.proteina)
+      && sameNumber(pick.acucar, it.acucar)
+      && sameList(pick.fontes, it.fontes)
+    ) return it
+    return {
+      ...it,
+      kcal: pick.kcal,
+      proteina: pick.proteina,
+      acucar: pick.acucar,
+      fonte: pick.fonte,
+      fontes: pick.fontes,
+      porcao: pick.porcao ?? it.porcao ?? null,
+    }
   })
 }
 
-/** O item ainda pode melhorar com a IA (sem dado ou só com a tabela local). */
-export function itemWantsAiKcal(it: Pick<FoodItem, 'kcal' | 'fonte'>): boolean
+/**
+ * O item ainda pode melhorar com a IA: sem dado, só com a tabela local, ou uma estimativa
+ * antiga da IA feita antes de existir proteína e açúcar (campos ausentes, não nulos).
+ */
+export function itemWantsAiKcal(it: Pick<FoodItem, 'kcal' | 'fonte'> & { proteina?: number | null; acucar?: number | null }): boolean
 {
-  return clampItemKcal(it.kcal) == null || it.fonte === 'estimativa_local'
+  if (clampItemKcal(it.kcal) == null || it.fonte === 'estimativa_local') return true
+  return it.fonte === 'ia' && it.proteina === undefined && it.acucar === undefined
 }
 
 // ---------------------------------------------------------------------------
@@ -387,7 +526,7 @@ export type FoodKcalAiRequest = {
 }
 
 export type FoodKcalAiResponse = {
-  items?: { kcal?: unknown; porcao?: unknown; confianca?: unknown }[]
+  items?: { kcal?: unknown; proteina?: unknown; acucar?: unknown; porcao?: unknown; confianca?: unknown; fontes?: unknown }[]
   source?: string
   iaDisponivel?: boolean
 }
@@ -418,10 +557,15 @@ export function normalizeFoodKcalAiResponse(json: FoodKcalAiResponse | null | un
     if (kcal == null) continue
     const conf = Number(r?.confianca)
     const porcao = typeof r?.porcao === 'string' ? r.porcao.replace(/[—–−]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 40) : ''
+    const fontes = sanitizeFoodSourceUrls(r?.fontes)
     out[i] = {
       kcal,
+      // servidor antigo não manda: fica null (a IA respondeu, só não soube)
+      proteina: clampItemGrams(r?.proteina),
+      acucar: clampItemGrams(r?.acucar),
       porcao: porcao || null,
       confianca: Number.isFinite(conf) ? Math.max(0, Math.min(1, conf)) : 0.5,
+      ...(fontes.length ? { fontes } : {}),
     }
   }
   return out

@@ -4,7 +4,6 @@ import { Text, Chip } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useFocusStore } from '../../store/focusStore'
 import { usePrefsStore } from '../../store/prefsStore'
-import { useActivityStore } from '../../store/activityStore'
 import { ExecuteTimerFace } from '../timer/ExecuteTimerFace'
 
 const PRESETS = [10, 15, 25, 30, 45, 60]
@@ -24,7 +23,6 @@ export function TaskTimerPanel({ taskId }: { taskId?: string })
   const tick = useFocusStore((s) => s.tick)
   const reset = useFocusStore((s) => s.reset)
   const setTargetTask = useFocusStore((s) => s.setTargetTask)
-  const markAction = useActivityStore((s) => s.markAction)
   const [goalMin, setGoalMin] = useState(prefsMin)
 
   useEffect(() =>
@@ -49,7 +47,7 @@ export function TaskTimerPanel({ taskId }: { taskId?: string })
       resume()
       return
     }
-    markAction('focus')
+    // o foco cumpre o dia quando a sessão TERMINA (focusStore.tick), não ao começar
     if (taskId) setTargetTask(taskId)
     start(goalMin, 'focus', taskId ?? null)
   }

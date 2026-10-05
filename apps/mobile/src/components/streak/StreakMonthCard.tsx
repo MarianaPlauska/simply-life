@@ -14,11 +14,11 @@ type Props = {
   onNext: () => void
 }
 
-function dotColor(kind: StreakMonthCell['kind'], colors: { axel: string; danger: string; attention: string; hairline: string }): string
+function dotColor(kind: StreakMonthCell['kind'], colors: { axel: string; attention: string; hairline: string; inkMuted: string }): string
 {
   if (kind === 'action') return colors.axel
   if (kind === 'open' || kind === 'today') return colors.attention
-  if (kind === 'missed') return colors.danger
+  if (kind === 'rest') return colors.inkMuted
   return colors.hairline
 }
 

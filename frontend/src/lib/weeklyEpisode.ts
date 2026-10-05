@@ -301,7 +301,7 @@ export function buildWeeklyEpisode(input: {
     '',
     `Cliffhanger: ${cliffhanger}`,
     '',
-    `#SimplyLife #AXEL`,
+    `#SunFy #AXEL`,
   ].join('\n')
 
   return {

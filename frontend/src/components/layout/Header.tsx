@@ -13,7 +13,7 @@ export function Header() {
 
   return (
     <header className="bg-card border-b border-zinc-700/50 p-4 flex items-center justify-between shadow-sm z-10">
-      <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+      <h1 className="text-xl font-bold tracking-tight text-ink flex items-center gap-2">
         <Zap className="text-ia w-6 h-6" />
         Orquestrador
       </h1>

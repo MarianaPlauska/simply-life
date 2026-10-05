@@ -11,7 +11,10 @@ export function AccountDataPanel()
 {
   const logout = useTaskStore((s) => s.logout)
   const [confirmText, setConfirmText] = useState('')
+  const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
+  const [needsReauth, setNeedsReauth] = useState(false)
+  const [totp, setTotp] = useState('')
 
   const handleExport = () =>
   {
@@ -29,6 +32,41 @@ export function AccountDataPanel()
     setBusy(true)
     try
     {
+      // Confirma que é você: senha de novo gera um login recente
+      const { data: { session } } = await supabase.auth.getSession()
+      const hasPassword = (session?.user.app_metadata?.providers as string[] | undefined)?.includes('email')
+      if (hasPassword && session?.user.email)
+      {
+        if (!password)
+        {
+          toast.error('Digite sua senha para confirmar')
+          return
+        }
+        const { error: authErr } = await supabase.auth.signInWithPassword({ email: session.user.email, password })
+        if (authErr)
+        {
+          toast.error('Senha incorreta')
+          return
+        }
+        // Com duas etapas, o novo login precisa do código para voltar a aal2
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2')
+        {
+          const { data: factors } = await supabase.auth.mfa.listFactors()
+          const factor = factors?.totp?.find((f) => f.status === 'verified')
+          if (!factor || totp.trim().length < 6)
+          {
+            toast.error('Digite o código do app autenticador')
+            return
+          }
+          const { error: mfaErr } = await supabase.auth.mfa.challengeAndVerify({ factorId: factor.id, code: totp.trim() })
+          if (mfaErr)
+          {
+            toast.error('Código inválido')
+            return
+          }
+        }
+      }
       const headers = await supabaseAuthHeaders()
       const res = await fetch('/api/axel/account-delete', {
         method: 'POST',
@@ -37,7 +75,8 @@ export function AccountDataPanel()
       })
       if (!res.ok)
       {
-        const body = await res.json().catch(() => ({})) as { error?: string }
+        const body = await res.json().catch(() => ({})) as { error?: string; code?: string }
+        if (body.code === 'reauth_required') setNeedsReauth(true)
         throw new Error(body.error || 'Não foi possível apagar a conta')
       }
       await supabase.auth.signOut()
@@ -84,6 +123,34 @@ export function AccountDataPanel()
           className="w-full bg-chrome border border-line rounded-sl px-3 py-2.5 text-[13px] text-ink"
           autoComplete="off"
         />
+        <label className={`block text-[12px] ${AXEL_TEXT_SECONDARY}`} htmlFor="delete-password">
+          Sua senha (para confirmar que é você)
+        </label>
+        <input
+          id="delete-password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full bg-chrome border border-line rounded-sl px-3 py-2.5 text-[13px] text-ink"
+          autoComplete="current-password"
+        />
+        <label className={`block text-[12px] ${AXEL_TEXT_SECONDARY}`} htmlFor="delete-totp">
+          Código do app autenticador (se você ativou as duas etapas)
+        </label>
+        <input
+          id="delete-totp"
+          inputMode="numeric"
+          maxLength={6}
+          value={totp}
+          onChange={(e) => setTotp(e.target.value.replace(/\D/g, ''))}
+          className="w-full bg-chrome border border-line rounded-sl px-3 py-2.5 text-[13px] text-ink"
+          autoComplete="one-time-code"
+        />
+        {needsReauth ? (
+          <p className={`text-[12px] ${AXEL_TEXT_SECONDARY}`}>
+            Entrou pelo Google? Saia e entre de novo; depois você tem 10 minutos para apagar a conta.
+          </p>
+        ) : null}
         <button
           type="button"
           disabled={busy || confirmText !== 'APAGAR'}

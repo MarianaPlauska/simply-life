@@ -7,6 +7,7 @@ import {
 import { Card, Text, PrimaryButton, SectionHeader } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useGamificationStore, gamificationLevel } from '../../store/gamificationStore'
+import { useElo } from '../../hooks/useElo'
 
 export function GamificationPanel()
 {
@@ -15,7 +16,7 @@ export function GamificationPanel()
   const gold = useGamificationStore((s) => s.gold)
   const unlocked = useGamificationStore((s) => s.unlocked)
   const owned = useGamificationStore((s) => s.owned)
-  const streak = useGamificationStore((s) => s.streak)
+  const streak = useElo().atual
   const buyItem = useGamificationStore((s) => s.buyItem)
   const { level, pct, xpInLevel, xpToNext, next } = gamificationLevel(totalXp)
 
@@ -27,7 +28,7 @@ export function GamificationPanel()
         </Text>
         <Text variant="hero">Nível {level}</Text>
         <Text variant="caption" muted>
-          {xpInLevel}/{xpToNext} XP neste nível · {gold} moedas · pique de {streak} dia{streak === 1 ? '' : 's'}
+          {xpInLevel}/{xpToNext} XP neste nível · {gold} moedas · elo de {streak} dia{streak === 1 ? '' : 's'}
         </Text>
         <View
           style={{

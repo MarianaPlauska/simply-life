@@ -1,4 +1,5 @@
 import { stripDashes } from '../../noDashes.js'
+import { geminiUrl } from '../../geminiModel.js'
 // POST /api/axel/today-verdict
 // AXEL - "posso fazer isso hoje?" com IA opcional (Groq/Gemini)
 
@@ -56,7 +57,7 @@ export default async function handler(req, res)
     return res.status(200).json({ ...localVerdict, source: 'local', iaDisponivel: false })
   }
 
-  const systemInstruction = `Você é o AXEL, melhor amigo no Simply-Life.
+  const systemInstruction = `Você é o AXEL, melhor amigo no SunFy.
 O usuário pergunta se pode fazer algo HOJE. Responda em JSON:
 {
   "tone": "ok|caution|wait",
@@ -89,7 +90,7 @@ ${JSON.stringify(localVerdict || {}, null, 2)}`
     else
     {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+        geminiUrl(geminiKey),
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

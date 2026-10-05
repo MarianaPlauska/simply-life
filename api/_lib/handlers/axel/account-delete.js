@@ -1,9 +1,11 @@
 // POST /api/axel/account-delete - apaga o usuário Auth (CASCADE nos dados)
 
 import { applyCors } from '../../cors.js'
-import { getUserFromBearer } from '../../supabaseUser.js'
+import { getUserFromBearer, secondsSinceLastAuth } from '../../supabaseUser.js'
 import { getSupabaseAdmin } from '../../supabaseAdmin.js'
 import { enforceRateLimit, sendRateLimited } from '../../rateLimit.js'
+
+const REAUTH_WINDOW_SEC = 10 * 60
 
 export default async function handler(req, res)
 {
@@ -44,6 +46,14 @@ export default async function handler(req, res)
   if (confirm !== 'APAGAR')
   {
     return res.status(400).json({ error: 'Confirmação inválida' })
+  }
+
+  // Ação irreversível: exige login recente (senha digitada de novo, ou entrar
+  // de novo pelo Google). Um token esquecido aberto não apaga a conta.
+  const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '')
+  if (secondsSinceLastAuth(token) > REAUTH_WINDOW_SEC)
+  {
+    return res.status(403).json({ error: 'Confirme que é você entrando de novo', code: 'reauth_required' })
   }
 
   const admin = getSupabaseAdmin()

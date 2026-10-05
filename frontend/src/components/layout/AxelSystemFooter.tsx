@@ -14,7 +14,7 @@ export function AxelSystemFooter({ className = '' }: AxelSystemFooterProps)
       aria-label="Status do sistema"
     >
       <p className={`font-mono text-[10px] uppercase tracking-[0.1em] text-center ${AXEL_TEXT_SECONDARY}`}>
-        Simply-Life · Uma vida simplificada, com AXEL ao seu lado
+        SunFy · Um girassol pra você, com AXEL ao seu lado
       </p>
       <p className="mt-1.5 text-center font-mono text-[10px] uppercase tracking-wide text-ink-muted">
         <Link to="/privacidade" className="hover:text-accent">Privacidade</Link>
