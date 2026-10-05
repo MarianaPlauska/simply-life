@@ -1,9 +1,6 @@
 export const AXEL_VOICE_LINE =
   'Humor, água, tarefas e finanças em um só lugar. O AXEL prioriza o essencial e reduz o ruído do dia.'
 
-export const AXEL_VOICE_LINE_SHORT =
-  'O essencial do seu dia, com calma.'
-
 export type CarePace = 'calm' | 'balanced' | 'direct'
 
 export const CARE_PACE_OPTIONS: {

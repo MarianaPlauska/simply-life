@@ -2,11 +2,14 @@ import { Pressable, ScrollView, View } from 'react-native'
 import { useState } from 'react'
 import { todayIso, isoDaysFromNow, type FinanceCategory, type FinanceEscopo } from '@simply-life/shared'
 import { Field, Text } from '../ui'
+import { Icon } from '../ui/Icon'
 import { useTheme } from '../theme/ThemeProvider'
 import { ExpenseCategoryChips, ExpenseFixasChips } from './finance/ExpenseCategoryChips'
 import type { PartnerWorkspaceState } from '../lib/partnerWorkspace'
 
-type Pagamento = 'conta' | 'cartao'
+type Pagamento = 'conta' | 'cartao' | 'boleto'
+
+const PARCELAS = [1, 2, 3, 4, 5, 6, 8, 10, 12, 18, 24] as const
 type Recorrencia = 'nenhuma' | 'mensal' | 'semanal'
 
 function ChoiceChip({
@@ -53,6 +56,10 @@ export type CaptureExpenseModel = {
   recorrencia: Recorrencia
   expenseDate: string
   parcelas: number
+  /** o valor digitado é de cada parcela (não o total) */
+  porParcela: boolean
+  /** compra em andamento: parcelas que já foram pagas antes de cadastrar */
+  parcelasPagas: number
   text: string
   escopo: FinanceEscopo
   pagoContaCasal: boolean
@@ -72,6 +79,8 @@ type Props = {
   partnerWs: PartnerWorkspaceState | null
   onEditCategories: () => void
   onEditFixas: () => void
+  /** "cabem até R$ X" ou o resultado da conta com o valor digitado */
+  spendHint?: { text: string; tone: 'ok' | 'atencao' | 'apertado' } | null
 }
 
 /** Campos de gasto — usados na captura rápida e no studio da Carteira. */
@@ -85,11 +94,12 @@ export function CaptureExpenseFields({
   partnerWs,
   onEditCategories,
   onEditFixas,
+  spendHint,
 }: Props)
 {
   const { colors, space } = useTheme()
   const [novaPasta, setNovaPasta] = useState('')
-  const { lancamento, categoria, pagamento, cardId, folderId, salvarFixa, recorrencia, expenseDate, parcelas, text, escopo, pagoContaCasal } = model
+  const { lancamento, categoria, pagamento, cardId, folderId, salvarFixa, recorrencia, expenseDate, parcelas, porParcela, parcelasPagas, text, escopo, pagoContaCasal } = model
   const isReceita = lancamento === 'receita'
 
   return (
@@ -107,7 +117,7 @@ export function CaptureExpenseFields({
           <ChoiceChip
             label="Receita"
             active={isReceita}
-            onPress={() => patch({ lancamento: 'receita', pagamento: 'conta', parcelas: 1 })}
+            onPress={() => patch({ lancamento: 'receita', pagamento: 'conta', parcelas: 1, parcelasPagas: 0 })}
           />
         </View>
       </View>
@@ -201,12 +211,17 @@ export function CaptureExpenseFields({
           <ChoiceChip
             label="Conta"
             active={pagamento === 'conta'}
-            onPress={() => patch({ pagamento: 'conta' })}
+            onPress={() => patch({ pagamento: 'conta', parcelas: 1, parcelasPagas: 0 })}
           />
           <ChoiceChip
             label="Cartão de crédito"
             active={pagamento === 'cartao'}
             onPress={() => patch({ pagamento: 'cartao' })}
+          />
+          <ChoiceChip
+            label="Boleto ou carnê"
+            active={pagamento === 'boleto'}
+            onPress={() => patch({ pagamento: 'boleto' })}
           />
         </View>
       </View>
@@ -234,27 +249,17 @@ export function CaptureExpenseFields({
               )}
             </View>
           </ScrollView>
-          <Text variant="caption" muted>
-            Parcelar
-          </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              {([1, 2, 3, 4, 6] as const).map((n) => (
-                <ChoiceChip
-                  key={n}
-                  label={n === 1 ? 'À vista' : `${n}x`}
-                  active={parcelas === n}
-                  onPress={() => patch({ parcelas: n })}
-                />
-              ))}
-            </View>
-          </ScrollView>
-          <Text variant="caption" muted>
-            {parcelas > 1
-              ? `${parcelas} parcelas mensais a partir da data. Mais do que 6x: edite os lançamentos depois.`
-              : 'Até 6x aqui. O restante você ajusta editando o lançamento.'}
-          </Text>
         </View>
+      ) : null}
+
+      {pagamento === 'cartao' || pagamento === 'boleto' ? (
+        <InstallmentFields
+          parcelas={parcelas}
+          porParcela={porParcela}
+          parcelasPagas={parcelasPagas}
+          boleto={pagamento === 'boleto'}
+          patch={patch}
+        />
       ) : null}
 
       <View style={{ gap: 12 }}>
@@ -368,6 +373,25 @@ export function CaptureExpenseFields({
         onChangeText={(next) => patch({ text: next })}
         style={{ minHeight: 88, textAlignVertical: 'top', paddingTop: 14 }}
       />
+      {!isReceita && spendHint ? (
+        <View
+          accessibilityLiveRegion="polite"
+          style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginTop: -4 }}
+        >
+          <Icon
+            name="wallet-outline"
+            size={16}
+            color={spendHint.tone === 'apertado' ? colors.attention : spendHint.tone === 'atencao' ? colors.finance : colors.inkMuted}
+          />
+          <Text
+            variant="caption"
+            style={{ flex: 1 }}
+            color={spendHint.tone === 'apertado' ? colors.attention : colors.inkMuted}
+          >
+            {spendHint.text}
+          </Text>
+        </View>
+      ) : null}
 
       {partnerWs?.partnerUserId ? (
         <View style={{ gap: space.sm }}>
@@ -459,6 +483,80 @@ export function CaptureExpenseFields({
             </Pressable>
           ) : null}
         </View>
+      ) : null}
+    </View>
+  )
+}
+
+/** Parcelas: quantas, se o valor é total ou de cada uma, e quantas já foram pagas (compra em andamento). */
+function InstallmentFields({
+  parcelas,
+  porParcela,
+  parcelasPagas,
+  boleto,
+  patch,
+}: {
+  parcelas: number
+  porParcela: boolean
+  parcelasPagas: number
+  boleto: boolean
+  patch: (partial: Partial<CaptureExpenseModel>) => void
+})
+{
+  const [pagasText, setPagasText] = useState(parcelasPagas ? String(parcelasPagas) : '')
+  const restantes = Math.max(1, parcelas - parcelasPagas)
+  const mensal = boleto ? 'boletos mensais' : 'parcelas mensais'
+
+  return (
+    <View style={{ gap: 12 }}>
+      <Text variant="caption" muted>
+        Parcelar
+      </Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={{ flexDirection: 'row', gap: 12 }}>
+          {PARCELAS.map((n) => (
+            <ChoiceChip
+              key={n}
+              label={n === 1 ? (boleto ? 'Um só' : 'À vista') : `${n}x`}
+              active={parcelas === n}
+              onPress={() =>
+              {
+                const pagas = Math.min(parcelasPagas, n - 1)
+                setPagasText(pagas ? String(pagas) : '')
+                patch({ parcelas: n, parcelasPagas: pagas, ...(n === 1 ? { porParcela: false } : {}) })
+              }}
+            />
+          ))}
+        </View>
+      </ScrollView>
+      {parcelas > 1 ? (
+        <>
+          <Text variant="caption" muted>
+            O valor que você digitou é
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+            <ChoiceChip label="Total da compra" active={!porParcela} onPress={() => patch({ porParcela: false })} />
+            <ChoiceChip label="De cada parcela" active={porParcela} onPress={() => patch({ porParcela: true })} />
+          </View>
+          <Field
+            tone="sand"
+            label="Parcelas que você já pagou (compra em andamento)"
+            keyboardType="number-pad"
+            placeholder="0"
+            value={pagasText}
+            onChangeText={(t) =>
+            {
+              const digits = t.replace(/\D/g, '').slice(0, 2)
+              setPagasText(digits)
+              patch({ parcelasPagas: Math.min(parcelas - 1, Number(digits) || 0) })
+            }}
+          />
+          <Text variant="caption" muted>
+            {parcelasPagas > 0
+              ? `Entram as parcelas ${parcelasPagas + 1} a ${parcelas}: ${restantes} ${mensal}, a primeira na data abaixo.`
+              : `${parcelas} ${mensal} a partir da data abaixo.`}
+          </Text>
+        </>
       ) : null}
     </View>
   )

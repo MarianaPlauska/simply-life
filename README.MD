@@ -6,7 +6,7 @@
 
 <p align="center">
   Um app para organizar o dia sem pressão.<br />
-  Tarefas, humor, saúde e dinheiro no mesmo lugar.<br />
+  Tarefas, humor, saúde e dinheiro no mesmo lugar. Sem lista infinita nem culpa por “falhar o streak”.<br />
   <sub>SunFy vem de <em>SUNflower</em> + <em>FY</em> (for you): um girassol pra você. Nos dias nublados, os girassóis se viram uns para os outros: por isso as pétalas do símbolo se voltam para o centro, que é você.</sub>
 </p>
 
@@ -40,23 +40,25 @@
 
 Assim como eu, muita gente vive com ansiedade, depressão ou TDAH e tenta se organizar com apps de produtividade comuns. Geralmente, a ideia é sempre trazer o usuário, montar seu diagnóstico ou pedir suas informações demais e desnecessárias. Na prática, esses apps costumam piorar as coisas. Mandam notificação o tempo todo, cobram sequência de dias, mostram listas enormes e fazem a pessoa se sentir culpada quando não dá conta.
 
-O SunFy foi pensado para o dia difícil, não para o dia perfeito. A ideia é simples:
+O SunFy foi pensado para o dia difícil, não para o dia perfeito. Eu mesma uso assim: abro, faço o mínimo que couber, fecho sem culpa. A ideia é simples:
 
 * **Um passo de cada vez.** O app mostra o que importa agora, e não a lista inteira de uma vez.
 * **Sem castigo.** Se você passar dias sem abrir, nada é perdido e ninguém te cobra.
 * **Tudo junto.** Tarefa, humor, remédio, água, conta para pagar. É tudo parte do mesmo dia, então fica tudo na mesma tela.
-* **Uma ajuda que explica.** O Axel, o assistente do app, sugere a ordem das tarefas e diz o porquê. Se você discordar, é só mudar. A escolha final é sempre sua. Com o Axel, você consegue manter uma constância dos seus gastos, rotinas, e em datas próximas ele sempre anotará e irá se lembrar das suas últimas decisões. Inteligência para gente. 
+* **Uma ajuda que explica.** O Axel, o assistente do app, sugere a ordem das tarefas e diz o porquê. Se você discordar, é só mudar. A escolha final é sempre sua. Com o Axel, você consegue manter uma constância dos seus gastos, rotinas, e em datas próximas ele sempre anotará e irá se lembrar das suas últimas decisões. Inteligência para gente.
 
 > O SunFy ajuda a organizar a rotina. Ele não faz diagnóstico e não substitui terapia ou médico. Se você estiver em crise, ligue para o CVV no **188**, de graça, a qualquer hora.
 
 ## O que dá para fazer
 
+Cada aba resolve um pedaço real do dia, e não é "módulo de produtividade" genérico colado em outro.
+
 | Parte do app | Para que serve |
 |---|---|
-| **Início** | Ver como está o dia, quanto você já fez e registrar como está se sentindo |
-| **Tarefas** | Listar o que precisa fazer, separar por dia e quebrar tarefas grandes em passos pequenos |
+| **Início** | Ver como está o dia, quanto você já fez e registrar como está se sentindo, sem abrir cinco apps diferentes |
+| **Tarefas** | Listar o que precisa fazer, separar por dia e quebrar tarefas grandes em passos pequenos (quando a cabeça não aguenta a tarefa inteira) |
 | **Saúde** | Diário de humor, água, proteína, sono, remédios e exercícios de respiração para momentos de aperto |
-| **Carteira** | Saldo, cartões, contas a pagar e quanto deve sobrar no fim do mês |
+| **Carteira** | Saldo, cartões, contas a pagar e quanto deve sobrar no fim do mês, o dinheiro no mesmo lugar do resto da rotina |
 | **Calendário** | Ver o mês inteiro e ligar sua agenda do Google, Outlook ou Teams |
 
 <p align="center">
@@ -147,20 +149,27 @@ No iPhone, por enquanto, o app funciona pelo navegador ou pelo Expo Go.
 
 ## Com o que ele foi feito
 
-Para quem tem curiosidade sobre a parte técnica:
+Para quem tem curiosidade sobre a parte técnica, e por que não é "só um site" ou "só um app de uma linguagem":
 
-* **TypeScript** é a linguagem principal. Todo o app que você vê na tela foi escrito nela.
-* **React Native com Expo** faz o mesmo código rodar no celular e no navegador.
-* **JavaScript (Node.js)** roda no servidor, na Vercel. É ali que ficam a inteligência do Axel, a leitura de e-mails e as notificações.
-* **SQL** no **Supabase**, que guarda os dados e cuida do login. Cada pessoa só enxerga os próprios dados.
-* **Python (FastAPI)** aparece na pasta `backend`, com parte da lógica de priorização.
-* **Groq** e **Gemini** são os modelos de IA que ajudam o Axel a entender e ordenar as tarefas.
+Eu montei o SunFy como **monorepo**: várias pastas, cada uma com a ferramenta que menos me atrapalha naquela camada. Não é moda de startup; é para eu conseguir manter sozinha (ou com ajuda pontual) sem reescrever tudo quando o celular e a web precisam da mesma tela.
 
-A identidade visual usa as cores petróleo e coral, as fontes Fraunces e Lexend e os ícones Phosphor. As cores foram escolhidas para passar calma e deixar o texto fácil de ler.
+| Peça | Linguagem / ferramenta | Por que ficou aqui |
+|------|------------------------|-------------------|
+| Telas (celular + web) | **TypeScript** + **React Native (Expo)** | Um código para Android, navegador e PWA. Tipos evitam bug bobo entre humor, tarefa e dinheiro no mesmo objeto. |
+| APIs e Axel na nuvem | **JavaScript (Node.js)** na **Vercel** | Resposta rápida para captura, e-mail, notificações e chamadas de IA perto do usuário, sem servidor sempre ligado. |
+| Banco e login | **SQL** no **Supabase** (Postgres) | Dados seus, com regra no banco de que cada conta só vê o que é dela (RLS). SQL porque relacionamento (tarefa ↔ dia ↔ humor) é o coração do app. |
+| Priorização e migrações | **Python (FastAPI)** + **Alembic** em `backend/` | Scoring, analytics e **versão do schema** do banco. Python + SQLAlchemy/Alembic é o caminho mais direto para mudar tabela com histórico. ver [`backend/alembic/README`](backend/alembic/README). |
+| Entendimento de texto | **Groq** e **Gemini** | Modelos que o Axel usa para ler “uber 23” ou “dentista amanhã 9h” sem você preencher formulário. |
+
+Resumindo o “porquê das linguagens”: **TypeScript na cara**, **Node nas APIs leves**, **Python + SQL onde os dados e as regras são sérias**. Três ecossistemas, um produto — porque nenhuma linguagem faz tudo bem sozinha, e eu preferi clareza a purismo.
+
+A identidade visual usa coral, petróleo e carvão quente, as fontes Fraunces e Manrope e ícones no estilo do app. As cores foram escolhidas para passar calma, combinar com a tab âmbar e deixar o texto legível no modo escuro (sem poço preto).
 
 ## Como rodar no seu computador
 
-Você vai precisar do [Node.js](https://nodejs.org) versão 20 ou mais nova e de um projeto gratuito no [Supabase](https://supabase.com).
+Se você só quer **usar**, o link no topo com **Continuar como convidado** já basta. Esta parte é para quem quer rodar o código localmente ou contribuir.
+
+Você vai precisar do [Node.js](https://nodejs.org) versão 20 ou mais nova e de um projeto gratuito no [Supabase](https://supabase.com). Para mexer no `backend/` (Python), também Python 3.11+ e `pip install -r backend/requirements.txt`.
 
 ```bash
 git clone https://github.com/MarianaPlauska/simply-life.git
@@ -182,10 +191,12 @@ Mais detalhes para quem vai publicar ou mexer no servidor estão na pasta [`docs
 
 ## Segurança e privacidade
 
-* Cada conta só acessa os próprios dados. Isso é garantido pelo banco, não só pela tela.
+Eu trato humor, remédio e dinheiro como dado sensível, não como "análises de app gratuito".
+
+* Cada conta só acessa os próprios dados. Isso é garantido pelo banco (RLS no Supabase), não só pela tela.
 * Dá para ligar a verificação em duas etapas no perfil.
 * Senhas de e-mail ficam guardadas com criptografia.
-* O app não se conecta ao seu banco. Os valores da carteira são os que você mesmo anota.
+* O app não se conecta ao seu banco bancário. Os valores da carteira são os que você mesmo anota.
 
 ## Atualizar os prints
 

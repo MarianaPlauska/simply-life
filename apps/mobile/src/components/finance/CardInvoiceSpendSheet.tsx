@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { Modal, Pressable, View } from 'react-native'
-import { cardFaturaAbertaDisplay, formatBRL, type FinanceCard } from '@simply-life/shared'
+import { cardFaturaAbertaDisplay, formatBRL, localTodayIso, type FinanceCard } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, Field } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
+import { guardSpend } from '../../lib/spendGuard'
+import { SpendGuardHost } from './SpendGuardHost'
 
 type Props = {
   card: FinanceCard | null
@@ -36,6 +38,7 @@ export function CardInvoiceSpendSheet({ card, mode, onClose }: Props)
       setMsg('Informe um valor')
       return
     }
+    if (!(await guardSpend({ launches: [{ valor: v, data: localTodayIso() }], cardId: card.id, host: 'card' }))) return
     const res = await addCardSpend(card.id, v, titulo.trim() || 'Compra', isGuest)
     if (!res.ok)
     {
@@ -130,6 +133,7 @@ export function CardInvoiceSpendSheet({ card, mode, onClose }: Props)
           </Card>
         </Pressable>
       </Pressable>
+      <SpendGuardHost host="card" />
     </Modal>
   )
 }

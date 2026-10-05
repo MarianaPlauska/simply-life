@@ -7,6 +7,7 @@ import {
   NOTIFY_CADENCE_OPTIONS,
   computeSaldoDisponivel,
   ORCHESTRATOR_STYLES,
+  SPEND_GUARD_LEVELS,
   minutesLabel,
   type NotifyCadence,
 } from '@simply-life/shared'
@@ -20,6 +21,7 @@ import { usePrefsStore } from '../src/store/prefsStore'
 import { useDataStore } from '../src/store/dataStore'
 import { useSalaryStore } from '../src/store/salaryStore'
 import { useOrchestratorPrefsStore } from '../src/store/orchestratorPrefsStore'
+import { useSpendGuardStore } from '../src/store/spendGuardStore'
 import { OnbNumber } from '../src/components/onboarding/OnbNumber'
 import { useConfirmStore } from '../src/store/confirmStore'
 import {
@@ -94,6 +96,9 @@ export default function PreferenciasScreen()
   const capacityMinutes = useOrchestratorPrefsStore((s) => s.capacityMinutes)
   const patchOrg = useOrchestratorPrefsStore((s) => s.patch)
   const hydrateOrg = useOrchestratorPrefsStore((s) => s.hydrate)
+  const guardLevel = useSpendGuardStore((s) => s.level)
+  const setGuardLevel = useSpendGuardStore((s) => s.setLevel)
+  const hydrateGuard = useSpendGuardStore((s) => s.hydrate)
 
   const [tab, setTab] = useState<Tab>(TAB_IDS.has(params.tab ?? '') ? (params.tab as Tab) : 'uso')
   const [kwInput, setKwInput] = useState('')
@@ -112,7 +117,8 @@ export default function PreferenciasScreen()
     void hydrate()
     void hydrateSalary()
     void hydrateOrg()
-  }, [hydrate, hydrateSalary, hydrateOrg])
+    void hydrateGuard()
+  }, [hydrate, hydrateSalary, hydrateOrg, hydrateGuard])
 
   useEffect(() =>
   {
@@ -374,6 +380,21 @@ export default function PreferenciasScreen()
                 />
               ))}
               {pushMsg ? <Text variant="caption">{pushMsg}</Text> : null}
+            </OnbBlock>
+            <OnbBlock
+              title="Aviso antes de gastar"
+              hint="Ao lançar um gasto, o app refaz a conta do mês com ele (e dos próximos, se for parcelado). O app avisa, não proíbe."
+            >
+              {SPEND_GUARD_LEVELS.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={guardLevel === opt.id}
+                  onPress={() => setGuardLevel(opt.id)}
+                />
+              ))}
             </OnbBlock>
             <Text variant="caption" muted>
               Medicamentos podem lembrar no horário, se você cadastrar. Widget na tela do celular chega com o app instalado.

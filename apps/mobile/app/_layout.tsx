@@ -17,6 +17,7 @@ import { CelebrationOverlay } from '../src/components/dashboard/CelebrationOverl
 import { TaskRewardToast } from '../src/components/rewards/TaskRewardToast'
 import { TaskEvolveSheet } from '../src/components/kanban/TaskEvolveSheet'
 import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
+import { SpendGuardHost } from '../src/components/finance/SpendGuardHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
 import { useEloSync } from '../src/hooks/useEloSync'
 
@@ -144,6 +145,7 @@ function RootNavigator()
       <TaskRewardToast />
       <TaskEvolveSheet />
       <ConfirmDialogHost />
+      <SpendGuardHost />
     </>
   )
 }

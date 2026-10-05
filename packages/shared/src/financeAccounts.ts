@@ -1,5 +1,6 @@
 import { formatBRL, monthIncomeTotal, type FinanceTx } from './finance'
 import { cashExpenseTotal, creditExpenseTotal } from './financeCash'
+import { localTodayIso } from './dates'
 
 export interface CashAccount
 {
@@ -135,6 +136,7 @@ export function computeSaldoDisponivel(
   cash: CashAccount,
   txs: FinanceTx[],
   fixas: ContaFixa[],
+  ref = new Date(),
 ): {
   disponivel: number
   receitas: number
@@ -143,6 +145,10 @@ export function computeSaldoDisponivel(
   creditoAberto: number
 }
 {
+  // lançamento com data futura (parcela de boleto, conta de amanhã) ainda não saiu da conta:
+  // entra na projeção do fim do mês, não no saldo de hoje
+  const today = localTodayIso(ref)
+  txs = txs.filter((t) => !t.data || String(t.data).slice(0, 10) <= today)
   const receitas = monthIncomeTotal(txs)
   // Débito sai na hora; crédito só depois de pagar a fatura (lançamento “Fatura …”).
   const despesas = cashExpenseTotal(txs)
