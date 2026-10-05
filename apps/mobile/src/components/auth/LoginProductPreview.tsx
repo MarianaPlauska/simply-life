@@ -100,7 +100,7 @@ export function LoginProductPreview()
                   width: 24,
                   height: 24,
                   borderRadius: 999,
-                  backgroundColor: i === 3 ? BRAND.sol : C.surface,
+                  backgroundColor: i === 3 ? BRAND.coral : C.surface,
                   borderWidth: i === 3 ? 0 : 1,
                   borderColor: C.hairline,
                   opacity: i === 3 ? 1 : o + 0.2,

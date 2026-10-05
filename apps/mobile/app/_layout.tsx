@@ -120,6 +120,7 @@ function RootNavigator()
           options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
         />
         <Stack.Screen name="ofensiva" />
+        <Stack.Screen name="relatorio" />
         <Stack.Screen name="juntos" />
         <Stack.Screen name="colecao" />
         <Stack.Screen name="desbloqueios" />

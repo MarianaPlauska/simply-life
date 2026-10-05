@@ -33,6 +33,61 @@ export function aguaMetaCopos(litros: number, ml: number): number
   return Math.max(1, Math.round((litros * 1000) / unit))
 }
 
+/**
+ * Meta do dia em ml, como a pessoa escolheu (config.meta_ml). Fica separada do copo:
+ * 2 L com copo de 350 ml continua 2 L (são ~6 copos). Sem escolha salva, vem de copos × ml.
+ */
+export function aguaMetaMl(h: HabitoDiario | undefined): number
+{
+  const n = Number(h?.config?.meta_ml)
+  if (Number.isFinite(n) && n >= 250) return Math.round(n)
+  return (h?.metaDiaria ?? AGUA_META_COPOS) * aguaMlPorCopo(h)
+}
+
+const AGUA_FRASES: Record<'inicio' | 'ritmo' | 'meio' | 'quase' | 'feito', string[]> = {
+  inicio: [
+    'Comece com um copo agora. O corpo agradece.',
+    'Um gole para acordar o dia.',
+    'Primeiro copo do dia: o mais fácil de esquecer.',
+    'Deixe a garrafa à vista. Ajuda a lembrar.',
+    'Cansaço e dor de cabeça às vezes são só sede.',
+  ],
+  ritmo: [
+    'Bom começo. Mais um copo e o ritmo pega.',
+    'Um copo a cada pausa já resolve.',
+    'Água antes do café conta pontos.',
+    'Seu cérebro funciona melhor hidratado.',
+    'Siga no ritmo. Um copo agora ajuda.',
+  ],
+  meio: [
+    'Metade do caminho. Está indo bem.',
+    'Já passou da metade. Continue assim.',
+    'Meio da meta, meio do dia. Bom par.',
+    'Mais uns copos e a meta chega sozinha.',
+  ],
+  quase: [
+    'Quase lá. {n} para fechar o dia.',
+    'Falta pouco: {n}.',
+    'Reta final da água: {n}.',
+    'Só {n} e a meta de hoje está feita.',
+  ],
+  feito: [
+    'Meta de hoje feita. Boa!',
+    'Hidratação em dia. Seu corpo agradece.',
+    'Água do dia cumprida. Pode relaxar.',
+    'Meta batida. Mais um copo é bônus.',
+  ],
+}
+
+/** Frase curta para o card da água. Muda com o progresso e varia ao longo do dia (sem repetir toda hora). */
+export function aguaCoachLine(pct: number, left: number, seed = new Date().getHours()): string
+{
+  const faixa = pct >= 100 ? 'feito' : pct >= 70 ? 'quase' : pct >= 45 ? 'meio' : pct >= 15 ? 'ritmo' : 'inicio'
+  const lista = AGUA_FRASES[faixa]
+  const n = `${left} copo${left === 1 ? '' : 's'}`
+  return lista[Math.abs(seed + left) % lista.length].replace('{n}', n)
+}
+
 /** Hábitos zerados para conta real — sem progresso inventado. */
 export function starterHabits(): HabitoDiario[]
 {

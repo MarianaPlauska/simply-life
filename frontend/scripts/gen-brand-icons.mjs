@@ -1,12 +1,15 @@
 // Gera favicon, ícones do PWA e og-image da marca SunFy (símbolo "tudo se volta pra você").
 // Desenho igual ao de src/components/brand/SunFyMark.tsx.
+// Também gera os ícones do app (apps/mobile/assets): ícone, Android, abertura e favicon.
 // Uso: node scripts/gen-brand-icons.mjs  (precisa do Playwright e do Microsoft Edge instalados)
 import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright'
 
 const OUT = fileURLToPath(new URL('../public/', import.meta.url))
-const SOL = '#E8B04B'
+const MOBILE = fileURLToPath(new URL('../../apps/mobile/assets/', import.meta.url))
+// só cores do app: pétalas creme e menta, centro coral
+const CREME = '#EEF2F0'
 const CORAL = '#E8734A'
 const PETROLEO = '#1F3A3D'
 
@@ -19,7 +22,7 @@ function sunShapes()
   let p = ''
   for (let i = 0; i < 8; i++)
   {
-    p += `<path d="${PETAL}" fill="${i % 2 ? MENTA : SOL}" transform="rotate(${i * 45} 32 32)"/>`
+    p += `<path d="${PETAL}" fill="${i % 2 ? MENTA : CREME}" transform="rotate(${i * 45} 32 32)"/>`
   }
   return p + `<circle cx="32" cy="32" r="6.5" fill="${CORAL}"/>`
 }
@@ -37,7 +40,7 @@ const OG_HTML = `<!doctype html><html><head>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Lexend:wght@400;500&display=block" rel="stylesheet">
 <style>
   body{margin:0;width:1200px;height:630px;background:${PETROLEO};display:flex;align-items:center;justify-content:space-between;padding:0 96px;box-sizing:border-box;font-family:Lexend,sans-serif;overflow:hidden;position:relative}
-  .glow{position:absolute;right:-120px;top:-60px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle, rgba(232,176,75,.28) 0%, rgba(31,58,61,0) 65%)}
+  .glow{position:absolute;right:-120px;top:-60px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle, rgba(232,115,74,.22) 0%, rgba(31,58,61,0) 65%)}
   .txt{position:relative;max-width:620px}
   .name{font-family:Fraunces,serif;font-weight:600;font-size:112px;line-height:1;color:#EEF2F0;letter-spacing:-3px}
   .name span{color:${CORAL}}
@@ -106,5 +109,11 @@ writeFileSync(OUT + 'favicon.ico', pngsToIco(icoPngs))
 writeFileSync(OUT + 'favicon.svg', iconSvg(32, 0.88, { radius: 14 }).replace('<svg ', '<svg role="img" aria-label="SunFy" ') + '\n')
 writeFileSync(OUT + 'og-image.png', await render(OG_HTML, 1200, 630, false))
 
+// app (Expo): ícone cheio sem cantos (o sistema arredonda); Android e abertura sem fundo, sobre o petróleo do app.json
+writeFileSync(MOBILE + 'icon.png', await render(bare(iconSvg(1024, 0.66)), 1024, 1024, false))
+writeFileSync(MOBILE + 'adaptive-icon.png', await render(bare(iconSvg(1024, 0.52, { bg: null })), 1024, 1024))
+writeFileSync(MOBILE + 'splash-icon.png', await render(bare(iconSvg(1024, 0.8, { bg: null })), 1024, 1024))
+writeFileSync(MOBILE + 'favicon.png', await render(bare(iconSvg(48, 0.9, { radius: 14 })), 48, 48))
+
 await browser.close()
-console.log('SunFy: favicon, PWA e og-image gerados em public/')
+console.log('SunFy: favicon, PWA e og-image gerados em public/; ícones do app em apps/mobile/assets/')

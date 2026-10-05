@@ -2,10 +2,10 @@
 
 export type AxelSunMood = 'calm' | 'happy' | 'care'
 
-const SOL = '#E8B04B'
-const SOL_LUZ = '#F6D58E'
-const SOL_BORDA = '#B9822A'
+// só cores do app: pétalas coral, rosto creme, contorno coral escuro
 const CORAL = '#E8734A'
+const CORAL_TEXTO = '#A84B27'
+const CREME = '#EEF2F0'
 const INK = '#1E1C1A'
 
 const PETALS = Array.from({ length: 12 }, (_, i) => i * 30)
@@ -31,13 +31,13 @@ export function AxelSunShapes({ mood = 'calm' }: { mood?: AxelSunMood })
           cy="9.5"
           rx="5.6"
           ry="9"
-          fill={SOL}
-          stroke={SOL_BORDA}
+          fill={CORAL}
+          stroke={CORAL_TEXTO}
           strokeWidth="1"
           transform={`rotate(${deg} 32 32)`}
         />
       ))}
-      <circle cx="32" cy="32" r="18.5" fill={SOL_LUZ} stroke={SOL_BORDA} strokeWidth="1.4" />
+      <circle cx="32" cy="32" r="18.5" fill={CREME} stroke={CORAL_TEXTO} strokeWidth="1.4" />
       <circle cx="22.5" cy="37" r="3.2" fill={CORAL} opacity="0.45" />
       <circle cx="41.5" cy="37" r="3.2" fill={CORAL} opacity="0.45" />
       {mood === 'happy' ? (

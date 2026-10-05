@@ -12,8 +12,9 @@ const ANGLES = Array.from({ length: 8 }, (_, i) => i * 45)
  * para o centro, e o centro coral é a pessoa. Como os girassóis que se viram
  * uns para os outros nos dias nublados.
  *
- * `tile`: quadro petróleo do ícone do app. Sem ele, `onLight` troca a menta
- * pelo verde-azulado para manter contraste sobre fundo claro.
+ * Só cores do app: pétalas creme e menta, centro coral (o único ponto de ação).
+ * `tile`: quadro petróleo do ícone do app. Sem ele, `onLight` troca creme e menta
+ * por petróleo e verde-azulado para manter contraste sobre fundo claro.
  */
 export function SunFyMark({
   size = 40,
@@ -27,7 +28,9 @@ export function SunFyMark({
   label?: string
 })
 {
-  const even = !tile && onLight ? TEAL : BRAND.menta
+  const light = !tile && onLight
+  const odd = light ? BRAND.petroleo : BRAND.creme
+  const even = light ? TEAL : BRAND.menta
   const scale = tile ? 0.82 : 1
   const off = (1 - scale) * 32
 
@@ -36,7 +39,7 @@ export function SunFyMark({
       {tile ? <Rect width="64" height="64" rx="14" fill={BRAND.petroleo} /> : null}
       <G transform={`translate(${off} ${off}) scale(${scale})`}>
         {ANGLES.map((deg, i) => (
-          <Path key={deg} d={PETAL} fill={i % 2 ? even : BRAND.sol} transform={`rotate(${deg} 32 32)`} />
+          <Path key={deg} d={PETAL} fill={i % 2 ? even : odd} transform={`rotate(${deg} 32 32)`} />
         ))}
         <Circle cx={32} cy={32} r={6.5} fill={BRAND.coral} />
       </G>

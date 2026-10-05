@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Icon } from '../../../ui/Icon'
-import { AGUA_META_COPOS, aguaMlPorCopo, findHabit, habitPct } from '@simply-life/shared'
+import { AGUA_META_COPOS, aguaMetaMl, aguaMlPorCopo, findHabit, habitPct } from '@simply-life/shared'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useAuthStore } from '../../../store/authStore'
@@ -41,7 +41,7 @@ export function WebHydrationWidget()
             Hidratação
           </Text>
           <Text variant="caption" muted style={{ fontSize: 12 }}>
-            {atual}/{meta} copos · {atual * ml}/{meta * ml} ml
+            {atual}/{meta} copos · {atual * ml}/{aguaMetaMl(agua)} ml
           </Text>
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -110,7 +110,7 @@ export function WebHydrationWidget()
         />
       </View>
 
-      {edit ? <WaterGoalEditor /> : null}
+      {edit ? <WaterGoalEditor onClose={() => setEdit(false)} /> : null}
     </View>
   )
 }

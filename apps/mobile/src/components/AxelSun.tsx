@@ -6,8 +6,8 @@ export type AxelMood = 'calm' | 'happy' | 'care'
 const PETALS = Array.from({ length: 12 }, (_, i) => i * 30)
 
 /**
- * Axel: um girassol com rosto de amigo. Pétalas âmbar, rosto claro,
- * bochechas coral. `care` é o rosto dos dias nublados (sobrancelha caída,
+ * Axel: um girassol com rosto de amigo. Pétalas coral (a cor de ação do app,
+ * que no código se chama `axel`), rosto creme, contorno coral escuro. `care` é o rosto dos dias nublados (sobrancelha caída,
  * sorriso pequeno); `happy` fecha os olhos de alegria.
  */
 export function AxelSun({
@@ -38,14 +38,14 @@ export function AxelSun({
             cy={9.5}
             rx={5.6}
             ry={9}
-            fill={BRAND.sol}
-            stroke={BRAND.solBorda}
+            fill={BRAND.coral}
+            stroke={BRAND.coralText}
             strokeWidth={1}
             transform={`rotate(${deg} 32 32)`}
           />
         ))}
       </G>
-      <Circle cx={32} cy={32} r={18.5} fill={BRAND.solLuz} stroke={BRAND.solBorda} strokeWidth={1.4} />
+      <Circle cx={32} cy={32} r={18.5} fill={BRAND.creme} stroke={BRAND.coralText} strokeWidth={1.4} />
 
       <Circle cx={22.5} cy={37} r={3.2} fill={BRAND.coral} opacity={0.45} />
       <Circle cx={41.5} cy={37} r={3.2} fill={BRAND.coral} opacity={0.45} />

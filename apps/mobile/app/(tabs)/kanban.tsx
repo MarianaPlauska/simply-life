@@ -139,12 +139,15 @@ export default function KanbanScreen()
           <KanbanOrchestratorBar tasks={tasks} />
         ) : null}
 
-        <SubNavTabs
-          accent="axel"
-          tabs={hubTabs}
-          value={hub}
-          onChange={setHub}
-        />
+        {/* abas mais perto do título: o conteúdo da aba sobe junto */}
+        <View style={{ marginTop: -12 }}>
+          <SubNavTabs
+            accent="axel"
+            tabs={hubTabs}
+            value={hub}
+            onChange={setHub}
+          />
+        </View>
 
         {hub === 'relatorios' ? (
           <View style={{ gap: space.xs }}>

@@ -63,9 +63,10 @@ export function HealthDiaryTab()
   const week = useMemo(() => weeklyMoodReview(humor), [humor])
   const comNota = useMemo(
     () =>
+      // todas as notas, da mais nova para a mais antiga (a tela pagina de 10 em 10)
       [...humor]
         .filter((h) => humorIso(h) && (h.nota || '').trim())
-        .slice(0, 12),
+        .sort((a, b) => (humorIso(b) ?? '').localeCompare(humorIso(a) ?? '')),
     [humor],
   )
   const prompt = useMemo(() => promptOfDay(), [])

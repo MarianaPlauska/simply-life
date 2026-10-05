@@ -1,5 +1,6 @@
-import { type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { View, Pressable, StyleSheet } from 'react-native'
+import { useRouter } from 'expo-router'
 import {
   moodLabel,
   moodColor,
@@ -15,6 +16,8 @@ import { useWorkspace } from '../../../layout/useWorkspace'
 import { DiarySection } from './DiarySection'
 import { MoodTrendChart, MoodYearGrid } from './MoodCharts'
 import { HomeCollapsible } from '../../dashboard/HomeCollapsible'
+
+const NOTES_PER_PAGE = 10
 
 type WeekReview = {
   avg: number
@@ -133,6 +136,8 @@ export function HealthDiaryStudio(props: Props)
 
   const { colors, space } = useTheme()
   const { showRail } = useWorkspace()
+  const router = useRouter()
+  const [page, setPage] = useState(0)
   const canSave = Boolean(last && nota.trim())
   const dateLine = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
@@ -212,9 +217,13 @@ export function HealthDiaryStudio(props: Props)
 
   const moodHeadline = last ? moodLabel(last.humor) : 'Como você está hoje?'
 
+  const pages = Math.max(1, Math.ceil(comNota.length / NOTES_PER_PAGE))
+  const pageSafe = Math.min(page, pages - 1)
+  const pageNotes = comNota.slice(pageSafe * NOTES_PER_PAGE, (pageSafe + 1) * NOTES_PER_PAGE)
+
   const notesBlock = comNota.length > 0 ? (
     <View>
-      {comNota.map((h, i) =>
+      {pageNotes.map((h, i) =>
       {
         const iso = (h.data || '').slice(0, 10)
         if (!iso) return null
@@ -224,7 +233,7 @@ export function HealthDiaryStudio(props: Props)
             style={{
               gap: 4,
               paddingVertical: 12,
-              borderBottomWidth: i < comNota.length - 1 ? StyleSheet.hairlineWidth : 0,
+              borderBottomWidth: i < pageNotes.length - 1 ? StyleSheet.hairlineWidth : 0,
               borderBottomColor: colors.hairline,
             }}
           >
@@ -237,6 +246,27 @@ export function HealthDiaryStudio(props: Props)
           </View>
         )
       })}
+      {pages > 1 ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 12 }}>
+          <PrimaryButton
+            label="Mais novas"
+            variant="ghost"
+            size="sm"
+            disabled={pageSafe === 0}
+            onPress={() => setPage(pageSafe - 1)}
+          />
+          <Text variant="caption" muted style={{ flex: 1, textAlign: 'center' }}>
+            Página {pageSafe + 1} de {pages}
+          </Text>
+          <PrimaryButton
+            label="Mais antigas"
+            variant="ghost"
+            size="sm"
+            disabled={pageSafe >= pages - 1}
+            onPress={() => setPage(pageSafe + 1)}
+          />
+        </View>
+      ) : null}
     </View>
   ) : null
 
@@ -244,6 +274,7 @@ export function HealthDiaryStudio(props: Props)
     daySlot ? 'seu dia' : null,
     !showRail ? 'padrões' : null,
     notesBlock ? 'notas' : null,
+    'relatório',
   ].filter(Boolean).join(', ')
 
   return (
@@ -301,6 +332,18 @@ export function HealthDiaryStudio(props: Props)
                 {notesBlock}
               </DiarySection>
             ) : null}
+            <DiarySection title="Relatório por período" dividerTop>
+              <Text variant="caption" muted>
+                Humor, gastos, alimentação, água, sono e tarefas das datas que você escolher. Dá para baixar em PDF.
+              </Text>
+              <PrimaryButton
+                label="Gerar relatório"
+                variant="secondary"
+                size="sm"
+                icon="document-text-outline"
+                onPress={() => router.push('/relatorio' as never)}
+              />
+            </DiarySection>
           </View>
         </HomeCollapsible>
       ) : null}

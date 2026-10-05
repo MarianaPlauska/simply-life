@@ -8,7 +8,6 @@ import { OperadorOfensivaCard } from '../dashboard/OperadorOfensivaCard'
 import { ProfileAxelHero } from '../gamification/ProfileAxelHero'
 import { AxelTrailPanel } from '../gamification/AxelTrailPanel'
 import { WeeklyEpisodeCard } from '../gamification/WeeklyEpisodeCard'
-import { MonthlyStreakShieldCard } from '../gamification/MonthlyStreakShieldCard'
 import { ProfileAchievementsGrid } from '../gamification/ProfileAchievementsGrid'
 import { AxelRewardShop } from '../gamification/AxelRewardShop'
 import { AxelCosmeticsLibrary } from '../gamification/AxelCosmeticsLibrary'
@@ -152,7 +151,6 @@ export function ProfileView()
         title="Escudos de ofensiva"
         subtitle={`${streakCount} dia(s) de sequência`}
       >
-        <MonthlyStreakShieldCard />
       </DashboardCollapsible>
 
       <DashboardCollapsible

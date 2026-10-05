@@ -210,7 +210,7 @@ export default function JuntosScreen()
         void reloadGoals()
       }}
     >
-      <StackHeader title="Juntos" subtitle="Seu elo, metas juntos e o que espera por alguém" />
+      <StackHeader title="Juntos" subtitle="Quem caminha com você e o que vocês fazem juntos" />
 
       <View style={{ gap: space.md }}>
         <Pressable onPress={() => router.push('/ofensiva' as never)} accessibilityRole="button">

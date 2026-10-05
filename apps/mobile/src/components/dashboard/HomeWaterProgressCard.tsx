@@ -7,6 +7,8 @@ import {
   habitPct,
   AGUA_META_COPOS,
   aguaMlPorCopo,
+  aguaMetaMl,
+  aguaCoachLine,
   currentWeekIsos,
 } from '@simply-life/shared'
 import { Text, ProgressRing, PressableScale } from '../../ui'
@@ -19,15 +21,6 @@ import { WaterBottleMark } from './WaterBottleMark'
 import { WaterGoalEditor } from './WaterGoalEditor'
 
 const WEEKDAYS = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S']
-
-function coachLine(pct: number, left: number): string
-{
-  if (pct >= 100) return 'Meta atingida hoje. Hidratação em dia.'
-  if (pct >= 70) return `Faltam ${left} copo${left === 1 ? '' : 's'}. Você está quase na meta.`
-  if (pct >= 60) return `${left} copo${left === 1 ? '' : 's'} para a meta.`
-  if (pct >= 20) return 'Siga no ritmo. Um copo agora ajuda.'
-  return 'Comece com um copo agora.'
-}
 
 type Props = {
   compact?: boolean
@@ -58,7 +51,7 @@ export function HomeWaterProgressCard({ compact }: Props)
   const atual = agua?.progressoAtual ?? 0
   const pct = habitPct(agua)
   const mlAtual = atual * ml
-  const mlMeta = meta * ml
+  const mlMeta = aguaMetaMl(agua)
   const left = Math.max(0, meta - atual)
   const mins = minutesSinceSip(lastSipAt)
   const week = useMemo(() => currentWeekIsos(), [])
@@ -83,7 +76,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             {atual} de {meta} copos
           </Text>
           <Text variant="caption" muted style={{ fontSize: 13, lineHeight: 18 }}>
-            {mlAtual} / {mlMeta} ml · {coachLine(pct, left)}
+            {mlAtual} / {mlMeta} ml · {aguaCoachLine(pct, left)}
           </Text>
         </View>
         <View style={{ width: 72, height: 72, alignItems: 'center', justifyContent: 'center' }}>
@@ -222,7 +215,7 @@ export function HomeWaterProgressCard({ compact }: Props)
         </PressableScale>
       </View>
 
-      {edit ? <WaterGoalEditor /> : null}
+      {edit ? <WaterGoalEditor onClose={() => setEdit(false)} /> : null}
     </View>
   )
 }

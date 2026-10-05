@@ -1,28 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
-import { Flame, Shield, Snowflake } from 'lucide-react'
-import { isWeekendStreakFrozen, WEEKEND_STREAK_TOOLTIP } from '../../lib/weekendStreak'
-import { toast } from 'sonner'
+import { Flame } from 'lucide-react'
 import { ProductivityHeatmap } from '../dashboard/ProductivityHeatmap'
 import { useTaskStore } from '../../store/useTaskStore'
 
-// Ofensiva + heatmap + compra de escudo (popover no header)
-
-const SHIELD_COST = 500
+// Elo + heatmap (popover no header)
 
 export function AxelStreakPopover()
 {
   const streakCount = useTaskStore((s) => s.streakCount)
   const hasCompletedTaskToday = useTaskStore((s) => s.hasCompletedTaskToday)
   const streakPulseNonce = useTaskStore((s) => s.streakPulseNonce)
-  const streakFreezes = useTaskStore((s) => s.streakFreezes)
   const focusMinutesByDate = useTaskStore((s) => s.focusMinutesByDate)
   const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
-  const purchaseStreakFreeze = useTaskStore((s) => s.purchaseStreakFreeze)
-  const getTotalXp = useTaskStore((s) => s.getTotalXp)
 
   const [open, setOpen] = useState(false)
   const [animating, setAnimating] = useState(false)
-  const [buying, setBuying] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() =>
@@ -53,31 +45,8 @@ export function AxelStreakPopover()
   }, [open])
 
   const activeToday = hasCompletedTaskToday
-  const weekendFreeze = isWeekendStreakFrozen()
   const dayLabel = streakCount === 1 ? 'dia' : 'dias'
-  const streakTitle = weekendFreeze
-    ? WEEKEND_STREAK_TOOLTIP
-    : 'Ofensiva e heatmap de foco'
-  const totalXp = getTotalXp()
-  const canBuy = totalXp >= SHIELD_COST
-
-  async function handleBuyShield()
-  {
-    setBuying(true)
-    const result = await purchaseStreakFreeze()
-    setBuying(false)
-    if (result.ok)
-    {
-      toast.success(result.message, {
-        description: 'Protege 1 dia sem prova de trabalho',
-        className: 'font-mono text-sm',
-      })
-    }
-    else
-    {
-      toast.error(result.message, { className: 'font-mono text-sm' })
-    }
-  }
+  const streakTitle = 'Elo e mapa de foco'
 
   return (
     <div ref={rootRef} className="relative">
@@ -95,29 +64,19 @@ export function AxelStreakPopover()
         aria-haspopup="dialog"
         title={streakTitle}
       >
-        {weekendFreeze ? (
-          <Snowflake
-            className="w-4 h-4 shrink-0 text-sky-300"
-            strokeWidth={1.75}
-            aria-hidden
-          />
-        ) : (
-          <Flame
-            className={`w-4 h-4 shrink-0 transition-colors ${
-              activeToday ? 'text-atencao' : 'text-ink-muted'
-            } ${animating ? 'animate-pulse' : ''}`}
-            strokeWidth={1.75}
-            aria-hidden
-          />
-        )}
+        <Flame
+          className={`w-4 h-4 shrink-0 transition-colors ${
+            activeToday ? 'text-atencao' : 'text-ink-muted'
+          } ${animating ? 'animate-pulse' : ''}`}
+          strokeWidth={1.75}
+          aria-hidden
+        />
         <span className="hidden sm:inline text-[11px] font-mono tabular-nums text-ink-muted">
           <span
             className={`font-semibold ${
-              weekendFreeze
-                ? 'text-sky-400'
-                : activeToday
-                  ? 'text-atencao'
-                  : 'text-ink-muted'
+              activeToday
+                ? 'text-atencao'
+                : 'text-ink-muted'
             }`}
           >
             {streakCount}
@@ -125,11 +84,6 @@ export function AxelStreakPopover()
           {' '}
           {dayLabel}
         </span>
-        {streakFreezes > 0 && (
-          <span className="text-[10px] font-mono text-accent" title="Escudos disponíveis">
-            🛡{streakFreezes}
-          </span>
-        )}
       </button>
 
       {open && (
@@ -141,11 +95,9 @@ export function AxelStreakPopover()
             <div>
               <p className="font-mono text-[10px] uppercase tracking-wide text-accent">Momentum AXEL</p>
               <p className="text-[11px] text-ink-muted mt-0.5">
-                {weekendFreeze
-                  ? WEEKEND_STREAK_TOOLTIP
-                  : activeToday
-                    ? 'Prova de trabalho validada hoje'
-                    : 'Score > 70 + 15 min de timer na tarefa'}
+                {activeToday
+                  ? 'Dia cumprido hoje'
+                  : 'Uma ação hoje cumpre o dia. Um dia de folga por semana não quebra.'}
               </p>
             </div>
             <div className="text-right shrink-0">
@@ -163,20 +115,6 @@ export function AxelStreakPopover()
             compact
           />
 
-          <div className="flex items-center justify-between text-[11px] font-mono text-ink-muted">
-            <span>Escudos: {streakFreezes}</span>
-            <span>XP: {totalXp}</span>
-          </div>
-
-          <button
-            type="button"
-            disabled={buying || !canBuy}
-            onClick={() => void handleBuyShield()}
-            className="w-full inline-flex items-center justify-center gap-2 h-9 px-3 font-mono text-[10px] uppercase tracking-wide rounded-sl border border-line text-ink-muted hover:text-accent hover:border-accent/40 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <Shield size={14} strokeWidth={1.75} aria-hidden />
-            Comprar Escudo (Custa {SHIELD_COST} XP)
-          </button>
         </div>
       )}
     </div>

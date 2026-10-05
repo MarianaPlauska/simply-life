@@ -215,7 +215,8 @@ type DataState = {
   setTaskStatus: (taskId: string, status: TaskStatus, isGuest?: boolean) => Promise<void>
   addWaterCup: (isGuest?: boolean) => Promise<void>
   removeWaterCup: (isGuest?: boolean) => Promise<void>
-  patchAguaHabit: (patch: { metaDiaria?: number; mlPorCopo?: number }, isGuest?: boolean) => Promise<void>
+  /** metaMl: meta escolhida em ml (fica em config.meta_ml, separada do tamanho do copo) */
+  patchAguaHabit: (patch: { metaDiaria?: number; mlPorCopo?: number; metaMl?: number }, isGuest?: boolean) => Promise<void>
   patchTreinoConfig: (config: Record<string, unknown>, isGuest?: boolean) => Promise<void>
   addProteinGrams: (grams: number, isGuest?: boolean) => Promise<void>
   setSleepHours: (hours: number, isGuest?: boolean) => Promise<void>
@@ -1088,6 +1089,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       config: {
         ...(agua.config ?? {}),
         ...(patch.mlPorCopo != null ? { ml_por_copo: patch.mlPorCopo } : {}),
+        ...(patch.metaMl != null ? { meta_ml: patch.metaMl } : {}),
       },
     }
     set({

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Icon } from '../../../ui/Icon'
-import { findHabit, habitPct, aguaMlPorCopo } from '@simply-life/shared'
+import { findHabit, habitPct, aguaMetaMl, aguaMlPorCopo } from '@simply-life/shared'
 import { PrimaryButton, PressableScale } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useDataStore } from '../../../store/dataStore'
@@ -31,7 +31,7 @@ export function HydrationPanel()
         icon="water"
         kicker="Hidratação"
         headline={`${atual}/${meta} copos`}
-        detail={`${ml} ml por copo`}
+        detail={`${ml} ml por copo · meta de ${String(aguaMetaMl(agua) / 1000).replace('.', ',')} L`}
         pillLabel={`${pct}% da meta`}
         pillColor={colors.health}
       />
@@ -94,7 +94,7 @@ export function HydrationPanel()
         onPress={() => setEdit((v) => !v)}
         style={{ alignSelf: 'flex-start', marginTop: -4 }}
       />
-      {edit ? <WaterGoalEditor /> : null}
+      {edit ? <WaterGoalEditor onClose={() => setEdit(false)} /> : null}
     </View>
   )
 }
