@@ -28,9 +28,13 @@ export default function Root({ children }: PropsWithChildren)
 const webInputStyles = `
   html, body { background-color: ${COLOR_LIGHT.canvas}; }
   @media (prefers-color-scheme: dark) { html, body { background-color: ${COLOR_DARK.canvas}; } }
-  input:focus, textarea:focus {
-    outline: 2px solid ${COLOR_LIGHT.axelFill};
-    outline-offset: 1px;
+  input, textarea { outline: none; }
+  /* o campo já marca o foco com a própria borda (petróleo no claro, menta no escuro) */
+  input:focus, textarea:focus { outline: none; }
+  /* preenchimento automático do navegador: sem o fundo amarelo dele */
+  input:-webkit-autofill, textarea:-webkit-autofill {
+    -webkit-text-fill-color: inherit;
+    transition: background-color 9999s ease-out 0s;
   }
   ::selection {
     background-color: rgba(232, 115, 74, 0.30);

@@ -73,6 +73,8 @@ export type WorkspacePrefs = {
   /** Chama: prêmios reais escolhidos pela pessoa */
   chama_premios?: import('@simply-life/shared').ChamaPrize[]
   /** Semana (domingo ISO) em que o relatório de humor foi dispensado. */
+  /** Metas escondidas da Home até este dia (inclusive). Sempre tem fim. */
+  life_goals_paused_until?: string | null
   mood_report_dismissed_week?: string | null
   /** Wizard Montar seu AXEL concluído */
   setup_completed_at?: string | null
@@ -277,6 +279,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
     profile_avatar_frame: typeof raw?.profile_avatar_frame === 'string' ? raw.profile_avatar_frame : 'lisa',
     kanban_fundo: typeof raw?.kanban_fundo === 'string' ? raw.kanban_fundo : 'nenhum',
     chama_premios: Array.isArray(raw?.chama_premios) ? raw.chama_premios : [],
+    life_goals_paused_until: typeof raw?.life_goals_paused_until === 'string' ? raw.life_goals_paused_until : null,
     mood_report_dismissed_week: raw?.mood_report_dismissed_week ?? null,
     color_scheme: scheme,
     enabled_modules: normalizeModules(raw?.enabled_modules),

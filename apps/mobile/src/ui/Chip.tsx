@@ -1,6 +1,7 @@
 import { View } from 'react-native'
 import { Text } from './Text'
 import { PressableScale } from './PressableScale'
+import { Icon, type IconName } from './Icon'
 import { useTheme } from '../theme/ThemeProvider'
 
 type Props = {
@@ -9,9 +10,12 @@ type Props = {
   onPress?: () => void
   dotColor?: string
   count?: number
+  /** ícone antes do texto; com label vazio vira um chip só de ícone */
+  icon?: IconName
+  accessibilityLabel?: string
 }
 
-export function Chip({ label, active, onPress, dotColor, count }: Props)
+export function Chip({ label, active, onPress, dotColor, count, icon, accessibilityLabel }: Props)
 {
   const { colors, radius, mode } = useTheme()
   // escolhido: fundo petróleo suave e contorno na tinta da marca (petróleo no claro, menta no escuro)
@@ -23,6 +27,7 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
+      accessibilityLabel={accessibilityLabel}
       style={{
         minHeight: 44,
         paddingHorizontal: 14,
@@ -48,14 +53,17 @@ export function Chip({ label, active, onPress, dotColor, count }: Props)
           }}
         />
       ) : null}
-      <Text
-        variant="micro"
-        color={active ? colors.ink : colors.inkMuted}
-        numberOfLines={1}
-        style={{ lineHeight: 16 }}
-      >
-        {text}
-      </Text>
+      {icon ? <Icon name={icon} size={16} color={active ? colors.ink : colors.inkMuted} /> : null}
+      {text ? (
+        <Text
+          variant="micro"
+          color={active ? colors.ink : colors.inkMuted}
+          numberOfLines={1}
+          style={{ lineHeight: 16 }}
+        >
+          {text}
+        </Text>
+      ) : null}
     </PressableScale>
   )
 }

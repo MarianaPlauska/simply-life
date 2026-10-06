@@ -17,7 +17,6 @@ import { SHARED_GOAL_METRIC_ICON } from '../src/components/sharedGoals/metricIco
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { useActivityStore } from '../src/store/activityStore'
-import { useElo } from '../src/hooks/useElo'
 import { useCircleStore } from '../src/store/circleStore'
 import { useSharedGoalsStore } from '../src/store/sharedGoalsStore'
 import { useTaskWaitStore } from '../src/store/taskWaitStore'
@@ -162,7 +161,6 @@ export default function JuntosScreen()
   const { colors, space } = useTheme()
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
-  const elo = useElo()
   const hydrateActivity = useActivityStore((s) => s.hydrate)
   const reloadFriends = useCircleStore((s) => s.load)
   const reloadGoals = useSharedGoalsStore((s) => s.load)
@@ -213,23 +211,8 @@ export default function JuntosScreen()
       <StackHeader title="Juntos" subtitle="Quem caminha com você e o que vocês fazem juntos" />
 
       <View style={{ gap: space.md }}>
-        <Pressable onPress={() => router.push('/ofensiva' as never)} accessibilityRole="button">
-          <Card style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-            <Icon name="flame" size={24} color={colors.axel} />
-            <View style={{ flex: 1, gap: 2 }}>
-              <Text variant="bodyStrong">
-                {elo.atual > 0
-                  ? `Elo de ${elo.atual} dia${elo.atual === 1 ? '' : 's'}`
-                  : 'Uma ação hoje começa o seu elo'}
-              </Text>
-              <Text variant="caption" muted>
-                {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} cumprido{elo.cumpridosNaSemana === 1 ? '' : 's'} nesta semana · recorde {elo.recorde}
-              </Text>
-            </View>
-            <Icon name="chevron-forward" size={16} color={colors.inkMuted} />
-          </Card>
-        </Pressable>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
+        {/* o elo é pessoal (qualquer ação do dia conta): mora na Home, não aqui */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md }}>
           <PrimaryButton
             label="Ligas"
             variant="link"
@@ -365,7 +348,7 @@ export default function JuntosScreen()
               <FriendCardBlock key={s.friend.userId} s={s} />
             ))}
 
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.md }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md }}>
               <PrimaryButton label="Metas juntos" variant="link" size="sm" onPress={() => router.push(METAS_HREF)} />
               <PrimaryButton label="Amigos e convites" variant="link" size="sm" onPress={() => router.push(AMIGOS_HREF)} />
               <PrimaryButton

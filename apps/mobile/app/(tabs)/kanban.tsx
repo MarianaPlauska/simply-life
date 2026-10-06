@@ -35,8 +35,8 @@ import { authedApi } from '../../src/lib/integrationsApi'
 import { fetchDecisionEvents } from '../../src/lib/sync/decisionLog'
 import { useBoardReplanStore } from '../../src/store/boardReplanStore'
 
-type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'gantt' | 'relatorios'
-type ReportMode = 'semana' | 'esperas' | 'desempenho' | 'overview' | 'calendario' | 'timeline' | 'ritmo'
+type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'calendario' | 'gantt' | 'relatorios'
+type ReportMode = 'semana' | 'esperas' | 'desempenho' | 'overview' | 'timeline' | 'ritmo'
 
 export default function KanbanScreen()
 {
@@ -115,6 +115,8 @@ export default function KanbanScreen()
     { id: 'rotina', label: 'Rotina' },
     { id: 'pastas', label: 'Pastas' },
     { id: 'board', label: 'Prazos', count: openCount },
+    // calendário é um jeito de ver as tarefas, não um relatório
+    { id: 'calendario', label: 'Calendário' },
     { id: 'gantt', label: 'Gantt' },
     { id: 'relatorios', label: 'Relatórios' },
   ] as { id: Hub; label: string; count?: number }[]).filter((t) =>
@@ -159,7 +161,6 @@ export default function KanbanScreen()
                 { id: 'esperas', label: 'Esperas' },
                 { id: 'desempenho', label: 'Desempenho' },
                 { id: 'overview', label: 'Visão geral' },
-                { id: 'calendario', label: 'Calendário' },
                 { id: 'timeline', label: 'Timeline' },
                 { id: 'ritmo', label: 'Ritmo' },
               ]}
@@ -223,7 +224,7 @@ export default function KanbanScreen()
           {hub === 'gantt' ? <KanbanGanttPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'desempenho' ? <KanbanReportsPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'overview' ? <KanbanOverviewPane tasks={tasks} /> : null}
-          {hub === 'relatorios' && report === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
+          {hub === 'calendario' ? <KanbanCalendarPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'timeline' ? <KanbanTimelinePane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'semana' ? <WeeklyReviewPane tasks={tasks} /> : null}
           {hub === 'relatorios' && report === 'esperas' ? <WaitingReportPane tasks={tasks} /> : null}

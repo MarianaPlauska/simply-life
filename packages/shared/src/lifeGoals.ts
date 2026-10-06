@@ -23,6 +23,32 @@ export type LifeGoal = {
   passos?: string[]
   /** dia em que a pessoa disse "cheguei lá" */
   feitaEm?: string | null
+  /** prática escolhida (saúde mental), ver MENTAL_PRACTICES */
+  pratica?: string
+  /** quantas vezes até o fim do prazo (o progresso vira "2 de 3") */
+  alvo?: number
+  /** por que isso importa (a pessoa escreve; aparece como lembrete) */
+  porque?: string
+}
+
+/** Práticas de cuidado para a meta de saúde mental. Gentis, curtas, sem cobrança. */
+export const MENTAL_PRACTICES: { id: string; label: string; icon: string; hint: string }[] = [
+  { id: 'respirar', label: 'Respirar com calma', icon: 'leaf', hint: 'Uns minutos de respiração lenta' },
+  { id: 'diario', label: 'Escrever no diário', icon: 'pencil', hint: 'Uma frase já vale' },
+  { id: 'caminhar', label: 'Caminhar ao ar livre', icon: 'sunny', hint: 'Mesmo que seja até a esquina' },
+  { id: 'conversar', label: 'Conversar com alguém de confiança', icon: 'people', hint: 'Mensagem ou ligação' },
+  { id: 'pausa_tela', label: 'Uma pausa sem tela', icon: 'phone-portrait', hint: 'Celular longe por um tempo' },
+  { id: 'dormir', label: 'Desacelerar antes de dormir', icon: 'moon', hint: 'Luz baixa, sem pressa' },
+  { id: 'musica', label: 'Ouvir algo que me acalma', icon: 'musical-notes', hint: 'Uma música, um som' },
+  { id: 'gentileza', label: 'Fazer algo gentil por mim', icon: 'heart', hint: 'Um cuidado pequeno' },
+  { id: 'checkin', label: 'Registrar como estou', icon: 'happy', hint: 'O check-in de humor do app' },
+]
+
+/** "Respirar com calma, 3 vezes" / "Escrever no diário, todo dia" */
+export function practiceGoalTitle(practiceId: string, alvo: number, todoDia: boolean): string
+{
+  const label = MENTAL_PRACTICES.find((p) => p.id === practiceId)?.label ?? 'Cuidar de mim'
+  return todoDia ? `${label}, todo dia` : `${label}, ${alvo} ${alvo === 1 ? 'vez' : 'vezes'}`
 }
 
 /** Até quantas metas ao mesmo tempo (mais que isso vira lista de tarefas) */
@@ -149,6 +175,8 @@ export type LifeGoalProgress = {
   passos: number
   passoHoje: boolean
   feita: boolean
+  /** quantas vezes a pessoa quer fazer (null = sem número) */
+  alvo: number | null
 }
 
 export function lifeGoalProgress(goal: LifeGoal, ref = new Date()): LifeGoalProgress
@@ -162,6 +190,7 @@ export function lifeGoalProgress(goal: LifeGoal, ref = new Date()): LifeGoalProg
     passos: passos.length,
     passoHoje: passos.includes(hoje),
     feita: Boolean(goal.feitaEm),
+    alvo: goal.alvo && goal.alvo > 0 ? goal.alvo : null,
   }
 }
 
@@ -174,7 +203,12 @@ export function lifeGoalTimeLabel(p: LifeGoalProgress): string
   return `faltam ${p.diasRestantes - 1} dias, no seu ritmo`
 }
 
-const CHEER: Record<'feita' | 'muitos' | 'poucos' | 'nenhum', string[]> = {
+const CHEER: Record<'feita' | 'alvo' | 'muitos' | 'poucos' | 'nenhum', string[]> = {
+  alvo: [
+    'Você fez as {n} vezes. Que orgulho de você.',
+    '{n} de {n}: você cumpriu o que combinou com você.',
+    'Todas as {n} vezes feitas. Isso é cuidado de verdade.',
+  ],
   feita: [
     'Você chegou lá. Guarde essa sensação.',
     'Meta cumprida. Você fez isso acontecer.',
@@ -200,7 +234,9 @@ const CHEER: Record<'feita' | 'muitos' | 'poucos' | 'nenhum', string[]> = {
 /** Frase de orgulho pela meta. Muda com os passos, nunca cobra. */
 export function lifeGoalCheer(p: LifeGoalProgress, seed = 0): string
 {
-  const faixa = p.feita ? 'feita' : p.passos >= 3 ? 'muitos' : p.passos >= 1 ? 'poucos' : 'nenhum'
+  const faixa = p.feita
+    ? 'feita'
+    : p.alvo && p.passos >= p.alvo ? 'alvo' : p.passos >= 3 ? 'muitos' : p.passos >= 1 ? 'poucos' : 'nenhum'
   const lista = CHEER[faixa]
   const plural = p.passos === 1 ? '' : 's'
   return lista[Math.abs(seed + p.passos) % lista.length].replace('{n}', String(p.passos)).replace(/\{s\}/g, plural)
@@ -221,4 +257,63 @@ export function lifeGoalToggleFeita(goal: LifeGoal, ref = new Date()): LifeGoal
   const hoje = localIso(ref)
   const passos = goal.passos ?? []
   return { ...goal, feitaEm: hoje, passos: passos.includes(hoje) ? passos : [...passos, hoje] }
+}
+
+/** Quantos dias a meta cobre, do dia em que foi criada até o fim (para "todo dia") */
+export function lifeGoalPeriodDays(goal: Pick<LifeGoal, 'cadence' | 'periodStart' | 'dueDate'>): number
+{
+  return Math.max(1, daysBetweenIso(goal.periodStart, lifeGoalEndIso(goal)) + 1)
+}
+
+// ---------------------------------------------------------------------------
+// Data no jeito do Brasil (DD/MM/AAAA) para os campos de prazo
+// ---------------------------------------------------------------------------
+
+/** "2026-10-12" vira "12/10/2026" */
+export function brDateFromIso(iso: string): string
+{
+  return /^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}` : ''
+}
+
+/** Vai pondo as barras enquanto a pessoa digita: "1210" vira "12/10" */
+export function maskBrDate(raw: string): string
+{
+  const digits = raw.replace(/\D/g, '').slice(0, 8)
+  if (digits.length <= 2) return digits
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`
+}
+
+/** "12/10/2026" vira "2026-10-12"; null se a data não existe (31/02, por exemplo) */
+export function isoFromBrDate(br: string): string | null
+{
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(br.trim())
+  if (!m) return null
+  const [, d, mo, y] = m
+  const date = new Date(Number(y), Number(mo) - 1, Number(d), 12)
+  if (date.getDate() !== Number(d) || date.getMonth() !== Number(mo) - 1) return null
+  return `${y}-${mo}-${d}`
+}
+
+// ---------------------------------------------------------------------------
+// Pausa das metas na Home: sempre com fim, nunca "para sempre"
+// ---------------------------------------------------------------------------
+
+export const LIFE_GOALS_PAUSE_OPTIONS: { days: number; label: string }[] = [
+  { days: 1, label: 'Só hoje' },
+  { days: 3, label: '3 dias' },
+  { days: 7, label: '1 semana' },
+  { days: 30, label: '1 mês' },
+]
+
+/** Último dia da pausa (inclusive). 1 dia = só hoje. Nunca passa de 30 dias. */
+export function lifeGoalsPauseUntil(days: number, ref = new Date()): string
+{
+  const n = Math.min(30, Math.max(1, Math.round(days)))
+  return isoPlus(localIso(ref), n - 1)
+}
+
+export function lifeGoalsPaused(until: string | null | undefined, ref = new Date()): boolean
+{
+  return Boolean(until) && (until as string) >= localIso(ref)
 }

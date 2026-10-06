@@ -5,11 +5,18 @@ import {
   lifeGoalEndIso,
   lifeGoalMicroLabel,
   lifeGoalNeedsRefresh,
+  lifeGoalPeriodDays,
+  practiceGoalTitle,
   lifeGoalProgress,
   lifeGoalTimeLabel,
   lifeGoalToggleFeita,
   lifeGoalTogglePasso,
   LIFE_GOALS_MAX,
+  brDateFromIso,
+  isoFromBrDate,
+  lifeGoalsPaused,
+  lifeGoalsPauseUntil,
+  maskBrDate,
   type LifeGoal,
 } from '../lifeGoals'
 
@@ -101,10 +108,61 @@ describe('progresso da meta', () =>
     {
       for (const seed of [0, 1, 2])
       {
-        const frase = lifeGoalCheer({ fim: '2026-10-10', diasRestantes: 1, passos, passoHoje: false, feita: false }, seed)
+        const frase = lifeGoalCheer({ fim: '2026-10-10', diasRestantes: 1, passos, passoHoje: false, feita: false, alvo: null }, seed)
         expect(frase).not.toMatch(/falhou|atrasad|só falta|corre|urgente|{n}|{s}/i)
       }
     }
-    expect(lifeGoalCheer({ fim: '', diasRestantes: 1, passos: 1, passoHoje: true, feita: false }, 0)).toBe('1 passo dado. Um de cada vez, como deve ser.')
+    expect(lifeGoalCheer({ fim: '', diasRestantes: 1, passos: 1, passoHoje: true, feita: false, alvo: null }, 0)).toBe('1 passo dado. Um de cada vez, como deve ser.')
+  })
+})
+
+describe('meta de saúde mental com número de vezes', () =>
+{
+  it('monta o título da prática', () =>
+  {
+    expect(practiceGoalTitle('respirar', 3, false)).toBe('Respirar com calma, 3 vezes')
+    expect(practiceGoalTitle('diario', 7, true)).toBe('Escrever no diário, todo dia')
+  })
+
+  it('conta os dias do período para "todo dia"', () =>
+  {
+    expect(lifeGoalPeriodDays(goal({ cadence: 'date', periodStart: '2026-10-10', dueDate: '2026-10-16' }))).toBe(7)
+  })
+
+  it('comemora quando completa as vezes, sem precisar marcar "cheguei lá"', () =>
+  {
+    let g = goal({ alvo: 2, pratica: 'respirar' })
+    g = lifeGoalTogglePasso(g, new Date(2026, 9, 9, 12))
+    g = lifeGoalTogglePasso(g, REF)
+    const p = lifeGoalProgress(g, REF)
+    expect(p).toMatchObject({ passos: 2, alvo: 2, feita: false })
+    expect(lifeGoalCheer(p, 0)).toMatch(/2 vezes|2 de 2/)
+  })
+})
+
+describe('data no formato do Brasil', () =>
+{
+  it('converte, mascara e recusa datas que não existem', () =>
+  {
+    expect(brDateFromIso('2026-10-12')).toBe('12/10/2026')
+    expect(maskBrDate('12102026')).toBe('12/10/2026')
+    expect(maskBrDate('121')).toBe('12/1')
+    expect(isoFromBrDate('12/10/2026')).toBe('2026-10-12')
+    expect(isoFromBrDate('31/02/2026')).toBeNull()
+    expect(isoFromBrDate('12/10')).toBeNull()
+  })
+})
+
+describe('pausa das metas', () =>
+{
+  it('tem sempre um fim e acaba sozinha', () =>
+  {
+    const ref = new Date(2026, 9, 6, 12)
+    expect(lifeGoalsPauseUntil(1, ref)).toBe('2026-10-06')
+    expect(lifeGoalsPauseUntil(7, ref)).toBe('2026-10-12')
+    expect(lifeGoalsPauseUntil(9999, ref)).toBe('2026-11-04')
+    expect(lifeGoalsPaused('2026-10-06', ref)).toBe(true)
+    expect(lifeGoalsPaused('2026-10-05', ref)).toBe(false)
+    expect(lifeGoalsPaused(null, ref)).toBe(false)
   })
 })
