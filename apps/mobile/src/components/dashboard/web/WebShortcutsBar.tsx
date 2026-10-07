@@ -13,6 +13,7 @@ import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '..
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
 import { filterMetrics } from '../../../lib/appModules'
+import { usePanelBox } from '../../../ui/Panel'
 
 function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
 {
@@ -29,6 +30,7 @@ function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
 export function WebShortcutsBar()
 {
   const { colors } = useTheme()
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const openCapture = useCaptureStore((s) => s.openCapture)
@@ -89,7 +91,7 @@ export function WebShortcutsBar()
       <Text variant="section" style={{ fontSize: 16 }}>
         Atalhos
       </Text>
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
+      <View style={boxStyle}>
         {rows.map((row, i) => (
           <WebHoverable
             key={row.id}

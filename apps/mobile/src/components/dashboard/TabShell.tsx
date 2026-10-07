@@ -3,14 +3,14 @@ import { View } from 'react-native'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useTheme } from '../../theme/ThemeProvider'
 
-/** Teto opcional em layouts centrados (não usado na sidebar desktop). */
-export const DESKTOP_CONTENT_MAX = 1360
+/** Largura máxima do conteúdo no computador: além disso as linhas ficam compridas demais. */
+export const DESKTOP_CONTENT_MAX = 1180
 export const DESKTOP_GUTTER = 20
 export const DESKTOP_PAD_H = 28
 
 /**
  * Container responsivo.
- * Celular: largura útil total. Tablet: teto em useWorkspace. Desktop: painel cheio.
+ * Celular: largura útil total. Tablet: teto em useWorkspace. Desktop: coluna centrada até DESKTOP_CONTENT_MAX.
  */
 export function TabShell({ children }: { children: ReactNode })
 {
@@ -26,8 +26,8 @@ export function TabShell({ children }: { children: ReactNode })
         paddingBottom: showRail ? space.lg : space.md,
         // Celular: o gutter de 20 já vem do Screen
         paddingHorizontal: showRail ? DESKTOP_PAD_H : 0,
-        maxWidth: showRail ? undefined : contentMaxWidth,
-        alignSelf: showRail || !capped ? 'stretch' : 'center',
+        maxWidth: showRail ? DESKTOP_CONTENT_MAX : contentMaxWidth,
+        alignSelf: showRail || capped ? 'center' : 'stretch',
         width: '100%',
       }}
     >

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { View, Modal, Pressable, ScrollView } from 'react-native'
+import { View, Pressable, ScrollView } from 'react-native'
+import { Modal } from '../../src/ui/Modal'
 import { useRouter } from 'expo-router'
 import {
   partitionTodayTimeline,
@@ -211,6 +212,7 @@ export default function DashboardScreen()
 
   return (
     <Screen
+      wide
       scroll
       refreshing={loading}
       onRefresh={() => void refreshAll({ isGuest })}

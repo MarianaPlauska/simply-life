@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { View, ActivityIndicator, AppState } from 'react-native'
-import { Stack } from 'expo-router'
+import { View, ActivityIndicator, AppState, Platform } from 'react-native'
+import { Stack, usePathname } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { useFonts, Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold, Lexend_700Bold } from '@expo-google-fonts/lexend'
 import { Fraunces_500Medium, Fraunces_600SemiBold } from '@expo-google-fonts/fraunces'
@@ -20,6 +20,11 @@ import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { SpendGuardHost } from '../src/components/finance/SpendGuardHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
 import { useEloSync } from '../src/hooks/useEloSync'
+import { WebSidebar } from '../src/components/layout/WebSidebar'
+import { useWorkspace } from '../src/layout/useWorkspace'
+
+/** Telas sem barra lateral: entrada, cadastro e telas de tela cheia */
+const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao']
 
 function RootNavigator()
 {
@@ -33,6 +38,10 @@ function RootNavigator()
   const hydrateActivity = useActivityStore((s) => s.hydrate)
   const markOpen = useActivityStore((s) => s.markOpen)
   usePushBootstrap()
+  const pathname = usePathname()
+  const { showRail } = useWorkspace()
+  // web no computador: a barra lateral fica em todas as telas da conta, não só nas abas
+  const withSidebar = Platform.OS === 'web' && showRail && Boolean(userId) && !NO_SIDEBAR.some((p) => pathname.startsWith(p))
 
   useEffect(() =>
   {
@@ -86,62 +95,67 @@ function RootNavigator()
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.canvas },
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="tokens-preview" />
-        <Stack.Screen name="auth/callback" />
-        <Stack.Screen name="google-callback" />
-        <Stack.Screen name="reset-password" />
-        <Stack.Screen name="join/[code]" />
-        <Stack.Screen name="parceiro/[code]" />
-        <Stack.Screen name="setup" />
-        <Stack.Screen name="perfil" />
-        <Stack.Screen name="configuracoes" />
-        <Stack.Screen name="axel/historico" />
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="preferencias" />
-        <Stack.Screen
-          name="personalizar-inicio"
-          options={{ presentation: 'modal', headerShown: false }}
-        />
-        <Stack.Screen name="inteligencia" />
-        <Stack.Screen name="relatorios" />
-        <Stack.Screen name="calendario" />
-        <Stack.Screen name="anotacoes" />
-        <Stack.Screen name="foco" />
-        <Stack.Screen
-          name="academia/sessao"
-          options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
-        />
-        <Stack.Screen name="ofensiva" />
-        <Stack.Screen name="relatorio" />
-        <Stack.Screen name="juntos" />
-        <Stack.Screen name="colecao" />
-        <Stack.Screen name="desbloqueios" />
-        <Stack.Screen name="calm/box-breathing" />
-        <Stack.Screen name="calm/grounding" />
-        <Stack.Screen name="tcc/thought-record" />
-        <Stack.Screen name="tcc/behavioral-activation" />
-        <Stack.Screen name="tcc/gradual-exposure" />
-        <Stack.Screen name="planejar-amanha" />
-        <Stack.Screen name="ritmo" />
-        <Stack.Screen name="agenda" />
-        <Stack.Screen name="meu-jeito" />
-        <Stack.Screen
-          name="task/[id]"
-          options={{ presentation: 'modal', headerShown: false }}
-        />
-        <Stack.Screen
-          name="pasta/[id]"
-          options={{ presentation: 'modal', headerShown: false }}
-        />
-      </Stack>
+      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.canvas }}>
+        {withSidebar ? <WebSidebar /> : null}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.canvas },
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
+            <Stack.Screen name="tokens-preview" />
+            <Stack.Screen name="auth/callback" />
+            <Stack.Screen name="google-callback" />
+            <Stack.Screen name="reset-password" />
+            <Stack.Screen name="join/[code]" />
+            <Stack.Screen name="parceiro/[code]" />
+            <Stack.Screen name="setup" />
+            <Stack.Screen name="perfil" />
+            <Stack.Screen name="configuracoes" />
+            <Stack.Screen name="axel/historico" />
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="preferencias" />
+            <Stack.Screen
+              name="personalizar-inicio"
+              options={{ presentation: 'modal', headerShown: false }}
+            />
+            <Stack.Screen name="inteligencia" />
+            <Stack.Screen name="relatorios" />
+            <Stack.Screen name="calendario" />
+            <Stack.Screen name="anotacoes" />
+            <Stack.Screen name="foco" />
+            <Stack.Screen
+              name="academia/sessao"
+              options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
+            />
+            <Stack.Screen name="ofensiva" />
+            <Stack.Screen name="relatorio" />
+            <Stack.Screen name="juntos" />
+            <Stack.Screen name="colecao" />
+            <Stack.Screen name="desbloqueios" />
+            <Stack.Screen name="calm/box-breathing" />
+            <Stack.Screen name="calm/grounding" />
+            <Stack.Screen name="tcc/thought-record" />
+            <Stack.Screen name="tcc/behavioral-activation" />
+            <Stack.Screen name="tcc/gradual-exposure" />
+            <Stack.Screen name="planejar-amanha" />
+            <Stack.Screen name="ritmo" />
+            <Stack.Screen name="agenda" />
+            <Stack.Screen name="meu-jeito" />
+            <Stack.Screen
+              name="task/[id]"
+              options={{ presentation: 'modal', headerShown: false }}
+            />
+            <Stack.Screen
+              name="pasta/[id]"
+              options={{ presentation: 'modal', headerShown: false }}
+            />
+          </Stack>
+        </View>
+      </View>
       <CelebrationOverlay />
       <TaskRewardToast />
       <TaskEvolveSheet />

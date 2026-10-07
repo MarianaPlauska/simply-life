@@ -60,7 +60,7 @@ export function FinanceHomeTab({
 }: Props)
 {
   const { colors, space, chart } = useTheme()
-  const { showRail } = useWorkspace()
+  const { showRail, isDesktop } = useWorkspace()
   const insets = useSafeAreaInsets()
   const [detailId, setDetailId] = useState<string | null>(null)
   const [visibleCardId, setVisibleCardId] = useState<string | null>(null)
@@ -279,8 +279,9 @@ export function FinanceHomeTab({
     )
   }
 
-  return (
-    <View style={{ gap: space.sm + 2 }}>
+  // blocos da Carteira: no celular um embaixo do outro; no computador em duas colunas
+  const blocoSaldo = (
+    <>
       <View style={{ gap: 1 }}>
         <Text variant="section" style={{ fontSize: 16 }}>
           Olá, {displayName}
@@ -293,8 +294,8 @@ export function FinanceHomeTab({
       {/* saldo da conta separado: a área de cartões mostra só cartões de crédito */}
       <FinanceBalancePanel />
 
-      {/* Ações leves */}
-      <View style={{ flexDirection: 'row', gap: 12 }}>
+      {/* Ações leves (no computador ficam juntas, sem espalhar pela largura) */}
+      <View style={{ flexDirection: 'row', gap: 12, maxWidth: isDesktop ? 440 : undefined }}>
         {quickIcons.map((a) => (
           <PressableScale
             key={a.id}
@@ -321,7 +322,10 @@ export function FinanceHomeTab({
           </PressableScale>
         ))}
       </View>
-
+    </>
+  )
+  const blocoCartoes = (
+    <>
       {/* Cartões de crédito: fatura, disponível e vencimento de cada um */}
       <View style={{ gap: space.sm }}>
         <SectionHeader
@@ -342,11 +346,17 @@ export function FinanceHomeTab({
           onAdd={() => setCreateOpen(true)}
         />
       </View>
-
+    </>
+  )
+  const blocoPrevisao = (
+    <>
       {/* Etapa 2: salário a confirmar + quanto sobra no fim do mês */}
       <SalaryConfirmCard />
       <MonthProjectionCard />
-
+    </>
+  )
+  const blocoCategorias = (
+    <>
       {/* Categorias — tiles leves (ref. imagem) */}
       <View style={{ gap: space.sm }}>
         <SectionHeader
@@ -408,7 +418,10 @@ export function FinanceHomeTab({
           ))}
         </View>
       </View>
-
+    </>
+  )
+  const blocoTransacoes = (
+    <>
       {/* Orçamentos saiu daqui: repetia as 2 primeiras categorias com meta estimada. Os reais ficam em Análise. */}
       {/* Transações compactas */}
       <View style={{ gap: space.sm }}>
@@ -435,7 +448,35 @@ export function FinanceHomeTab({
           )}
         </Card>
       </View>
+    </>
+  )
 
+  if (isDesktop)
+  {
+    return (
+      <View style={{ flexDirection: 'row', gap: 24, alignItems: 'flex-start' }}>
+        <View style={{ flex: 1, minWidth: 0, gap: space.md }}>
+          {blocoSaldo}
+          {blocoPrevisao}
+          {blocoTransacoes}
+        </View>
+        <View style={{ width: 400, gap: space.md }}>
+          {blocoCartoes}
+          {blocoCategorias}
+        </View>
+        {sheets}
+        <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
+      </View>
+    )
+  }
+
+  return (
+    <View style={{ gap: space.sm + 2 }}>
+      {blocoSaldo}
+      {blocoCartoes}
+      {blocoPrevisao}
+      {blocoCategorias}
+      {blocoTransacoes}
       {sheets}
       <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
       <View style={{ marginBottom: fabClearance }} />

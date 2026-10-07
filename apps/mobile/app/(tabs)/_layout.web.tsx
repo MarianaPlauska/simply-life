@@ -3,7 +3,6 @@ import { Tabs, Redirect } from 'expo-router'
 import { TabBarWithFab } from '../../src/components/TabBarWithFab'
 import { CaptureSheet } from '../../src/components/CaptureSheet'
 import { CalmQuickFab } from '../../src/components/calm/CalmQuickFab'
-import { WebSidebar } from '../../src/components/layout/WebSidebar'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { useDataSync } from '../../src/hooks/useDataSync'
@@ -49,7 +48,7 @@ export default function TabsLayoutWeb()
         alignItems: showRail ? 'stretch' : undefined,
       }}
     >
-      {showRail ? <WebSidebar /> : null}
+      {/* a barra lateral mora no layout raiz (app/_layout.tsx): aparece em todas as telas */}
       <View style={{ flex: 1, minWidth: 0, height: '100%' }}>
         <Tabs
           tabBar={(props) => (showRail ? null : <TabBarWithFab {...props} />)}

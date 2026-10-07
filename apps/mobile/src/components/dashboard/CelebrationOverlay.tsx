@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { Modal, Pressable } from 'react-native'
+import { Pressable } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { Text, PrimaryButton, Card } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useGamificationStore } from '../../store/gamificationStore'
@@ -22,7 +23,7 @@ export function CelebrationOverlay()
   if (quiet) return null
 
   return (
-    <Modal visible={Boolean(celebration)} transparent animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={dismiss}>
+    <Modal fullWidth visible={Boolean(celebration)} transparent animationType={reduceMotion ? 'none' : 'fade'} onRequestClose={dismiss}>
       <Pressable
         onPress={dismiss}
         style={{

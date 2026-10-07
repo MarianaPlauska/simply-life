@@ -8,6 +8,8 @@ type Props = ViewProps & {
   tone?: 'default' | 'elevated' | 'widget' | 'hero' | 'inset'
   /** Faixa no topo (módulo), sem pintar o card inteiro */
   accentTop?: ModuleAccent
+  /** sem fundo, borda, sombra e recuo: quando o card está dentro de um Panel */
+  bare?: boolean
 }
 
 function accentColor(colors: ColorTokens, key: ModuleAccent): string
@@ -18,7 +20,7 @@ function accentColor(colors: ColorTokens, key: ModuleAccent): string
   return colors.axel
 }
 
-export function Card({ children, style, tone = 'default', accentTop, ...rest }: Props)
+export function Card({ children, style, tone = 'default', accentTop, bare, ...rest }: Props)
 {
   const { colors, radius, elevation, mode } = useTheme()
   const widget = tone === 'widget'
@@ -67,6 +69,8 @@ export function Card({ children, style, tone = 'default', accentTop, ...rest }: 
         borderTopColor: accentColor(colors, accentTop),
       }
     : {}
+
+  if (bare) return <View style={style} {...rest}>{children}</View>
 
   return (
     <View

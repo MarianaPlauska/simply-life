@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View, ScrollView, Pressable } from 'react-native'
 import { Icon } from '../ui/Icon'
+import { DateField } from '../ui/DateField'
 import type { ChartSeries } from '@simply-life/ui-tokens'
 import {
   todayIso,
@@ -349,11 +350,11 @@ export function CaptureTaskForm({ draft, onChange }: Props)
             />
           </View>
         </ScrollView>
-        <Field tone="sand"
-          label="Data (AAAA-MM-DD)"
+        <DateField
+          tone="sand"
+          label="Data"
           value={draft.due}
-          placeholder="2026-09-10"
-          onChangeText={(due) => patch({ due })}
+          onChange={(due) => patch({ due })}
         />
       </View>
 

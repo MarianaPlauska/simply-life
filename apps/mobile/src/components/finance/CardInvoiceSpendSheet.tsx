@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { cardFaturaAbertaDisplay, formatBRL, localTodayIso, type FinanceCard } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, Field } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

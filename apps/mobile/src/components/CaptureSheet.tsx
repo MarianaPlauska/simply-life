@@ -1,5 +1,4 @@
 import {
-  Modal,
   Pressable,
   View,
   KeyboardAvoidingView,
@@ -7,6 +6,8 @@ import {
   ScrollView,
   useWindowDimensions,
 } from 'react-native'
+import { Modal } from '../ui/Modal'
+import { useWorkspace } from '../layout/useWorkspace'
 import { Icon } from '../ui/Icon'
 import { useEffect, useState, Fragment, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -132,7 +133,9 @@ export function CaptureSheet()
   const { colors, space, radius } = useTheme()
   const insets = useSafeAreaInsets()
   const { height: windowH } = useWindowDimensions()
-  const sheetMaxH = Math.round(windowH * 0.88)
+  const { showRail } = useWorkspace()
+  // no computador a ficha não precisa da tela toda: altura de um formulário
+  const sheetMaxH = Math.round(showRail ? Math.min(windowH * 0.88, 600) : windowH * 0.88)
   const open = useCaptureStore((s) => s.open)
   const kind = useCaptureStore((s) => s.kind)
   const listId = useCaptureStore((s) => s.listId)
@@ -830,7 +833,8 @@ export function CaptureSheet()
               padding: space.lg,
               paddingBottom: Math.max(insets.bottom, space.lg),
               gap: space.md,
-              height: sheetMaxH,
+              // celular: altura fixa (o teclado sobe por cima); computador: só a altura do conteúdo
+              ...(showRail ? { maxHeight: sheetMaxH } : { height: sheetMaxH }),
               flexDirection: 'column',
             }}
           >
@@ -849,7 +853,7 @@ export function CaptureSheet()
               }}
             />
             <ScrollView
-              style={{ flex: 1, minHeight: 0 }}
+              style={showRail ? { flexGrow: 0, flexShrink: 1, minHeight: 0 } : { flex: 1, minHeight: 0 }}
               contentContainerStyle={{ gap: space.md, paddingBottom: 4 }}
               nestedScrollEnabled
               keyboardShouldPersistTaps="handled"

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Linking, Modal, Pressable, View } from 'react-native'
+import { Linking, Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import {
   clampItemGrams,
   clampItemKcal,

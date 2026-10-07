@@ -18,6 +18,7 @@
     "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "^14.1.0",
     "@opentelemetry/api": "^1.9.1",
+    "@react-native-community/datetimepicker": "8.2.0",
     "@simply-life/shared": "*",
     "@simply-life/ui-tokens": "*",
     "@supabase/supabase-js": "^2.45.4",

@@ -243,7 +243,7 @@ export default function JuntosScreen()
               title="Metas juntos precisam de uma conta"
               body="No modo convidado tudo fica neste aparelho. Com uma conta você chama amigos e vê aqui o progresso de vocês."
             />
-            <PrimaryButton label="Criar conta ou entrar" onPress={() => router.push('/login')} />
+            <PrimaryButton label="Criar conta ou entrar" style={{ alignSelf: 'center' }} onPress={() => router.push('/login')} />
           </Card>
         ) : (
           <>

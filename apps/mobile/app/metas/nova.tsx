@@ -19,6 +19,7 @@ import {
   type SharedGoalPreset,
 } from '@simply-life/shared'
 import { Screen, Text, Card, PrimaryButton, Field, Icon, PressableScale } from '../../src/ui'
+import { DateField } from '../../src/ui/DateField'
 import { StackHeader } from '../../src/components/layout/StackHeader'
 import { SelectPill } from '../../src/components/sharedGoals/SelectPill'
 import { GuestGoalsState } from '../../src/components/sharedGoals/GuestGoalsState'
@@ -29,22 +30,6 @@ import { useAuthStore } from '../../src/store/authStore'
 import { useSharedGoalsStore } from '../../src/store/sharedGoalsStore'
 import { createSharedGoal } from '../../src/lib/sync/sharedGoals'
 import { goalHref } from '../../src/lib/sharedGoalRoutes'
-
-/** "05/10" ou "05/10/2026" para YYYY-MM-DD */
-function parseDayMonth(text: string, today: string): string | null
-{
-  const m = text.trim().match(/^(\d{1,2})[/.](\d{1,2})(?:[/.](\d{2,4}))?$/)
-  if (!m) return null
-  const d = Number(m[1])
-  const mo = Number(m[2])
-  let y = m[3] ? Number(m[3]) : Number(today.slice(0, 4))
-  if (y < 100) y += 2000
-  if (d < 1 || d > 31 || mo < 1 || mo > 12) return null
-  const iso = `${y}-${String(mo).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-  // sem ano: se já passou, é do ano que vem
-  if (!m[3] && diffDaysIso(today, iso) < 0) return `${y + 1}${iso.slice(4)}`
-  return iso
-}
 
 function formatNumber(n: number): string
 {
@@ -78,8 +63,9 @@ export default function NovaMetaScreen()
   const [modo, setModo] = useState<SharedGoalModo>('pote')
   const [exibicao, setExibicao] = useState<SharedGoalExibicao>('faixas')
   const [duracao, setDuracao] = useState<SharedGoalDurationKey>('esta_semana')
-  const [inicioTxt, setInicioTxt] = useState('')
-  const [fimTxt, setFimTxt] = useState('')
+  // datas escolhidas (AAAA-MM-DD); vazio = ainda não escolhida
+  const [inicio, setInicio] = useState('')
+  const [fim, setFim] = useState('')
   const [alvoTxt, setAlvoTxt] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -87,8 +73,8 @@ export default function NovaMetaScreen()
   const spec = sharedGoalMetricaSpec(metrica)
   const custom = duracao === 'datas'
     ? {
-        inicio: parseDayMonth(inicioTxt, today) ?? today,
-        fim: parseDayMonth(fimTxt, today) ?? '',
+        inicio: inicio || today,
+        fim,
       }
     : undefined
   const period = sharedGoalDuration(duracao, today, custom && custom.fim ? { inicio: custom.inicio, fim: custom.fim } : undefined)
@@ -132,9 +118,14 @@ export default function NovaMetaScreen()
 
   const submit = async () =>
   {
-    if (duracao === 'datas' && (!parseDayMonth(inicioTxt, today) || !parseDayMonth(fimTxt, today)))
+    if (duracao === 'datas' && (!inicio || !fim))
     {
-      setErr('Escreva as datas como dia/mês, por exemplo 05/10')
+      setErr('Escolha o dia em que a meta começa e o dia em que termina')
+      return
+    }
+    if (duracao === 'datas' && fim < inicio)
+    {
+      setErr('O dia do fim vem antes do começo')
       return
     }
     const invalid = validateSharedGoalDraft(draft)
@@ -300,10 +291,10 @@ export default function NovaMetaScreen()
           {duracao === 'datas' ? (
             <View style={{ flexDirection: 'row', gap: space.sm }}>
               <View style={{ flex: 1 }}>
-                <Field label="Começa" value={inicioTxt} onChangeText={setInicioTxt} placeholder="dd/mm" keyboardType="numbers-and-punctuation" />
+                <DateField label="Começa" value={inicio} min={today} onChange={setInicio} />
               </View>
               <View style={{ flex: 1 }}>
-                <Field label="Termina" value={fimTxt} onChangeText={setFimTxt} placeholder="dd/mm" keyboardType="numbers-and-punctuation" />
+                <DateField label="Termina" value={fim} min={inicio || today} onChange={setFim} />
               </View>
             </View>
           ) : null}

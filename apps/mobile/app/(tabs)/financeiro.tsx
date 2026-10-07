@@ -73,6 +73,7 @@ export default function FinanceiroScreen()
 
   return (
     <Screen
+      wide
       scroll
       refreshing={loading}
       onRefresh={() => void refreshAll({ isGuest })}

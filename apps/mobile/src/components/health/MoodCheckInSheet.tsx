@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, TextInput, View } from 'react-native'
+import { Pressable, TextInput, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { moodLabel, humorDoDia, localTodayIso } from '@simply-life/shared'
 import { Card, PrimaryButton, Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

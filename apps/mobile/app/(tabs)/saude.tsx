@@ -70,6 +70,7 @@ export default function SaudeScreen()
 
   return (
     <Screen
+      wide
       scroll
       refreshing={loading}
       onRefresh={() => void refreshAll({ isGuest })}

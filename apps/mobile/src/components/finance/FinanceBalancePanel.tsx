@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import {
   BALANCE_TONE_LABEL,
   balanceRunway,

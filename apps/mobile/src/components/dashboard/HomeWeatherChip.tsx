@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   View,
   Pressable,
-  Modal,
   TextInput,
   Platform,
   AppState,
   ScrollView,
   type AppStateStatus,
 } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { Icon } from '../../ui/Icon'
 import * as Location from 'expo-location'
 import { Text, PrimaryButton, IconBadge, Card } from '../../ui'

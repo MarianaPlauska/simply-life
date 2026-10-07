@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
+import { DateField } from '../../ui/DateField'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { formatBRL, installmentGroupOf, parseBrlNumber, type FinanceCategory } from '@simply-life/shared'
 import { Text, Field, PrimaryButton } from '../../ui'
@@ -67,7 +69,7 @@ export function FinanceTxEditSheet({ txId, onClose }: Props)
     const v = parseBrlNumber(valor)
     if (!titulo.trim()) return setError('Escreva uma descrição')
     if (v == null) return setError('Valor inválido. Ex.: 45,90')
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) return setError('Data no formato AAAA-MM-DD')
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data)) return setError('Escolha o dia do lançamento')
     setSaving(true)
     const res = await updateFinanceTx(tx.id, { titulo: titulo.trim(), valor: v, data, tipo, categoria }, isGuest)
     if (res.ok && group && applyToNext)
@@ -154,7 +156,7 @@ export function FinanceTxEditSheet({ txId, onClose }: Props)
             </View>
             <Field label="Descrição" value={titulo} onChangeText={setTitulo} />
             <Field label="Valor (R$)" keyboardType="decimal-pad" value={valor} onChangeText={setValor} />
-            <Field label="Data (AAAA-MM-DD)" value={data} onChangeText={setData} autoCapitalize="none" />
+            <DateField label="Data" value={data} onChange={setData} />
             <Text variant="caption" muted>Categoria</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
               {categorias.map((c) => (

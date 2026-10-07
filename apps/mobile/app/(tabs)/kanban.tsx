@@ -113,11 +113,11 @@ export default function KanbanScreen()
     { id: 'lista', label: 'Lista' },
     { id: 'feitas', label: 'Feitas', count: doneCount },
     { id: 'rotina', label: 'Rotina' },
-    { id: 'pastas', label: 'Pastas' },
     { id: 'board', label: 'Prazos', count: openCount },
     // calendário é um jeito de ver as tarefas, não um relatório
     { id: 'calendario', label: 'Calendário' },
     { id: 'gantt', label: 'Gantt' },
+    { id: 'pastas', label: 'Pastas' },
     { id: 'relatorios', label: 'Relatórios' },
   ] as { id: Hub; label: string; count?: number }[]).filter((t) =>
     t.id === 'rotina' ? modules.on('routine') : modules.on('tasks'))
@@ -129,6 +129,7 @@ export default function KanbanScreen()
 
   return (
     <Screen
+      wide
       scroll
       backdrop={<KanbanBackdrop />}
       refreshing={loading}

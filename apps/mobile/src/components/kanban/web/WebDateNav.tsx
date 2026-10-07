@@ -51,7 +51,10 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
       }),
     [weekStart],
   )
-  const monthLabel = fromIso(selectedIso).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+  // "Out 2026": cabe ao lado das setas (o mês por extenso cortava e virava "Outubro De 2...")
+  const monthDate = fromIso(selectedIso)
+  const monthShort = monthDate.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')
+  const monthLabel = `${monthShort.charAt(0).toUpperCase()}${monthShort.slice(1)} ${monthDate.getFullYear()}`
 
   const shiftWeek = (dir: 1 | -1) =>
   {
@@ -63,7 +66,7 @@ export function WebDateNav({ selectedIso, onSelect }: Props)
   return (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Text variant="micro" muted numberOfLines={1} style={{ textTransform: 'capitalize', fontSize: 11 }}>
+        <Text variant="micro" muted numberOfLines={1} style={{ fontSize: 11 }}>
           {monthLabel}
         </Text>
         <View style={{ flexDirection: 'row', gap: 4 }}>

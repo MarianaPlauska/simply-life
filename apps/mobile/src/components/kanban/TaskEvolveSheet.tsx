@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { confirmDestructive } from '../../lib/confirmDestructive'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'

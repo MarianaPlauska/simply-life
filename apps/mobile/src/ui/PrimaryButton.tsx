@@ -3,6 +3,8 @@ import { Icon } from './Icon'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
 import { useTheme } from '../theme/ThemeProvider'
+import { useWorkspace } from '../layout/useWorkspace'
+import { IS_ANDROID, useRipple } from './ripple'
 
 /**
  * Hierarquia (heurística de ação):
@@ -23,6 +25,8 @@ type Props = PressableProps & {
   variant?: ButtonVariant
   size?: Size
   icon?: keyof typeof Icon.glyphMap
+  /** ocupa a linha toda também no computador */
+  block?: boolean
 }
 
 export function PrimaryButton({
@@ -31,12 +35,16 @@ export function PrimaryButton({
   variant = 'primary',
   size = 'md',
   icon,
+  block,
   disabled,
   style,
   ...rest
 }: Props)
 {
   const { colors, mode } = useTheme()
+  const { showRail } = useWorkspace()
+  // computador: botão do tamanho do texto, como em qualquer app de mesa; celular: linha toda
+  const compact = showRail && !block && variant !== 'link'
   const minHeight = size === 'sm' ? 44 : Math.max(44, COMPONENT_SPEC.PrimaryButton.minHeight)
   const radius = COMPONENT_SPEC.PrimaryButton.radius
   const isLink = variant === 'link'
@@ -77,12 +85,14 @@ export function PrimaryButton({
   const borderWidth = isGhost || isDismiss ? 1 : 0
   const borderColor = isDismiss ? iceLine : isGhost ? iceLine : 'transparent'
   const filled = isPrimary || isDanger || isSuccess
+  const ripple = useRipple(filled)
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled || loading}
+      android_ripple={ripple}
       style={({ pressed }) => [
         {
           minHeight: isLink ? 44 : minHeight,
@@ -95,8 +105,11 @@ export function PrimaryButton({
           backgroundColor: bg,
           borderWidth,
           borderColor,
-          opacity: disabled || loading ? 0.45 : pressed ? 0.9 : 1,
-          transform: [{ scale: pressed && !disabled && !loading ? 0.98 : 1 }],
+          opacity: disabled || loading ? 0.45 : pressed && !IS_ANDROID ? 0.9 : 1,
+          transform: [{ scale: pressed && !disabled && !loading && !IS_ANDROID ? 0.98 : 1 }],
+          // a onda do Android respeita o canto arredondado
+          overflow: 'hidden' as const,
+          ...(compact ? { alignSelf: 'flex-start' as const, minWidth: 120 } : null),
         },
         typeof style === 'function' ? undefined : style,
       ]}

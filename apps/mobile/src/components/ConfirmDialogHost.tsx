@@ -1,4 +1,5 @@
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../ui/Modal'
 import { Icon, PrimaryButton, Text } from '../ui'
 import { useTheme } from '../theme/ThemeProvider'
 import { useConfirmStore } from '../store/confirmStore'

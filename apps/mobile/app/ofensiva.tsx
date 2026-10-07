@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../src/ui/Modal'
 import { Redirect, useRouter } from 'expo-router'
 import { Icon } from '../src/ui/Icon'
 import {

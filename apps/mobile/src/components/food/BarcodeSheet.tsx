@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { Linking, Modal, Platform, Pressable, View } from 'react-native'
+import { Linking, Platform, Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera'
 import {
   OFF_ATTRIBUTION,

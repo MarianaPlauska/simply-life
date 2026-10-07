@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { View, Modal, Pressable, ScrollView } from 'react-native'
+import { View, Pressable, ScrollView } from 'react-native'
+import { Modal } from '../../src/ui/Modal'
 import { useRouter } from 'expo-router'
 import {
   partitionTodayTimeline,
@@ -28,14 +29,13 @@ import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
 import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
 import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
-import { LifeGoalMicroLine, LifeGoalSheet } from '../../src/components/dashboard/LifeGoalSheet'
-import { TabShell, DESKTOP_CONTENT_MAX } from '../../src/components/dashboard/TabShell'
-import { WebStatRow, type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
+import { TabShell } from '../../src/components/dashboard/TabShell'
+import { Panel } from '../../src/ui/Panel'
+import { type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
 import { WebTodayAgenda } from '../../src/components/dashboard/web/WebTodayAgenda'
 import { WebFinanceSnapshot } from '../../src/components/dashboard/web/WebFinanceSnapshot'
 import { WebBodyMetrics } from '../../src/components/dashboard/web/WebBodyMetrics'
 import { WebHydrationWidget } from '../../src/components/dashboard/web/WebHydrationWidget'
-import { WebMoodCheckIn } from '../../src/components/dashboard/web/WebMoodCheckIn'
 import { WebShortcutsBar } from '../../src/components/dashboard/web/WebShortcutsBar'
 import { webStyle } from '../../src/components/dashboard/web/webStyle'
 import { useWorkspace } from '../../src/layout/useWorkspace'
@@ -103,7 +103,6 @@ export default function DashboardScreenWeb()
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
 
-  const [goalOpen, setGoalOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const name = resolveAxelName({
     isGuest,
@@ -257,7 +256,7 @@ export default function DashboardScreenWeb()
   {
     // Navegador estreito (celular): mantém a mesma composição visual do app mobile.
     return (
-      <Screen scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
+      <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
         <TabShell>
           <HomeFitnessHero greet={greet} name={name} dateLabel={dateLabel} isAdmin={isAdmin} onAccount={() => setMenuOpen(true)} />
           <HomeTodayDashboard
@@ -305,67 +304,69 @@ export default function DashboardScreenWeb()
     )
   }
 
+  // Computador: as mesmas peças do app, em duas colunas.
+  // Esquerda = o seu dia (progresso, metas, agenda, dinheiro, corpo); direita = acompanhamento.
   return (
-    <Screen scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
-      <LifeGoalSheet visible={goalOpen} onClose={() => setGoalOpen(false)} />
+    <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
       <TabShell>
-        <View style={{ maxWidth: DESKTOP_CONTENT_MAX, width: '100%', alignSelf: 'center', gap: 28 }}>
-          <View style={{ gap: 12 }}>
-            <HomeFitnessHero
-              greet={greet}
-              name={name}
-              dateLabel={dateLabel}
-              isAdmin={isAdmin}
-              onAccount={() => setMenuOpen(true)}
+        <HomeFitnessHero
+          greet={greet}
+          name={name}
+          dateLabel={dateLabel}
+          isAdmin={isAdmin}
+          onAccount={() => setMenuOpen(true)}
+        />
+
+        <View
+          style={webStyle({
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1fr) 360px',
+            gap: 24,
+            alignItems: 'start',
+          })}
+        >
+          <View style={{ gap: 24, minWidth: 0 }}>
+            <HomeTodayDashboard
+              tasks={tasks}
+              finance={finance}
+              pending={openTasks.length}
+              doneToday={doneToday}
+              ritualSlot={
+                showMorningRitual ? (
+                  <HomeMorningRitual needSleep={showSleepForm} needMood={showMoodForm} />
+                ) : null
+              }
             />
-            <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />
-          </View>
-
-          <View style={{ gap: 20 }}>
-            <WebStatRow items={statItems} />
-
-            {showMorningRitual ? (
-              <WebMoodCheckIn needSleep={showSleepForm} needMood={showMoodForm} />
-            ) : null}
-          </View>
-
-          <View
-            style={webStyle({
-              display: 'grid',
-              gridTemplateColumns: '1fr 340px',
-              gap: 20,
-              alignItems: 'start',
-            })}
-          >
-            <View style={{ gap: 16, minWidth: 0 }}>
+            {/* uma superfície só para o que é consulta: agenda, dinheiro e corpo */}
+            <Panel>
               <WebTodayAgenda tasks={today} overdueCount={overdueToday} />
               <WebFinanceSnapshot finance={finance} />
               <WebBodyMetrics />
-            </View>
+            </Panel>
+          </View>
 
-            <View style={{ gap: 16, minWidth: 0 }}>
+          <View style={{ gap: 16, minWidth: 0 }}>
+            {/* avisos que só aparecem às vezes ficam por cima, cada um no seu cartão */}
+            <SalaryConfirmCard />
+            <DayPlanHomeCard />
+            <VisualDayCard />
+            <MoodWeekReportGate humor={humor} />
+            <Panel>
               <AxelDayBrief />
-              <SalaryConfirmCard />
-
-              <DayPlanHomeCard />
-
-              <VisualDayCard />
-
-              <MoodWeekReportGate humor={humor} />
               {waterOnHome ? <WebHydrationWidget /> : null}
               <EloHeatmap semanas={12} compact />
               <WebShortcutsBar />
-            </View>
+            </Panel>
           </View>
-
-          {prefsLoaded && !prefs.home_metrics_configured_at ? (
-            <Pressable onPress={() => router.push('/personalizar-inicio')} style={{ paddingVertical: 4 }}>
-              <Text variant="caption" muted>
-                Quando quiser, personalize seu Início.
-              </Text>
-            </Pressable>
-          ) : null}
         </View>
+
+        {prefsLoaded && !prefs.home_metrics_configured_at ? (
+          <Pressable onPress={() => router.push('/personalizar-inicio')} style={{ paddingVertical: 4 }}>
+            <Text variant="caption" muted>
+              Quando quiser, personalize seu Início.
+            </Text>
+          </Pressable>
+        ) : null}
       </TabShell>
 
       {accountMenu}

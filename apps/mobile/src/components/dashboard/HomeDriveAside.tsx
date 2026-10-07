@@ -14,6 +14,7 @@ import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { AxelSun } from '../AxelSun'
+import { useInPanel } from '../../ui/Panel'
 
 /**
  * AXEL compacto - fechado por padrão no mobile (só título + 1 frase + 1 passo).
@@ -22,6 +23,7 @@ export function AxelDayBrief()
 {
   const { colors, space } = useTheme()
   const { showRail } = useWorkspace()
+  const inPanel = useInPanel()
   const router = useRouter()
   const collapsed = usePrefsStore((s) => s.prefs.axel_home_collapsed) ?? false
   const patchPrefs = usePrefsStore((s) => s.patch)
@@ -64,7 +66,8 @@ export function AxelDayBrief()
   return (
     <Card
       tone="elevated"
-      style={{
+      bare={inPanel}
+      style={inPanel ? { gap: open ? space.md : space.xs } : {
         gap: open ? space.md : space.xs,
         borderRadius: 20,
         borderWidth: 1,

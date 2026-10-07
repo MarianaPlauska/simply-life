@@ -5,6 +5,7 @@ import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { usePanelBox } from '../../../ui/Panel'
 
 function timeLabel(mins: number | null): string
 {
@@ -25,6 +26,7 @@ type Props = {
 export function WebTodayAgenda({ tasks, overdueCount }: Props)
 {
   const { colors } = useTheme()
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
   const router = useRouter()
 
   return (
@@ -55,7 +57,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
         </WebHoverable>
       </View>
 
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
+      <View style={boxStyle}>
       {tasks.length === 0 ? (
         <View style={{ paddingHorizontal: 20, paddingBottom: 22 }}>
           <Text variant="caption" muted>

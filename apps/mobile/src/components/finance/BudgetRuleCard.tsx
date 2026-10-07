@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import {
   BUDGET_BUCKET_HINT,
   BUDGET_BUCKET_LABEL,

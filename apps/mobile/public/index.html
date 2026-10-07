@@ -59,6 +59,8 @@
         transition: background-color 9999s ease-out 0s;
       }
       ::selection { background-color: rgba(232, 115, 74, 0.30); }
+      /* Panel: bloco que não tem nada a mostrar não deixa faixa vazia */
+      [data-panel-item]:empty { display: none; }
     </style>
   </head>
 

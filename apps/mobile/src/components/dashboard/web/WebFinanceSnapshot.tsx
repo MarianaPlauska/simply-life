@@ -5,11 +5,13 @@ import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { usePanelBox } from '../../../ui/Panel'
 
 /** Painel de finanças no dashboard web: total do mês + últimos lançamentos. */
 export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
 {
   const { colors } = useTheme()
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 })
   const router = useRouter()
   const total = monthExpenseTotal(finance)
   const recent = [...finance].sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5)
@@ -32,7 +34,7 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
         </WebHoverable>
       </View>
 
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 }}>
+      <View style={boxStyle}>
         {recent.length === 0 ? (
           <Text variant="caption" muted>
             Sem lançamentos recentes.

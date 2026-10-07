@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import {
   LIFE_GOAL_TEMPLATES,
   LIFE_GOALS_MAX,
@@ -9,8 +10,6 @@ import {
   activeLifeGoals,
   addDaysIso,
   brDateFromIso,
-  isoFromBrDate,
-  maskBrDate,
   lifeGoalsPaused,
   lifeGoalsPauseUntil,
   LIFE_GOALS_PAUSE_OPTIONS,
@@ -28,6 +27,7 @@ import {
 } from '@simply-life/shared'
 import { Card, Text, Field, PrimaryButton, Chip, CloseButton } from '../../ui'
 import { Icon } from '../../ui/Icon'
+import { DateField } from '../../ui/DateField'
 import { useTheme } from '../../theme/ThemeProvider'
 import { usePrefsStore } from '../../store/prefsStore'
 import { hapticLight, hapticRestDone } from '../../lib/haptics'
@@ -59,8 +59,6 @@ export function LifeGoalSheet({ visible, onClose }: Props)
   const [title, setTitle] = useState('')
   const [cadence, setCadence] = useState<LifeGoalCadence>('week')
   const [dueDate, setDueDate] = useState('')
-  /** o dia como a pessoa escreve: DD/MM/AAAA */
-  const [dueText, setDueText] = useState('')
   /** "+": outros prazos e o dia escolhido à mão */
   const [customOpen, setCustomOpen] = useState(false)
   // saúde mental: prática, quantas vezes e o porquê
@@ -81,7 +79,6 @@ export function LifeGoalSheet({ visible, onClose }: Props)
     setCategory('custom')
     setCadence('week')
     setDueDate('')
-    setDueText('')
     setCustomOpen(false)
     setPratica(null)
     setVezes(3)
@@ -138,11 +135,10 @@ export function LifeGoalSheet({ visible, onClose }: Props)
     }
   }
 
-  /** prazo escolhido num atalho: guarda o ISO e mostra no campo como DD/MM/AAAA */
+  /** prazo escolhido num atalho ou no campo de data */
   const pickDue = (iso: string) =>
   {
     setDueDate(iso)
-    setDueText(brDateFromIso(iso))
     setError(null)
   }
 
@@ -371,20 +367,13 @@ export function LifeGoalSheet({ visible, onClose }: Props)
                         <Chip label="Em 15 dias" active={dueDate === addDaysIso(today, 15)} onPress={() => pickDue(addDaysIso(today, 15))} />
                         <Chip label="Fim do mês" active={dueDate === endOfMonthIso(today)} onPress={() => pickDue(endOfMonthIso(today))} />
                       </View>
-                      <Field
+                      {/* celular: calendário do sistema; web: DD/MM/AAAA digitado */}
+                      <DateField
                         tone="widget"
-                        label="Dia (DD/MM/AAAA)"
-                        placeholder={brDateFromIso(addDaysIso(today, 7))}
-                        value={dueText}
-                        keyboardType="number-pad"
-                        maxLength={10}
-                        onChangeText={(v) =>
-                        {
-                          const masked = maskBrDate(v)
-                          setDueText(masked)
-                          setDueDate(isoFromBrDate(masked) ?? '')
-                          setError(null)
-                        }}
+                        label="Dia"
+                        value={dueDate}
+                        min={today}
+                        onChange={pickDue}
                       />
                     </View>
                   ) : null}
@@ -571,12 +560,10 @@ function LifeGoalRow({ goal, seed, onChange }: { goal: LifeGoal; seed: number; o
           alignItems: 'center',
           gap: 8,
           minHeight: 44,
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          borderRadius: 14,
-          backgroundColor: colors.elevated,
-          borderWidth: 1,
-          borderColor: colors.cardRim,
+          // linha simples dentro do cartão de progresso, sem caixa dentro de caixa
+          paddingTop: 10,
+          borderTopWidth: 1,
+          borderTopColor: colors.featureTrack,
         }}
       >
         <Icon name="checkmark-circle" size={18} color={colors.health} />
@@ -607,11 +594,9 @@ function LifeGoalRow({ goal, seed, onChange }: { goal: LifeGoal; seed: number; o
     <View
       style={{
         gap: 6,
-        padding: 12,
-        borderRadius: 14,
-        backgroundColor: p.feita ? colors.healthMuted : colors.elevated,
-        borderWidth: 1,
-        borderColor: p.feita ? colors.health : colors.cardRim,
+        paddingTop: 10,
+        borderTopWidth: 1,
+        borderTopColor: colors.featureTrack,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>

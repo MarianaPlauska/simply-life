@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { TAB_BAR_CONTENT_HEIGHT } from '@simply-life/ui-tokens'

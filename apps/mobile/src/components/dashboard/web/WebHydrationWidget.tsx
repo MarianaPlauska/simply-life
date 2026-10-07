@@ -10,11 +10,13 @@ import { useWaterLogStore } from '../../../store/waterLogStore'
 import { WaterGoalEditor } from '../WaterGoalEditor'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { usePanelBox } from '../../../ui/Panel'
 
 /** Hidratação como barra de progresso horizontal + controles compactos — sem ilustração de garrafa. */
 export function WebHydrationWidget()
 {
   const { colors } = useTheme()
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 })
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits) ?? []
   const addWaterCup = useDataStore((s) => s.addWaterCup)
@@ -34,7 +36,7 @@ export function WebHydrationWidget()
   const pct = habitPct(agua)
 
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 }}>
+    <View style={boxStyle}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <View style={{ gap: 4 }}>
           <Text variant="section" style={{ fontSize: 16 }}>

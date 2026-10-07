@@ -1,4 +1,5 @@
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { describeDayPt, groupDecisionsByKind, type AxelDecisionEvent } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

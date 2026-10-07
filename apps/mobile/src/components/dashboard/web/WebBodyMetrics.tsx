@@ -18,6 +18,7 @@ import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../../store/waterLogStore'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { usePanelBox } from '../../../ui/Panel'
 
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
@@ -25,6 +26,7 @@ type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 export function WebBodyMetrics()
 {
   const { colors } = useTheme()
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits)
@@ -126,7 +128,7 @@ export function WebBodyMetrics()
       <Text variant="section" style={{ fontSize: 16 }}>
         Corpo na semana
       </Text>
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
+      <View style={boxStyle}>
         {rows.map((row, i) => (
           <WebHoverable
             key={row.id}
