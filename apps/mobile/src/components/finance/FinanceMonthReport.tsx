@@ -26,6 +26,12 @@ import { useDataStore } from '../../store/dataStore'
 import { useCategoryMetaStore } from '../../store/categoryMetaStore'
 import { colorMapFromMeta, labelMapFromMeta } from '../../lib/categoryMeta'
 import { useWorkspace } from '../../layout/useWorkspace'
+import { Panel } from '../../ui/Panel'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WEB_DISPLAY_FONT } from '../dashboard/web/webTypography'
+import { useFinanceDeskGrid } from './desk/deskLayout'
+import { DeskPanelHeader } from './desk/DeskPanelHeader'
+import { FinanceCategoryList } from './desk/FinanceCategoryList'
 
 const MONTH_OFFSETS = [0, 1, 2, 3, 4, 5]
 
@@ -41,6 +47,8 @@ export function FinanceMonthReport()
 {
   const { colors, space, radius, chart } = useTheme()
   const { isDesktop } = useWorkspace()
+  const desk = useWebDesk()
+  const deskGrid = useFinanceDeskGrid()
   const txs = useDataStore((s) => s.finance)
   const catMap = useCategoryMetaStore((s) => s.map)
   const [offset, setOffset] = useState(0)
@@ -65,6 +73,105 @@ export function FinanceMonthReport()
   }))
   const pctReceita = receitas > 0 ? Math.round((naConta / receitas) * 100) : 0
   const monthTitle = ref.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+
+  const monthChips = (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <View style={{ flexDirection: 'row', gap: 12 }}>
+        {MONTH_OFFSETS.map((n) => (
+          <Chip
+            key={n}
+            label={n === 0 ? 'Este mês' : monthChipLabel(n)}
+            active={offset === n}
+            onPress={() => setOffset(n)}
+          />
+        ))}
+      </View>
+    </ScrollView>
+  )
+
+  // computador: relatório e donut na mesma linha, gráfico largo ao lado do ranking
+  if (desk)
+  {
+    const stat = (label: string, value: string, color: string) => (
+      <View style={{ gap: 2 }}>
+        <Text variant="caption" muted>{label}</Text>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 36, color, fontVariant: ['tabular-nums'] }}>
+          {value}
+        </Text>
+      </View>
+    )
+    return (
+      <View style={{ gap: 16 }}>
+        {monthChips}
+        <View style={deskGrid.grid}>
+          <Panel style={deskGrid.span2}>
+            <View style={{ gap: 16 }}>
+              <DeskPanelHeader title="Relatório do mês" subtitle={monthTitle} />
+              <View style={{ flexDirection: 'row', columnGap: 48, rowGap: 12, flexWrap: 'wrap' }}>
+                {stat('Receitas', formatBRL(receitas), colors.health)}
+                {stat('Saiu do saldo', formatBRL(naConta), colors.ink)}
+                {stat('No cartão', formatBRL(noCartao), colors.ink)}
+                {stat('Saldo do mês', formatBRL(saldoMes), saldoMes >= 0 ? colors.health : colors.danger)}
+              </View>
+              <View style={{ gap: 8 }}>
+                <View style={{ height: 8, borderRadius: radius.pill, backgroundColor: colors.hairline, overflow: 'hidden' }}>
+                  <View
+                    style={{
+                      width: receitas > 0 ? `${Math.min(100, pctReceita)}%` : '0%',
+                      height: '100%',
+                      backgroundColor: colors.finance,
+                    }}
+                  />
+                </View>
+                <Text variant="caption" muted>
+                  {receitas > 0
+                    ? `${pctReceita}% da receita já saiu da conta. Crédito só deixa o saldo quando a fatura é paga; no total, ${formatBRL(gastos)} em gastos.`
+                    : 'Lance uma receita para ver o ritmo do caixa.'}
+                </Text>
+              </View>
+            </View>
+          </Panel>
+          <Panel>
+            <View style={{ alignItems: 'center', gap: 12 }}>
+              <View style={{ alignSelf: 'stretch' }}>
+                <DeskPanelHeader title="Gastos por categoria" />
+              </View>
+              {ranking.length === 0 ? (
+                <EmptyState title="Sem gastos" body="Capture um gasto para ver o donut." />
+              ) : (
+                <FinanceDonut
+                  segments={donutSegments}
+                  centerLabel="Gasto total"
+                  centerValue={formatBRL(gastos)}
+                  size={200}
+                  strokeWidth={20}
+                />
+              )}
+            </View>
+          </Panel>
+
+          <Panel style={deskGrid.span2}>
+            <View style={{ gap: 8 }}>
+              <DeskPanelHeader title="Receita e gastos por dia" subtitle="Linha verde entra, cobre sai" />
+              <ExpenseSparkline
+                series={series}
+                incomeSeries={incomeSeries}
+                height={220}
+                color={colors.finance}
+                incomeColor={colors.health}
+              />
+            </View>
+          </Panel>
+          <Panel>
+            <View>
+              <DeskPanelHeader title="Ranking" subtitle="Maiores categorias" />
+              <FinanceCategoryList rows={ranking} />
+            </View>
+          </Panel>
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View style={{ gap: space.md }}>

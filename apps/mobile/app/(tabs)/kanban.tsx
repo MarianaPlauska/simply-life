@@ -34,16 +34,32 @@ import { WaitingReportPane } from '../../src/components/kanban/reports/WaitingRe
 import { authedApi } from '../../src/lib/integrationsApi'
 import { fetchDecisionEvents } from '../../src/lib/sync/decisionLog'
 import { useBoardReplanStore } from '../../src/store/boardReplanStore'
+import { useWebDesk } from '../../src/components/dashboard/web/webBox'
+import { WebKanbanHeader } from '../../src/components/kanban/web/WebKanbanHeader'
+import { WebKanbanTabs } from '../../src/components/kanban/web/WebKanbanTabs'
+import { WebBoardActions } from '../../src/components/kanban/web/WebBoardActions'
+import { useSectionState, usePublishSectionTabs } from '../../src/store/sectionNavStore'
 
 type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'calendario' | 'gantt' | 'relatorios'
 type ReportMode = 'semana' | 'esperas' | 'desempenho' | 'overview' | 'timeline' | 'ritmo'
+
+const REPORT_TABS: { id: ReportMode; label: string }[] = [
+  { id: 'semana', label: 'Semana' },
+  { id: 'esperas', label: 'Esperas' },
+  { id: 'desempenho', label: 'Desempenho' },
+  { id: 'overview', label: 'Visão geral' },
+  { id: 'timeline', label: 'Timeline' },
+  { id: 'ritmo', label: 'Ritmo' },
+]
 
 export default function KanbanScreen()
 {
   const { relatorio } = useLocalSearchParams<{ relatorio?: string }>()
   const { space } = useTheme()
+  // computador: cabeçalho e barra de abas de site; celular segue igual
+  const desk = useWebDesk()
   const modules = useModules()
-  const [hub, setHub] = useState<Hub>(() =>
+  const [hub, setHub] = useSectionState<Hub>('kanban', () =>
     relatorio === 'esperas' ? 'relatorios' : modules.on('tasks') ? 'lista' : 'rotina')
   const [report, setReport] = useState<ReportMode>(relatorio === 'esperas' ? 'esperas' : 'semana')
   const [logOpen, setLogOpen] = useState(false)
@@ -121,6 +137,8 @@ export default function KanbanScreen()
     { id: 'relatorios', label: 'Relatórios' },
   ] as { id: Hub; label: string; count?: number }[]).filter((t) =>
     t.id === 'rotina' ? modules.on('routine') : modules.on('tasks'))
+  // computador: as abas principais ficam na barra lateral, como subitens de Tarefas
+  usePublishSectionTabs('kanban', hubTabs)
   const hubShown = hubTabs.some((t) => t.id === hub) ? hub : (hubTabs[0]?.id ?? hub)
   useEffect(() =>
   {
@@ -136,47 +154,65 @@ export default function KanbanScreen()
       onRefresh={() => void refreshAll({ isGuest })}
     >
       <TabShell>
-        <ScreenIntro title="Tarefas" subtitle="Uma coisa de cada vez, no seu ritmo." />
+        {desk ? (
+          <>
+            <WebKanbanHeader
+              actions={hub === 'board' || hub === 'lista' || hub === 'pastas' ? <WebBoardActions /> : null}
+            />
+          </>
+        ) : (
+          <>
+            <ScreenIntro title="Tarefas" subtitle="Uma coisa de cada vez, no seu ritmo." />
 
-        {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
-          <KanbanOrchestratorBar tasks={tasks} />
-        ) : null}
+            {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
+              <KanbanOrchestratorBar tasks={tasks} />
+            ) : null}
 
-        {/* abas mais perto do título: o conteúdo da aba sobe junto */}
-        <View style={{ marginTop: -12 }}>
-          <SubNavTabs
-            accent="axel"
-            tabs={hubTabs}
-            value={hub}
-            onChange={setHub}
-          />
-        </View>
+            {/* abas mais perto do título: o conteúdo da aba sobe junto */}
+            <View style={{ marginTop: -12 }}>
+              <SubNavTabs
+                accent="axel"
+                tabs={hubTabs}
+                value={hub}
+                onChange={setHub}
+              />
+            </View>
+          </>
+        )}
 
         {hub === 'relatorios' ? (
           <View style={{ gap: space.xs }}>
             {/* sub-abas no mesmo sublinhado do resto do app, sem pílula escura */}
-            <SubNavTabs
-              accent="axel"
-              tabs={[
-                { id: 'semana', label: 'Semana' },
-                { id: 'esperas', label: 'Esperas' },
-                { id: 'desempenho', label: 'Desempenho' },
-                { id: 'overview', label: 'Visão geral' },
-                { id: 'timeline', label: 'Timeline' },
-                { id: 'ritmo', label: 'Ritmo' },
-              ]}
-              value={report}
-              onChange={setReport}
-            />
+            {desk ? (
+              <WebKanbanTabs
+                size="sm"
+                tabs={REPORT_TABS}
+                value={report}
+                onChange={setReport}
+                right={
+                  <PrimaryButton
+                    label="Histórico de decisões"
+                    icon="reload-outline"
+                    variant="link"
+                    size="sm"
+                    onPress={() => setLogOpen(true)}
+                  />
+                }
+              />
+            ) : (
+              <SubNavTabs accent="axel" tabs={REPORT_TABS} value={report} onChange={setReport} />
+            )}
             {/* ações secundárias como links, numa linha só; Gmail só aparece com conta */}
             <View style={{ flexDirection: 'row', gap: space.md, flexWrap: 'wrap', alignItems: 'center' }}>
-              <PrimaryButton
-                label="Histórico de decisões"
-                icon="reload-outline"
-                variant="link"
-                size="sm"
-                onPress={() => setLogOpen(true)}
-              />
+              {desk ? null : (
+                <PrimaryButton
+                  label="Histórico de decisões"
+                  icon="reload-outline"
+                  variant="link"
+                  size="sm"
+                  onPress={() => setLogOpen(true)}
+                />
+              )}
               {!isGuest ? (
               <PrimaryButton
                 label="Sincronizar Gmail"
@@ -214,7 +250,7 @@ export default function KanbanScreen()
           </View>
         ) : null}
 
-        <View style={{ marginTop: space.sm }}>
+        <View style={{ marginTop: desk ? 4 : space.sm }}>
           {hub === 'lista' ? (
             <KanbanListPane tasks={tasks} onSeeDone={() => setHub('feitas')} />
           ) : null}

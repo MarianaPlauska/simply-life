@@ -38,6 +38,12 @@ import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
 import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 import { MonthProjectionCard, SalaryConfirmCard } from './FinanceForecastCards'
 import { FinanceBalancePanel } from './FinanceBalancePanel'
+import { Panel } from '../../ui/Panel'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { useFinanceDeskGrid } from './desk/deskLayout'
+import { DeskPanelHeader } from './desk/DeskPanelHeader'
+import { FinanceTxTable } from './desk/FinanceTxTable'
+import { FinanceCategoryList } from './desk/FinanceCategoryList'
 
 type Props = {
   onGoMovimentos: () => void
@@ -61,6 +67,8 @@ export function FinanceHomeTab({
 {
   const { colors, space, chart } = useTheme()
   const { showRail, isDesktop } = useWorkspace()
+  const desk = useWebDesk()
+  const deskGrid = useFinanceDeskGrid()
   const insets = useSafeAreaInsets()
   const [detailId, setDetailId] = useState<string | null>(null)
   const [visibleCardId, setVisibleCardId] = useState<string | null>(null)
@@ -95,10 +103,11 @@ export function FinanceHomeTab({
     () => [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 6),
     [txs],
   )
-  const ranking = useMemo(
-    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)).slice(0, 4),
+  const rankingAll = useMemo(
+    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)),
     [txs, catMap, chart],
   )
+  const ranking = rankingAll.slice(0, 4)
 
   useEffect(() =>
   {
@@ -450,6 +459,111 @@ export function FinanceHomeTab({
       </View>
     </>
   )
+
+  // computador: painel de finanças de verdade (grade alinhada, ações em barra, extrato em tabela)
+  if (desk)
+  {
+    const recentDesk = [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 8)
+    return (
+      <View style={{ gap: 16 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <Text variant="caption" muted>
+            Resumo de {currentMonthLabel()}
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <PrimaryButton
+              label="Novo gasto"
+              size="sm"
+              icon="add"
+              onPress={() => openCapture('expense', null, { studio: true })}
+              style={{ minWidth: 0 }}
+            />
+            <PrimaryButton
+              label="Nova receita"
+              size="sm"
+              variant="ghost"
+              icon="download-outline"
+              onPress={() => openCapture('expense', null, { studio: true, lancamento: 'receita' })}
+              style={{ minWidth: 0 }}
+            />
+            <PrimaryButton
+              label="Cartões"
+              size="sm"
+              variant="ghost"
+              icon="card-outline"
+              onPress={() => (onGoCartoes ? onGoCartoes() : onCardsFocusChange(true))}
+              style={{ minWidth: 0 }}
+            />
+            <PrimaryButton
+              label="Análise"
+              size="sm"
+              variant="ghost"
+              icon="analytics"
+              onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
+              style={{ minWidth: 0 }}
+            />
+          </View>
+        </View>
+
+        {/* aviso que só aparece no dia do salário: largura toda, acima da grade */}
+        <SalaryConfirmCard />
+
+        <View style={deskGrid.grid}>
+          <Panel>
+            <FinanceBalancePanel />
+          </Panel>
+          <Panel>
+            <MonthProjectionCard />
+          </Panel>
+          <Panel>
+            <View>
+              <DeskPanelHeader
+                title="Cartões"
+                actionLabel={cards.length ? 'Gerenciar' : undefined}
+                onAction={onGoCartoes ?? (() => onCardsFocusChange(true))}
+              />
+              <CardCarousel
+                cards={cards}
+                selectedId={null}
+                onSelect={(id) =>
+                {
+                  setVisibleCardId(id)
+                  setDetailId(id)
+                }}
+                onVisibleChange={setVisibleCardId}
+                onAdd={() => setCreateOpen(true)}
+                maxCardWidth={300}
+              />
+            </View>
+          </Panel>
+
+          <Panel style={deskGrid.span2}>
+            <View>
+              <DeskPanelHeader title="Últimos lançamentos" actionLabel="Ver extrato" onAction={onGoMovimentos} />
+              {recentDesk.length === 0 ? (
+                <EmptyState title="Nada por aqui" body="Seu próximo gasto aparece nesta lista." />
+              ) : (
+                <FinanceTxTable rows={recentDesk} onPress={setEditingTx} />
+              )}
+            </View>
+          </Panel>
+          <Panel>
+            <View>
+              <DeskPanelHeader
+                title="Gastos por categoria"
+                subtitle={currentMonthLabel()}
+                actionLabel="Ver análise"
+                onAction={onGoAnalise ?? onGoMovimentos}
+              />
+              <FinanceCategoryList rows={rankingAll.slice(0, 6)} onPress={onGoAnalise ?? onGoMovimentos} />
+            </View>
+          </Panel>
+        </View>
+        {sheets}
+        <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
+      </View>
+    )
+  }
 
   if (isDesktop)
   {

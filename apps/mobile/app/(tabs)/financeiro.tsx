@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { useFocusEffect } from 'expo-router'
-import { formatBRL, cashExpenseTotal, monthIncomeTotal } from '@simply-life/shared'
+import { formatBRL, cashExpenseTotal, creditExpenseTotal, monthIncomeTotal } from '@simply-life/shared'
 import { Screen, SubNavTabs } from '../../src/ui'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
@@ -22,14 +22,18 @@ import {
 import { useFinanceFocusStore } from '../../src/store/financeFocusStore'
 import { useModules } from '../../src/hooks/useModules'
 import { visibleFinanceTabs } from '../../src/components/finance/financeNav'
+import { useWebDesk } from '../../src/components/dashboard/web/webBox'
+import { WebStatRow } from '../../src/components/dashboard/web/WebStatRow'
+import { useSectionState, usePublishSectionTabs } from '../../src/store/sectionNavStore'
 
 export default function FinanceiroScreen()
 {
   const { colors } = useTheme()
-  const [tab, setTab] = useState<FinanceMainTab>('inicio')
+  const desk = useWebDesk()
+  const [tab, setTab] = useSectionState<FinanceMainTab>('financeiro', 'inicio')
   const [cardsFocus, setCardsFocus] = useState(false)
   const [movSub, setMovSub] = useState<MovimentosSubTab>('diario')
-  const [contasSub, setContasSub] = useState<ContasSubTab>('conta')
+  const [contasSub, setContasSub] = useSectionState<ContasSubTab>('financeiroContas', 'conta')
   const [analiseSub, setAnaliseSub] = useState<AnaliseSubTab>('visao-geral')
   const txs = useDataStore((s) => s.finance)
   const loading = useDataStore((s) => s.loading)
@@ -70,6 +74,18 @@ export default function FinanceiroScreen()
   const receitas = monthIncomeTotal(txs)
   const saldo = receitas - despesas
   const movCount = txs.filter((t) => t.tipo === 'despesa' || t.tipo === 'receita').length
+  const tabsWithCount = mainTabs.map((t) => ({
+    ...t,
+    count: t.id === 'movimentos' ? movCount : undefined,
+  }))
+  // computador: as abas principais ficam na barra lateral, como subitens de Finanças
+  usePublishSectionTabs('financeiro', tabsWithCount)
+
+  // trocar de aba pela barra lateral sai do foco nos cartões
+  useEffect(() =>
+  {
+    setCardsFocus(false)
+  }, [tab])
 
   return (
     <Screen
@@ -80,16 +96,14 @@ export default function FinanceiroScreen()
     >
       <TabShell>
         {!(tab === 'inicio' && cardsFocus) && (
-          <ScreenIntro title="Carteira" subtitle="Saldo, cartões, extrato e relatórios." />
+          // computador: o título repete o nome da barra lateral; "Carteira" fica só na sub aba
+          <ScreenIntro title={desk ? 'Finanças' : 'Carteira'} subtitle="Saldo, cartões, extrato e relatórios." />
         )}
 
-        {!(tab === 'inicio' && cardsFocus) && (
+        {!desk && !(tab === 'inicio' && cardsFocus) && (
           <SubNavTabs
             accent="finance"
-            tabs={mainTabs.map((t) => ({
-              ...t,
-              count: t.id === 'movimentos' ? movCount : undefined,
-            }))}
+            tabs={tabsWithCount}
             value={tab}
             onChange={(next) =>
             {
@@ -127,7 +141,24 @@ export default function FinanceiroScreen()
             <FinanceMovimentosTab
               subTab={movSub}
               onSubTabChange={setMovSub}
-              summary={
+              summary={desk ? (
+                // computador: números soltos numa linha, como no Início
+                <WebStatRow
+                  items={[
+                    { id: 'out', label: 'Saiu da conta', value: formatBRL(despesas), icon: 'arrow-up', color: colors.ink },
+                    { id: 'in', label: 'Entradas', value: formatBRL(receitas), icon: 'download-outline', color: colors.health },
+                    {
+                      id: 'net',
+                      label: 'Saldo do mês',
+                      value: formatBRL(saldo),
+                      icon: 'wallet-outline',
+                      color: saldo >= 0 ? colors.health : colors.danger,
+                    },
+                    { id: 'card', label: 'No cartão', value: formatBRL(creditExpenseTotal(txs)), icon: 'card-outline', color: colors.ink },
+                    { id: 'count', label: 'Lançamentos', value: String(movCount), icon: 'list', color: colors.ink },
+                  ]}
+                />
+              ) : (
                 <MetricCards
                   items={[
                     {
@@ -143,7 +174,7 @@ export default function FinanceiroScreen()
                     },
                   ]}
                 />
-              }
+              )}
             />
           )}
           {tab === 'contas' && (

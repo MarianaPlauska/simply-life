@@ -18,6 +18,9 @@ import { useDuePaidStore } from '../../store/duePaidStore'
 import { useSalaryStore } from '../../store/salaryStore'
 import { useBillAnswersStore } from '../../store/billAnswersStore'
 import { currentMonthProjection } from '../../lib/monthProjection'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WEB_DISPLAY_FONT } from '../dashboard/web/webTypography'
+import { useDeskBigNumber } from './desk/deskLayout'
 
 const MONTHS_SHORT = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
 
@@ -129,18 +132,38 @@ export function MonthProjectionCard()
 
   const future = useMemo(() => futureCommitments(txs), [txs])
   const tone = projection.tom === 'apertado' ? colors.attention : projection.tom === 'atencao' ? colors.finance : colors.health
+  const desk = useWebDesk()
+  const bigNumber = useDeskBigNumber()
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
-      <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" accessibilityLabel="Ver a conta do fim do mês" style={{ gap: 6 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Text variant="caption" muted style={{ flex: 1 }}>Fim do mês (dia {projection.fimDoMes.slice(8, 10)})</Text>
-          <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkMuted} />
-        </View>
-        <Text variant="title" style={{ fontSize: 26 }} color={tone}>
+      <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" accessibilityLabel="Ver a conta do fim do mês" style={{ gap: desk ? 12 : 6 }}>
+        {desk ? (
+          // computador: mesmo cabeçalho dos outros blocos da grade
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Text variant="section" style={{ flex: 1, fontSize: 18, lineHeight: 26 }}>Fim do mês</Text>
+            <Text variant="caption" muted>dia {projection.fimDoMes.slice(8, 10)}</Text>
+            <Icon name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.inkMuted} />
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Text variant="caption" muted style={{ flex: 1 }}>Fim do mês (dia {projection.fimDoMes.slice(8, 10)})</Text>
+            <Icon name={open ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkMuted} />
+          </View>
+        )}
+        <Text
+          variant="title"
+          style={desk ? { fontFamily: WEB_DISPLAY_FONT, ...bigNumber, fontVariant: ['tabular-nums'] } : { fontSize: 26 }}
+          color={tone}
+        >
           {projection.sobra >= 0 ? `Sobra ~${formatBRL(projection.sobra)}` : `Faltam ~${formatBRL(Math.abs(projection.sobra))}`}
         </Text>
-        <Text variant="body" style={{ fontSize: 14 }}>{projectionMessage(projection, formatBRL)}</Text>
+        <Text variant={desk ? 'caption' : 'body'} muted={desk} style={desk ? undefined : { fontSize: 14 }}>
+          {projectionMessage(projection, formatBRL)}
+        </Text>
+        {desk && !open ? (
+          <Text variant="caption" style={{ color: colors.axel, fontFamily: 'Lexend_500Medium' }}>Ver a conta</Text>
+        ) : null}
       </Pressable>
 
       {projection.vencidas.map((v) => (
@@ -205,7 +228,7 @@ export function MonthProjectionCard()
               </Text>
             </View>
           ) : null}
-          <Text variant="micro" muted>
+          <Text variant={desk ? 'label' : 'micro'} muted>
             Como calculamos: o saldo de hoje, menos as contas que ainda vencem e as faturas, mais o que ainda vai entrar, menos o gasto médio do dia a dia.
           </Text>
         </View>

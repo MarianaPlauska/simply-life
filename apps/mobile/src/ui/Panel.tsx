@@ -1,5 +1,6 @@
-import { Children, createContext, useContext, type ReactNode } from 'react'
-import { View, type StyleProp, type ViewStyle } from 'react-native'
+import { Children, createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
+import { Platform, View, type StyleProp, type ViewStyle } from 'react-native'
+import { useWebDesk } from '../components/dashboard/web/webBox'
 import { useTheme } from '../theme/ThemeProvider'
 
 const InPanel = createContext(false)
@@ -18,16 +19,46 @@ export function useInPanel(): boolean
 export function Panel({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> })
 {
   const { colors } = useTheme()
+  const desk = useWebDesk()
   const items = Children.toArray(children)
+  const ref = useRef<View>(null)
+
+  // web: bloco que retornou null deixa um item vazio; esconde o item e, se todos
+  // estiverem vazios, o painel inteiro (não depende do :has do CSS do navegador)
+  useEffect(() =>
+  {
+    if (Platform.OS !== 'web') return
+    const el = ref.current as unknown as HTMLElement | null
+    if (!el || typeof MutationObserver === 'undefined') return
+    const sync = () =>
+    {
+      let any = false
+      el.querySelectorAll<HTMLElement>(':scope > div > [data-panel-item]').forEach((it) =>
+      {
+        const has = it.childElementCount > 0
+        it.style.display = has ? '' : 'none'
+        if (has) any = true
+      })
+      el.style.display = any ? '' : 'none'
+    }
+    sync()
+    const mo = new MutationObserver(sync)
+    mo.observe(el, { childList: true, subtree: true })
+    return () => mo.disconnect()
+  }, [])
 
   return (
     <View
+      ref={ref}
+      // na web, Panel sem nenhum bloco com conteúdo some (regra em app/+html.tsx)
+      {...({ dataSet: { panel: '' } } as object)}
       style={[
         {
-          borderRadius: 16,
+          borderRadius: desk ? 16 : 12,
           backgroundColor: colors.elevated,
           borderWidth: 1,
-          borderColor: colors.hairline,
+          // computador (web): cartão branco, contorno só de leve
+          borderColor: desk ? colors.cardRim : colors.hairline,
           overflow: 'hidden',
         },
         style,
@@ -52,7 +83,7 @@ function PanelItem({ children }: { children: ReactNode })
     <View
       // na web, item vazio some (bloco que retornou null não deixa espaço); dataSet é do react-native-web
       {...({ dataSet: { panelItem: '' } } as object)}
-      style={{ paddingHorizontal: 20, paddingVertical: 18, borderTopWidth: 1, borderTopColor: colors.hairline }}
+      style={{ paddingHorizontal: 20, paddingVertical: 16, borderTopWidth: 1, borderTopColor: colors.hairline }}
     >
       {children}
     </View>

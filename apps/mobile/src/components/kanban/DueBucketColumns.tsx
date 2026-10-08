@@ -16,6 +16,10 @@ import { useCaptureStore } from '../../store/captureStore'
 import { MoveTaskSheet } from './MoveTaskSheet'
 import { MoveStatusSheet } from './MoveStatusSheet'
 import { KanbanBoardCard } from './KanbanBoardCard'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WebBoardColumns } from './web/WebBoardColumns'
+import { WebSegmented } from './web/WebListParts'
+import { LEX } from './web/kanbanWeb'
 
 type Props = {
   tasks: MobileTask[]
@@ -76,8 +80,10 @@ function BoardColumn({
 
 export function DueBucketColumns({ tasks }: Props)
 {
-  const { space } = useTheme()
+  const { space, colors } = useTheme()
   const { isMobile } = useWorkspace()
+  // computador: alternador e colunas todas à vista; celular sem mudança
+  const desk = useWebDesk()
   const { width: winW } = useWindowDimensions()
   const isGuest = useAuthStore((s) => s.isGuest)
   const toggleTaskDone = useDataStore((s) => s.toggleTaskDone)
@@ -110,17 +116,40 @@ export function DueBucketColumns({ tasks }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <PaneTitle
-        title="Prazos"
-        subtitle={kind === 'agenda'
-          ? 'Compromissos e tarefas contra o tempo livre, das 8h às 18h.'
-          : 'Tarefas abertas agrupadas por quando vencem. Alterne para ver por status ou pela agenda.'}
-      />
-      <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
-        <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
-        <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />
-        <Chip label="Agenda" active={kind === 'agenda'} onPress={() => setKind('agenda')} />
-      </View>
+      {desk ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <WebSegmented
+            options={[
+              { id: 'prazo', label: 'Por prazo' },
+              { id: 'status', label: 'Por status' },
+              { id: 'agenda', label: 'Agenda' },
+            ]}
+            value={kind}
+            onChange={setKind}
+          />
+          <Text style={[LEX.regular, { fontSize: 14, lineHeight: 20, color: colors.inkMuted }]}>
+            {kind === 'agenda'
+              ? 'Compromissos e tarefas contra o tempo livre, das 8h às 18h.'
+              : kind === 'status'
+                ? 'Tarefas por andamento. O botão de mover aparece ao passar o mouse no cartão.'
+                : 'Tarefas abertas por quando vencem. O botão de mover aparece ao passar o mouse no cartão.'}
+          </Text>
+        </View>
+      ) : (
+        <>
+          <PaneTitle
+            title="Prazos"
+            subtitle={kind === 'agenda'
+              ? 'Compromissos e tarefas contra o tempo livre, das 8h às 18h.'
+              : 'Tarefas abertas agrupadas por quando vencem. Alterne para ver por status ou pela agenda.'}
+          />
+          <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
+            <Chip label="Prazo" active={kind === 'prazo'} onPress={() => setKind('prazo')} />
+            <Chip label="Status" active={kind === 'status'} onPress={() => setKind('status')} />
+            <Chip label="Agenda" active={kind === 'agenda'} onPress={() => setKind('agenda')} />
+          </View>
+        </>
+      )}
 
       {/* Agenda: carga da semana e prazos em risco, perto de onde os prazos moram */}
       {kind === 'agenda' ? <AgendaLoadPane tasks={tasks} embedded /> : null}
@@ -135,7 +164,9 @@ export function DueBucketColumns({ tasks }: Props)
         />
       ) : null}
 
-      {isMobile ? (
+      {desk ? (
+        <WebBoardColumns groups={groups} onToggle={toggle} onMove={setMoveId} onAdd={add} />
+      ) : isMobile ? (
         <View style={{ gap: 24 }}>
           {filled.map((g) => (
             <BoardColumn

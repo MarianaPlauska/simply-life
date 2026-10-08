@@ -8,6 +8,7 @@ import { useAuthStore } from '../../../store/authStore'
 import { useDataStore } from '../../../store/dataStore'
 import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { WebHoverable } from './WebHoverable'
+import { useInPanel } from '../../../ui/Panel'
 import { webStyle } from './webStyle'
 
 const MOOD_ICONS: Record<number, keyof typeof Icon.glyphMap> = {
@@ -45,6 +46,8 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
   const [mood, setMood] = useState<number | null>(hoje?.humor ?? null)
   const [nota, setNota] = useState(hoje?.nota ?? '')
   const [saving, setSaving] = useState(false)
+  const [noteOpen, setNoteOpen] = useState(false)
+  const inPanel = useInPanel()
 
   const showSleep = needSleep && !sleepLogged
   const showMood = needMood
@@ -78,116 +81,95 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
     }
   }
 
+  // um botão pequeno, do tamanho do texto (não esticado para preencher a linha)
+  const chip = (key: string | number, label: string, selected: boolean, onPress: () => void, icon?: keyof typeof Icon.glyphMap, tint?: string) => (
+    <WebHoverable
+      key={key}
+      onPress={onPress}
+      accessibilityLabel={label}
+      style={(hovered) => webStyle({
+        height: 36,
+        paddingHorizontal: 14,
+        borderRadius: 18,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: selected ? `${tint ?? colors.axel}22` : hovered ? colors.surface : 'transparent',
+        borderWidth: 1,
+        borderColor: selected ? (tint ?? colors.axel) : colors.hairline,
+        cursor: 'pointer',
+      })}
+    >
+      {icon ? <Icon name={icon} size={16} color={selected ? tint ?? colors.axel : colors.inkMuted} /> : null}
+      <Text variant="caption" style={{ color: selected ? tint ?? colors.axel : colors.ink }}>
+        {label}
+      </Text>
+    </WebHoverable>
+  )
+
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 }}>
+    <View style={inPanel ? { gap: 12 } : { borderRadius: 12, backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.hairline, paddingVertical: 12, paddingHorizontal: 20, gap: 12 }}>
       {showSleep ? (
-        <View style={{ gap: 12 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text variant="caption" style={{ fontWeight: '700' }}>
-              Sono · meta {meta}h
-            </Text>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-            {QUICK_HOURS.map((h) => (
-              <WebHoverable
-                key={h}
-                onPress={() =>
-                {
-                  setHours(h)
-                  void saveSleep(h)
-                }}
-                style={webStyle({
-                  height: 30,
-                  paddingHorizontal: 12,
-                  borderRadius: 8,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: hours === h ? colors.axelFill : colors.surface,
-                  borderWidth: 1,
-                  borderColor: hours === h ? colors.axel : colors.hairline,
-                  cursor: 'pointer',
-                })}
-              >
-                <Text
-                  variant="caption"
-                  style={{ color: hours === h ? colors.axelOnFill : colors.ink, fontWeight: '600' }}
-                >
-                  {formatSleepHours(h)}
-                </Text>
-              </WebHoverable>
-            ))}
-          </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <Text variant="bodyStrong" style={{ marginRight: 8 }}>
+            Quanto você dormiu?
+          </Text>
+          {QUICK_HOURS.map((h) =>
+            chip(h, formatSleepHours(h), hours === h, () =>
+            {
+              setHours(h)
+              void saveSleep(h)
+            }),
+          )}
         </View>
       ) : null}
 
       {showMood ? (
-        <View style={{ gap: 12 }}>
-          <Text variant="caption" style={{ fontWeight: '700' }}>
-            Como você está agora?
-          </Text>
-          <View style={{ flexDirection: 'row', gap: 8 }}>
-            {[1, 2, 3, 4, 5].map((m) =>
-            {
-              const selected = (mood ?? hoje?.humor) === m
-              return (
-                <WebHoverable
-                  key={m}
-                  onPress={() =>
-                  {
-                    setMood(m)
-                    void saveMood(m)
-                  }}
-                  accessibilityLabel={moodLabel(m)}
-                  style={webStyle({
-                    flex: 1,
-                    height: 44,
-                    borderRadius: 10,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexDirection: 'row',
-                    gap: 8,
-                    backgroundColor: selected ? `${moodColor(m)}22` : colors.surface,
-                    borderWidth: 1,
-                    borderColor: selected ? moodColor(m) : colors.hairline,
-                    cursor: 'pointer',
-                  })}
-                >
-                  <Icon name={MOOD_ICONS[m]} size={16} color={selected ? moodColor(m) : colors.inkMuted} />
-                  <Text
-                    variant="micro"
-                    style={{ color: selected ? moodColor(m) : colors.inkMuted, fontWeight: '700' }}
-                  >
-                    {moodLabel(m)}
-                  </Text>
-                </WebHoverable>
-              )
-            })}
-          </View>
-          <TextInput
-            value={nota}
-            onChangeText={setNota}
-            onBlur={() =>
-            {
-              const m = mood ?? hoje?.humor
-              if (m != null) void saveMood(m)
-            }}
-            placeholder="Uma linha sobre agora… (opcional)"
-            placeholderTextColor={colors.inkFaint}
-            style={{
-              height: 36,
-              borderRadius: 8,
-              paddingHorizontal: 12,
-              fontSize: 13,
-              color: colors.ink,
-              backgroundColor: colors.surface,
-              borderWidth: 1,
-              borderColor: colors.hairline,
-            }}
-          />
-          {saving ? (
-            <Text variant="micro" muted>
-              Salvando…
+        <View style={{ gap: 10 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <Text variant="bodyStrong" style={{ marginRight: 8 }}>
+              Como você está agora?
             </Text>
+            {[1, 2, 3, 4, 5].map((m) =>
+              chip(m, moodLabel(m), (mood ?? hoje?.humor) === m, () =>
+              {
+                setMood(m)
+                void saveMood(m)
+              }, MOOD_ICONS[m], moodColor(m)),
+            )}
+            {!noteOpen ? (
+              <WebHoverable onPress={() => setNoteOpen(true)} style={webStyle({ paddingHorizontal: 8, cursor: 'pointer' })}>
+                <Text variant="caption" color={colors.axel}>
+                  Escrever uma linha
+                </Text>
+              </WebHoverable>
+            ) : null}
+            {saving ? (
+              <Text variant="caption" muted>
+                Salvando…
+              </Text>
+            ) : null}
+          </View>
+          {noteOpen ? (
+            <TextInput
+              autoFocus
+              value={nota}
+              onChangeText={setNota}
+              placeholder="Uma linha sobre agora, depois escolha como está"
+              placeholderTextColor={colors.inkFaint}
+              style={{
+                height: 40,
+                maxWidth: 560,
+                borderRadius: 10,
+                paddingHorizontal: 14,
+                fontSize: 15,
+                fontFamily: 'Lexend_400Regular',
+                color: colors.ink,
+                backgroundColor: colors.surface,
+                borderWidth: 1,
+                borderColor: colors.hairline,
+              }}
+            />
           ) : null}
         </View>
       ) : null}

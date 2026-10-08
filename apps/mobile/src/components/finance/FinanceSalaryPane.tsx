@@ -14,6 +14,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { SelectChip } from '../CaptureTaskForm'
 import { competenciaLabel, emptySalary, scheduleSummary, useSalaryStore } from '../../store/salaryStore'
 import type { StoredSalary } from '../../lib/sync/salary'
+import { useDeskMicro } from './desk/deskLayout'
 
 const KIND_LABEL: Record<OvertimeKind, string> = {
   util: 'Dia útil',
@@ -33,6 +34,9 @@ const num = (t: string) => parseBrlNumber(t) ?? (Number(t.replace(',', '.')) || 
 export function FinanceSalaryPane()
 {
   const { colors, space } = useTheme()
+  const micro = useDeskMicro()
+  // computador: campo no tom da página para aparecer dentro do cartão
+  const fieldStyle = micro === 'label' ? { backgroundColor: colors.canvas } : undefined
   const salary = useSalaryStore((s) => s.salary)
   const entries = useSalaryStore((s) => s.entries)
   const confirmations = useSalaryStore((s) => s.confirmations)
@@ -89,7 +93,7 @@ export function FinanceSalaryPane()
         <Text variant="caption" muted>
           Entra previsto na conta do fim do mês e no aviso antes de gastar. No dia, o app pergunta se caiu.
         </Text>
-        <Text variant="micro" muted>Faz hora extra? Em Editar, escolha "Com horas extras".</Text>
+        <Text variant={micro} muted>Faz hora extra? Em Editar, escolha "Com horas extras".</Text>
       </Card>
     )
   }
@@ -127,7 +131,7 @@ export function FinanceSalaryPane()
             value={forecast.liquido != null ? formatBRL(forecast.liquido) : '--'}
             strong={forecast.liquido != null}
           />
-          <Text variant="micro" muted>
+          <Text variant={micro} muted>
             Estimativa. Convenção coletiva, faltas e descontos podem mudar o valor; no dia você confirma o que caiu de verdade.
           </Text>
         </Card>
@@ -136,6 +140,7 @@ export function FinanceSalaryPane()
       <Card tone="elevated" style={{ gap: space.sm }}>
         <Text variant="section">Horas extras</Text>
         <Field
+          style={fieldStyle}
           tone="sand"
           label="Anotar horas"
           placeholder='Ex.: "fiz 2h30 ontem", "3h domingo", "1h noturna"'
@@ -173,7 +178,7 @@ export function FinanceSalaryPane()
             />
           ))}
           {salary.taxaDesconto != null ? (
-            <Text variant="micro" muted>
+            <Text variant={micro} muted>
               Desconto médio aprendido: {(salary.taxaDesconto * 100).toFixed(1).replace('.', ',')}% do bruto.
             </Text>
           ) : null}
@@ -196,6 +201,9 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
 function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onDone: () => void; canCancel: boolean })
 {
   const { colors, space } = useTheme()
+  const micro = useDeskMicro()
+  // computador: campo no tom da página para aparecer dentro do cartão
+  const fieldStyle = micro === 'label' ? { backgroundColor: colors.canvas } : undefined
   const save = useSalaryStore((s) => s.save)
   const saving = useSalaryStore((s) => s.saving)
   const error = useSalaryStore((s) => s.error)
@@ -249,7 +257,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
         <SelectChip label="5º dia útil" active={f.quinto} onPress={() => patch({ quinto: true })} />
         <SelectChip label="Dia fixo" active={!f.quinto} onPress={() => patch({ quinto: false })} />
       </View>
-      {!f.quinto ? <Field label="Dia do mês" keyboardType="number-pad" value={f.diaPag} onChangeText={(v) => patch({ diaPag: v })} /> : null}
+      {!f.quinto ? <Field style={fieldStyle} label="Dia do mês" keyboardType="number-pad" value={f.diaPag} onChangeText={(v) => patch({ diaPag: v })} /> : null}
     </>
   )
 
@@ -265,10 +273,10 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
           ? 'O salário entra previsto todo mês. No dia do pagamento, você confirma o valor que caiu.'
           : 'O salário entra previsto todo mês. Você anota as horas extras e, no dia do pagamento, confirma o valor que caiu.'}
       </Text>
-      <Field label="Nome" value={f.titulo} onChangeText={(v) => patch({ titulo: v })} />
+      <Field style={fieldStyle} label="Nome" value={f.titulo} onChangeText={(v) => patch({ titulo: v })} />
       {simples ? (
         <>
-          <Field label="Quanto cai na conta por mês" placeholder="Ex.: 2980" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
+          <Field style={fieldStyle} label="Quanto cai na conta por mês" placeholder="Ex.: 2980" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
           {payWhen}
           {error ? <Text variant="caption" color={colors.danger}>{error}</Text> : null}
           <PrimaryButton label="Salvar salário" loading={saving} onPress={() => void save(simpleDraft).then((ok) => ok && onDone())} />
@@ -276,16 +284,16 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
         </>
       ) : (
       <>
-      <Field label="Salário base, sem horas extras (bruto)" placeholder="Ex.: 3500" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
+      <Field style={fieldStyle} label="Salário base, sem horas extras (bruto)" placeholder="Ex.: 3500" keyboardType="decimal-pad" value={f.base} onChangeText={(v) => patch({ base: v })} />
 
       <Text variant="caption" muted>Seu horário</Text>
       <View style={{ flexDirection: 'row', gap: 12 }}>
-        <View style={{ flex: 1 }}><Field label="Entrada" placeholder="08:00" value={f.entrada} onChangeText={(v) => patch({ entrada: v })} /></View>
-        <View style={{ flex: 1 }}><Field label="Saída" placeholder="17:00" value={f.saida} onChangeText={(v) => patch({ saida: v })} /></View>
+        <View style={{ flex: 1 }}><Field style={fieldStyle} label="Entrada" placeholder="08:00" value={f.entrada} onChangeText={(v) => patch({ entrada: v })} /></View>
+        <View style={{ flex: 1 }}><Field style={fieldStyle} label="Saída" placeholder="17:00" value={f.saida} onChangeText={(v) => patch({ saida: v })} /></View>
       </View>
       <View style={{ flexDirection: 'row', gap: 12 }}>
-        <View style={{ flex: 1 }}><Field label="Almoço (min)" keyboardType="number-pad" value={f.intervalo} onChangeText={(v) => patch({ intervalo: v })} /></View>
-        <View style={{ flex: 1 }}><Field label="Dias por semana" keyboardType="number-pad" value={f.dias} onChangeText={(v) => patch({ dias: v })} /></View>
+        <View style={{ flex: 1 }}><Field style={fieldStyle} label="Almoço (min)" keyboardType="number-pad" value={f.intervalo} onChangeText={(v) => patch({ intervalo: v })} /></View>
+        <View style={{ flex: 1 }}><Field style={fieldStyle} label="Dias por semana" keyboardType="number-pad" value={f.dias} onChangeText={(v) => patch({ dias: v })} /></View>
       </View>
       <View style={{ padding: 12, borderRadius: 12, backgroundColor: colors.hairline }}>
         <Text variant="bodyStrong" style={{ fontSize: 14 }}>
@@ -293,7 +301,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
             ? `${sched.semanais}h por semana → divisor ${sched.divisor}${sched.valorHora ? ` · sua hora vale ${formatBRL(sched.valorHora)}` : ''}`
             : 'Confira entrada e saída (formato 08:00)'}
         </Text>
-        <Text variant="micro" muted>Regra da CLT: divisor = horas semanais ÷ 6 × 30. 44h → 220 · 40h → 200.</Text>
+        <Text variant={micro} muted>Regra da CLT: divisor = horas semanais ÷ 6 × 30. 44h → 220 · 40h → 200.</Text>
       </View>
 
       <Text variant="caption" muted>Adicional de hora extra em dia útil</Text>
@@ -311,6 +319,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
 
       {payWhen}
       <Field
+          style={fieldStyle}
         label="Fechamento do ponto (dia, opcional)"
         placeholder="Vazio = mês inteiro. Ex.: 20"
         keyboardType="number-pad"
@@ -318,6 +327,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
         onChangeText={(v) => patch({ fechamento: v })}
       />
       <Field
+          style={fieldStyle}
         label="Seu líquido num mês sem hora extra (opcional)"
         placeholder={initial.taxaDesconto != null ? `Desconto atual: ${(initial.taxaDesconto * 100).toFixed(1)}%` : 'Ex.: 2980, para estimar o líquido'}
         keyboardType="decimal-pad"

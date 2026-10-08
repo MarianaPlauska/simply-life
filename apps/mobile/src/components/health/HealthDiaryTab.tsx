@@ -7,6 +7,7 @@ import {
   weeklyMoodReview,
   isSoftMoodDay,
   AGUA_META_COPOS,
+  moodGoalPeriodStats,
   type HumorRegistro,
 } from '@simply-life/shared'
 import { Text } from '../../ui'
@@ -17,6 +18,9 @@ import { useBodyWeekStore } from '../../store/bodyWeekStore'
 import { MoodGoalAlertCard } from '../dashboard/MoodGoalAlertCard'
 import { HealthDiaryStudio } from './diary/HealthDiaryStudio'
 import { DiaryDaySummary } from './diary/DiaryDaySummary'
+import { HealthDiaryDesk } from './diary/HealthDiaryDesk'
+import { Panel } from '../../ui/Panel'
+import { useWebDesk } from '../dashboard/web/webBox'
 
 const DAILY_PROMPTS = [
   'O que pesou mais hoje?',
@@ -51,6 +55,9 @@ export function HealthDiaryTab()
   const isGuest = useAuthStore((s) => s.isGuest)
   const lifeGoal = usePrefsStore((s) => s.prefs.life_goal)
   const [nota, setNota] = useState('')
+  const desk = useWebDesk()
+  const goalStats = useMemo(() => moodGoalPeriodStats(humor, lifeGoal), [humor, lifeGoal])
+  const goalAlert = Boolean(goalStats && goalStats.alertLevel !== 'none')
 
   const slices = useMemo(() => buildMoodDistribution(humor), [humor])
   const agregados = useMemo(() => aggregateHumorByDay(humor), [humor])
@@ -117,6 +124,39 @@ export function HealthDiaryTab()
       </Text>
     </View>
   ) : undefined
+
+  const studioProps = {
+    alertSlot,
+    daySlot: <DiaryDaySummary />,
+    last,
+    prompt,
+    nota,
+    onNotaChange: setNota,
+    onMood: (m: number) => void addHumor(m, nota.trim() || undefined, isGuest),
+    onSaveNote: saveNote,
+    onOpenNotes: () => router.push('/anotacoes'),
+    total,
+    slices,
+    days: agregados,
+    week,
+    comNota,
+    habits: habitCorrelation,
+  }
+
+  // computador: grade de painéis; celular segue com o diário em pilha
+  if (desk)
+  {
+    return (
+      <View style={{ gap: 16 }}>
+        {goalAlert ? (
+          <Panel>
+            <MoodGoalAlertCard humor={humor} goal={lifeGoal} inline />
+          </Panel>
+        ) : null}
+        <HealthDiaryDesk {...studioProps} />
+      </View>
+    )
+  }
 
   return (
     <View style={{ gap: 16 }}>

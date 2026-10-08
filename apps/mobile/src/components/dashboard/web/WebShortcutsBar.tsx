@@ -30,7 +30,7 @@ function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
 export function WebShortcutsBar()
 {
   const { colors } = useTheme()
-  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const openCapture = useCaptureStore((s) => s.openCapture)

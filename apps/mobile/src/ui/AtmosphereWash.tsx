@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../theme/ThemeProvider'
 import { useWorkspace } from '../layout/useWorkspace'
@@ -8,6 +8,9 @@ export function AtmosphereWash()
 {
   const { mode, colors } = useTheme()
   const { showRail } = useWorkspace()
+
+  // computador: fundo liso; a névoa no monitor vira uma mancha que cansa a vista
+  if (Platform.OS === 'web' && showRail) return null
 
   if (mode !== 'dark')
   {

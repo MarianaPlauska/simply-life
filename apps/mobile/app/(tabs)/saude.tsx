@@ -18,11 +18,13 @@ import {
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useModules } from '../../src/hooks/useModules'
 import { visibleHealthTabs, visibleCuidadosTabs } from '../../src/components/health/healthNav'
+import { useSectionState, usePublishSectionTabs } from '../../src/store/sectionNavStore'
+import { useWebDesk } from '../../src/components/dashboard/web/webBox'
 
 export default function SaudeScreen()
 {
   const params = useLocalSearchParams<{ section?: string; care?: string }>()
-  const [section, setSection] = useState<HealthSection>('diario')
+  const [section, setSection] = useSectionState<HealthSection>('saude', 'diario')
   const [cuidadosTab, setCuidadosTab] = useState<CuidadosTab>('hidratacao')
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
@@ -32,6 +34,9 @@ export default function SaudeScreen()
   const modules = useModules()
   const mainTabs = visibleHealthTabs(modules.on)
   const careTabs = visibleCuidadosTabs(modules.on)
+  // computador: as abas principais ficam na barra lateral, como subitens de Saúde
+  const desk = useWebDesk()
+  usePublishSectionTabs('saude', mainTabs)
 
   // aba escolhida que ficou escondida: vai para a primeira que aparece
   useEffect(() =>
@@ -79,12 +84,14 @@ export default function SaudeScreen()
         {/* Título fixo "Saúde": a aba interna já diz Diário/Hoje/Cuidados/Apoio. */}
         <ScreenIntro title="Saúde" subtitle={intro.subtitle} />
 
-        <SubNavTabs
-          accent="health"
-          tabs={mainTabs}
-          value={section}
-          onChange={setSection}
-        />
+        {desk ? null : (
+          <SubNavTabs
+            accent="health"
+            tabs={mainTabs}
+            value={section}
+            onChange={setSection}
+          />
+        )}
 
         <View style={{ marginTop: space.xs }}>
           {section === 'hoje' && (

@@ -41,4 +41,6 @@ const webInputStyles = `
   }
   /* Panel: bloco que não tem nada a mostrar não deixa faixa vazia */
   [data-panel-item]:empty { display: none; }
+  /* Panel inteiro sem nenhum bloco com conteúdo (ex.: aviso que não se aplica hoje) some da grade */
+  [data-panel]:not(:has([data-panel-item]:not(:empty))) { display: none; }
 `

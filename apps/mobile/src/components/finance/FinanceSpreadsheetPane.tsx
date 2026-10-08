@@ -10,6 +10,12 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { ExpenseCategoryChips } from './ExpenseCategoryChips'
+import { Panel } from '../../ui/Panel'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { useFinanceDeskGrid } from './desk/deskLayout'
+import { DeskPanelHeader } from './desk/DeskPanelHeader'
+import { FinanceTxTable } from './desk/FinanceTxTable'
+import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 
 /** Planilha tabular simplificada (native) / edição linha a linha */
 export function FinanceSpreadsheetPane()
@@ -24,6 +30,9 @@ export function FinanceSpreadsheetPane()
   const [tipo, setTipo] = useState<'despesa' | 'receita'>('despesa')
   const [categoria, setCategoria] = useState<FinanceCategory>('outros')
   const [msg, setMsg] = useState('')
+  const desk = useWebDesk()
+  const deskGrid = useFinanceDeskGrid()
+  const [editingTx, setEditingTx] = useState<string | null>(null)
 
   const addRow = async () =>
   {
@@ -45,30 +54,32 @@ export function FinanceSpreadsheetPane()
     setMsg('Linha adicionada')
   }
 
-  return (
-    <View style={{ gap: space.md }}>
-      <Card tone="elevated" style={{ gap: space.sm }}>
-        <Text variant="section">Nova linha</Text>
-        <Field label="Descrição" value={desc} onChangeText={setDesc} />
+  // computador: o campo fica no tom da página para aparecer dentro do painel
+  const fieldStyle = desk ? { backgroundColor: colors.canvas } : undefined
+  const offVariant = desk ? ('ghost' as const) : ('secondary' as const)
+  const form = (
+    <>
+        <Field label="Descrição" value={desc} onChangeText={setDesc} style={fieldStyle} />
         <Field
           label="Valor"
           keyboardType="decimal-pad"
           value={valor}
           onChangeText={setValor}
+          style={fieldStyle}
         />
-        <Field label="Data (YYYY-MM-DD)" value={data} onChangeText={setData} />
+        <Field label="Data (YYYY-MM-DD)" value={data} onChangeText={setData} style={fieldStyle} />
         <View style={{ flexDirection: 'row', gap: space.sm }}>
           <PrimaryButton
             label="Despesa"
             size="sm"
-            variant={tipo === 'despesa' ? 'primary' : 'secondary'}
+            variant={tipo === 'despesa' ? 'primary' : offVariant}
             onPress={() => setTipo('despesa')}
             style={{ flex: 1 }}
           />
           <PrimaryButton
             label="Receita"
             size="sm"
-            variant={tipo === 'receita' ? 'primary' : 'secondary'}
+            variant={tipo === 'receita' ? 'primary' : offVariant}
             onPress={() => setTipo('receita')}
             style={{ flex: 1 }}
           />
@@ -82,6 +93,36 @@ export function FinanceSpreadsheetPane()
             {msg}
           </Text>
         ) : null}
+    </>
+  )
+
+  // computador: formulário numa coluna, a planilha (tabela) nas outras duas
+  if (desk)
+  {
+    return (
+      <View style={deskGrid.grid}>
+        <Panel>
+          <View style={{ gap: space.sm }}>
+            <DeskPanelHeader title="Nova linha" subtitle="Lançamento manual, sem duplicar" />
+            {form}
+          </View>
+        </Panel>
+        <Panel style={deskGrid.span2}>
+          <View>
+            <DeskPanelHeader title="Lançamentos" subtitle={`${Math.min(txs.length, 40)} mais recentes`} />
+            <FinanceTxTable rows={txs.slice(0, 40)} onPress={setEditingTx} />
+          </View>
+        </Panel>
+        <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
+      </View>
+    )
+  }
+
+  return (
+    <View style={{ gap: space.md }}>
+      <Card tone="elevated" style={{ gap: space.sm }}>
+        <Text variant="section">Nova linha</Text>
+        {form}
       </Card>
       <Card tone="elevated" style={{ gap: 12 }}>
         <Text variant="section">Lançamentos</Text>

@@ -15,6 +15,7 @@ import { usePrefsStore } from '../../store/prefsStore'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { AxelSun } from '../AxelSun'
 import { useInPanel } from '../../ui/Panel'
+import { useWebDesk } from './web/webBox'
 
 /**
  * AXEL compacto - fechado por padrão no mobile (só título + 1 frase + 1 passo).
@@ -24,6 +25,7 @@ export function AxelDayBrief()
   const { colors, space } = useTheme()
   const { showRail } = useWorkspace()
   const inPanel = useInPanel()
+  const desk = useWebDesk()
   const router = useRouter()
   const collapsed = usePrefsStore((s) => s.prefs.axel_home_collapsed) ?? false
   const patchPrefs = usePrefsStore((s) => s.patch)
@@ -104,12 +106,12 @@ export function AxelDayBrief()
 
           {primaryStep ? (
             <View
-              style={{
-                gap: 6,
-                padding: space.md,
-                borderRadius: 14,
-                backgroundColor: colors.surface,
-              }}
+              style={
+                desk
+                  // computador: só um traço ao lado, sem caixa dentro do bloco
+                  ? { gap: 6, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: colors.health }
+                  : { gap: 6, padding: space.md, borderRadius: 14, backgroundColor: colors.surface }
+              }
             >
               <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
                 Um passo

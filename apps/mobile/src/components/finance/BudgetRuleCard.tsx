@@ -22,6 +22,7 @@ import { useCaptureStore } from '../../store/captureStore'
 import { useFinanceFocusStore } from '../../store/financeFocusStore'
 import { resolveCategoryMeta, visibleCategoryIds } from '../../lib/categoryMeta'
 import { OnbNumber } from '../onboarding/OnbNumber'
+import { useDeskMicro } from './desk/deskLayout'
 
 const BUCKETS: BudgetBucket[] = ['needs', 'wants', 'savings']
 
@@ -32,6 +33,7 @@ const BUCKETS: BudgetBucket[] = ['needs', 'wants', 'savings']
 export function BudgetRuleCard()
 {
   const { colors, space, radius } = useTheme()
+  const micro = useDeskMicro()
   const accents = useAccents()
   const txs = useDataStore((s) => s.finance)
   const prefs = usePrefsStore((s) => s.prefs)
@@ -85,9 +87,9 @@ export function BudgetRuleCard()
                 <View style={{ width: `${pct}%`, height: '100%', borderRadius: radius.pill, backgroundColor: over ? colors.attention : barColor[row.bucket] }} />
               </View>
               {over ? (
-                <Text variant="micro" color={colors.attention}>Passou {formatBRL(row.used - row.budget)} do combinado.</Text>
+                <Text variant={micro} color={colors.attention}>Passou {formatBRL(row.used - row.budget)} do combinado.</Text>
               ) : short ? (
-                <Text variant="micro" muted>Faltam {formatBRL(row.budget - row.used)} para a meta de reserva.</Text>
+                <Text variant={micro} muted>Faltam {formatBRL(row.budget - row.used)} para a meta de reserva.</Text>
               ) : null}
             </View>
           )

@@ -12,10 +12,15 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useMonthProjection } from './FinanceForecastCards'
 import { BudgetRuleCard } from './BudgetRuleCard'
+import { Panel } from '../../ui/Panel'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { useFinanceDeskGrid } from './desk/deskLayout'
 
 export function FinanceCoachCards()
 {
   const { space, colors, radius } = useTheme()
+  const desk = useWebDesk()
+  const deskGrid = useFinanceDeskGrid()
   const txs = useDataStore((s) => s.finance)
   const cash = useDataStore((s) => s.cashAccount)
   const fixas = useDataStore((s) => s.contasFixas)
@@ -38,8 +43,11 @@ export function FinanceCoachCards()
         ? colors.finance
         : colors.health
 
+  // computador: os três blocos lado a lado na grade, cada um numa superfície
+  const Wrap = desk ? Panel : View
   return (
-    <View style={{ gap: space.md }}>
+    <View style={desk ? deskGrid.grid : { gap: space.md }}>
+      <Wrap>
       <Card tone="elevated" style={{ gap: space.sm }}>
         <SectionHeader title="Coach" subtitle="Leitura do mês" />
         {tips.length === 0 ? (
@@ -57,7 +65,9 @@ export function FinanceCoachCards()
           ))
         )}
       </Card>
+      </Wrap>
 
+      <Wrap>
       <Card tone="elevated" style={{ gap: space.sm }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <Text variant="section">Fim do mês</Text>
@@ -74,9 +84,12 @@ export function FinanceCoachCards()
           Gasto médio do dia a dia {formatBRL(projection.mediaDiaria)} · faltam {projection.diasRestantes} dias
         </Text>
       </Card>
+      </Wrap>
 
       {/* regra de orçamento sobre as categorias reais, com percentuais da pessoa */}
-      <BudgetRuleCard />
+      <Wrap>
+        <BudgetRuleCard />
+      </Wrap>
     </View>
   )
 }

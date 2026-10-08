@@ -26,7 +26,7 @@ type Props = {
 export function WebTodayAgenda({ tasks, overdueCount }: Props)
 {
   const { colors } = useTheme()
-  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
   const router = useRouter()
 
   return (
@@ -93,7 +93,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
                 flexDirection: 'row',
                 alignItems: 'center',
                 paddingHorizontal: 20,
-                paddingVertical: 12,
+                paddingVertical: 8,
                 backgroundColor: hovered ? colors.surface : 'transparent',
                 cursor: 'pointer',
               })}

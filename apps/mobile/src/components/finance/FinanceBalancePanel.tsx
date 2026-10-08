@@ -14,6 +14,11 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useAccents } from '../../theme/useAccents'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WebHoverable } from '../dashboard/web/WebHoverable'
+import { webStyle } from '../dashboard/web/webStyle'
+import { WEB_DISPLAY_FONT } from '../dashboard/web/webTypography'
+import { useDeskBigNumber } from './desk/deskLayout'
 
 /**
  * Saldo da conta corrente, separado dos cartões. O estado é medido em dias de
@@ -35,6 +40,8 @@ export function FinanceBalancePanel()
   const [value, setValue] = useState('')
   const [msg, setMsg] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const desk = useWebDesk()
+  const bigNumber = useDeskBigNumber()
 
   const toneColor: Record<BalanceTone, string> = {
     sem_dados: colors.inkFaint,
@@ -79,8 +86,52 @@ export function FinanceBalancePanel()
     setOpen(false)
   }
 
+  // computador: bloco de painel (sem caixa própria), número grande e link para ajustar
+  const deskView = (
+    <View style={{ gap: 12 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <Text variant="section" style={{ fontSize: 18, lineHeight: 26 }}>Saldo da conta</Text>
+        <WebHoverable
+          onPress={openSheet}
+          accessibilityLabel={noData ? 'Informar saldo de hoje' : 'Ajustar saldo de hoje'}
+          style={(hovered) => webStyle({ paddingVertical: 4, cursor: 'pointer', opacity: hovered ? 0.8 : 1 })}
+        >
+          <Text variant="caption" style={{ color: colors.axel, fontFamily: 'Lexend_500Medium' }}>
+            {noData ? 'Informar' : 'Ajustar'}
+          </Text>
+        </WebHoverable>
+      </View>
+      <Text style={{ fontFamily: WEB_DISPLAY_FONT, ...bigNumber, color: colors.ink, fontVariant: ['tabular-nums'] }}>
+        {noData ? 'Informe seu saldo' : formatBRL(pos.disponivel)}
+      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <View style={{ paddingHorizontal: 10, paddingVertical: 2, borderRadius: 999, borderWidth: 1, borderColor: tint }}>
+          <Text variant="label" color={tint}>{BALANCE_TONE_LABEL[runway.tone]}</Text>
+        </View>
+        <Text variant="caption" muted style={{ flexShrink: 1 }}>{detail}</Text>
+      </View>
+      {!noData ? (
+        <View style={{ flexDirection: 'row', columnGap: 32, rowGap: 8, flexWrap: 'wrap', paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.hairline }}>
+          <View style={{ gap: 2 }}>
+            <Text variant="label" muted>Entrou no mês</Text>
+            <Text variant="body" color={colors.health} style={{ fontFamily: 'Lexend_500Medium', fontVariant: ['tabular-nums'] }}>
+              {formatBRL(pos.receitas)}
+            </Text>
+          </View>
+          <View style={{ gap: 2 }}>
+            <Text variant="label" muted>Saiu da conta</Text>
+            <Text variant="body" style={{ fontFamily: 'Lexend_500Medium', fontVariant: ['tabular-nums'] }}>
+              {formatBRL(pos.despesas)}
+            </Text>
+          </View>
+        </View>
+      ) : null}
+    </View>
+  )
+
   return (
     <>
+      {desk ? deskView : (
       <PressableScale
         accessibilityRole="button"
         accessibilityLabel={`Saldo da conta, ${formatBRL(pos.disponivel)}. Toque para ajustar.`}
@@ -115,6 +166,7 @@ export function FinanceBalancePanel()
           </Text>
         </View>
       </PressableScale>
+      )}
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
         <Pressable style={{ flex: 1, backgroundColor: colors.overlay }} onPress={() => setOpen(false)} accessibilityLabel="Fechar" />

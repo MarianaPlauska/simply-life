@@ -20,7 +20,7 @@ import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { SpendGuardHost } from '../src/components/finance/SpendGuardHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
 import { useEloSync } from '../src/hooks/useEloSync'
-import { WebSidebar } from '../src/components/layout/WebSidebar'
+import { WebTopNav } from '../src/components/layout/WebTopNav'
 import { useWorkspace } from '../src/layout/useWorkspace'
 
 /** Telas sem barra lateral: entrada, cadastro e telas de tela cheia */
@@ -95,8 +95,9 @@ function RootNavigator()
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: colors.canvas }}>
-        {withSidebar ? <WebSidebar /> : null}
+      {/* computador: menu no topo (faixa petróleo com submenus suspensos), no lugar da barra lateral */}
+      <View style={{ flex: 1, flexDirection: 'column', backgroundColor: colors.canvas }}>
+        {withSidebar ? <WebTopNav /> : null}
         <View style={{ flex: 1, minWidth: 0 }}>
           <Stack
             screenOptions={{

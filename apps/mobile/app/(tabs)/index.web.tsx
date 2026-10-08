@@ -29,19 +29,21 @@ import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
 import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
 import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
-import { TabShell } from '../../src/components/dashboard/TabShell'
+import { TabShell, DESKTOP_PAD_H } from '../../src/components/dashboard/TabShell'
 import { Panel } from '../../src/ui/Panel'
 import { type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
-import { WebTodayAgenda } from '../../src/components/dashboard/web/WebTodayAgenda'
-import { WebFinanceSnapshot } from '../../src/components/dashboard/web/WebFinanceSnapshot'
+import { WebAgendaBlock, WebBillsBlock, WebCategoryBlock } from '../../src/components/dashboard/web/WebHomeBlocks'
+import { SiteHero, SiteNumbers, SiteSection, SiteNotes, SiteCta, SiteFooter } from '../../src/components/dashboard/web/WebHomeSite'
+import { WEB_DISPLAY_FONT } from '../../src/components/dashboard/web/webTypography'
+import { useModules } from '../../src/hooks/useModules'
+import { WebMoodCheckIn } from '../../src/components/dashboard/web/WebMoodCheckIn'
 import { WebBodyMetrics } from '../../src/components/dashboard/web/WebBodyMetrics'
 import { WebHydrationWidget } from '../../src/components/dashboard/web/WebHydrationWidget'
-import { WebShortcutsBar } from '../../src/components/dashboard/web/WebShortcutsBar'
-import { webStyle } from '../../src/components/dashboard/web/webStyle'
 import { useWorkspace } from '../../src/layout/useWorkspace'
 import { usePrefsStore } from '../../src/store/prefsStore'
 import { normalizeHomeMetrics } from '../../src/lib/homeMetrics'
 import { resolveAxelName } from '../../src/lib/axelName'
+import { webStyle } from '../../src/components/dashboard/web/webStyle'
 import { filterMetrics } from '../../src/lib/appModules'
 
 function greetingForHour(h: number): string
@@ -59,7 +61,9 @@ function greetingForHour(h: number): string
 export default function DashboardScreenWeb()
 {
   const { colors, space, mode, setMode } = useTheme()
-  const { isDesktop } = useWorkspace()
+  const { isDesktop, width } = useWorkspace()
+  // 3 colunas a partir daqui (barra lateral + margens + 3 x ~340); antes, uma coluna
+  const wideGrid = width >= 1280
   const router = useRouter()
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -73,7 +77,7 @@ export default function DashboardScreenWeb()
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const prefs = usePrefsStore((s) => s.prefs)
-  const prefsLoaded = usePrefsStore((s) => s.loaded)
+  const financeOn = useModules().group('carteira')
   const hydratePrefs = usePrefsStore((s) => s.hydrate)
 
   const today = useMemo(() => partitionTodayTimeline(tasks), [tasks])
@@ -144,7 +148,7 @@ export default function DashboardScreenWeb()
     {
       id: 'mood',
       label: 'Humor de hoje',
-      value: humorHoje != null ? moodLabel(humorHoje) : 'Sem check-in',
+      value: humorHoje != null ? moodLabel(humorHoje) : 'Pendente',
       icon: 'happy-outline',
       color: colors.health,
       onPress: () => router.push('/(tabs)/saude'),
@@ -304,69 +308,104 @@ export default function DashboardScreenWeb()
     )
   }
 
-  // Computador: as mesmas peças do app, em duas colunas.
-  // Esquerda = o seu dia (progresso, metas, agenda, dinheiro, corpo); direita = acompanhamento.
+  // Computador: a Home é uma página de site, na ordem do wireframe; cada parte leva
+  // para a página de verdade (a mesma do menu do topo).
+  const cols = (n: number) => (wideGrid ? `repeat(${n}, minmax(0, 1fr))` : 'minmax(0, 1fr)')
+  const span2 = webStyle({ gridColumn: wideGrid ? 'span 2' : undefined })
+
   return (
     <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
       <TabShell>
-        <HomeFitnessHero
+        <SiteHero
           greet={greet}
           name={name}
           dateLabel={dateLabel}
-          isAdmin={isAdmin}
-          onAccount={() => setMenuOpen(true)}
+          pending={openTasks.length}
+          overdue={overdueToday}
+          todayTasks={today}
+          allTasks={tasks}
+          onMore={() => setMenuOpen(true)}
+          padH={DESKTOP_PAD_H}
+          padTop={24}
+          wide={wideGrid}
         />
 
-        <View
-          style={webStyle({
-            display: 'grid',
-            gridTemplateColumns: 'minmax(0, 1fr) 360px',
-            gap: 24,
-            alignItems: 'start',
-          })}
-        >
-          <View style={{ gap: 24, minWidth: 0 }}>
-            <HomeTodayDashboard
-              tasks={tasks}
-              finance={finance}
-              pending={openTasks.length}
-              doneToday={doneToday}
-              ritualSlot={
-                showMorningRitual ? (
-                  <HomeMorningRitual needSleep={showSleepForm} needMood={showMoodForm} />
-                ) : null
-              }
-            />
-            {/* uma superfície só para o que é consulta: agenda, dinheiro e corpo */}
+        <SiteNumbers items={statItems.filter((i) => i.id !== 'water' || waterOnHome)} />
+
+        {/* avisos que só aparecem às vezes */}
+        <SalaryConfirmCard />
+        <DayPlanHomeCard />
+        <MoodWeekReportGate humor={humor} />
+
+        <SiteSection title="Suas áreas" subtitle="Um resumo de cada parte do seu dia. Clique para abrir a página completa.">
+          <View style={webStyle({ display: 'grid', gridTemplateColumns: cols(3), gap: 16, alignItems: 'stretch' })}>
+            <Panel style={span2}>
+              <WebAgendaBlock tasks={today} overdueCount={overdueToday} />
+            </Panel>
             <Panel>
-              <WebTodayAgenda tasks={today} overdueCount={overdueToday} />
-              <WebFinanceSnapshot finance={finance} />
               <WebBodyMetrics />
             </Panel>
+            {financeOn ? (
+              <Panel>
+                <WebBillsBlock />
+              </Panel>
+            ) : null}
+            {financeOn ? (
+              <Panel style={span2}>
+                <WebCategoryBlock />
+              </Panel>
+            ) : null}
           </View>
+        </SiteSection>
 
-          <View style={{ gap: 16, minWidth: 0 }}>
-            {/* avisos que só aparecem às vezes ficam por cima, cada um no seu cartão */}
-            <SalaryConfirmCard />
-            <DayPlanHomeCard />
-            <VisualDayCard />
-            <MoodWeekReportGate humor={humor} />
-            <Panel>
-              <AxelDayBrief />
-              {waterOnHome ? <WebHydrationWidget /> : null}
-              <EloHeatmap semanas={12} compact />
-              <WebShortcutsBar />
-            </Panel>
+        <SiteSection title="Seu ritmo" subtitle="Como o dia está indo, o que vem agora e os dias que você já cumpriu.">
+          <View style={webStyle({ display: 'grid', gridTemplateColumns: wideGrid ? 'minmax(0, 2fr) minmax(0, 1fr)' : 'minmax(0, 1fr)', gap: 16, alignItems: 'start' })}>
+            <View style={{ gap: 16, minWidth: 0 }}>
+              <Panel>
+                <HomeTodayDashboard
+                  tasks={tasks}
+                  finance={finance}
+                  pending={openTasks.length}
+                  doneToday={doneToday}
+                  ritualSlot={null}
+                />
+              </Panel>
+              <Panel>
+                <VisualDayCard />
+              </Panel>
+            </View>
+            <View style={{ gap: 16, minWidth: 0 }}>
+              <Panel>
+                {showMorningRitual ? <WebMoodCheckIn needSleep={showSleepForm} needMood={showMoodForm} /> : null}
+                {waterOnHome ? <WebHydrationWidget /> : null}
+              </Panel>
+              <Panel>
+                <EloHeatmap semanas={wideGrid ? 16 : 26} compact />
+              </Panel>
+            </View>
           </View>
+        </SiteSection>
+
+        <SiteSection title="O que você escreveu" subtitle="As últimas notas do seu diário de humor.">
+          <SiteNotes wide={wideGrid} />
+        </SiteSection>
+
+        {/* como o "perguntas" do wireframe: título à esquerda, o Axel à direita */}
+        <View style={webStyle({ display: 'grid', gridTemplateColumns: wideGrid ? 'minmax(0, 1fr) minmax(0, 1.4fr)' : 'minmax(0, 1fr)', gap: 32, paddingTop: 40, alignItems: 'start' })}>
+          <View style={{ gap: 8 }}>
+            <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, color: colors.ink }}>Axel olha o seu dia</Text>
+            <View style={{ width: 40, height: 3, borderRadius: 2, backgroundColor: colors.axelFill }} />
+            <Text variant="body" muted style={{ maxWidth: 420 }}>
+              Ele junta tarefas, contas, humor e cuidados e sugere um próximo passo, sem pressa.
+            </Text>
+          </View>
+          <Panel>
+            <AxelDayBrief />
+          </Panel>
         </View>
 
-        {prefsLoaded && !prefs.home_metrics_configured_at ? (
-          <Pressable onPress={() => router.push('/personalizar-inicio')} style={{ paddingVertical: 4 }}>
-            <Text variant="caption" muted>
-              Quando quiser, personalize seu Início.
-            </Text>
-          </Pressable>
-        ) : null}
+        <SiteCta />
+        <SiteFooter />
       </TabShell>
 
       {accountMenu}

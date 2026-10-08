@@ -16,7 +16,7 @@ import { usePanelBox } from '../../../ui/Panel'
 export function WebHydrationWidget()
 {
   const { colors } = useTheme()
-  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 })
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 })
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits) ?? []
   const addWaterCup = useDataStore((s) => s.addWaterCup)

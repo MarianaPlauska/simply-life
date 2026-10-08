@@ -9,6 +9,7 @@ import { useDataStore } from '../../../store/dataStore'
 import { useCalendarStore } from '../../../store/calendarStore'
 import { useAgendaPromptStore, useShowAgendaPrompt } from '../../../store/agendaPromptStore'
 import { usePlanLogStore } from '../../../store/planLogStore'
+import { useWebDesk } from '../../dashboard/web/webBox'
 
 const hhmm = (m: number | null) => (m == null ? 'dia inteiro' : `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`)
 
@@ -28,6 +29,7 @@ export function DiaryDaySummary()
   const completions = usePlanLogStore((s) => s.completions)
   const plans = usePlanLogStore((s) => s.plans)
   const today = localTodayIso()
+  const desk = useWebDesk()
 
   const todayEvents = useMemo(() => events.filter((e) => e.date === today), [events, today])
   const doneToday = useMemo(() =>
@@ -61,9 +63,9 @@ export function DiaryDaySummary()
         <Text variant="caption" muted>Nada na agenda hoje.</Text>
       ) : showAgendaPrompt ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <Pressable onPress={() => router.push('/agenda')} accessibilityRole="button" hitSlop={6}>
+          <Pressable onPress={() => router.push('/agenda')} accessibilityRole="button" hitSlop={6} style={desk ? { flexShrink: 1 } : undefined}>
             <Text variant="caption" color={colors.axel} style={{ fontWeight: '600' }}>
-              Conectar agenda para ver seus compromissos aqui.
+              {desk ? 'Conectar agenda' : 'Conectar agenda para ver seus compromissos aqui.'}
             </Text>
           </Pressable>
           <Pressable onPress={snoozeAgenda} accessibilityRole="button" accessibilityLabel="Conectar agenda depois" hitSlop={6}>

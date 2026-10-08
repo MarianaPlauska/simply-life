@@ -11,7 +11,7 @@ import { usePanelBox } from '../../../ui/Panel'
 export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
 {
   const { colors } = useTheme()
-  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 })
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.hairline, padding: 20, gap: 16 })
   const router = useRouter()
   const total = monthExpenseTotal(finance)
   const recent = [...finance].sort((a, b) => (b.data || '').localeCompare(a.data || '')).slice(0, 5)
@@ -40,7 +40,7 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
             Sem lançamentos recentes.
           </Text>
         ) : (
-          <View style={{ gap: 4 }}>
+          <View style={{ marginHorizontal: -8 }}>
             {recent.map((tx) => (
               <WebHoverable
                 key={tx.id}
@@ -50,19 +50,19 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   gap: 16,
-                  paddingVertical: 8,
+                  paddingVertical: 6,
                   paddingHorizontal: 8,
-                  borderRadius: 10,
+                  borderRadius: 8,
                   backgroundColor: hovered ? colors.surface : 'transparent',
                   cursor: 'pointer',
                 })}
               >
-                <Text variant="body" numberOfLines={1} style={{ flex: 1, fontSize: 13 }}>
+                <Text variant="body" numberOfLines={1} style={{ flex: 1, fontSize: 14 }}>
                   {tx.titulo}
                 </Text>
                 <Text
                   variant="bodyStrong"
-                  style={{ fontSize: 13, color: tx.tipo === 'receita' ? colors.health : colors.ink }}
+                  style={{ fontSize: 14, color: tx.tipo === 'receita' ? colors.health : colors.ink }}
                 >
                   {tx.tipo === 'receita' ? '+' : '-'}
                   {formatBRL(tx.valor)}
