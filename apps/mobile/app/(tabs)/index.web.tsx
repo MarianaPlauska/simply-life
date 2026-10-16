@@ -33,7 +33,7 @@ import { TabShell, DESKTOP_PAD_H } from '../../src/components/dashboard/TabShell
 import { Panel } from '../../src/ui/Panel'
 import { type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
 import { WebAgendaBlock, WebBillsBlock, WebCategoryBlock } from '../../src/components/dashboard/web/WebHomeBlocks'
-import { SiteHero, SiteNumbers, SiteSection, SiteNotes, SiteCta, SiteFooter } from '../../src/components/dashboard/web/WebHomeSite'
+import { DashGreeting, DashHero, DashProgress, DashWellness, DashQuickActions, DashUpcoming, DashForYou, DashFooter } from '../../src/components/dashboard/web/WebHomeDash'
 import { WEB_DISPLAY_FONT } from '../../src/components/dashboard/web/webTypography'
 import { useModules } from '../../src/hooks/useModules'
 import { WebMoodCheckIn } from '../../src/components/dashboard/web/WebMoodCheckIn'
@@ -308,104 +308,61 @@ export default function DashboardScreenWeb()
     )
   }
 
-  // Computador: a Home é uma página de site, na ordem do wireframe; cada parte leva
-  // para a página de verdade (a mesma do menu do topo).
-  const cols = (n: number) => (wideGrid ? `repeat(${n}, minmax(0, 1fr))` : 'minmax(0, 1fr)')
-  const span2 = webStyle({ gridColumn: wideGrid ? 'span 2' : undefined })
+  // Computador: painel de bem-estar (não a pilha do app). Duas colunas:
+  // esquerda = destaque do Axel, bem-estar, contas e gastos; direita = progresso, ações e próximos.
+  // Embaixo, recomendações e o rodapé com todos os caminhos.
+  const leftCol = (
+    <View style={{ gap: 20, minWidth: 0 }}>
+      <DashHero />
+      <DashWellness doneToday={doneToday} totalToday={doneToday + today.length} onCustomize={() => router.push('/personalizar-inicio')} />
+      {financeOn ? (
+        <View style={webStyle({ display: 'grid', gridTemplateColumns: wideGrid ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 1fr)', gap: 16, alignItems: 'stretch' })}>
+          <Panel>
+            <WebBillsBlock />
+          </Panel>
+          <Panel>
+            <WebCategoryBlock />
+          </Panel>
+        </View>
+      ) : null}
+    </View>
+  )
+  const rightCol = (
+    <View style={{ gap: 20, minWidth: 0 }}>
+      <DashProgress done={doneToday} total={doneToday + today.length} />
+      <DashQuickActions />
+      <DashUpcoming tasks={today} />
+    </View>
+  )
 
   return (
     <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
       <TabShell>
-        <SiteHero
-          greet={greet}
-          name={name}
-          dateLabel={dateLabel}
-          pending={openTasks.length}
-          overdue={overdueToday}
-          todayTasks={today}
-          allTasks={tasks}
-          onMore={() => setMenuOpen(true)}
-          padH={DESKTOP_PAD_H}
-          padTop={24}
-          wide={wideGrid}
-        />
-
-        <SiteNumbers items={statItems.filter((i) => i.id !== 'water' || waterOnHome)} />
+        <DashGreeting greet={greet} name={name} dateLabel={dateLabel} onMore={() => setMenuOpen(true)} />
 
         {/* avisos que só aparecem às vezes */}
         <SalaryConfirmCard />
         <DayPlanHomeCard />
         <MoodWeekReportGate humor={humor} />
 
-        <SiteSection title="Suas áreas" subtitle="Um resumo de cada parte do seu dia. Clique para abrir a página completa.">
-          <View style={webStyle({ display: 'grid', gridTemplateColumns: cols(3), gap: 16, alignItems: 'stretch' })}>
-            <Panel style={span2}>
-              <WebAgendaBlock tasks={today} overdueCount={overdueToday} />
-            </Panel>
-            <Panel>
-              <WebBodyMetrics />
-            </Panel>
-            {financeOn ? (
-              <Panel>
-                <WebBillsBlock />
-              </Panel>
-            ) : null}
-            {financeOn ? (
-              <Panel style={span2}>
-                <WebCategoryBlock />
-              </Panel>
-            ) : null}
-          </View>
-        </SiteSection>
-
-        <SiteSection title="Seu ritmo" subtitle="Como o dia está indo, o que vem agora e os dias que você já cumpriu.">
-          <View style={webStyle({ display: 'grid', gridTemplateColumns: wideGrid ? 'minmax(0, 2fr) minmax(0, 1fr)' : 'minmax(0, 1fr)', gap: 16, alignItems: 'start' })}>
-            <View style={{ gap: 16, minWidth: 0 }}>
-              <Panel>
-                <HomeTodayDashboard
-                  tasks={tasks}
-                  finance={finance}
-                  pending={openTasks.length}
-                  doneToday={doneToday}
-                  ritualSlot={null}
-                />
-              </Panel>
-              <Panel>
-                <VisualDayCard />
-              </Panel>
-            </View>
-            <View style={{ gap: 16, minWidth: 0 }}>
-              <Panel>
-                {showMorningRitual ? <WebMoodCheckIn needSleep={showSleepForm} needMood={showMoodForm} /> : null}
-                {waterOnHome ? <WebHydrationWidget /> : null}
-              </Panel>
-              <Panel>
-                <EloHeatmap semanas={wideGrid ? 16 : 26} compact />
-              </Panel>
-            </View>
-          </View>
-        </SiteSection>
-
-        <SiteSection title="O que você escreveu" subtitle="As últimas notas do seu diário de humor.">
-          <SiteNotes wide={wideGrid} />
-        </SiteSection>
-
-        {/* como o "perguntas" do wireframe: título à esquerda, o Axel à direita */}
-        <View style={webStyle({ display: 'grid', gridTemplateColumns: wideGrid ? 'minmax(0, 1fr) minmax(0, 1.4fr)' : 'minmax(0, 1fr)', gap: 32, paddingTop: 40, alignItems: 'start' })}>
-          <View style={{ gap: 8 }}>
-            <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, color: colors.ink }}>Axel olha o seu dia</Text>
-            <View style={{ width: 40, height: 3, borderRadius: 2, backgroundColor: colors.axelFill }} />
-            <Text variant="body" muted style={{ maxWidth: 420 }}>
-              Ele junta tarefas, contas, humor e cuidados e sugere um próximo passo, sem pressa.
-            </Text>
-          </View>
-          <Panel>
-            <AxelDayBrief />
-          </Panel>
+        <View
+          style={webStyle({
+            display: 'grid',
+            gridTemplateColumns: wideGrid ? 'minmax(0, 2.2fr) minmax(300px, 1fr)' : 'minmax(0, 1fr)',
+            gap: 20,
+            alignItems: 'start',
+            paddingTop: 8,
+          })}
+        >
+          {leftCol}
+          {rightCol}
         </View>
 
-        <SiteCta />
-        <SiteFooter />
+        <View style={{ paddingTop: 16 }}>
+          <DashForYou />
+        </View>
+
+        <DashFooter />
       </TabShell>
 
       {accountMenu}

@@ -3,8 +3,8 @@ import { View } from 'react-native'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useTheme } from '../../theme/ThemeProvider'
 
-/** Conteúdo no computador: ocupa a largura (a grade da página divide o espaço); teto só para telas enormes. */
-export const DESKTOP_CONTENT_MAX = 2000
+/** Conteúdo no computador: coluna centralizada com teto, para não esticar em telas largas. */
+export const DESKTOP_CONTENT_MAX = 1280
 export const DESKTOP_GUTTER = 20
 /** margem lateral e espaço entre blocos no computador */
 export const DESKTOP_PAD_H = 32
@@ -17,7 +17,7 @@ export function TabShell({ children }: { children: ReactNode })
 {
   const { contentMaxWidth, showRail } = useWorkspace()
   const { space } = useTheme()
-  const capped = !showRail && contentMaxWidth != null
+  const capped = showRail || contentMaxWidth != null
 
   return (
     <View

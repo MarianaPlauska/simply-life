@@ -14,7 +14,7 @@ import { useSectionNavStore, type SectionArea } from '../../store/sectionNavStor
 import { resolveAxelName } from '../../lib/axelName'
 import { WebHoverable } from '../dashboard/web/WebHoverable'
 import { webStyle } from '../dashboard/web/webStyle'
-import { DESKTOP_PAD_H } from '../dashboard/TabShell'
+import { DESKTOP_PAD_H, DESKTOP_CONTENT_MAX } from '../dashboard/TabShell'
 import { useSidebarTree, applySidebarChild, type SidebarChild } from './sidebarTree'
 
 /** Altura da faixa do menu; a Home continua a faixa por baixo com a saudação. */
@@ -66,10 +66,14 @@ export function WebTopNav()
   const capture = captureForTab(pathname)
 
   return (
+    // a faixa vai de ponta a ponta; o conteúdo fica na mesma coluna centralizada das páginas
+    <View style={{ backgroundColor: webBandColor(mode), zIndex: 20 }}>
     <View
       style={{
         height: TOP_NAV_HEIGHT,
-        backgroundColor: webBandColor(mode),
+        width: '100%',
+        maxWidth: DESKTOP_CONTENT_MAX,
+        alignSelf: 'center',
         flexDirection: 'row',
         alignItems: 'center',
         gap: 24,
@@ -157,6 +161,7 @@ export function WebTopNav()
           </Text>
         </View>
       </WebHoverable>
+    </View>
     </View>
   )
 }

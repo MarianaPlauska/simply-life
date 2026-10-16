@@ -2,7 +2,7 @@ import { chromium } from '@playwright/test'
 import { join } from 'node:path'
 const out = process.env.SHOT_DIR
 const tag = process.env.SHOT_TAG ?? 'before'
-const W = 1440
+const W = Number(process.env.W ?? 1440)
 const browser = await chromium.launch({ channel: 'msedge' })
 const page = await browser.newPage({ viewport: { width: W, height: 900 }, colorScheme: process.env.DARK ? 'dark' : 'light' })
 page.on('pageerror', (e) => console.log('pageerror', e.message))
