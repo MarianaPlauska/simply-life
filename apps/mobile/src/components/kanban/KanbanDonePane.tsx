@@ -15,6 +15,8 @@ import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { KanbanTaskRow } from './KanbanTaskRow'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WebDonePane } from './web/WebDonePane'
 
 type Props = { tasks: MobileTask[] }
 
@@ -30,6 +32,13 @@ function groupLabel(iso: string | null, today: string): string
 
 /** Aba Feitas — concluir some da Lista; o check aqui devolve a tarefa. */
 export function KanbanDonePane({ tasks }: Props)
+{
+  // computador: lista densa com filtros ao lado; celular sem mudança
+  const desk = useWebDesk()
+  return desk ? <WebDonePane tasks={tasks} /> : <DonePaneStack tasks={tasks} />
+}
+
+function DonePaneStack({ tasks }: Props)
 {
   const { space } = useTheme()
   const isGuest = useAuthStore((s) => s.isGuest)

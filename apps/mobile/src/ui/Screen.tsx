@@ -23,7 +23,16 @@ type ScreenProps = ViewProps & {
   onRefresh?: () => void
   /** Camada de fundo atrás do conteúdo (ex.: fundo do quadro desbloqueado) */
   backdrop?: ReactNode
+  /**
+   * Abas principais (Início, Tarefas, Saúde, Finanças): o TabShell cuida da largura.
+   * Sem isso, no computador a tela vira uma coluna de leitura centrada.
+   */
+  wide?: boolean
 }
+
+/** Coluna das telas avulsas no computador (Perfil, Juntos, Configurações...). */
+export const DESKTOP_PAGE_WIDTH = 820
+const DESKTOP_PAGE_PAD = 32
 
 export function Screen({
   children,
@@ -33,6 +42,7 @@ export function Screen({
   refreshing,
   onRefresh,
   backdrop,
+  wide,
   style,
   ...rest
 }: ScreenProps)
@@ -53,13 +63,25 @@ export function Screen({
       ? COMPONENT_SPEC.Screen.paddingHorizontalNarrow
       : COMPONENT_SPEC.Screen.paddingHorizontal
 
+  // computador, tela avulsa: coluna centrada com margem, em vez de colar nas bordas
+  const page = showRail && !wide
+    ? {
+        width: '100%' as const,
+        maxWidth: DESKTOP_PAGE_WIDTH + DESKTOP_PAGE_PAD * 2,
+        alignSelf: 'center' as const,
+        paddingHorizontal: DESKTOP_PAGE_PAD,
+        paddingTop: 24,
+      }
+    : null
+
   const pad = padded
     ? {
         paddingHorizontal: hPad,
         paddingBottom: bottom,
         ...(showRail ? { flexGrow: 1 } : null),
+        ...page,
       }
-    : { paddingBottom: bottom }
+    : { paddingBottom: bottom, ...page }
 
   const refresh =
     onRefresh != null ? (

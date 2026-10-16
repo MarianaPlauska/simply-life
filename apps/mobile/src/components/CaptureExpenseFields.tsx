@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { todayIso, isoDaysFromNow, type FinanceCategory, type FinanceEscopo } from '@simply-life/shared'
 import { Field, Text } from '../ui'
 import { Icon } from '../ui/Icon'
+import { DateField } from '../ui/DateField'
 import { useTheme } from '../theme/ThemeProvider'
 import { ExpenseCategoryChips, ExpenseFixasChips } from './finance/ExpenseCategoryChips'
 import type { PartnerWorkspaceState } from '../lib/partnerWorkspace'
@@ -308,12 +309,11 @@ export function CaptureExpenseFields({
             onPress={() => patch({ expenseDate: isoDaysFromNow(1) })}
           />
         </View>
-        <Field
+        <DateField
           tone="sand"
-          label="Data (AAAA-MM-DD)"
+          label="Data"
           value={expenseDate}
-          placeholder="2026-09-10"
-          onChangeText={(expenseDate) => patch({ expenseDate })}
+          onChange={(expenseDate) => patch({ expenseDate })}
         />
       </View>
 

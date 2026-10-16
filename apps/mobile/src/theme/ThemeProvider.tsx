@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
-import { useWindowDimensions } from 'react-native'
+import { Platform, useWindowDimensions } from 'react-native'
 import {
   colorsFor,
   chartFor,
@@ -18,6 +18,7 @@ import {
 } from '@simply-life/ui-tokens'
 import { usePrefsStore } from '../store/prefsStore'
 import { readColorSchemeSync } from '../lib/sync/prefs'
+import { withWebPalette } from './webPalette'
 
 type ThemeContextValue = {
   mode: ThemeMode
@@ -64,7 +65,9 @@ export function ThemeProvider({
 
   const value = useMemo<ThemeContextValue>(() =>
   {
-    const base = colorsFor(mode)
+    // web no computador: fundo liso e camadas visíveis (o celular não muda)
+    const webDesk = Platform.OS === 'web' && width >= BREAKPOINT.tablet
+    const base = webDesk ? withWebPalette(colorsFor(mode), mode) : colorsFor(mode)
     const colors = highContrast
       ? {
           ...base,

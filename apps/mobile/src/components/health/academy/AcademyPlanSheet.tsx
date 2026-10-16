@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../../ui/Modal'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
   ACADEMY_WEEK_DAYS,

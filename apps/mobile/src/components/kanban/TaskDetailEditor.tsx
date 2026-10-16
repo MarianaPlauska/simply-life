@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View, ScrollView } from 'react-native'
 import { Icon } from '../../ui/Icon'
+import { DateField } from '../../ui/DateField'
 import {
   applyTaskMeta,
   minutesToLabel,
@@ -134,18 +135,30 @@ export function TaskDetailEditor({ task, isGuest }: Props)
         </View>
       </View>
 
-      <Field
-        label="Prazo (AAAA-MM-DD)"
-        value={due}
-        onChangeText={setDue}
-        placeholder="2026-09-10"
-        onBlur={() =>
-        {
-          const iso = due.trim() || null
-          if (iso && !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return
-          void patchTask(task.id, { dataVencimento: iso }, isGuest)
-        }}
-      />
+      <View style={{ gap: 12 }}>
+        <DateField
+          label="Prazo"
+          value={due}
+          onChange={(iso) =>
+          {
+            setDue(iso)
+            // na web, data pela metade chega vazia: só salva um dia completo
+            if (iso) void patchTask(task.id, { dataVencimento: iso }, isGuest)
+          }}
+        />
+        {task.dataVencimento ? (
+          <View style={{ flexDirection: 'row' }}>
+            <Chip
+              label="Sem prazo"
+              onPress={() =>
+              {
+                setDue('')
+                void patchTask(task.id, { dataVencimento: null }, isGuest)
+              }}
+            />
+          </View>
+        ) : null}
+      </View>
 
       <Field
         label="Horário (HH:MM)"

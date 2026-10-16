@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { Modal, Pressable, ScrollView } from 'react-native'
+import { Pressable, ScrollView } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { formatBRL, cardFaturaAbertaDisplay, parseParcela, type FinanceCard } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, ListRow, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

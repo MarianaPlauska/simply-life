@@ -14,7 +14,8 @@ import {
   reportPeriodLabel,
   type PeriodReport,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, Field, Chip } from '../src/ui'
+import { Screen, Text, Card, PrimaryButton, Chip } from '../src/ui'
+import { DateField } from '../src/ui/DateField'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
@@ -86,7 +87,7 @@ export default function RelatorioScreen()
   }, [hydrateFood, hydrateWater, hydrateBody, hydrateWorkout, userId, isGuest])
 
   const rangeError = !ISO_RE.test(from) || !ISO_RE.test(to)
-    ? 'Use datas no formato AAAA-MM-DD.'
+    ? 'Escolha o dia de início e o dia final.'
     : from > to ? 'A data inicial vem depois da final.' : null
 
   const report = useMemo<PeriodReport | null>(() =>
@@ -136,10 +137,10 @@ export default function RelatorioScreen()
           {preset === 'datas' ? (
             <View style={{ flexDirection: 'row', gap: space.sm }}>
               <View style={{ flex: 1 }}>
-                <Field label="De (AAAA-MM-DD)" value={from} placeholder="2026-09-01" onChangeText={(v) => setFrom(v.trim())} />
+                <DateField label="De" value={from} onChange={setFrom} />
               </View>
               <View style={{ flex: 1 }}>
-                <Field label="Até" value={to} placeholder={localTodayIso()} onChangeText={(v) => setTo(v.trim())} />
+                <DateField label="Até" value={to} min={from || undefined} onChange={setTo} />
               </View>
             </View>
           ) : null}

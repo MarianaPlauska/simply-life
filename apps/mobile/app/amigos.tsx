@@ -108,7 +108,7 @@ export default function AmigosScreen()
             title="O Círculo precisa de uma conta"
             body="No modo convidado tudo fica só neste aparelho. Crie uma conta para chamar amigos e fazer metas juntos."
           />
-          <PrimaryButton label="Criar conta ou entrar" onPress={() => router.push('/login')} />
+          <PrimaryButton label="Criar conta ou entrar" style={{ alignSelf: 'center' }} onPress={() => router.push('/login')} />
         </Card>
       </Screen>
     )

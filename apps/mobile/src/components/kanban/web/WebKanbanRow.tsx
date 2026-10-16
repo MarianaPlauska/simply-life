@@ -1,36 +1,48 @@
 import { View } from 'react-native'
-import { Icon } from '../../../ui/Icon'
+import { Icon, type IconName } from '../../../ui/Icon'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { WebHoverable } from '../../dashboard/web/WebHoverable'
 import { webStyle } from '../../dashboard/web/webStyle'
+import { LEX, useRowHover } from './kanbanWeb'
+
+export type WebRowTag = { label: string; color?: string }
 
 export type WebKanbanRowProps = {
   time?: string
   title: string
   meta?: string
-  tagLabel?: string
-  tagColor?: string
+  /** marcadores à direita (prioridade, prazo, valor) em texto colorido, sem pílula */
+  tags?: WebRowTag[]
   urgent?: boolean
   done?: boolean
+  /** ícone no lugar da caixinha (contas não se concluem com um clique) */
+  leadIcon?: IconName
+  /** ação explícita no fim da linha (ex.: marcar conta paga) */
+  action?: { label: string; onPress: () => void }
   onPress?: () => void
   onToggle?: () => void
+  /** reserva a coluna de horário mesmo sem hora, para alinhar a lista */
+  timeColumn?: boolean
 }
 
-/** Linha densa única para tarefas e contas na Lista web — sem cartão colorido por item. */
+/** Linha densa única para tarefas e contas na web: uma linha de leitura, sem cartão por item. */
 export function WebKanbanRow({
   time,
   title,
   meta,
-  tagLabel,
-  tagColor,
+  tags,
   urgent,
   done,
+  leadIcon,
+  action,
   onPress,
   onToggle,
+  timeColumn,
 }: WebKanbanRowProps)
 {
   const { colors } = useTheme()
+  const hoverBg = useRowHover()
 
   return (
     <WebHoverable
@@ -38,71 +50,108 @@ export function WebKanbanRow({
       style={(hovered) => webStyle({
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        backgroundColor: hovered ? colors.surface : 'transparent',
+        gap: 14,
+        paddingHorizontal: 20,
+        paddingVertical: 11,
+        minHeight: 48,
+        backgroundColor: hovered && onPress ? hoverBg : 'transparent',
         cursor: onPress ? 'pointer' : 'default',
+        transitionProperty: 'background-color',
+        transitionDuration: '120ms',
       })}
     >
       {onToggle ? (
         <WebHoverable
           onPress={onToggle}
           accessibilityLabel={done ? 'Reabrir' : 'Concluir'}
-          style={webStyle({
-            width: 18,
-            height: 18,
-            borderRadius: 5,
+          style={(hovered) => webStyle({
+            width: 20,
+            height: 20,
+            borderRadius: 6,
             alignItems: 'center',
             justifyContent: 'center',
             borderWidth: done ? 0 : 1.5,
-            borderColor: colors.inkMuted,
+            borderColor: hovered ? colors.axel : urgent ? colors.danger : colors.inkFaint,
             backgroundColor: done ? colors.axelFill : 'transparent',
             cursor: 'pointer',
           })}
         >
-          {done ? <Icon name="checkmark" size={12} color={colors.axelOnFill} /> : null}
+          {(hovered) =>
+            done ? (
+              <Icon name="checkmark" size={13} color={colors.axelOnFill} />
+            ) : hovered ? (
+              <Icon name="checkmark" size={12} color={colors.axel} />
+            ) : null}
         </WebHoverable>
-      ) : null}
+      ) : (
+        <View style={{ width: 20, alignItems: 'center' }}>
+          {leadIcon ? <Icon name={leadIcon} size={17} color={urgent ? colors.danger : colors.inkMuted} /> : null}
+        </View>
+      )}
 
-      {time ? (
-        <Text variant="caption" style={{ width: 76, color: colors.inkMuted, fontSize: 12 }} numberOfLines={1}>
-          {time}
+      {time || timeColumn ? (
+        <Text
+          numberOfLines={1}
+          style={[LEX.regular, { width: 48, fontSize: 14, lineHeight: 20, color: colors.inkMuted, fontVariant: ['tabular-nums'] }]}
+        >
+          {time ?? ''}
         </Text>
       ) : null}
 
-      <View style={{ flex: 1, minWidth: 0 }}>
+      <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
         <Text
-          variant="bodyStrong"
           numberOfLines={1}
-          style={{
-            fontSize: 14,
-            textDecorationLine: done ? 'line-through' : 'none',
-            opacity: done ? 0.5 : 1,
-          }}
+          style={[
+            LEX.regular,
+            {
+              fontSize: 15,
+              lineHeight: 22,
+              color: done ? colors.inkMuted : colors.ink,
+              textDecorationLine: done ? 'line-through' : 'none',
+            },
+          ]}
         >
           {title}
         </Text>
         {meta ? (
-          <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 12, color: urgent ? colors.axel : undefined }}>
+          <Text
+            numberOfLines={1}
+            style={[LEX.regular, { fontSize: 13, lineHeight: 18, color: urgent ? colors.danger : colors.inkMuted }]}
+          >
             {meta}
           </Text>
         ) : null}
       </View>
 
-      {tagLabel ? (
-        <View
-          style={{
-            paddingHorizontal: 8,
-            paddingVertical: 3,
-            borderRadius: 999,
-            backgroundColor: tagColor ? `${tagColor}22` : colors.hairline,
-          }}
-        >
-          <Text variant="micro" style={{ color: tagColor ?? colors.inkMuted, fontWeight: '700' }}>
-            {tagLabel}
-          </Text>
+      {tags?.length ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          {tags.map((t) => (
+            <Text
+              key={t.label}
+              numberOfLines={1}
+              style={[LEX.medium, { fontSize: 13, lineHeight: 18, color: t.color ?? colors.inkMuted }]}
+            >
+              {t.label}
+            </Text>
+          ))}
         </View>
+      ) : null}
+
+      {action ? (
+        <WebHoverable
+          onPress={action.onPress}
+          accessibilityLabel={action.label}
+          style={(hovered) => webStyle({
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: hovered ? colors.axel : colors.hairline,
+            cursor: 'pointer',
+          })}
+        >
+          <Text style={[LEX.medium, { fontSize: 13, lineHeight: 18, color: colors.axel }]}>{action.label}</Text>
+        </WebHoverable>
       ) : null}
     </WebHoverable>
   )

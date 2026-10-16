@@ -17,6 +17,7 @@ import { useDataStore } from '../../../store/dataStore'
 import { useAuthStore } from '../../../store/authStore'
 import { last7Iso, useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { HealthPanelHero } from '../HealthPanelHero'
+import { useWebDesk } from '../../dashboard/web/webBox'
 
 const QUICK = [6, 6.5, 7, 7.5, 8, 8.5, 9]
 
@@ -44,6 +45,9 @@ export function SleepPanel()
     i === weekRaw.length - 1 ? atual : (sleepHours[iso] ?? 0),
   )
   const pillBtn = { borderRadius: 999 as const }
+  // computador: botões do tamanho do texto, não esticados na largura toda
+  const desk = useWebDesk()
+  const btnFlex = desk ? { paddingHorizontal: 24 } : { flex: 1 }
   const headline = atual > 0 ? formatSleepHours(atual) : '--'
 
   return (
@@ -87,12 +91,12 @@ export function SleepPanel()
           variant="secondary"
           onPress={() => void setSleepHours(Math.max(0, atual - 0.5), isGuest)}
           disabled={atual <= 0}
-          style={[pillBtn, { flex: 1 }]}
+          style={[pillBtn, btnFlex]}
         />
         <PrimaryButton
           label="+ 30 min"
           onPress={() => void setSleepHours(Math.min(16, atual + 0.5), isGuest)}
-          style={[pillBtn, { flex: 1 }]}
+          style={[pillBtn, btnFlex]}
         />
       </View>
     </View>

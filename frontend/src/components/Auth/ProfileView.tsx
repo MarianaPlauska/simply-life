@@ -34,7 +34,6 @@ export function ProfileView()
   const fetchAchievements = useTaskStore((s) => s.fetchAchievements)
   const fetchGamificacaoStats = useTaskStore((s) => s.fetchGamificacaoStats)
   const syncStreakCalendarDay = useTaskStore((s) => s.syncStreakCalendarDay)
-  const streakCount = useTaskStore((s) => s.streakCount)
   const userStats = useTaskStore((s) => s.userStats)
 
   const [nome, setNome] = useState(userProfile.nome)
@@ -145,12 +144,6 @@ export function ProfileView()
         subtitle="Resumo dos últimos 7 dias"
       >
         <WeeklyEpisodeCard />
-      </DashboardCollapsible>
-
-      <DashboardCollapsible
-        title="Escudos de ofensiva"
-        subtitle={`${streakCount} dia(s) de sequência`}
-      >
       </DashboardCollapsible>
 
       <DashboardCollapsible

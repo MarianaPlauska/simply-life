@@ -21,8 +21,8 @@ const NAV = [
   { href: '/calendario', match: 'calendario', label: 'Calendário', icon: 'calendar-outline' as const },
 ]
 
-export const DESKTOP_SIDEBAR_WIDTH = 220
-export const DESKTOP_SIDEBAR_COLLAPSED = 68
+export const DESKTOP_SIDEBAR_WIDTH = 256
+export const DESKTOP_SIDEBAR_COLLAPSED = 76
 const NOTCH = 14
 
 /**

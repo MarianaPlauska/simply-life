@@ -13,11 +13,20 @@ import { Text, EmptyState, PressableScale, PrimaryButton, PaneTitle } from '../.
 import { useTheme } from '../../theme/ThemeProvider'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { FolderGlyph } from './FolderGlyph'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WebFoldersPane } from './web/WebFoldersPane'
 
 type Props = { tasks: MobileTask[] }
 
 /** Pastas em grade (ícone + contagem) e leitura das anotações de cada tarefa. */
 export function KanbanFoldersPane({ tasks }: Props)
+{
+  // computador: tabela de pastas e anotações lado a lado; celular sem mudança
+  const desk = useWebDesk()
+  return desk ? <WebFoldersPane tasks={tasks} /> : <FoldersPaneStack tasks={tasks} />
+}
+
+function FoldersPaneStack({ tasks }: Props)
 {
   const { colors, chart, space } = useTheme()
   const { width } = useWindowDimensions()

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import type { FinanceCard } from '@simply-life/shared'
 import { Card, Text, PrimaryButton, Icon } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '../theme/ThemeProvider'
 import { useWorkspace } from '../layout/useWorkspace'
@@ -8,6 +8,9 @@ export function AtmosphereWash()
 {
   const { mode, colors } = useTheme()
   const { showRail } = useWorkspace()
+
+  // computador: fundo liso; a névoa no monitor vira uma mancha que cansa a vista
+  if (Platform.OS === 'web' && showRail) return null
 
   if (mode !== 'dark')
   {
@@ -26,7 +29,7 @@ export function AtmosphereWash()
           colors={['rgba(31, 58, 61, 0.08)', 'rgba(31, 58, 61, 0.02)', 'transparent']}
           locations={[0, 0.3, 1]}
           start={{ x: 1, y: 0 }}
-          end={{ x: 0.2, y: 0.75 }}
+          end={{ x: 0.2, y: 0.52 }}
           style={styles.accent}
         />
       </>
@@ -48,7 +51,7 @@ export function AtmosphereWash()
         colors={['rgba(31, 58, 61, 0.55)', 'rgba(31, 58, 61, 0.12)', 'transparent']}
         locations={[0, 0.35, 1]}
         start={{ x: 1, y: 0 }}
-        end={{ x: 0.1, y: 0.65 }}
+        end={{ x: 0.1, y: 0.45 }}
         style={styles.accent}
       />
     </>
@@ -56,11 +59,7 @@ export function AtmosphereWash()
 }
 
 const styles = StyleSheet.create({
-  accent: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    left: 0,
-    height: '70%',
-  },
+  // tela toda, com o degradê sumindo em ~45%: antes a caixa parava em 70% e,
+  // na tela larga, deixava uma borda reta no meio da página
+  accent: StyleSheet.absoluteFillObject,
 })

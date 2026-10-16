@@ -4,6 +4,7 @@ import { Card, Text, Chip, PrimaryButton } from '../../ui'
 import { SettingsToggleRow } from '../settings/SettingsToggleRow'
 import { useTheme } from '../../theme/ThemeProvider'
 import { usePrefsStore } from '../../store/prefsStore'
+import { useWebDesk } from '../dashboard/web/webBox'
 import { GAMIFICATION_MODE_OPTIONS, type GamificationMode } from '@simply-life/shared'
 
 /** Apoio foco / TDAH, preferências sincronizadas na conta. `bare`: sem Card próprio (dentro de bloco recolhível). */
@@ -13,9 +14,11 @@ export function HealthNeuroFocusPanel({ bare = false }: { bare?: boolean } = {})
   const prefs = usePrefsStore((s) => s.prefs)
   const patch = usePrefsStore((s) => s.patch)
   const router = useRouter()
+  // computador: título no mesmo tamanho dos outros painéis
+  const desk = useWebDesk()
   const body = (
     <>
-      <Text variant="section">Foco e neurodivergência</Text>
+      <Text variant="section" style={desk ? { fontSize: 18, lineHeight: 26 } : undefined}>Foco e neurodivergência</Text>
       <Text variant="caption" muted>
         Não é diagnóstico. Ajusta quebra de tarefas, linha do dia na Home e gamificação
         opcional. Também aparece no onboarding inicial.

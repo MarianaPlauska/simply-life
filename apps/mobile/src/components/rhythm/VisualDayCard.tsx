@@ -8,6 +8,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useNeuroStore } from '../../store/neuroStore'
 import { useAgendaPromptStore, useShowAgendaPrompt } from '../../store/agendaPromptStore'
+import { useWebDesk } from '../dashboard/web/webBox'
 import { useMinuteClock, useVisualDay } from '../../hooks/useTodayVisualDay'
 
 const hhmm = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`
@@ -29,6 +30,7 @@ export function VisualDayCard()
   const { colors, space } = useTheme()
   const router = useRouter()
   const now = useMinuteClock()
+  const webDesk = useWebDesk()
   const day = useVisualDay(undefined, now)
   const maxVisible = useNeuroStore((s) => s.maxVisibleTasks)
   const source = useCalendarStore((s) => s.source)
@@ -51,7 +53,16 @@ export function VisualDayCard()
       </View>
 
       {showAgendaPrompt ? (
-        <View style={{ gap: 12, padding: 16, borderRadius: 14, backgroundColor: colors.featureBg }}>
+        <View
+          style={{
+            gap: 12,
+            padding: 16,
+            borderRadius: 14,
+            backgroundColor: colors.featureBg,
+            // web: sem caixa dentro do bloco, o aviso é só texto e botões
+            ...(webDesk ? { backgroundColor: 'transparent', padding: 0, borderRadius: 0 } : null),
+          }}
+        >
           <Text variant="body" color={colors.featureInk}>
             Conecte sua agenda para o Axel encaixar as tarefas entre os seus compromissos.
           </Text>
@@ -132,12 +143,20 @@ export function VisualDayCard()
 function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number; onStart?: () => void })
 {
   const { colors } = useTheme()
+  const desk = useWebDesk()
   const total = Math.max(1, block.fim - block.inicio)
   const done = Math.min(1, Math.max(0, (nowMin - block.inicio) / total))
   const left = Math.max(0, block.fim - nowMin)
   const meta = KIND_META[block.kind]
   return (
-    <View style={{ gap: 12, padding: 16, borderRadius: 14, backgroundColor: block.kind === 'tarefa' ? colors.axelMuted : colors.hairline }}>
+    <View
+      style={
+        desk
+          // computador: o "agora" se marca por um traço, sem caixa cinza dentro do bloco
+          ? { gap: 12, paddingLeft: 16, paddingVertical: 4, borderLeftWidth: 3, borderLeftColor: block.kind === 'tarefa' ? colors.axel : colors.inkFaint }
+          : { gap: 12, padding: 16, borderRadius: 14, backgroundColor: block.kind === 'tarefa' ? colors.axelMuted : colors.hairline }
+      }
+    >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
         <Icon name={meta.icon} size={18} color={colors.ink} />
         <Text variant="caption" muted style={{ flex: 1 }}>Agora · {meta.label}</Text>
@@ -160,11 +179,16 @@ function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number;
 function BlockRow({ block, compact, past }: { block: DayBlock; compact?: boolean; past?: boolean })
 {
   const { colors } = useTheme()
+  const desk = useWebDesk()
   const meta = KIND_META[block.kind]
   const isTask = block.kind === 'tarefa'
   const isPause = block.kind === 'pausa'
   const minutes = block.fim - block.inicio
   const height = compact ? undefined : Math.max(40, Math.min(110, minutes * 0.9))
+  // computador: linha de lista (traço fino entre linhas), sem pílula cinza
+  const deskRow = desk
+    ? { backgroundColor: 'transparent', borderRadius: 0, borderLeftWidth: 0, paddingHorizontal: 0, borderBottomWidth: 1, borderBottomColor: colors.hairline }
+    : null
   return (
     <View
       style={{
@@ -189,9 +213,10 @@ function BlockRow({ block, compact, past }: { block: DayBlock; compact?: boolean
           backgroundColor: isPause ? 'transparent' : isTask ? colors.axelMuted : colors.hairline,
           borderLeftWidth: isPause ? 0 : 3,
           borderLeftColor: isTask ? colors.axel : colors.inkFaint,
+          ...deskRow,
         }}
       >
-        <Icon name={block.essential ? 'star' : meta.icon} size={15} color={isPause ? colors.inkMuted : colors.ink} />
+        <Icon name={block.essential ? 'star' : meta.icon} size={15} color={isPause ? colors.inkMuted : desk && isTask ? colors.axel : colors.ink} />
         <View style={{ flex: 1, gap: 4 }}>
           <Text variant={isPause ? 'caption' : 'bodyStrong'} muted={isPause} style={{ fontSize: 14 }} numberOfLines={2}>
             {block.titulo}

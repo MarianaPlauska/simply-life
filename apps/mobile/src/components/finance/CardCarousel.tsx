@@ -19,17 +19,19 @@ type Props = {
   leading?: ReactNode
   /** Mostra uma página "Adicionar cartão" no fim */
   onAdd?: () => void
+  /** largura máxima do cartão (padrão 380) */
+  maxCardWidth?: number
 }
 
 type Page = { kind: 'leading' } | { kind: 'card'; card: FinanceCard } | { kind: 'add' }
 
 /** Carteira: um cartão por página, com bolinhas e setas (no web o mouse quase não desliza). */
-export function CardCarousel({ cards, selectedId, onSelect, onVisibleChange, leading, onAdd }: Props)
+export function CardCarousel({ cards, selectedId, onSelect, onVisibleChange, leading, onAdd, maxCardWidth = 380 }: Props)
 {
   const { colors, space } = useTheme()
   const scrollRef = useRef<ScrollView>(null)
   const [trackW, setTrackW] = useState(0)
-  const cardW = Math.min(Math.max(0, trackW - 8), 380)
+  const cardW = Math.min(Math.max(0, trackW - 8), maxCardWidth)
   const [page, setPage] = useState(0)
 
   const pages: Page[] = [

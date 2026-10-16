@@ -17,6 +17,9 @@ import { useCalendarStore } from '../../../store/calendarStore'
 import { usePrefsStore } from '../../../store/prefsStore'
 import { shareReportPdf, shareReportText } from '../../../lib/shareReport'
 import { ReportCard, ReportRow, ReportStat, shortDate } from './ReportBits'
+import { useWebDesk } from '../../dashboard/web/webBox'
+import { webStyle } from '../../dashboard/web/webStyle'
+import { WebSegmented } from '../web/WebListParts'
 
 /** 1 e 9. Revisão da semana: planejado × feito, destaques, o que escorregou, o que vem. */
 export function WeeklyReviewPane({ tasks }: { tasks: MobileTask[] })
@@ -29,6 +32,8 @@ export function WeeklyReviewPane({ tasks }: { tasks: MobileTask[] })
   const events = useCalendarStore((s) => s.events)
   const name = usePrefsStore((s) => s.prefs.axel_calls_you || s.prefs.display_name)
   const [offset, setOffset] = useState<0 | -1>(0)
+  // computador: cartões lado a lado em vez de uma pilha comprida
+  const desk = useWebDesk()
   const [msg, setMsg] = useState<string | null>(null)
 
   useEffect(() =>
@@ -50,10 +55,21 @@ export function WeeklyReviewPane({ tasks }: { tasks: MobileTask[] })
         title="Revisão da semana"
         subtitle={`${shortDate(review.start)} a ${shortDate(review.end)}. O que foi feito, o que escorregou e o que vem.`}
       />
-      <View style={{ flexDirection: 'row', gap: space.sm }}>
-        <Chip label="Esta semana" active={offset === 0} onPress={() => setOffset(0)} />
-        <Chip label="Semana passada" active={offset === -1} onPress={() => setOffset(-1)} />
-      </View>
+      {desk ? (
+        <WebSegmented
+          options={[
+            { id: 'now', label: 'Esta semana' },
+            { id: 'prev', label: 'Semana passada' },
+          ]}
+          value={offset === 0 ? 'now' : 'prev'}
+          onChange={(id) => setOffset(id === 'now' ? 0 : -1)}
+        />
+      ) : (
+        <View style={{ flexDirection: 'row', gap: space.sm }}>
+          <Chip label="Esta semana" active={offset === 0} onPress={() => setOffset(0)} />
+          <Chip label="Semana passada" active={offset === -1} onPress={() => setOffset(-1)} />
+        </View>
+      )}
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
         <ReportStat value={String(review.done.length)} label="Concluídas" />
@@ -66,6 +82,11 @@ export function WeeklyReviewPane({ tasks }: { tasks: MobileTask[] })
       </View>
 
       {/* cartões vazios não aparecem: sem frase de consolo ocupando espaço */}
+      <View
+        style={desk
+          ? webStyle({ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16, alignItems: 'start' })
+          : { gap: space.md }}
+      >
       {review.highlights.length ? (
         <ReportCard title="Destaques" hint="As mais importantes que você concluiu.">
           {review.highlights.map((t, i, arr) => (
@@ -123,6 +144,7 @@ export function WeeklyReviewPane({ tasks }: { tasks: MobileTask[] })
         </View>
         {msg ? <Text variant="caption" muted>{msg}</Text> : null}
       </ReportCard>
+      </View>
     </View>
   )
 }

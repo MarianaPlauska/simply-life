@@ -1,4 +1,5 @@
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import {
   ACTIVE_DUE_BUCKETS,
   DUE_BUCKET_LABELS,

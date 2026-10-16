@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { View, Switch, Modal, Pressable } from 'react-native'
+import { View, Switch, Pressable } from 'react-native'
+import { Modal } from '../src/ui/Modal'
 import { Redirect, useRouter } from 'expo-router'
 import { Icon, type IconName } from '../src/ui/Icon'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'

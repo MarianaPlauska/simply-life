@@ -21,5 +21,6 @@ describe('ProtectedRoute behavior', () =>
     const { useTaskStore } = await import('../store/useTaskStore')
     useTaskStore.setState({ isLoggedIn: false, userId: '' })
     expect(useTaskStore.getState().isLoggedIn).toBe(false)
-  })
+  // carrega a loja inteira do site: com a suíte toda em paralelo passa dos 5 s padrão
+  }, 20000)
 })

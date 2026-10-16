@@ -10,27 +10,9 @@ import { HealthCalmSection } from './HealthCalmSection'
 import { HealthFocusSection } from './HealthFocusSection'
 import { HealthNeuroFocusPanel } from './HealthNeuroFocusPanel'
 import { loadRecentTccItems, type TccRecentItem } from '../../lib/tccPersist'
-
-function recentLabel(item: TccRecentItem): string
-{
-  if (item.kind === 'thought')
-  {
-    return item.entry.automaticThought.trim() || item.entry.situation.trim() || 'Registro de pensamento'
-  }
-  if (item.kind === 'behavior')
-  {
-    return item.entry.action.trim() || 'Ativação comportamental'
-  }
-  const step = item.entry.steps.find((s) => s.id === item.entry.chosenStepId)
-  return step?.label.trim() || item.entry.situation.trim() || 'Exposição gradual'
-}
-
-function recentKindLabel(item: TccRecentItem): string
-{
-  if (item.kind === 'thought') return 'Pensamento'
-  if (item.kind === 'behavior') return 'Ativação'
-  return 'Exposição'
-}
+import { recentKindLabel, recentLabel } from './web/tccRecent'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { HealthApoioDesk } from './web/HealthApoioDesk'
 
 /** Saúde → Apoio: CVV no topo, ações de agora, depois TCC e ajustes recolhidos. */
 export function HealthApoioTab()
@@ -39,6 +21,7 @@ export function HealthApoioTab()
   const router = useRouter()
   const [recent, setRecent] = useState<TccRecentItem[]>([])
   const [loading, setLoading] = useState(true)
+  const desk = useWebDesk()
 
   const reload = useCallback(async () =>
   {
@@ -51,6 +34,9 @@ export function HealthApoioTab()
   {
     void reload()
   }, [reload])
+
+  // computador: grade de painéis, tudo à vista
+  if (desk) return <HealthApoioDesk />
 
   return (
     <View style={{ gap: space.lg }}>

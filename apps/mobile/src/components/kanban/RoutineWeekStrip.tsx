@@ -3,6 +3,7 @@ import { Icon } from '../../ui/Icon'
 import type { RoutineWeekCell } from '@simply-life/shared'
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useWebDesk } from '../dashboard/web/webBox'
 
 type Props = {
   cells: RoutineWeekCell[]
@@ -14,6 +15,8 @@ type Props = {
 export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
 {
   const { colors } = useTheme()
+  // computador: caixa fina como o resto da web e texto sem ficar minúsculo
+  const desk = useWebDesk()
 
   return (
     <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -39,28 +42,31 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
             onPress={() => onSelect(cell.iso)}
             style={{
               flex: 1,
-              minHeight: 84,
-              borderRadius: 14,
+              minHeight: desk ? 76 : 84,
+              borderRadius: desk ? 10 : 14,
               paddingVertical: 8,
               alignItems: 'center',
               gap: 6,
               backgroundColor: bg,
-              borderWidth: selected || cell.tone === 'today' ? 1 : 0,
-              borderColor: colors.axel,
+              borderWidth: selected || cell.tone === 'today' ? 1 : desk ? 1 : 0,
+              borderColor: selected || cell.tone === 'today' ? colors.axel : colors.hairline,
             }}
           >
-            <Text variant="micro" muted>
+            <Text variant={desk ? 'label' : 'micro'} muted>
               {cell.label}
             </Text>
             <Text variant="bodyStrong">{cell.dayNum}</Text>
-            <Text variant="micro" muted style={{ fontSize: 11, lineHeight: 14 }}>
-              {new Date(`${cell.iso}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}
-            </Text>
+            {/* no computador o mês já está na barra da semana */}
+            {desk ? null : (
+              <Text variant="micro" muted style={{ fontSize: 11, lineHeight: 14 }}>
+                {new Date(`${cell.iso}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}
+              </Text>
+            )}
             <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
               {cell.done > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Icon name="checkmark" size={11} color={colors.health} />
-                  <Text variant="micro" style={{ color: colors.health }}>
+                  <Text variant={desk ? 'label' : 'micro'} style={{ color: colors.health }}>
                     {cell.done}
                   </Text>
                 </View>
@@ -68,7 +74,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
               {cell.miss > 0 ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                   <Icon name="close" size={11} color={colors.danger} />
-                  <Text variant="micro" style={{ color: colors.danger }}>
+                  <Text variant={desk ? 'label' : 'micro'} style={{ color: colors.danger }}>
                     {cell.miss}
                   </Text>
                 </View>

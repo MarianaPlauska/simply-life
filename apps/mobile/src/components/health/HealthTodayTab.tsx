@@ -22,6 +22,8 @@ import { HealthAxelStrip } from './HealthAxelStrip'
 import { useCalmFabSuppressStore } from '../../store/calmFabSuppressStore'
 import { useModules } from '../../hooks/useModules'
 import { CARE_MODULE, CUIDADOS_SUB_TABS } from './healthNav'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { HealthTodayDesk } from './web/HealthTodayDesk'
 
 type Props = {
   onGoCuidados: (tab: CuidadosTab) => void
@@ -53,6 +55,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   const lastAxelCare = useDataStore((s) => s.lastAxelCare)
   const addHumor = useDataStore((s) => s.addHumor)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const desk = useWebDesk()
 
   const agua = findHabit(habits, 'agua')
   const proteina = findHabit(habits, 'proteina')
@@ -104,6 +107,12 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   if (isSoftMoodDay(humor))
   {
     return <HealthSoftModeView onGoApoio={onGoApoio} onGoDiario={onGoDiario} />
+  }
+
+  // computador: grade de painéis em vez da pilha do celular
+  if (desk)
+  {
+    return <HealthTodayDesk onGoCuidados={onGoCuidados} onGoApoio={onGoApoio} onGoDiario={onGoDiario} />
   }
 
   const tileDetail = (tile: typeof TILES[number]): { pillLabel: string; done: boolean } =>

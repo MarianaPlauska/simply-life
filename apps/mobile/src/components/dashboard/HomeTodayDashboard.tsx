@@ -11,6 +11,8 @@ import {
 import { Text, ProgressRing } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useElo } from '../../hooks/useElo'
+import { useWebBox } from './web/webBox'
+import { useInPanel } from '../../ui/Panel'
 import { LifeGoalMicroLine, LifeGoalSheet } from './LifeGoalSheet'
 
 type Props = {
@@ -32,6 +34,10 @@ export function HomeTodayDashboard({
 }: Props)
 {
   const { colors, elevation } = useTheme()
+  const inPanel = useInPanel()
+  const webBox = useWebBox()
+  // dentro de um Panel (grade da web) a caixa é do Panel
+  const box = inPanel ? { borderRadius: 0, padding: 0, backgroundColor: 'transparent' } : webBox
   const router = useRouter()
   const elo = useElo()
   const [query, setQuery] = useState('')
@@ -72,7 +78,9 @@ export function HomeTodayDashboard({
           paddingHorizontal: 14,
           gap: 12,
           backgroundColor: colors.elevated,
-          ...elevation.card,
+          ...(inPanel
+            ? { borderRadius: 10, borderWidth: 1, borderColor: colors.hairline, backgroundColor: colors.surface, minHeight: 40 }
+            : box ? { ...box, paddingVertical: 0, minHeight: 44 } : elevation.card),
         }}
       >
         <MagnifyingGlassIcon size={18} color={colors.inkMuted} />
@@ -110,6 +118,7 @@ export function HomeTodayDashboard({
             gap: 16,
             backgroundColor: colors.featureBg,
             minHeight: 200,
+            ...box,
           }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -158,6 +167,7 @@ export function HomeTodayDashboard({
               padding: 20,
               gap: 16,
               backgroundColor: colors.featureBg,
+              ...box,
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>

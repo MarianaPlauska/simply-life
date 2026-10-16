@@ -10,6 +10,7 @@ import {
   type EloNivel,
 } from '@simply-life/shared'
 import { Text } from '../../ui'
+import { useInPanel } from '../../ui/Panel'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAccents } from '../../theme/useAccents'
 import { useElo } from '../../hooks/useElo'
@@ -43,6 +44,7 @@ function faixaPt(de: string, ate: string): string
 export function EloHeatmap({ semanas = 26, compact }: Props)
 {
   const { colors } = useTheme()
+  const inPanel = useInPanel()
   const accents = useAccents()
   const router = useRouter()
   const elo = useElo()
@@ -114,7 +116,7 @@ export function EloHeatmap({ semanas = 26, compact }: Props)
   const cumpridos = mapa.colunas.flat().filter((c) => c.status === 'cumprido').length
 
   return (
-    <View style={{ gap: 16, padding: compact ? 16 : 20, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardRim }}>
+    <View style={inPanel ? { gap: 16 } : { gap: 16, padding: compact ? 16 : 20, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardRim }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
         <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text variant={compact ? 'bodyStrong' : 'section'}>Mapa de dias</Text>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { formatBRL, monthNamePt, localTodayIso, SPEND_GUARD_FIRM_SECONDS } from '@simply-life/shared'
 import { Icon, PrimaryButton, Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

@@ -58,6 +58,8 @@ export type WorkspacePrefs = {
   home_module_order?: DashboardPriority[]
   /** Meta semanal ou mensal escolhida pelo usuário. */
   life_goal?: import('@simply-life/shared').LifeGoal | null
+  /** várias metas ao mesmo tempo; `life_goal` segue como a principal (a primeira) */
+  life_goals?: import('@simply-life/shared').LifeGoal[]
   /** Desbloqueios: ícone do avatar ('initials' ou nome do ícone) */
   profile_avatar_icon?: string
   /** Desbloqueios: estilo do anel do avatar */
@@ -71,6 +73,8 @@ export type WorkspacePrefs = {
   /** Chama: prêmios reais escolhidos pela pessoa */
   chama_premios?: import('@simply-life/shared').ChamaPrize[]
   /** Semana (domingo ISO) em que o relatório de humor foi dispensado. */
+  /** Metas escondidas da Home até este dia (inclusive). Sempre tem fim. */
+  life_goals_paused_until?: string | null
   mood_report_dismissed_week?: string | null
   /** Wizard Montar seu AXEL concluído */
   setup_completed_at?: string | null
@@ -268,12 +272,14 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
         ? raw.home_module_order
         : undefined,
     life_goal: raw?.life_goal ?? null,
+    life_goals: Array.isArray(raw?.life_goals) ? raw.life_goals : [],
     chama_colecao: raw?.chama_colecao ?? null,
     share_focus_status: raw?.share_focus_status === true,
     profile_avatar_icon: typeof raw?.profile_avatar_icon === 'string' ? raw.profile_avatar_icon : 'initials',
     profile_avatar_frame: typeof raw?.profile_avatar_frame === 'string' ? raw.profile_avatar_frame : 'lisa',
     kanban_fundo: typeof raw?.kanban_fundo === 'string' ? raw.kanban_fundo : 'nenhum',
     chama_premios: Array.isArray(raw?.chama_premios) ? raw.chama_premios : [],
+    life_goals_paused_until: typeof raw?.life_goals_paused_until === 'string' ? raw.life_goals_paused_until : null,
     mood_report_dismissed_week: raw?.mood_report_dismissed_week ?? null,
     color_scheme: scheme,
     enabled_modules: normalizeModules(raw?.enabled_modules),

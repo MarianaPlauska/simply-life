@@ -1,4 +1,5 @@
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import type { TaskStatus } from '@simply-life/shared'
 import { Card, Text, Chip, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'

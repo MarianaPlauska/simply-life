@@ -18,6 +18,7 @@ import { useBodyWeekStore } from '../../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../../store/waterLogStore'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
+import { usePanelBox } from '../../../ui/Panel'
 
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
@@ -25,6 +26,7 @@ type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 export function WebBodyMetrics()
 {
   const { colors } = useTheme()
+  const boxStyle = usePanelBox({ borderRadius: 14, backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }, true)
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits)
@@ -126,7 +128,7 @@ export function WebBodyMetrics()
       <Text variant="section" style={{ fontSize: 16 }}>
         Corpo na semana
       </Text>
-      <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
+      <View style={boxStyle}>
         {rows.map((row, i) => (
           <WebHoverable
             key={row.id}
@@ -136,8 +138,8 @@ export function WebBodyMetrics()
               flexDirection: 'row',
               alignItems: 'center',
               gap: 16,
-              paddingHorizontal: 18,
-              paddingVertical: 12,
+              paddingHorizontal: 20,
+              paddingVertical: 8,
               borderTopWidth: i === 0 ? 0 : 1,
               borderTopColor: colors.cardRim,
               backgroundColor: hovered ? colors.surface : 'transparent',
@@ -145,7 +147,7 @@ export function WebBodyMetrics()
             })}
           >
             <Icon name={row.icon} size={16} color={row.color} style={{ width: 20 }} />
-            <Text variant="body" style={{ width: 76, fontSize: 13 }}>
+            <Text variant="body" style={{ width: 76, fontSize: 14 }}>
               {row.label}
             </Text>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>

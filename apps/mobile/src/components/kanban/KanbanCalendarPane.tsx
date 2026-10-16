@@ -7,6 +7,8 @@ import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { PlansCalendar } from '../calendar/PlansCalendar'
 import { KanbanDayCard } from './KanbanDayCard'
+import { useWebDesk } from '../dashboard/web/webBox'
+import { WebCalendarPane } from './web/WebCalendarPane'
 
 type Props = {
   tasks: MobileTask[]
@@ -24,6 +26,13 @@ function isoOffset(days: number): string
  * Grade mensal (Planos) continua em “Mês”.
  */
 export function KanbanCalendarPane({ tasks }: Props)
+{
+  // computador: mês em grade com a agenda do dia ao lado; celular sem mudança
+  const desk = useWebDesk()
+  return desk ? <WebCalendarPane tasks={tasks} /> : <CalendarPaneStack tasks={tasks} />
+}
+
+function CalendarPaneStack({ tasks }: Props)
 {
   const { colors, space } = useTheme()
   const isGuest = useAuthStore((s) => s.isGuest)

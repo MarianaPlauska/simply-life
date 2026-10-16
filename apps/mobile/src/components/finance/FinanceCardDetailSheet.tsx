@@ -1,4 +1,5 @@
-import { Modal, Pressable, ScrollView, View, useWindowDimensions } from 'react-native'
+import { Pressable, ScrollView, View, useWindowDimensions } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon } from '../../ui/Icon'

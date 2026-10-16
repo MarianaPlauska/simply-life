@@ -40,6 +40,11 @@ export function Field({ label, error, tone = 'default', style, onFocus, onBlur, 
       </Text>
       <TextInput
         placeholderTextColor={colors.inkFaint}
+        // cores da marca no lugar das do sistema (o Android usa a cor de destaque do aparelho)
+        underlineColorAndroid="transparent"
+        cursorColor={focusInk}
+        selectionColor={`${colors.axelFill}55`}
+        selectionHandleColor={colors.axelFill}
         onFocus={(e) =>
         {
           setFocused(true)

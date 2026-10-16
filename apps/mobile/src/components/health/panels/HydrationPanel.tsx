@@ -8,6 +8,7 @@ import { useDataStore } from '../../../store/dataStore'
 import { useAuthStore } from '../../../store/authStore'
 import { WaterGoalEditor } from '../../dashboard/WaterGoalEditor'
 import { HealthPanelHero } from '../HealthPanelHero'
+import { useWebDesk } from '../../dashboard/web/webBox'
 
 export function HydrationPanel()
 {
@@ -18,6 +19,9 @@ export function HydrationPanel()
   const isGuest = useAuthStore((s) => s.isGuest)
   const agua = findHabit(habits, 'agua')
   const pillBtn = { borderRadius: 999 as const }
+  // computador: botões do tamanho do texto, não esticados na largura toda
+  const desk = useWebDesk()
+  const btnFlex = desk ? { paddingHorizontal: 24 } : { flex: 1 }
   const [edit, setEdit] = useState(false)
   const ml = aguaMlPorCopo(agua)
 
@@ -80,12 +84,12 @@ export function HydrationPanel()
           variant="secondary"
           onPress={() => void removeWaterCup(isGuest)}
           disabled={atual <= 0}
-          style={[pillBtn, { flex: 1 }]}
+          style={[pillBtn, btnFlex]}
         />
         <PrimaryButton
           label={`+ Copo (${ml} ml)`}
           onPress={() => void addWaterCup(isGuest)}
-          style={[pillBtn, { flex: 1 }]}
+          style={[pillBtn, btnFlex]}
         />
       </View>
       <PrimaryButton

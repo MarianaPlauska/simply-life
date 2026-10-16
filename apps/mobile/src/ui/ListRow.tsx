@@ -1,4 +1,5 @@
 import { Pressable, View, StyleSheet } from 'react-native'
+import { IS_ANDROID, useRipple } from './ripple'
 import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
 import { Icon, type IconName } from './Icon'
@@ -25,20 +26,24 @@ export function ListRow({
 {
   const { colors, space, radius } = useTheme()
   const spec = COMPONENT_SPEC.ListRow
+  const ripple = useRipple()
 
   return (
     <View>
       <Pressable
         onPress={onPress}
         disabled={!onPress}
+        android_ripple={onPress ? ripple : undefined}
         style={({ pressed }) => ({
           paddingVertical: spec.paddingVertical,
           minHeight: subtitle ? spec.minHeightTwoLine : spec.minHeight,
           paddingHorizontal: spec.paddingHorizontal,
           borderRadius: radius.control,
-          backgroundColor: pressed ? colors.elevated : 'transparent',
-          opacity: pressed ? 0.88 : 1,
-          transform: [{ scale: pressed && onPress ? 0.97 : 1 }],
+          // Android: a onda do sistema faz o retorno do toque; nos outros, fundo + escala
+          backgroundColor: pressed && !IS_ANDROID ? colors.elevated : 'transparent',
+          opacity: pressed && !IS_ANDROID ? 0.88 : 1,
+          transform: [{ scale: pressed && onPress && !IS_ANDROID ? 0.97 : 1 }],
+          overflow: 'hidden',
           justifyContent: 'center',
           gap: space.sm,
         })}

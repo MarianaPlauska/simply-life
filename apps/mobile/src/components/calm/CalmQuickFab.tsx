@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { usePathname, useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -67,7 +68,7 @@ export function CalmQuickFab()
 
       <Modal visible={sheet} transparent animationType="fade" onRequestClose={() => setSheet(false)}>
         <Pressable
-          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' }}
+          style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}
           onPress={() => setSheet(false)}
         >
           <Pressable onPress={(e) => e.stopPropagation()}>

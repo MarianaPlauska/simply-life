@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Modal, Pressable, View } from 'react-native'
+import { Pressable, View } from 'react-native'
+import { Modal } from '../../ui/Modal'
 import { Text, PrimaryButton, Card } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { AuthField } from './AuthField'

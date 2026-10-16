@@ -26,71 +26,39 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
 {
   const { colors } = useTheme()
 
+  // leve: números soltos numa linha, sem caixa nem divisórias
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        borderRadius: 14,
-        backgroundColor: colors.elevated,
-        borderWidth: 1,
-        borderColor: colors.hairline,
-        overflow: 'hidden',
-      }}
-    >
-      {items.map((item, i) => (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 48, rowGap: 16, paddingVertical: 4 }}>
+      {items.map((item) => (
         <WebHoverable
           key={item.id}
           onPress={item.onPress}
           accessibilityLabel={`${item.label}: ${item.value}`}
-          style={(hovered) => webStyle({
-            flex: 1,
-            minWidth: 0,
-            paddingVertical: 18,
-            paddingHorizontal: 20,
-            gap: 12,
-            borderLeftWidth: i === 0 ? 0 : 1,
-            borderLeftColor: colors.cardRim,
-            backgroundColor: hovered && item.onPress ? colors.surface : 'transparent',
-            cursor: item.onPress ? 'pointer' : 'default',
-          })}
+          style={webStyle({ gap: 2, minWidth: 0, cursor: item.onPress ? 'pointer' : 'default' })}
         >
           {(hovered: boolean) => (
             <>
-              <Text
-                variant="micro"
-                muted
-                numberOfLines={1}
-                style={{ fontSize: 11, letterSpacing: 1, textTransform: 'uppercase' }}
-              >
+              <Text variant="caption" muted numberOfLines={1}>
                 {item.label}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12, minWidth: 0 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
                 <Text
                   numberOfLines={1}
                   style={{
                     fontFamily: WEB_DISPLAY_FONT,
-                    fontSize: 28,
-                    lineHeight: 32,
-                    color: colors.ink,
-                    flexShrink: 1,
+                    fontSize: 22,
+                    lineHeight: 30,
+                    color: hovered && item.onPress ? item.color : colors.ink,
                   }}
                 >
                   {item.value}
                 </Text>
                 {item.hint ? (
-                  <Text variant="micro" style={{ color: item.color, fontSize: 11 }} numberOfLines={1}>
+                  <Text variant="caption" style={{ color: item.color }} numberOfLines={1}>
                     {item.hint}
                   </Text>
                 ) : null}
               </View>
-              <View
-                style={{
-                  width: 20,
-                  height: 2,
-                  borderRadius: 1,
-                  backgroundColor: hovered && item.onPress ? item.color : colors.hairline,
-                }}
-              />
             </>
           )}
         </WebHoverable>

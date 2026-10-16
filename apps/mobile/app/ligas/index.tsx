@@ -66,7 +66,7 @@ export default function LigasScreen()
             title="Ligas precisam de uma conta"
             body="No modo convidado tudo fica neste aparelho. Com uma conta você cria ligas com amigos e enchem o pote juntos."
           />
-          <PrimaryButton label="Criar conta ou entrar" onPress={() => router.push('/login')} />
+          <PrimaryButton label="Criar conta ou entrar" style={{ alignSelf: 'center' }} onPress={() => router.push('/login')} />
         </Card>
       </Screen>
     )
