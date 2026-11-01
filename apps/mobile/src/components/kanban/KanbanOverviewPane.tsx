@@ -245,11 +245,15 @@ export function KanbanOverviewPane({ tasks }: Props)
                 borderRadius: 20,
                 padding: space.md,
                 gap: 12,
-                shadowColor: elevation.card.shadowColor,
-                shadowOpacity: 0.05,
-                shadowRadius: 14,
-                shadowOffset: { width: 0, height: 4 },
-                elevation: 2,
+                ...(mode === 'dark'
+                  ? {}
+                  : {
+                      shadowColor: elevation.card.shadowColor,
+                      shadowOpacity: 0.05,
+                      shadowRadius: 14,
+                      shadowOffset: { width: 0, height: 4 },
+                      elevation: 2,
+                    }),
               }}
             >
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

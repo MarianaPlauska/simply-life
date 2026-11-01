@@ -187,7 +187,7 @@ export default function NovaMetaScreen()
                     flexDirection: 'row',
                     alignItems: 'center',
                     gap: space.md,
-                    backgroundColor: on ? (mode === 'dark' ? colors.brandInk : colors.brand) : colors.elevated,
+                    backgroundColor: on ? (mode === 'dark' ? colors.brandInk : colors.brand) : colors.fill,
                   }}
                 >
                   <Icon name={SHARED_GOAL_METRIC_ICON[p.metrica]} size={22} color={fg} />
@@ -317,7 +317,7 @@ export default function NovaMetaScreen()
               accessibilityRole="button"
               accessibilityLabel="Diminuir"
               onPress={() => bump(-1)}
-              style={{ width: 48, height: 48, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.elevated }}
+              style={{ width: 48, height: 48, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.fill }}
             >
               <Icon name="remove" size={20} color={colors.ink} />
             </Pressable>
@@ -330,7 +330,7 @@ export default function NovaMetaScreen()
                 flex: 1,
                 minHeight: 48,
                 borderRadius: radius.control,
-                backgroundColor: colors.elevated,
+                backgroundColor: colors.fill,
                 color: colors.ink,
                 textAlign: 'center',
                 fontFamily: 'Lexend_600SemiBold',
@@ -341,7 +341,7 @@ export default function NovaMetaScreen()
               accessibilityRole="button"
               accessibilityLabel="Aumentar"
               onPress={() => bump(1)}
-              style={{ width: 48, height: 48, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.elevated }}
+              style={{ width: 48, height: 48, borderRadius: radius.control, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.fill }}
             >
               <Icon name="add" size={20} color={colors.ink} />
             </Pressable>

@@ -76,7 +76,7 @@ export function HomeCollapsible({
             width: 28,
             height: 28,
             borderRadius: 8,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.fill,
             alignItems: 'center',
             justifyContent: 'center',
           }}

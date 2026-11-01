@@ -11,7 +11,7 @@ import {
   AGUA_META_COPOS,
   classifyDueBucket,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, ListRow } from '../../src/ui'
+import { Screen, Text, Card, PrimaryButton, ListRow, SectionHeader } from '../../src/ui'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { useDataStore } from '../../src/store/dataStore'
@@ -19,7 +19,7 @@ import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
 import { HomeWaterProgressCard } from '../../src/components/dashboard/HomeWaterProgressCard'
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
 import { AxelDayBrief } from '../../src/components/dashboard/HomeDriveAside'
-import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
+import { MoodWeekReportGate, isMoodWeekReportVisible } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
@@ -106,6 +106,8 @@ export default function DashboardScreenWeb()
   const moodDone = humorHoje != null
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
+  const showMoodWeek = isMoodWeekReportVisible(humor, prefs.mood_report_dismissed_week)
+  const showCareSection = waterOnHome || showMoodWeek
 
   const [menuOpen, setMenuOpen] = useState(false)
   const name = resolveAxelName({
@@ -274,16 +276,27 @@ export default function DashboardScreenWeb()
               ) : null
             }
           />
-          {/* Axel sempre presente: o próximo passo, logo abaixo do progresso */}
-          <AxelDayBrief />
-          <SalaryConfirmCard />
+          {/* Abaixo do destaque, seções: um painel por assunto, blocos separados por linha */}
+          <View>
+            <SectionHeader title="Agora" />
+            <Panel>
+              <AxelDayBrief />
+              <DayPlanHomeCard />
+              <VisualDayCard />
+              <SalaryConfirmCard />
+            </Panel>
+          </View>
 
-          <DayPlanHomeCard />
+          {showCareSection ? (
+            <View>
+              <SectionHeader title="Cuidar de você" />
+              <Panel>
+                {waterOnHome ? <HomeWaterProgressCard /> : null}
+                {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
+              </Panel>
+            </View>
+          ) : null}
 
-          <VisualDayCard />
-
-          <MoodWeekReportGate humor={humor} />
-          {waterOnHome ? <HomeWaterProgressCard /> : null}
           {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
           <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" pill="abrir" defaultOpen={false}>
             <View style={{ gap: 24, paddingTop: 8 }}>

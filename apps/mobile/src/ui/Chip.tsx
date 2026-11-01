@@ -3,6 +3,7 @@ import { Text } from './Text'
 import { PressableScale } from './PressableScale'
 import { Icon, type IconName } from './Icon'
 import { useTheme } from '../theme/ThemeProvider'
+import { hapticSelect } from '../lib/haptics'
 
 type Props = {
   label: string
@@ -24,7 +25,11 @@ export function Chip({ label, active, onPress, dotColor, count, icon, accessibil
 
   return (
     <PressableScale
-      onPress={onPress}
+      onPress={onPress ? () =>
+      {
+        hapticSelect()
+        onPress()
+      } : undefined}
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
       accessibilityLabel={accessibilityLabel}
@@ -37,7 +42,7 @@ export function Chip({ label, active, onPress, dotColor, count, icon, accessibil
         alignItems: 'center',
         flexShrink: 0,
         gap: 6,
-        backgroundColor: active ? colors.brandMuted : colors.elevated,
+        backgroundColor: active ? colors.brandMuted : colors.fill,
         borderWidth: 1,
         // não escolhida: contorno suave, senão some dentro de cartões da mesma cor
         borderColor: active ? ink : colors.hairlineStrong,

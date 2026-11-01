@@ -57,7 +57,7 @@ export function WebHydrationWidget()
               borderRadius: 8,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: colors.surface,
+              backgroundColor: colors.fill,
               opacity: atual <= 0 ? 0.4 : 1,
               cursor: atual <= 0 ? 'default' : 'pointer',
             })}
@@ -92,7 +92,7 @@ export function WebHydrationWidget()
               borderRadius: 8,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: colors.surface,
+              backgroundColor: colors.fill,
               cursor: 'pointer',
             })}
           >

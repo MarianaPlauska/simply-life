@@ -85,7 +85,7 @@ export function GoalPace({ ritmo }: { ritmo: SharedGoalRitmo | null })
             alignItems: 'center',
             justifyContent: 'center',
             paddingHorizontal: 6,
-            backgroundColor: r === ritmo ? on : colors.elevated,
+            backgroundColor: r === ritmo ? on : colors.fill,
           }}
         >
           <Text variant="micro" color={r === ritmo ? colors.onBrand : colors.inkMuted} numberOfLines={1}>

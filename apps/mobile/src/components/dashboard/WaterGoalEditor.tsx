@@ -32,7 +32,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
         paddingHorizontal: 12,
         borderRadius: 999,
         justifyContent: 'center',
-        backgroundColor: active ? colors.health : colors.elevated,
+        backgroundColor: active ? colors.health : colors.fill,
       }}
     >
       <Text variant="caption" style={{ fontWeight: '700', color: active ? colors.canvas : colors.ink }}>

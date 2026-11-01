@@ -73,7 +73,7 @@ export function SpendGuardHost({ host = 'root' }: { host?: SpendGuardHostId })
             <Text variant="body" muted>{mine.mensagem}</Text>
           </View>
           {pior ? (
-            <View style={{ gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.hairline }}>
+            <View style={{ gap: 8, padding: 12, borderRadius: 14, backgroundColor: colors.hairline }}>
               <Text variant="caption" muted>{mes}</Text>
               <Row label="Sobra prevista" value={formatBRL(pior.sobraAntes)} />
               <Row label="Esse gasto" value={`-${formatBRL(pior.impacto)}`} />

@@ -30,6 +30,22 @@ export function hapticLight(): void
   pulseNative()
 }
 
+/** Toque de seleção (aba, chip, marcar item) - mais curto que o leve; no-op no web */
+export function hapticSelect(): void
+{
+  if (Platform.OS === 'web') return
+  try
+  {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Haptics = require('expo-haptics') as typeof import('expo-haptics')
+    void Haptics.selectionAsync()
+  }
+  catch
+  {
+    /* ignore */
+  }
+}
+
 /** Pulso nas trocas de fase da respiração. Respeita prefs e reduzir movimento. */
 export function hapticBreathPulse(): void
 {

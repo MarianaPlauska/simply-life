@@ -198,7 +198,7 @@ export default function AmigosScreen()
                       if (ok) setFriends((cur) => cur.map((x) => (x.userId === f.userId ? { ...x, muted: !f.muted } : x)))
                     })
                   }}
-                  style={{ width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.elevated }}
+                  style={{ width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.fill }}
                 >
                   <Icon name={f.muted ? 'volume-mute' : 'notifications-outline'} size={20} color={colors.inkMuted} />
                 </Pressable>
@@ -219,7 +219,7 @@ export default function AmigosScreen()
                       },
                       'Remover',
                     )}
-                  style={{ width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.elevated }}
+                  style={{ width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.fill }}
                 >
                   <Icon name="close" size={20} color={colors.inkMuted} />
                 </Pressable>

@@ -119,7 +119,7 @@ export function MoodCheckInSheet()
               padding: 16,
               fontSize: 16,
               color: colors.ink,
-              backgroundColor: colors.elevated,
+              backgroundColor: colors.fill,
               borderWidth: 1,
               borderColor: colors.hairline,
             }}

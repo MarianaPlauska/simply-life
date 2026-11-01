@@ -56,9 +56,13 @@ export function AxelDayBrief()
     [tasks, habits, medicamentos, finance, cash, fixas, lastAxelCare, moodLevel],
   )
 
-  const accent = colors.axel
   const primaryStep = brief.nextSteps[0]
   const open = !collapsed
+  const sunMood = moodLevel != null && moodLevel <= 2
+    ? 'care'
+    : moodLevel != null && moodLevel >= 4
+      ? 'happy'
+      : 'calm'
 
   const toggleOpen = () =>
   {
@@ -69,38 +73,32 @@ export function AxelDayBrief()
     <Card
       tone="elevated"
       bare={inPanel}
-      style={inPanel ? { gap: open ? space.md : space.xs } : {
-        gap: open ? space.md : space.xs,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: colors.hairline,
-        padding: space.lg,
-      }}
+      style={inPanel ? { gap: open ? space.md : 0 } : { gap: open ? space.md : 0, padding: space.lg }}
     >
       <Pressable
         onPress={toggleOpen}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityLabel={open ? 'Fechar AXEL' : 'Abrir AXEL'}
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 16, minHeight: 48 }}
+        accessibilityLabel={open ? 'Fechar Axel' : 'Abrir Axel'}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}
       >
-        <AxelSun size={44} mood={moodLevel != null && moodLevel <= 2 ? 'care' : moodLevel != null && moodLevel >= 4 ? 'happy' : 'calm'} />
-        <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
-          <Text variant="caption" color={accent} style={{ fontWeight: '700', fontSize: 11 }}>
-            AXEL
+        <AxelSun size={40} mood={sunMood} />
+        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+          <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
+            Axel
           </Text>
           <Text variant="section" style={{ fontSize: 17 }} numberOfLines={2}>
             {brief.headline}
           </Text>
         </View>
-        <Text variant="caption" color={accent} style={{ fontWeight: '700' }}>
+        <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
           {open ? 'Fechar' : 'Abrir'}
         </Text>
       </Pressable>
 
       {open ? (
         <>
-          <Text variant="voice" style={{ fontSize: 15, lineHeight: 22 }} numberOfLines={details ? 8 : 4}>
+          <Text variant="body" style={{ fontSize: 15, lineHeight: 22 }} numberOfLines={details ? 6 : 3}>
             {brief.voice}
           </Text>
 
@@ -108,22 +106,24 @@ export function AxelDayBrief()
             <View
               style={
                 desk
-                  // computador: só um traço ao lado, sem caixa dentro do bloco
-                  ? { gap: 6, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: colors.health }
-                  : { gap: 6, padding: space.md, borderRadius: 14, backgroundColor: colors.surface }
+                  ? { gap: 4, paddingLeft: 12, borderLeftWidth: 2, borderLeftColor: colors.hairline }
+                  : { gap: 4, paddingVertical: 4 }
               }
             >
-              <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
-                Um passo
+              <Text variant="caption" muted>
+                Próximo
               </Text>
-              <Text variant="bodyStrong" style={{ fontSize: 14, lineHeight: 20 }}>
+              <Text variant="bodyStrong" style={{ fontSize: 15, lineHeight: 22 }}>
                 {primaryStep}
               </Text>
             </View>
           ) : null}
 
-          <Pressable onPress={() => setDetails((v) => !v)} style={{ minHeight: 44, justifyContent: 'center' }}>
-            <Text variant="caption" color={accent} style={{ fontWeight: '700' }}>
+          <Pressable
+            onPress={() => setDetails((v) => !v)}
+            style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}
+          >
+            <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
               {details ? 'Menos' : 'Mais'}
             </Text>
           </Pressable>
@@ -131,39 +131,33 @@ export function AxelDayBrief()
           {details ? (
             <View style={{ gap: space.md }}>
               {brief.gaps.length > 0 ? (
-                <View style={{ gap: 8 }}>
-                  <Text variant="caption" color={accent} style={{ fontWeight: '700' }}>
-                    Olho nisso
-                  </Text>
+                <View style={{ gap: 6 }}>
                   {brief.gaps.map((g) => (
                     <Text key={g} variant="caption" muted>
-                      · {g}
+                      {g}
                     </Text>
                   ))}
                 </View>
               ) : null}
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
                 <PrimaryButton
-                  label="Prioridades"
+                  label="Tarefas"
                   variant="secondary"
                   size="sm"
                   onPress={() => router.push('/(tabs)/kanban')}
-                  style={{ borderRadius: 999 }}
                 />
                 <PrimaryButton
                   label="Saúde"
                   variant="ghost"
                   size="sm"
                   onPress={() => router.push('/(tabs)/saude')}
-                  style={{ borderRadius: 999 }}
                 />
                 {showRail ? null : (
                   <PrimaryButton
-                    label="Finanças"
+                    label="Carteira"
                     variant="ghost"
                     size="sm"
                     onPress={() => router.push('/(tabs)/financeiro')}
-                    style={{ borderRadius: 999 }}
                   />
                 )}
               </View>

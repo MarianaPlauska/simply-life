@@ -9,6 +9,8 @@ import {
   demoCashAccount,
   emptyCashAccount,
   demoFinanceCards,
+  emptyFinanceCards,
+  isDemoFinanceCard,
   demoContasFixas,
   demoContasAPagar,
   demoFinanceGoals,
@@ -433,7 +435,7 @@ export const useDataStore = create<DataState>((set, get) => ({
   waterWeekDays: {},
   medicamentos: [],
   cashAccount: emptyCashAccount(),
-  financeCards: [],
+  financeCards: emptyFinanceCards(),
   contasFixas: [],
   contasAPagar: [],
   financeGoals: [],
@@ -448,7 +450,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       habits: [],
       medicamentos: [],
       cashAccount: emptyCashAccount(),
-      financeCards: [],
+      financeCards: emptyFinanceCards(),
       contasFixas: [],
       contasAPagar: [],
       financeGoals: [],
@@ -565,6 +567,15 @@ export const useDataStore = create<DataState>((set, get) => ({
         const keepFinance = get().source === 'demo' && get().finance.length > 0
           ? get().finance
           : demoFinance()
+        const keepCards = get().source === 'demo' && get().financeCards.length
+          ? get().financeCards
+          : demoFinanceCards()
+        // startOwn pode ter zerado os cartões no meio deste fetch
+        if (get().guestOwnData)
+        {
+          set({ loading: false })
+          return
+        }
         set({
           humor,
           tasks: keepTasks,
@@ -574,9 +585,7 @@ export const useDataStore = create<DataState>((set, get) => ({
             ? get().medicamentos
             : demoMedicamentos(),
           cashAccount: get().source === 'demo' ? get().cashAccount : demoCashAccount(),
-          financeCards: get().source === 'demo' && get().financeCards.length
-            ? get().financeCards
-            : demoFinanceCards(),
+          financeCards: keepCards,
           contasFixas: get().source === 'demo' && get().contasFixas.length
             ? get().contasFixas
             : demoContasFixas(),
@@ -659,7 +668,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         waterWeekDays,
         medicamentos: medicamentosRaw,
         cashAccount: cash,
-        financeCards: cards,
+        financeCards: cards.filter((c) => !isDemoFinanceCard(c)),
         contasFixas: fixas,
         contasAPagar: bills,
         financeGoals: goals,
@@ -1890,7 +1899,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       habits: applyHabitGoals(habits),
       medicamentos: [],
       cashAccount: emptyCashAccount(),
-      financeCards: [],
+      financeCards: emptyFinanceCards(),
       contasFixas: [],
       contasAPagar: [],
       financeGoals: [],

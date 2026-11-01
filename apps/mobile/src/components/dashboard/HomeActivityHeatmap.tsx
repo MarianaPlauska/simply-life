@@ -5,6 +5,7 @@ import { Text, ProgressRing, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAccents } from '../../theme/useAccents'
 import { useElo } from '../../hooks/useElo'
+import { usePanelBox } from '../../ui/Panel'
 
 type Props = {
   /** mantido por compatibilidade; o elo vem de useElo (tarefas entram pela conclusão) */
@@ -23,16 +24,15 @@ export function HomeActivityHeatmap(_props: Props)
 
   const ringPct = Math.min(100, Math.round((current / 30) * 100))
   const phrase = eloFrase(elo)
+  const box = usePanelBox({
+    borderRadius: 20,
+    padding: 20,
+    gap: 16,
+    backgroundColor: colors.elevated,
+  })
 
   return (
-    <View
-      style={{
-        borderRadius: 20,
-        padding: 20,
-        gap: 16,
-        backgroundColor: colors.elevated,
-      }}
-    >
+    <View style={box}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <ProgressRing
           progress={ringPct}

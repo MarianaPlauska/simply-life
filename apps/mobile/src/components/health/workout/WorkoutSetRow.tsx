@@ -74,7 +74,7 @@ export function WorkoutSetRow({ index, set, previous, bodyweight, onChange, onTo
             borderRadius: radius.control,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: set.done ? colors.done : colors.elevated,
+            backgroundColor: set.done ? colors.done : colors.fill,
             borderWidth: set.done ? 0 : 1,
             borderColor: colors.hairlineStrong,
             opacity: pressed ? 0.85 : 1,
@@ -105,7 +105,7 @@ export function WorkoutSetRow({ index, set, previous, bodyweight, onChange, onTo
                 borderRadius: radius.pill,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: set.rpe === r ? colors.brand : colors.elevated,
+                backgroundColor: set.rpe === r ? colors.brand : colors.fill,
               }}
             >
               <Text variant="label" color={set.rpe === r ? colors.onBrand : colors.ink}>{r}</Text>

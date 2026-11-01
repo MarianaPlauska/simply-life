@@ -21,7 +21,7 @@ O APK **não é** o site dentro de uma moldura: as telas são nativas do Android
 
 Dados do app no `apps/mobile/app.json`:
 * Nome: **SunFy**
-* Pacote (package): `app.simplylife.os`
+* Pacote (package): `app.sunfy`
 * Esquema de links: `simplylife://`
 
 ---
@@ -211,7 +211,7 @@ Há dois tipos:
 | **Remotas** (vêm do servidor) | apoio de amigos nas Metas juntos, resumo do dia | **Ainda não.** Precisa do Firebase (FCM), que não está configurado |
 
 Para ligar as notificações remotas:
-1. Crie um projeto no [Firebase](https://console.firebase.google.com) e adicione um app Android com o pacote `app.simplylife.os`.
+1. Crie um projeto no [Firebase](https://console.firebase.google.com) e adicione um app Android com o pacote `app.sunfy`.
 2. Baixe o `google-services.json` para `apps/mobile/` e adicione no `app.json`: `expo.android.googleServicesFile: "./google-services.json"`.
 3. No Firebase, em **Configurações do projeto → Contas de serviço**, gere uma chave privada (arquivo JSON) e envie para a Expo:
    ```bash
@@ -257,7 +257,7 @@ Login com e-mail e senha funciona sem nada disso.
 ## 10. Play Store (depois)
 
 1. Crie uma conta no [Google Play Console](https://play.google.com/console). A taxa é paga uma vez só.
-2. Crie o app com o pacote **`app.simplylife.os`**, igual ao do `app.json`.
+2. Crie o app com o pacote **`app.sunfy`**, igual ao do `app.json`.
 3. Ative o **Play App Signing**.
 4. Gere o pacote da loja (um `.aab`, não um `.apk`):
    ```bash

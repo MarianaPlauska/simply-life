@@ -142,7 +142,7 @@ export function WebBodyMetrics()
               paddingVertical: 8,
               borderTopWidth: i === 0 ? 0 : 1,
               borderTopColor: colors.cardRim,
-              backgroundColor: hovered ? colors.surface : 'transparent',
+              backgroundColor: hovered ? colors.fill : 'transparent',
               cursor: 'pointer',
             })}
           >

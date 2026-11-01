@@ -13,7 +13,7 @@ export type HomeShortcut = {
 
 export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
 {
-  const { colors, space } = useTheme()
+  const { colors, space, mode } = useTheme()
   if (actions.length === 0)
   {
     return null
@@ -34,18 +34,22 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
             flexGrow: 1,
             flexBasis: `${(100 / perRow) - 3}%` as `${number}%`,
             minHeight: 96,
-            borderRadius: 20,
-            backgroundColor: colors.surface,
+            borderRadius: 14,
+            backgroundColor: colors.fill,
             alignItems: 'center',
             justifyContent: 'center',
             gap: 8,
             paddingVertical: 14,
             paddingHorizontal: 10,
-            shadowColor: colors.ink,
-            shadowOpacity: 0.05,
-            shadowRadius: 8,
-            shadowOffset: { width: 0, height: 2 },
-            elevation: 1,
+            ...(mode === 'dark'
+              ? null
+              : {
+                  shadowColor: colors.ink,
+                  shadowOpacity: 0.05,
+                  shadowRadius: 8,
+                  shadowOffset: { width: 0, height: 2 },
+                  elevation: 1,
+                }),
           }}
         >
           <View

@@ -91,20 +91,21 @@ export const ELEVATION: { light: ElevationSet; dark: ElevationSet } = {
       elevation: 5,
     },
   },
+  // escuro: cartão sem sombra (no escuro vira mancha); a camada é o tom da superfície
   dark: {
     card: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.28,
-      shadowRadius: 18,
-      elevation: 3,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     },
     hero: {
       shadowColor: '#000000',
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.35,
-      shadowRadius: 12,
-      elevation: 4,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     },
     fab: {
       shadowColor: '#B76021',

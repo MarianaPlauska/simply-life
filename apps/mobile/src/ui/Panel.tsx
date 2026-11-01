@@ -1,6 +1,7 @@
-import { Children, createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
-import { Platform, View, type StyleProp, type ViewStyle } from 'react-native'
+import { Children, createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { View, type StyleProp, type ViewStyle } from 'react-native'
 import { useWebDesk } from '../components/dashboard/web/webBox'
+import { SurfaceGlow } from './SurfaceGlow'
 import { useTheme } from '../theme/ThemeProvider'
 
 const InPanel = createContext(false)
@@ -21,71 +22,84 @@ export function Panel({ children, style }: { children: ReactNode; style?: StyleP
   const { colors } = useTheme()
   const desk = useWebDesk()
   const items = Children.toArray(children)
-  const ref = useRef<View>(null)
+  const [filled, setFilled] = useState<Record<number, boolean>>({})
+  const any = items.some((_c, i) => filled[i] === true)
+  const reported = items.length > 0 && items.every((_c, i) => typeof filled[i] === 'boolean')
 
-  // web: bloco que retornou null deixa um item vazio; esconde o item e, se todos
-  // estiverem vazios, o painel inteiro (não depende do :has do CSS do navegador)
-  useEffect(() =>
+  const report = useCallback((i: number, has: boolean) =>
   {
-    if (Platform.OS !== 'web') return
-    const el = ref.current as unknown as HTMLElement | null
-    if (!el || typeof MutationObserver === 'undefined') return
-    const sync = () =>
-    {
-      let any = false
-      el.querySelectorAll<HTMLElement>(':scope > div > [data-panel-item]').forEach((it) =>
-      {
-        const has = it.childElementCount > 0
-        it.style.display = has ? '' : 'none'
-        if (has) any = true
-      })
-      el.style.display = any ? '' : 'none'
-    }
-    sync()
-    const mo = new MutationObserver(sync)
-    mo.observe(el, { childList: true, subtree: true })
-    return () => mo.disconnect()
+    setFilled((prev) => (prev[i] === has ? prev : { ...prev, [i]: has }))
   }, [])
+
+  const first = items.findIndex((_c, i) => filled[i] === true)
+
+  if (items.length === 0 || (reported && !any)) return null
 
   return (
     <View
-      ref={ref}
-      // na web, Panel sem nenhum bloco com conteúdo some (regra em app/+html.tsx)
-      {...({ dataSet: { panel: '' } } as object)}
       style={[
         {
-          borderRadius: desk ? 16 : 12,
-          backgroundColor: colors.elevated,
-          borderWidth: 1,
-          // computador (web): cartão branco, contorno só de leve
+          borderRadius: desk ? 16 : 20,
+          backgroundColor: any ? colors.elevated : 'transparent',
+          borderWidth: any ? 1 : 0,
           borderColor: desk ? colors.cardRim : colors.hairline,
           overflow: 'hidden',
         },
         style,
       ]}
     >
-      {/* margem -1: esconde a linha de cima do primeiro bloco que aparecer */}
-      <View style={{ marginTop: -1 }}>
-        <InPanel.Provider value>
-          {items.map((child, i) => (
-            <PanelItem key={i}>{child}</PanelItem>
-          ))}
-        </InPanel.Provider>
-      </View>
+      {any && !desk ? <SurfaceGlow /> : null}
+      <InPanel.Provider value>
+        {items.map((child, i) => (
+          <PanelItem key={i} index={i} divider={i !== first} onFilled={report}>
+            {child}
+          </PanelItem>
+        ))}
+      </InPanel.Provider>
     </View>
   )
 }
 
-function PanelItem({ children }: { children: ReactNode })
+function PanelItem({
+  children,
+  index,
+  divider,
+  onFilled,
+}: {
+  children: ReactNode
+  index: number
+  divider: boolean
+  onFilled: (i: number, has: boolean) => void
+})
 {
   const { colors } = useTheme()
+  const [has, setHas] = useState<boolean | null>(null)
+
+  if (has === false) return null
+
   return (
     <View
-      // na web, item vazio some (bloco que retornou null não deixa espaço); dataSet é do react-native-web
-      {...({ dataSet: { panelItem: '' } } as object)}
-      style={{ paddingHorizontal: 20, paddingVertical: 16, borderTopWidth: 1, borderTopColor: colors.hairline }}
+      style={
+        has
+          ? {
+              paddingHorizontal: 20,
+              paddingVertical: 16,
+              borderTopWidth: divider ? 1 : 0,
+              borderTopColor: colors.hairline,
+            }
+          : { position: 'absolute', opacity: 0, pointerEvents: 'none' }
+      }
     >
-      {children}
+      <View
+        onLayout={(e) =>
+        {
+          const next = e.nativeEvent.layout.height > 0
+          setHas(next)
+          onFilled(index, next)
+        }}
+      >
+        {children}
+      </View>
     </View>
   )
 }

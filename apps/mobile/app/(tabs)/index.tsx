@@ -18,7 +18,9 @@ import {
   Card,
   PrimaryButton,
   ListRow,
+  SectionHeader,
 } from '../../src/ui'
+import { Panel } from '../../src/ui/Panel'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { useDataStore } from '../../src/store/dataStore'
@@ -38,7 +40,7 @@ import { HomeWaterProgressCard } from '../../src/components/dashboard/HomeWaterP
 import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
-import { MoodWeekReportGate } from '../../src/components/dashboard/MoodWeekReportCard'
+import { MoodWeekReportGate, isMoodWeekReportVisible } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
@@ -66,7 +68,7 @@ function greetingForHour(h: number): string
 export default function DashboardScreen()
 {
   const { colors, space, mode, setMode } = useTheme()
-  const { showRail, isDesktop, isTablet } = useWorkspace()
+  const { showRail, isDesktop } = useWorkspace()
   const router = useRouter()
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -116,6 +118,8 @@ export default function DashboardScreen()
   const moodDone = humorHoje != null
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
+  const showMoodWeek = isMoodWeekReportVisible(humor, prefs.mood_report_dismissed_week)
+  const showCareSection = waterOnHome || showMoodWeek
   const rpgMode = prefs.gamification_mode === 'rpg'
   const moduleOrder = filterPriorities(prefs.enabled_modules, prefs.home_module_order ?? ['tasks', 'health', 'finance'])
 
@@ -284,33 +288,28 @@ export default function DashboardScreen()
               }
             />
 
-            {/* Axel sempre presente: o próximo passo, logo abaixo do progresso */}
-            {isTablet && waterOnHome ? (
-              <View style={{ flexDirection: 'row', gap: 16, alignItems: 'stretch' }}>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <AxelDayBrief />
-                </View>
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <HomeWaterProgressCard />
-                </View>
-              </View>
-            ) : (
-              <>
+            {/* Abaixo do destaque, seções: um painel por assunto, blocos separados por linha */}
+            <View>
+              <SectionHeader title="Agora" />
+              <Panel>
                 <AxelDayBrief />
-                {waterOnHome ? <HomeWaterProgressCard /> : null}
-              </>
-            )}
+                <DayPlanHomeCard />
+                <VisualDayCard />
+                <SalaryConfirmCard />
+              </Panel>
+            </View>
 
-            <SalaryConfirmCard />
-
-            <DayPlanHomeCard />
-
-            <VisualDayCard />
-
-            <MoodWeekReportGate humor={humor} />
+            {showCareSection ? (
+              <View>
+                <SectionHeader title="Cuidar de você" />
+                <Panel>
+                  {waterOnHome ? <HomeWaterProgressCard /> : null}
+                  {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
+                </Panel>
+              </View>
+            ) : null}
 
             {rpgMode ? <HomeRpgStrip /> : null}
-
 
             {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
             <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" pill="abrir" defaultOpen={false}>
@@ -375,7 +374,7 @@ export default function DashboardScreen()
                         onPress={() => router.push(`/task/${t.id}`)}
                         style={{
                           borderRadius: 14,
-                          backgroundColor: colors.elevated,
+                          backgroundColor: colors.fill,
                           padding: 16,
                           minHeight: 52,
                           justifyContent: 'center',

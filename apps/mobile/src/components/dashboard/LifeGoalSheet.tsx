@@ -496,8 +496,8 @@ export function LifeGoalMicroLine({ onPress }: { onPress: () => void })
             maxWidth: '100%',
             paddingHorizontal: 10,
             paddingVertical: 6,
-            borderRadius: 10,
-            backgroundColor: colors.elevated,
+            borderRadius: 999,
+            backgroundColor: colors.fill,
             borderWidth: 1,
             borderColor: colors.hairline,
           }}

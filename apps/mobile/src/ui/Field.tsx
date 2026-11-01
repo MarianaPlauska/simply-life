@@ -22,7 +22,7 @@ export function Field({ label, error, tone = 'default', style, onFocus, onBlur, 
       ? colors.canvas
       : tone === 'sand'
         ? colors.hairline
-        : colors.elevated
+        : colors.fill
   const labelColor =
     tone === 'widget'
       ? focused
@@ -62,8 +62,7 @@ export function Field({ label, error, tone = 'default', style, onFocus, onBlur, 
             ...(rest.multiline
               ? { paddingTop: 14, paddingBottom: 14, textAlignVertical: 'top' as const, lineHeight: 24 }
               : null),
-            // caixa de texto um pouco mais reta que botões e pílulas
-            borderRadius: 10,
+            borderRadius: 14,
             paddingHorizontal: 16,
             fontSize: 16,
             fontFamily: 'Lexend_400Regular',

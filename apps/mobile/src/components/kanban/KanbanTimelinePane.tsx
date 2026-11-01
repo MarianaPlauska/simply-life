@@ -122,7 +122,7 @@ export function KanbanTimelinePane({ tasks }: Props)
                         paddingHorizontal: 8,
                         paddingVertical: 4,
                         borderRadius: 999,
-                        backgroundColor: colors.elevated,
+                        backgroundColor: colors.fill,
                       }}
                     >
                       <Text variant="micro" style={{ color: colors.ink, fontWeight: '700' }}>

@@ -23,7 +23,7 @@ function cycle(current: number, opts: number[]): number
 export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }: Props)
 {
   const { colors } = useTheme()
-  const tileBg = colors.elevated
+  const tileBg = colors.fill
 
   const tiles = [
     {
@@ -61,7 +61,7 @@ export function PomodoroDurationTiles({ focus, shortBreak, longBreak, onChange }
               style={{
                 alignSelf: 'stretch',
                 minHeight: 88,
-                borderRadius: 20,
+                borderRadius: 14,
                 backgroundColor: tileBg,
                 alignItems: 'center',
                 justifyContent: 'center',

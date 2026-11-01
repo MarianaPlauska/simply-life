@@ -146,7 +146,7 @@ export function DashHero()
       }}
     >
       <View style={{ flex: 1, gap: 10, minWidth: 0, zIndex: 1 }}>
-        <Text style={{ fontSize: 12, letterSpacing: 1.2, fontFamily: 'Lexend_600SemiBold', color: creamSoft }}>AXEL PARA HOJE</Text>
+        <Text style={{ fontSize: 13, fontFamily: 'Lexend_600SemiBold', color: creamSoft }}>Axel</Text>
         <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, color: cream }}>{brief.headline}</Text>
         <Text numberOfLines={2} style={{ fontSize: 14, lineHeight: 21, fontFamily: 'Lexend_400Regular', color: creamSoft, maxWidth: 520 }}>
           {brief.voice}

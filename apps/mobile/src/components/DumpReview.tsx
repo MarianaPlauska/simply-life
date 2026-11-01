@@ -135,7 +135,7 @@ function MetaChip({ icon, label, accessibilityLabel }: MetaChipProps)
         minHeight: 28,
         paddingHorizontal: 10,
         borderRadius: radius.pill,
-        backgroundColor: colors.elevated,
+        backgroundColor: colors.fill,
       }}
     >
       <Icon name={icon} size={14} color={colors.inkMuted} />
@@ -223,7 +223,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
             borderRadius: 12,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: colors.elevated,
+            backgroundColor: colors.fill,
           }}
         >
           <Icon name="close" size={16} color={colors.inkMuted} />
@@ -243,7 +243,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
           paddingVertical: 8,
           paddingHorizontal: 12,
           borderRadius: radius.control,
-          backgroundColor: colors.elevated,
+          backgroundColor: colors.fill,
         }}
       />
 
@@ -333,7 +333,7 @@ function DumpReviewRow({ item, onChange, onRemove }: RowProps)
               gap: 8,
               paddingHorizontal: 12,
               borderRadius: radius.control,
-              backgroundColor: colors.elevated,
+              backgroundColor: colors.fill,
               borderWidth: 1,
               borderColor: missingValue ? colors.attention : 'transparent',
             }}

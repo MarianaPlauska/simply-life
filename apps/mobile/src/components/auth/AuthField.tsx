@@ -9,6 +9,7 @@ type Props = TextInputProps & {
   error?: string
   leadingIcon: keyof typeof Icon.glyphMap
   trailing?: ReactNode
+  compact?: boolean
 }
 
 /** Campo de autenticação - label, ícone à esquerda e slot trailing (ex.: Mostrar/Ocultar) */
@@ -17,6 +18,7 @@ export function AuthField({
   error,
   leadingIcon,
   trailing,
+  compact = false,
   style,
   onFocus,
   onBlur,
@@ -27,7 +29,7 @@ export function AuthField({
   const [focused, setFocused] = useState(false)
 
   return (
-    <View style={{ gap: 6 }}>
+    <View style={{ gap: compact ? 4 : 6 }}>
       <Text
         variant="label"
         color={focused ? colors.axel : colors.inkMuted}
@@ -37,9 +39,9 @@ export function AuthField({
       </Text>
       <View
         style={{
-          minHeight: 52,
+          minHeight: compact ? 44 : 52,
           borderRadius: radius.control,
-          backgroundColor: colors.elevated,
+          backgroundColor: colors.fill,
           borderWidth: 1.5,
           borderColor: error
             ? colors.danger
@@ -73,8 +75,8 @@ export function AuthField({
           style={[
             {
               flex: 1,
-              minHeight: 48,
-              fontSize: 16,
+              minHeight: compact ? 42 : 48,
+              fontSize: compact ? 15 : 16,
               fontFamily: 'Lexend_400Regular',
               color: colors.ink,
               paddingVertical: 0,

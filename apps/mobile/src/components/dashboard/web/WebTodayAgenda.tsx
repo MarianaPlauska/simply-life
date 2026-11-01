@@ -94,7 +94,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
                 alignItems: 'center',
                 paddingHorizontal: 20,
                 paddingVertical: 8,
-                backgroundColor: hovered ? colors.surface : 'transparent',
+                backgroundColor: hovered ? colors.fill : 'transparent',
                 cursor: 'pointer',
               })}
             >

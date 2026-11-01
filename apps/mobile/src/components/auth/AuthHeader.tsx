@@ -9,17 +9,18 @@ type Props = {
   welcomeLabel?: string
   compact?: boolean
   width?: number
+  contentMaxWidth?: number
 }
 
 /**
- * Topo do login mobile. Segue o tema: menta clara no modo claro (sem bloco
- * escuro) e petróleo no escuro. Baixo de propósito, para o formulário
- * caber na tela sem rolar.
+ * Topo do login mobile e janelas verticais estreitas. Segue o tema: menta clara
+ * no modo claro (sem bloco escuro) e petróleo no escuro.
  */
 export function AuthHeader({
   welcomeLabel = 'Passos pequenos.\nSem pressa.\nFeito pra você.',
   compact,
   width: widthProp,
+  contentMaxWidth = 560,
 }: Props)
 {
   const { colors, space, mode } = useTheme()
@@ -59,37 +60,39 @@ export function AuthHeader({
           flex: 1,
           paddingTop: insets.top + space.md,
           paddingBottom: space.xl,
-          paddingHorizontal: space.lg,
+          paddingHorizontal: 22,
           justifyContent: 'flex-end',
-          gap: 8,
+          alignItems: 'center',
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <BrandMark size={36} onFill={dark} />
-          <SunFyWordmark color={colors.heroInk} style={{ fontSize: 22, lineHeight: 28, letterSpacing: -0.4 }} />
+        <View style={{ width: '100%', maxWidth: contentMaxWidth, gap: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <BrandMark size={36} onFill={dark} />
+            <SunFyWordmark color={colors.heroInk} style={{ fontSize: 22, lineHeight: 28, letterSpacing: -0.4 }} />
+          </View>
+          <Text
+            variant="hero"
+            style={{ color: colors.heroInk, fontSize: titleSize, letterSpacing: -1, lineHeight: titleSize + 4 }}
+          >
+            {welcomeLabel.split('\n').map((line, i, all) => (
+              <Text
+                key={line}
+                variant="hero"
+                style={{
+                  color: i === all.length - 1 ? colors.axel : colors.heroInk,
+                  fontSize: titleSize,
+                  letterSpacing: -1,
+                  lineHeight: titleSize + 4,
+                }}
+              >
+                {i === 0 ? line : `\n${line}`}
+              </Text>
+            ))}
+          </Text>
+          <Text variant="body" style={{ color: colors.heroMuted, maxWidth: 380, fontSize: 15, lineHeight: 22 }}>
+            Nos dias nublados, a gente se vira um pro outro.
+          </Text>
         </View>
-        <Text
-          variant="hero"
-          style={{ color: colors.heroInk, fontSize: titleSize, letterSpacing: -1, lineHeight: titleSize + 4 }}
-        >
-          {welcomeLabel.split('\n').map((line, i, all) => (
-            <Text
-              key={line}
-              variant="hero"
-              style={{
-                color: i === all.length - 1 ? colors.axel : colors.heroInk,
-                fontSize: titleSize,
-                letterSpacing: -1,
-                lineHeight: titleSize + 4,
-              }}
-            >
-              {i === 0 ? line : `\n${line}`}
-            </Text>
-          ))}
-        </Text>
-        <Text variant="body" style={{ color: colors.heroMuted, maxWidth: 340, fontSize: 15, lineHeight: 22 }}>
-          Nos dias nublados, a gente se vira um pro outro.
-        </Text>
       </View>
     </View>
   )

@@ -5,6 +5,7 @@ import {
   Platform,
   useWindowDimensions,
   Pressable,
+  ScrollView,
 } from 'react-native'
 import { Redirect } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -18,21 +19,34 @@ import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 
 const PAD_X = 22
+const WAVE_MAX_WIDTH = 560
 
-/** Login - mobile: marca compacta + form; desktop: split-screen */
+/** Login - mobile: marca compacta + form; desktop: split-screen responsivo à altura */
 export default function LoginScreen()
 {
   const { colors, space, mode, setMode } = useTheme()
   const insets = useSafeAreaInsets()
   const { width: vw, height: winH } = useWindowDimensions()
   const isDesktop = vw >= BREAKPOINT.desktop
+  // Notebooks tipicamente têm viewport útil entre 640px e 800px de altura
+  const compactDesktop = isDesktop && winH < 820
   const userId = useAuthStore((s) => s.userId)
   const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
   const [authMode, setAuthMode] = useState<AuthMode>('login')
 
+  if (
+    Platform.OS === 'web' &&
+    typeof window !== 'undefined' &&
+    (window.location.hash.includes('type=recovery') ||
+      window.location.search.includes('type=recovery'))
+  )
+  {
+    return <Redirect href="/reset-password" />
+  }
+
   if (userId && !mfaPending) return <Redirect href="/(tabs)" />
 
-  const minH = Math.max(winH - insets.top, 640)
+  const minH = Math.max(winH - insets.top, 600)
 
   const toggleTheme = () =>
   {
@@ -44,68 +58,88 @@ export default function LoginScreen()
   {
     return (
       <View style={{ flex: 1, flexDirection: 'row', minHeight: minH, backgroundColor: colors.canvas }}>
-        <View style={{ flex: 0.58, minWidth: 380 }}>
-          <LoginBrandPanel />
+        <View style={{ flex: 0.56, minWidth: 380 }}>
+          <LoginBrandPanel compact={compactDesktop} />
         </View>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{
-            flex: 0.42,
-            justifyContent: 'center',
-            alignItems: 'center',
-            paddingHorizontal: space.xxl,
-            paddingVertical: Math.max(insets.top, space.xl),
-            paddingBottom: Math.max(insets.bottom, space.xl),
+            flex: 0.44,
+            position: 'relative',
             backgroundColor: colors.canvas,
           }}
         >
-          <View style={{ width: '100%', maxWidth: 420, gap: space.md }}>
-            <Pressable
-              onPress={toggleTheme}
-              accessibilityLabel={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
-              style={{
-                alignSelf: 'flex-end',
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                minHeight: 44,
-                paddingHorizontal: 12,
-                borderRadius: 999,
-                backgroundColor: colors.surface,
-                borderWidth: 1,
-                borderColor: colors.hairline,
-              }}
-            >
-              <Icon
-                name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
-                size={18}
-                color={colors.axel}
-              />
-              <Text variant="caption" style={{ fontWeight: '700' }}>
-                {mode === 'dark' ? 'Escuro' : 'Claro'}
-              </Text>
-            </Pressable>
+          <Pressable
+            onPress={toggleTheme}
+            accessibilityLabel={mode === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'}
+            style={{
+              position: 'absolute',
+              top: Math.max(insets.top, 14),
+              right: 24,
+              zIndex: 10,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
+              minHeight: 38,
+              paddingHorizontal: 12,
+              borderRadius: 999,
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.hairline,
+            }}
+          >
+            <Icon
+              name={mode === 'dark' ? 'sunny-outline' : 'moon-outline'}
+              size={16}
+              color={colors.axel}
+            />
+            <Text variant="caption" style={{ fontWeight: '700' }}>
+              {mode === 'dark' ? 'Escuro' : 'Claro'}
+            </Text>
+          </Pressable>
+
+          <ScrollView
+            bounces={false}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: compactDesktop ? space.xl : space.xxl,
+              paddingTop: Math.max(insets.top, compactDesktop ? 56 : 64),
+              paddingBottom: Math.max(insets.bottom, compactDesktop ? 20 : space.xl),
+            }}
+          >
             <View
               style={{
                 width: '100%',
+                maxWidth: compactDesktop ? 396 : 424,
                 backgroundColor: colors.surface,
                 borderRadius: 20,
-                padding: space.xl,
+                padding: compactDesktop ? space.lg : space.xl,
                 borderWidth: 1,
                 borderColor: colors.hairline,
               }}
             >
-              <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading />
+              <LoginForm
+                mode={authMode}
+                onModeChange={setAuthMode}
+                showHeading
+                compact={compactDesktop}
+              />
             </View>
-          </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </View>
     )
   }
 
-  // Mobile / tablet < desktop - marca no topo + form full-width
+  // Mobile e janela vertical estreita (< 1024px) - cabeçalho e formulário alinhados e centrados
+  const isTallWindow = vw >= 500 && winH >= 800
+
   return (
-    <Screen scroll tabBarInset={false} padded={false} style={{ flexGrow: 1, minHeight: minH }}>
+    <Screen scroll wide tabBarInset={false} padded={false} style={{ flexGrow: 1, minHeight: minH }}>
       <View
         style={{
           flexGrow: 1,
@@ -118,6 +152,7 @@ export default function LoginScreen()
             welcomeLabel={authMode === 'register' ? 'Chega mais.\nAqui você\nnão está só.' : 'Passos pequenos.\nSem pressa.\nFeito pra você.'}
             compact={authMode === 'register'}
             width={vw}
+            contentMaxWidth={WAVE_MAX_WIDTH}
           />
           <Pressable
             onPress={toggleTheme}
@@ -147,9 +182,10 @@ export default function LoginScreen()
           style={{
             flexGrow: 1,
             alignItems: 'center',
+            justifyContent: isTallWindow ? 'center' : 'flex-start',
             paddingHorizontal: PAD_X,
             paddingTop: space.xl,
-            paddingBottom: Math.max(insets.bottom, space.lg),
+            paddingBottom: Math.max(insets.bottom, isTallWindow ? space.xxl : space.lg),
             backgroundColor: colors.surface,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
@@ -159,7 +195,13 @@ export default function LoginScreen()
             minHeight: winH * 0.7,
           }}
         >
-          <LoginForm mode={authMode} onModeChange={setAuthMode} showHeading variant="wave" />
+          <LoginForm
+            mode={authMode}
+            onModeChange={setAuthMode}
+            showHeading
+            variant="wave"
+            maxWidth={WAVE_MAX_WIDTH}
+          />
         </KeyboardAvoidingView>
       </View>
     </Screen>

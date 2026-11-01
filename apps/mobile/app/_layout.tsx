@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { View, ActivityIndicator, AppState, Platform } from 'react-native'
 import { Stack, usePathname } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
+import * as SplashScreen from 'expo-splash-screen'
+import * as NavigationBar from 'expo-navigation-bar'
 import { useFonts, Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold, Lexend_700Bold } from '@expo-google-fonts/lexend'
 import { Fraunces_500Medium, Fraunces_600SemiBold } from '@expo-google-fonts/fraunces'
 import { colorsFor } from '@simply-life/ui-tokens'
@@ -23,8 +25,11 @@ import { useEloSync } from '../src/hooks/useEloSync'
 import { WebTopNav } from '../src/components/layout/WebTopNav'
 import { useWorkspace } from '../src/layout/useWorkspace'
 
+// a splash nativa fica até fontes, sessão e preferências carregarem (sem tela de "carregando")
+void SplashScreen.preventAutoHideAsync().catch(() => undefined)
+
 /** Telas sem barra lateral: entrada, cadastro e telas de tela cheia */
-const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao']
+const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao', '/privacidade']
 
 function RootNavigator()
 {
@@ -61,6 +66,19 @@ function RootNavigator()
     })
     return () => sub.remove()
   }, [userId, markOpen])
+
+  useEffect(() =>
+  {
+    if (ready && prefsLoaded) void SplashScreen.hideAsync().catch(() => undefined)
+  }, [ready, prefsLoaded])
+
+  // Android: barra de navegação do sistema na cor da barra de abas, ícones legíveis no tema
+  useEffect(() =>
+  {
+    if (Platform.OS !== 'android') return
+    void NavigationBar.setBackgroundColorAsync(colors.navBg).catch(() => undefined)
+    void NavigationBar.setButtonStyleAsync(mode === 'dark' ? 'light' : 'dark').catch(() => undefined)
+  }, [mode, colors.navBg])
 
   // elo igual em todos os aparelhos, recorde e cartão público
   useEloSync()

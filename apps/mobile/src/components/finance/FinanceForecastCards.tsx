@@ -167,7 +167,7 @@ export function MonthProjectionCard()
       </Pressable>
 
       {projection.vencidas.map((v) => (
-        <View key={v.fixaId} style={{ gap: 8, padding: 12, borderRadius: 12, backgroundColor: colors.hairline }}>
+        <View key={v.fixaId} style={{ gap: 8, padding: 12, borderRadius: 14, backgroundColor: colors.hairline }}>
           <Text variant="body" style={{ fontSize: 14 }}>
             {v.nome} venceu dia {v.data.slice(8, 10)} ({formatBRL(v.valor)}). Você já pagou?
           </Text>

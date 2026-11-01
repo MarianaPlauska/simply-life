@@ -40,7 +40,7 @@ export function ListRow({
           paddingHorizontal: spec.paddingHorizontal,
           borderRadius: radius.control,
           // Android: a onda do sistema faz o retorno do toque; nos outros, fundo + escala
-          backgroundColor: pressed && !IS_ANDROID ? colors.elevated : 'transparent',
+          backgroundColor: pressed && !IS_ANDROID ? colors.fill : 'transparent',
           opacity: pressed && !IS_ANDROID ? 0.88 : 1,
           transform: [{ scale: pressed && onPress && !IS_ANDROID ? 0.97 : 1 }],
           overflow: 'hidden',

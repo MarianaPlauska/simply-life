@@ -286,7 +286,7 @@ export default function MetaDetailScreen()
                   flex: 1,
                   minHeight: 48,
                   borderRadius: radius.control,
-                  backgroundColor: colors.elevated,
+                  backgroundColor: colors.fill,
                   color: colors.ink,
                   paddingHorizontal: space.md,
                   fontFamily: 'Lexend_500Medium',
@@ -328,7 +328,7 @@ export default function MetaDetailScreen()
                     paddingHorizontal: 14,
                     borderRadius: radius.pill,
                     justifyContent: 'center',
-                    backgroundColor: colors.elevated,
+                    backgroundColor: colors.fill,
                     opacity: pressed || cheerBusy === c.key ? 0.7 : 1,
                   })}
                 >

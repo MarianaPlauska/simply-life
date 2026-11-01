@@ -284,7 +284,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
               padding: 16,
               fontSize: 15,
               color: colors.ink,
-              backgroundColor: colors.canvas,
+              backgroundColor: colors.fill,
               borderWidth: 1,
               borderColor: colors.hairline,
             }}

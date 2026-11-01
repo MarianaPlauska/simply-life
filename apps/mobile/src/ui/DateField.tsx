@@ -68,13 +68,13 @@ export function DateField({ label, value, min, onChange, tone = 'default' }: Pro
         accessibilityLabel={`${label}: ${value ? brDateFromIso(value) : 'escolher'}`}
         style={{
           minHeight: 52,
-          borderRadius: 10,
+          borderRadius: 14,
           paddingHorizontal: 16,
           flexDirection: 'row',
           alignItems: 'center',
           gap: 12,
           overflow: 'hidden',
-          backgroundColor: tone === 'widget' ? colors.canvas : tone === 'sand' ? colors.hairline : colors.elevated,
+          backgroundColor: tone === 'widget' ? colors.canvas : tone === 'sand' ? colors.hairline : colors.fill,
         }}
       >
         <Icon name="calendar" size={18} color={colors.inkMuted} />

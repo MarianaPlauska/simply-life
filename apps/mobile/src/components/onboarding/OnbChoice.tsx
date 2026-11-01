@@ -36,7 +36,7 @@ export function OnbChoice({ title, hint, icon, selected, onPress, kind = 'checkb
         paddingVertical: 12,
         paddingHorizontal: space.md,
         borderRadius: radius.control,
-        backgroundColor: selected ? colors.brandMuted : colors.elevated,
+        backgroundColor: selected ? colors.brandMuted : colors.fill,
         borderWidth: 1,
         borderColor: selected ? accent : colors.hairline,
         ...(half ? { flexBasis: '46%', flexGrow: 1 } : null),

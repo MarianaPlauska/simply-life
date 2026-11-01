@@ -109,7 +109,7 @@ export function HealthDiaryDesk(props: Props)
           placeholderTextColor={colors.inkFaint}
           style={webStyle({
             height: Math.max(72, Math.min(220, noteH + 2)),
-            borderRadius: 12,
+            borderRadius: 14,
             paddingHorizontal: 16,
             paddingVertical: 12,
             fontSize: 16,

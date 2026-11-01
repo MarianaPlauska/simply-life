@@ -34,7 +34,7 @@ export function FinanceIconPicker({ value, onChange }: Props)
                 borderRadius: 12,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: active ? colors.axelMuted : colors.elevated,
+                backgroundColor: active ? colors.axelMuted : colors.fill,
                 borderWidth: 1,
                 borderColor: active ? colors.axel : colors.hairline,
               }}

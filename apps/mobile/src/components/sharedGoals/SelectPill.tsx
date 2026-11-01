@@ -33,7 +33,7 @@ export function SelectPill({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
-        backgroundColor: active ? on : colors.elevated,
+        backgroundColor: active ? on : colors.fill,
       }}
     >
       {icon ? <Icon name={icon} size={18} color={fg} /> : null}

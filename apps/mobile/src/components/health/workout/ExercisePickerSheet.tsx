@@ -100,7 +100,7 @@ export function ExercisePickerSheet({ visible, onClose, onPick }: Props)
                   gap: space.sm,
                   paddingHorizontal: 8,
                   borderRadius: radius.control,
-                  backgroundColor: pressed ? colors.elevated : 'transparent',
+                  backgroundColor: pressed ? colors.fill : 'transparent',
                 })}
               >
                 <View style={{ flex: 1, minWidth: 0 }}>

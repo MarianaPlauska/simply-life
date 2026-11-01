@@ -81,7 +81,7 @@ TestFlight é o app da Apple para distribuir versões de teste. Você envia o bu
    npx eas-cli login
    npx eas-cli init
    ```
-3. Gere o build de iOS. Na primeira vez, o EAS pede o login da Apple e cria sozinho os certificados e o registro do app (bundle id `app.simplylife.os`, já definido no `app.json`):
+3. Gere o build de iOS. Na primeira vez, o EAS pede o login da Apple e cria sozinho os certificados e o registro do app (bundle id `app.sunfy`, já definido no `app.json`):
    ```bash
    npx eas-cli build -p ios --profile production
    ```

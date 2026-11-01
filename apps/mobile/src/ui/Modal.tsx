@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Animated, Modal as RNModal, PanResponder, Platform, Pressable, View, type ModalProps } from 'react-native'
 import { useWorkspace } from '../layout/useWorkspace'
 import { useTheme } from '../theme/ThemeProvider'
+import { hapticSelect } from '../lib/haptics'
 
 /** Largura das fichas no computador: o suficiente para um formulário, sem esticar botões. */
 export const DESKTOP_SHEET_WIDTH = 560
@@ -40,6 +41,7 @@ export function Modal({ children, fullWidth, noDrag, ...props }: Props)
       {
         if (g.dy > DRAG_CLOSE || g.vy > 1.2)
         {
+          hapticSelect()
           closeRef.current()
           // volta ao lugar depois de fechar, pronto para a próxima vez
           setTimeout(() => dragY.setValue(0), 300)
@@ -55,9 +57,14 @@ export function Modal({ children, fullWidth, noDrag, ...props }: Props)
   const native = Platform.OS !== 'web'
   if (native)
   {
-    if (noDrag || !props.transparent || fullWidth) return <RNModal {...props}>{children}</RNModal>
+    // Android: o fundo escuro cobre também a barra de status, como numa ficha nativa
+    const statusBarTranslucent = props.statusBarTranslucent ?? Boolean(props.transparent)
+    if (noDrag || !props.transparent || fullWidth)
+    {
+      return <RNModal {...props} statusBarTranslucent={statusBarTranslucent}>{children}</RNModal>
+    }
     return (
-      <RNModal {...props}>
+      <RNModal {...props} statusBarTranslucent={statusBarTranslucent}>
         <Animated.View style={{ flex: 1, transform: [{ translateY: dragY }] }} {...pan.panHandlers}>
           {children}
         </Animated.View>

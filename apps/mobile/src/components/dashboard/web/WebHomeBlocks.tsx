@@ -93,7 +93,7 @@ function Row({ children, onPress, label }: { children: ReactNode; onPress?: () =
         paddingHorizontal: 8,
         marginHorizontal: -8,
         borderRadius: 8,
-        backgroundColor: hovered && onPress ? colors.surface : 'transparent',
+        backgroundColor: hovered && onPress ? colors.fill : 'transparent',
         cursor: onPress ? 'pointer' : 'default',
       })}
     >
@@ -114,7 +114,7 @@ function Empty({ children }: { children: string })
 /** Faixa de indicadores: ícone, selo opcional, número e nome. O último é o atalho para personalizar. */
 export function WebKpiTiles({ items, onCustomize }: { items: WebStatItem[]; onCustomize?: () => void })
 {
-  const { colors } = useTheme()
+  const { colors, mode } = useTheme()
   const cols = items.length + (onCustomize ? 1 : 0)
   return (
     <View style={webStyle({ display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, gap: 16 })}>
@@ -129,7 +129,7 @@ export function WebKpiTiles({ items, onCustomize }: { items: WebStatItem[]; onCu
             borderWidth: 1,
             borderColor: hovered && item.onPress ? colors.hairline : colors.cardRim,
             backgroundColor: colors.elevated,
-            boxShadow: '0 1px 2px rgba(21, 32, 34, 0.04)',
+            boxShadow: mode === 'dark' ? 'none' : '0 1px 2px rgba(21, 32, 34, 0.04)',
             paddingHorizontal: 16,
             paddingVertical: 14,
             cursor: item.onPress ? 'pointer' : 'default',
@@ -275,8 +275,8 @@ export function WebBillsBlock()
                 style={{
                   paddingHorizontal: 8,
                   paddingVertical: 3,
-                  borderRadius: 6,
-                  backgroundColor: b.locked ? `${colors.danger}1A` : colors.surface,
+                  borderRadius: 999,
+                  backgroundColor: b.locked ? `${colors.danger}1A` : colors.fill,
                   borderWidth: 1,
                   borderColor: b.locked ? 'transparent' : colors.hairline,
                 }}

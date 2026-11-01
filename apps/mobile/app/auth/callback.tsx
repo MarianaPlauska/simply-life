@@ -15,11 +15,16 @@ export default function AuthCallbackScreen()
   const userId = useAuthStore((s) => s.userId)
   const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
   const [error, setError] = useState('')
+  const [recovery, setRecovery] = useState(false)
 
   useEffect(() =>
   {
     if (typeof window === 'undefined') return
     const params = parseAuthCallbackParams(window.location.href)
+    if (params.type === 'recovery')
+    {
+      setRecovery(true)
+    }
     if (params.error)
     {
       setError('Autorização cancelada ou recusada.')
@@ -27,10 +32,12 @@ export default function AuthCallbackScreen()
     }
     void completeSessionFromUrl(window.location.href).then((res) =>
     {
+      if (res.recovery) setRecovery(true)
       if (res.error) setError(res.error)
     })
   }, [completeSessionFromUrl])
 
+  if (recovery && userId && !error) return <Redirect href="/reset-password" />
   if (userId && !mfaPending && !error) return <Redirect href="/(tabs)" />
   if (mfaPending) return <Redirect href="/login" />
 

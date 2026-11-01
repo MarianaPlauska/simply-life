@@ -148,7 +148,7 @@ export default function DesbloqueiosScreen()
                     alignItems: 'center',
                     gap: 6,
                     paddingVertical: 12,
-                    borderRadius: 16,
+                    borderRadius: 14,
                     backgroundColor: on ? colors.axelMuted : colors.surface,
                     borderWidth: 1,
                     borderColor: on ? colors.axel : colors.hairline,

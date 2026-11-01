@@ -16,17 +16,15 @@ export function ScreenIntro({
 
   return (
     <View style={{ gap: space.sm }}>
-      <Text variant="hero">
-        {title}
-      </Text>
+      <Text variant="section" style={{ fontSize: 28, lineHeight: 34 }}>
+          {title}
+        </Text>
       {subtitle ? (
-        <Text variant="body" muted style={{ maxWidth: 600 }}>
+        <Text variant="caption" muted style={{ maxWidth: 600 }}>
           {subtitle}
         </Text>
       ) : null}
-      <View style={{ marginTop: space.xs }}>
-        <SyncHint />
-      </View>
+      <SyncHint />
     </View>
   )
 }

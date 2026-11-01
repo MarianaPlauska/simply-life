@@ -9,7 +9,7 @@ import {
   parseBrlNumber,
   type BalanceTone,
 } from '@simply-life/shared'
-import { CloseButton, Field, PressableScale, PrimaryButton, StatusPill, Text } from '../../ui'
+import { CloseButton, Field, PressableScale, PrimaryButton, ProgressRing, Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAccents } from '../../theme/useAccents'
 import { useDataStore } from '../../store/dataStore'
@@ -132,40 +132,71 @@ export function FinanceBalancePanel()
   return (
     <>
       {desk ? deskView : (
-      <PressableScale
-        accessibilityRole="button"
-        accessibilityLabel={`Saldo da conta, ${formatBRL(pos.disponivel)}. Toque para ajustar.`}
-        onPress={openSheet}
-        style={{
-          flexDirection: 'row',
-          borderRadius: radius.card,
-          backgroundColor: colors.elevated,
-          borderWidth: 1,
-          borderColor: colors.hairline,
-          overflow: 'hidden',
-        }}
-      >
-        <View style={{ width: 4, backgroundColor: tint }} />
-        <View style={{ flex: 1, padding: 20, gap: space.sm }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm }}>
-            <Text variant="caption" muted>Saldo da conta</Text>
-            <StatusPill label={BALANCE_TONE_LABEL[runway.tone]} color={tint} />
-          </View>
-          <Text variant="hero" style={{ fontSize: 30, lineHeight: 38, fontVariant: ['tabular-nums'] }}>
-            {noData ? 'Informe seu saldo' : formatBRL(pos.disponivel)}
-          </Text>
-          <Text variant="caption" muted>{detail}</Text>
+        <View style={{ gap: 16 }}>
+          <PressableScale
+            accessibilityRole="button"
+            accessibilityLabel={`Saldo da conta, ${formatBRL(pos.disponivel)}. Toque para ajustar.`}
+            onPress={openSheet}
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
+          >
+            <ProgressRing
+              progress={runway.days == null ? (noData ? 0 : 100) : Math.min(100, Math.round((runway.days / 30) * 100))}
+              size={64}
+              strokeWidth={7}
+              color={tint}
+              trackColor={colors.fill}
+              centerLabel={runway.days == null ? (noData ? '—' : 'ok') : `${Math.min(runway.days, 99)}d`}
+              labelColor={colors.ink}
+            />
+            <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                <Text variant="caption" muted>Saldo da conta</Text>
+                <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
+                  {noData ? 'Informar' : 'Ajustar'}
+                </Text>
+              </View>
+              <Text variant="bodyStrong" style={{ fontSize: 22, lineHeight: 28, fontVariant: ['tabular-nums'] }}>
+                {noData ? 'Informe seu saldo' : formatBRL(pos.disponivel)}
+              </Text>
+              <Text variant="caption" muted numberOfLines={2}>
+                {BALANCE_TONE_LABEL[runway.tone]}. {detail}
+              </Text>
+            </View>
+          </PressableScale>
           {!noData ? (
-            <View style={{ flexDirection: 'row', gap: space.lg }}>
-              <Text variant="label" muted>Entrou {formatBRL(pos.receitas)}</Text>
-              <Text variant="label" muted>Saiu {formatBRL(pos.despesas)}</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                borderTopWidth: 1,
+                borderTopColor: colors.hairline,
+                paddingTop: 12,
+              }}
+            >
+              {[
+                { label: 'Entrou', value: formatBRL(pos.receitas) },
+                { label: 'Saiu', value: formatBRL(pos.despesas) },
+              ].map((item, i) => (
+                <View
+                  key={item.label}
+                  style={{
+                    flex: 1,
+                    gap: 2,
+                    paddingLeft: i === 0 ? 0 : 12,
+                    borderLeftWidth: i === 0 ? 0 : 1,
+                    borderLeftColor: colors.hairline,
+                  }}
+                >
+                  <Text variant="bodyStrong" style={{ fontSize: 16, lineHeight: 22, fontVariant: ['tabular-nums'] }}>
+                    {item.value}
+                  </Text>
+                  <Text variant="micro" muted>
+                    {item.label}
+                  </Text>
+                </View>
+              ))}
             </View>
           ) : null}
-          <Text variant="micro" color={accents.selectInk}>
-            {noData ? 'Tocar para informar' : 'Tocar para ajustar'}
-          </Text>
         </View>
-      </PressableScale>
       )}
 
       <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>

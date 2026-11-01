@@ -5,10 +5,17 @@ import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { LoginProductPreview } from './LoginProductPreview'
 
+type Props = {
+  /** Ajusta alturas e tipografia em telas de notebook (altura menor) sem diminuir em monitores grandes */
+  compact?: boolean
+}
+
 /** Landing desktop: petróleo, o Axel girassol, manifesto SunFy e mock do produto. */
-export function LoginBrandPanel()
+export function LoginBrandPanel({ compact = false }: Props)
 {
   const { space, colors } = useTheme()
+  const heroSize = compact ? 36 : 44
+  const heroLine = compact ? 40 : 48
 
   return (
     <View style={{ flex: 1, overflow: 'hidden', backgroundColor: colors.brandDeep }}>
@@ -34,55 +41,80 @@ export function LoginBrandPanel()
         style={{
           flex: 1,
           justifyContent: 'center',
-          paddingHorizontal: space.xl,
-          paddingVertical: space.xl,
-          gap: space.md,
+          alignItems: 'center',
+          paddingHorizontal: compact ? space.xl : space.xxl,
+          paddingVertical: compact ? space.md : space.xl,
         }}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <BrandMark size={48} onFill />
-          <SunFyWordmark color={colors.onBrand} style={{ fontSize: 28, lineHeight: 34, letterSpacing: -0.6 }} />
-        </View>
         <View
           style={{
-            alignSelf: 'flex-start',
-            paddingHorizontal: 12,
-            minHeight: 32,
-            borderRadius: 999,
-            borderWidth: 1,
-            borderColor: `${colors.brandInk}73`,
-            backgroundColor: `${colors.brandInk}1F`,
-            justifyContent: 'center',
+            width: '100%',
+            maxWidth: compact ? 500 : 560,
+            gap: compact ? 10 : 14,
           }}
         >
-          <Text variant="caption" style={{ color: colors.onBrand, fontWeight: '700' }}>
-            Um girassol pra você
-          </Text>
-        </View>
-        <Text
-          variant="hero"
-          style={{
-            color: colors.onBrand,
-            fontSize: 48,
-            lineHeight: 52,
-            letterSpacing: -1.6,
-          }}
-        >
-          {'Passos pequenos.\nSem pressa.\n'}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <BrandMark size={compact ? 38 : 46} onFill />
+            <SunFyWordmark
+              color={colors.onBrand}
+              style={{
+                fontSize: compact ? 24 : 28,
+                lineHeight: compact ? 30 : 34,
+                letterSpacing: -0.6,
+              }}
+            />
+          </View>
+          <View
+            style={{
+              alignSelf: 'flex-start',
+              paddingHorizontal: compact ? 10 : 12,
+              minHeight: compact ? 28 : 32,
+              borderRadius: 999,
+              borderWidth: 1,
+              borderColor: `${colors.brandInk}73`,
+              backgroundColor: `${colors.brandInk}1F`,
+              justifyContent: 'center',
+            }}
+          >
+            <Text variant="caption" style={{ color: colors.onBrand, fontWeight: '700' }}>
+              Um girassol pra você
+            </Text>
+          </View>
           <Text
             variant="hero"
-            style={{ color: colors.axelFill, fontSize: 48, lineHeight: 52, letterSpacing: -1.6 }}
+            style={{
+              color: colors.onBrand,
+              fontSize: heroSize,
+              lineHeight: heroLine,
+              letterSpacing: compact ? -1.2 : -1.5,
+            }}
           >
-            Nunca sozinho.
+            {'Passos pequenos.\nSem pressa.\n'}
+            <Text
+              variant="hero"
+              style={{
+                color: colors.axelFill,
+                fontSize: heroSize,
+                lineHeight: heroLine,
+                letterSpacing: compact ? -1.2 : -1.5,
+              }}
+            >
+              Nunca sozinho.
+            </Text>
           </Text>
-        </Text>
-        <Text
-          variant="body"
-          style={{ color: `${colors.onBrand}C7`, maxWidth: 440, fontSize: 16, lineHeight: 24 }}
-        >
-          {'Nos dias nublados, os girassóis se viram uns para os outros.\nO SunFy é esse girassol pra você.'}
-        </Text>
-        <LoginProductPreview />
+          <Text
+            variant="body"
+            style={{
+              color: `${colors.onBrand}C7`,
+              maxWidth: 440,
+              fontSize: compact ? 14 : 16,
+              lineHeight: compact ? 20 : 24,
+            }}
+          >
+            {'Nos dias nublados, os girassóis se viram uns para os outros.\nO SunFy é esse girassol pra você.'}
+          </Text>
+          <LoginProductPreview compact={compact} />
+        </View>
       </View>
     </View>
   )

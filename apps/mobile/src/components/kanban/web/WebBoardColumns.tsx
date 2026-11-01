@@ -107,7 +107,7 @@ function BoardCard({ task, onToggle, onMove }: { task: MobileTask; onToggle: () 
               borderRadius: 6,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: h ? hoverBg : colors.elevated,
+              backgroundColor: h ? hoverBg : colors.fill,
               opacity: hovered ? 1 : 0,
               cursor: 'pointer',
             })}

@@ -293,7 +293,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                             paddingHorizontal: 12,
                             paddingVertical: 8,
                             borderRadius: 999,
-                            backgroundColor: colors.elevated,
+                            backgroundColor: colors.fill,
                           }}
                         >
                           <Text variant="caption">{label}</Text>
@@ -375,7 +375,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                       paddingHorizontal: 14,
                       fontSize: 15,
                       color: colors.ink,
-                      backgroundColor: colors.elevated,
+                      backgroundColor: colors.fill,
                     }}
                   />
                   {hits.map((h) => (

@@ -165,7 +165,7 @@ export default function AgendaScreen()
               </View>
             ))}
             {GUIDES[guide].note ? (
-              <View style={{ flexDirection: 'row', gap: 8, padding: 10, borderRadius: 12, backgroundColor: colors.hairline }}>
+              <View style={{ flexDirection: 'row', gap: 8, padding: 10, borderRadius: 14, backgroundColor: colors.hairline }}>
                 <Icon name="information-circle-outline" size={16} color={colors.inkMuted} style={{ marginTop: 2 }} />
                 <Text variant="caption" style={{ flex: 1 }}>{GUIDES[guide].note}</Text>
               </View>

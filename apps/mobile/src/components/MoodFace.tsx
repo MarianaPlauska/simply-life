@@ -39,7 +39,7 @@ export function MoodFace({
     ? moodColor(m)
     : onWidget
       ? colors.hairline
-      : colors.elevated
+      : colors.fill
   const iconColor = selected ? COLOR_DARK.canvas : tint
 
   const body = (

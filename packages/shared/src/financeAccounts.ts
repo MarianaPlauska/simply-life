@@ -76,6 +76,11 @@ export function emptyCashAccount(): CashAccount
   return { saldoInicial: 0 }
 }
 
+export function emptyFinanceCards(): FinanceCard[]
+{
+  return []
+}
+
 export function demoFinanceCards(): FinanceCard[]
 {
   return [
@@ -104,6 +109,12 @@ export function demoFinanceCards(): FinanceCard[]
       faturaAberta: 680,
     },
   ]
+}
+
+/** Cartão plantado pelo modo demo — não entra em conta nova. */
+export function isDemoFinanceCard(card: Pick<FinanceCard, 'id'>): boolean
+{
+  return card.id === 'c1' || card.id === 'c2'
 }
 
 export function demoContasFixas(): ContaFixa[]

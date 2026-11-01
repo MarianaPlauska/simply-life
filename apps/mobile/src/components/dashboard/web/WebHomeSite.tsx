@@ -213,7 +213,7 @@ export function SiteHero({
                   gap: 10,
                   padding: 10,
                   borderRadius: 12,
-                  backgroundColor: hovered ? colors.surface : `${colors.brand}0F`,
+                  backgroundColor: hovered ? colors.fill : `${colors.brand}0F`,
                   cursor: 'pointer',
                 })}
               >

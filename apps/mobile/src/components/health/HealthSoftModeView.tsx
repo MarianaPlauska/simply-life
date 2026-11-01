@@ -232,7 +232,7 @@ function SoftModeDesk({
                     flexDirection: 'row',
                     gap: 12,
                     padding: 14,
-                    borderRadius: 12,
+                    borderRadius: 14,
                     borderWidth: 1,
                     borderColor: hovered ? colors.hairlineStrong : colors.hairline,
                     cursor: 'pointer',

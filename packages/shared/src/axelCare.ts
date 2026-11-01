@@ -3,8 +3,9 @@
 export type MoodLevel = 1 | 2 | 3 | 4 | 5
 
 /** Remove - / - e normaliza espaços. Regra permanente de copy AXEL. */
-export function sanitizeAxelCopy(text: string): string
+export function sanitizeAxelCopy(text: string | null | undefined): string
 {
+  if (!text) return ''
   return text
     .replace(/\s*[--]\s*/g, '. ')
     .replace(/\.\s+\./g, '.')

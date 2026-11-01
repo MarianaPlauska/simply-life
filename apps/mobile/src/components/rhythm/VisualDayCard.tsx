@@ -53,16 +53,7 @@ export function VisualDayCard()
       </View>
 
       {showAgendaPrompt ? (
-        <View
-          style={{
-            gap: 12,
-            padding: 16,
-            borderRadius: 14,
-            backgroundColor: colors.featureBg,
-            // web: sem caixa dentro do bloco, o aviso é só texto e botões
-            ...(webDesk ? { backgroundColor: 'transparent', padding: 0, borderRadius: 0 } : null),
-          }}
-        >
+        <View style={{ gap: 12 }}>
           <Text variant="body" color={colors.featureInk}>
             Conecte sua agenda para o Axel encaixar as tarefas entre os seus compromissos.
           </Text>

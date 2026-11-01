@@ -68,7 +68,7 @@ export function MoodWeekReportCard({ humor }: Props)
           gap: 12,
           padding: 16,
           borderRadius: 14,
-          backgroundColor: colors.elevated,
+          backgroundColor: colors.fill,
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -180,12 +180,22 @@ function formatShort(iso: string): string
   return `${d}/${m}`
 }
 
+/** Domingo, com humor na semana passada e ainda não dispensado. */
+export function isMoodWeekReportVisible(
+  humor: HumorRegistro[],
+  dismissedWeek?: string | null,
+): boolean
+{
+  if (new Date().getDay() !== 0) return false
+  const { start } = previousWeekRange()
+  if (dismissedWeek === start) return false
+  return buildMoodWeekReport(humor) != null
+}
+
 /** Só renderiza aos domingos, se ainda não foi dispensado. */
 export function MoodWeekReportGate({ humor }: Props)
 {
   const dismissed = usePrefsStore((s) => s.prefs.mood_report_dismissed_week)
-  const { start } = previousWeekRange()
-  const isSunday = new Date().getDay() === 0
-  if (!isSunday || dismissed === start) return null
+  if (!isMoodWeekReportVisible(humor, dismissed)) return null
   return <MoodWeekReportCard humor={humor} />
 }

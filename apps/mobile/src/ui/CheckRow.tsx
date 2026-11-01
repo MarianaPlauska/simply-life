@@ -2,6 +2,7 @@ import { Pressable, View, StyleSheet } from 'react-native'
 import { Icon } from './Icon'
 import { Text } from './Text'
 import { useTheme } from '../theme/ThemeProvider'
+import { hapticSelect } from '../lib/haptics'
 
 export function CheckRow({
   title,
@@ -44,7 +45,11 @@ export function CheckRow({
         })}
       >
         <Pressable
-          onPress={() => onToggle?.()}
+          onPress={() =>
+          {
+            hapticSelect()
+            onToggle?.()
+          }}
           hitSlop={8}
           accessibilityRole="checkbox"
           accessibilityState={{ checked: !!done }}

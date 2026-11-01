@@ -91,7 +91,7 @@ export function ExecuteTimerFace({
           minHeight: 52,
           paddingHorizontal: 28,
           borderRadius: 999,
-          backgroundColor: colors.elevated,
+          backgroundColor: colors.fill,
           alignItems: 'center',
           justifyContent: 'center',
           flexDirection: 'row',

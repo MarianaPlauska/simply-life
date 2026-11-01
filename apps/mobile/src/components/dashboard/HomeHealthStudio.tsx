@@ -131,7 +131,7 @@ export function HomeHealthStudio()
               gap: 12,
               padding: space.md,
               borderRadius: 14,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.fill,
               borderWidth: 1,
               borderColor: colors.hairline,
             }}
@@ -189,7 +189,7 @@ export function HomeHealthStudio()
                   width: 44,
                   height: 48,
                   borderRadius: 14,
-                  backgroundColor: filled ? colors.health : colors.elevated,
+                  backgroundColor: filled ? colors.health : colors.fill,
                   borderWidth: 1,
                   borderColor: filled ? colors.health : colors.hairline,
                   alignItems: 'center',
@@ -209,7 +209,7 @@ export function HomeHealthStudio()
           style={{
             height: 8,
             borderRadius: radius.pill,
-            backgroundColor: colors.elevated,
+            backgroundColor: colors.fill,
             overflow: 'hidden',
           }}
         >

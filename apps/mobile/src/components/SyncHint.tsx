@@ -21,7 +21,7 @@ export function SyncHint({ color }: { color?: string })
   if (!label) return null
 
   return (
-    <Text variant="micro" color={color ?? (error ? colors.danger : colors.inkMuted)}>
+    <Text variant="micro" color={color ?? (error ? colors.danger : colors.inkMuted)} style={{ marginTop: 4 }}>
       {label}
     </Text>
   )

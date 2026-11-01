@@ -66,7 +66,7 @@ export function PrimaryButton({
       : isSuccess
         ? colors.done
         : isSecondary
-          ? colors.elevated
+          ? colors.fill
           : isDismiss
             ? iceFill
             : 'transparent'

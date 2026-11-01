@@ -144,7 +144,7 @@ export function WebFoldersPane({ tasks }: { tasks: MobileTask[] })
               placeholderTextColor={colors.inkFaint}
               autoFocus
               onSubmitEditing={create}
-              style={[inputStyle, { flex: 1 }]}
+              style={[inputStyle, { flex: 1, backgroundColor: colors.fill }]}
             />
             <WebHoverable
               onPress={create}

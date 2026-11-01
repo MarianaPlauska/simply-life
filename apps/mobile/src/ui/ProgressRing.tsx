@@ -62,6 +62,7 @@ export function ProgressRing({
           style={{
             position: 'absolute',
             fontSize: centerLabel ? (size >= 72 ? 22 : 14) : 9,
+            lineHeight: centerLabel ? (size >= 72 ? 26 : 17) : 11,
             fontWeight: '700',
             color: ink,
             letterSpacing: centerLabel ? -0.4 : 0,

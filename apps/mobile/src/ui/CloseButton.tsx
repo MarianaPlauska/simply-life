@@ -30,7 +30,7 @@ export function CloseButton({
         borderRadius: 999,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: pressed ? colors.dismissMuted : colors.elevated,
+        backgroundColor: pressed ? colors.dismissMuted : colors.fill,
         borderWidth: 1,
         borderColor: pressed ? colors.dismiss : colors.hairline,
         transform: [{ scale: pressed ? 0.94 : 1 }],

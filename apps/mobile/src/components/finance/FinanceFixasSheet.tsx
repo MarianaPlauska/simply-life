@@ -236,7 +236,7 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
                           paddingHorizontal: 14,
                           borderRadius: 999,
                           justifyContent: 'center',
-                          backgroundColor: active ? `${accent}33` : colors.elevated,
+                          backgroundColor: active ? `${accent}33` : colors.fill,
                           borderWidth: 1,
                           borderColor: active ? accent : colors.hairline,
                         }}

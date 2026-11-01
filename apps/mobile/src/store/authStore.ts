@@ -32,6 +32,7 @@ type AuthState = {
     nome?: string,
   ) => Promise<{ error?: string; needsConfirm?: boolean }>
   resetPassword: (email: string) => Promise<{ error?: string }>
+  verifyRecoveryInput: (email: string, rawInput: string) => Promise<{ error?: string }>
   updatePassword: (password: string) => Promise<{ error?: string }>
   signInWithGoogle: () => Promise<{ error?: string }>
   completeSessionFromUrl: (href: string) => Promise<{ error?: string; recovery?: boolean }>
@@ -45,6 +46,56 @@ const FOUNDER_ADMIN_EMAILS = new Set([
   'marianaplauska.c@gmail.com',
   'marianaplauska.cf@gmail.com',
 ])
+
+/** Traduz mensagens de erro do Supabase Auth (GoTrue) para PT-BR claro. */
+export function translateAuthError(raw: string): string
+{
+  const msg = raw.trim()
+  const lower = msg.toLowerCase()
+  if (lower.includes('invalid login credentials') || lower.includes('invalid_credentials'))
+  {
+    return 'E-mail ou senha incorretos. Confira os dados ou clique em "Esqueceu a senha?".'
+  }
+  if (lower.includes('email not confirmed'))
+  {
+    return 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada e o spam.'
+  }
+  if (lower.includes('already registered') || lower.includes('already been registered'))
+  {
+    return 'Este e-mail já possui uma conta cadastrada. Tente entrar ou recuperar a senha.'
+  }
+  if (lower.includes('password should be at least'))
+  {
+    return 'A senha precisa ter no mínimo 8 caracteres.'
+  }
+  if (lower.includes('new password should be different'))
+  {
+    return 'A nova senha precisa ser diferente da senha atual.'
+  }
+  if (
+    lower.includes('rate limit') ||
+    lower.includes('only request this after') ||
+    lower.includes('too many requests')
+  )
+  {
+    return 'Muitas tentativas seguidas. Aguarde um minuto e tente novamente.'
+  }
+  if (
+    lower.includes('expired') ||
+    (lower.includes('invalid') && lower.includes('token')) ||
+    lower.includes('otp_expired') ||
+    lower.includes('flow_state_not_found') ||
+    lower.includes('bad_code_verifier')
+  )
+  {
+    return 'Link ou código inválido ou expirado. Solicite um novo e-mail de recuperação.'
+  }
+  if (lower.includes('auth session missing'))
+  {
+    return 'Sessão de recuperação expirada. Solicite um novo link.'
+  }
+  return msg
+}
 
 async function loadIsAdmin(userId: string): Promise<boolean>
 {
@@ -164,7 +215,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       email: email.trim(),
       password,
     })
-    if (error) return { error: error.message }
+    if (error) return { error: translateAuthError(error.message) }
     return get().applySession()
   },
 
@@ -173,7 +224,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const factorId = get().mfaPendingFactorId
     if (!factorId) return { error: 'Nenhum desafio 2FA pendente' }
     const result = await verifyTotpCode(supabase as never, factorId, code)
-    if (!result.ok) return { error: result.message }
+    if (!result.ok) return { error: translateAuthError(result.message) }
     const uid = get().userId
     const admin = uid ? await loadIsAdmin(uid) : false
     set({ mfaPendingFactorId: null, isAdmin: admin })
@@ -200,7 +251,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         emailRedirectTo: buildAuthCallbackUrl(appOrigin(), '/auth/callback'),
       },
     })
-    if (error) return { error: error.message }
+    if (error) return { error: translateAuthError(error.message) }
     if (data.session?.user)
     {
       return get().applySession()
@@ -218,7 +269,76 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
       redirectTo,
     })
-    if (error) return { error: error.message }
+    if (error) return { error: translateAuthError(error.message) }
+    return {}
+  },
+
+  verifyRecoveryInput: async (email, rawInput) =>
+  {
+    if (!supabaseConfigured) return { error: 'Recuperação indisponível no modo offline.' }
+    const trimmed = rawInput.trim()
+    if (!trimmed) return { error: 'Cole o link recebido no e-mail ou o código.' }
+
+    // Aceita o link original do e-mail (/auth/v1/verify?token=...), a URL pós-redirect ou hash
+    if (
+      trimmed.startsWith('http://') ||
+      trimmed.startsWith('https://') ||
+      trimmed.includes('access_token=') ||
+      trimmed.includes('token=') ||
+      trimmed.includes('token_hash=') ||
+      trimmed.includes('code=')
+    )
+    {
+      const candidateUrl = trimmed.startsWith('http')
+        ? trimmed
+        : `https://placeholder.local/${trimmed.replace(/^[/?#]+/, '?')}`
+      const params = parseAuthCallbackParams(candidateUrl)
+
+      if (params.accessToken && params.refreshToken)
+      {
+        const { error } = await supabase.auth.setSession({
+          access_token: params.accessToken,
+          refresh_token: params.refreshToken,
+        })
+        if (error) return { error: translateAuthError(error.message) }
+        return {}
+      }
+
+      if (params.tokenHash)
+      {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: params.tokenHash,
+          type: 'recovery',
+        })
+        if (error) return { error: translateAuthError(error.message) }
+        return {}
+      }
+
+      if (params.code)
+      {
+        const { error } = await supabase.auth.exchangeCodeForSession(params.code)
+        if (error) return { error: translateAuthError(error.message) }
+        return {}
+      }
+    }
+
+    // Código OTP de 6 dígitos
+    if (/^\d{6,8}$/.test(trimmed) && email.trim())
+    {
+      const { error } = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: trimmed,
+        type: 'recovery',
+      })
+      if (!error) return {}
+    }
+
+    // Fallback: token_hash colado diretamente
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash: trimmed,
+      type: 'recovery',
+    })
+    if (error) return { error: translateAuthError(error.message) }
     return {}
   },
 
@@ -226,7 +346,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   {
     if (!supabaseConfigured) return { error: 'Indisponível offline' }
     const { error } = await supabase.auth.updateUser({ password })
-    if (error) return { error: error.message }
+    if (error) return { error: translateAuthError(error.message) }
     return {}
   },
 
@@ -298,7 +418,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (params.code)
     {
       const { error } = await supabase.auth.exchangeCodeForSession(params.code)
-      if (error) return { error: error.message }
+      if (error)
+      {
+        const { data: existing } = await supabase.auth.getSession()
+        if (!existing.session) return { error: translateAuthError(error.message) }
+      }
+    }
+    else if (params.tokenHash)
+    {
+      const otpType =
+        params.type === 'recovery' ||
+        params.type === 'signup' ||
+        params.type === 'email' ||
+        params.type === 'invite' ||
+        params.type === 'magiclink'
+          ? params.type
+          : 'recovery'
+      const { error } = await supabase.auth.verifyOtp({
+        token_hash: params.tokenHash,
+        type: otpType,
+      })
+      if (error)
+      {
+        const { data: existing } = await supabase.auth.getSession()
+        if (!existing.session) return { error: translateAuthError(error.message) }
+      }
     }
     else if (params.accessToken && params.refreshToken)
     {
@@ -306,7 +450,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         access_token: params.accessToken,
         refresh_token: params.refreshToken,
       })
-      if (error) return { error: error.message }
+      if (error)
+      {
+        const { data: existing } = await supabase.auth.getSession()
+        if (!existing.session) return { error: translateAuthError(error.message) }
+      }
     }
     else
     {

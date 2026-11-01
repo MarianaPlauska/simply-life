@@ -1,5 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { View, TextInput, Pressable, ScrollView } from 'react-native'
+import Svg, { Defs, LinearGradient, Stop, Rect } from 'react-native-svg'
+import { SurfaceGlow } from '../../ui/SurfaceGlow'
 import { Icon } from '../../ui/Icon'
 import { MagnifyingGlassIcon } from 'phosphor-react-native/src/icons/MagnifyingGlass'
 import { useRouter } from 'expo-router'
@@ -33,7 +35,7 @@ export function HomeTodayDashboard({
   ritualSlot,
 }: Props)
 {
-  const { colors, elevation } = useTheme()
+  const { colors, elevation, mode } = useTheme()
   const inPanel = useInPanel()
   const webBox = useWebBox()
   // dentro de um Panel (grade da web) a caixa é do Panel
@@ -74,12 +76,15 @@ export function HomeTodayDashboard({
           flexDirection: 'row',
           alignItems: 'center',
           minHeight: 48,
-          borderRadius: 14,
+          borderRadius: 999,
+          paddingLeft: 18,
+          borderWidth: 1,
+          borderColor: colors.hairline,
           paddingHorizontal: 14,
           gap: 12,
           backgroundColor: colors.elevated,
           ...(inPanel
-            ? { borderRadius: 10, borderWidth: 1, borderColor: colors.hairline, backgroundColor: colors.surface, minHeight: 40 }
+            ? { borderRadius: 14, borderWidth: 1, borderColor: colors.hairline, backgroundColor: colors.fill, minHeight: 40 }
             : box ? { ...box, paddingVertical: 0, minHeight: 44 } : elevation.card),
         }}
       >
@@ -163,52 +168,88 @@ export function HomeTodayDashboard({
         <>
           <View
             style={{
-              borderRadius: 20,
+              borderRadius: 24,
               padding: 20,
-              gap: 16,
-              backgroundColor: colors.featureBg,
+              gap: 20,
+              overflow: 'hidden',
+              backgroundColor: colors.heroBg,
+              ...(inPanel ? null : elevation.hero),
               ...box,
             }}
           >
+            {inPanel ? null : (
+              <>
+                <Svg style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} width="100%" height="100%">
+                  <Defs>
+                    <LinearGradient id="todayHero" x1="0" y1="0" x2="1" y2="1">
+                      <Stop offset="0" stopColor={colors.heroBg} />
+                      <Stop offset="1" stopColor={colors.heroBgDeep} />
+                    </LinearGradient>
+                  </Defs>
+                  <Rect width="100%" height="100%" fill="url(#todayHero)" />
+                </Svg>
+                <SurfaceGlow opacity={0.28} />
+              </>
+            )}
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-              <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
-                <Text variant="caption" style={{ color: colors.featureMuted }}>
-                  Progresso de hoje
+              <View style={{ flex: 1, gap: 6, minWidth: 0 }}>
+                <Text variant="micro" style={{ color: colors.heroMuted, fontWeight: '700', letterSpacing: 0.8 }}>
+                  PROGRESSO DE HOJE
                 </Text>
-                <Text variant="title" style={{ color: colors.featureInk, fontSize: 22 }}>
+                <Text variant="title" style={{ color: colors.heroInk, fontSize: 24, lineHeight: 30 }}>
                   {todayTotal > 0
                     ? `${doneToday} de ${todayTotal} concluídas`
                     : pending > 0
                       ? `${pending} em aberto`
-                      : 'Nada no dia ainda'}
+                      : 'Dia livre por enquanto'}
                 </Text>
-                <Text variant="caption" style={{ color: colors.featureMuted }}>
+                <Text variant="caption" style={{ color: colors.heroMuted }}>
                   {todayTotal > 0
                     ? `${pct}% do dia, um passo de cada vez`
-                    : 'As tarefas da sua conta aparecem aqui'}
+                    : 'Capture uma tarefa e ela aparece aqui'}
                 </Text>
               </View>
               <ProgressRing
                 progress={pct}
-                size={72}
-                strokeWidth={7}
-                color={colors.axel}
+                size={84}
+                strokeWidth={9}
+                color={colors.axelFill}
                 trackColor={colors.featureTrack}
                 centerLabel={`${pct}%`}
-                labelColor={colors.featureInk}
+                labelColor={colors.heroInk}
               />
             </View>
-            <View style={{ gap: 12 }}>
-              <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Text variant="micro" style={{ color: colors.featureMuted }}>
-                  Elo de {elo.atual} dia{elo.atual === 1 ? '' : 's'}
-                </Text>
-                <Text variant="micro" style={{ color: colors.featureMuted }}>
-                  {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} cumprido{elo.cumpridosNaSemana === 1 ? '' : 's'} nesta semana
-                </Text>
-              </View>
-              <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              {[
+                { icon: 'list' as const, value: pending, label: 'abertas' },
+                { icon: 'checkmark-circle' as const, value: doneToday, label: 'feitas' },
+                { icon: 'flame' as const, value: elo.atual, label: elo.atual === 1 ? 'dia de elo' : 'dias de elo' },
+              ].map((s) => (
+                <View
+                  key={s.label}
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    borderRadius: 16,
+                    paddingVertical: 12,
+                    paddingHorizontal: 12,
+                    gap: 4,
+                    backgroundColor: mode === 'dark' ? 'rgba(0, 0, 0, 0.22)' : 'rgba(255, 255, 255, 0.6)',
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <Icon name={s.icon} size={14} color={colors.axelFill} />
+                    <Text variant="bodyStrong" style={{ color: colors.heroInk, fontSize: 18, lineHeight: 22 }}>
+                      {s.value}
+                    </Text>
+                  </View>
+                  <Text variant="micro" numberOfLines={1} style={{ color: colors.heroMuted }}>
+                    {s.label}
+                  </Text>
+                </View>
+              ))}
             </View>
+            <LifeGoalMicroLine onPress={() => setGoalOpen(true)} />
           </View>
 
           {/* Os três quadradinhos (pendentes, feitas, hábitos) saíram: repetiam o progresso acima. */}

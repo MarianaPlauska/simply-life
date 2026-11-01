@@ -79,7 +79,7 @@ export function ProfileSection({
   children: ReactNode
 })
 {
-  const { colors, space } = useTheme()
+  const { colors, space, mode } = useTheme()
   return (
     <View
       style={{
@@ -88,11 +88,15 @@ export function ProfileSection({
         paddingHorizontal: space.md,
         paddingVertical: space.sm,
         gap: 4,
-        shadowColor: colors.ink,
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 2,
+        ...(mode === 'dark'
+          ? null
+          : {
+              shadowColor: colors.ink,
+              shadowOpacity: 0.06,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 4 },
+              elevation: 2,
+            }),
       }}
     >
       <Text

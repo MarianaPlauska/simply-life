@@ -279,7 +279,7 @@ export function WebListDesk({ tasks, onSeeDone }: Props)
               borderColor: colors.hairlineStrong,
               paddingHorizontal: 10,
               color: colors.ink,
-              backgroundColor: colors.elevated,
+              backgroundColor: colors.fill,
               fontSize: 14,
               fontFamily: 'Lexend_400Regular',
             }}

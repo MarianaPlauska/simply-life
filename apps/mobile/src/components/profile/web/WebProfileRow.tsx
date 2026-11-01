@@ -55,7 +55,7 @@ export function WebProfileSection({
 {
   const { colors } = useTheme()
   return (
-    <View style={{ borderRadius: 14, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
+    <View style={{ borderRadius: 20, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.hairline, overflow: 'hidden' }}>
       <Text
         variant="micro"
         muted

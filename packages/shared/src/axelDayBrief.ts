@@ -3,8 +3,7 @@ import { medsTakenCount, type Medicamento } from './medicamentos'
 import { priorityTodayTasks, type MobileTask } from './tasks'
 import { monthExpenseTotal, type FinanceTx } from './finance'
 import { computeSaldoDisponivel, type CashAccount, type ContaFixa } from './financeAccounts'
-import { todayIso } from './dates'
-import { moodCarePhraseForDay, sanitizeAxelCopy, type MoodLevel } from './axelCare'
+import { sanitizeAxelCopy, type MoodLevel } from './axelCare'
 
 export type AxelDayBriefInput = {
   tasks: MobileTask[]
@@ -46,13 +45,13 @@ function moodToneOf(level: MoodLevel | null): AxelMoodTone
   return 'bright'
 }
 
-/** Abertura curta - evita parede de texto em dias pesados */
-function moodOpener(tone: AxelMoodTone): string | null
+/** Uma linha objetiva. Sem coach, sem “modo”. */
+function moodOpener(tone: AxelMoodTone): string
 {
-  if (tone === 'heavy') return 'Sem pressa. Um passo já é suficiente hoje.'
-  if (tone === 'soft') return 'Ritmo reduzido. O essencial vem primeiro.'
-  if (tone === 'bright') return 'Energia disponível. Mantemos o foco sem sobrecarga.'
-  return 'Prioridade clara, sem excesso de informação.'
+  if (tone === 'heavy') return 'Pode ir no mínimo hoje.'
+  if (tone === 'soft') return 'Só o essencial.'
+  if (tone === 'bright') return 'Tem espaço para avançar.'
+  return 'Prioridade clara, sem excesso.'
 }
 
 function moodFocusLine(
@@ -62,25 +61,15 @@ function moodFocusLine(
 {
   if (!topTitle)
   {
-    if (tone === 'heavy' || tone === 'soft')
-    {
-      return 'A fila pode esperar. Um cuidado pequeno já basta.'
-    }
-    return 'Fila leve. Use a folga com calma.'
+    return tone === 'heavy' || tone === 'soft'
+      ? 'A fila espera.'
+      : 'Nada urgente na fila.'
   }
-  if (tone === 'heavy')
+  if (tone === 'heavy' || tone === 'soft')
   {
-    return `Foco só em “${topTitle}”. O resto pode dormir.`
+    return `Hoje: ${topTitle}.`
   }
-  if (tone === 'soft')
-  {
-    return `Um passo: “${topTitle}”.`
-  }
-  if (tone === 'bright')
-  {
-    return `Comece por “${topTitle}”.`
-  }
-  return `Centro do mapa: “${topTitle}”.`
+  return `Comece por ${topTitle}.`
 }
 
 function moodHeadline(
@@ -89,14 +78,14 @@ function moodHeadline(
   overdue: number,
 ): string
 {
-  if (tone === 'heavy') return topTask ? 'Um passo basta hoje' : 'Dia em modo abrigo'
-  if (tone === 'soft') return topTask ? 'Vamos com calma' : 'Ritmo suave'
+  if (tone === 'heavy') return topTask ? 'Uma coisa de cada vez' : 'Dia mais leve'
+  if (tone === 'soft') return topTask ? 'Com calma' : 'Sem pressa'
   if (tone === 'bright')
   {
-    return overdue > 0 ? 'Energia boa para destravar' : 'Vamos aproveitar o ritmo'
+    return overdue > 0 ? 'Dá para adiantar o atraso' : 'Bom ritmo'
   }
-  if (topTask) return overdue > 0 ? 'Vamos destravar o atraso' : 'O que importa agora'
-  return 'Dia em modo leve'
+  if (topTask) return overdue > 0 ? 'Tem atraso para resolver' : 'O que importa agora'
+  return 'Nada urgente'
 }
 
 /**
@@ -162,16 +151,16 @@ export function buildAxelDayBrief(input: AxelDayBriefInput): AxelDayBriefResult
   {
     nextSteps.push(
       moodTone === 'heavy' || moodTone === 'soft'
-        ? `Só “${topTask.titulo}” - a versão mínima já conta`
-        : `Feche “${topTask.titulo}” antes de abrir outra`,
+        ? topTask.titulo
+        : `Fazer: ${topTask.titulo}`,
     )
   }
   else
   {
     nextSteps.push(
       moodTone === 'heavy' || moodTone === 'soft'
-        ? '5 minutos: água ou check-in de humor'
-        : '10 minutos para um cuidado (água, humor ou um gasto)',
+        ? 'Beber água ou marcar o humor'
+        : 'Beber água, marcar humor ou lançar um gasto',
     )
   }
   if (agua && waterPct < 70)
@@ -192,17 +181,9 @@ export function buildAxelDayBrief(input: AxelDayBriefInput): AxelDayBriefResult
   if (agua) chips.push(`Água ${agua.progressoAtual}/${agua.metaDiaria}`)
   if (medsTotal > 0) chips.push(`${medsDone}/${medsTotal} doses`)
 
-  const day = todayIso(now)
-  const poolPhrase = moodLevel != null ? moodCarePhraseForDay(moodLevel, day) : null
-  const sessionCare = input.lastAxelCare?.trim() || null
-  const opener =
-    (moodLevel != null ? sessionCare || poolPhrase : null)
-    || moodOpener(moodTone)
+  const opener = moodOpener(moodTone)
   const focusLine = moodFocusLine(moodTone, topTask?.titulo ?? null)
-  // Voz curta: no máx. abertura + foco (sem listas embutidas)
-  const voice = sanitizeAxelCopy(
-    [opener, focusLine].filter(Boolean).join(' '),
-  )
+  const voice = sanitizeAxelCopy(`${opener} ${focusLine}`)
 
   return {
     headline: moodHeadline(moodTone, Boolean(topTask), overdue),

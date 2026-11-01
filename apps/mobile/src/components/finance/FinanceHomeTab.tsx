@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { View } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
   cardFaturaAbertaDisplay,
@@ -65,7 +65,7 @@ export function FinanceHomeTab({
   onCardsFocusChange,
 }: Props)
 {
-  const { colors, space, chart } = useTheme()
+  const { colors, space, chart, elevation } = useTheme()
   const { showRail, isDesktop } = useWorkspace()
   const desk = useWebDesk()
   const deskGrid = useFinanceDeskGrid()
@@ -290,7 +290,17 @@ export function FinanceHomeTab({
 
   // blocos da Carteira: no celular um embaixo do outro; no computador em duas colunas
   const blocoSaldo = (
-    <>
+    <View
+      style={{
+        borderRadius: 16,
+        padding: 16,
+        gap: 16,
+        backgroundColor: colors.elevated,
+        overflow: 'hidden',
+        maxWidth: isDesktop ? 520 : undefined,
+        ...elevation.card,
+      }}
+    >
       <View style={{ gap: 1 }}>
         <Text variant="section" style={{ fontSize: 16 }}>
           Olá, {displayName}
@@ -303,8 +313,7 @@ export function FinanceHomeTab({
       {/* saldo da conta separado: a área de cartões mostra só cartões de crédito */}
       <FinanceBalancePanel />
 
-      {/* Ações leves (no computador ficam juntas, sem espalhar pela largura) */}
-      <View style={{ flexDirection: 'row', gap: 12, maxWidth: isDesktop ? 440 : undefined }}>
+      <View style={{ flexDirection: 'row', gap: 8, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: 12 }}>
         {quickIcons.map((a) => (
           <PressableScale
             key={a.id}
@@ -315,15 +324,15 @@ export function FinanceHomeTab({
           >
             <View
               style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                backgroundColor: colors.elevated,
+                width: 44,
+                height: 44,
+                borderRadius: 999,
+                backgroundColor: colors.fill,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Icon name={a.icon} size={16} color={colors.ink} />
+              <Icon name={a.icon} size={18} color={colors.ink} />
             </View>
             <Text variant="micro" muted style={{ fontWeight: '600' }}>
               {a.label}
@@ -331,7 +340,7 @@ export function FinanceHomeTab({
           </PressableScale>
         ))}
       </View>
-    </>
+    </View>
   )
   const blocoCartoes = (
     <>
@@ -379,7 +388,17 @@ export function FinanceHomeTab({
             />
           }
         />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            gap: 12,
+            borderRadius: 16,
+            padding: 12,
+            backgroundColor: colors.elevated,
+            ...elevation.card,
+          }}
+        >
           {(ranking.length
             ? ranking
             : [
@@ -398,9 +417,7 @@ export function FinanceHomeTab({
                 flexBasis: '46%',
                 minHeight: 68,
                 borderRadius: 14,
-                backgroundColor: colors.surface,
-                borderWidth: StyleSheet.hairlineWidth,
-                borderColor: colors.hairline,
+                backgroundColor: colors.fill,
                 padding: 12,
                 gap: 6,
               }}
@@ -442,7 +459,7 @@ export function FinanceHomeTab({
         />
         <Card tone="elevated" style={{ paddingVertical: 4, paddingHorizontal: 4 }}>
           {recent.length === 0 ? (
-            <EmptyState title="Nada por aqui" body="Seu próximo gasto aparece nesta lista." />
+            <EmptyState icon="wallet" title="Nada por aqui" body="Seu próximo gasto aparece nesta lista." />
           ) : (
             recent.map((t, i) => (
               <ListRow
@@ -541,7 +558,7 @@ export function FinanceHomeTab({
             <View>
               <DeskPanelHeader title="Últimos lançamentos" actionLabel="Ver extrato" onAction={onGoMovimentos} />
               {recentDesk.length === 0 ? (
-                <EmptyState title="Nada por aqui" body="Seu próximo gasto aparece nesta lista." />
+                <EmptyState icon="wallet" title="Nada por aqui" body="Seu próximo gasto aparece nesta lista." />
               ) : (
                 <FinanceTxTable rows={recentDesk} onPress={setEditingTx} />
               )}

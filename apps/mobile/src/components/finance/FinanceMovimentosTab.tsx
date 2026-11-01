@@ -230,7 +230,7 @@ function FinanceMovimentosDesk({
                 width: 280,
                 maxWidth: '100%',
                 paddingHorizontal: 12,
-                borderRadius: 10,
+                borderRadius: 14,
                 borderWidth: 1,
                 borderColor: colors.hairline,
                 backgroundColor: colors.elevated,

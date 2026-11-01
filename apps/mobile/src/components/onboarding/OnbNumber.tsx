@@ -31,7 +31,7 @@ export function OnbNumber({ label, value, onChange, step = 1, min, max, format }
         borderRadius: 999,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colors.elevated,
+        backgroundColor: colors.fill,
         borderWidth: 1,
         borderColor: colors.hairline,
         opacity: disabled ? 0.4 : 1,

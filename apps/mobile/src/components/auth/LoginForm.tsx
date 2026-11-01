@@ -32,6 +32,9 @@ type Props = {
   showHeading?: boolean
   /** wave = form flat no sheet branco (login mobile ref) */
   variant?: 'card' | 'wave'
+  /** Ajusta espaçamento vertical para telas de notebook com menor altura */
+  compact?: boolean
+  maxWidth?: number
 }
 
 type FieldErrors = {
@@ -42,7 +45,14 @@ type FieldErrors = {
 }
 
 /** Formulário de login/cadastro - estrutura rotulada (referência split-screen) */
-export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'card' }: Props)
+export function LoginForm({
+  mode,
+  onModeChange,
+  showHeading = true,
+  variant = 'card',
+  compact = false,
+  maxWidth,
+}: Props)
 {
   const { colors, space, elevation } = useTheme()
   const isWave = variant === 'wave'
@@ -144,7 +154,7 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
       accessibilityLabel={show ? 'Ocultar senha' : 'Mostrar senha'}
       hitSlop={8}
       style={{
-        minHeight: 44,
+        minHeight: compact ? 40 : 44,
         minWidth: 72,
         paddingHorizontal: 10,
         alignItems: 'center',
@@ -163,252 +173,283 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
       ? 'Que bom ter você de volta.'
       : 'Leva menos de um minuto e funciona em todos os seus aparelhos.'
 
+  const fieldGap = compact ? 10 : space.md
+
   const fields = (
-    <View style={{ gap: space.md }}>
-        {!supabaseConfigured ? (
-          <Text variant="caption" muted>
-            Modo offline: use convidado ou qualquer email.
+    <View style={{ gap: fieldGap }}>
+      {!supabaseConfigured ? (
+        <Text variant="caption" muted>
+          Modo offline: use convidado ou qualquer email.
+        </Text>
+      ) : null}
+
+      {mfaPendingFactorId ? (
+        <View style={{ gap: space.sm }}>
+          <Text variant="body" muted>
+            Digite o código de 6 dígitos do autenticador.
           </Text>
-        ) : null}
-
-        {mfaPendingFactorId ? (
-          <View style={{ gap: space.sm }}>
-            <Text variant="body" muted>
-              Digite o código de 6 dígitos do autenticador.
-            </Text>
-            <AuthField
-              label="Código 2FA"
-              leadingIcon="shield-checkmark-outline"
-              placeholder="000000"
-              keyboardType="number-pad"
-              autoComplete="one-time-code"
-              value={mfaCode}
-              onChangeText={(t) => setMfaCode(t.replace(/\D/g, '').slice(0, 6))}
-            />
-            {error ? (
-              <Text variant="caption" color={colors.danger}>
-                {error}
-              </Text>
-            ) : null}
-            <PrimaryButton
-              label="Confirmar 2FA"
-              loading={loading}
-              onPress={() =>
-              {
-                void (async () =>
-                {
-                  setLoading(true)
-                  setError('')
-                  const res = await verifyMfa(mfaCode)
-                  if (res.error) setError(res.error)
-                  setLoading(false)
-                })()
-              }}
-              style={{ width: '100%', borderRadius: isWave ? 14 : 999 }}
-            />
-          </View>
-        ) : null}
-
-        {!mfaPendingFactorId && mode === 'register' ? (
           <AuthField
-            label="Nome"
-            leadingIcon="person-outline"
-            placeholder="Seu nome"
-            autoCapitalize="words"
-            autoComplete="name"
-            value={nome}
+            label="Código 2FA"
+            leadingIcon="shield-checkmark-outline"
+            placeholder="000000"
+            keyboardType="number-pad"
+            autoComplete="one-time-code"
+            compact={compact}
+            value={mfaCode}
+            onChangeText={(t) => setMfaCode(t.replace(/\D/g, '').slice(0, 6))}
+          />
+          {error ? (
+            <Text variant="caption" color={colors.danger}>
+              {error}
+            </Text>
+          ) : null}
+          <PrimaryButton
+            label="Confirmar 2FA"
+            loading={loading}
+            onPress={() =>
+            {
+              void (async () =>
+              {
+                setLoading(true)
+                setError('')
+                const res = await verifyMfa(mfaCode)
+                if (res.error) setError(res.error)
+                setLoading(false)
+              })()
+            }}
+            style={{ width: '100%', borderRadius: 999 }}
+          />
+        </View>
+      ) : null}
+
+      {!mfaPendingFactorId && mode === 'register' ? (
+        <AuthField
+          label="Nome"
+          leadingIcon="person-outline"
+          placeholder="Seu nome"
+          autoCapitalize="words"
+          autoComplete="name"
+          compact={compact}
+          value={nome}
+          onChangeText={(t) =>
+          {
+            setNome(t)
+            clearField('nome')
+          }}
+          error={fieldError.nome}
+        />
+      ) : null}
+
+      {!mfaPendingFactorId ? (
+        <>
+          <AuthField
+            label="E-mail"
+            leadingIcon="mail-outline"
+            placeholder="voce@email.com"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            compact={compact}
+            value={email}
             onChangeText={(t) =>
             {
-              setNome(t)
-              clearField('nome')
+              setEmail(t)
+              clearField('email')
+              if (error) setError('')
             }}
-            error={fieldError.nome}
+            error={fieldError.email}
           />
-        ) : null}
 
-        {!mfaPendingFactorId ? (
-          <>
-        <AuthField
-          label="E-mail"
-          leadingIcon="mail-outline"
-          placeholder="voce@email.com"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-          value={email}
-          onChangeText={(t) =>
-          {
-            setEmail(t)
-            clearField('email')
-          }}
-          error={fieldError.email}
-        />
-
-        <AuthField
-          label="Senha"
-          leadingIcon="lock-closed-outline"
-          placeholder="••••••••"
-          secureTextEntry={!showPassword}
-          autoComplete={mode === 'login' ? 'password' : 'new-password'}
-          value={password}
-          onChangeText={(t) =>
-          {
-            setPassword(t)
-            clearField('password')
-          }}
-          error={fieldError.password}
-          trailing={passwordToggle(showPassword, setShowPassword)}
-        />
-
-        {mode === 'register' ? (
           <AuthField
-            label="Confirmar senha"
+            label="Senha"
             leadingIcon="lock-closed-outline"
             placeholder="••••••••"
-            secureTextEntry={!showConfirm}
-            autoComplete="new-password"
-            value={confirm}
+            secureTextEntry={!showPassword}
+            autoComplete={mode === 'login' ? 'password' : 'new-password'}
+            compact={compact}
+            value={password}
             onChangeText={(t) =>
             {
-              setConfirm(t)
-              clearField('confirm')
+              setPassword(t)
+              clearField('password')
+              if (error) setError('')
             }}
-            error={fieldError.confirm}
-            trailing={passwordToggle(showConfirm, setShowConfirm)}
+            error={fieldError.password}
+            trailing={passwordToggle(showPassword, setShowPassword)}
           />
-        ) : null}
 
-        {mode === 'login' ? (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: space.sm,
-              minHeight: 44,
-            }}
-          >
-            <Pressable
-              onPress={() => setRemember((v) => !v)}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: remember }}
+          {mode === 'register' ? (
+            <AuthField
+              label="Confirmar senha"
+              leadingIcon="lock-closed-outline"
+              placeholder="••••••••"
+              secureTextEntry={!showConfirm}
+              autoComplete="new-password"
+              compact={compact}
+              value={confirm}
+              onChangeText={(t) =>
+              {
+                setConfirm(t)
+                clearField('confirm')
+              }}
+              error={fieldError.confirm}
+              trailing={passwordToggle(showConfirm, setShowConfirm)}
+            />
+          ) : null}
+
+          {mode === 'login' ? (
+            <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                gap: 10,
-                minHeight: 44,
-                flexShrink: 1,
+                justifyContent: 'space-between',
+                gap: space.sm,
+                minHeight: compact ? 36 : 44,
               }}
             >
-              <View
+              <Pressable
+                onPress={() => setRemember((v) => !v)}
+                accessibilityRole="checkbox"
+                accessibilityState={{ checked: remember }}
                 style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 4,
-                  borderWidth: remember ? 0 : 1.5,
-                  borderColor: colors.inkMuted,
-                  backgroundColor: remember ? colors.axelFill : 'transparent',
+                  flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: 10,
+                  minHeight: compact ? 36 : 44,
+                  flexShrink: 1,
                 }}
               >
-                {remember ? (
-                  <Icon name="checkmark" size={14} color={colors.axelOnFill} />
-                ) : null}
-              </View>
-              <Text variant="caption" color={colors.ink}>
-                Lembrar de mim
-              </Text>
-            </Pressable>
+                <View
+                  style={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: 4,
+                    borderWidth: remember ? 0 : 1.5,
+                    borderColor: colors.inkMuted,
+                    backgroundColor: remember ? colors.axelFill : 'transparent',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {remember ? (
+                    <Icon name="checkmark" size={14} color={colors.axelOnFill} />
+                  ) : null}
+                </View>
+                <Text variant="caption" color={colors.ink}>
+                  Lembrar de mim
+                </Text>
+              </Pressable>
 
-            <Pressable
-              onPress={() => setForgotOpen(true)}
-              accessibilityRole="link"
-              style={{ minHeight: 44, justifyContent: 'center' }}
-            >
-              <Text variant="label" color={colors.inkMuted}>
-                Esqueceu a senha?
-              </Text>
-            </Pressable>
-          </View>
-        ) : null}
-
-        {error ? (
-          <Text variant="caption" color={colors.danger}>
-            {error}
-          </Text>
-        ) : null}
-        {info ? (
-          <Text variant="caption" color={colors.axel}>
-            {info}
-          </Text>
-        ) : null}
-
-        <PrimaryButton
-          label={mode === 'login' ? 'Entrar' : 'Criar conta'}
-          loading={loading}
-          onPress={() => void onSubmit()}
-          style={{ width: '100%', borderRadius: isWave ? 14 : 999, marginTop: space.sm }}
-        />
-
-        {supabaseConfigured && mode === 'login' ? (
-          <>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: 4 }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.hairline }} />
-              <Text variant="caption" muted>
-                ou
-              </Text>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.hairline }} />
+              <Pressable
+                onPress={() => setForgotOpen(true)}
+                accessibilityRole="link"
+                style={{ minHeight: compact ? 36 : 44, justifyContent: 'center' }}
+              >
+                <Text variant="label" color={colors.inkMuted}>
+                  Esqueceu a senha?
+                </Text>
+              </Pressable>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Continuar com Google"
-              disabled={googleLoading}
-              onPress={() =>
-              {
-                void (async () =>
+          ) : null}
+
+          {error ? (
+            <Text variant="caption" color={colors.danger}>
+              {error}
+            </Text>
+          ) : null}
+          {info ? (
+            <Text variant="caption" color={colors.axel}>
+              {info}
+            </Text>
+          ) : null}
+
+          <PrimaryButton
+            label={mode === 'login' ? 'Entrar' : 'Criar conta'}
+            loading={loading}
+            onPress={() => void onSubmit()}
+            style={{
+              width: '100%',
+              borderRadius: 999,
+              marginTop: compact ? 2 : space.sm,
+              minHeight: compact ? 44 : 50,
+            }}
+          />
+
+          {supabaseConfigured && mode === 'login' ? (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: compact ? 0 : 4 }}>
+                <View style={{ flex: 1, height: 1, backgroundColor: colors.hairline }} />
+                <Text variant="caption" muted>
+                  ou
+                </Text>
+                <View style={{ flex: 1, height: 1, backgroundColor: colors.hairline }} />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Continuar com Google"
+                disabled={googleLoading}
+                onPress={() =>
                 {
-                  setGoogleLoading(true)
-                  setError('')
-                  const res = await signInWithGoogle()
-                  if (res.error) setError(res.error)
-                  setGoogleLoading(false)
-                })()
-              }}
-              style={({ pressed }) => ({
-                minHeight: 48,
-                borderRadius: isWave ? 14 : 999,
-                borderWidth: 1,
-                borderColor: colors.hairlineStrong,
-                backgroundColor: pressed ? colors.elevated : 'transparent',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 10,
-                opacity: googleLoading ? 0.6 : 1,
-              })}
-            >
-              <GoogleG size={18} />
-              <Text variant="bodyStrong">{googleLoading ? 'Abrindo o Google...' : 'Continuar com Google'}</Text>
-            </Pressable>
-          </>
-        ) : null}
-          </>
-        ) : null}
+                  void (async () =>
+                  {
+                    setGoogleLoading(true)
+                    setError('')
+                    const res = await signInWithGoogle()
+                    if (res.error) setError(res.error)
+                    setGoogleLoading(false)
+                  })()
+                }}
+                style={({ pressed }) => ({
+                  minHeight: compact ? 44 : 48,
+                  borderRadius: 999,
+                  borderWidth: 1,
+                  borderColor: colors.hairlineStrong,
+                  backgroundColor: pressed ? colors.fill : 'transparent',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 10,
+                  opacity: googleLoading ? 0.6 : 1,
+                })}
+              >
+                <GoogleG size={18} />
+                <Text variant="bodyStrong">{googleLoading ? 'Abrindo o Google...' : 'Continuar com Google'}</Text>
+              </Pressable>
+            </>
+          ) : null}
+        </>
+      ) : null}
     </View>
   )
 
+  const resolvedMaxWidth = maxWidth ?? (isWave ? 560 : 480)
+
   return (
-    <View style={{ gap: space.lg, width: '100%', maxWidth: 480 }}>
+    <View
+      style={{
+        gap: compact ? space.sm : space.lg,
+        width: '100%',
+        maxWidth: resolvedMaxWidth,
+        alignSelf: 'center',
+      }}
+    >
       {showHeading ? (
-        <View style={{ gap: space.xs, marginBottom: space.xs }}>
+        <View style={{ gap: 2, marginBottom: compact ? 0 : space.xs }}>
           <Text
             variant="hero"
-            style={{ letterSpacing: -0.5, fontSize: isWave ? 28 : undefined }}
+            style={{
+              letterSpacing: -0.5,
+              fontSize: isWave ? 28 : compact ? 26 : 30,
+              lineHeight: isWave ? 34 : compact ? 32 : 36,
+            }}
           >
             {title}
           </Text>
-          <Text variant="body" muted>
+          <Text
+            variant="body"
+            muted
+            style={compact ? { fontSize: 14, lineHeight: 20 } : undefined}
+          >
             {subtitle}
           </Text>
         </View>
@@ -419,54 +460,65 @@ export function LoginForm({ mode, onModeChange, showHeading = true, variant = 'c
       ) : (
         <Card
           tone="elevated"
-          style={{ gap: space.md, paddingVertical: space.lg, ...elevation.card }}
+          style={{
+            gap: fieldGap,
+            paddingVertical: compact ? space.md : space.lg,
+            paddingHorizontal: compact ? space.md : space.lg,
+            ...elevation.card,
+          }}
         >
           {fields}
         </Card>
       )}
 
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: 6,
-          minHeight: 44,
-        }}
-      >
-        <Text variant="body" muted>
-          {mode === 'login' ? 'Não tem conta?' : 'Já tem conta?'}
-        </Text>
-        <Pressable
-          onPress={() =>
-          {
-            setError('')
-            setInfo('')
-            setFieldError({})
-            onModeChange(mode === 'login' ? 'register' : 'login')
+      <View style={{ gap: compact ? 2 : 6 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 6,
+            minHeight: compact ? 36 : 44,
           }}
-          accessibilityRole="link"
-          style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}
         >
-          <Text variant="bodyStrong" color={isWave ? colors.axel : colors.ink}>
-            {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
+          <Text variant="body" muted style={compact ? { fontSize: 14 } : undefined}>
+            {mode === 'login' ? 'Não tem conta?' : 'Já tem conta?'}
           </Text>
-        </Pressable>
-      </View>
+          <Pressable
+            onPress={() =>
+            {
+              setError('')
+              setInfo('')
+              setFieldError({})
+              onModeChange(mode === 'login' ? 'register' : 'login')
+            }}
+            accessibilityRole="link"
+            style={{ minHeight: compact ? 36 : 44, justifyContent: 'center', paddingHorizontal: 4 }}
+          >
+            <Text
+              variant="bodyStrong"
+              color={isWave ? colors.axel : colors.ink}
+              style={compact ? { fontSize: 14 } : undefined}
+            >
+              {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
+            </Text>
+          </Pressable>
+        </View>
 
-      {mode === 'login' && !mfaPendingFactorId ? (
-        <Pressable
-          onPress={enterGuest}
-          accessibilityRole="button"
-          accessibilityLabel="Explorar sem conta"
-          style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <Text variant="label" color={colors.inkMuted}>
-            Só quero explorar, sem conta
-          </Text>
-        </Pressable>
-      ) : null}
+        {mode === 'login' && !mfaPendingFactorId ? (
+          <Pressable
+            onPress={enterGuest}
+            accessibilityRole="button"
+            accessibilityLabel="Explorar sem conta"
+            style={{ minHeight: compact ? 34 : 44, alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Text variant="label" color={colors.inkMuted}>
+              Só quero explorar, sem conta
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
 
       <ForgotPasswordSheet
         visible={forgotOpen}

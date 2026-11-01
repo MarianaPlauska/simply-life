@@ -66,6 +66,8 @@ export type ColorTokens = {
   chrome: string
   surface: string
   elevated: string
+  /** Preenchimento de elementos DENTRO de um cartão (botão secundário, chip, trilho, círculo) */
+  fill: string
   ink: string
   inkMuted: string
   inkFaint: string
@@ -144,16 +146,18 @@ export type ColorTokens = {
 }
 
 export const COLOR_DARK: ColorTokens = {
-  canvas: '#151A1A',
-  chrome: '#1C2322',
-  surface: '#1C2322',
-  elevated: '#232C2B',
+  /** Escuro: profundidade por tom, um degrau visível por camada (sem sombra) */
+  canvas: '#111615',
+  chrome: '#1A2120',
+  surface: '#1A2120',
+  elevated: '#242E2D',
+  fill: '#2E3A38',
   ink: '#EEF2F0',
-  inkMuted: '#9FB0AC',
-  inkFaint: '#7F8E8B',
-  hairline: '#2C3836',
+  inkMuted: '#A3B3AF',
+  inkFaint: '#8A9996',
+  hairline: '#33403E',
   hairlineStrong: 'rgba(238, 242, 240, 0.22)',
-  cardRim: 'rgba(238, 242, 240, 0.06)',
+  cardRim: 'rgba(238, 242, 240, 0.07)',
   brand: BRAND.petroleo,
   brandInk: BRAND.menta,
   onBrand: '#EEF2F0',
@@ -178,7 +182,7 @@ export const COLOR_DARK: ColorTokens = {
   attentionMuted: 'rgba(232, 176, 75, 0.16)',
   done: '#6CC79B',
   overlay: 'rgba(0, 0, 0, 0.72)',
-  widget: '#232C2B',
+  widget: '#242E2D',
   widgetInk: '#EEF2F0',
   widgetMuted: '#9FB0AC',
   navBg: BRAND.petroleo,
@@ -190,7 +194,7 @@ export const COLOR_DARK: ColorTokens = {
   navActiveDot: BRAND.coral,
   dismiss: '#C889BD',
   dismissMuted: 'rgba(200, 137, 189, 0.16)',
-  featureBg: '#232C2B',
+  featureBg: '#242E2D',
   featureInk: '#EEF2F0',
   featureMuted: '#9FB0AC',
   featureTrack: 'rgba(238, 242, 240, 0.16)',
@@ -205,6 +209,7 @@ export const COLOR_LIGHT: ColorTokens = {
   chrome: '#FFFFFF',
   surface: '#FAF9F6',
   elevated: '#FFFFFF',
+  fill: '#EDF1EF',
   ink: '#1F2A2A',
   inkMuted: '#5E6B69',
   inkFaint: '#7D8987',

@@ -295,7 +295,7 @@ function SalaryForm({ initial, onDone, canCancel }: { initial: StoredSalary; onD
         <View style={{ flex: 1 }}><Field style={fieldStyle} label="Almoço (min)" keyboardType="number-pad" value={f.intervalo} onChangeText={(v) => patch({ intervalo: v })} /></View>
         <View style={{ flex: 1 }}><Field style={fieldStyle} label="Dias por semana" keyboardType="number-pad" value={f.dias} onChangeText={(v) => patch({ dias: v })} /></View>
       </View>
-      <View style={{ padding: 12, borderRadius: 12, backgroundColor: colors.hairline }}>
+      <View style={{ padding: 12, borderRadius: 14, backgroundColor: colors.hairline }}>
         <Text variant="bodyStrong" style={{ fontSize: 14 }}>
           {sched.semanais != null
             ? `${sched.semanais}h por semana → divisor ${sched.divisor}${sched.valorHora ? ` · sua hora vale ${formatBRL(sched.valorHora)}` : ''}`

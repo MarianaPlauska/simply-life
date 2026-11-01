@@ -421,7 +421,7 @@ export function CaptureExpenseFields({
                   borderRadius: 14,
                   borderWidth: 1,
                   borderColor: escopo === opt.id ? colors.axel : colors.hairline,
-                  backgroundColor: escopo === opt.id ? colors.axelMuted : colors.elevated,
+                  backgroundColor: escopo === opt.id ? colors.axelMuted : colors.fill,
                   paddingHorizontal: 12,
                   paddingVertical: 8,
                   justifyContent: 'center',

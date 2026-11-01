@@ -11,21 +11,17 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1F3A3D"
-    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "app.simplylife.os"
+      "bundleIdentifier": "app.sunfy"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1F3A3D"
       },
-      "package": "app.simplylife.os"
+      "package": "app.sunfy",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +33,19 @@
       "expo-asset",
       "expo-font",
       [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#1F3A3D",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#111615"
+          }
+        }
+      ],
+      [
         "expo-camera",
         {
           "cameraPermission": "O SunFy usa a câmera só para ler o código de barras dos alimentos.",
@@ -46,8 +55,8 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon.png",
-          "color": "#C9A15C",
+          "icon": "./assets/notification-icon.png",
+          "color": "#E8734A",
           "defaultChannel": "default"
         }
       ],

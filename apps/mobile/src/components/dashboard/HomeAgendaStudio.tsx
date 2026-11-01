@@ -135,7 +135,7 @@ export function HomeAgendaStudio({ tasks }: Props)
           gap: 12,
           padding: 4,
           borderRadius: 999,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.fill,
           alignSelf: 'flex-start',
         }}
       >
@@ -240,7 +240,7 @@ export function HomeAgendaStudio({ tasks }: Props)
                       borderRadius: 12,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: colors.elevated,
+                      backgroundColor: colors.fill,
                     }}
                   >
                     <Icon
@@ -263,7 +263,7 @@ export function HomeAgendaStudio({ tasks }: Props)
                 gap: 12,
                 padding: space.sm,
                 borderRadius: 14,
-                backgroundColor: day.offset === 0 ? colors.axelMuted : colors.surface,
+                backgroundColor: day.offset === 0 ? colors.axelMuted : colors.fill,
                 borderWidth: 1,
                 borderColor: colors.hairline,
               }}

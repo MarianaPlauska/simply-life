@@ -12,6 +12,7 @@ import {
   currentWeekIsos,
 } from '@simply-life/shared'
 import { Text, ProgressRing, PressableScale } from '../../ui'
+import { usePanelBox } from '../../ui/Panel'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -57,16 +58,17 @@ export function HomeWaterProgressCard({ compact }: Props)
   const week = useMemo(() => currentWeekIsos(), [])
   const todayIso = localTodayIso()
   const maxBar = Math.max(meta, 1)
+  const box = usePanelBox({
+    borderRadius: 20,
+    padding: 20,
+    gap: 16,
+    backgroundColor: colors.elevated,
+    borderWidth: 1,
+    borderColor: colors.cardRim,
+  })
 
   return (
-    <View
-      style={{
-        borderRadius: 20,
-        padding: 20,
-        gap: 16,
-        backgroundColor: colors.healthMuted,
-      }}
-    >
+    <View style={box}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
         <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
           <Text variant="caption" muted>
@@ -85,7 +87,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             size={72}
             strokeWidth={6}
             color={colors.health}
-            trackColor={colors.hairline}
+            trackColor={colors.fill}
             showLabel={false}
           />
           <View style={{ position: 'absolute', alignItems: 'center' }}>
@@ -131,7 +133,7 @@ export function HomeWaterProgressCard({ compact }: Props)
                     width: '70%',
                     height: 44,
                     borderRadius: 8,
-                    backgroundColor: colors.elevated,
+                    backgroundColor: colors.fill,
                     justifyContent: 'flex-end',
                     overflow: 'hidden',
                   }}
@@ -171,7 +173,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             minWidth: 44,
             paddingHorizontal: 14,
             borderRadius: 999,
-            backgroundColor: colors.elevated,
+            backgroundColor: colors.fill,
             alignItems: 'center',
             justifyContent: 'center',
             opacity: atual <= 0 ? 0.4 : 1,
@@ -206,7 +208,7 @@ export function HomeWaterProgressCard({ compact }: Props)
             minWidth: 44,
             paddingHorizontal: 14,
             borderRadius: 999,
-            backgroundColor: colors.elevated,
+            backgroundColor: colors.fill,
             alignItems: 'center',
             justifyContent: 'center',
           }}

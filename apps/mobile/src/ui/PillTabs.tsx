@@ -3,6 +3,7 @@ import { COMPONENT_SPEC } from '@simply-life/ui-tokens'
 import { Text } from './Text'
 import { PressableScale } from './PressableScale'
 import { useTheme } from '../theme/ThemeProvider'
+import { hapticSelect } from '../lib/haptics'
 
 export type PillTab<T extends string> = {
   id: T
@@ -39,7 +40,7 @@ export function PillTabs<T extends string>({
       style={{
         alignSelf: 'stretch',
         borderRadius: radius.pill,
-        backgroundColor: colors.elevated,
+        backgroundColor: colors.fill,
         maxHeight: spec.height + 8,
       }}
     >
@@ -53,7 +54,11 @@ export function PillTabs<T extends string>({
         return (
           <PressableScale
             key={tab.id}
-            onPress={() => onChange(tab.id)}
+            onPress={() =>
+            {
+              hapticSelect()
+              onChange(tab.id)
+            }}
             style={{
               minHeight: spec.height,
               paddingHorizontal: 16,

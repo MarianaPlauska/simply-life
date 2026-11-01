@@ -6,6 +6,8 @@ import {
   NOTIFY_CADENCE_OPTIONS,
   GAMIFICATION_MODE_OPTIONS,
   formatSleepHours,
+  demoFinanceCards,
+  isDemoFinanceCard,
   type CarePace,
   type NotifyCadence,
   type GamificationMode,
@@ -94,8 +96,10 @@ export default function SetupScreen()
   const hydrate = usePrefsStore((s) => s.hydrate)
   const patch = usePrefsStore((s) => s.patch)
   const habits = useDataStore((s) => s.habits)
-  const cards = useDataStore((s) => s.financeCards)
+  const rawCards = useDataStore((s) => s.financeCards)
+  const cards = rawCards.filter((c) => !isDemoFinanceCard(c))
   const addCard = useDataStore((s) => s.addFinanceCard)
+  const removeCard = useDataStore((s) => s.removeFinanceCard)
   const updateCard = useDataStore((s) => s.updateFinanceCard)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const startGuestOwnData = useDataStore((s) => s.startGuestOwnData)
@@ -124,10 +128,18 @@ export default function SetupScreen()
 
   useEffect(() =>
   {
-    void hydrate()
-    // convidado entra direto aqui: carrega os hábitos para as metas partirem do que existe
-    void refreshAll({ isGuest })
-  }, [hydrate, refreshAll, isGuest])
+    void (async () =>
+    {
+      await hydrate()
+      await refreshAll({ isGuest })
+      // conta em criação: some com Nubank/Inter de exemplo, se o fetch tiver plantado
+      const leftover = useDataStore.getState().financeCards.filter(isDemoFinanceCard)
+      for (const card of leftover)
+      {
+        removeCard(card.id)
+      }
+    })()
+  }, [hydrate, refreshAll, isGuest, removeCard])
 
   useEffect(() =>
   {
@@ -194,6 +206,11 @@ export default function SetupScreen()
   const exploreDemo = async () =>
   {
     setSaving(true)
+    // modo vitrine: devolve os cartões de exemplo (Nubank/Inter) só neste caminho
+    if (!useDataStore.getState().financeCards.length)
+    {
+      useDataStore.setState({ financeCards: demoFinanceCards() })
+    }
     await patch({ color_scheme: mode, setup_completed_at: new Date().toISOString() })
     setSaving(false)
     router.replace('/(tabs)')
@@ -203,6 +220,12 @@ export default function SetupScreen()
   {
     // só na primeira vez: voltar e tocar de novo não apaga o que já foi cadastrado
     if (isGuest && !guestOwnData) await startGuestOwnData()
+    // conta nova começa sem cartão; Nubank/Inter de exemplo não entram
+    const leftover = useDataStore.getState().financeCards.filter(isDemoFinanceCard)
+    for (const card of leftover)
+    {
+      removeCard(card.id)
+    }
     next()
   }
 

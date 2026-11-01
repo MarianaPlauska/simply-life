@@ -62,7 +62,7 @@ export function FinanceCategoryPicker()
                   borderRadius: radius.pill,
                   borderWidth: 1,
                   borderColor: on ? ink : colors.hairline,
-                  backgroundColor: on ? colors.brandMuted : colors.elevated,
+                  backgroundColor: on ? colors.brandMuted : colors.fill,
                   opacity: on ? 1 : 0.7,
                 }}
               >

@@ -72,7 +72,7 @@ export function ExpenseCategoryChips({ value, onChange, onEditCategories }: Prop
                 flexDirection: 'row',
                 alignItems: 'center',
                 gap: 12,
-                backgroundColor: active ? `${accent}38` : colors.elevated,
+                backgroundColor: active ? `${accent}38` : colors.fill,
                 borderWidth: 1,
                 borderColor: active ? accent : colors.hairline,
               }}

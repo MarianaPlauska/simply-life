@@ -94,7 +94,7 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        backgroundColor: selected ? `${tint ?? colors.axel}22` : hovered ? colors.surface : 'transparent',
+        backgroundColor: selected ? `${tint ?? colors.axel}22` : hovered ? colors.fill : 'transparent',
         borderWidth: 1,
         borderColor: selected ? (tint ?? colors.axel) : colors.hairline,
         cursor: 'pointer',
@@ -160,12 +160,12 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
               style={{
                 height: 40,
                 maxWidth: 560,
-                borderRadius: 10,
+                borderRadius: 14,
                 paddingHorizontal: 14,
                 fontSize: 15,
                 fontFamily: 'Lexend_400Regular',
                 color: colors.ink,
-                backgroundColor: colors.surface,
+                backgroundColor: colors.fill,
                 borderWidth: 1,
                 borderColor: colors.hairline,
               }}

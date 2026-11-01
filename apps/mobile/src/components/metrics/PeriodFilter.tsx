@@ -37,7 +37,7 @@ export function PeriodFilter({ value, onChange }: Props)
               borderRadius: 999,
               alignItems: 'center',
               justifyContent: 'center',
-              backgroundColor: active ? accents.selectBg : colors.elevated,
+              backgroundColor: active ? accents.selectBg : colors.fill,
             }}
           >
             <Text

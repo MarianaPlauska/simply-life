@@ -60,7 +60,7 @@ function daysUntilDay(day: number, ref = new Date()): number
 /** Cartão de crédito com cara de cartão: nome, chip, disponível, fatura, vencimento, finais e validade. */
 export function CreditCardVisual({ card, width, selected, onPress }: Props)
 {
-  const { colors } = useTheme()
+  const { colors, mode } = useTheme()
   const txs = useDataStore((s) => s.finance)
   const skin = CARD_SKINS[card.tipoGradiente ?? 'copper'] ?? CARD_SKINS.copper
   // fatura pelas compras do cartão no mês; sem gasto, o disponível é o limite cheio
@@ -76,7 +76,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
   const face = (
     <View
       style={[
-        styles.shadow,
+        mode === 'dark' ? null : styles.shadow,
         {
           width,
           opacity: blocked ? 0.72 : 1,

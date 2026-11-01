@@ -418,10 +418,10 @@ export default function PreferenciasScreen()
                 style={{
                   flex: 1,
                   minHeight: 44,
-                  borderRadius: 12,
+                  borderRadius: 14,
                   paddingHorizontal: 14,
                   color: colors.ink,
-                  backgroundColor: colors.elevated,
+                  backgroundColor: colors.fill,
                   borderWidth: 1,
                   borderColor: colors.hairline,
                   fontFamily: 'Lexend_400Regular',

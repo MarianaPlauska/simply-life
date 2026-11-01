@@ -520,7 +520,7 @@ function DraftCard({
         borderRadius: 14,
         borderWidth: 1,
         borderColor: included ? colors.hairlineStrong : colors.hairline,
-        backgroundColor: colors.elevated,
+        backgroundColor: colors.fill,
         opacity: included ? 1 : 0.55,
       }}
     >

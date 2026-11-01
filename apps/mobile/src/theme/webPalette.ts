@@ -22,6 +22,7 @@ const WEB_DARK: Partial<ColorTokens> = {
   surface: '#1E2C2E',
   /** cartão quase do tom da página: se mistura, sem parecer caixa */
   elevated: '#192628',
+  fill: '#24353A',
   ink: '#EEF2F0',
   /** 7,8:1 no elevated */
   inkMuted: '#B0C0BD',
@@ -53,6 +54,7 @@ const WEB_LIGHT: Partial<ColorTokens> = {
   /** campos e hover: um tom abaixo do cartão branco (igual ao cartão, o hover sumia) */
   surface: '#F7F6F3',
   elevated: '#FFFFFF',
+  fill: '#EEF0EE',
   hairline: '#E3E6E3',
   cardRim: 'rgba(31, 58, 61, 0.05)',
   widget: '#FFFFFF',

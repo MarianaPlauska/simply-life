@@ -1,6 +1,8 @@
 import { ScrollView, View } from 'react-native'
-import { Text, PressableScale } from './index'
+import { Text } from './Text'
+import { PressableScale } from './PressableScale'
 import { useTheme } from '../theme/ThemeProvider'
+import { hapticSelect } from '../lib/haptics'
 
 export type SubNavTab<T extends string> = {
   id: T
@@ -39,7 +41,11 @@ export function SubNavTabs<T extends string>({
             return (
               <PressableScale
                 key={tab.id}
-                onPress={() => onChange(tab.id)}
+                onPress={() =>
+                {
+                  hapticSelect()
+                  onChange(tab.id)
+                }}
                 style={{
                   minHeight: 48,
                   paddingHorizontal: 12,

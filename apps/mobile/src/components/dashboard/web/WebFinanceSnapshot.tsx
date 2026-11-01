@@ -53,7 +53,7 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
                   paddingVertical: 6,
                   paddingHorizontal: 8,
                   borderRadius: 8,
-                  backgroundColor: hovered ? colors.surface : 'transparent',
+                  backgroundColor: hovered ? colors.fill : 'transparent',
                   cursor: 'pointer',
                 })}
               >
