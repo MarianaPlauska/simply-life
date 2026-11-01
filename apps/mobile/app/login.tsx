@@ -146,8 +146,9 @@ export default function LoginScreen()
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           style={{
             flexGrow: 1,
+            alignItems: 'center',
             paddingHorizontal: PAD_X,
-            paddingTop: space.lg,
+            paddingTop: space.xl,
             paddingBottom: Math.max(insets.bottom, space.lg),
             backgroundColor: colors.surface,
             borderTopLeftRadius: 24,
