@@ -36,19 +36,8 @@ export function AtmosphereWash()
     )
   }
 
-  // escuro: fundo liso (o degradê ate o surface apagava os cartoes na parte de baixo)
-  return (
-    <>
-      <LinearGradient
-        pointerEvents="none"
-        colors={['rgba(31, 58, 61, 0.55)', 'rgba(31, 58, 61, 0.12)', 'transparent']}
-        locations={[0, 0.35, 1]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0.1, y: 0.45 }}
-        style={styles.accent}
-      />
-    </>
-  )
+  // escuro: fundo liso, sem nevoa colorida (padrao dos apps nativos)
+  return null
 }
 
 const styles = StyleSheet.create({

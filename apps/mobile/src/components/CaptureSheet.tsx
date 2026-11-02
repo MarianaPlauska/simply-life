@@ -67,6 +67,8 @@ import { useNotesStore } from '../store/notesStore'
 import { DumpReview, dumpItemsMissingValue, dumpSummary } from './DumpReview'
 import { readDumpLocally, refineDumpWithAi } from '../lib/dumpCaptureApi'
 import { evaluateSpend, guardSpend } from '../lib/spendGuard'
+import { useCareExtrasStore } from '../store/careExtrasStore'
+import { shouldHoldImpulse } from '@simply-life/shared'
 import { useMonthProjection } from './finance/FinanceForecastCards'
 import { SpendGuardHost } from './finance/SpendGuardHost'
 
@@ -488,6 +490,28 @@ export function CaptureSheet()
           const seguir = await guardSpend({ launches: plan, cardId: pagamento === 'cartao' ? cardId : null, host: 'capture' })
           if (!seguir)
           {
+            setSaving(false)
+            return
+          }
+          const planejado = plan.length > 1 || salvarFixa || recorrencia !== 'nenhuma'
+          const care = useCareExtrasStore.getState()
+          if (shouldHoldImpulse(care.impulseEnabled, care.impulseThreshold, {
+            titulo,
+            valor: parsed.valor,
+            planejado,
+          }))
+          {
+            care.pushHold({
+              titulo,
+              valor: parsed.valor,
+              data,
+              categoria,
+              cardId: pagamento === 'cartao' ? cardId : null,
+              forma: pagamento === 'cartao' ? 'cartao' : pagamento === 'boleto' ? 'boleto' : 'debito',
+              folderId: folderId ?? null,
+            })
+            setSavedLabel('Guardado por 24 horas. A decisão fica na Carteira, em Análise.')
+            setSaved(true)
             setSaving(false)
             return
           }

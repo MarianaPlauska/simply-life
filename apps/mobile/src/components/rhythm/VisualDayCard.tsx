@@ -7,6 +7,7 @@ import { Card, Text, PrimaryButton, GroupedList, GroupedRow, RowGlyph } from '..
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useNeuroStore } from '../../store/neuroStore'
+import { useCareExtrasStore } from '../../store/careExtrasStore'
 import { useAgendaPromptStore, useShowAgendaPrompt } from '../../store/agendaPromptStore'
 import { useWebDesk } from '../dashboard/web/webBox'
 import { useMinuteClock, useVisualDay } from '../../hooks/useTodayVisualDay'
@@ -18,6 +19,8 @@ const KIND_META: Record<DayBlock['kind'], { icon: keyof typeof Icon.glyphMap; la
   compromisso: { icon: 'time-outline', label: 'Horário marcado' },
   tarefa: { icon: 'ellipse-outline', label: 'Sugerido pelo Axel' },
   pausa: { icon: 'cafe-outline', label: 'Pausa' },
+  troca: { icon: 'time-outline', label: 'Tempo para trocar' },
+  espera: { icon: 'time-outline', label: 'Até o compromisso' },
 }
 
 /**
@@ -33,6 +36,8 @@ export function VisualDayCard()
   const webDesk = useWebDesk()
   const day = useVisualDay(undefined, now)
   const maxVisible = useNeuroStore((s) => s.maxVisibleTasks)
+  const buffer = useCareExtrasStore((s) => s.transitionBufferMin)
+  const setBuffer = useCareExtrasStore((s) => s.setTransitionBuffer)
   const source = useCalendarStore((s) => s.source)
   const [expanded, setExpanded] = useState(false)
   const showAgendaPrompt = useShowAgendaPrompt() && !source
@@ -151,6 +156,12 @@ export function VisualDayCard()
             onPress={() => setExpanded(!expanded)}
           />
         ) : null}
+        <PrimaryButton
+          label={buffer > 0 ? `Troca de ${buffer} min ligada` : 'Reservar tempo de troca'}
+          variant="ghost"
+          size="sm"
+          onPress={() => setBuffer(buffer > 0 ? 0 : 10)}
+        />
         <PrimaryButton label="Ajustar ao meu jeito" variant="ghost" size="sm" onPress={() => router.push('/meu-jeito')} />
       </View>
     </Card>

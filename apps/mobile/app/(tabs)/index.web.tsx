@@ -22,6 +22,7 @@ import { AxelDayBrief } from '../../src/components/dashboard/HomeDriveAside'
 import { MoodWeekReportGate, isMoodWeekReportVisible } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
+import { CareHomeStrip } from '../../src/components/care/CareHomeStrip'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
@@ -291,6 +292,7 @@ export default function DashboardScreenWeb()
               <AxelDayBrief />
               <DayPlanHomeCard />
               <VisualDayCard />
+              <CareHomeStrip />
               <SalaryConfirmCard />
             </View>
           </View>
@@ -354,6 +356,7 @@ export default function DashboardScreenWeb()
         {/* avisos que só aparecem às vezes */}
         <SalaryConfirmCard />
         <DayPlanHomeCard />
+        <CareHomeStrip />
         <MoodWeekReportGate humor={humor} />
 
         <View

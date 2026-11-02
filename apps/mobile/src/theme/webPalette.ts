@@ -21,5 +21,5 @@ export function withWebPalette(base: ColorTokens, mode: ThemeMode): ColorTokens
  */
 export function webBandColor(mode: ThemeMode): string
 {
-  return mode === 'dark' ? '#1F3A3D' : '#33585B'
+  return mode === 'dark' ? '#1C1C1E' : '#33585B'
 }

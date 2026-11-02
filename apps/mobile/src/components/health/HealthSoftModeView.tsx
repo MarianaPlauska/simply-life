@@ -78,7 +78,7 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
               leading={<RowGlyph name={calmIcon(ex.route)} color={colors.health} />}
               title={ex.title}
               subtitle={`Cerca de ${ex.durationMin} min`}
-              onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding')}
+              onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding' | '/sobrecarga')}
             />
           ))}
           <GroupedRow
@@ -102,7 +102,11 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
 }
 
 // ícone pelo exercício (rota): respiração e volta ao corpo
-const calmIcon = (route: string): IconName => (route.includes('grounding') ? 'body-outline' : 'leaf-outline')
+const calmIcon = (route: string): IconName =>
+{
+  if (route.includes('sobrecarga')) return 'volume-mute'
+  return route.includes('grounding') ? 'body-outline' : 'leaf-outline'
+}
 
 /**
  * Modo suave no computador: duas colunas compactas e cores baixas (dia difícil não
@@ -209,7 +213,7 @@ function SoftModeDesk({
               {CALM_EXERCISES.map((ex) => (
                 <WebHoverable
                   key={ex.id}
-                  onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding')}
+                  onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding' | '/sobrecarga')}
                   accessibilityLabel={ex.title}
                   style={(hovered) => webStyle({
                     flexDirection: 'row',

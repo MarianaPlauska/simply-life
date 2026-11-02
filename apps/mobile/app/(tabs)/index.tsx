@@ -43,6 +43,7 @@ import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { MoodWeekReportGate, isMoodWeekReportVisible } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
+import { CareHomeStrip } from '../../src/components/care/CareHomeStrip'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeRpgStrip } from '../../src/components/dashboard/HomeRpgStrip'
 import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
@@ -259,6 +260,7 @@ export default function DashboardScreen()
                 <SalaryConfirmCard />
                 <DayPlanHomeCard />
                 <VisualDayCard />
+                <CareHomeStrip />
                 <MoodWeekReportGate humor={humor} />
                 <EloHeatmap semanas={12} compact />
                 <View style={{ gap: 12 }}>
@@ -299,6 +301,7 @@ export default function DashboardScreen()
                 <AxelDayBrief />
                 <DayPlanHomeCard />
                 <VisualDayCard />
+                <CareHomeStrip />
                 <SalaryConfirmCard />
               </View>
             </View>

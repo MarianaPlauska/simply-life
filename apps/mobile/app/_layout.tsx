@@ -13,6 +13,7 @@ import { pingPresence } from '../src/lib/presence'
 import { useFocusPresence } from '../src/hooks/useFocusPresence'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { useActivityStore } from '../src/store/activityStore'
+import { useCareExtrasStore } from '../src/store/careExtrasStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { readColorSchemeSync } from '../src/lib/sync/prefs'
 import { CelebrationOverlay } from '../src/components/dashboard/CelebrationOverlay'
@@ -41,6 +42,7 @@ function RootNavigator()
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const hydrateActivity = useActivityStore((s) => s.hydrate)
+  const hydrateCare = useCareExtrasStore((s) => s.hydrate)
   const markOpen = useActivityStore((s) => s.markOpen)
   usePushBootstrap()
   const pathname = usePathname()
@@ -53,7 +55,8 @@ function RootNavigator()
     void hydrate()
     hydrateXp()
     hydrateActivity()
-  }, [hydrate, hydrateXp, hydrateActivity])
+    void hydrateCare()
+  }, [hydrate, hydrateXp, hydrateActivity, hydrateCare])
 
   useEffect(() =>
   {
@@ -157,6 +160,8 @@ function RootNavigator()
             <Stack.Screen name="desbloqueios" />
             <Stack.Screen name="calm/box-breathing" />
             <Stack.Screen name="calm/grounding" />
+            <Stack.Screen name="sobrecarga" />
+            <Stack.Screen name="lugares" />
             <Stack.Screen name="tcc/thought-record" />
             <Stack.Screen name="tcc/behavioral-activation" />
             <Stack.Screen name="tcc/gradual-exposure" />

@@ -912,7 +912,7 @@ const COST_TAG_RE = /#custo:(\d+(?:\.\d{1,2})?):([^\s:]+)(?::(fx\d+|cd[^\s]+))?/
 const ENERGY_TAG_RE = /#energia:(baixa|media|alta)/i
 const RIGID_TAG_RE = /#prazo:firme/i
 // com: etapa planejada com outra pessoa (taskWaits.ts)
-export const TASK_SIDECAR_TAGS_RE = /#(?:custo:\S+|energia:(?:baixa|media|alta)|prazo:firme|com:\S+)/gi
+export const TASK_SIDECAR_TAGS_RE = /#(?:custo:\S+|energia:(?:baixa|media|alta)|prazo:firme|com:\S+|lugar:[a-z0-9-]{1,40})/gi
 
 export type TaskCostMeta = {
   valor: number

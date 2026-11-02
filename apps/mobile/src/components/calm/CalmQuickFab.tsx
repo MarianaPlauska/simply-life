@@ -96,7 +96,7 @@ export function CalmQuickFab()
                 onPick={(route) =>
                 {
                   setSheet(false)
-                  router.push(route as '/calm/box-breathing' | '/calm/grounding')
+                  router.push(route as '/calm/box-breathing' | '/calm/grounding' | '/sobrecarga')
                 }}
               />
             </Card>

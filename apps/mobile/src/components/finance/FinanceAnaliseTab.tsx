@@ -19,6 +19,7 @@ import { FinanceCoachCards } from './FinanceCoachCards'
 import { FinancePlanningPanel } from './FinancePlanningPanel'
 import { FinanceMonthReport } from './FinanceMonthReport'
 import { FoodSpendCard } from '../food/FoodSpendCard'
+import { FinanceCareMoney } from './FinanceCareMoney'
 import { visibleAnaliseTabs, type AnaliseSubTab } from './financeNav'
 import { useModules } from '../../hooks/useModules'
 import { Panel } from '../../ui/Panel'
@@ -73,6 +74,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
 
       {subTab === 'visao-geral' && <FinanceMonthReport />}
       {subTab === 'visao-geral' && <FoodSpendCard />}
+      {subTab === 'visao-geral' && <FinanceCareMoney />}
 
       {subTab === 'orcamentos' && <FinancePlanningPanel />}
 

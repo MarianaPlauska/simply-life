@@ -142,30 +142,26 @@ export type ColorTokens = {
 }
 
 export const COLOR_DARK: ColorTokens = {
-  /**
-   * Escuro feito só com as cores do ícone (espelho do claro): fundo petróleo profundo,
-   * cartão no petróleo exato do ícone, texto creme e secundário menta (as pétalas),
-   * coral (o miolo) só para ação. Uma paleta só para celular e web.
-   */
-  canvas: '#102426',
-  chrome: '#163033',
-  surface: '#163033',
-  elevated: BRAND.petroleo,
-  fill: '#29494C',
-  /** 10,7:1 no elevated */
+  /** Escuro neutro (grafite), como os apps nativos: petroleo e coral so como destaque. */
+  canvas: '#0E0E0F',
+  chrome: '#161618',
+  surface: '#161618',
+  elevated: '#1C1C1E',
+  fill: '#2A2A2D',
+  /** 15:1 no elevated */
   ink: BRAND.creme,
-  /** 7,4:1 no elevated */
-  inkMuted: BRAND.menta,
-  /** 4,9:1 no elevated */
-  inkFaint: '#8FAAA6',
-  hairline: '#2C4B4E',
-  hairlineStrong: 'rgba(238, 242, 240, 0.22)',
-  cardRim: 'rgba(185, 207, 202, 0.08)',
+  /** 7,6:1 no elevated */
+  inkMuted: '#ABABB2',
+  /** 5,1:1 no elevated */
+  inkFaint: '#8A8A92',
+  hairline: '#2C2C2F',
+  hairlineStrong: 'rgba(255, 255, 255, 0.18)',
+  cardRim: 'rgba(255, 255, 255, 0.06)',
   brand: BRAND.petroleo,
   brandInk: BRAND.menta,
   onBrand: '#EEF2F0',
   brandDeep: '#152B2D',
-  brandMuted: BRAND.petroleo,
+  brandMuted: '#26262A',
   /** Coral clareado para texto: o coral puro dá 4,0:1 no cartão petróleo; este, 4,9:1 */
   axel: '#F08A65',
   axelFill: BRAND.coral,
@@ -185,25 +181,25 @@ export const COLOR_DARK: ColorTokens = {
   dangerMuted: 'rgba(244, 138, 155, 0.16)',
   attentionMuted: 'rgba(232, 176, 75, 0.16)',
   done: '#6CC79B',
-  overlay: 'rgba(6, 16, 17, 0.76)',
-  glyphInk: '#102426',
-  navBg: BRAND.petroleo,
-  navBorder: 'transparent',
-  navInk: BRAND.menta,
+  overlay: 'rgba(0, 0, 0, 0.72)',
+  glyphInk: '#0E0E0F',
+  navBg: '#161618',
+  navBorder: '#2C2C2F',
+  navInk: '#8E8E93',
   /** Sem caixa: a aba ativa é ícone cheio, rótulo em negrito e o pontinho coral */
   navActiveBg: 'transparent',
   navActiveInk: '#EEF2F0',
   navActiveDot: BRAND.coral,
   dismiss: '#C889BD',
   dismissMuted: 'rgba(200, 137, 189, 0.16)',
-  featureBg: BRAND.petroleo,
+  featureBg: '#1C1C1E',
   featureInk: BRAND.creme,
-  featureMuted: BRAND.menta,
-  featureTrack: 'rgba(238, 242, 240, 0.16)',
-  heroBg: '#24474B',
-  heroBgDeep: '#1A3336',
+  featureMuted: '#ABABB2',
+  featureTrack: 'rgba(255, 255, 255, 0.14)',
+  heroBg: '#1C1C1E',
+  heroBgDeep: '#161618',
   heroInk: '#EEF2F0',
-  heroMuted: BRAND.menta,
+  heroMuted: '#ABABB2',
 }
 
 export const COLOR_LIGHT: ColorTokens = {

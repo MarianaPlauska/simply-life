@@ -8,7 +8,7 @@ import type { MobileTask } from './tasks'
 import { localTodayIso } from './dates'
 import { freeSlots, type CalendarEvent } from './icsCalendar'
 
-export type DayBlockKind = 'agenda' | 'compromisso' | 'tarefa' | 'pausa'
+export type DayBlockKind = 'agenda' | 'compromisso' | 'tarefa' | 'pausa' | 'troca' | 'espera'
 
 export type DayBlock = {
   id: string
@@ -55,11 +55,66 @@ export type VisualDayInput = {
   pauseMin?: number
   /** tempo livre para tarefas no dia; essenciais entram mesmo assim */
   capacityMinutes?: number
+  /**
+   * Minutos reservados antes de cada horário marcado.
+   * 0 (padrão) não muda o dia. Acima de 0, a pessoa ligou o tempo de troca.
+   */
+  transitionBufferMin?: number
 }
 
 const round5 = (n: number) => Math.ceil(n / 5) * 5
 /** maior bloco contínuo de uma tarefa (minutos) */
 const MAX_BLOCK = 90
+
+/**
+ * Reserva minutos antes de cada horário marcado.
+ * O bloco "até o compromisso" aparece, mas não tira o horário das tarefas.
+ * O bloco de troca ocupa tempo de verdade. Com buffer 0, não devolve nada.
+ */
+export function transitionBlocksFor(
+  fixed: Pick<DayBlock, 'id' | 'titulo' | 'inicio' | 'fim' | 'soft' | 'kind'>[],
+  bufferMin: number,
+  dayStart: number,
+): DayBlock[]
+{
+  if (bufferMin <= 0) return []
+  const ordered = fixed.filter((block) => !block.soft && block.kind !== 'troca' && block.kind !== 'espera')
+    .slice()
+    .sort((a, b) => a.inicio - b.inicio)
+  const out: DayBlock[] = []
+  let cursor = dayStart
+  for (const block of ordered)
+  {
+    const trocaInicio = block.inicio - bufferMin
+    if (trocaInicio >= cursor)
+    {
+      if (trocaInicio - cursor >= 45)
+      {
+        out.push({
+          id: `esp:${block.id}`,
+          kind: 'espera',
+          titulo: `Até ${block.titulo}`,
+          inicio: cursor,
+          fim: trocaInicio,
+          fixed: false,
+          soft: true,
+          local: null,
+        })
+      }
+      out.push({
+        id: `tr:${block.id}`,
+        kind: 'troca',
+        titulo: 'Tempo para trocar',
+        inicio: trocaInicio,
+        fim: block.inicio,
+        fixed: false,
+        local: null,
+      })
+    }
+    cursor = Math.max(cursor, block.fim)
+  }
+  return out
+}
 
 export function buildVisualDay(input: VisualDayInput): VisualDay
 {
@@ -112,7 +167,13 @@ export function buildVisualDay(input: VisualDayInput): VisualDay
     })
   }
 
-  // janelas livres: agenda + compromissos contam como ocupado
+  const bufferMin = input.transitionBufferMin ?? 0
+  if (bufferMin > 0)
+  {
+    blocks.push(...transitionBlocksFor(blocks, bufferMin, dayStart))
+  }
+
+  // janelas livres: agenda + compromissos + tempo de troca contam como ocupado
   const asBusy: CalendarEvent[] = blocks.filter((b) => !b.soft).map((b) => ({
     id: b.id,
     titulo: b.titulo,
@@ -214,10 +275,11 @@ export type NowNext = {
 export function nowAndNext(day: VisualDay, ref = new Date(), limit = 3): NowNext
 {
   const nowMin = ref.getHours() * 60 + ref.getMinutes()
-  const now = day.blocks.find((b) => b.inicio <= nowMin && b.fim > nowMin && b.kind !== 'pausa')
-    ?? day.blocks.find((b) => b.inicio <= nowMin && b.fim > nowMin)
+  const quietNow = (kind: DayBlockKind) => kind === 'pausa' || kind === 'espera'
+  const now = day.blocks.find((b) => b.inicio <= nowMin && b.fim > nowMin && !quietNow(b.kind))
+    ?? day.blocks.find((b) => b.inicio <= nowMin && b.fim > nowMin && b.kind !== 'espera')
     ?? null
-  const upcoming = day.blocks.filter((b) => b.inicio > nowMin && b.kind !== 'pausa').slice(0, limit)
+  const upcoming = day.blocks.filter((b) => b.inicio > nowMin && b.kind !== 'pausa' && b.kind !== 'espera').slice(0, limit)
   return {
     now,
     next: upcoming,
@@ -237,7 +299,7 @@ export function transitionAlerts(day: VisualDay, warningsMin: number[], ref = ne
   const out: TransitionAlert[] = []
   for (const b of day.blocks)
   {
-    if (b.kind === 'pausa') continue
+    if (b.kind === 'pausa' || b.kind === 'troca' || b.kind === 'espera') continue
     for (const w of warningsMin)
     {
       const at = b.inicio - w

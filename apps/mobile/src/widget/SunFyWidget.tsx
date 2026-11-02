@@ -1,10 +1,10 @@
 import { FlexWidget, TextWidget } from 'react-native-android-widget'
 
-// cores fixas da marca: o widget fica na tela inicial, fora do tema do app
-const BG = '#1F3A3D'
+// grafite fixo, como o modo escuro do app: o widget fica fora do tema
+const BG = '#1C1C1E'
 const INK = '#EEF2F0'
-const MUTED = '#B9CFCA'
-const FILL = '#29494C'
+const MUTED = '#ABABB2'
+const FILL = '#2A2A2D'
 const CORAL = '#E8734A'
 const ON_CORAL = '#1E1C1A'
 
