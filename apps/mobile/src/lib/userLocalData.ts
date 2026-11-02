@@ -1,6 +1,8 @@
 import { persistStorage, whenPersistReady } from './persistStorage'
 import { GAMIFICATION_LOCAL_KEYS, useGamificationStore } from '../store/gamificationStore'
 import { PLAY_LOCAL_KEYS, usePlayStore } from '../store/playStore'
+import { LIFE_PLEDGE_KEYS, useLifePledgeStore } from '../store/lifePledgeStore'
+import { HABIT_TRACK_KEYS, useHabitTrackStore } from '../store/habitTrackStore'
 import { ACTIVITY_LOCAL_KEYS, useActivityStore } from '../store/activityStore'
 
 /**
@@ -34,6 +36,8 @@ const SNAP_KEYS = [
   'simply-life-play-week',
   'simply-life-play-beat',
   'simply-life-play-energy',
+  'simply-life-life-pledges',
+  'simply-life-habit-tracks',
 ]
 
 function snapKey(uid: string): string
@@ -57,9 +61,11 @@ export function stashAndClearUserLocal(uid: string | null): void
   useGamificationStore.getState().reset()
   useActivityStore.getState().reset()
   usePlayStore.getState().reset()
+  useLifePledgeStore.getState().reset()
+  useHabitTrackStore.getState().reset()
   persistStorage.removeItem(ELO_SYNC_UID_KEY)
   // garante que nenhuma chave por conta ficou para trás
-  for (const key of [...GAMIFICATION_LOCAL_KEYS, ...ACTIVITY_LOCAL_KEYS, ...PLAY_LOCAL_KEYS]) persistStorage.removeItem(key)
+  for (const key of [...GAMIFICATION_LOCAL_KEYS, ...ACTIVITY_LOCAL_KEYS, ...PLAY_LOCAL_KEYS, ...LIFE_PLEDGE_KEYS, ...HABIT_TRACK_KEYS]) persistStorage.removeItem(key)
 }
 
 /**
@@ -96,4 +102,6 @@ export async function restoreUserLocal(uid: string): Promise<void>
   useGamificationStore.getState().hydrate()
   useActivityStore.getState().hydrate()
   usePlayStore.getState().hydrate()
+  useLifePledgeStore.getState().hydrate()
+  useHabitTrackStore.getState().hydrate()
 }

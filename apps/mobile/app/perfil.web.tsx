@@ -235,6 +235,8 @@ export default function PerfilScreenWeb()
             </View>
             <ProfileSettingsRow icon="sparkles-outline" label="Pontos" value="Nível, moedas e elo" onPress={() => setSheet('xp')} />
             <ProfileSettingsRow icon="albums" label="Cartas" value="Coleção do dia" onPress={() => router.push('/cartas' as never)} />
+            <ProfileSettingsRow icon="flag-outline" label="Metas importantes" value="Dias de uma promessa" onPress={() => router.push('/metas-vida' as never)} />
+            <ProfileSettingsRow icon="checkbox-outline" label="Hábitos" value="Dias marcados" onPress={() => router.push('/habitos' as never)} />
             <ProfileSettingsRow icon="flame-outline" label="Elo" value="Dias seguidos" onPress={() => router.push('/ofensiva' as never)} />
           </ProfileSection>
 
@@ -607,6 +609,8 @@ export default function PerfilScreenWeb()
         <WebProfileSection title="Seu placar">
           <WebProfileRow label="Pontos" value="Nível, moedas e elo" onPress={() => setSheet('xp')} />
           <WebProfileRow label="Cartas" value="Coleção do dia" onPress={() => router.push('/cartas' as never)} />
+          <WebProfileRow label="Metas importantes" value="Dias de uma promessa" onPress={() => router.push('/metas-vida' as never)} />
+          <WebProfileRow label="Hábitos" value="Dias marcados" onPress={() => router.push('/habitos' as never)} />
           <WebProfileRow label="Elo" value="Dias seguidos" onPress={() => router.push('/ofensiva' as never)} />
         </WebProfileSection>
 

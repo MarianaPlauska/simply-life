@@ -14,6 +14,7 @@ import {
 } from '@simply-life/shared'
 import { Screen, Text, PrimaryButton, Field } from '../src/ui'
 import { AdventurePreview } from '../src/components/play/AdventurePreview'
+import { AvatarIconPicker } from '../src/components/profile/AvatarIconPicker'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'

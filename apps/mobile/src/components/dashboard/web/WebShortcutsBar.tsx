@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { View } from 'react-native'
 import { Icon } from '../../../ui/Icon'
 import { useRouter } from 'expo-router'
-import { findHabit, formatBRL, monthExpenseTotal, moodLabel, AGUA_META_COPOS } from '@simply-life/shared'
+import { findHabit, formatBRL, localTodayIso, monthExpenseTotal, moodLabel, AGUA_META_COPOS, pledgeProgress } from '@simply-life/shared'
 import { Text } from '../../../ui'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useAuthStore } from '../../../store/authStore'
@@ -13,6 +13,7 @@ import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '..
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
 import { filterMetrics } from '../../../lib/appModules'
+import { useLifePledgeStore } from '../../../store/lifePledgeStore'
 import { usePanelBox } from '../../../ui/Panel'
 
 function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
@@ -23,6 +24,7 @@ function iconFor(id: HomeMetricId): keyof typeof Icon.glyphMap
   if (id === 'tasks') return 'checkbox-outline'
   if (id === 'finance') return 'wallet-outline'
   if (id === 'stats') return 'stats-chart-outline'
+  if (id === 'pledge') return 'flag-outline'
   return 'flag-outline'
 }
 
@@ -44,6 +46,8 @@ export function WebShortcutsBar()
   const tasks = useDataStore((s) => s.tasks) ?? []
   const finance = useDataStore((s) => s.finance) ?? []
   const addWaterCup = useDataStore((s) => s.addWaterCup)
+  const pledges = useLifePledgeStore((s) => s.pledges)
+  const pinnedPledge = pledges.find((p) => p.pinned) ?? pledges[0]
 
   const todayIso = new Date().toISOString().slice(0, 10)
   const agua = findHabit(habits, 'agua')
@@ -72,7 +76,11 @@ export function WebShortcutsBar()
               ? String(openTasks)
               : id === 'finance'
                 ? formatBRL(gastosMes)
-                : '--'
+                : id === 'pledge'
+                  ? pinnedPledge
+                    ? `${pledgeProgress(pinnedPledge.startedOn, pinnedPledge.targetDays, localTodayIso()).elapsed}/${pinnedPledge.targetDays}`
+                    : 'Começar'
+                  : '--'
     const onPress =
       id === 'water'
         ? () => void addWaterCup(isGuest)
@@ -80,7 +88,9 @@ export function WebShortcutsBar()
           ? () => router.push('/(tabs)/financeiro')
           : id === 'tasks'
             ? () => openCapture('dump')
-            : () => router.push('/(tabs)/saude')
+            : id === 'pledge'
+              ? () => router.push('/metas-vida' as never)
+              : () => router.push('/(tabs)/saude')
     return { id, label: meta?.label ?? id, icon: iconFor(id), value, onPress }
   })
 

@@ -5,6 +5,7 @@ export type DashboardWidgetId =
   | 'critical_tasks'
   | 'finance_brief'
   | 'quick_spend'
+  | 'life_pledge'
 
 export type DashboardPriority = 'finance' | 'tasks' | 'health'
 
@@ -20,6 +21,7 @@ export const DASHBOARD_WIDGET_CATALOG: {
   { id: 'medicamentos', label: 'Medicamentos', hint: 'Doses de hoje.' },
   { id: 'critical_tasks', label: 'Tarefas', hint: 'Críticas de hoje.' },
   { id: 'finance_brief', label: 'Finanças', hint: 'Resumo do mês.' },
+  { id: 'life_pledge', label: 'Meta importante', hint: 'Dias de uma meta longa.' },
 ]
 
 function normalizeWidgetIds(widgets: DashboardWidgetId[]): DashboardWidgetId[]

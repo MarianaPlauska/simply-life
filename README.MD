@@ -11,8 +11,12 @@
 </p>
 
 <p align="center">
+  <sub>Versão <strong>1.1.0</strong> · 2 de novembro de 2026</sub>
+</p>
+
+<p align="center">
   <a href="https://simply-life.vercel.app/login"><strong>Experimentar agora</strong></a><br />
-  <sub>Na tela de entrada, toque em <strong>Continuar como convidado</strong> para ver o app com dados de exemplo, sem criar conta.</sub>
+  <sub>Na tela de entrada, toque em <strong>Só quero explorar, sem conta</strong> para ver o app com dados de exemplo, sem criar conta.</sub>
 </p>
 
 <p align="center">
@@ -82,6 +86,52 @@ Abra o app e você cai aqui.
 3. Confira o que o app entendeu e salve. Tarefa, gasto e conta a pagar vão cada um para o lugar certo.
 4. O AXEL sugere o que fazer agora e diz o motivo. Você decide se segue.
 
+### Modo aventura
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/rpg-escuro.png" />
+    <img src="docs/images/app/rpg.png" alt="Modo aventura como convidado: nível, moedas e o caminho do AXEL" width="240" />
+  </picture>
+</p>
+
+O modo aventura é opcional. Ele liga em Preferências. O print é do app real, como convidado, com o modo já ligado.
+
+No topo ficam o nível, a forma e as moedas. As moedas não são dinheiro: servem só para a aparência. O AXEL começa broto, vira flor no nível 2 e girassol no nível 5. Embaixo, ele anda um caminho e os hábitos do dia ficam no palco. Humor, água ou tarefa concluída dão um passo. Um dia em branco não apaga o que já foi feito. A carta do dia e as missões aparecem para todo mundo e podem ser fechadas.
+
+### Formas e roupas
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/formas-escuro.png" />
+    <img src="docs/images/app/formas.png" alt="As três formas do AXEL e as roupas: laço, cachecol, óculos, chapéu e capa" width="240" />
+  </picture>
+</p>
+
+Em Seu AXEL dá para ver as três formas e as roupas. Cada peça custa 40 moedas. Comprar não tira nível nem as peças que você já tem. Toque de novo para tirar a peça do corpo.
+
+### Hábitos
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/habitos-escuro.png" />
+    <img src="docs/images/app/habitos.png" alt="Hábitos com a semana marcada, como caminhar e um dia sem bebida" width="240" />
+  </picture>
+</p>
+
+Um hábito é uma marca no dia. A fileira mostra os últimos sete dias. Faltar um dia não apaga os dias já marcados. No modo aventura, os hábitos também aparecem no palco da Home.
+
+### Meta longa
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/meta-longa-escuro.png" />
+    <img src="docs/images/app/meta-longa.png" alt="Meta de um ano sem beber, com a faixa de dias" width="240" />
+  </picture>
+</p>
+
+Uma meta importante conta os dias a partir da data em que você começou. Um ano sem beber, noventa dias ou um mês. A faixa enche sozinha. Dá para deixar o cartão na Home. Recomeçar volta a contagem para o dia 1 e não tira ponto, moeda nem as outras metas. Isso não é a meta de dinheiro da Carteira.
+
 ### Tarefas
 
 <p align="center">
@@ -133,7 +183,7 @@ O **Mais** fica no canto da tela inicial. Lá estão o perfil, as preferências,
   <img src="docs/images/app/login.png" alt="Tela de entrada, com a opção de continuar como convidado" width="240" />
 </p>
 
-Na primeira vez, os passos iniciais perguntam o nome, o ícone, o que você quer usar e explicam estas seções. Dá para pular e completar depois em Preferências. Quem só quer olhar toca em **Continuar como convidado** e vê dados de exemplo.
+Na primeira vez, os passos iniciais perguntam o nome, o ícone, o que você quer usar e explicam estas seções. Dá para pular e completar depois em Preferências. Quem só quer olhar toca em **Só quero explorar, sem conta** e vê dados de exemplo.
 
 ## Como funciona na prática
 
@@ -288,7 +338,7 @@ Identidade visual: as quatro cores do ícone (petróleo `#1F3A3D`, menta `#B9CFC
 
 ## Rodar no computador
 
-Para só usar, o link do topo com **Continuar como convidado** basta. Esta parte é para quem vai mexer no código.
+Para só usar, o link do topo com **Só quero explorar, sem conta** basta. Esta parte é para quem vai mexer no código.
 
 Requisitos: [Node.js](https://nodejs.org) 20 ou mais novo e um projeto gratuito no [Supabase](https://supabase.com). Para o `backend/`, Python 3.11 ou mais novo e `pip install -r backend/requirements.txt`.
 
@@ -317,6 +367,7 @@ Com o app rodando no navegador:
 ```bash
 node scripts/readme-shots.mjs   # telas principais
 node scripts/readme-flow.mjs    # passo a passo de uso
+node scripts/readme-rpg.mjs     # modo aventura, como convidado
 ```
 
 <p align="center">

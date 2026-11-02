@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { View } from 'react-native'
-import { localTodayIso } from '@simply-life/shared'
+import { axelForm, axelFormLabel, localTodayIso } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { usePlayStore } from '../../store/playStore'
@@ -54,7 +54,7 @@ export function AdventureHud()
         <Bar pct={energy} color={colors.health} track={colors.fill} />
         <Bar pct={pct} color={colors.axelFill} track={colors.fill} />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
-          <Text variant="caption" muted>Nível {level}</Text>
+          <Text variant="caption" muted>Nível {level}, {axelFormLabel(axelForm(level))}</Text>
           <Text variant="caption" muted>{gold} moedas</Text>
         </View>
       </View>

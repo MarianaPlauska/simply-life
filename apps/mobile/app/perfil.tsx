@@ -239,6 +239,18 @@ export default function PerfilScreen()
             onPress={() => router.push('/cartas' as never)}
           />
           <ProfileSettingsRow
+            icon="flag-outline"
+            label="Metas importantes"
+            value="Dias de uma promessa"
+            onPress={() => router.push('/metas-vida' as never)}
+          />
+          <ProfileSettingsRow
+            icon="checkbox-outline"
+            label="Hábitos"
+            value="Dias marcados"
+            onPress={() => router.push('/habitos' as never)}
+          />
+          <ProfileSettingsRow
             icon="flame-outline"
             label="Elo"
             value="Dias seguidos"

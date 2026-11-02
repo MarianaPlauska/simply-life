@@ -166,7 +166,7 @@ export default function DashboardScreenWeb()
                 { label: 'Apoio do dia', subtitle: 'Energia, burnout, lugares e espera de gasto', href: '/apoio' },
                 { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
                 { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
-                { label: 'Seu AXEL', subtitle: 'Como funciona, o jogo e os ícones', href: '/seu-axel' },
+                { label: 'Seu AXEL', subtitle: 'Formas, roupas e o jogo', href: '/seu-axel' },
                 { label: 'Mais do dia', subtitle: 'Plano, mapas e resumos', href: '/mais-do-dia' },
                 { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
                 { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
@@ -178,13 +178,13 @@ export default function DashboardScreenWeb()
                 { label: 'Relatório', subtitle: 'Tudo de um período, em PDF', href: '/relatorio' },
                 { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
               ] as const
-            ).map((item, i, arr) => (
+            ).map((item) => (
               <ListRow
                 key={item.href}
                 title={item.label}
                 subtitle={item.subtitle}
                 right="›"
-                showSeparator={i < arr.length - 1}
+                showSeparator
                 onPress={() =>
                 {
                   setMenuOpen(false)
@@ -192,6 +192,27 @@ export default function DashboardScreenWeb()
                 }}
               />
             ))}
+            <ListRow
+              title="Hábitos"
+              subtitle="Marque o dia. A semana fica na fileira."
+              right="›"
+              showSeparator
+              onPress={() =>
+              {
+                setMenuOpen(false)
+                router.push('/habitos' as never)
+              }}
+            />
+            <ListRow
+              title="Metas importantes"
+              subtitle="Um ano sem beber, se for o seu caso."
+              right="›"
+              onPress={() =>
+              {
+                setMenuOpen(false)
+                router.push('/metas-vida' as never)
+              }}
+            />
           </Card>
           <MoreMenuExit
             onClose={() => setMenuOpen(false)}

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { axelFace, humorDoDia, localTodayIso } from '@simply-life/shared'
+import { axelFace, axelForm, humorDoDia, localTodayIso } from '@simply-life/shared'
 import { AxelSun } from '../AxelSun'
 import { useDataStore } from '../../store/dataStore'
 import { usePlayStore } from '../../store/playStore'
 import { usePrefsStore } from '../../store/prefsStore'
+import { gamificationLevel, useGamificationStore } from '../../store/gamificationStore'
 
 /** O girassol com a cara do dia e o acessório equipado. */
 export function AxelFaceSun({ size = 40 }: { size?: number })
@@ -13,6 +14,8 @@ export function AxelFaceSun({ size = 40 }: { size?: number })
   const habits = useDataStore((s) => s.habits) ?? []
   const party = usePlayStore((s) => s.party)
   const accessory = usePrefsStore((s) => s.prefs.axel_accessory)
+  const totalXp = useGamificationStore((s) => s.totalXp)
+  const { level } = gamificationLevel(totalXp)
   const [hour, setHour] = useState(() => new Date().getHours())
   useEffect(() =>
   {
@@ -30,5 +33,5 @@ export function AxelFaceSun({ size = 40 }: { size?: number })
     loggedToday,
     celebrating: Boolean(party),
   })
-  return <AxelSun size={size} mood={mood} accessory={accessory} />
+  return <AxelSun size={size} mood={mood} accessory={accessory} form={axelForm(level)} />
 }

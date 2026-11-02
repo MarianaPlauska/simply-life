@@ -29,7 +29,33 @@ export const AXEL_ACCESSORIES: AxelAccessory[] = [
   { id: 'laco', label: 'Laço', coins: 40 },
   { id: 'cachecol', label: 'Cachecol', coins: 40 },
   { id: 'oculos', label: 'Óculos', coins: 40 },
+  { id: 'chapeu', label: 'Chapéu', coins: 40 },
+  { id: 'capa', label: 'Capa', coins: 40 },
 ]
+
+export type AxelForm = 'broto' | 'flor' | 'girassol'
+
+/** A forma acompanha o nível. Não muda ponto, moeda nem o que ela já tem. */
+export function axelForm(level: number): AxelForm
+{
+  if (level >= 5) return 'girassol'
+  if (level >= 2) return 'flor'
+  return 'broto'
+}
+
+export function axelFormLabel(form: AxelForm): string
+{
+  if (form === 'girassol') return 'Girassol'
+  if (form === 'flor') return 'Flor'
+  return 'Broto'
+}
+
+export function axelFormNext(level: number): string | null
+{
+  if (level < 2) return 'No nível 2 ele vira flor.'
+  if (level < 5) return 'No nível 5 ele vira girassol.'
+  return 'Esta é a forma completa.'
+}
 
 export type ChestPrize =
   | { kind: 'gold'; amount: number }

@@ -13,6 +13,8 @@ import { pingPresence } from '../src/lib/presence'
 import { useFocusPresence } from '../src/hooks/useFocusPresence'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { usePlayStore } from '../src/store/playStore'
+import { useLifePledgeStore } from '../src/store/lifePledgeStore'
+import { useHabitTrackStore } from '../src/store/habitTrackStore'
 import { useActivityStore } from '../src/store/activityStore'
 import { useCareExtrasStore } from '../src/store/careExtrasStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -42,6 +44,8 @@ function RootNavigator()
   const prefsLoaded = usePrefsStore((s) => s.loaded)
   const hydrateXp = useGamificationStore((s) => s.hydrate)
   const hydratePlay = usePlayStore((s) => s.hydrate)
+  const hydratePledges = useLifePledgeStore((s) => s.hydrate)
+  const hydrateHabits = useHabitTrackStore((s) => s.hydrate)
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const hydrateActivity = useActivityStore((s) => s.hydrate)
@@ -58,10 +62,12 @@ function RootNavigator()
     void hydrate()
     hydrateXp()
     hydratePlay()
+    hydratePledges()
+    hydrateHabits()
     hydrateActivity()
     void hydrateCare()
     registerServiceWorker()
-  }, [hydrate, hydrateXp, hydratePlay, hydrateActivity, hydrateCare])
+  }, [hydrate, hydrateXp, hydratePlay, hydratePledges, hydrateHabits, hydrateActivity, hydrateCare])
 
   useEffect(() =>
   {
@@ -175,6 +181,8 @@ function RootNavigator()
             />
             <Stack.Screen name="ofensiva" />
             <Stack.Screen name="cartas" />
+            <Stack.Screen name="metas-vida" />
+            <Stack.Screen name="habitos" />
             <Stack.Screen name="relatorio" />
             <Stack.Screen name="juntos" />
             <Stack.Screen name="colecao" />

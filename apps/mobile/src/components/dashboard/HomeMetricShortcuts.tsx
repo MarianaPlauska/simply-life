@@ -7,6 +7,8 @@ import {
   monthExpenseTotal,
   moodLabel,
   AGUA_META_COPOS,
+  localTodayIso,
+  pledgeProgress,
 } from '@simply-life/shared'
 import { useAuthStore } from '../../store/authStore'
 import { useCaptureStore } from '../../store/captureStore'
@@ -16,6 +18,7 @@ import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '..
 import { useTheme } from '../../theme/ThemeProvider'
 import { HomeQuickActions, type HomeShortcut } from './HomeQuickActions'
 import { filterMetrics } from '../../lib/appModules'
+import { useLifePledgeStore } from '../../store/lifePledgeStore'
 
 function tintFor(id: HomeMetricId, colors: {
   health: string
@@ -46,6 +49,10 @@ function tintFor(id: HomeMetricId, colors: {
   {
     return colors.attention
   }
+  if (id === 'pledge')
+  {
+    return colors.health
+  }
   return colors.axelFill
 }
 
@@ -70,6 +77,10 @@ function iconFor(id: HomeMetricId): HomeShortcut['icon']
   if (id === 'finance')
   {
     return 'wallet-outline'
+  }
+  if (id === 'pledge')
+  {
+    return 'flag-outline'
   }
   if (id === 'stats')
   {
@@ -114,6 +125,8 @@ export function HomeMetricShortcuts()
   ).length
   const gastosMes = monthExpenseTotal(finance) ?? 0
   const habitsDone = habits.filter((h) => h.progressoAtual >= (h.metaDiaria || 1)).length
+  const pledges = useLifePledgeStore((s) => s.pledges)
+  const pinnedPledge = pledges.find((p) => p.pinned) ?? pledges[0]
 
   const actions = useMemo((): HomeShortcut[] =>
   {
@@ -150,6 +163,12 @@ export function HomeMetricShortcuts()
       if (id === 'sleep')
       {
         return sono && sono.progressoAtual > 0 ? formatSleepHours(sono.progressoAtual) : '-'
+      }
+      if (id === 'pledge')
+      {
+        if (!pinnedPledge) return 'Começar'
+        const progress = pledgeProgress(pinnedPledge.startedOn, pinnedPledge.targetDays, localTodayIso())
+        return `${progress.elapsed}/${progress.target}`
       }
       const total = doneToday + todayOpen
       if (habits.length > 0)
@@ -189,6 +208,10 @@ export function HomeMetricShortcuts()
       {
         return () => router.push('/(tabs)/saude')
       }
+      if (id === 'pledge')
+      {
+        return () => router.push('/metas-vida' as never)
+      }
       return () => router.push('/(tabs)/financeiro')
     }
 
@@ -221,6 +244,7 @@ export function HomeMetricShortcuts()
     isGuest,
     openCapture,
     router,
+    pinnedPledge,
   ])
 
   return (

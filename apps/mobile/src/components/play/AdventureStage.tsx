@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import { View } from 'react-native'
-import { localTodayIso } from '@simply-life/shared'
+import { axelForm, axelFormLabel, axelFormNext, localTodayIso } from '@simply-life/shared'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { usePlayStore } from '../../store/playStore'
 import { useNeuroStore } from '../../store/neuroStore'
 import { useDataStore } from '../../store/dataStore'
 import { AxelFaceSun } from './AxelFaceSun'
+import { HabitQuest } from './HabitQuest'
+import { gamificationLevel, useGamificationStore } from '../../store/gamificationStore'
 
 /** Caminho do dia. O peso afina quando ela registra. Sem monstro e sem perda. */
 export function AdventureStage()
 {
   const { colors } = useTheme()
   const energy = usePlayStore((s) => s.energy)
+  const totalXp = useGamificationStore((s) => s.totalXp)
+  const { level } = gamificationLevel(totalXp)
   const quiet = useNeuroStore((s) => s.quietCelebrations)
   const humor = useDataStore((s) => s.humor) ?? []
   const tasks = useDataStore((s) => s.tasks) ?? []
@@ -42,8 +46,8 @@ export function AdventureStage()
   const mist = Math.max(0, (100 - energy) / 100) * 0.45
 
   return (
-    <View style={{ width: '100%', alignSelf: 'stretch', height: 180, justifyContent: 'flex-end', gap: 8 }}>
-      <View style={{ height: 120, justifyContent: 'flex-end' }}>
+    <View accessibilityLabel="Palco do AXEL" style={{ width: '100%', alignSelf: 'stretch', gap: 8 }}>
+      <View style={{ height: 150, justifyContent: 'flex-end' }}>
         <View
           pointerEvents="none"
           style={{
@@ -58,17 +62,16 @@ export function AdventureStage()
           }}
         />
         <View style={{ marginLeft: 12 + steps * 36 + shift, marginBottom: 4 }}>
-          <AxelFaceSun size={56} />
+          <AxelFaceSun size={84} />
         </View>
         <View style={{ height: 4, borderRadius: 99, backgroundColor: colors.hairline, overflow: 'hidden' }}>
           <View style={{ width: `${(steps / 3) * 100}%`, height: '100%', backgroundColor: colors.axelFill }} />
         </View>
       </View>
-      {hour >= 22 && energy < 100 ? (
-        <Text variant="caption" muted>O AXEL está cansado. Amanhã a energia volta.</Text>
-      ) : (
-        <Text variant="caption" muted>Cada registro anda um passo. O dia em branco não apaga nada.</Text>
-      )}
+      <Text variant="caption" muted>
+        Forma: {axelFormLabel(axelForm(level))}. {axelFormNext(level)} {hour >= 22 && energy < 100 ? 'O AXEL está cansado. Amanhã a energia volta.' : 'Cada registro anda um passo.'}
+      </Text>
+      <HabitQuest />
     </View>
   )
 }

@@ -120,7 +120,7 @@ describe('AXEL', () =>
 
   it('o baú não devolve um acessório que ela já tem', () =>
   {
-    const prize = pickChestPrize('2026-11-02', ['laco', 'cachecol', 'oculos'])
+    const prize = pickChestPrize('2026-11-02', ['laco', 'cachecol', 'oculos', 'chapeu', 'capa'])
     expect(prize.kind).toBe('gold')
   })
 })

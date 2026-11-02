@@ -1,6 +1,6 @@
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { UNLOCKS, isUnlocked } from '@simply-life/shared'
+import { UNLOCKS, axelForm, isUnlocked } from '@simply-life/shared'
 import { Screen, Text, GroupedList, GroupedRow, RowGlyph } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { AxelSun } from '../src/components/AxelSun'
@@ -11,6 +11,7 @@ import { gamificationLevel, useGamificationStore } from '../src/store/gamificati
 import { useElo } from '../src/hooks/useElo'
 import { resolveAxelName } from '../src/lib/axelName'
 import { useAuthStore } from '../src/store/authStore'
+import { AxelWardrobe } from '../src/components/play/AxelWardrobe'
 
 const PARTES = [
   {
@@ -76,7 +77,7 @@ export default function SeuAxelScreen()
 
       <View style={{ gap: space.lg }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <AxelSun size={72} mood="calm" />
+            <AxelSun size={72} mood="calm" form={axelForm(level)} accessory={prefs.axel_accessory} />
           <View style={{ flex: 1, gap: 4 }}>
             <Text variant="section">{name}</Text>
             <Text variant="caption" muted>
@@ -102,6 +103,8 @@ export default function SeuAxelScreen()
             ))}
           </GroupedList>
         </View>
+
+        <AxelWardrobe />
 
         <View style={{ gap: 8 }}>
           <Text variant="caption" muted style={{ marginLeft: 4 }}>
@@ -138,6 +141,20 @@ export default function SeuAxelScreen()
               subtitle="Conta dias seguidos com alguma ação. Um descanso por semana não quebra. Ficar sem abrir o app não tira ponto."
               subtitleLines={3}
               onPress={() => router.push('/ofensiva')}
+            />
+            <GroupedRow
+              leading={<RowGlyph name="checkbox" color={colors.health} />}
+              title="Hábitos"
+              subtitle="Marque o dia em que fez. A fileira mostra a semana. Faltar um dia não apaga os outros."
+              subtitleLines={2}
+              onPress={() => router.push('/habitos' as never)}
+            />
+            <GroupedRow
+              leading={<RowGlyph name="flag" color={colors.health} />}
+              title="Metas importantes"
+              subtitle="Um ano sem beber, se for o seu caso. Os dias contam sozinhos e dá para deixar uma na Home."
+              subtitleLines={2}
+              onPress={() => router.push('/metas-vida' as never)}
             />
             <GroupedRow
               title={calm ? 'Modo calmo ligado' : 'Modo aventura ligado'}
