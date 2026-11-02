@@ -281,6 +281,9 @@ export default function DashboardScreen()
               doneToday={doneToday}
             />
 
+            {/* Atalhos logo abaixo da busca, como as categorias de um app de entrega */}
+            <HomeMetricShortcuts />
+
             <HomeKpiSquares items={kpiItems} />
 
             {showMorningRitual ? (
@@ -290,9 +293,8 @@ export default function DashboardScreen()
               />
             ) : null}
 
-            {/* Rótulo pequeno sobre cada grupo, como as seções de lista do Android */}
-            <View style={{ gap: 8 }}>
-              <Text variant="caption" muted style={{ marginLeft: 4 }}>Seu dia</Text>
+            <View style={{ gap: 12 }}>
+              <Text variant="section">Seu dia</Text>
               <View style={{ gap: 12 }}>
                 <AxelDayBrief />
                 <DayPlanHomeCard />
@@ -302,8 +304,8 @@ export default function DashboardScreen()
             </View>
 
             {showCareSection ? (
-              <View style={{ gap: 8 }}>
-                <Text variant="caption" muted style={{ marginLeft: 4 }}>Cuidar de você</Text>
+              <View style={{ gap: 12 }}>
+                <Text variant="section">Cuidar de você</Text>
                 <View style={{ gap: 12 }}>
                   {waterOnHome ? <HomeWaterProgressCard /> : null}
                   {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
@@ -314,11 +316,10 @@ export default function DashboardScreen()
             {rpgMode ? <HomeRpgStrip /> : null}
 
             {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" defaultOpen={false}>
+            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia e mapa de dias" defaultOpen={false}>
               <View style={{ gap: 24, paddingTop: 8 }}>
                 <HomeDayTimeline tasks={today} />
                 <EloHeatmap semanas={12} compact />
-                <HomeMetricShortcuts />
               </View>
             </HomeCollapsible>
           </>

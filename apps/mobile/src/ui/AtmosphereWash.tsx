@@ -36,16 +36,9 @@ export function AtmosphereWash()
     )
   }
 
+  // escuro: fundo liso (o degradê ate o surface apagava os cartoes na parte de baixo)
   return (
     <>
-      <LinearGradient
-        pointerEvents="none"
-        colors={[colors.canvas, colors.surface, colors.surface]}
-        locations={showRail ? [0, 0.5, 1] : [0, 0.45, 1]}
-        start={{ x: 0.5, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
       <LinearGradient
         pointerEvents="none"
         colors={['rgba(31, 58, 61, 0.55)', 'rgba(31, 58, 61, 0.12)', 'transparent']}

@@ -2,7 +2,7 @@
   "expo": {
     "name": "SunFy",
     "slug": "simply-life",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "runtimeVersion": {
       "policy": "appVersion"
@@ -30,7 +30,8 @@
         "backgroundColor": "#1F3A3D"
       },
       "package": "app.sunfy",
-      "versionCode": 1
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -69,7 +70,25 @@
           "defaultChannel": "default"
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "SunFyHoje",
+              "label": "SunFy - Hoje",
+              "description": "Água, humor e próxima tarefa sem abrir o app",
+              "minWidth": "250dp",
+              "minHeight": "160dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

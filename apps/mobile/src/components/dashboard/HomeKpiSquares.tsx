@@ -1,6 +1,6 @@
 import { View, Pressable } from 'react-native'
 import { Icon } from '../../ui/Icon'
-import { Text, IconBadge, GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { Text, IconBadge } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 
@@ -14,30 +14,13 @@ export type KpiSquare = {
   onPress?: () => void
 }
 
-/** Celular: lista agrupada (padrão iOS/Android). Desktop: quatro na linha. */
+/** Celular: grade 2x2 de cartoes. Desktop: quatro na linha. */
 export function HomeKpiSquares({ items }: { items: KpiSquare[] })
 {
-  const { colors } = useTheme()
+  const { colors, elevation } = useTheme()
   const workspace = useWorkspace()
   const dense = Boolean(workspace.isDesktop)
   const list = items.slice(0, 4)
-
-  if (!dense)
-  {
-    return (
-      <GroupedList>
-        {list.map((item) => (
-          <GroupedRow
-            key={item.id}
-            leading={<RowGlyph name={item.icon} color={item.color} />}
-            title={item.label}
-            value={item.value}
-            onPress={item.onPress}
-          />
-        ))}
-      </GroupedList>
-    )
-  }
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
@@ -48,10 +31,10 @@ export function HomeKpiSquares({ items }: { items: KpiSquare[] })
           disabled={!item.onPress}
           style={({ pressed }) => ({
             flexGrow: 1,
-            flexBasis: '22%',
-            width: '23%',
-            minHeight: 96,
-            borderRadius: 14,
+            flexBasis: dense ? '22%' : '46%',
+            width: dense ? '23%' : '47%',
+            minHeight: dense ? 96 : 108,
+            borderRadius: 16,
             padding: 16,
             gap: 12,
             backgroundColor: colors.elevated,
@@ -59,6 +42,7 @@ export function HomeKpiSquares({ items }: { items: KpiSquare[] })
             borderColor: colors.cardRim,
             justifyContent: 'space-between',
             opacity: pressed ? 0.85 : 1,
+            ...(dense ? null : elevation.card),
           })}
         >
           <IconBadge name={item.icon} color={item.color} size={36} iconSize={18} />

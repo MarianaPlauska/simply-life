@@ -1,4 +1,4 @@
-import { Platform } from 'react-native'
+import { Appearance, Platform } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
 import { parseNotifyCadence, type NotifyCadence } from '@simply-life/shared'
 import { supabase, supabaseConfigured } from '../supabase'
@@ -241,7 +241,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
   const scheme =
     parseColorScheme(raw?.color_scheme)
     ?? readColorSchemeSync()
-    ?? DEFAULT_WORKSPACE_PREFS.color_scheme
+    ?? (Appearance.getColorScheme() === 'dark' ? 'dark' : 'light')
   return {
     ...DEFAULT_WORKSPACE_PREFS,
     ...raw,
@@ -320,9 +320,11 @@ export async function loadWorkspacePrefs(): Promise<WorkspacePrefs>
       .maybeSingle()
     if (error) throw error
 
+    // tema e do aparelho: a escolha feita no login nao pode ser trocada pela da conta
     const merged = mergePrefs({
       ...local,
       ...(data?.prefs as Partial<WorkspacePrefs> | undefined),
+      ...(local?.color_scheme ? { color_scheme: local.color_scheme } : null),
     })
     writeLocal(merged)
     return merged

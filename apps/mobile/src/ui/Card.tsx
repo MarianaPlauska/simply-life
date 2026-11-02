@@ -37,7 +37,7 @@ export function Card({ children, style, tone = 'default', accentTop, bare, ...re
     ? colors.featureBg
     : inset
       ? colors.canvas
-      : elevated || hero
+      : elevated || hero || mode === 'dark'
         ? colors.elevated
         : colors.surface
 

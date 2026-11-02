@@ -47,7 +47,8 @@ export const usePrefsStore = create<PrefsState>((set, get) => ({
   {
     set({
       loaded: false,
-      prefs: DEFAULT_WORKSPACE_PREFS,
+      // sair da conta nao troca o tema do aparelho
+      prefs: { ...DEFAULT_WORKSPACE_PREFS, color_scheme: get().prefs.color_scheme },
       keywords: [],
       radar: [],
     })
