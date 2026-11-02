@@ -86,7 +86,7 @@ export function demoFinanceCards(): FinanceCard[]
   return [
     {
       id: 'c1',
-      nome: 'Nubank',
+      nome: 'Cartão lilás',
       limite: 8000,
       diaVencimento: 12,
       status: 'ativo',
@@ -98,7 +98,7 @@ export function demoFinanceCards(): FinanceCard[]
     },
     {
       id: 'c2',
-      nome: 'Inter',
+      nome: 'Cartão azul',
       limite: 3500,
       diaVencimento: 5,
       status: 'ativo',
@@ -120,26 +120,26 @@ export function isDemoFinanceCard(card: Pick<FinanceCard, 'id'>): boolean
 export function demoContasFixas(): ContaFixa[]
 {
   return [
-    { id: 1, nome: 'Aluguel', valor: 2200, diaVencimento: 5, categoria: 'habitacao', ativa: true },
-    { id: 2, nome: 'Internet', valor: 120, diaVencimento: 10, categoria: 'outros', ativa: true },
-    { id: 3, nome: 'Academia', valor: 99, diaVencimento: 15, categoria: 'saude', ativa: true },
+    { id: 1, nome: 'Aluguel do quiosque', valor: 90, diaVencimento: 5, categoria: 'habitacao', ativa: true },
+    { id: 2, nome: 'Revista mensal', valor: 19, diaVencimento: 10, categoria: 'outros', ativa: true },
+    { id: 3, nome: 'Aula de origami', valor: 33, diaVencimento: 15, categoria: 'saude', ativa: true },
   ]
 }
 
 export function demoContasAPagar(): ContaAPagar[]
 {
   return [
-    { id: 1, titulo: 'Energia', valor: 185, vencimento: '2026-09-05', status: 'aberta' },
-    { id: 2, titulo: 'Cartão Nubank', valor: 1240, vencimento: '2026-09-12', status: 'aberta' },
-    { id: 3, titulo: 'Condomínio', valor: 420, vencimento: '2026-08-28', status: 'paga' },
+    { id: 1, titulo: 'Luz do galpão', valor: 47, vencimento: '2026-09-05', status: 'aberta' },
+    { id: 2, titulo: 'Fatura do cartão lilás', valor: 86, vencimento: '2026-09-12', status: 'aberta' },
+    { id: 3, titulo: 'Taxa do clube de xadrez', valor: 25, vencimento: '2026-08-28', status: 'paga' },
   ]
 }
 
 export function demoFinanceGoals(): FinanceGoal[]
 {
   return [
-    { id: 1, titulo: 'Reserva de emergência', meta: 15000, atual: 6200 },
-    { id: 2, titulo: 'Viagem', meta: 5000, atual: 1800 },
+    { id: 1, titulo: 'Estante de quadrinhos', meta: 400, atual: 80 },
+    { id: 2, titulo: 'Viagem de barco', meta: 260, atual: 40 },
   ]
 }
 

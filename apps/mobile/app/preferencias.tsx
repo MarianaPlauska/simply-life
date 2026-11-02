@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { View, TextInput, Platform } from 'react-native'
+import { View, TextInput, Platform, Linking } from 'react-native'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import {
   CARE_PACE_OPTIONS,
@@ -37,6 +37,7 @@ import {
   type AppModuleId,
 } from '../src/lib/appModules'
 import { registerExpoPushAsync, unregisterExpoPushAsync } from '../src/lib/pushRegister'
+import { sendTestAlert } from '../src/lib/pushNotifications'
 import { ModulePicker } from '../src/components/onboarding/ModulePicker'
 import { OnbBlock } from '../src/components/onboarding/OnbStep'
 import { OnbChoice } from '../src/components/onboarding/OnbChoice'
@@ -357,29 +358,55 @@ export default function PreferenciasScreen()
                   onPress={() =>
                   {
                     const next = opt.id as NotifyCadence
-                    void patch({ notify_cadence: next }).then(() =>
+                    const where = Platform.OS === 'web' ? 'neste navegador' : 'no celular'
+                    // web: pedir permissão já, ainda dentro do toque (o Safari exige)
+                    const action = next === 'off' ? unregisterExpoPushAsync() : registerExpoPushAsync(true)
+                    void patch({ notify_cadence: next })
+                    void Promise.resolve(action).then((res) =>
                     {
-                      if (Platform.OS === 'web')
-                      {
-                        setPushMsg('No celular, o ritmo passa a valer depois de abrir o app instalado.')
-                        return
-                      }
                       if (next === 'off')
                       {
-                        void unregisterExpoPushAsync().then(() => setPushMsg('Alertas no celular desligados.'))
+                        setPushMsg(`Alertas ${where} desligados.`)
                         return
                       }
-                      void registerExpoPushAsync().then((res) =>
-                      {
-                        setPushMsg(res.ok
-                          ? 'Ritmo salvo. O sistema pode pedir permissão uma vez.'
-                          : (res.error || 'Autorize as notificações nas configurações do sistema.'))
-                      })
+                      const r = res as { ok: boolean; error?: string }
+                      setPushMsg(r.ok
+                        ? 'Ritmo salvo. O sistema pode pedir permissão uma vez.'
+                        : (r.error || 'Autorize as notificações nas configurações do sistema.'))
                     })
                   }}
                 />
               ))}
               {pushMsg ? <Text variant="caption">{pushMsg}</Text> : null}
+              <PrimaryButton
+                label="Testar aviso agora"
+                variant="secondary"
+                onPress={() =>
+                {
+                  if (Platform.OS === 'web')
+                  {
+                    setPushMsg('Aviso de verdade só chega no app instalado no celular.')
+                    return
+                  }
+                  void sendTestAlert().then((ok) =>
+                  {
+                    setPushMsg(ok
+                      ? 'Aviso enviado. Se o celular estiver no Não perturbe e não tocar, abra os ajustes e deixe o canal Avisos do SunFy passar.'
+                      : 'O celular ainda não autorizou avisos. Toque em abrir ajustes e permita notificações.')
+                  })
+                }}
+              />
+              {Platform.OS === 'android' ? (
+                <PrimaryButton
+                  label="Deixar passar no Não perturbe"
+                  variant="ghost"
+                  onPress={() =>
+                  {
+                    void Linking.sendIntent('android.settings.NOTIFICATION_POLICY_ACCESS_SETTINGS').catch(() =>
+                      Linking.openSettings())
+                  }}
+                />
+              ) : null}
             </OnbBlock>
             <OnbBlock
               title="Aviso antes de gastar"

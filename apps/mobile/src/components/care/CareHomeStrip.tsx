@@ -70,7 +70,7 @@ export function CareHomeStrip()
   }, [tasks, events, today])
 
   const budget = energyBudget(used, stock)
-  const humorToday = humor.filter((item) => item.data.slice(0, 10) === today)
+  const humorToday = humor.filter((item) => (item.data ?? '').slice(0, 10) === today)
   const humorLow = humorToday.some((item) => item.humor <= 2)
   const suggestion = suggestedEnergyStock(stock, { humorLow, manyHigh: used > stock })
   const agua = findHabit(habits, 'agua')

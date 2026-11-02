@@ -284,8 +284,8 @@ export default function PerfilScreen()
             <ProfileSettingsRow
               icon="shield-checkmark-outline"
               iconNode={<ShieldCheck size={18} color={colors.axel} />}
-              label="Admin"
-              value="Usuários"
+              label="Pessoas no app"
+              value="Quem está conectado"
               onPress={() => setSheet('admin')}
             />
           ) : null}

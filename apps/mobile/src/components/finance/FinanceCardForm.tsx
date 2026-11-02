@@ -65,7 +65,7 @@ export function validateCardDraft(d: CardDraft): string | null
 {
   const lim = parseMoney(d.limite)
   const dia = Number(d.dia)
-  if (!d.nome.trim()) return 'Dê um nome ao cartão, por exemplo Nubank.'
+  if (!d.nome.trim()) return 'Dê um nome ao cartão, por exemplo Cartão do dia a dia.'
   if (!Number.isFinite(lim) || lim <= 0) return 'Informe o limite do cartão.'
   if (!Number.isInteger(dia) || dia < 1 || dia > 28) return 'O vencimento precisa ser um dia entre 1 e 28.'
   if (d.validade && !/^(0[1-9]|1[0-2])\/\d{2}$/.test(d.validade)) return 'Validade no formato MM/AA, por exemplo 08/29.'
@@ -174,7 +174,7 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
         </View>
       </View>
 
-      <Field label="Nome do cartão" value={d.nome} onChangeText={(t) => set('nome', t)} placeholder="Nubank" />
+      <Field label="Nome do cartão" value={d.nome} onChangeText={(t) => set('nome', t)} placeholder="Cartão do dia a dia" />
       <Field
         label="Limite"
         keyboardType="decimal-pad"

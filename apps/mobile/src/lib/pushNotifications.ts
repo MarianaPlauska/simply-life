@@ -37,6 +37,12 @@ export async function setNativeAndroidChannel(): Promise<void>
 {
 }
 
+/** Web não dispara aviso do sistema. */
+export async function sendTestAlert(): Promise<boolean>
+{
+  return false
+}
+
 /** Web: sem notificação local agendada (o card da noite aparece na Home). */
 export async function scheduleEveningPlanReminder(_hour: number, _minute: number): Promise<boolean>
 {

@@ -100,12 +100,12 @@ export function MedicamentosPanel()
 
       {adding || total === 0 ? (
       <HealthScreenSection dividerTop title="Novo medicamento">
-        <Field label="Nome" value={nome} onChangeText={setNome} placeholder="Vitamina D" />
+        <Field label="Nome" value={nome} onChangeText={setNome} placeholder="Xarope de exemplo" />
         <Field
           label="Horário (HH:MM)"
           value={horario}
           onChangeText={setHorario}
-          placeholder="08:00"
+          placeholder="09:40"
         />
         {error ? (
           <Text variant="caption" color={colors.danger}>

@@ -3,6 +3,15 @@ import { Platform } from 'react-native'
 
 const AXEL_CATEGORY = 'axel-actions'
 
+/** Canal novo: o canal "default" já criado não aceita mudar o Não perturbe. */
+const ALERT_CHANNEL = 'sunfy-avisos'
+
+function withAlertChannel(trigger: Notifications.NotificationTriggerInput): Notifications.NotificationTriggerInput
+{
+  if (Platform.OS !== 'android' || !trigger) return trigger
+  return { ...trigger, channelId: ALERT_CHANNEL } as Notifications.NotificationTriggerInput
+}
+
 function readData(notification: Notifications.Notification): {
   url: string | null
   actionToken: string | null
@@ -55,7 +64,37 @@ export async function setNativeAndroidChannel(): Promise<void>
     name: 'SunFy',
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
+    sound: 'default',
   })
+  await Notifications.setNotificationChannelAsync(ALERT_CHANNEL, {
+    name: 'Avisos do SunFy',
+    importance: Notifications.AndroidImportance.MAX,
+    vibrationPattern: [0, 280, 180, 280],
+    sound: 'default',
+    bypassDnd: true,
+    enableVibrate: true,
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  })
+}
+
+/** Aviso imediato para a pessoa confirmar que o celular recebeu. */
+export async function sendTestAlert(): Promise<boolean>
+{
+  const granted = await requestNativePushPermission()
+  if (!granted) return false
+  await setNativeAndroidChannel()
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'SunFy',
+      body: 'Aviso de teste. No Não perturbe, o Android precisa deixar o canal Avisos do SunFy passar.',
+      sound: 'default',
+    },
+    trigger: withAlertChannel({
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 2,
+    }),
+  })
+  return true
 }
 
 export async function getNativeExpoPushToken(projectId?: string): Promise<string>
@@ -130,11 +169,11 @@ export async function scheduleEveningPlanReminder(hour: number, minute: number):
       body: 'Uns 3 minutos para o Axel deixar o seu amanhã do tamanho certo.',
       data: { url: '/planejar-amanha' },
     },
-    trigger: {
+    trigger: withAlertChannel({
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
       minute,
-    },
+    }),
   })
   return true
 }
@@ -158,7 +197,7 @@ export async function scheduleMorningFirstStep(when: Date, firstStep: string): P
       body: firstStep,
       data: { url: '/' },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+    trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: when }),
   })
 }
 
@@ -178,7 +217,10 @@ export async function scheduleFocusEnd(seconds: number, taskTitle: string | null
       body: taskTitle ? `${taskTitle}: pode parar aqui ou continuar mais um pouco.` : 'Pode parar aqui ou continuar mais um pouco.',
       data: { url: '/foco' },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: Math.round(seconds) },
+    trigger: withAlertChannel({
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: Math.round(seconds),
+    }),
   })
 }
 
@@ -207,7 +249,7 @@ export async function scheduleTransitionAlerts(alerts: { at: Date; title: string
     await Notifications.scheduleNotificationAsync({
       identifier: `${TRANSITION_PREFIX}${i}`,
       content: { title: a.title, body: a.body, data: { url: '/' } },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: a.at },
+      trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: a.at }),
     })
     i += 1
     if (i >= 20) break
@@ -222,7 +264,14 @@ export async function showStickyPlan(title: string, body: string): Promise<void>
   if (!perm.granted) return
   await Notifications.scheduleNotificationAsync({
     identifier: STICKY_ID,
-    content: { title, body, sticky: true, autoDismiss: false, data: { url: '/' } },
+    content: {
+      title,
+      body,
+      sticky: true,
+      autoDismiss: false,
+      data: { url: '/' },
+      ...(Platform.OS === 'android' ? { channelId: ALERT_CHANNEL } : {}),
+    },
     trigger: null,
   })
 }
@@ -259,7 +308,7 @@ export async function scheduleTaskReminder(input: {
       sound: input.quiet ? false : 'default',
       data: { url: `/task/${input.id}` },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: input.at },
+    trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: input.at }),
   })
   return true
 }

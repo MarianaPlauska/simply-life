@@ -22,6 +22,7 @@ import { TaskEvolveSheet } from '../src/components/kanban/TaskEvolveSheet'
 import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { SpendGuardHost } from '../src/components/finance/SpendGuardHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
+import { registerServiceWorker } from '../src/lib/webPush'
 import { useEloSync } from '../src/hooks/useEloSync'
 import { WebTopNav } from '../src/components/layout/WebTopNav'
 import { useWorkspace } from '../src/layout/useWorkspace'
@@ -30,7 +31,7 @@ import { useWorkspace } from '../src/layout/useWorkspace'
 void SplashScreen.preventAutoHideAsync().catch(() => undefined)
 
 /** Telas sem barra lateral: entrada, cadastro e telas de tela cheia */
-const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao', '/privacidade']
+const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao', '/privacidade', '/termos']
 
 function RootNavigator()
 {
@@ -56,6 +57,7 @@ function RootNavigator()
     hydrateXp()
     hydrateActivity()
     void hydrateCare()
+    registerServiceWorker()
   }, [hydrate, hydrateXp, hydrateActivity, hydrateCare])
 
   useEffect(() =>
@@ -162,6 +164,7 @@ function RootNavigator()
             <Stack.Screen name="calm/grounding" />
             <Stack.Screen name="sobrecarga" />
             <Stack.Screen name="lugares" />
+            <Stack.Screen name="apoio" />
             <Stack.Screen name="tcc/thought-record" />
             <Stack.Screen name="tcc/behavioral-activation" />
             <Stack.Screen name="tcc/gradual-exposure" />

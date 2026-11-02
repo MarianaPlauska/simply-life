@@ -773,7 +773,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     const parsed = opts?.lido && opts.lido.valor > 0
       ? { titulo: opts.lido.titulo.trim() || (opts.tipo === 'receita' ? 'Receita' : 'Gasto'), valor: opts.lido.valor }
       : parseExpenseQuick(text)
-    if (!parsed) return { ok: false, error: 'Informe valor, ex: café 12,50' }
+    if (!parsed) return { ok: false, error: 'Informe valor, ex: lanche 8,00' }
 
     const tipo = opts?.tipo === 'receita' ? 'receita' : 'despesa'
     const formaPagamento = opts?.formaPagamento

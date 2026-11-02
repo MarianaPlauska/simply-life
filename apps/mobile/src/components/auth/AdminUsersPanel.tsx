@@ -8,6 +8,45 @@ import { supabase, supabaseConfigured } from '../../lib/supabase'
 import { getApiBaseUrl } from '../../lib/apiBase'
 import { isUserConnected } from '@simply-life/shared'
 
+function sortDirectory(rows: AdminCard[]): AdminCard[]
+{
+  return [...rows].sort((a, b) =>
+  {
+    const ac = isUserConnected(a.last_seen_at) ? 1 : 0
+    const bc = isUserConnected(b.last_seen_at) ? 1 : 0
+    if (ac !== bc)
+    {
+      return bc - ac
+    }
+    return String(b.last_seen_at || b.last_sign_in_at || '').localeCompare(String(a.last_seen_at || a.last_sign_in_at || ''))
+  })
+}
+
+async function loadDirectoryFromApi(): Promise<AdminCard[] | null>
+{
+  const { data: session } = await supabase.auth.getSession()
+  const token = session.session?.access_token
+  if (!token) return null
+  try
+  {
+    const res = await fetch(`${getApiBaseUrl()}/api/axel/admin-users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ action: 'list' }),
+    })
+    if (!res.ok) return null
+    const body = (await res.json()) as { users?: AdminCard[] }
+    return Array.isArray(body.users) ? body.users : null
+  }
+  catch
+  {
+    return null
+  }
+}
+
 type AdminCard = {
   user_id: string
   email?: string | null
@@ -46,10 +85,17 @@ export function AdminUsersPanel()
   const load = useCallback(async () =>
   {
     if (!supabaseConfigured) return
+    const fromApi = await loadDirectoryFromApi()
+    if (fromApi)
+    {
+      setRows(sortDirectory(fromApi))
+      setMsg('')
+      return
+    }
     const rpc = await supabase.rpc('admin_list_directory')
     if (!rpc.error && Array.isArray(rpc.data))
     {
-      setRows(rpc.data as AdminCard[])
+      setRows(sortDirectory(rpc.data as AdminCard[]))
       return
     }
     const { data, error } = await supabase
@@ -61,7 +107,7 @@ export function AdminUsersPanel()
       setMsg(error.message)
       return
     }
-    setRows((data ?? []) as AdminCard[])
+    setRows(sortDirectory((data ?? []) as AdminCard[]))
   }, [])
 
   useEffect(() =>
@@ -148,7 +194,7 @@ export function AdminUsersPanel()
         </View>
       </View>
       <Text variant="caption" muted>
-        Contas que criaram login e estão com o app aberto aparecem como conectadas.
+        Toda conta aparece aqui. Quem está com o app aberto fica no topo, como conectada.
       </Text>
       {msg ? (
         <Text variant="caption" color={colors.axel}>

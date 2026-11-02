@@ -346,7 +346,7 @@ export default function PlanTomorrowScreen()
             <Field
               tone="sand"
               label="Mais alguma coisa para amanhã?"
-              placeholder="Escreva solto: ligar pro dentista, comprar remédio, estudar 1h..."
+              placeholder="Escreva solto: devolver o livro, comprar pão, alongar 10 min..."
               multiline
               value={promptText}
               onChangeText={setPromptText}

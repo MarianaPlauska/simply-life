@@ -124,7 +124,7 @@ export function HealthStartForm({ value, onChange, enabled, showMeds = true }: P
           ))}
           <View style={{ flexDirection: 'row', gap: 12, alignItems: 'flex-end' }}>
             <View style={{ flex: 2 }}>
-              <Field label="Nome" value={medName} onChangeText={setMedName} placeholder="Vitamina D" />
+              <Field label="Nome" value={medName} onChangeText={setMedName} placeholder="Xarope de exemplo" />
             </View>
             <View style={{ flex: 1 }}>
               <Field label="Horário" value={medTime} onChangeText={setMedTime} placeholder="08:00" />

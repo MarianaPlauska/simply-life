@@ -3,6 +3,7 @@ import * as Device from 'expo-device'
 import * as SecureStore from 'expo-secure-store'
 import Constants from 'expo-constants'
 import { apiFetch } from './apiBase'
+import { registerWebPushAsync, unregisterWebPushAsync } from './webPush'
 import { supabase } from './supabase'
 import {
   configureNativePush,
@@ -42,7 +43,7 @@ async function clearSavedToken(): Promise<void>
   await SecureStore.deleteItemAsync(TOKEN_KEY)
 }
 
-export async function registerExpoPushAsync(): Promise<{
+export async function registerExpoPushAsync(prompt = true): Promise<{
   ok: boolean
   token?: string
   error?: string
@@ -51,7 +52,7 @@ export async function registerExpoPushAsync(): Promise<{
 {
   if (Platform.OS === 'web')
   {
-    return { ok: true, skipped: true }
+    return registerWebPushAsync(prompt)
   }
 
   if (!Device.isDevice)
@@ -118,6 +119,11 @@ export async function registerExpoPushAsync(): Promise<{
 
 export async function unregisterExpoPushAsync(): Promise<void>
 {
+  if (Platform.OS === 'web')
+  {
+    await unregisterWebPushAsync()
+    return
+  }
   const token = await getSavedExpoPushToken()
   if (!token) return
   const { data: sessionData } = await supabase.auth.getSession()

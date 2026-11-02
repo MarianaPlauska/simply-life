@@ -367,7 +367,7 @@ export function CaptureExpenseFields({
       <Field
         tone="sand"
         label={isReceita ? 'O que entrou e o valor' : 'Descrição e valor'}
-        placeholder={isReceita ? 'Ex: salário 4500' : 'Ex: café 12,50'}
+        placeholder={isReceita ? 'Ex: reembolso 75' : 'Ex: lanche 8,00'}
         multiline
         value={text}
         onChangeText={(next) => patch({ text: next })}

@@ -25,6 +25,8 @@ import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { CareHomeStrip } from '../../src/components/care/CareHomeStrip'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
+import { LifePatternCard } from '../../src/components/dashboard/LifePatternCard'
+import { useLifePatterns } from '../../src/hooks/useLifePatterns'
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
 import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
 import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
@@ -77,6 +79,7 @@ export default function DashboardScreenWeb()
   const humor = useDataStore((s) => s.humor) ?? []
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
+  const lifePatterns = useLifePatterns().patterns
   const prefs = usePrefsStore((s) => s.prefs)
   const financeOn = useModules().group('carteira')
   const hydratePrefs = usePrefsStore((s) => s.hydrate)
@@ -216,6 +219,7 @@ export default function DashboardScreenWeb()
           <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
             {(
               [
+                { label: 'Apoio do dia', subtitle: 'Energia, burnout, lugares e espera de gasto', href: '/apoio' },
                 { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
                 { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
                 { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
@@ -266,6 +270,7 @@ export default function DashboardScreenWeb()
       <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
         <TabShell>
           <HomeFitnessHero greet={greet} name={name} dateLabel={dateLabel} isAdmin={isAdmin} onAccount={() => setMenuOpen(true)} />
+          <HomeMetricShortcuts />
           <HomeTodayDashboard
             tasks={tasks}
             finance={finance}
@@ -290,6 +295,7 @@ export default function DashboardScreenWeb()
             <Text variant="caption" muted style={{ marginLeft: 4 }}>Seu dia</Text>
             <View style={{ gap: 12 }}>
               <AxelDayBrief />
+              <LifePatternCard patterns={lifePatterns} />
               <DayPlanHomeCard />
               <VisualDayCard />
               <CareHomeStrip />
@@ -308,11 +314,10 @@ export default function DashboardScreenWeb()
           ) : null}
 
           {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-          <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" defaultOpen={false}>
+          <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia e mapa de dias" defaultOpen={false}>
             <View style={{ gap: 24, paddingTop: 8 }}>
               <HomeDayTimeline tasks={today} />
               <EloHeatmap semanas={12} compact />
-              <HomeMetricShortcuts />
             </View>
           </HomeCollapsible>
         </TabShell>
@@ -352,6 +357,7 @@ export default function DashboardScreenWeb()
     <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
       <TabShell>
         <DashGreeting greet={greet} name={name} dateLabel={dateLabel} onMore={() => setMenuOpen(true)} />
+        <HomeMetricShortcuts />
 
         {/* avisos que só aparecem às vezes */}
         <SalaryConfirmCard />

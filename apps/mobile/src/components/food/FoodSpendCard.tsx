@@ -53,7 +53,7 @@ export function FoodSpendCard({ embedded = false, limit = 5 }: { embedded?: bool
     <View style={{ gap: space.sm }}>
       {rows.length === 0 ? (
         <Text variant="body" muted>
-          Quando você lançar gastos como "café 12,50" ou "almoço", eles aparecem aqui agrupados pelo item.
+          Quando você lançar gastos como "lanche 8,00" ou "suco", eles aparecem aqui agrupados pelo item.
         </Text>
       ) : (
         <>

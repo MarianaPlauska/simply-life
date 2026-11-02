@@ -26,6 +26,8 @@ import { useAuthStore } from '../../src/store/authStore'
 import { useDataStore } from '../../src/store/dataStore'
 import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
+import { LifePatternCard } from '../../src/components/dashboard/LifePatternCard'
+import { useLifePatterns } from '../../src/hooks/useLifePatterns'
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
 import { HomeActivityHeatmap } from '../../src/components/dashboard/HomeActivityHeatmap'
 import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
@@ -98,6 +100,7 @@ export default function DashboardScreen()
   )
   const gastosMes = monthExpenseTotal(finance) ?? 0
   const actionable = useActionableTasks(tasks)
+  const lifePatterns = useLifePatterns().patterns
   const focusTask = useMemo(
     () => priorityTodayTasks(actionable, new Date(), 1)[0]?.task ?? null,
     [actionable],
@@ -255,6 +258,7 @@ export default function DashboardScreen()
             side={(
               <>
                 <AxelDayBrief />
+                <LifePatternCard patterns={lifePatterns} />
                 <HomeDayTimeline tasks={today} fill />
                 {waterOnHome ? <HomeWaterProgressCard compact /> : null}
                 <SalaryConfirmCard />
@@ -299,6 +303,7 @@ export default function DashboardScreen()
               <Text variant="section">Seu dia</Text>
               <View style={{ gap: 12 }}>
                 <AxelDayBrief />
+                <LifePatternCard patterns={lifePatterns} />
                 <DayPlanHomeCard />
                 <VisualDayCard />
                 <CareHomeStrip />
@@ -508,6 +513,7 @@ export default function DashboardScreen()
             <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
               {(
                 [
+                  { label: 'Apoio do dia', subtitle: 'Energia, burnout, lugares e espera de gasto', href: '/apoio' },
                   { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
                   { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
                   { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },

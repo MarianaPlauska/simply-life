@@ -80,9 +80,9 @@ const TABS: { id: CaptureKind; label: string }[] = [
 ]
 
 const PLACEHOLDERS: Record<CaptureKind, string> = {
-  dump: 'Uma coisa por linha. Ex.: dentista amanhã 9h, café 12,50, lembrar mãe de pagar conta',
+  dump: 'Uma coisa por linha. Ex.: devolver o livro amanhã 16h, lanche 8,00, lembrar de levar a garrafa',
   task: 'O que precisa ser feito?',
-  expense: 'Ex: café 12,50',
+  expense: 'Ex: lanche 8,00',
   note: 'Escreva o que ficou do dia',
 }
 
@@ -449,7 +449,7 @@ export function CaptureSheet()
         const parsed = parseExpenseQuick(text)
         if (!parsed)
         {
-          setError(lancamento === 'receita' ? 'Informe valor, ex: salário 4500' : 'Informe valor, ex: café 12,50')
+          setError(lancamento === 'receita' ? 'Informe valor, ex: reembolso 75' : 'Informe valor, ex: lanche 8,00')
           setSaving(false)
           return
         }

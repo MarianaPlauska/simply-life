@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { ScrollView, Share, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import {
   CARE_PACE_OPTIONS,
@@ -26,6 +26,8 @@ import {
   type HomeMetricId,
 } from '../src/lib/homeMetrics'
 import { SETUP_PRIORITY } from '../src/lib/setupOnboarding'
+import { supabaseConfigured } from '../src/lib/supabase'
+import { acceptFriendCode, createFriendInviteLink } from '../src/lib/sync/friends'
 import {
   ALL_APP_MODULES,
   filterMetrics,
@@ -45,6 +47,7 @@ import {
   type CardDraft,
 } from '../src/components/finance/FinanceCardForm'
 import { OnbStep, OnbBlock } from '../src/components/onboarding/OnbStep'
+import { AxelSun } from '../src/components/AxelSun'
 import { OnbChoice } from '../src/components/onboarding/OnbChoice'
 import { ModulePicker } from '../src/components/onboarding/ModulePicker'
 import { HealthStartForm } from '../src/components/onboarding/HealthStartForm'
@@ -65,14 +68,24 @@ import {
 type StepId =
   | 'welcome'
   | 'name'
+  | 'axel'
   | 'modules'
   | 'tasks'
   | 'health'
   | 'finance'
   | 'cards'
   | 'rhythm'
+  | 'circle'
   | 'home'
   | 'summary'
+
+const AXEL_INTRO: { title: string; hint: string }[] = [
+  { title: 'Organiza o seu dia', hint: 'Monta o plano de hoje com o que vence primeiro e replaneja quando o dia sai do roteiro.' },
+  { title: 'Tira tudo da cabeça', hint: 'Escreva do seu jeito, "pagar luz sexta e comprar pão 8 reais", e ele separa em tarefa e gasto.' },
+  { title: 'Cuida sem julgar', hint: 'Lembra de água, remédio e pausa, e no fim da semana mostra como foi o seu humor.' },
+  { title: 'Ajuda com o dinheiro', hint: 'Diz se uma compra cabe no mês e avisa antes de a conta vencer.' },
+  { title: 'Descobre o que mexe com você', hint: 'Com o tempo, mostra padrões entre sono, humor, treino, gastos e tarefas.' },
+]
 
 const PRIORITY_MODULES: Record<DashboardPriority, AppModuleId[]> = {
   tasks: ['tasks', 'routine'],
@@ -125,6 +138,11 @@ export default function SetupScreen()
   const [cardMsg, setCardMsg] = useState('')
   const [saving, setSaving] = useState(false)
   const [problems, setProblems] = useState<string[]>([])
+  const [friendCode, setFriendCode] = useState('')
+  const [circleBusy, setCircleBusy] = useState(false)
+  const [circleMsg, setCircleMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [joinedCount, setJoinedCount] = useState(0)
+  const [invitesSent, setInvitesSent] = useState(0)
 
   useEffect(() =>
   {
@@ -155,15 +173,18 @@ export default function SetupScreen()
   const on = (id: AppModuleId) => isModuleOn(modules, id)
   const steps = useMemo<StepId[]>(() =>
   {
-    const list: StepId[] = ['welcome', 'name', 'modules']
+    const list: StepId[] = ['welcome', 'name', 'axel', 'modules']
     if (on('tasks') || on('routine')) list.push('tasks')
     if (on('water') || on('sleep') || on('food') || on('gym') || on('meds')) list.push('health')
     if (on('spend') || on('bills') || on('goals')) list.push('finance')
     if (on('cards')) list.push('cards')
-    list.push('rhythm', 'home', 'summary')
+    list.push('rhythm')
+    // Círculo precisa de conta: convidado não vê este passo
+    if (!isGuest && supabaseConfigured) list.push('circle')
+    list.push('home', 'summary')
     return list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules])
+  }, [modules, isGuest])
 
   if (!userId) return <Redirect href="/login" />
   if (loaded && prefs.setup_completed_at && !saving && !problems.length) return <Redirect href="/(tabs)" />
@@ -265,6 +286,40 @@ export default function SetupScreen()
     router.replace('/(tabs)')
   }
 
+  const joinFriend = async () =>
+  {
+    setCircleBusy(true)
+    const res = await acceptFriendCode(friendCode)
+    setCircleBusy(false)
+    setCircleMsg({ ok: res.ok, text: res.message })
+    if (res.ok)
+    {
+      setJoinedCount((n) => n + 1)
+      setFriendCode('')
+    }
+  }
+
+  const inviteFriends = async () =>
+  {
+    setCircleBusy(true)
+    const res = await createFriendInviteLink()
+    setCircleBusy(false)
+    if (!res)
+    {
+      setCircleMsg({ ok: false, text: 'Não deu para gerar o convite agora' })
+      return
+    }
+    try
+    {
+      await Share.share({ message: `Vem para o meu Círculo no SunFy: ${res.url}`, url: res.url })
+      setInvitesSent((n) => n + 1)
+    }
+    catch
+    {
+      /* a pessoa fechou o compartilhar */
+    }
+  }
+
   const stepProps = {
     step: Math.min(step, total - 1),
     total,
@@ -322,6 +377,16 @@ export default function SetupScreen()
       ].filter(Boolean).join(', '),
       step: 'rhythm',
     },
+    ...(steps.includes('circle')
+      ? [{
+          label: 'Círculo',
+          value: [
+            joinedCount ? `${joinedCount} amigo(s) conectado(s)` : '',
+            invitesSent ? `${invitesSent} convite(s) enviado(s)` : '',
+          ].filter(Boolean).join(', ') || 'Ninguém por enquanto',
+          step: 'circle' as StepId,
+        }]
+      : []),
     {
       label: 'Início',
       value: homeMetrics.map((id) => HOME_METRIC_CATALOG.find((m) => m.id === id)?.label).join(', ') || 'Padrão',
@@ -385,6 +450,33 @@ export default function SetupScreen()
               placeholder="Seu nome"
               autoCapitalize="words"
             />
+          </OnbStep>
+        ) : null}
+
+        {current === 'axel' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Conheça o AXEL"
+            title={name.trim() ? `${name.trim()}, este é o AXEL` : 'Este é o AXEL'}
+            subtitle="O girassol que acompanha você no SunFy. Ele usa inteligência artificial para pensar junto, nunca para cobrar."
+            onNext={next}
+            nextLabel="Entendi"
+          >
+            <View style={{ alignItems: 'center', paddingVertical: space.sm }}>
+              <AxelSun size={88} mood="happy" />
+            </View>
+            <OnbBlock title="O que ele faz por você">
+              {AXEL_INTRO.map((b) => (
+                <View key={b.title} style={{ gap: 2, paddingVertical: 4 }}>
+                  <Text variant="bodyStrong">{b.title}</Text>
+                  <Text variant="caption" muted>{b.hint}</Text>
+                </View>
+              ))}
+            </OnbBlock>
+            <Text variant="caption" muted>
+              Ele lê só o que você registra no app, e o texto vai para a IA só na hora de responder. Nada é usado para treinar
+              modelos. Você pode desligar o AXEL em Configurações.
+            </Text>
           </OnbStep>
         ) : null}
 
@@ -557,6 +649,49 @@ export default function SetupScreen()
                 />
               ))}
             </OnbBlock>
+          </OnbStep>
+        ) : null}
+
+        {current === 'circle' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Círculo"
+            title="Traga quem caminha com você"
+            subtitle="Amigos veem só seu nome, avatar e Elo. Nunca seus registros de humor, saúde ou dinheiro."
+            onNext={next}
+            onSkip={next}
+            nextLabel={joinedCount || invitesSent ? 'Continuar' : 'Pular por agora'}
+          >
+            <OnbBlock title="Recebeu um convite?" hint="Cole o código ou o link que seu amigo mandou.">
+              <Field
+                label="Código do convite"
+                value={friendCode}
+                onChangeText={setFriendCode}
+                placeholder="Ex.: K7M2QX9P"
+                autoCapitalize="characters"
+              />
+              <PrimaryButton
+                label="Entrar no Círculo"
+                variant="secondary"
+                loading={circleBusy}
+                disabled={!friendCode.trim()}
+                onPress={() => void joinFriend()}
+              />
+            </OnbBlock>
+            <OnbBlock title="Chamar alguém" hint="O link vale por 7 dias. Quando aceitarem, vocês aparecem um na linha do tempo do outro.">
+              <PrimaryButton
+                label="Convidar amigos"
+                icon="person-add-outline"
+                variant="secondary"
+                loading={circleBusy}
+                onPress={() => void inviteFriends()}
+              />
+            </OnbBlock>
+            {circleMsg ? (
+              <Text variant="caption" color={circleMsg.ok ? colors.health : colors.danger}>
+                {circleMsg.text}
+              </Text>
+            ) : null}
           </OnbStep>
         ) : null}
 

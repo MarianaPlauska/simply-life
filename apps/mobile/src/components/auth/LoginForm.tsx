@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
+import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { Text, PrimaryButton, Card } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -55,6 +56,7 @@ export function LoginForm({
 }: Props)
 {
   const { colors, space, elevation } = useTheme()
+  const router = useRouter()
   const isWave = variant === 'wave'
   const signIn = useAuthStore((s) => s.signIn)
   const signUp = useAuthStore((s) => s.signUp)
@@ -518,6 +520,23 @@ export function LoginForm({
             </Text>
           </Pressable>
         ) : null}
+
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+          <Text variant="caption" muted>
+            {mode === 'register' ? 'Ao criar a conta, você aceita os ' : ''}
+          </Text>
+          <Pressable onPress={() => router.push('/termos')} accessibilityRole="link" style={{ minHeight: 32, justifyContent: 'center' }}>
+            <Text variant="caption" color={colors.inkMuted} style={{ textDecorationLine: 'underline' }}>
+              {mode === 'register' ? 'Termos de uso' : 'Termos'}
+            </Text>
+          </Pressable>
+          <Text variant="caption" muted>{' e a '}</Text>
+          <Pressable onPress={() => router.push('/privacidade')} accessibilityRole="link" style={{ minHeight: 32, justifyContent: 'center' }}>
+            <Text variant="caption" color={colors.inkMuted} style={{ textDecorationLine: 'underline' }}>
+              Privacidade
+            </Text>
+          </Pressable>
+        </View>
       </View>
 
       <ForgotPasswordSheet

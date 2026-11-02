@@ -172,5 +172,17 @@ export function HomeMetricShortcuts()
     router,
   ])
 
-  return <HomeQuickActions actions={actions} />
+  return (
+    <HomeQuickActions
+      actions={[
+        {
+          id: 'apoio',
+          label: 'Apoio',
+          icon: 'heart-outline',
+          onPress: () => router.push('/apoio' as never),
+        },
+        ...actions,
+      ]}
+    />
+  )
 }

@@ -107,7 +107,7 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange, summary }: Props)
         {rows.length === 0 ? (
           <EmptyState
             title="Nenhum lançamento"
-            body="Ex.: café 12,50 na conta, compra no crédito ou salário 4500."
+            body="Ex.: lanche 8,00 na conta, compra no crédito ou reembolso 75."
           />
         ) : subTab === 'diario' ? (
           rows.map((t, i, arr) => (
@@ -272,7 +272,7 @@ function FinanceMovimentosDesk({
           {rows.length === 0 ? (
             <EmptyState
               title="Nenhum lançamento"
-              body="Ex.: café 12,50 na conta, compra no crédito ou salário 4500."
+              body="Ex.: lanche 8,00 na conta, compra no crédito ou reembolso 75."
             />
           ) : shown.length === 0 ? (
             <Text variant="caption" muted>Nada encontrado com esse filtro.</Text>

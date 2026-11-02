@@ -28,7 +28,7 @@ export function FinanceGoalWizard({ collapsed = false }: { collapsed?: boolean }
   return (
     <Card tone="elevated" style={{ gap: space.md }}>
       <Text variant="section">Nova meta</Text>
-      <Field label="Nome" value={titulo} onChangeText={setTitulo} placeholder="Reserva de emergência" style={fieldStyle} />
+      <Field label="Nome" value={titulo} onChangeText={setTitulo} placeholder="Estante de quadrinhos" style={fieldStyle} />
       <Field
         label="Valor alvo"
         keyboardType="decimal-pad"
