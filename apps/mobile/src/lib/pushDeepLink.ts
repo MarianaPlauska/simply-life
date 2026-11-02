@@ -27,6 +27,7 @@ export function mapPushUrlToRoute(url: string): string | null
     if (pathname.startsWith('/planejar-amanha')) return '/planejar-amanha'
     if (pathname.startsWith('/ritmo')) return '/ritmo'
     if (pathname.startsWith('/foco')) return '/foco'
+    if (pathname.startsWith('/cartas')) return '/cartas'
     if (pathname.startsWith('/agenda')) return '/agenda'
     if (pathname.startsWith('/metas/'))
     {
@@ -42,6 +43,7 @@ export function mapPushUrlToRoute(url: string): string | null
     }
     if (pathname === '/' || pathname.startsWith('/dashboard'))
     {
+      if (path.includes('carta=1')) return '/(tabs)?carta=1'
       return '/(tabs)'
     }
     return '/(tabs)'

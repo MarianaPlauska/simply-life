@@ -13,6 +13,7 @@ import {
   type GamificationMode,
 } from '@simply-life/shared'
 import { Screen, Text, PrimaryButton, Field } from '../src/ui'
+import { AdventurePreview } from '../src/components/play/AdventurePreview'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -69,6 +70,7 @@ type StepId =
   | 'welcome'
   | 'name'
   | 'axel'
+  | 'guide'
   | 'modules'
   | 'tasks'
   | 'health'
@@ -85,6 +87,33 @@ const AXEL_INTRO: { title: string; hint: string }[] = [
   { title: 'Cuida sem julgar', hint: 'Lembra de água, remédio e pausa, e no fim da semana mostra como foi o seu humor.' },
   { title: 'Ajuda com o dinheiro', hint: 'Diz se uma compra cabe no mês e avisa antes de a conta vencer.' },
   { title: 'Descobre o que mexe com você', hint: 'Com o tempo, mostra padrões entre sono, humor, treino, gastos e tarefas.' },
+]
+
+const SUNFY_GUIDE: { title: string; hint: string }[] = [
+  {
+    title: 'Início',
+    hint: 'É a primeira tela. Toque na carinha para dizer como você está. O botão + tira da cabeça o que está pendente: uma coisa por linha, sem escolher categoria.',
+  },
+  {
+    title: 'Tarefas',
+    hint: 'A lista do que fazer. Marque o que terminou. Uma tarefa grande pode virar passos pequenos. O AXEL sugere uma ordem e diz o motivo. A decisão continua sua.',
+  },
+  {
+    title: 'Saúde',
+    hint: 'Três partes. Hoje mostra o cuidado do dia. Cuidados tem água, comida, academia e remédios. Diário guarda humor, sono e o que você anotou. O app mostra o quanto falta e não cobra sequência de dias.',
+  },
+  {
+    title: 'Carteira',
+    hint: 'Quatro abas. Carteira é o dinheiro da conta. Extrato é a lista do que entrou e saiu. Contas guarda salário, faturas e o que se repete todo mês. Análise mostra para onde o dinheiro foi. Compra no cartão só muda o saldo quando a fatura é paga.',
+  },
+  {
+    title: 'Calendário',
+    hint: 'O mês inteiro, com o que já está marcado. Dá para ligar a agenda do Google, do Outlook ou do Teams.',
+  },
+  {
+    title: 'Mais',
+    hint: 'Perfil, preferências, tema e histórico. Sair da conta encerra a sessão neste aparelho. Fechar só esconde o menu. O Elo, os dias seguidos, também fica por aqui. Os pontos de nível ficam no Perfil e não são dinheiro.',
+  },
 ]
 
 const PRIORITY_MODULES: Record<DashboardPriority, AppModuleId[]> = {
@@ -122,6 +151,7 @@ export default function SetupScreen()
 
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
+  const [avatarIcon, setAvatarIcon] = useState(prefs.profile_avatar_icon || 'initials')
   const [modules, setModules] = useState<AppModuleId[]>(prefs.enabled_modules ?? ALL_APP_MODULES)
   const [tasksDraft, setTasksDraft] = useState<TasksDraft>(EMPTY_TASKS_DRAFT)
   const [healthDraft, setHealthDraft] = useState<HealthDraft>(() => healthDraftFrom(habits))
@@ -173,7 +203,7 @@ export default function SetupScreen()
   const on = (id: AppModuleId) => isModuleOn(modules, id)
   const steps = useMemo<StepId[]>(() =>
   {
-    const list: StepId[] = ['welcome', 'name', 'axel', 'modules']
+    const list: StepId[] = ['welcome', 'name', 'axel', 'guide', 'modules']
     if (on('tasks') || on('routine')) list.push('tasks')
     if (on('water') || on('sleep') || on('food') || on('gym') || on('meds')) list.push('health')
     if (on('spend') || on('bills') || on('goals')) list.push('finance')
@@ -258,6 +288,7 @@ export default function SetupScreen()
     await patch({
       axel_calls_you: trimmed,
       display_name: trimmed,
+      profile_avatar_icon: avatarIcon,
       color_scheme: mode,
       enabled_modules: modules,
       dashboard_priority: finalOrder[0] ?? 'tasks',
@@ -268,7 +299,7 @@ export default function SetupScreen()
       care_pace: pace,
       notify_cadence: notifyCadence,
       adhd_support: adhdSupport,
-      gamification_mode: adhdSupport ? gamificationMode : 'calm',
+      gamification_mode: gamificationMode,
     })
     await applyHealthDraft(healthDraft, modules, isGuest)
     await applyTasksDraft(tasksDraft, modules, isGuest)
@@ -439,10 +470,17 @@ export default function SetupScreen()
           <OnbStep
             {...stepProps}
             title="Como quer ser chamado?"
-            subtitle="Aparece só para você, na tela inicial e nas mensagens do AXEL."
+            subtitle="O nome aparece na tela inicial. O ícone é o seu rosto no app. No começo são poucos. Os outros abrem com o nível."
             onNext={next}
             canNext={Boolean(name.trim())}
           >
+            <AvatarIconPicker
+              selected={avatarIcon}
+              onSelect={setAvatarIcon}
+              level={1}
+              owned={[]}
+              startersOnly
+            />
             <Field
               label="Nome ou apelido"
               value={name}
@@ -477,6 +515,26 @@ export default function SetupScreen()
               Ele lê só o que você registra no app, e o texto vai para a IA só na hora de responder. Nada é usado para treinar
               modelos. Você pode desligar o AXEL em Configurações.
             </Text>
+          </OnbStep>
+        ) : null}
+
+        {current === 'guide' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Como usar"
+            title="Cada parte faz uma coisa"
+            subtitle="Não precisa abrir tudo no mesmo dia. Estas são as seções do SunFy e o que fazer em cada uma."
+            onNext={next}
+            nextLabel="Entendi"
+          >
+            <OnbBlock title="As seções">
+              {SUNFY_GUIDE.map((item) => (
+                <View key={item.title} style={{ gap: 2, paddingVertical: 4 }}>
+                  <Text variant="bodyStrong">{item.title}</Text>
+                  <Text variant="caption" muted>{item.hint}</Text>
+                </View>
+              ))}
+            </OnbBlock>
           </OnbStep>
         ) : null}
 
@@ -624,18 +682,19 @@ export default function SetupScreen()
                 selected={!adhdSupport}
                 onPress={() => setAdhdSupport(false)}
               />
-              {adhdSupport
-                ? GAMIFICATION_MODE_OPTIONS.map((opt) => (
-                    <OnbChoice
-                      key={opt.id}
-                      kind="radio"
-                      title={opt.label}
-                      hint={opt.hint}
-                      selected={gamificationMode === opt.id}
-                      onPress={() => setGamificationMode(opt.id)}
-                    />
-                  ))
-                : null}
+            </OnbBlock>
+            <OnbBlock title="Como o dia aparece" hint="O jogo é opcional. Os pontos existem nos dois modos.">
+              {GAMIFICATION_MODE_OPTIONS.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={gamificationMode === opt.id}
+                  onPress={() => setGamificationMode(opt.id)}
+                />
+              ))}
+              {gamificationMode === 'rpg' ? <AdventurePreview /> : null}
             </OnbBlock>
             <OnbBlock title="Avisos no celular" hint="Nunca à noite: silêncio das 22h às 8h.">
               {NOTIFY_CADENCE_OPTIONS.map((opt) => (

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { View, TextInput } from 'react-native'
+import { Pressable, View, TextInput } from 'react-native'
 import { Redirect } from 'expo-router'
 import { moodLabel, todayIso } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, EmptyState, ListRow } from '../src/ui'
+import { Screen, Text, Card, PrimaryButton, EmptyState, ListRow, Icon } from '../src/ui'
+import { confirmDestructive } from '../src/lib/confirmDestructive'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { MoodFaceRow } from '../src/components/MoodFace'
 import { useTheme } from '../src/theme/ThemeProvider'
@@ -26,7 +27,27 @@ export default function AnotacoesScreen()
   const update = useNotesStore((s) => s.update)
   const remove = useNotesStore((s) => s.remove)
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
   const selected = items.find((n) => n.id === selectedId) ?? null
+
+  const askRemove = (id: number, titulo: string | null) =>
+  {
+    confirmDestructive(
+      'Excluir anotação',
+      `“${titulo || 'Sem título'}” sai da sua conta. Não dá para desfazer.`,
+      () =>
+      {
+        void remove(id)
+          .then(() =>
+          {
+            setErro(null)
+            if (selectedId === id) setSelectedId(null)
+          })
+          .catch(() => setErro('Não consegui excluir. Tente de novo.'))
+      },
+      'Excluir',
+    )
+  }
 
   useEffect(() =>
   {
@@ -69,14 +90,37 @@ export default function AnotacoesScreen()
         ) : (
           <Card tone="elevated" style={{ paddingVertical: space.sm }}>
             {items.map((n, i) => (
-              <ListRow
-                key={n.id}
-                title={n.titulo || 'Sem título'}
-                subtitle={(n.conteudo || '').slice(0, 80) || n.categoria}
-                right={n.fixado ? 'Pin' : undefined}
-                showSeparator={i < items.length - 1}
-                onPress={() => setSelectedId(n.id)}
-              />
+              <View key={n.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1, minWidth: 0 }}>
+                  <ListRow
+                    title={n.titulo || 'Sem título'}
+                    subtitle={(n.conteudo || '').slice(0, 80) || n.categoria}
+                    right={n.fixado ? 'Pin' : undefined}
+                    showSeparator={false}
+                    onPress={() => setSelectedId(n.id)}
+                  />
+                </View>
+                <Pressable
+                  onPress={() => askRemove(n.id, n.titulo)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Excluir ${n.titulo || 'anotação'}`}
+                  style={{ width: 48, height: 48, alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Icon name="trash-outline" size={20} color={colors.danger} />
+                </Pressable>
+                {i < items.length - 1 ? (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      left: 16,
+                      right: 16,
+                      bottom: 0,
+                      height: 1,
+                      backgroundColor: colors.hairline,
+                    }}
+                  />
+                ) : null}
+              </View>
             ))}
           </Card>
         )}
@@ -115,13 +159,14 @@ export default function AnotacoesScreen()
             <PrimaryButton
               label="Excluir"
               variant="danger"
-              onPress={() =>
-              {
-                void remove(selected.id)
-                setSelectedId(null)
-              }}
+              onPress={() => askRemove(selected.id, selected.titulo)}
             />
           </Card>
+        ) : null}
+        {erro ? (
+          <Text variant="caption" style={{ color: colors.danger }}>
+            {erro}
+          </Text>
         ) : null}
       </View>
     </Screen>

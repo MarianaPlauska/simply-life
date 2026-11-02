@@ -1,5 +1,6 @@
 import { persistStorage, whenPersistReady } from './persistStorage'
 import { GAMIFICATION_LOCAL_KEYS, useGamificationStore } from '../store/gamificationStore'
+import { PLAY_LOCAL_KEYS, usePlayStore } from '../store/playStore'
 import { ACTIVITY_LOCAL_KEYS, useActivityStore } from '../store/activityStore'
 
 /**
@@ -27,6 +28,12 @@ const SNAP_KEYS = [
   'simply-life-xp-weeks',
   'simply-life-xp-weeks-area',
   'simply_life_elo_recorde_v1',
+  'simply-life-play-cards',
+  'simply-life-play-day',
+  'simply-life-play-records',
+  'simply-life-play-week',
+  'simply-life-play-beat',
+  'simply-life-play-energy',
 ]
 
 function snapKey(uid: string): string
@@ -49,9 +56,10 @@ export function stashAndClearUserLocal(uid: string | null): void
   }
   useGamificationStore.getState().reset()
   useActivityStore.getState().reset()
+  usePlayStore.getState().reset()
   persistStorage.removeItem(ELO_SYNC_UID_KEY)
   // garante que nenhuma chave por conta ficou para trás
-  for (const key of [...GAMIFICATION_LOCAL_KEYS, ...ACTIVITY_LOCAL_KEYS]) persistStorage.removeItem(key)
+  for (const key of [...GAMIFICATION_LOCAL_KEYS, ...ACTIVITY_LOCAL_KEYS, ...PLAY_LOCAL_KEYS]) persistStorage.removeItem(key)
 }
 
 /**
@@ -87,4 +95,5 @@ export async function restoreUserLocal(uid: string): Promise<void>
   persistStorage.removeItem(key)
   useGamificationStore.getState().hydrate()
   useActivityStore.getState().hydrate()
+  usePlayStore.getState().hydrate()
 }

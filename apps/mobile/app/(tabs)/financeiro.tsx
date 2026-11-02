@@ -97,7 +97,7 @@ export default function FinanceiroScreen()
       <TabShell>
         {!(tab === 'inicio' && cardsFocus) && (
           // computador: o título repete o nome da barra lateral; "Carteira" fica só na sub aba
-          <ScreenIntro title={desk ? 'Finanças' : 'Carteira'} subtitle="Saldo, cartões, extrato e relatórios." />
+          <ScreenIntro title={desk ? 'Finanças' : 'Carteira'} subtitle="O saldo fica nesta aba. Extrato, contas e gráficos abrem nas outras." />
         )}
 
         {!desk && !(tab === 'inicio' && cardsFocus) && (

@@ -202,6 +202,33 @@ export async function scheduleMorningFirstStep(when: Date, firstStep: string): P
 }
 
 const FOCUS_END_ID = 'axel-focus-end'
+const CURIOSITY_ID = 'axel-curiosity-card'
+
+/** Aviso diário que abre a carta. Não mexe no lembrete da noite. */
+export async function scheduleCuriosityCard(): Promise<void>
+{
+  const perm = await Notifications.getPermissionsAsync()
+  if (!perm.granted) return
+  await Notifications.cancelScheduledNotificationAsync(CURIOSITY_ID).catch(() => undefined)
+  await Notifications.scheduleNotificationAsync({
+    identifier: CURIOSITY_ID,
+    content: {
+      title: 'O AXEL descobriu uma coisa sobre a sua semana',
+      body: 'Se quiser ler, ela está aqui. Sem pressa.',
+      data: { url: '/?carta=1' },
+    },
+    trigger: withAlertChannel({
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: 16,
+      minute: 0,
+    }),
+  })
+}
+
+export async function cancelCuriosityCard(): Promise<void>
+{
+  await Notifications.cancelScheduledNotificationAsync(CURIOSITY_ID).catch(() => undefined)
+}
 
 /** Aviso de fim do timer mesmo com o app em segundo plano. */
 export async function scheduleFocusEnd(seconds: number, taskTitle: string | null): Promise<void>

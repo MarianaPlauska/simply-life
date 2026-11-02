@@ -11,6 +11,9 @@ import { MfaEnrollPanel } from '../src/components/auth/MfaEnrollPanel'
 import { AdminUsersPanel } from '../src/components/auth/AdminUsersPanel'
 import { ForgotPasswordSheet } from '../src/components/auth/ForgotPasswordSheet'
 import { GamificationPanel } from '../src/components/dashboard/GamificationPanel'
+import { AvatarIconPicker } from '../src/components/profile/AvatarIconPicker'
+import { ProfileAvatarBadge } from '../src/components/social/ProfileAvatarBadge'
+import { gamificationLevel } from '../src/store/gamificationStore'
 import { PersonalSummaryGrid } from '../src/components/dashboard/PersonalSummaryGrid'
 import { ChamaAlbumCard, PersonalDivisionCard, WalletRow } from '../src/components/rewards/TrilhaCards'
 import {
@@ -30,6 +33,7 @@ import { useGamificationStore } from '../src/store/gamificationStore'
 import { supabase } from '../src/lib/supabase'
 import { appOrigin } from '../src/lib/appOrigin'
 import { resolveAxelName } from '../src/lib/axelName'
+import { METAS_HREF } from '../src/lib/sharedGoalRoutes'
 
 type Sheet = 'nome' | 'a11y' | 'seguranca' | 'circulo' | 'xp' | 'admin' | 'senha' | null
 
@@ -58,6 +62,9 @@ export default function PerfilScreenWeb()
   const patch = usePrefsStore((s) => s.patch)
   const hydrate = usePrefsStore((s) => s.hydrate)
   const history = useGamificationStore((s) => s.history)
+  const totalXp = useGamificationStore((s) => s.totalXp)
+  const owned = useGamificationStore((s) => s.owned)
+  const level = gamificationLevel(totalXp).level
   const [sheet, setSheet] = useState<Sheet>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -105,7 +112,7 @@ export default function PerfilScreenWeb()
   {
     return (
       <Screen scroll tabBarInset={false}>
-        <StackHeader title="Perfil" subtitle="Conta, acessibilidade e sync" />
+        <StackHeader title="Perfil" subtitle="Seus dados, seu ícone e o app" />
 
         <View style={{ gap: space.lg }}>
           <View style={{ alignItems: 'center', gap: space.md, paddingTop: space.sm }}>
@@ -135,9 +142,7 @@ export default function PerfilScreenWeb()
                     justifyContent: 'center',
                   }}
                 >
-                  <Text variant="hero" style={{ fontSize: 36, color: avatarTint }}>
-                    {initial}
-                  </Text>
+                  <ProfileAvatarBadge size={84} initial={initial} />
                 </View>
               </View>
               <Pressable
@@ -178,12 +183,7 @@ export default function PerfilScreenWeb()
             </View>
           </View>
 
-          <PersonalSummaryGrid />
-          <WalletRow />
-          <PersonalDivisionCard />
-          <ChamaAlbumCard />
-
-          <ProfileSection title="Dados">
+          <ProfileSection title="Você">
             <ProfileSettingsRow icon="mail-outline" label="E-mail" value={email ?? '-'} accent={colors.tasks} />
             <ProfileSettingsRow
               icon="call-outline"
@@ -207,10 +207,42 @@ export default function PerfilScreenWeb()
               accent={colors.axel}
               onPress={() => setSheet('nome')}
             />
+          </ProfileSection>
+
+          <ProfileSection title="Seu ícone">
+            <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
+              <AvatarIconPicker
+                selected={prefs.profile_avatar_icon || 'initials'}
+                onSelect={(value) => void patch({ profile_avatar_icon: value })}
+                level={level}
+                owned={owned}
+              />
+            </View>
+            <ProfileSettingsRow
+              icon="lock-open-outline"
+              label="Ícones que ainda vão abrir"
+              value={`Nível ${level}`}
+              onPress={() => router.push('/desbloqueios' as never)}
+            />
+          </ProfileSection>
+
+          <ProfileSection title="Seu placar">
+            <View style={{ padding: 16, gap: space.md }}>
+              <PersonalSummaryGrid />
+              <WalletRow />
+              <PersonalDivisionCard />
+              <ChamaAlbumCard />
+            </View>
+            <ProfileSettingsRow icon="sparkles-outline" label="Pontos" value="Nível, moedas e elo" onPress={() => setSheet('xp')} />
+            <ProfileSettingsRow icon="albums" label="Cartas" value="Coleção do dia" onPress={() => router.push('/cartas' as never)} />
+            <ProfileSettingsRow icon="flame-outline" label="Elo" value="Dias seguidos" onPress={() => router.push('/ofensiva' as never)} />
+          </ProfileSection>
+
+          <ProfileSection title="O app">
             <ProfileSettingsRow
               icon="cloud-outline"
               label="Sincronização na nuvem"
-              value={prefs.cloud_sync_opt_in ? 'Opt-in' : 'Local'}
+              value={prefs.cloud_sync_opt_in ? 'Ligada' : 'Só neste aparelho'}
               accent={colors.tasks}
               onPress={() => void patch({ cloud_sync_opt_in: !prefs.cloud_sync_opt_in })}
             />
@@ -220,9 +252,6 @@ export default function PerfilScreenWeb()
               accent={colors.inkMuted}
               onPress={isGuest ? undefined : () => setSheet('senha')}
             />
-          </ProfileSection>
-
-          <ProfileSection title="Configurações">
             <ProfileSettingsRow
               icon="accessibility-outline"
               label="Acessibilidade"
@@ -242,14 +271,17 @@ export default function PerfilScreenWeb()
             />
             <ProfileSettingsRow icon="options-outline" label="Preferências" onPress={() => router.push('/preferencias')} />
             <ProfileSettingsRow icon="settings-outline" label="Configurações e integrações" onPress={() => router.push('/configuracoes')} />
+          </ProfileSection>
+
+          <ProfileSection title="Pessoas">
             <ProfileSettingsRow icon="people-outline" label="Círculo" onPress={() => setSheet('circulo')} />
-            <ProfileSettingsRow icon="sparkles-outline" label="AXEL / XP" onPress={() => setSheet('xp')} />
+            <ProfileSettingsRow icon="flag-outline" label="Metas juntos" onPress={() => router.push(METAS_HREF)} />
             {isAdmin ? (
               <ProfileSettingsRow
                 icon="shield-checkmark-outline"
                 iconNode={<ShieldCheck size={18} color={colors.axel} />}
-                label="Admin"
-                value="Usuários"
+                label="Pessoas no app"
+                value="Quem está conectado"
                 onPress={() => setSheet('admin')}
               />
             ) : null}
@@ -476,9 +508,7 @@ export default function PerfilScreenWeb()
               justifyContent: 'center',
             }}
           >
-            <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 20, color: avatarTint }}>
-              {initial}
-            </Text>
+            <ProfileAvatarBadge size={48} initial={initial} />
           </Pressable>
           <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -508,7 +538,7 @@ export default function PerfilScreenWeb()
           />
           <WebProfileRow
             label="Sincronização na nuvem"
-            value={prefs.cloud_sync_opt_in ? 'Opt-in' : 'Local'}
+            value={prefs.cloud_sync_opt_in ? 'Ligada' : 'Só neste aparelho'}
             onPress={() => void patch({ cloud_sync_opt_in: !prefs.cloud_sync_opt_in })}
           />
           <WebProfileRow
@@ -518,7 +548,23 @@ export default function PerfilScreenWeb()
           />
         </WebProfileSection>
 
-        <WebProfileSection title="Dados pessoais">
+        <WebProfileSection title="Seu ícone">
+          <View style={{ padding: 16 }}>
+            <AvatarIconPicker
+              selected={prefs.profile_avatar_icon || 'initials'}
+              onSelect={(value) => void patch({ profile_avatar_icon: value })}
+              level={level}
+              owned={owned}
+            />
+          </View>
+          <WebProfileRow
+            label="Ícones que ainda vão abrir"
+            value={`Nível ${level}`}
+            onPress={() => router.push('/desbloqueios' as never)}
+          />
+        </WebProfileSection>
+
+        <WebProfileSection title="Você">
           <WebProfileRow label="E-mail" value={email ?? '-'} />
           <WebProfileRow
             label="Telefone"
@@ -538,7 +584,7 @@ export default function PerfilScreenWeb()
           />
         </WebProfileSection>
 
-        <WebProfileSection title="Configurações">
+        <WebProfileSection title="O app">
           <WebProfileRow
             label="Acessibilidade"
             value={
@@ -556,10 +602,19 @@ export default function PerfilScreenWeb()
           />
           <WebProfileRow label="Preferências" onPress={() => router.push('/preferencias')} />
           <WebProfileRow label="Configurações e integrações" onPress={() => router.push('/configuracoes')} />
+        </WebProfileSection>
+
+        <WebProfileSection title="Seu placar">
+          <WebProfileRow label="Pontos" value="Nível, moedas e elo" onPress={() => setSheet('xp')} />
+          <WebProfileRow label="Cartas" value="Coleção do dia" onPress={() => router.push('/cartas' as never)} />
+          <WebProfileRow label="Elo" value="Dias seguidos" onPress={() => router.push('/ofensiva' as never)} />
+        </WebProfileSection>
+
+        <WebProfileSection title="Pessoas">
           <WebProfileRow label="Círculo" onPress={() => setSheet('circulo')} />
-          <WebProfileRow label="AXEL / XP" onPress={() => setSheet('xp')} />
+          <WebProfileRow label="Metas juntos" onPress={() => router.push(METAS_HREF)} />
           {isAdmin ? (
-            <WebProfileRow label="Admin · Usuários" onPress={() => setSheet('admin')} />
+            <WebProfileRow label="Pessoas no app" value="Quem está conectado" onPress={() => setSheet('admin')} />
           ) : null}
         </WebProfileSection>
 

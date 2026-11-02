@@ -49,6 +49,8 @@ type Props = {
   onMood: (m: number) => void
   onSaveNote: () => void
   onOpenNotes: () => void
+  /** Apaga só o texto escrito. O humor do dia fica. */
+  onClearNote?: (id: number) => void
   total: number
   slices: MoodDistributionSlice[]
   /** Humor agregado por dia (todo o histórico) */
@@ -133,6 +135,7 @@ export function HealthDiaryStudio(props: Props)
     onMood,
     onSaveNote,
     onOpenNotes,
+    onClearNote,
     total,
     slices,
     days,
@@ -253,6 +256,18 @@ export function HealthDiaryStudio(props: Props)
             <Text variant="body" style={{ lineHeight: 22 }}>
               {h.nota}
             </Text>
+            {onClearNote ? (
+              <Pressable
+                onPress={() => onClearNote(h.id)}
+                accessibilityRole="button"
+                accessibilityLabel="Apagar este texto"
+                style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}
+              >
+                <Text variant="caption" style={{ color: colors.danger, fontWeight: '700' }}>
+                  Apagar
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         )
       })}
@@ -339,6 +354,9 @@ export function HealthDiaryStudio(props: Props)
                   leading={<RowGlyph name={moodIcon(h.humor)} color={moodColor(h.humor)} />}
                   title={h.nota ?? ''}
                   subtitle={`${formatDayPt((h.data || '').slice(0, 10))} · ${moodLabel(h.humor)}`}
+                  value={onClearNote ? 'Apagar' : undefined}
+                  onPress={onClearNote ? () => onClearNote(h.id) : undefined}
+                  accessibilityLabel="Apagar este texto"
                 />
               ))}
               <GroupedRow

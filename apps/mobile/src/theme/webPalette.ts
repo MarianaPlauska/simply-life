@@ -15,11 +15,10 @@ export function withWebPalette(base: ColorTokens, mode: ThemeMode): ColorTokens
 }
 
 /**
- * Faixa do menu no topo (web, computador): petróleo da marca clareado um degrau,
- * para não pesar como um bloco escuro. No escuro fica o petróleo puro, que já
- * se destaca do fundo.
+ * Faixa do menu no topo (web, computador): petróleo um degrau acima do fundo,
+ * para a barra não sumir na mesma tinta da tela.
  */
 export function webBandColor(mode: ThemeMode): string
 {
-  return mode === 'dark' ? '#1C1C1E' : '#33585B'
+  return mode === 'dark' ? '#2F565A' : '#33585B'
 }

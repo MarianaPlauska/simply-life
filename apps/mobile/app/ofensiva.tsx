@@ -105,8 +105,14 @@ export default function OfensivaScreen()
           <Icon name="help" size={18} color={colors.ink} />
         </Pressable>
       </View>
-      <Text variant="hero" style={{ fontSize: 32, letterSpacing: -0.8, marginBottom: 12 }}>
+      <Text variant="hero" style={{ fontSize: 32, letterSpacing: -0.8, marginBottom: 8 }}>
         Elo
+      </Text>
+      <Text variant="body" muted style={{ marginBottom: 6 }}>
+        Elo é a sequência de dias em que você fez alguma coisa. Não é nota e não é dinheiro.
+      </Text>
+      <Text variant="caption" muted style={{ marginBottom: 12 }}>
+        Pontos e moedas ficam no Perfil, em Pontos. Eles sobem com o dia. O elo só conta se o dia teve uma ação. Um descanso por semana não quebra a sequência.
       </Text>
 
       <PillTabs

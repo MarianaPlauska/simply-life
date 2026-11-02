@@ -1,12 +1,24 @@
-import { FlexWidget, TextWidget } from 'react-native-android-widget'
+import { FlexWidget, TextWidget, type ColorProp } from 'react-native-android-widget'
 
-// grafite fixo, como o modo escuro do app: o widget fica fora do tema
-const BG = '#1C1C1E'
+// Petróleo do logo. O degradê de uma cor só vira um fundo opaco no Android 12+,
+// onde backgroundColor sozinho sai transparente e aparece o wallpaper.
+const BG = '#1F3A3D'
 const INK = '#EEF2F0'
-const MUTED = '#ABABB2'
-const FILL = '#2A2A2D'
+const MUTED = '#A9C2BC'
+const FILL = '#2C4C50'
 const CORAL = '#E8734A'
 const ON_CORAL = '#1E1C1A'
+
+function solid(color: ColorProp)
+{
+  return {
+    backgroundGradient: {
+      from: color,
+      to: color,
+      orientation: 'LEFT_RIGHT' as const,
+    },
+  }
+}
 
 const FACES = ['😫', '😕', '😐', '🙂', '😄']
 
@@ -25,7 +37,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
     return (
       <FlexWidget
         clickAction="OPEN_APP"
-        style={{ height: 'match_parent', width: 'match_parent', backgroundColor: BG, borderRadius: 24, padding: 16, justifyContent: 'center', alignItems: 'center' }}
+        style={{ height: 'match_parent', width: 'match_parent', ...solid(BG), borderRadius: 22, padding: 16, justifyContent: 'center', alignItems: 'center' }}
       >
         <TextWidget text="Entre no SunFy para usar o widget" style={{ fontSize: 14, color: INK }} />
       </FlexWidget>
@@ -37,8 +49,8 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
       style={{
         height: 'match_parent',
         width: 'match_parent',
-        backgroundColor: BG,
-        borderRadius: 24,
+        ...solid(BG),
+        borderRadius: 22,
         padding: 14,
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -51,7 +63,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
         </FlexWidget>
         <FlexWidget
           clickAction="WATER"
-          style={{ backgroundColor: CORAL, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 8 }}
+          style={{ ...solid(CORAL), borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 }}
         >
           <TextWidget text="+1 copo" style={{ fontSize: 14, color: ON_CORAL, fontWeight: '700' }} />
         </FlexWidget>
@@ -59,7 +71,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
 
       <FlexWidget style={{ width: 'match_parent', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <TextWidget text={data.moodToday ? 'Humor de hoje' : 'Como você está?'} style={{ fontSize: 12, color: MUTED }} />
-        <FlexWidget style={{ flexDirection: 'row', flexGap: 4 }}>
+        <FlexWidget style={{ flexDirection: 'row' }}>
           {FACES.map((face, i) => (
             <FlexWidget
               key={face}
@@ -68,10 +80,11 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
               style={{
                 width: 34,
                 height: 34,
-                borderRadius: 999,
+                marginLeft: i === 0 ? 0 : 4,
+                borderRadius: 17,
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: data.moodToday === i + 1 ? CORAL : FILL,
+                ...solid(data.moodToday === i + 1 ? CORAL : FILL),
               }}
             >
               <TextWidget text={face} style={{ fontSize: 17 }} />
@@ -85,7 +98,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
           width: 'match_parent',
           flexDirection: 'row',
           alignItems: 'center',
-          backgroundColor: FILL,
+          ...solid(FILL),
           borderRadius: 14,
           paddingHorizontal: 12,
           paddingVertical: 8,
@@ -108,7 +121,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
           <FlexWidget
             clickAction="TASK_DONE"
             clickActionData={{ id: data.task.id }}
-            style={{ borderRadius: 999, borderWidth: 1, borderColor: MUTED, paddingHorizontal: 12, paddingVertical: 6 }}
+            style={{ ...solid(FILL), borderRadius: 16, borderWidth: 1, borderColor: MUTED, paddingHorizontal: 12, paddingVertical: 6 }}
           >
             <TextWidget text="Concluir" style={{ fontSize: 13, color: INK, fontWeight: '600' }} />
           </FlexWidget>

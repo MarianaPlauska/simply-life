@@ -52,6 +52,7 @@ O SunFy foi feito para o dia difícil:
 | **Saúde** | Diário de humor, água, alimentação, sono, academia, remédios e exercícios de respiração |
 | **Carteira** | Saldo, cartões, contas a pagar e quanto sobra no fim do mês |
 | **Calendário** | Ver o mês e ligar a agenda do Google, Outlook ou Teams |
+| **Mais** | Perfil, preferências, tema, Elo e sair da conta |
 
 <p align="center">
   <picture>
@@ -63,6 +64,76 @@ O SunFy foi feito para o dia difícil:
     <img src="docs/images/app/login.png" alt="Tela de entrada" width="240" />
   </picture>
 </p>
+
+## Como usar cada seção
+
+Cada seção abaixo mostra a tela e o que fazer nela. Os prints do topo e do passo a passo da manhã continuam no lugar.
+
+### Início
+
+<p align="center">
+  <img src="docs/images/app/inicio.png" alt="Tela inicial do SunFy, com o dia e o humor" width="240" />
+</p>
+
+Abra o app e você cai aqui.
+
+1. Toque na carinha para dizer como está. Se quiser, escreva uma linha.
+2. Toque no **+** e despeje o que está na cabeça, uma coisa por linha. Não precisa escolher categoria nem data.
+3. Confira o que o app entendeu e salve. Tarefa, gasto e conta a pagar vão cada um para o lugar certo.
+4. O AXEL sugere o que fazer agora e diz o motivo. Você decide se segue.
+
+### Tarefas
+
+<p align="center">
+  <img src="docs/images/app/tarefas.png" alt="Lista de tarefas do SunFy" width="240" />
+</p>
+
+1. Veja o que está para hoje e o que ficou para outros dias.
+2. Marque o que terminou.
+3. Se uma tarefa for grande demais, quebre em passos pequenos.
+4. O horário que o AXEL sugere aparece diferente do que veio da sua agenda.
+
+### Saúde
+
+<p align="center">
+  <img src="docs/images/app/saude.png" alt="Diário de humor na tela de saúde" width="240" />
+</p>
+
+A Saúde tem três partes. **Hoje** mostra o cuidado do dia. **Cuidados** separa água, comida, academia e remédios. **Diário** guarda humor, sono e o que você anotou.
+
+1. Em Hoje, registre o que cabe agora: um copo de água, o humor, o sono.
+2. Em Cuidados, ajuste a meta de água, a alimentação, os dias de academia e os horários do remédio.
+3. Em Diário, volte para ver como a semana foi.
+4. O app mostra o quanto falta. Ficar dias sem abrir não apaga nada e não cobra sequência.
+
+Se o humor do dia for muito baixo, a aba troca as metas por um check-in curto, dois exercícios de respiração e o CVV (188).
+
+### Carteira
+
+<p align="center">
+  <img src="docs/images/app/financas.png" alt="Carteira com o saldo da conta" width="240" />
+</p>
+
+A Carteira tem quatro abas. Cada uma faz uma coisa.
+
+1. **Carteira.** O número grande é o dinheiro da conta. Toque em Ajustar se o saldo estiver errado. Anotar gasto tira dinheiro. Anotar entrada põe dinheiro. Compra no cartão só entra neste número quando a fatura é paga.
+2. **Extrato.** A lista de cada valor que entrou ou saiu. Toque em um lançamento para corrigir.
+3. **Contas.** Salário, faturas, contas que se repetem e cartões. Débito e PIX saem do saldo na hora. No crédito, só na fatura paga.
+4. **Análise.** Para onde o dinheiro foi no mês e quanto deve sobrar no fim.
+
+O app não se conecta ao banco. Os valores são os que você anota.
+
+### Calendário e Mais
+
+O **Calendário** mostra o mês e o que já está marcado. Dá para ligar a agenda do Google, do Outlook ou do Teams.
+
+O **Mais** fica no canto da tela inicial. Lá estão o perfil, as preferências, o tema, o histórico e o Elo (os dias seguidos). Os pontos de nível ficam no Perfil e não são dinheiro. **Sair da conta** encerra a sessão neste aparelho. **Fechar** só esconde o menu.
+
+<p align="center">
+  <img src="docs/images/app/login.png" alt="Tela de entrada, com a opção de continuar como convidado" width="240" />
+</p>
+
+Na primeira vez, os passos iniciais perguntam o nome, o ícone, o que você quer usar e explicam estas seções. Dá para pular e completar depois em Preferências. Quem só quer olhar toca em **Continuar como convidado** e vê dados de exemplo.
 
 ## Como funciona na prática
 

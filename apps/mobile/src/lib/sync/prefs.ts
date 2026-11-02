@@ -64,6 +64,8 @@ export type WorkspacePrefs = {
   profile_avatar_icon?: string
   /** Desbloqueios: estilo do anel do avatar */
   profile_avatar_frame?: string
+  /** Acessório equipado no AXEL (laço, cachecol, óculos). Ausente = nenhum. */
+  axel_accessory?: string | null
   /** Desbloqueios: fundo do quadro de tarefas ('nenhum', 'cor:areia', 'padrao:pontos'...) */
   kanban_fundo?: string
   /** Foco junto: mostrar aos amigos do Círculo quando estou focando (padrão: não) */
@@ -277,6 +279,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
     share_focus_status: raw?.share_focus_status === true,
     profile_avatar_icon: typeof raw?.profile_avatar_icon === 'string' ? raw.profile_avatar_icon : 'initials',
     profile_avatar_frame: typeof raw?.profile_avatar_frame === 'string' ? raw.profile_avatar_frame : 'lisa',
+    axel_accessory: typeof raw?.axel_accessory === 'string' ? raw.axel_accessory : null,
     kanban_fundo: typeof raw?.kanban_fundo === 'string' ? raw.kanban_fundo : 'nenhum',
     chama_premios: Array.isArray(raw?.chama_premios) ? raw.chama_premios : [],
     life_goals_paused_until: typeof raw?.life_goals_paused_until === 'string' ? raw.life_goals_paused_until : null,

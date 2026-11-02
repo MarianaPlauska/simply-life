@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
+import Constants from 'expo-constants'
 import { Icon } from '../../ui/Icon'
 import { Text, PrimaryButton, Card } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -533,10 +534,13 @@ export function LoginForm({
           <Text variant="caption" muted>{' e a '}</Text>
           <Pressable onPress={() => router.push('/privacidade')} accessibilityRole="link" style={{ minHeight: 32, justifyContent: 'center' }}>
             <Text variant="caption" color={colors.inkMuted} style={{ textDecorationLine: 'underline' }}>
-              Privacidade
+              Política de Privacidade
             </Text>
           </Pressable>
         </View>
+        <Text variant="caption" muted style={{ textAlign: 'center', fontSize: 11 }}>
+          {`SunFy v${Constants.expoConfig?.version ?? '1.1.0'} · © ${new Date().getFullYear()} Mariana Plauska. Todos os direitos reservados.`}
+        </Text>
       </View>
 
       <ForgotPasswordSheet

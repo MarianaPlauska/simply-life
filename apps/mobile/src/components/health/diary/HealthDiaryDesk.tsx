@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { TextInput, View, type TextStyle } from 'react-native'
+import { Pressable, TextInput, View, type TextStyle } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
   moodLabel,
@@ -38,6 +38,7 @@ type Props = {
   onMood: (m: number) => void
   onSaveNote: () => void
   onOpenNotes: () => void
+  onClearNote?: (id: number) => void
   total: number
   slices: MoodDistributionSlice[]
   days: DiaHumorAgregado[]
@@ -54,7 +55,7 @@ type Props = {
  */
 export function HealthDiaryDesk(props: Props)
 {
-  const { last, prompt, nota, onNotaChange, onMood, onSaveNote, onOpenNotes, total, slices, days, week, comNota, habits, alertSlot, daySlot } = props
+  const { last, prompt, nota, onNotaChange, onMood, onSaveNote, onOpenNotes, onClearNote, total, slices, days, week, comNota, habits, alertSlot, daySlot } = props
   const { colors } = useTheme()
   const { width } = useWorkspace()
   const router = useRouter()
@@ -281,6 +282,18 @@ export function HealthDiaryDesk(props: Props)
                 <Text variant="body" style={{ flex: 1, minWidth: 0 }}>
                   {h.nota}
                 </Text>
+                {onClearNote ? (
+                  <Pressable
+                    onPress={() => onClearNote(h.id)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Apagar este texto"
+                    style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 }}
+                  >
+                    <Text variant="caption" style={{ color: colors.danger, fontWeight: '700' }}>
+                      Apagar
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
             )
           })}

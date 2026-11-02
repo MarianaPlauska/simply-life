@@ -1,24 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import {
-  bodyChecked,
-  burnoutActive,
-  doneTodayLines,
-  energyBudget,
-  energyFromMinutes,
-  energyPoints,
-  findHabit,
-  localTodayIso,
-  parseTaskEnergy,
-  suggestedEnergyStock,
-  tasksForPlace,
-} from '@simply-life/shared'
-import { Text } from '../../ui'
+import { Text, Icon, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
-import { useDataStore } from '../../store/dataStore'
-import { useCalendarStore } from '../../store/calendarStore'
-import { useCareExtrasStore } from '../../store/careExtrasStore'
+import { useHomeDayCare } from './useHomeDayCare'
 
 /**
  * Acréscimos do dia: energia, burnout, o que já foi feito e o lugar.
@@ -28,114 +13,133 @@ export function CareHomeStrip()
 {
   const { colors, space } = useTheme()
   const router = useRouter()
-  const hydrate = useCareExtrasStore((s) => s.hydrate)
-  const stock = useCareExtrasStore((s) => s.energyStock)
-  const setStock = useCareExtrasStore((s) => s.setEnergyStock)
-  const burnout = useCareExtrasStore((s) => s.burnoutActive)
-  const startBurnout = useCareExtrasStore((s) => s.startBurnout)
-  const stopBurnout = useCareExtrasStore((s) => s.stopBurnout)
-  const hereSlug = useCareExtrasStore((s) => s.hereSlug)
-  const places = useCareExtrasStore((s) => s.places)
-  const bodyByDay = useCareExtrasStore((s) => s.bodyByDay)
-  const tasks = useDataStore((s) => s.tasks) ?? []
-  const finance = useDataStore((s) => s.finance) ?? []
-  const humor = useDataStore((s) => s.humor) ?? []
-  const habits = useDataStore((s) => s.habits) ?? []
-  const events = useCalendarStore((s) => s.events)
+  const {
+    stock,
+    setStock,
+    burnout,
+    startBurnout,
+    stopBurnout,
+    suggestion,
+    lines,
+    here,
+    hereTasks,
+    budget,
+    active,
+  } = useHomeDayCare()
   const [burnoutOpen, setBurnoutOpen] = useState(false)
   const [doneOpen, setDoneOpen] = useState(false)
-  const today = localTodayIso()
 
-  useEffect(() =>
-  {
-    void hydrate()
-  }, [hydrate])
-
-  const used = useMemo(() =>
-  {
-    let points = 0
-    for (const task of tasks)
-    {
-      if (task.status === 'done') continue
-      if (task.dataVencimento?.slice(0, 10) !== today) continue
-      const level = parseTaskEnergy(task.anotacao) ?? energyFromMinutes(task.estimativaMinutos || 30)
-      points += energyPoints(level)
-    }
-    for (const event of events)
-    {
-      if (event.date !== today || event.allDay || !event.busy || event.inicio == null || event.fim == null) continue
-      points += energyPoints(energyFromMinutes(event.fim - event.inicio))
-    }
-    return points
-  }, [tasks, events, today])
-
-  const budget = energyBudget(used, stock)
-  const humorToday = humor.filter((item) => (item.data ?? '').slice(0, 10) === today)
-  const humorLow = humorToday.some((item) => item.humor <= 2)
-  const suggestion = suggestedEnergyStock(stock, { humorLow, manyHigh: used > stock })
-  const agua = findHabit(habits, 'agua')
-  const lines = doneTodayLines({
-    today,
-    tasks,
-    txs: finance,
-    humorCount: humorToday.length,
-    aguaCopos: agua?.progressoAtual ?? 0,
-    bodyChecked: bodyChecked(bodyByDay[today]),
-  })
-  const here = places.find((place) => place.slug === hereSlug) ?? null
-  const hereTasks = here ? tasksForPlace(tasks, here.slug) : []
-  const active = burnoutActive(burnout, today)
+  const pct = Math.min(1, budget.used / budget.stock)
+  const energyTitle = budget.used === 0
+    ? 'Dia leve até agora'
+    : budget.over ? 'Dia mais cheio que sua energia' : `Dia ${budget.used <= budget.stock / 2 ? 'tranquilo' : 'cheio, mas cabe'}`
+  const energySubtitle = budget.over
+    ? `As tarefas de hoje pedem ${budget.used} de energia e você tem ${budget.stock}. Vale adiar algo.`
+    : `As tarefas e compromissos de hoje usam ${budget.used} dos seus ${budget.stock} pontos de energia.`
 
   return (
-    <View style={{ gap: space.sm, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: space.sm }}>
-      <Text variant="caption" muted>{budget.phrase}</Text>
-      {suggestion != null ? (
-        <Pressable accessibilityRole="button" onPress={() => setStock(suggestion)} style={{ minHeight: 44, justifyContent: 'center' }}>
-          <Text variant="body">Baixar o medidor para {suggestion}. O plano do dia continua igual.</Text>
-        </Pressable>
+    <View style={{ gap: space.sm }}>
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph name="flash-outline" color={budget.over ? colors.danger : colors.attention} />}
+          title={energyTitle}
+          subtitle={energySubtitle}
+          subtitleLines={2}
+        >
+          <View style={{ height: 6, borderRadius: 3, backgroundColor: colors.fill, marginTop: 6, overflow: 'hidden' }}>
+            <View
+              style={{
+                width: `${Math.round(pct * 100)}%`,
+                height: '100%',
+                borderRadius: 3,
+                backgroundColor: budget.over ? colors.danger : colors.attention,
+              }}
+            />
+          </View>
+        </GroupedRow>
+
+        {suggestion != null ? (
+          <GroupedRow
+            leading={<RowGlyph name="moon" color={colors.axel} />}
+            title="Hoje parece um dia de pouca energia"
+            subtitle={`Toque para contar com ${suggestion} pontos em vez de ${stock}. Suas tarefas não mudam.`}
+            subtitleLines={2}
+            onPress={() => setStock(suggestion)}
+          />
+        ) : null}
+
+        {active && burnout ? (
+          <GroupedRow
+            leading={<RowGlyph name="leaf-outline" color={colors.health} />}
+            title={`Modo descanso até ${burnout.until.split('-').reverse().join('/')}`}
+            subtitle="Sua sequência fica protegida nesses dias. Toque para desligar."
+            subtitleLines={2}
+            onPress={stopBurnout}
+          />
+        ) : (
+          <GroupedRow
+            leading={<RowGlyph name="leaf-outline" color={colors.health} />}
+            title="Preciso de uns dias leves"
+            subtitle="Para semanas difíceis: sua sequência não quebra e o AXEL pega leve."
+            subtitleLines={2}
+            onPress={() => setBurnoutOpen((open) => !open)}
+            chevron={false}
+            trailing={<Icon name={burnoutOpen ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkFaint} />}
+          />
+        )}
+
+        {lines.length > 0 ? (
+          <GroupedRow
+            leading={<RowGlyph name="checkmark-circle" color={colors.axel} />}
+            title="O que você já fez hoje"
+            subtitle={doneOpen ? undefined : 'Toque para ver a lista'}
+            value={String(lines.length)}
+            onPress={() => setDoneOpen((open) => !open)}
+            chevron={false}
+            trailing={<Icon name={doneOpen ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkFaint} />}
+          >
+            {doneOpen ? (
+              <View style={{ gap: 4, marginTop: 6 }}>
+                {lines.slice(0, 8).map((line) => (
+                  <Text key={line.id} variant="caption" muted>{`- ${line.text}`}</Text>
+                ))}
+              </View>
+            ) : null}
+          </GroupedRow>
+        ) : null}
+
+        <GroupedRow
+          leading={<RowGlyph name="location" color={colors.tasks} />}
+          title={here ? `Você está em: ${here.nome}` : 'Onde você está agora?'}
+          subtitle={here
+            ? `${hereTasks.length} tarefa${hereTasks.length === 1 ? '' : 's'} para fazer aqui.`
+            : 'Marque casa, trabalho ou mercado e veja o que dá para fazer lá.'}
+          subtitleLines={2}
+          onPress={() => router.push('/lugares' as never)}
+        />
+      </GroupedList>
+
+      {burnoutOpen && !active ? (
+        <View style={{ flexDirection: 'row', gap: space.sm }}>
+          {([3, 7] as const).map((days) => (
+            <Pressable
+              key={days}
+              accessibilityRole="button"
+              onPress={() => { startBurnout(days); setBurnoutOpen(false) }}
+              style={{
+                flex: 1,
+                minHeight: 44,
+                borderRadius: 12,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.healthMuted,
+              }}
+            >
+              <Text variant="bodyStrong" color={colors.health}>{`${days} dias leves`}</Text>
+            </Pressable>
+          ))}
+        </View>
       ) : null}
-
-      {active && burnout ? (
-        <View style={{ gap: 4 }}>
-          <Text variant="body">Modo burnout até {burnout.until.split('-').reverse().join('/')}. O Elo não quebra nesses dias.</Text>
-          <Pressable accessibilityRole="button" onPress={stopBurnout} style={{ minHeight: 44, justifyContent: 'center' }}>
-            <Text variant="body">Desligar</Text>
-          </Pressable>
-        </View>
-      ) : (
-        <View style={{ gap: 4 }}>
-          <Pressable accessibilityRole="button" onPress={() => setBurnoutOpen((open) => !open)} style={{ minHeight: 44, justifyContent: 'center' }}>
-            <Text variant="body">Dia pesado por vários dias</Text>
-          </Pressable>
-          {burnoutOpen ? (
-            <View style={{ flexDirection: 'row', gap: space.sm }}>
-              <Pressable accessibilityRole="button" onPress={() => startBurnout(3)} style={{ minHeight: 44, justifyContent: 'center' }}>
-                <Text variant="body">3 dias</Text>
-              </Pressable>
-              <Pressable accessibilityRole="button" onPress={() => startBurnout(7)} style={{ minHeight: 44, justifyContent: 'center' }}>
-                <Text variant="body">7 dias</Text>
-              </Pressable>
-            </View>
-          ) : null}
-        </View>
-      )}
-
-      {lines.length > 0 ? (
-        <View style={{ gap: 4 }}>
-          <Pressable accessibilityRole="button" onPress={() => setDoneOpen((open) => !open)} style={{ minHeight: 44, justifyContent: 'center' }}>
-            <Text variant="body">Hoje você já fez {lines.length}</Text>
-          </Pressable>
-          {doneOpen ? lines.slice(0, 8).map((line) => (
-            <Text key={line.id} variant="caption" muted>{line.text}</Text>
-          )) : null}
-        </View>
-      ) : null}
-
-      <Pressable accessibilityRole="button" onPress={() => router.push('/lugares' as never)} style={{ minHeight: 44, justifyContent: 'center' }}>
-        <Text variant="body">
-          {here ? `Você marcou: ${here.nome}. ${hereTasks.length} coisa${hereTasks.length === 1 ? '' : 's'} deste lugar.` : 'Cheguei em um lugar'}
-        </Text>
-      </Pressable>
     </View>
   )
 }

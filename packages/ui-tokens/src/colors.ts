@@ -142,28 +142,31 @@ export type ColorTokens = {
 }
 
 export const COLOR_DARK: ColorTokens = {
-  /** Escuro neutro (grafite), como os apps nativos: petroleo e coral so como destaque. */
-  canvas: '#0E0E0F',
-  chrome: '#161618',
-  surface: '#161618',
-  elevated: '#1C1C1E',
-  fill: '#2A2A2D',
-  /** 15:1 no elevated */
+  /**
+   * O fundo é o petróleo do logo (#1F3A3D). Cartão um degrau mais claro, na mesma tinta.
+   * Um fundo #122226 lia como preto e sumia com a marca.
+   */
+  canvas: BRAND.petroleo,
+  chrome: '#244246',
+  surface: '#244246',
+  elevated: '#244246',
+  fill: '#2A4E52',
+  /** 9,6:1 no cartão */
   ink: BRAND.creme,
-  /** 7,6:1 no elevated */
-  inkMuted: '#ABABB2',
-  /** 5,1:1 no elevated */
-  inkFaint: '#8A8A92',
-  hairline: '#2C2C2F',
-  hairlineStrong: 'rgba(255, 255, 255, 0.18)',
-  cardRim: 'rgba(255, 255, 255, 0.06)',
+  /** 5,7:1 no cartão */
+  inkMuted: '#A9C2BC',
+  /** 4,8:1 no cartão */
+  inkFaint: '#8FB3AE',
+  hairline: '#4A6E72',
+  hairlineStrong: 'rgba(185, 207, 202, 0.40)',
+  cardRim: 'rgba(185, 207, 202, 0.32)',
   brand: BRAND.petroleo,
   brandInk: BRAND.menta,
   onBrand: '#EEF2F0',
-  brandDeep: '#152B2D',
-  brandMuted: '#26262A',
-  /** Coral clareado para texto: o coral puro dá 4,0:1 no cartão petróleo; este, 4,9:1 */
-  axel: '#F08A65',
+  brandDeep: '#1A3336',
+  brandMuted: '#2F565A',
+  /** Coral clareado: 4,6:1 no cartão petróleo claro */
+  axel: '#F6A48A',
   axelFill: BRAND.coral,
   axelHover: '#C45A32',
   axelMuted: 'rgba(232, 115, 74, 0.18)',
@@ -181,25 +184,28 @@ export const COLOR_DARK: ColorTokens = {
   dangerMuted: 'rgba(244, 138, 155, 0.16)',
   attentionMuted: 'rgba(232, 176, 75, 0.16)',
   done: '#6CC79B',
-  overlay: 'rgba(0, 0, 0, 0.72)',
-  glyphInk: '#0E0E0F',
-  navBg: '#161618',
-  navBorder: '#2C2C2F',
-  navInk: '#8E8E93',
-  /** Sem caixa: a aba ativa é ícone cheio, rótulo em negrito e o pontinho coral */
+  overlay: 'rgba(16, 40, 42, 0.62)',
+  glyphInk: '#102426',
+  /** Barra de abas na cor do logo, separada do fundo por um fio de menta */
+  navBg: BRAND.petroleo,
+  navBorder: '#4A6E72',
+  navInk: BRAND.menta,
+  /** Sem caixa: a aba ativa é ícone cheio em cobre, rótulo em negrito e o pontinho */
   navActiveBg: 'transparent',
-  navActiveInk: '#EEF2F0',
+  navActiveInk: '#F08A65',
   navActiveDot: BRAND.coral,
   dismiss: '#C889BD',
   dismissMuted: 'rgba(200, 137, 189, 0.16)',
-  featureBg: '#1C1C1E',
+  featureBg: '#2A4E52',
   featureInk: BRAND.creme,
-  featureMuted: '#ABABB2',
-  featureTrack: 'rgba(255, 255, 255, 0.14)',
-  heroBg: '#1C1C1E',
-  heroBgDeep: '#161618',
+  featureMuted: '#A9C2BC',
+  featureTrack: 'rgba(185, 207, 202, 0.24)',
+  /** Faixa de marca no petróleo do logo */
+  heroBg: BRAND.petroleo,
+  heroBgDeep: '#1A3336',
   heroInk: '#EEF2F0',
-  heroMuted: '#ABABB2',
+  /** 7:1 no petróleo */
+  heroMuted: BRAND.menta,
 }
 
 export const COLOR_LIGHT: ColorTokens = {

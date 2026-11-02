@@ -71,3 +71,16 @@ export async function registrarHumor(input: {
   if (inserted.error) throw new Error(inserted.error.message)
   return mapRow(inserted.data as Record<string, unknown>)
 }
+
+/** Tira só o texto. O humor do dia continua. */
+export async function limparNotaHumor(id: number): Promise<void>
+{
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user?.id) throw new Error('Não autenticado')
+  const { error } = await supabase
+    .from('diario_humor')
+    .update({ nota: null })
+    .eq('id', id)
+    .eq('user_id', auth.user.id)
+  if (error) throw new Error(error.message)
+}

@@ -11,7 +11,9 @@ import {
 import { mapPushUrlToRoute } from '../lib/pushDeepLink'
 import {
   addNativePushResponseListener,
+  cancelCuriosityCard,
   getLastNativePushResponse,
+  scheduleCuriosityCard,
 } from '../lib/pushNotifications'
 
 function navigateFromPush(
@@ -43,6 +45,7 @@ export function usePushBootstrap(): void
     {
       registeredFor.current = null
       void unregisterExpoPushAsync()
+      void cancelCuriosityCard()
       return
     }
 
@@ -50,6 +53,7 @@ export function usePushBootstrap(): void
     registeredFor.current = userId
     // web: sem toque da pessoa, só renova se a permissão já foi dada
     void registerExpoPushAsync(Platform.OS !== 'web')
+    if (Platform.OS !== 'web') void scheduleCuriosityCard()
   }, [userId, isGuest, prefsLoaded, notifyCadence])
 
   useEffect(() =>

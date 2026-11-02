@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import { View } from 'react-native'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import {
   findHabit,
@@ -55,6 +55,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   const addHumor = useDataStore((s) => s.addHumor)
   const isGuest = useAuthStore((s) => s.isGuest)
   const desk = useWebDesk()
+  const router = useRouter()
 
   const agua = findHabit(habits, 'agua')
   const proteina = findHabit(habits, 'proteina')
@@ -226,9 +227,10 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
         <GroupedList>
           <GroupedRow
             leading={<RowGlyph color="transparent"><AxelSun size={30} mood="calm" /></RowGlyph>}
-            title="Axel"
-            subtitle={lastAxelCare || 'Sem pressa. Um passo de cada vez já conta.'}
-            subtitleLines={3}
+            title="Seu AXEL"
+            subtitle={lastAxelCare || 'Quem sugere o próximo passo. Toque para ver o jogo e os ícones.'}
+            subtitleLines={2}
+            onPress={() => router.push('/seu-axel')}
           />
           {modules.on('mood') ? (
             <GroupedRow

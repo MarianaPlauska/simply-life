@@ -36,16 +36,12 @@ export function HealthNeuroFocusPanel({ bare = false }: { bare?: boolean } = {})
         value={Boolean(prefs.adhd_support)}
         onValueChange={(on) =>
         {
-          void patch({
-            adhd_support: on,
-            gamification_mode: on ? prefs.gamification_mode ?? 'calm' : 'calm',
-          })
+          void patch({ adhd_support: on })
         }}
       />
-      {prefs.adhd_support ? (
-        <View style={{ gap: space.xs, paddingHorizontal: 4 }}>
+      <View style={{ gap: space.xs, paddingHorizontal: 4 }}>
           <Text variant="caption" muted>
-            Modo de motivação na Home
+            Como o dia aparece
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
             {GAMIFICATION_MODE_OPTIONS.map((opt) =>
@@ -67,7 +63,6 @@ export function HealthNeuroFocusPanel({ bare = false }: { bare?: boolean } = {})
             {GAMIFICATION_MODE_OPTIONS.find((o) => o.id === (prefs.gamification_mode || 'calm'))?.hint}
           </Text>
         </View>
-      ) : null}
     </>
   )
 

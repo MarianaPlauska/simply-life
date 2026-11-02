@@ -41,6 +41,7 @@ import { sendTestAlert } from '../src/lib/pushNotifications'
 import { ModulePicker } from '../src/components/onboarding/ModulePicker'
 import { OnbBlock } from '../src/components/onboarding/OnbStep'
 import { OnbChoice } from '../src/components/onboarding/OnbChoice'
+import { AdventurePreview } from '../src/components/play/AdventurePreview'
 import { HealthStartForm } from '../src/components/onboarding/HealthStartForm'
 import { FinanceStartForm } from '../src/components/onboarding/FinanceStartForm'
 import {
@@ -298,20 +299,21 @@ export default function PreferenciasScreen()
                 kind="radio"
                 title="Prefiro o modo padrão"
                 selected={!prefs.adhd_support}
-                onPress={() => void patch({ adhd_support: false, gamification_mode: 'calm' })}
+                onPress={() => void patch({ adhd_support: false })}
               />
-              {prefs.adhd_support
-                ? GAMIFICATION_MODE_OPTIONS.map((opt) => (
-                    <OnbChoice
-                      key={opt.id}
-                      kind="radio"
-                      title={opt.label}
-                      hint={opt.hint}
-                      selected={(prefs.gamification_mode || 'calm') === opt.id}
-                      onPress={() => void patch({ gamification_mode: opt.id })}
-                    />
-                  ))
-                : null}
+            </OnbBlock>
+            <OnbBlock title="Como o dia aparece" hint="O jogo é opcional. Dá para trocar quando quiser.">
+              {GAMIFICATION_MODE_OPTIONS.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={(prefs.gamification_mode || 'calm') === opt.id}
+                  onPress={() => void patch({ gamification_mode: opt.id })}
+                />
+              ))}
+              {(prefs.gamification_mode || 'calm') === 'rpg' ? <AdventurePreview /> : null}
             </OnbBlock>
 
             <OnbBlock title="Início" hint="Atalhos do topo e cartões rápidos.">

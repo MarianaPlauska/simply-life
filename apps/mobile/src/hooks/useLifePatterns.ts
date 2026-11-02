@@ -19,7 +19,7 @@ function toSeries(rows: { data: string; valor: number }[]): DaySeries
 }
 
 /** Padrões entre sono, água, treino, humor, gastos e tarefas dos últimos 60 dias. */
-export function useLifePatterns(): { patterns: LifePattern[]; loading: boolean; daysLogged: number }
+export function useLifePatterns(): { patterns: LifePattern[]; series: LifeSeries; loading: boolean; daysLogged: number }
 {
   const isGuest = useAuthStore((s) => s.isGuest)
   const humor = useDataStore((s) => s.humor)
@@ -85,6 +85,7 @@ export function useLifePatterns(): { patterns: LifePattern[]; loading: boolean; 
     const series: LifeSeries = { ...habits, mood, spend, tasksDone }
     return {
       patterns: findLifePatterns(series),
+      series,
       loading,
       daysLogged: lifePatternDays(series).length,
     }

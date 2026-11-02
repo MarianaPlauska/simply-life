@@ -8,6 +8,10 @@ export type HomeShortcut = {
   label: string
   value?: string
   icon: keyof typeof Icon.glyphMap
+  /** Cor da área (água, humor, tarefas). Sem ela, o círculo fica no cobre. */
+  tint?: string
+  /** Ícone sobre o círculo. Padrão: tinta que contrasta com a cor da área. */
+  iconColor?: string
   onPress: () => void
 }
 
@@ -49,12 +53,12 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
                 width: 36,
                 height: 36,
                 borderRadius: 999,
-                backgroundColor: colors.axelMuted,
+                backgroundColor: a.tint ?? colors.axelMuted,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Icon name={a.icon} size={20} color={colors.ink} />
+              <Icon name={a.icon} size={20} color={a.iconColor ?? (a.tint ? colors.glyphInk : colors.ink)} />
             </View>
           </View>
           {a.value ? (

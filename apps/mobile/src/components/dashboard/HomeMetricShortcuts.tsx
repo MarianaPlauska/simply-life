@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import {
   findHabit,
   formatBRL,
+  formatSleepHours,
   monthExpenseTotal,
   moodLabel,
   AGUA_META_COPOS,
@@ -12,8 +13,41 @@ import { useCaptureStore } from '../../store/captureStore'
 import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { normalizeHomeMetrics, HOME_METRIC_CATALOG, type HomeMetricId } from '../../lib/homeMetrics'
+import { useTheme } from '../../theme/ThemeProvider'
 import { HomeQuickActions, type HomeShortcut } from './HomeQuickActions'
 import { filterMetrics } from '../../lib/appModules'
+
+function tintFor(id: HomeMetricId, colors: {
+  health: string
+  tasks: string
+  finance: string
+  attention: string
+  dismiss: string
+  axelFill: string
+}): string
+{
+  if (id === 'humor' || id === 'water')
+  {
+    return colors.health
+  }
+  if (id === 'tasks')
+  {
+    return colors.tasks
+  }
+  if (id === 'finance')
+  {
+    return colors.finance
+  }
+  if (id === 'sleep')
+  {
+    return colors.dismiss
+  }
+  if (id === 'protein' || id === 'stats')
+  {
+    return colors.attention
+  }
+  return colors.axelFill
+}
 
 function iconFor(id: HomeMetricId): HomeShortcut['icon']
 {
@@ -41,12 +75,17 @@ function iconFor(id: HomeMetricId): HomeShortcut['icon']
   {
     return 'stats-chart-outline'
   }
+  if (id === 'sleep')
+  {
+    return 'moon-outline'
+  }
   return 'flag-outline'
 }
 
 export function HomeMetricShortcuts()
 {
   const router = useRouter()
+  const { colors } = useTheme()
   const isGuest = useAuthStore((s) => s.isGuest)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const prefs = usePrefsStore((s) => s.prefs)
@@ -64,6 +103,7 @@ export function HomeMetricShortcuts()
   const todayIso = new Date().toISOString().slice(0, 10)
   const agua = findHabit(habits, 'agua')
   const proteina = findHabit(habits, 'proteina')
+  const sono = findHabit(habits, 'sono')
   const humorHoje = humor.find((h) => (h.data || '').slice(0, 10) === todayIso)?.humor
   const openTasks = tasks.filter((t) => t.status !== 'done').length
   const doneToday = tasks.filter(
@@ -107,6 +147,10 @@ export function HomeMetricShortcuts()
       {
         return String(doneToday)
       }
+      if (id === 'sleep')
+      {
+        return sono && sono.progressoAtual > 0 ? formatSleepHours(sono.progressoAtual) : '-'
+      }
       const total = doneToday + todayOpen
       if (habits.length > 0)
       {
@@ -141,6 +185,10 @@ export function HomeMetricShortcuts()
       {
         return () => router.push('/(tabs)/kanban')
       }
+      if (id === 'sleep')
+      {
+        return () => router.push('/(tabs)/saude')
+      }
       return () => router.push('/(tabs)/financeiro')
     }
 
@@ -151,6 +199,7 @@ export function HomeMetricShortcuts()
         id,
         label: meta?.label ?? id,
         icon: iconFor(id),
+        tint: tintFor(id, colors),
         value: valueFor(id),
         onPress: pressFor(id),
       }
@@ -160,12 +209,14 @@ export function HomeMetricShortcuts()
     humorHoje,
     agua,
     proteina,
+    sono,
     openTasks,
     gastosMes,
     doneToday,
     todayOpen,
     habits.length,
     habitsDone,
+    colors,
     addWaterCup,
     isGuest,
     openCapture,
@@ -179,6 +230,8 @@ export function HomeMetricShortcuts()
           id: 'apoio',
           label: 'Apoio',
           icon: 'heart-outline',
+          tint: colors.axelFill,
+          iconColor: colors.axelOnFill,
           onPress: () => router.push('/apoio' as never),
         },
         ...actions,

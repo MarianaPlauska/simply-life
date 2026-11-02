@@ -13,7 +13,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { useWorkspace } from '../../layout/useWorkspace'
-import { AxelSun } from '../AxelSun'
+import { AxelFaceSun } from '../play/AxelFaceSun'
 import { useInPanel } from '../../ui/Panel'
 import { useWebDesk } from './web/webBox'
 
@@ -58,11 +58,6 @@ export function AxelDayBrief()
 
   const primaryStep = brief.nextSteps[0]
   const open = !collapsed
-  const sunMood = moodLevel != null && moodLevel <= 2
-    ? 'care'
-    : moodLevel != null && moodLevel >= 4
-      ? 'happy'
-      : 'calm'
 
   const toggleOpen = () =>
   {
@@ -75,7 +70,7 @@ export function AxelDayBrief()
     return (
       <GroupedList>
         <GroupedRow
-          leading={<RowGlyph color="transparent"><AxelSun size={32} mood={sunMood} /></RowGlyph>}
+          leading={<RowGlyph color="transparent"><AxelFaceSun size={32} /></RowGlyph>}
           title={brief.headline}
           subtitle={brief.voice}
           subtitleLines={2}
@@ -88,6 +83,15 @@ export function AxelDayBrief()
             leading={<RowGlyph name="sparkles" color={colors.health} />}
             title={primaryStep}
             subtitle="Próximo passo"
+            onPress={() =>
+            {
+              if (brief.focusTaskId)
+              {
+                router.push(`/task/${brief.focusTaskId}`)
+                return
+              }
+              router.push('/(tabs)/saude')
+            }}
           />
         ) : null}
         {details ? (
@@ -128,7 +132,7 @@ export function AxelDayBrief()
         accessibilityLabel={open ? 'Fechar Axel' : 'Abrir Axel'}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}
       >
-        <AxelSun size={40} mood={sunMood} />
+        <AxelFaceSun size={40} />
         <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             Axel

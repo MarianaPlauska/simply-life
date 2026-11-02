@@ -6,6 +6,7 @@ import {
   xpProgressInLevel,
   STARTER_ACHIEVEMENTS,
   REWARD_SHOP,
+  AXEL_ACCESSORIES,
   appendHistory,
   nextMilestone,
   localTodayIso,
@@ -122,7 +123,11 @@ type GamificationState = {
   /** XP por semana e área temática (tarefas, foco, treino): base das ligas temáticas */
   weekXpArea: Record<string, Partial<Record<'tarefas' | 'foco' | 'treino', number>>>
   celebration: Celebration
+  /** Último XP realmente concedido, para o +N subir na Home. Zero não entra. */
+  lastGrant: { xp: number; at: number } | null
   hydrate: () => void
+  grantGold: (amount: number) => void
+  addOwned: (id: string) => void
   grantXp: (amount: number, title: string, detail?: string) => number
   unlockIf: (id: string) => void
   buyItem: (id: string, cost: number) => { ok: boolean; message: string }
@@ -144,6 +149,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
   weekXp: {},
   weekXpArea: {},
   celebration: null,
+  lastGrant: null,
 
   hydrate: () =>
   {
@@ -197,8 +203,29 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       history,
       weekXp,
       weekXpArea,
+      lastGrant: { xp: granted, at: Date.now() },
     })
     return granted
+  },
+
+  grantGold: (amount) =>
+  {
+    const add = Math.max(0, Math.floor(amount))
+    if (add <= 0) return
+    if (!loaded) get().hydrate()
+    const gold = get().gold + add
+    storage.setItem(GOLD_KEY, String(gold))
+    set({ gold })
+  },
+
+  addOwned: (id) =>
+  {
+    if (!id) return
+    if (!loaded) get().hydrate()
+    if (get().owned.includes(id)) return
+    const owned = [...get().owned, id]
+    storage.setItem(OWNED_KEY, JSON.stringify(owned))
+    set({ owned })
   },
 
   unlockIf: (id) =>
@@ -223,11 +250,12 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
     const owned = [...get().owned, id]
     storage.setItem(GOLD_KEY, String(gold))
     storage.setItem(OWNED_KEY, JSON.stringify(owned))
-    const item = REWARD_SHOP.find((s) => s.id === id)
+    const shop = REWARD_SHOP.find((s) => s.id === id)
+    const accessory = AXEL_ACCESSORIES.find((s) => s.id === id)
     set({
       gold,
       owned,
-      celebration: { title: item?.title ?? 'Recompensa', body: 'Item desbloqueado' },
+      celebration: { title: shop?.title ?? accessory?.label ?? 'Recompensa', body: 'Item desbloqueado' },
     })
     return { ok: true, message: 'Comprado' }
   },
@@ -252,6 +280,7 @@ export const useGamificationStore = create<GamificationState>((set, get) => ({
       weekXp: {},
       weekXpArea: {},
       celebration: null,
+      lastGrant: null,
     })
   },
 

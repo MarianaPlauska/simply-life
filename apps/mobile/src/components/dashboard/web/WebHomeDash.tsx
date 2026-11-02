@@ -14,7 +14,7 @@ import {
 import { Text } from '../../../ui'
 import { Icon, type IconName } from '../../../ui/Icon'
 import { ProgressRing } from '../../../ui/ProgressRing'
-import { AxelSun } from '../../AxelSun'
+import { AxelFaceSun } from '../../play/AxelFaceSun'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { webBandColor } from '../../../theme/webPalette'
 import { useDataStore } from '../../../store/dataStore'
@@ -24,6 +24,7 @@ import { useElo } from '../../../hooks/useElo'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
 import { WEB_DISPLAY_FONT } from './webTypography'
+import { HomeXpBar } from '../../play/HomeXpBar'
 
 /*
  * Início da web como painel de bem-estar (não a pilha do app): destaque grande do Axel
@@ -82,6 +83,7 @@ export function DashGreeting({ greet, name, dateLabel, onMore }: { greet: string
         <Text variant="caption" muted>Uma coisa de cada vez. Você está indo bem.</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <HomeXpBar />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.cardRim }}>
           <Icon name="calendar-outline" size={15} color={colors.inkMuted} />
           <Text variant="caption">{dateLabel}</Text>
@@ -202,7 +204,7 @@ export function DashHero()
             style={{ position: 'absolute', width: d, height: d, borderRadius: 999, backgroundColor: `${colors.onBrand}0F` }}
           />
         ))}
-        <AxelSun size={76} mood={moodLevel != null && moodLevel <= 2 ? 'care' : moodLevel != null && moodLevel >= 4 ? 'happy' : 'calm'} />
+        <AxelFaceSun size={76} />
       </View>
     </View>
   )

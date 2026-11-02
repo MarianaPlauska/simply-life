@@ -43,7 +43,7 @@ export const GAMIFICATION_MODE_OPTIONS: {
   {
     id: 'rpg',
     label: 'Aventura',
-    hint: 'Nível, moedas e trilha visíveis na Home. Útil para motivação com TDAH, sem punir dias parados.',
+    hint: 'O AXEL ganha um palco, energia e um baú. Nada disso tira o que você já ganhou. Dá para desligar depois.',
   },
 ]
 

@@ -19,13 +19,23 @@ import {
   PrimaryButton,
   ListRow,
   SectionHeader,
+  GroupedList,
+  GroupedRow,
+  RowGlyph,
 } from '../../src/ui'
 import { Panel } from '../../src/ui/Panel'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { useDataStore } from '../../src/store/dataStore'
+import { AxelSun } from '../../src/components/AxelSun'
 import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
+import { HomePlay } from '../../src/components/play/HomePlay'
+import { MoreMenuExit } from '../../src/components/dashboard/MoreMenuExit'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
+import { HomeSearchBar } from '../../src/components/dashboard/HomeSearchBar'
+import { HomeNowCard } from '../../src/components/dashboard/HomeNowCard'
+import { HomeDayList } from '../../src/components/dashboard/HomeDayList'
+import { HomeLifeGoals } from '../../src/components/dashboard/HomeLifeGoals'
 import { LifePatternCard } from '../../src/components/dashboard/LifePatternCard'
 import { useLifePatterns } from '../../src/hooks/useLifePatterns'
 import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
@@ -47,7 +57,9 @@ import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
 import { CareHomeStrip } from '../../src/components/care/CareHomeStrip'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
-import { HomeRpgStrip } from '../../src/components/dashboard/HomeRpgStrip'
+import { HomePlay } from '../../src/components/play/HomePlay'
+import { AdventureHud } from '../../src/components/play/AdventureHud'
+import { AdventureStage } from '../../src/components/play/AdventureStage'
 import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
 import { PersonalSummaryGrid } from '../../src/components/dashboard/PersonalSummaryGrid'
 import { LifeSummaryReport } from '../../src/components/metrics/LifeSummaryReport'
@@ -123,7 +135,8 @@ export default function DashboardScreen()
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
   const showMoodWeek = isMoodWeekReportVisible(humor, prefs.mood_report_dismissed_week)
-  const showCareSection = waterOnHome || showMoodWeek
+  // Água e humor já têm atalho com o número. Aqui fica o formulário da manhã e o relatório da semana.
+  const showCareSection = showMorningRitual || showMoodWeek
   const rpgMode = prefs.gamification_mode === 'rpg'
   const moduleOrder = filterPriorities(prefs.enabled_modules, prefs.home_module_order ?? ['tasks', 'health', 'finance'])
 
@@ -233,6 +246,9 @@ export default function DashboardScreen()
           isAdmin={isAdmin}
           onAccount={() => setMenuOpen(true)}
         />
+        {rpgMode ? <AdventureHud /> : null}
+        <HomePlay />
+        {rpgMode ? <AdventureStage /> : null}
 
         {isDesktop ? (
           <HomeDesktopStage
@@ -252,7 +268,6 @@ export default function DashboardScreen()
                     ) : null
                   }
                 />
-                {rpgMode ? <HomeRpgStrip /> : null}
               </>
             )}
             side={(
@@ -279,57 +294,46 @@ export default function DashboardScreen()
           />
         ) : (
           <>
-            {/* Celular: resumo (destaque + números), depois ação (ritual), depois guia (AXEL) e plano */}
-            <HomeTodayDashboard
-              tasks={tasks}
-              finance={finance}
-              pending={openTasks.length}
-              doneToday={doneToday}
-            />
-
-            {/* Atalhos logo abaixo da busca, como as categorias de um app de entrega */}
+            {/* Saudação, busca, atalhos. Cada número aparece uma vez. */}
+            <HomeSearchBar tasks={tasks} finance={finance} />
             <HomeMetricShortcuts />
-
-            <HomeKpiSquares items={kpiItems} />
-
-            {showMorningRitual ? (
-              <HomeMorningRitual
-                needSleep={showSleepForm}
-                needMood={showMoodForm}
-              />
-            ) : null}
-
-            <View style={{ gap: 12 }}>
-              <Text variant="section">Seu dia</Text>
-              <View style={{ gap: 12 }}>
-                <AxelDayBrief />
-                <LifePatternCard patterns={lifePatterns} />
-                <DayPlanHomeCard />
-                <VisualDayCard />
-                <CareHomeStrip />
-                <SalaryConfirmCard />
-              </View>
-            </View>
+            <HomeNowCard task={focusTask} />
+            <SalaryConfirmCard />
+            <HomeDayList />
 
             {showCareSection ? (
               <View style={{ gap: 12 }}>
                 <Text variant="section">Cuidar de você</Text>
-                <View style={{ gap: 12 }}>
-                  {waterOnHome ? <HomeWaterProgressCard /> : null}
-                  {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
-                </View>
+                {showMorningRitual ? (
+                  <HomeMorningRitual
+                    needSleep={showSleepForm}
+                    needMood={showMoodForm}
+                  />
+                ) : null}
+                {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
               </View>
             ) : null}
 
-            {rpgMode ? <HomeRpgStrip /> : null}
-
-            {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia e mapa de dias" defaultOpen={false}>
-              <View style={{ gap: 24, paddingTop: 8 }}>
-                <HomeDayTimeline tasks={today} />
-                <EloHeatmap semanas={12} compact />
-              </View>
-            </HomeCollapsible>
+            {/* O mapa e os resumos saíram da frente. Continuam a um toque. */}
+            <View style={{ gap: 8 }}>
+              <Text variant="caption" muted style={{ marginLeft: 4 }}>
+                Quando quiser entender
+              </Text>
+              <GroupedList>
+                <GroupedRow
+                  leading={<RowGlyph color="transparent"><AxelSun size={30} mood="calm" /></RowGlyph>}
+                  title="Seu AXEL"
+                  subtitle="Como o app funciona, o jogo e os ícones"
+                  onPress={() => router.push('/seu-axel')}
+                />
+                <GroupedRow
+                  leading={<RowGlyph name="layers" color={colors.brandDeep} />}
+                  title="Mais do dia"
+                  subtitle="Plano, mapas e os resumos"
+                  onPress={() => router.push('/mais-do-dia')}
+                />
+              </GroupedList>
+            </View>
           </>
         )}
 
@@ -344,6 +348,7 @@ export default function DashboardScreen()
           </Pressable>
         ) : null}
 
+        {isDesktop ? (
         <View
           style={{
             flexDirection: showRail ? 'row' : 'column',
@@ -432,6 +437,7 @@ export default function DashboardScreen()
             </View>
           ) : null}
         </View>
+        ) : null}
       </TabShell>
 
       <Modal
@@ -516,13 +522,15 @@ export default function DashboardScreen()
                   { label: 'Apoio do dia', subtitle: 'Energia, burnout, lugares e espera de gasto', href: '/apoio' },
                   { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
                   { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
+                  { label: 'Seu AXEL', subtitle: 'Como funciona, o jogo e os ícones', href: '/seu-axel' },
+                  { label: 'Mais do dia', subtitle: 'Plano, mapas e resumos', href: '/mais-do-dia' },
                   { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
                   { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
                   { label: 'Preferências', subtitle: 'O que eu uso, metas e alertas', href: '/preferencias' },
                   { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                   { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                   { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                  { label: 'Elo', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
+                  { label: 'Elo', subtitle: 'Dias seguidos. O placar de pontos fica no Perfil.', href: '/ofensiva' },
                   { label: 'Relatório', subtitle: 'Tudo de um período, em PDF', href: '/relatorio' },
                   { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
                 ] as const
@@ -541,19 +549,15 @@ export default function DashboardScreen()
                 />
               ))}
             </Card>
-            <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
-              <ListRow
-                title="Sair"
-                subtitle="Encerrar sessão neste aparelho"
-                onPress={() =>
-                {
-                  setMenuOpen(false)
-                  void signOut()
-                  router.replace('/login')
-                }}
-              />
-            </Card>
-            <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setMenuOpen(false)} />
+            <MoreMenuExit
+              onClose={() => setMenuOpen(false)}
+              onSignOut={() =>
+              {
+                setMenuOpen(false)
+                void signOut()
+                router.replace('/login')
+              }}
+            />
           </ScrollView>
         </View>
       </Modal>

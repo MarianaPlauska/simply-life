@@ -8,6 +8,7 @@ import { useWorkspace } from '../../layout/useWorkspace'
 import { HomeWeatherChip } from './HomeWeatherChip'
 import { CircleCornerButton } from '../social/CircleCornerButton'
 import { ProfileAvatarBadge } from '../social/ProfileAvatarBadge'
+import { HomeXpBar } from '../play/HomeXpBar'
 
 type Props = {
   greet: string
@@ -60,7 +61,8 @@ export function HomeFitnessHero({
             {title}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <HomeXpBar />
         <CircleCornerButton size={SIDE} />
         <PressableScale
           onPress={onAccount}
@@ -117,7 +119,8 @@ export function HomeFitnessHero({
             {title}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <HomeXpBar />
         <CircleCornerButton />
         <PressableScale
           onPress={onAccount}

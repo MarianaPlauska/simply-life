@@ -1,12 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { View } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
-  cardFaturaAbertaDisplay,
   formatBRL,
   currentMonthLabel,
-  computeSaldoDisponivel,
-  rankCategoriesBySpend,
 } from '@simply-life/shared'
 import {
   Card,
@@ -21,12 +18,6 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useCaptureStore } from '../../store/captureStore'
 import { useDataStore } from '../../store/dataStore'
-import { useAuthStore } from '../../store/authStore'
-import { useCategoryMetaStore } from '../../store/categoryMetaStore'
-import { usePrefsStore } from '../../store/prefsStore'
-import { resolveAxelName } from '../../lib/axelName'
-import { colorMapFromMeta, labelMapFromMeta, resolveCategoryMeta } from '../../lib/categoryMeta'
-import { FinanceIcon } from '../../lib/financeIcons'
 import { tabBarScreenPadding } from '../../ui/chrome'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { financeTxSubtitle } from '../../lib/financeTxLabel'
@@ -43,8 +34,6 @@ import { useWebDesk } from '../dashboard/web/webBox'
 import { useFinanceDeskGrid } from './desk/deskLayout'
 import { DeskPanelHeader } from './desk/DeskPanelHeader'
 import { FinanceTxTable } from './desk/FinanceTxTable'
-import { FinanceCategoryList } from './desk/FinanceCategoryList'
-
 type Props = {
   onGoMovimentos: () => void
   onGoCartoes?: () => void
@@ -65,7 +54,7 @@ export function FinanceHomeTab({
   onCardsFocusChange,
 }: Props)
 {
-  const { colors, space, chart, elevation } = useTheme()
+  const { colors, space, elevation } = useTheme()
   const { showRail, isDesktop } = useWorkspace()
   const desk = useWebDesk()
   const deskGrid = useFinanceDeskGrid()
@@ -78,66 +67,16 @@ export function FinanceHomeTab({
   const [ledgerOpen, setLedgerOpen] = useState(false)
   const [editingTx, setEditingTx] = useState<string | null>(null)
   const openCapture = useCaptureStore((s) => s.openCapture)
-  const email = useAuthStore((s) => s.sessionEmail)
-  const isGuest = useAuthStore((s) => s.isGuest)
-  const callsYou = usePrefsStore((s) => s.prefs.axel_calls_you)
-  const displayNamePref = usePrefsStore((s) => s.prefs.display_name)
   const txs = useDataStore((s) => s.finance)
-  const cash = useDataStore((s) => s.cashAccount)
   const cards = useDataStore((s) => s.financeCards)
-  const fixas = useDataStore((s) => s.contasFixas)
-  const catMap = useCategoryMetaStore((s) => s.map)
-  const hydrateCats = useCategoryMetaStore((s) => s.hydrate)
-  const pos = computeSaldoDisponivel(cash, txs, fixas)
   const fabClearance = showRail ? space.md : tabBarScreenPadding(insets.bottom) + space.md
   const primaryCard = cards.find((c) => c.id === visibleCardId) ?? cards[0]
   const detailCard = cards.find((c) => c.id === detailId) ?? null
-  const displayName = resolveAxelName({
-    isGuest,
-    callsYou,
-    displayName: displayNamePref,
-    email,
-  })
 
   const recent = useMemo(
-    () => [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 6),
+    () => [...txs].sort((a, b) => b.data.localeCompare(a.data)).slice(0, 3),
     [txs],
   )
-  const rankingAll = useMemo(
-    () => rankCategoriesBySpend(txs, colorMapFromMeta(catMap), chart, labelMapFromMeta(catMap)),
-    [txs, catMap, chart],
-  )
-  const ranking = rankingAll.slice(0, 4)
-
-  useEffect(() =>
-  {
-    void hydrateCats()
-  }, [hydrateCats])
-
-
-
-  const quickIcons: {
-    id: string
-    label: string
-    icon: keyof typeof Icon.glyphMap
-    onPress: () => void
-  }[] = [
-    { id: 'send', label: 'Gasto', icon: 'swap-vertical-outline', onPress: () => openCapture('expense', null, { studio: true }) },
-    {
-      id: 'recv',
-      label: 'Receita',
-      icon: 'download-outline',
-      onPress: () => openCapture('expense', null, { studio: true, lancamento: 'receita' }),
-    },
-    { id: 'cards', label: 'Cartões', icon: 'wallet-outline', onPress: () => onCardsFocusChange(true) },
-    {
-      id: 'more',
-      label: 'Mais',
-      icon: 'grid-outline',
-      onPress: () => (onGoAnalise ? onGoAnalise() : onGoMovimentos()),
-    },
-  ]
-
   const openEditPrimary = () =>
   {
     if (!primaryCard)
@@ -296,14 +235,15 @@ export function FinanceHomeTab({
         padding: 16,
         gap: 16,
         backgroundColor: colors.elevated,
-        overflow: 'hidden',
+        alignSelf: 'stretch',
+        width: '100%',
         maxWidth: isDesktop ? 520 : undefined,
         ...elevation.card,
       }}
     >
       <View style={{ gap: 1 }}>
         <Text variant="section" style={{ fontSize: 16 }}>
-          Olá, {displayName}
+          Saldo da conta
         </Text>
         <Text variant="caption" muted style={{ fontSize: 12 }}>
           {currentMonthLabel()}
@@ -313,138 +253,25 @@ export function FinanceHomeTab({
       {/* saldo da conta separado: a área de cartões mostra só cartões de crédito */}
       <FinanceBalancePanel />
 
-      <View style={{ flexDirection: 'row', gap: 8, borderTopWidth: 1, borderTopColor: colors.hairline, paddingTop: 12 }}>
-        {quickIcons.map((a) => (
-          <PressableScale
-            key={a.id}
-            onPress={a.onPress}
-            accessibilityRole="button"
-            accessibilityLabel={a.label}
-            style={{ flex: 1, alignItems: 'center', gap: 6 }}
-          >
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 999,
-                backgroundColor: colors.fill,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Icon name={a.icon} size={18} color={colors.ink} />
-            </View>
-            <Text variant="micro" muted style={{ fontWeight: '600' }}>
-              {a.label}
-            </Text>
-          </PressableScale>
-        ))}
+      <Text variant="caption" muted>
+        Este número é o dinheiro da conta. Compra no cartão só entra aqui quando a fatura é paga.
+      </Text>
+      <View style={{ gap: 8, alignSelf: 'stretch' }}>
+        <PrimaryButton
+          label="Anotar gasto"
+          icon="swap-vertical-outline"
+          onPress={() => openCapture('expense', null, { studio: true })}
+          style={{ alignSelf: 'stretch', minHeight: 48 }}
+        />
+        <PrimaryButton
+          label="Anotar entrada"
+          variant="secondary"
+          icon="download-outline"
+          onPress={() => openCapture('expense', null, { studio: true, lancamento: 'receita' })}
+          style={{ alignSelf: 'stretch', minHeight: 48 }}
+        />
       </View>
     </View>
-  )
-  const blocoCartoes = (
-    <>
-      {/* Cartões de crédito: fatura, disponível e vencimento de cada um */}
-      <View style={{ gap: space.sm }}>
-        <SectionHeader
-          title="Cartões"
-          action={cards.length ? (
-            <PrimaryButton label="Ver todos" variant="link" size="sm" onPress={() => onCardsFocusChange(true)} />
-          ) : undefined}
-        />
-        <CardCarousel
-          cards={cards}
-          selectedId={null}
-          onSelect={(id) =>
-          {
-            setVisibleCardId(id)
-            setDetailId(id)
-          }}
-          onVisibleChange={setVisibleCardId}
-          onAdd={() => setCreateOpen(true)}
-        />
-      </View>
-    </>
-  )
-  const blocoPrevisao = (
-    <>
-      {/* Etapa 2: salário a confirmar + quanto sobra no fim do mês */}
-      <SalaryConfirmCard />
-      <MonthProjectionCard />
-    </>
-  )
-  const blocoCategorias = (
-    <>
-      {/* Categorias — tiles leves (ref. imagem) */}
-      <View style={{ gap: space.sm }}>
-        <SectionHeader
-          title="Categorias"
-          action={
-            <PrimaryButton
-              label="Ver mais"
-              variant="link"
-              size="sm"
-              onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
-            />
-          }
-        />
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: 12,
-            borderRadius: 16,
-            padding: 12,
-            backgroundColor: colors.elevated,
-            ...elevation.card,
-          }}
-        >
-          {(ranking.length
-            ? ranking
-            : [
-                { categoria: 'alimentacao', label: 'Alimentação', total: 0, pct: 0, color: colors.axel },
-                { categoria: 'transporte', label: 'Transporte', total: 0, pct: 0, color: colors.tasks },
-                { categoria: 'saude', label: 'Saúde', total: 0, pct: 0, color: colors.health },
-                { categoria: 'outros', label: 'Outros', total: 0, pct: 0, color: colors.finance },
-              ]
-          ).map((row) => (
-            <PressableScale
-              key={row.categoria}
-              onPress={() => (onGoAnalise ? onGoAnalise() : onGoMovimentos())}
-              style={{
-                width: '48%' as `${number}%`,
-                flexGrow: 1,
-                flexBasis: '46%',
-                minHeight: 68,
-                borderRadius: 14,
-                backgroundColor: colors.fill,
-                padding: 12,
-                gap: 6,
-              }}
-            >
-              <View
-                style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 999,
-                  backgroundColor: `${row.color}22`,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <FinanceIcon name={String(resolveCategoryMeta(row.categoria, catMap).icon)} size={13} color={row.color} />
-              </View>
-              <Text variant="caption" muted style={{ fontSize: 11 }} numberOfLines={1}>
-                {row.label}
-              </Text>
-              <Text variant="bodyStrong" style={{ fontSize: 12 }}>
-                {formatBRL(row.total)}
-              </Text>
-            </PressableScale>
-          ))}
-        </View>
-      </View>
-    </>
   )
   const blocoTransacoes = (
     <>
@@ -452,9 +279,9 @@ export function FinanceHomeTab({
       {/* Transações compactas */}
       <View style={{ gap: space.sm }}>
         <SectionHeader
-          title="Transações"
+          title="Últimos lançamentos"
           action={
-            <PrimaryButton label="Ver tudo" variant="link" size="sm" onPress={onGoMovimentos} />
+            <PrimaryButton label="Ver extrato" variant="link" size="sm" onPress={onGoMovimentos} />
           }
         />
         <Card tone="elevated" style={{ paddingVertical: 4, paddingHorizontal: 4 }}>
@@ -485,7 +312,7 @@ export function FinanceHomeTab({
       <View style={{ gap: 16 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <Text variant="caption" muted>
-            Resumo de {currentMonthLabel()}
+            Resumo de {currentMonthLabel()}. Cartões e categorias abrem nas abas deles.
           </Text>
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             <PrimaryButton
@@ -532,28 +359,6 @@ export function FinanceHomeTab({
           <Panel>
             <MonthProjectionCard />
           </Panel>
-          <Panel>
-            <View>
-              <DeskPanelHeader
-                title="Cartões"
-                actionLabel={cards.length ? 'Gerenciar' : undefined}
-                onAction={onGoCartoes ?? (() => onCardsFocusChange(true))}
-              />
-              <CardCarousel
-                cards={cards}
-                selectedId={null}
-                onSelect={(id) =>
-                {
-                  setVisibleCardId(id)
-                  setDetailId(id)
-                }}
-                onVisibleChange={setVisibleCardId}
-                onAdd={() => setCreateOpen(true)}
-                maxCardWidth={300}
-              />
-            </View>
-          </Panel>
-
           <Panel style={deskGrid.span2}>
             <View>
               <DeskPanelHeader title="Últimos lançamentos" actionLabel="Ver extrato" onAction={onGoMovimentos} />
@@ -564,36 +369,6 @@ export function FinanceHomeTab({
               )}
             </View>
           </Panel>
-          <Panel>
-            <View>
-              <DeskPanelHeader
-                title="Gastos por categoria"
-                subtitle={currentMonthLabel()}
-                actionLabel="Ver análise"
-                onAction={onGoAnalise ?? onGoMovimentos}
-              />
-              <FinanceCategoryList rows={rankingAll.slice(0, 6)} onPress={onGoAnalise ?? onGoMovimentos} />
-            </View>
-          </Panel>
-        </View>
-        {sheets}
-        <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
-      </View>
-    )
-  }
-
-  if (isDesktop)
-  {
-    return (
-      <View style={{ flexDirection: 'row', gap: 24, alignItems: 'flex-start' }}>
-        <View style={{ flex: 1, minWidth: 0, gap: space.md }}>
-          {blocoSaldo}
-          {blocoPrevisao}
-          {blocoTransacoes}
-        </View>
-        <View style={{ width: 400, gap: space.md }}>
-          {blocoCartoes}
-          {blocoCategorias}
         </View>
         {sheets}
         <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
@@ -602,15 +377,15 @@ export function FinanceHomeTab({
   }
 
   return (
-    <View style={{ gap: space.sm + 2 }}>
-      {blocoSaldo}
-      {blocoCartoes}
-      {blocoPrevisao}
-      {blocoCategorias}
-      {blocoTransacoes}
+    <View style={{ gap: space.md, width: '100%', alignSelf: 'stretch' }}>
+      <View style={{ gap: space.md, width: '100%', maxWidth: isDesktop ? 560 : undefined }}>
+        {blocoSaldo}
+        <SalaryConfirmCard />
+        {blocoTransacoes}
+      </View>
       {sheets}
       <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
-      <View style={{ marginBottom: fabClearance }} />
+      {isDesktop ? null : <View style={{ marginBottom: fabClearance }} />}
     </View>
   )
 }

@@ -23,10 +23,10 @@ export default function ApoioScreen()
         subtitle="Nada daqui muda o plano, a carteira ou o foco até você ligar."
       />
       <View style={{ gap: space.lg }}>
-        <Card tone="elevated" style={{ gap: space.sm, padding: space.md }}>
-          <Text variant="section">Energia, burnout e o que já fez</Text>
+        <View style={{ gap: space.sm }}>
+          <Text variant="section">Como está o seu dia</Text>
           <CareHomeStrip />
-        </Card>
+        </View>
 
         <View style={{ gap: space.sm }}>
           <Text variant="section">Corpo</Text>

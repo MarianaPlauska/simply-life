@@ -12,6 +12,7 @@ import { useAuthStore } from '../src/store/authStore'
 import { pingPresence } from '../src/lib/presence'
 import { useFocusPresence } from '../src/hooks/useFocusPresence'
 import { useGamificationStore } from '../src/store/gamificationStore'
+import { usePlayStore } from '../src/store/playStore'
 import { useActivityStore } from '../src/store/activityStore'
 import { useCareExtrasStore } from '../src/store/careExtrasStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -40,6 +41,7 @@ function RootNavigator()
   const ready = useAuthStore((s) => s.ready)
   const prefsLoaded = usePrefsStore((s) => s.loaded)
   const hydrateXp = useGamificationStore((s) => s.hydrate)
+  const hydratePlay = usePlayStore((s) => s.hydrate)
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const hydrateActivity = useActivityStore((s) => s.hydrate)
@@ -55,10 +57,11 @@ function RootNavigator()
   {
     void hydrate()
     hydrateXp()
+    hydratePlay()
     hydrateActivity()
     void hydrateCare()
     registerServiceWorker()
-  }, [hydrate, hydrateXp, hydrateActivity, hydrateCare])
+  }, [hydrate, hydrateXp, hydratePlay, hydrateActivity, hydrateCare])
 
   useEffect(() =>
   {
@@ -84,6 +87,19 @@ function RootNavigator()
     void NavigationBar.setBackgroundColorAsync(colors.navBg).catch(() => undefined)
     void NavigationBar.setButtonStyleAsync(mode === 'dark' ? 'light' : 'dark').catch(() => undefined)
   }, [mode, colors.navBg])
+
+  // O widget só ganha fundo quando o app redesenha. Abrir o app (ou voltar a ele) faz isso.
+  useEffect(() =>
+  {
+    if (Platform.OS !== 'android') return
+    const { refreshHomeWidget } = require('../src/widget/widgetSetup') as typeof import('../src/widget/widgetSetup')
+    refreshHomeWidget()
+    const sub = AppState.addEventListener('change', (state) =>
+    {
+      if (state === 'active') refreshHomeWidget()
+    })
+    return () => sub.remove()
+  }, [])
 
   // elo igual em todos os aparelhos, recorde e cartão público
   useEloSync()
@@ -140,6 +156,8 @@ function RootNavigator()
             <Stack.Screen name="perfil" />
             <Stack.Screen name="configuracoes" />
             <Stack.Screen name="axel/historico" />
+            <Stack.Screen name="seu-axel" />
+            <Stack.Screen name="mais-do-dia" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="preferencias" />
             <Stack.Screen
@@ -156,6 +174,7 @@ function RootNavigator()
               options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
             />
             <Stack.Screen name="ofensiva" />
+            <Stack.Screen name="cartas" />
             <Stack.Screen name="relatorio" />
             <Stack.Screen name="juntos" />
             <Stack.Screen name="colecao" />

@@ -54,9 +54,8 @@ export function SubNavTabs<T extends string>({
             >
               <Text
                 variant="label"
-                numberOfLines={1}
                 color={active ? colors.ink : colors.inkMuted}
-                style={{ fontWeight: active ? '600' : '500', paddingBottom: 12 }}
+                style={{ fontWeight: active ? '600' : '500', paddingBottom: 12, textAlign: 'center', paddingHorizontal: 4 }}
               >
                 {typeof tab.count === 'number' ? `${tab.label} · ${tab.count}` : tab.label}
               </Text>

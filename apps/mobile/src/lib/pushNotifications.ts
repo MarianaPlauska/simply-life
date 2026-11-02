@@ -57,6 +57,14 @@ export async function scheduleMorningFirstStep(_when: Date, _firstStep: string):
 {
 }
 
+export async function scheduleCuriosityCard(): Promise<void>
+{
+}
+
+export async function cancelCuriosityCard(): Promise<void>
+{
+}
+
 export async function scheduleFocusEnd(_seconds: number, _taskTitle: string | null): Promise<void>
 {
 }

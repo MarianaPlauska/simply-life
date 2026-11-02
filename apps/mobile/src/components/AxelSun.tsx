@@ -1,7 +1,7 @@
 import Svg, { Circle, Ellipse, G, Path } from 'react-native-svg'
 import { BRAND } from '@simply-life/ui-tokens'
 
-export type AxelMood = 'calm' | 'happy' | 'care'
+export type AxelMood = 'calm' | 'happy' | 'care' | 'sleepy' | 'party'
 
 const PETALS = Array.from({ length: 12 }, (_, i) => i * 30)
 
@@ -14,10 +14,12 @@ export function AxelSun({
   size = 40,
   mood = 'calm',
   label = 'Axel',
+  accessory = null,
 }: {
   size?: number
   mood?: AxelMood
   label?: string
+  accessory?: string | null
 })
 {
   const ink = BRAND.carvao
@@ -50,11 +52,17 @@ export function AxelSun({
       <Circle cx={22.5} cy={37} r={3.2} fill={BRAND.coral} opacity={0.45} />
       <Circle cx={41.5} cy={37} r={3.2} fill={BRAND.coral} opacity={0.45} />
 
-      {mood === 'happy' ? (
+      {mood === 'happy' || mood === 'party' ? (
         <>
           <Path d="M23.5 31.5 q3 -3.6 6 0" fill="none" stroke={ink} strokeWidth={2.2} strokeLinecap="round" />
           <Path d="M34.5 31.5 q3 -3.6 6 0" fill="none" stroke={ink} strokeWidth={2.2} strokeLinecap="round" />
-          <Path d="M25 37.5 q7 7.5 14 0" fill="none" stroke={ink} strokeWidth={2.4} strokeLinecap="round" />
+          <Path d="M24 36.5 q8 9 16 0" fill="none" stroke={ink} strokeWidth={2.4} strokeLinecap="round" />
+        </>
+      ) : mood === 'sleepy' ? (
+        <>
+          <Path d="M23 31 q4 2.2 7 0" fill="none" stroke={ink} strokeWidth={2.2} strokeLinecap="round" />
+          <Path d="M34 31 q4 2.2 7 0" fill="none" stroke={ink} strokeWidth={2.2} strokeLinecap="round" />
+          <Path d="M28 38 q4 2 8 0" fill="none" stroke={ink} strokeWidth={2} strokeLinecap="round" />
         </>
       ) : (
         <>
@@ -73,6 +81,15 @@ export function AxelSun({
           )}
         </>
       )}
+      {accessory === 'laco' ? (
+        <Path d="M32 8 l6 5 l-6 2 l-6 -2 z" fill={BRAND.coralText} />
+      ) : null}
+      {accessory === 'oculos' ? (
+        <Path d="M20 31 h8 m8 0 h8 M28 31 h8" fill="none" stroke={ink} strokeWidth={1.6} strokeLinecap="round" />
+      ) : null}
+      {accessory === 'cachecol' ? (
+        <Path d="M22 46 q10 6 20 0" fill="none" stroke={BRAND.coral} strokeWidth={3.2} strokeLinecap="round" />
+      ) : null}
     </Svg>
   )
 }
