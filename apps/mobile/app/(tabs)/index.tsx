@@ -29,10 +29,8 @@ import { useAuthStore } from '../../src/store/authStore'
 import { useDataStore } from '../../src/store/dataStore'
 import { AxelSun } from '../../src/components/AxelSun'
 import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
-import { HomePlay } from '../../src/components/play/HomePlay'
 import { MoreMenuExit } from '../../src/components/dashboard/MoreMenuExit'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
-import { HomeSearchBar } from '../../src/components/dashboard/HomeSearchBar'
 import { HomeNowCard } from '../../src/components/dashboard/HomeNowCard'
 import { HomeDayList } from '../../src/components/dashboard/HomeDayList'
 import { HomeLifeGoals } from '../../src/components/dashboard/HomeLifeGoals'
@@ -246,7 +244,6 @@ export default function DashboardScreen()
           onAccount={() => setMenuOpen(true)}
         />
         {rpgMode ? <AdventureHud /> : null}
-        <HomePlay />
         {rpgMode ? <AdventureStage /> : null}
 
         {isDesktop ? (
@@ -293,8 +290,7 @@ export default function DashboardScreen()
           />
         ) : (
           <>
-            {/* Saudação, busca, atalhos. Cada número aparece uma vez. */}
-            <HomeSearchBar tasks={tasks} finance={finance} />
+            {/* Saudação e atalhos; busca e carta ficam nos ícones do topo. */}
             <HomeMetricShortcuts />
             <HomeNowCard task={focusTask} />
             <SalaryConfirmCard />

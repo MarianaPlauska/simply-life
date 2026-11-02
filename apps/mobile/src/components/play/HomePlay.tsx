@@ -2,14 +2,15 @@ import { useEffect, useState } from 'react'
 import { Modal, Pressable, Share, View } from 'react-native'
 import { useGlobalSearchParams, useRouter } from 'expo-router'
 import { weekStoryShareText, localTodayIso, type ChestPrize } from '@simply-life/shared'
-import { PrimaryButton, Text } from '../../ui'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { PrimaryButton, Text, Icon, PressableScale, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { hapticRestDone } from '../../lib/haptics'
 import { useHomePlay } from '../../hooks/useHomePlay'
 import { usePlayStore } from '../../store/playStore'
 import { AxelFaceSun } from './AxelFaceSun'
 
-/** Carta virada, missões do dia, baú e o convite do domingo. */
+/** Ícone no topo da Home: abre a gaveta com carta, coleção, missões, baú e semana. */
 export function HomePlay()
 {
   const play = useHomePlay()
@@ -27,6 +28,8 @@ export function HomePlay()
   const [stories, setStories] = useState(false)
   const [prize, setPrize] = useState<ChestPrize | null>(null)
   const [step, setStep] = useState(0)
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const insets = useSafeAreaInsets()
 
   useEffect(() =>
   {
@@ -65,64 +68,126 @@ export function HomePlay()
   }
 
   const slide = play.slides[Math.min(step, play.slides.length - 1)]
+  const missionsLeft = play.missions.filter((m) => !m.done).length
+  const pending = !play.revealed || play.chestReady || play.showWeek
 
   return (
-    <View style={{ gap: space.md }}>
-      <Pressable
-        onPress={() =>
-        {
-          setFaceUp(play.revealed)
-          setCardOpen(true)
-        }}
+    <View>
+      <PressableScale
+        onPress={() => setSheetOpen(true)}
         accessibilityRole="button"
-        accessibilityLabel="Abrir a carta de hoje"
-        style={{ minHeight: 44, justifyContent: 'center' }}
+        accessibilityLabel={pending ? 'Hoje no SunFy, tem novidade' : 'Hoje no SunFy'}
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 999,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.elevated,
+        }}
       >
-        <Text variant="caption" color={colors.axel}>Carta de hoje</Text>
-      </Pressable>
-      <Pressable onPress={() => router.push('/cartas' as never)} accessibilityRole="button">
-        <Text variant="caption" color={colors.axel}>Ver coleção</Text>
-      </Pressable>
+        <Icon name="gift-outline" size={20} color={colors.ink} />
+        {pending ? (
+          <View
+            style={{
+              position: 'absolute',
+              top: 8,
+              right: 9,
+              width: 9,
+              height: 9,
+              borderRadius: 999,
+              backgroundColor: colors.axelFill,
+              borderWidth: 1.5,
+              borderColor: colors.elevated,
+            }}
+          />
+        ) : null}
+      </PressableScale>
 
-      {play.missions.length ? (
-        <View style={{ gap: 8 }}>
-          <Text variant="section">Se couber hoje</Text>
-          {play.missions.map((m) => (
-            <View key={m.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 }}>
-              <Text variant="body">{m.done ? '●' : '○'}</Text>
-              <Text variant="body" style={{ flex: 1 }}>{m.title}</Text>
-            </View>
-          ))}
-          {play.chestReady ? (
-            <PrimaryButton
-              label="Abrir o baú"
-              onPress={() => setPrize(play.openChest())}
+      <Modal visible={sheetOpen} transparent animationType="slide" onRequestClose={() => setSheetOpen(false)}>
+        <Pressable
+          accessibilityLabel="Fechar"
+          onPress={() => setSheetOpen(false)}
+          style={{ flex: 1, backgroundColor: colors.overlay }}
+        />
+        <View
+          style={{
+            backgroundColor: colors.canvas,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            padding: space.lg,
+            paddingBottom: space.lg + insets.bottom,
+            gap: space.md,
+          }}
+        >
+          <View style={{ alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: colors.hairlineStrong }} />
+          <Text variant="section">Hoje no SunFy</Text>
+
+          <GroupedList>
+            <GroupedRow
+              leading={<RowGlyph name="sparkles" color={colors.axel} />}
+              title="Carta de hoje"
+              subtitle={play.revealed ? 'Ler de novo' : 'Uma descoberta sobre você'}
+              onPress={() =>
+              {
+                setSheetOpen(false)
+                setFaceUp(play.revealed)
+                setCardOpen(true)
+              }}
             />
-          ) : null}
-          {play.chestOpened ? (
-            <Text variant="caption" muted>O baú de hoje já abriu. O de amanhã espera.</Text>
-          ) : null}
-          {prize ? (
-            <Text variant="bodyStrong">
-              {prize.kind === 'gold' ? `+${prize.amount} moedas, para você` : `Ficou com você: ${prize.label}`}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
+            <GroupedRow
+              leading={<RowGlyph name="albums" color={colors.tasks} />}
+              title="Coleção de cartas"
+              onPress={() =>
+              {
+                setSheetOpen(false)
+                router.push('/cartas' as never)
+              }}
+            />
+            {play.showWeek ? (
+              <GroupedRow
+                leading={<RowGlyph name="calendar" color={colors.health} />}
+                title="Sua semana"
+                subtitle="O resumo dos últimos 7 dias"
+                onPress={() =>
+                {
+                  setSheetOpen(false)
+                  setStep(0)
+                  setStories(true)
+                }}
+              />
+            ) : null}
+          </GroupedList>
 
-      {play.showWeek ? (
-        <View style={{ gap: 8 }}>
-          <Text variant="bodyStrong">Se quiser ver a sua semana</Text>
-          <View style={{ gap: 8 }}>
-            <PrimaryButton label="Ver" onPress={() =>
-            {
-              setStep(0)
-              setStories(true)
-            }} />
-            <PrimaryButton label="Agora não" variant="ghost" onPress={play.dismissWeek} />
-          </View>
+          {play.missions.length ? (
+            <View style={{ gap: space.sm }}>
+              <Text variant="label" muted>
+                {missionsLeft ? `Missões de hoje: faltam ${missionsLeft}` : 'Missões de hoje: todas feitas'}
+              </Text>
+              <GroupedList>
+                {play.missions.map((m) => (
+                  <GroupedRow
+                    key={m.id}
+                    leading={<Icon name={m.done ? 'checkmark-circle' : 'ellipse-outline'} size={22} color={m.done ? colors.health : colors.inkFaint} />}
+                    title={m.title}
+                    muted={m.done}
+                  />
+                ))}
+              </GroupedList>
+              {play.chestReady ? (
+                <PrimaryButton label="Abrir o baú" onPress={() => setPrize(play.openChest())} />
+              ) : null}
+              {prize ? (
+                <Text variant="bodyStrong" style={{ textAlign: 'center' }}>
+                  {prize.kind === 'gold' ? `+${prize.amount} moedas, para você` : `Ficou com você: ${prize.label}`}
+                </Text>
+              ) : play.chestOpened ? (
+                <Text variant="caption" muted style={{ textAlign: 'center' }}>O baú de hoje já abriu. O de amanhã espera.</Text>
+              ) : null}
+            </View>
+          ) : null}
         </View>
-      ) : null}
+      </Modal>
 
       <Modal
         visible={cardOpen && !play.party}

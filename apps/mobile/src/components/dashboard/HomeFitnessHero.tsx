@@ -9,6 +9,8 @@ import { HomeWeatherChip } from './HomeWeatherChip'
 import { CircleCornerButton } from '../social/CircleCornerButton'
 import { ProfileAvatarBadge } from '../social/ProfileAvatarBadge'
 import { HomeXpBar } from '../play/HomeXpBar'
+import { HomePlay } from '../play/HomePlay'
+import { HomeSearchButton } from './HomeSearchButton'
 
 type Props = {
   greet: string
@@ -63,6 +65,8 @@ export function HomeFitnessHero({
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <HomeXpBar />
+        <HomePlay />
+        <HomeSearchButton />
         <CircleCornerButton size={SIDE} />
         <PressableScale
           onPress={onAccount}
@@ -106,21 +110,17 @@ export function HomeFitnessHero({
   // Celular: leitura de cima para baixo, alinhada à esquerda. Data pequena e saudação
   // formam um grupo só; a conta fica no canto, fora do grupo.
   return (
-    <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
-        <View style={{ flex: 1, minWidth: 0, gap: space.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
-            <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
-              {dateLabel}
-            </Text>
-            <HomeWeatherChip compact />
-          </View>
-          <Text variant="section" numberOfLines={2} style={{ fontSize: 24, lineHeight: 30 }}>
-            {title}
+    <View style={{ paddingTop: topPad, gap: space.sm, marginBottom: space.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+        <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
+          <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
+            {dateLabel}
           </Text>
+          <HomeWeatherChip compact />
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <HomeXpBar />
+        <HomePlay />
+        <HomeSearchButton />
         <CircleCornerButton />
         <PressableScale
           onPress={onAccount}
@@ -157,6 +157,12 @@ export function HomeFitnessHero({
           ) : null}
         </PressableScale>
         </View>
+      </View>
+      <Text variant="section" numberOfLines={2} style={{ fontSize: 24, lineHeight: 30 }}>
+        {title}
+      </Text>
+      <View style={{ maxWidth: 220 }}>
+        <HomeXpBar />
       </View>
       <SyncHint />
     </View>

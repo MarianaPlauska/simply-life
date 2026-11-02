@@ -14,10 +14,11 @@ type Props = {
   finance: FinanceTx[]
   /** Avisa o pai para esconder o resto enquanto a pessoa está buscando. */
   onSearching?: (searching: boolean) => void
+  autoFocus?: boolean
 }
 
 /** Busca da Home. Fica logo abaixo da saudação, antes dos atalhos. */
-export function HomeSearchBar({ tasks, finance, onSearching }: Props)
+export function HomeSearchBar({ tasks, finance, onSearching, autoFocus }: Props)
 {
   const { colors } = useTheme()
   const inPanel = useInPanel()
@@ -71,6 +72,7 @@ export function HomeSearchBar({ tasks, finance, onSearching }: Props)
           autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="search"
+          autoFocus={autoFocus}
           style={{
             flex: 1,
             fontSize: 15,

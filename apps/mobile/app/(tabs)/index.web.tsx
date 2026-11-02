@@ -24,7 +24,6 @@ import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
 import { CareHomeStrip } from '../../src/components/care/CareHomeStrip'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
-import { HomeSearchBar } from '../../src/components/dashboard/HomeSearchBar'
 import { HomeNowCard } from '../../src/components/dashboard/HomeNowCard'
 import { HomeDayList } from '../../src/components/dashboard/HomeDayList'
 import { TabShell, DESKTOP_PAD_H } from '../../src/components/dashboard/TabShell'
@@ -236,9 +235,7 @@ export default function DashboardScreenWeb()
         <TabShell>
           <HomeFitnessHero greet={greet} name={name} dateLabel={dateLabel} isAdmin={isAdmin} onAccount={() => setMenuOpen(true)} />
           {rpgMode ? <AdventureHud /> : null}
-          <HomePlay />
           {rpgMode ? <AdventureStage /> : null}
-          <HomeSearchBar tasks={tasks} finance={finance} />
           <HomeMetricShortcuts />
           <HomeNowCard task={focusTask} />
           <SalaryConfirmCard />
