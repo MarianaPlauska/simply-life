@@ -8,7 +8,7 @@ import { useNeuroStore } from '../../store/neuroStore'
 
 export function CelebrationOverlay()
 {
-  const { space } = useTheme()
+  const { colors, space } = useTheme()
   const celebration = useGamificationStore((s) => s.celebration)
   const dismiss = useGamificationStore((s) => s.dismissCelebration)
   const quiet = useNeuroStore((s) => s.quietCelebrations)
@@ -28,7 +28,7 @@ export function CelebrationOverlay()
         onPress={dismiss}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(26, 24, 22, 0.72)',
+          backgroundColor: colors.overlay,
           justifyContent: 'center',
           alignItems: 'center',
           padding: space.lg,

@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { View, StyleSheet } from 'react-native'
+import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { TCC_JOURNEYS } from '@simply-life/shared'
-import { Text, SectionHeader, PressableScale } from '../../ui'
-import { HomeCollapsible } from '../dashboard/HomeCollapsible'
+import { Text, Card, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { CrisisSupportCard } from './CrisisSupportCard'
 import { HealthCalmSection } from './HealthCalmSection'
@@ -49,102 +48,56 @@ export function HealthApoioTab()
         <HealthFocusSection />
       </View>
 
-      {/* 3. Consulta e ajustes: um bloco recolhido */}
-      <HomeCollapsible
-        title="Mais apoio"
-        subtitle="Exercícios de TCC, registros e foco"
-        pill="abrir"
-        pillColor={colors.health}
-      >
-        <View style={{ gap: space.lg, paddingTop: space.sm }}>
-          <View style={{ gap: space.md }}>
-            <SectionHeader
-              title="Exercícios de TCC"
-              subtitle="Jornadas curtas e opcionais. Organizam o pensamento, não substituem psicoterapia nem diagnóstico."
+      {/* 3. Exercícios e registros como listas do sistema, à vista */}
+      <View style={{ gap: 8 }}>
+        <Text variant="caption" muted style={{ marginLeft: 4 }}>Exercícios de TCC</Text>
+        <GroupedList>
+          {TCC_JOURNEYS.map((journey) => (
+            <GroupedRow
+              key={journey.id}
+              leading={<RowGlyph name="sparkles" color={colors.axelFill} />}
+              title={journey.title}
+              subtitle={`~${journey.durationMin} min · ${journey.steps} passos`}
+              onPress={() => router.push(journey.route as '/tcc/thought-record' | '/tcc/behavioral-activation' | '/tcc/gradual-exposure')}
             />
-            {TCC_JOURNEYS.map((journey) => (
-              <PressableScale
-                key={journey.id}
-                onPress={() => router.push(journey.route as '/tcc/thought-record' | '/tcc/behavioral-activation' | '/tcc/gradual-exposure')}
-                style={{
-                  minHeight: 56,
-                  padding: space.md,
-                  borderRadius: 14,
-                  gap: 6,
-                  backgroundColor: colors.axelMuted,
-                  borderWidth: 1,
-                  borderColor: colors.hairline,
-                }}
-              >
-                <Text variant="bodyStrong">{journey.title}</Text>
-                <Text variant="caption" muted>
-                  {journey.subtitle}
-                </Text>
-                <Text variant="caption" color={colors.axel}>
-                  ~{journey.durationMin} min · {journey.steps} passos
-                </Text>
-              </PressableScale>
-            ))}
-          </View>
+          ))}
+        </GroupedList>
+        <Text variant="caption" muted style={{ marginHorizontal: 4 }}>
+          Jornadas curtas e opcionais. Organizam o pensamento, não substituem psicoterapia nem diagnóstico.
+        </Text>
+      </View>
 
-          <View
-            style={{
-              gap: space.sm,
-              paddingTop: space.md,
-              borderTopWidth: StyleSheet.hairlineWidth,
-              borderTopColor: colors.hairline,
-            }}
-          >
-            <SectionHeader title="Registros recentes" subtitle="Últimos exercícios concluídos" />
-            {loading ? (
-              <Text variant="caption" muted>Carregando…</Text>
-            ) : recent.length === 0 ? (
-              <Text variant="caption" muted>
-                Nenhum exercício ainda. Comece por registro de pensamento ou ativação comportamental.
-              </Text>
-            ) : (
-              recent.map((row) => (
-                <View
-                  key={`${row.kind}-${row.entry.id}`}
-                  style={{
-                    paddingVertical: 8,
-                    borderBottomWidth: 1,
-                    borderBottomColor: colors.hairline,
-                    gap: 6,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
-                    <Text variant="caption" muted>
-                      {new Date(row.entry.createdAt).toLocaleDateString('pt-BR', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                    <Text variant="caption" color={colors.health}>
-                      {recentKindLabel(row)}
-                    </Text>
-                  </View>
-                  <Text variant="body" numberOfLines={2}>
-                    {recentLabel(row)}
-                  </Text>
-                </View>
-              ))
-            )}
-          </View>
+      <View style={{ gap: 8 }}>
+        <Text variant="caption" muted style={{ marginLeft: 4 }}>Registros recentes</Text>
+        <GroupedList>
+          {loading ? (
+            <GroupedRow title="Carregando…" />
+          ) : recent.length === 0 ? (
+            <GroupedRow
+              title="Nenhum exercício ainda"
+              subtitle="Comece por registro de pensamento ou ativação comportamental"
+              subtitleLines={2}
+            />
+          ) : (
+            recent.map((row) => (
+              <GroupedRow
+                key={`${row.kind}-${row.entry.id}`}
+                title={recentLabel(row)}
+                subtitle={`${recentKindLabel(row)} · ${new Date(row.entry.createdAt).toLocaleDateString('pt-BR', {
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}`}
+              />
+            ))
+          )}
+        </GroupedList>
+      </View>
 
-          <View
-            style={{
-              paddingTop: space.md,
-              borderTopWidth: StyleSheet.hairlineWidth,
-              borderTopColor: colors.hairline,
-            }}
-          >
-            <HealthNeuroFocusPanel bare />
-          </View>
-        </View>
-      </HomeCollapsible>
+      <Card tone="elevated" style={{ padding: 16 }}>
+        <HealthNeuroFocusPanel bare />
+      </Card>
     </View>
   )
 }

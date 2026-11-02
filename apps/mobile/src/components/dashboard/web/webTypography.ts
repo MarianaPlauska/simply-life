@@ -1,7 +1,5 @@
 /**
- * Regra tipográfica única para toda a build web: Fraunces para números
- * grandes e títulos de tela; Lexend para tudo o mais (rótulos, corpo,
- * navegação). Aplicada de forma sistemática — não em um componente isolado —
- * para não parecer um acidente de estilo.
+ * Fonte dos números grandes e títulos de tela na web. Lexend, a mesma do app:
+ * uma família só em toda a interface (a Fraunces fica apenas no logotipo).
  */
-export const WEB_DISPLAY_FONT = 'Fraunces_500Medium'
+export const WEB_DISPLAY_FONT = 'Lexend_600SemiBold'

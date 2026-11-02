@@ -2,7 +2,6 @@ import { View, type ViewProps } from 'react-native'
 import { COMPONENT_SPEC, type ColorTokens } from '@simply-life/ui-tokens'
 import { useWebBox } from '../components/dashboard/web/webBox'
 import { useInPanel } from './Panel'
-import { SurfaceGlow } from './SurfaceGlow'
 import { useTheme } from '../theme/ThemeProvider'
 
 type ModuleAccent = 'health' | 'axel' | 'finance' | 'tasks'
@@ -78,8 +77,6 @@ export function Card({ children, style, tone = 'default', accentTop, bare, ...re
     )
   }
 
-  const wash = elevated || hero || widget
-
   return (
     <View
       style={[
@@ -96,7 +93,6 @@ export function Card({ children, style, tone = 'default', accentTop, bare, ...re
       ]}
       {...rest}
     >
-      {wash ? <SurfaceGlow opacity={hero ? 0.28 : undefined} /> : null}
       {children}
     </View>
   )

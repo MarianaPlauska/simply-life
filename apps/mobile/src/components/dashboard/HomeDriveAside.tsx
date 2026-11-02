@@ -8,7 +8,7 @@ import {
   humorDoDia,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, Card, PrimaryButton } from '../../ui'
+import { Text, Card, PrimaryButton, GroupedList, GroupedRow, RowGlyph, Icon } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
@@ -67,6 +67,52 @@ export function AxelDayBrief()
   const toggleOpen = () =>
   {
     void patchPrefs({ axel_home_collapsed: open })
+  }
+
+  // celular: lista no padrão do sistema, sem caixa própria com botões de texto
+  if (!desk && !inPanel)
+  {
+    return (
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph color="transparent"><AxelSun size={32} mood={sunMood} /></RowGlyph>}
+          title={brief.headline}
+          subtitle={brief.voice}
+          subtitleLines={2}
+          onPress={() => setDetails((v) => !v)}
+          chevron={false}
+          trailing={<Icon name={details ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkFaint} />}
+        />
+        {primaryStep ? (
+          <GroupedRow
+            leading={<RowGlyph name="sparkles" color={colors.health} />}
+            title={primaryStep}
+            subtitle="Próximo passo"
+          />
+        ) : null}
+        {details ? (
+          <GroupedRow
+            leading={<RowGlyph name="checkbox" color={colors.tasks} />}
+            title="Tarefas"
+            onPress={() => router.push('/(tabs)/kanban')}
+          />
+        ) : null}
+        {details ? (
+          <GroupedRow
+            leading={<RowGlyph name="heart" color={colors.health} />}
+            title="Saúde"
+            onPress={() => router.push('/(tabs)/saude')}
+          />
+        ) : null}
+        {details ? (
+          <GroupedRow
+            leading={<RowGlyph name="wallet" color={colors.finance} />}
+            title="Carteira"
+            onPress={() => router.push('/(tabs)/financeiro')}
+          />
+        ) : null}
+      </GroupedList>
+    )
   }
 
   return (

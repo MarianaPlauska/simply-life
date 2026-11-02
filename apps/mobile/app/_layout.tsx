@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar'
 import * as SplashScreen from 'expo-splash-screen'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useFonts, Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold, Lexend_700Bold } from '@expo-google-fonts/lexend'
-import { Fraunces_500Medium, Fraunces_600SemiBold } from '@expo-google-fonts/fraunces'
+import { Fraunces_500Medium } from '@expo-google-fonts/fraunces'
 import { colorsFor } from '@simply-life/ui-tokens'
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
@@ -192,7 +192,6 @@ export default function RootLayout()
     Lexend_600SemiBold,
     Lexend_700Bold,
     Fraunces_500Medium,
-    Fraunces_600SemiBold,
   })
 
   const splash = colorsFor(readColorSchemeSync() ?? 'light')

@@ -21,7 +21,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
   const { colors } = useTheme()
   const tint = danger ? colors.danger : (accent ?? colors.axel)
   const badgeBg = danger
-    ? 'rgba(224,122,106,0.12)'
+    ? colors.dangerMuted
     : accent
       ? `${accent}22`
       : colors.axelMuted

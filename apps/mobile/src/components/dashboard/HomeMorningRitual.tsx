@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { TextInput, View } from 'react-native'
+import { Pressable, ScrollView, TextInput, View } from 'react-native'
 import {
   findHabit,
   formatSleepHours,
@@ -7,7 +7,9 @@ import {
   moodLabel,
   SONO_META_H,
 } from '@simply-life/shared'
-import { Card, Text, PrimaryButton, Chip } from '../../ui'
+import { Card, Text, PrimaryButton, PressableScale, IconBadge } from '../../ui'
+import { Icon } from '../../ui/Icon'
+import { hapticSelect } from '../../lib/haptics'
 import { useTheme } from '../../theme/ThemeProvider'
 import { MoodFaceRow } from '../MoodFace'
 import { useAuthStore } from '../../store/authStore'
@@ -39,7 +41,7 @@ type Props = {
  */
 export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Props)
 {
-  const { colors, radius, space } = useTheme()
+  const { colors } = useTheme()
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits)
   const humor = useDataStore((s) => s.humor)
@@ -191,77 +193,157 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
     || (showSleepStep ? hours == null : moodSelected == null || moodUnchanged)
 
   return (
-    <Card tone="elevated" accentTop="health" style={{ gap: space.md, padding: 20 }}>
-      <View style={{ gap: 8 }}>
-        <Text variant="caption" color={colors.health} style={{ fontWeight: '700' }}>
-          Ritual da manhã
-        </Text>
-        <Text variant="bodyStrong" style={{ fontSize: 17 }}>
-          {showSleepStep ? 'Como foi a noite?' : 'Como você está agora?'}
-        </Text>
+    <Card tone="elevated" style={{ gap: 20, padding: 16, borderRadius: 16, overflow: 'hidden' }}>
+      <View style={{ gap: 14 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <IconBadge
+            name={showSleepStep ? 'moon' : 'happy'}
+            color={showSleepStep ? colors.tasks : colors.health}
+            size={40}
+            iconSize={20}
+          />
+          <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
+            <Text variant="caption" muted>
+              Ritual da manhã
+            </Text>
+            <Text variant="section" style={{ fontSize: 18 }} numberOfLines={1}>
+              {showSleepStep ? 'Como foi a noite?' : 'Como você está agora?'}
+            </Text>
+          </View>
+          {needSleep && needMood ? (
+            <Text variant="micro" muted style={{ fontWeight: '600' }}>
+              {showSleepStep ? '1' : '2'} de 2
+            </Text>
+          ) : null}
+        </View>
         {needSleep && needMood ? (
-          <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-            <StepPill
-              label="Sono"
-              done={sleepLogged}
-              active={showSleepStep}
-            />
-            <View style={{ width: 12, height: 1, backgroundColor: colors.hairline }} />
-            <StepPill
-              label="Humor"
-              done={Boolean(hoje)}
-              active={showMoodStep}
-            />
+          <View style={{ flexDirection: 'row', gap: 6 }}>
+            <StepBar label="Sono" done={sleepLogged} active={showSleepStep} />
+            <StepBar label="Humor" done={Boolean(hoje)} active={showMoodStep} />
           </View>
         ) : null}
       </View>
 
       {sleepLogged && needSleep && !showSleepStep ? (
-        <Text variant="caption" muted>
-          Sono: {formatSleepHours(sono!.progressoAtual)} registrado
-          {needMood ? ' · agora o humor' : ''}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Icon name="checkmark-circle" size={16} color={colors.health} />
+          <Text variant="caption" muted>
+            Sono de {formatSleepHours(sono!.progressoAtual)} registrado
+          </Text>
+        </View>
       ) : null}
 
       {showSleepStep ? (
-        <View style={{ gap: space.sm }}>
-          <Text variant="caption" muted>
-            Um toque basta. Meta sugerida: {meta}h.
-          </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-            {QUICK_HOURS.map((h) => (
-              <Chip
-                key={h}
-                label={formatSleepHours(h)}
-                active={hours === h}
-                onPress={() =>
-                {
-                  setHours(h)
-                  setError(null)
-                }}
-              />
-            ))}
+        <View style={{ gap: 20 }}>
+          <View style={{ gap: 12 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Text variant="caption" muted>Quantas horas você dormiu?</Text>
+              <Text variant="micro" color={colors.axel} style={{ fontWeight: '700' }}>
+                Meta {meta}h
+              </Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ marginHorizontal: -16 }}
+              contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+            >
+              {QUICK_HOURS.map((h) =>
+              {
+                const active = hours === h
+                const half = h % 1 !== 0
+                return (
+                  <PressableScale
+                    key={h}
+                    onPress={() =>
+                    {
+                      hapticSelect()
+                      setHours(h)
+                      setError(null)
+                    }}
+                    accessibilityLabel={formatSleepHours(h)}
+                    accessibilityState={{ selected: active }}
+                    style={{
+                      width: 64,
+                      height: 72,
+                      borderRadius: 18,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 2,
+                      backgroundColor: active ? colors.axelFill : colors.fill,
+                      borderWidth: 1,
+                      borderColor: active ? colors.axelFill : h === meta ? colors.hairlineStrong : colors.hairline,
+                    }}
+                  >
+                    <Text
+                      variant="bodyStrong"
+                      style={{ fontSize: 20, lineHeight: 24, color: active ? colors.axelOnFill : colors.ink }}
+                    >
+                      {Math.floor(h)}h
+                    </Text>
+                    <Text
+                      variant="micro"
+                      style={{ color: active ? colors.axelOnFill : colors.inkMuted }}
+                    >
+                      {half ? '30min' : h === meta ? 'meta' : ' '}
+                    </Text>
+                  </PressableScale>
+                )
+              })}
+            </ScrollView>
           </View>
-          <View style={{ gap: 8 }}>
-            <Text variant="caption" muted>Descanso (opcional)</Text>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              {QUALITY.map((q) => (
-                <Chip
-                  key={q.id}
-                  label={q.label}
-                  active={quality === q.id}
-                  onPress={() => setQuality(q.id)}
-                />
-              ))}
+          <View style={{ gap: 12 }}>
+            <Text variant="caption" muted>Como foi o descanso? (opcional)</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                padding: 4,
+                borderRadius: 999,
+                backgroundColor: colors.fill,
+              }}
+            >
+              {QUALITY.map((q) =>
+              {
+                const active = quality === q.id
+                return (
+                  <Pressable
+                    key={q.id}
+                    onPress={() =>
+                    {
+                      hapticSelect()
+                      setQuality(active ? null : q.id)
+                    }}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    style={{
+                      flex: 1,
+                      minHeight: 40,
+                      borderRadius: 999,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: active ? colors.elevated : 'transparent',
+                      borderWidth: active ? 1 : 0,
+                      borderColor: colors.hairlineStrong,
+                    }}
+                  >
+                    <Text
+                      variant="bodyStrong"
+                      style={{ fontSize: 14, color: active ? colors.ink : colors.inkMuted }}
+                    >
+                      {q.label}
+                    </Text>
+                  </Pressable>
+                )
+              })}
             </View>
           </View>
         </View>
       ) : null}
 
       {showMoodStep ? (
-        <View style={{ gap: space.sm }}>
+        <View style={{ gap: 16 }}>
           <Text variant="caption" muted>
-            Registro pessoal (1 a 5). Pode pular qualquer dia. Detalhes em Saúde.
+            De 1 a 5, só para você. Pode pular qualquer dia.
           </Text>
           <MoodFaceRow
             value={moodSelected}
@@ -280,7 +362,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
             style={{
               minHeight: 52,
               textAlignVertical: 'top',
-              borderRadius: radius.control,
+              borderRadius: 16,
               padding: 16,
               fontSize: 15,
               color: colors.ink,
@@ -306,7 +388,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
   )
 }
 
-function StepPill({
+function StepBar({
   label,
   done,
   active,
@@ -317,15 +399,13 @@ function StepPill({
 })
 {
   const { colors } = useTheme()
+  const color = done ? colors.health : active ? colors.axelFill : colors.inkMuted
   return (
-    <Text
-      variant="caption"
-      style={{
-        fontWeight: '600',
-        color: done ? colors.health : active ? colors.axel : colors.inkMuted,
-      }}
-    >
-      {done ? `${label} ✓` : label}
-    </Text>
+    <View style={{ flex: 1, gap: 6 }}>
+      <View style={{ height: 4, borderRadius: 999, backgroundColor: done || active ? color : colors.fill }} />
+      <Text variant="micro" style={{ fontWeight: '600', color }}>
+        {done ? `${label} ✓` : label}
+      </Text>
+    </View>
   )
 }

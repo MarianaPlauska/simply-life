@@ -1,7 +1,6 @@
 import { Children, createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { View, type StyleProp, type ViewStyle } from 'react-native'
 import { useWebDesk } from '../components/dashboard/web/webBox'
-import { SurfaceGlow } from './SurfaceGlow'
 import { useTheme } from '../theme/ThemeProvider'
 
 const InPanel = createContext(false)
@@ -39,16 +38,15 @@ export function Panel({ children, style }: { children: ReactNode; style?: StyleP
     <View
       style={[
         {
-          borderRadius: desk ? 16 : 20,
+          borderRadius: 16,
           backgroundColor: any ? colors.elevated : 'transparent',
-          borderWidth: any ? 1 : 0,
-          borderColor: desk ? colors.cardRim : colors.hairline,
+          borderWidth: any && desk ? 1 : 0,
+          borderColor: colors.cardRim,
           overflow: 'hidden',
         },
         style,
       ]}
     >
-      {any && !desk ? <SurfaceGlow /> : null}
       <InPanel.Provider value>
         {items.map((child, i) => (
           <PanelItem key={i} index={i} divider={i !== first} onFilled={report}>

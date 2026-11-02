@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { formatMinutesPt, nowAndNext, type DayBlock } from '@simply-life/shared'
-import { Card, Text, PrimaryButton } from '../../ui'
+import { Card, Text, PrimaryButton, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useNeuroStore } from '../../store/neuroStore'
@@ -44,6 +44,32 @@ export function VisualDayCard()
   // sem nada no dia, o card só aparece para convidar a conectar a agenda; com agenda
   // conectada ou depois de "Conectar depois", ele some em vez de mostrar um card vazio
   if (nothing && !showAgendaPrompt) return null
+
+  if (nothing)
+  {
+    return (
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph name="calendar" color={colors.tasks} />}
+          title="Conectar agenda"
+          subtitle="O Axel encaixa as tarefas entre seus compromissos"
+          subtitleLines={2}
+          onPress={() => router.push('/agenda')}
+          chevron={false}
+          trailing={(
+            <Pressable
+              onPress={snoozeAgenda}
+              accessibilityLabel="Conectar depois"
+              hitSlop={8}
+              style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name="close" size={18} color={colors.inkFaint} />
+            </Pressable>
+          )}
+        />
+      </GroupedList>
+    )
+  }
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>

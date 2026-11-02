@@ -176,7 +176,7 @@ export function HomeAgendaStudio({ tasks }: Props)
               const color = chipColor(bucket, colors)
               const bg =
                 bucket === 'vencido'
-                  ? 'rgba(232, 107, 107, 0.12)'
+                  ? colors.dangerMuted
                   : bucket === 'hoje'
                     ? colors.axelMuted
                     : colors.healthMuted

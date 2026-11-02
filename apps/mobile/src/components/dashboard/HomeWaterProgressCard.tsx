@@ -11,7 +11,9 @@ import {
   aguaCoachLine,
   currentWeekIsos,
 } from '@simply-life/shared'
-import { Text, ProgressRing, PressableScale } from '../../ui'
+import { Text, ProgressRing, PressableScale, GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { useWebDesk } from './web/webBox'
+import { hapticLight } from '../../lib/haptics'
 import { usePanelBox } from '../../ui/Panel'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
@@ -40,6 +42,7 @@ export function HomeWaterProgressCard({ compact }: Props)
   const waterWeekDays = useDataStore((s) => s.waterWeekDays)
   const hydrateLog = useWaterLogStore((s) => s.hydrate)
   const [edit, setEdit] = useState(false)
+  const desk = useWebDesk()
 
   useEffect(() =>
   {
@@ -66,6 +69,60 @@ export function HomeWaterProgressCard({ compact }: Props)
     borderWidth: 1,
     borderColor: colors.cardRim,
   })
+
+  // celular: uma linha de lista com a barra e os botões de copo; a semana fica em Saúde
+  if (!compact && !desk)
+  {
+    const roundBtn = {
+      width: 40,
+      height: 40,
+      borderRadius: 999,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    }
+    return (
+      <View style={{ gap: 12 }}>
+        <GroupedList>
+          <GroupedRow
+            leading={<RowGlyph name="water" color={colors.health} />}
+            title="Água"
+            subtitle={`${atual} de ${meta} copos · ${mlAtual} ml`}
+            onPress={() => setEdit((v) => !v)}
+            chevron={false}
+            accessibilityLabel={`Água: ${atual} de ${meta} copos. Tocar para ajustar a meta`}
+            trailing={(
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <PressableScale
+                  accessibilityLabel="Remover copo"
+                  disabled={atual <= 0}
+                  onPress={() => void removeWaterCup(isGuest)}
+                  style={{ ...roundBtn, backgroundColor: colors.fill }}
+                >
+                  <Icon name="remove" size={18} color={colors.ink} />
+                </PressableScale>
+                <PressableScale
+                  accessibilityLabel={`Registrar copo de ${ml} ml`}
+                  onPress={() =>
+                  {
+                    hapticLight()
+                    void addWaterCup(isGuest)
+                  }}
+                  style={{ ...roundBtn, backgroundColor: colors.health }}
+                >
+                  <Icon name="add" size={20} color={colors.canvas} />
+                </PressableScale>
+              </View>
+            )}
+          >
+            <View style={{ height: 4, borderRadius: 999, backgroundColor: colors.fill, overflow: 'hidden', marginTop: 6 }}>
+              <View style={{ width: `${Math.min(100, pct)}%`, height: 4, borderRadius: 999, backgroundColor: colors.health }} />
+            </View>
+          </GroupedRow>
+        </GroupedList>
+        {edit ? <WaterGoalEditor onClose={() => setEdit(false)} /> : null}
+      </View>
+    )
+  }
 
   return (
     <View style={box}>

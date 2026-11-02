@@ -20,7 +20,7 @@ type Props = {
 }
 
 /**
- * Moldura de cada passo das boas-vindas: progresso fino, título Fraunces,
+ * Moldura de cada passo das boas-vindas: progresso fino, título,
  * conteúdo e rodapé fixo (Continuar em coral, Pular e Voltar discretos).
  */
 export function OnbStep({

@@ -273,49 +273,50 @@ export default function DashboardScreen()
           />
         ) : (
           <>
+            {/* Celular: resumo (destaque + números), depois ação (ritual), depois guia (AXEL) e plano */}
             <HomeTodayDashboard
               tasks={tasks}
               finance={finance}
               pending={openTasks.length}
               doneToday={doneToday}
-              ritualSlot={
-                showMorningRitual ? (
-                  <HomeMorningRitual
-                    needSleep={showSleepForm}
-                    needMood={showMoodForm}
-                  />
-                ) : null
-              }
             />
 
-            {/* Abaixo do destaque, seções: um painel por assunto, blocos separados por linha */}
-            <View>
-              <SectionHeader title="Agora" />
-              <Panel>
+            <HomeKpiSquares items={kpiItems} />
+
+            {showMorningRitual ? (
+              <HomeMorningRitual
+                needSleep={showSleepForm}
+                needMood={showMoodForm}
+              />
+            ) : null}
+
+            {/* Rótulo pequeno sobre cada grupo, como as seções de lista do Android */}
+            <View style={{ gap: 8 }}>
+              <Text variant="caption" muted style={{ marginLeft: 4 }}>Seu dia</Text>
+              <View style={{ gap: 12 }}>
                 <AxelDayBrief />
                 <DayPlanHomeCard />
                 <VisualDayCard />
                 <SalaryConfirmCard />
-              </Panel>
+              </View>
             </View>
 
             {showCareSection ? (
-              <View>
-                <SectionHeader title="Cuidar de você" />
-                <Panel>
+              <View style={{ gap: 8 }}>
+                <Text variant="caption" muted style={{ marginLeft: 4 }}>Cuidar de você</Text>
+                <View style={{ gap: 12 }}>
                   {waterOnHome ? <HomeWaterProgressCard /> : null}
                   {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
-                </Panel>
+                </View>
               </View>
             ) : null}
 
             {rpgMode ? <HomeRpgStrip /> : null}
 
             {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" pill="abrir" defaultOpen={false}>
+            <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" defaultOpen={false}>
               <View style={{ gap: 24, paddingTop: 8 }}>
                 <HomeDayTimeline tasks={today} />
-                <HomeKpiSquares items={kpiItems} />
                 <EloHeatmap semanas={12} compact />
                 <HomeMetricShortcuts />
               </View>
@@ -345,7 +346,6 @@ export default function DashboardScreen()
             <HomeCollapsible
               title="Resumo do dia"
               subtitle="Corpo, desempenho, agenda e panorama"
-              pill="abrir"
               defaultOpen={false}
             >
               <View style={{ gap: space.sm, paddingTop: space.xs }}>

@@ -9,7 +9,7 @@ import {
   type MoodDistributionSlice,
   type DiaHumorAgregado,
 } from '@simply-life/shared'
-import { Text, PrimaryButton, Field } from '../../../ui'
+import { Text, PrimaryButton, Field, Card, Icon, GroupedList, GroupedRow, RowGlyph, type IconName } from '../../../ui'
 import { MoodFaceRow } from '../../MoodFace'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useWorkspace } from '../../../layout/useWorkspace'
@@ -18,6 +18,15 @@ import { MoodTrendChart, MoodYearGrid } from './MoodCharts'
 import { HomeCollapsible } from '../../dashboard/HomeCollapsible'
 
 const NOTES_PER_PAGE = 10
+
+type DiarySectionId = 'dia' | 'padroes' | 'notas'
+
+function moodIcon(m: number): IconName
+{
+  if (m <= 2) return 'sad'
+  if (m === 3) return 'remove'
+  return 'happy'
+}
 
 type WeekReview = {
   avg: number
@@ -138,6 +147,7 @@ export function HealthDiaryStudio(props: Props)
   const { showRail } = useWorkspace()
   const router = useRouter()
   const [page, setPage] = useState(0)
+  const [openSection, setOpenSection] = useState<DiarySectionId | null>(null)
   const canSave = Boolean(last && nota.trim())
   const dateLine = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
@@ -276,6 +286,120 @@ export function HealthDiaryStudio(props: Props)
     notesBlock ? 'notas' : null,
     'relatório',
   ].filter(Boolean).join(', ')
+
+  // celular: registro num cartão, últimas notas como lista e o resto em linhas que abrem
+  // (padrão Daylio / How We Feel: check-in em cima, entradas e padrões abaixo)
+  if (!showRail)
+  {
+    const sectionBody =
+      openSection === 'dia' ? daySlot
+        : openSection === 'padroes' ? patternsBlock
+          : openSection === 'notas' ? notesBlock
+            : null
+    const toggle = (id: DiarySectionId) => setOpenSection((cur) => (cur === id ? null : id))
+    const caret = (id: DiarySectionId) => (
+      <Icon name={openSection === id ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkFaint} />
+    )
+
+    return (
+      <View style={{ gap: space.lg }}>
+        {alertSlot}
+
+        <Card tone="elevated" style={{ gap: space.md, padding: 16 }}>
+          <View style={{ gap: 2 }}>
+            <Text variant="caption" muted>{dateLine}</Text>
+            <Text variant="section" style={{ fontSize: 20, lineHeight: 26 }}>{moodHeadline}</Text>
+            <Text variant="caption" muted>{weekLine}</Text>
+          </View>
+          <MoodFaceRow value={last?.humor} onChange={onMood} onWidget />
+          <Field
+            label={prompt}
+            value={nota}
+            onChangeText={onNotaChange}
+            placeholder="Uma frase já vira histórico"
+            multiline
+            tone="widget"
+          />
+          {nota.trim() ? (
+            <PrimaryButton
+              label={canSave ? 'Salvar nota' : 'Escolha um humor para salvar a nota'}
+              disabled={!canSave}
+              onPress={onSaveNote}
+            />
+          ) : null}
+        </Card>
+
+        {comNota.length > 0 ? (
+          <View style={{ gap: 8 }}>
+            <Text variant="caption" muted style={{ marginLeft: 4 }}>Últimas anotações</Text>
+            <GroupedList>
+              {comNota.slice(0, 3).map((h) => (
+                <GroupedRow
+                  key={h.id}
+                  leading={<RowGlyph name={moodIcon(h.humor)} color={moodColor(h.humor)} />}
+                  title={h.nota ?? ''}
+                  subtitle={`${formatDayPt((h.data || '').slice(0, 10))} · ${moodLabel(h.humor)}`}
+                />
+              ))}
+              <GroupedRow
+                leading={<RowGlyph name="document-text" color={colors.tasks} />}
+                title="Abrir anotações"
+                onPress={onOpenNotes}
+              />
+            </GroupedList>
+          </View>
+        ) : null}
+
+        <View style={{ gap: 8 }}>
+          <Text variant="caption" muted style={{ marginLeft: 4 }}>Mais do seu diário</Text>
+          <GroupedList>
+            {daySlot ? (
+              <GroupedRow
+                leading={<RowGlyph name="today" color={colors.axelFill} />}
+                title="Seu dia"
+                subtitle="Agenda e o que foi concluído"
+                onPress={() => toggle('dia')}
+                chevron={false}
+                trailing={caret('dia')}
+              />
+            ) : null}
+            <GroupedRow
+              leading={<RowGlyph name="stats-chart" color={colors.health} />}
+              title="Padrões"
+              subtitle={total > 0 ? `${total} registro(s) de humor` : 'Aparecem depois de alguns check-ins'}
+              onPress={() => toggle('padroes')}
+              chevron={false}
+              trailing={caret('padroes')}
+            />
+            {notesBlock ? (
+              <GroupedRow
+                leading={<RowGlyph name="book" color={colors.finance} />}
+                title="O que você escreveu"
+                value={String(comNota.length)}
+                onPress={() => toggle('notas')}
+                chevron={false}
+                trailing={caret('notas')}
+              />
+            ) : null}
+            {comNota.length === 0 ? (
+              <GroupedRow
+                leading={<RowGlyph name="document-text" color={colors.tasks} />}
+                title="Abrir anotações"
+                onPress={onOpenNotes}
+              />
+            ) : null}
+            <GroupedRow
+              leading={<RowGlyph name="download" color={colors.inkMuted} />}
+              title="Relatório por período"
+              subtitle="Humor, gastos, água, sono e tarefas em PDF"
+              onPress={() => router.push('/relatorio' as never)}
+            />
+          </GroupedList>
+          {sectionBody ? <Card tone="elevated" style={{ padding: 16 }}>{sectionBody}</Card> : null}
+        </View>
+      </View>
+    )
+  }
 
   return (
     <View style={{ gap: space.lg }}>

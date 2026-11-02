@@ -29,12 +29,12 @@ export function ScreenIntro({
           {title}
         </Text>
       ) : (
-        <Text variant="hero">
+        <Text variant="section" style={{ fontSize: 28, lineHeight: 34 }}>
           {title}
         </Text>
       )}
       {subtitle ? (
-        <Text variant="body" muted style={{ maxWidth: 600 }}>
+        <Text variant="caption" muted style={{ maxWidth: 600 }}>
           {subtitle}
         </Text>
       ) : null}

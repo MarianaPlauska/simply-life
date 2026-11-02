@@ -139,7 +139,7 @@ export default function TaskDetailScreen()
               style={{
                 fontSize: 32,
                 letterSpacing: -0.8,
-                fontFamily: 'Fraunces_500Medium',
+                fontFamily: 'Lexend_600SemiBold',
               }}
             >
               Dashboard
@@ -190,7 +190,7 @@ export default function TaskDetailScreen()
                   style={{
                     fontSize: 52,
                     letterSpacing: -2,
-                    fontFamily: 'Fraunces_500Medium',
+                    fontFamily: 'Lexend_600SemiBold',
                   }}
                 >
                   {progress}%

@@ -7,6 +7,15 @@
     "runtimeVersion": {
       "policy": "appVersion"
     },
+    "owner": "marianaplauska",
+    "extra": {
+      "eas": {
+        "projectId": "71a668d6-d410-4b6f-83c5-2d58723bd183"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/71a668d6-d410-4b6f-83c5-2d58723bd183"
+    },
     "scheme": "simplylife",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -41,7 +50,7 @@
           "backgroundColor": "#1F3A3D",
           "dark": {
             "image": "./assets/splash-icon.png",
-            "backgroundColor": "#111615"
+            "backgroundColor": "#102426"
           }
         }
       ],

@@ -4,7 +4,7 @@ import { Text } from './Text'
 
 /**
  * Título de aba interna (Hoje, Feitas, Rotina, Pastas, Prazos...).
- * Hierarquia única: PaneTitle (Fraunces 22/30) › Text "section" (Lexend) › Text "bodyStrong" para rótulos de grupo.
+ * Hierarquia única: PaneTitle (22/30) › Text "section" › Text "bodyStrong" para rótulos de grupo.
  */
 export function PaneTitle({
   title,

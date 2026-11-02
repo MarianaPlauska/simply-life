@@ -10,7 +10,8 @@ import {
   moodGoalPeriodStats,
   type HumorRegistro,
 } from '@simply-life/shared'
-import { Text } from '../../ui'
+import { Text, GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { usePrefsStore } from '../../store/prefsStore'
@@ -48,6 +49,7 @@ function humorIso(h: HumorRegistro): string
 export function HealthDiaryTab()
 {
   const router = useRouter()
+  const { colors } = useTheme()
   const humor = useDataStore((s) => s.humor)
   const addHumor = useDataStore((s) => s.addHumor)
   const waterWeekDays = useDataStore((s) => s.waterWeekDays)
@@ -117,12 +119,14 @@ export function HealthDiaryTab()
   const softMode = isSoftMoodDay(humor)
 
   const alertSlot = softMode ? (
-    <View style={{ gap: 8 }}>
-      <Text variant="bodyStrong">Modo suave ativo na aba Hoje</Text>
-      <Text variant="caption" muted>
-        Menos metas, mais espaço. Cuidados e apoio continuam nas outras abas.
-      </Text>
-    </View>
+    <GroupedList>
+      <GroupedRow
+        leading={<RowGlyph name="leaf" color={colors.health} />}
+        title="Modo suave ativo na aba Hoje"
+        subtitle="Menos metas, mais espaço. Cuidados e apoio continuam nas outras abas."
+        subtitleLines={2}
+      />
+    </GroupedList>
   ) : undefined
 
   const studioProps = {
