@@ -68,7 +68,7 @@ export function AuthHeader({
         <View style={{ width: '100%', maxWidth: contentMaxWidth, gap: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <BrandMark size={36} onFill={dark} />
-            <SunFyWordmark color={colors.heroInk} style={{ fontSize: 22, lineHeight: 28, letterSpacing: -0.4 }} />
+            <SunFyWordmark color={colors.heroInk} style={{ fontSize: 24, lineHeight: 28, letterSpacing: -0.4 }} />
           </View>
           <Text
             variant="hero"
@@ -89,7 +89,7 @@ export function AuthHeader({
               </Text>
             ))}
           </Text>
-          <Text variant="body" style={{ color: colors.heroMuted, maxWidth: 380, fontSize: 15, lineHeight: 22 }}>
+          <Text variant="body" style={{ color: colors.heroMuted, maxWidth: 380, fontSize: 16, lineHeight: 22 }}>
             Nos dias nublados, a gente se vira um pro outro.
           </Text>
         </View>

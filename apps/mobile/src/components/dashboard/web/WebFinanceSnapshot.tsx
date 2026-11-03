@@ -20,7 +20,7 @@ export function WebFinanceSnapshot({ finance }: { finance: FinanceTx[] })
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <View style={{ gap: 4 }}>
-          <Text variant="section" style={{ fontSize: 18 }}>
+          <Text variant="section" style={{ fontSize: 19 }}>
             Finanças
           </Text>
           <Text variant="caption" muted>

@@ -19,9 +19,9 @@ export function WebKanbanHeader({ actions }: { actions?: ReactNode })
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 16 }}>
       <View style={{ flex: 1, minWidth: 240, gap: 4 }}>
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 34, lineHeight: 42, color: colors.ink }}>Tarefas</Text>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 32, lineHeight: 42, color: colors.ink }}>Tarefas</Text>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
-          <Text style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.inkMuted }]}>
+          <Text style={[LEX.regular, { fontSize: 16, lineHeight: 42, color: colors.inkMuted }]}>
             Uma coisa de cada vez, no seu ritmo.
           </Text>
           <SyncHint />
@@ -45,7 +45,7 @@ export function WebKanbanHeader({ actions }: { actions?: ReactNode })
         })}
       >
         <Icon name="add" size={18} color={colors.axelOnFill} />
-        <Text style={[LEX.medium, { fontSize: 15, lineHeight: 20, color: colors.axelOnFill }]}>Nova tarefa</Text>
+        <Text style={[LEX.medium, { fontSize: 16, lineHeight: 20, color: colors.axelOnFill }]}>Nova tarefa</Text>
       </WebHoverable>
     </View>
   )

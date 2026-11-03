@@ -58,7 +58,7 @@ export function HomeFitnessHero({
           <Text
             variant="hero"
             numberOfLines={1}
-            style={{ fontSize: 26, letterSpacing: -0.5, lineHeight: 34 }}
+            style={{ fontSize: 28, letterSpacing: -0.5, lineHeight: 34 }}
           >
             {title}
           </Text>

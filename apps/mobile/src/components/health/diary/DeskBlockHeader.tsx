@@ -21,7 +21,7 @@ export function DeskBlockHeader({ title, subtitle, aside, action }: Props)
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
       <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-        <Text variant="section" style={{ fontSize: 18, lineHeight: 26 }}>
+        <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>
           {title}
         </Text>
         {subtitle ? (

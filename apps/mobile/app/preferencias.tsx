@@ -37,6 +37,7 @@ import {
   type AppModuleId,
 } from '../src/lib/appModules'
 import { registerExpoPushAsync, unregisterExpoPushAsync } from '../src/lib/pushRegister'
+import { scheduleCadenceAlerts } from '../src/lib/pushNotifications'
 import { sendTestAlert } from '../src/lib/pushNotifications'
 import { ModulePicker } from '../src/components/onboarding/ModulePicker'
 import { OnbBlock } from '../src/components/onboarding/OnbStep'
@@ -368,10 +369,12 @@ export default function PreferenciasScreen()
                     {
                       if (next === 'off')
                       {
+                        void scheduleCadenceAlerts('off')
                         setPushMsg(`Alertas ${where} desligados.`)
                         return
                       }
                       const r = res as { ok: boolean; error?: string }
+                      if (r.ok) void scheduleCadenceAlerts(next)
                       setPushMsg(r.ok
                         ? 'Ritmo salvo. O sistema pode pedir permissão uma vez.'
                         : (r.error || 'Autorize as notificações nas configurações do sistema.'))
@@ -393,7 +396,7 @@ export default function PreferenciasScreen()
                   void sendTestAlert().then((ok) =>
                   {
                     setPushMsg(ok
-                      ? 'Aviso enviado. Se o celular estiver no Não perturbe e não tocar, abra os ajustes e deixe o canal Avisos do SunFy passar.'
+                      ? 'Notificação enviada, com ícone e texto. Se o Não perturbe estiver ligado, use o botão abaixo e ative o SunFy.'
                       : 'O celular ainda não autorizou avisos. Toque em abrir ajustes e permita notificações.')
                   })
                 }}

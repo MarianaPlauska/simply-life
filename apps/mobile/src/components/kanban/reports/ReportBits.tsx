@@ -20,7 +20,7 @@ export function ReportStat({ value, label, hint }: { value: string; label: strin
         borderColor: colors.hairline,
       }}
     >
-      <Text variant="hero" style={{ fontSize: 22, lineHeight: 28 }}>
+      <Text variant="hero" style={{ fontSize: 24, lineHeight: 28 }}>
         {value}
       </Text>
       <Text variant="caption" muted>

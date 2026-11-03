@@ -168,7 +168,7 @@ export function FinanceCardDetailSheet({
               <Text variant="caption" muted>
                 Saldo atual
               </Text>
-              <Text variant="hero" style={{ fontSize: 26, letterSpacing: -0.6 }}>
+              <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.6 }}>
                 {formatBRL(disponivel)}
               </Text>
             </View>

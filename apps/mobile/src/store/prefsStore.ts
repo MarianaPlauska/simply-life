@@ -56,10 +56,15 @@ export const usePrefsStore = create<PrefsState>((set, get) => ({
 
   hydrate: async () =>
   {
+    const cap = <T,>(work: Promise<T>, fallback: T) =>
+      Promise.race([
+        work,
+        new Promise<T>((resolve) => setTimeout(() => resolve(fallback), 8000)),
+      ])
     const [prefs, keywords, radar] = await Promise.all([
-      loadWorkspacePrefs(),
-      loadEmailKeywords(),
-      loadRadarKeywords(),
+      cap(loadWorkspacePrefs(), get().prefs),
+      cap(loadEmailKeywords(), get().keywords),
+      cap(loadRadarKeywords(), get().radar),
     ])
     set({ prefs, keywords, radar, loaded: true })
     return prefs

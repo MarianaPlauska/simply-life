@@ -128,13 +128,13 @@ function CalendarPaneStack({ tasks }: Props)
               </Text>
               <Text
                 variant="bodyStrong"
-                style={{ fontSize: 18, color: active ? colors.axelOnFill : colors.ink }}
+                style={{ fontSize: 19, color: active ? colors.axelOnFill : colors.ink }}
               >
                 {d.num}
               </Text>
               <Text
                 variant="micro"
-                style={{ color: active ? colors.axelOnFill : colors.inkFaint, fontSize: 11 }}
+                style={{ color: active ? colors.axelOnFill : colors.inkFaint, fontSize: 12 }}
               >
                 {count}
               </Text>

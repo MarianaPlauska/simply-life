@@ -2,7 +2,7 @@
   "expo": {
     "name": "SunFy",
     "slug": "simply-life",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "runtimeVersion": {
       "policy": "appVersion"
@@ -71,6 +71,12 @@
         }
       ],
       "@react-native-community/datetimepicker",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "O SunFy coloca na agenda do celular o que você marcar para amanhã."
+        }
+      ],
       [
         "react-native-android-widget",
         {

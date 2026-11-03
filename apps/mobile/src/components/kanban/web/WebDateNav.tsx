@@ -89,7 +89,7 @@ export function WebDateNav({ selectedIso, onSelect, marked }: Props)
   return (
     <View style={{ gap: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-        <Text numberOfLines={1} style={[LEX.medium, { flex: 1, fontSize: 15, lineHeight: 22, color: colors.ink }]}>
+        <Text numberOfLines={1} style={[LEX.medium, { flex: 1, fontSize: 16, lineHeight: 22, color: colors.ink }]}>
           {monthLabel}
         </Text>
         {arrow(-1)}

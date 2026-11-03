@@ -98,7 +98,7 @@ function FoldersPaneStack({ tasks }: Props)
           onChangeText={setQuery}
           placeholder="Buscar pasta"
           placeholderTextColor={colors.inkFaint}
-          style={{ flex: 1, color: colors.ink, fontSize: 15, minHeight: 44 }}
+          style={{ flex: 1, color: colors.ink, fontSize: 16, minHeight: 44 }}
         />
       </View>
 
@@ -157,7 +157,7 @@ function FoldersPaneStack({ tasks }: Props)
               paddingHorizontal: 14,
               color: colors.ink,
               backgroundColor: colors.surface,
-              fontSize: 15,
+              fontSize: 16,
             }}
             onSubmitEditing={create}
           />

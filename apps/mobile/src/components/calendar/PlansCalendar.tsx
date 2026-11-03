@@ -114,7 +114,7 @@ export function PlansCalendar({ tasks }: Props)
       >
         <Text
           variant="hero"
-          style={{ fontSize: 26, color: colors.heroInk, letterSpacing: -0.6, lineHeight: 32 }}
+          style={{ fontSize: 28, color: colors.heroInk, letterSpacing: -0.6, lineHeight: 32 }}
         >
           Organize sua Vida{'\n'}Acompanhe o Progresso
         </Text>
@@ -178,7 +178,7 @@ export function PlansCalendar({ tasks }: Props)
             marginTop: -28,
           }}
         >
-          <Text variant="label" style={{ color: colors.ink, fontWeight: '800', fontSize: 15 }}>
+          <Text variant="label" style={{ color: colors.ink, fontWeight: '800', fontSize: 16 }}>
             Planos
           </Text>
         </View>
@@ -293,7 +293,7 @@ export function PlansCalendar({ tasks }: Props)
                     color={accent}
                   />
                 </View>
-                <Text variant="bodyStrong" style={{ flex: 1, color: colors.ink, fontSize: 15 }}>
+                <Text variant="bodyStrong" style={{ flex: 1, color: colors.ink, fontSize: 16 }}>
                   {cat.label}
                 </Text>
                 <Text variant="caption" muted style={{ fontWeight: '700' }}>

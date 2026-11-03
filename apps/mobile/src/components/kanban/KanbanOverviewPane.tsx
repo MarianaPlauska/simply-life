@@ -165,7 +165,7 @@ export function KanbanOverviewPane({ tasks }: Props)
       </View>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.25 }}>
+        <Text variant="hero" style={{ fontSize: 24, lineHeight: 30, letterSpacing: -0.25 }}>
           Visão geral
         </Text>
         <View
@@ -207,7 +207,7 @@ export function KanbanOverviewPane({ tasks }: Props)
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <Text
                 variant="hero"
-                style={{ fontSize: 30, color: tile.color, letterSpacing: -1.2, fontWeight: '700' }}
+                style={{ fontSize: 28, color: tile.color, letterSpacing: -1.2, fontWeight: '700' }}
               >
                 {tile.value}
               </Text>

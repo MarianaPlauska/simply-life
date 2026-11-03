@@ -81,7 +81,7 @@ export function HealthDiaryDesk(props: Props)
           <Text variant="caption" muted>
             {dateLine}
           </Text>
-          <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, letterSpacing: -0.3, color: colors.ink }}>
+          <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, letterSpacing: -0.3, color: colors.ink }}>
             {last ? `Hoje você está ${moodLabel(last.humor).toLowerCase()}` : 'Como você está hoje?'}
           </Text>
         </View>
@@ -211,7 +211,7 @@ export function HealthDiaryDesk(props: Props)
     <View style={{ gap: 8 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
         <Icon name={icon} size={16} color={colors.inkMuted} />
-        <Text variant="bodyStrong" style={{ fontSize: 15 }}>
+        <Text variant="bodyStrong" style={{ fontSize: 16 }}>
           {label}
         </Text>
       </View>

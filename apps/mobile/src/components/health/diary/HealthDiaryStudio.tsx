@@ -9,7 +9,7 @@ import {
   type MoodDistributionSlice,
   type DiaHumorAgregado,
 } from '@simply-life/shared'
-import { Text, PrimaryButton, Field, Card, Icon, GroupedList, GroupedRow, RowGlyph, type IconName } from '../../../ui'
+import { Text, PrimaryButton, Field, Icon, GroupedList, GroupedRow, RowGlyph, type IconName } from '../../../ui'
 import { MoodFaceRow } from '../../MoodFace'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useWorkspace } from '../../../layout/useWorkspace'
@@ -113,7 +113,7 @@ function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; tota
                   backgroundColor: moodColor(m),
                 }}
               />
-              <Text variant="micro" style={{ color: colors.featureMuted, fontSize: 11 }}>
+              <Text variant="micro" style={{ color: colors.featureMuted, fontSize: 12 }}>
                 {moodLabel(m)} {Math.round((count / total) * 100)}%
               </Text>
             </View>
@@ -320,12 +320,9 @@ export function HealthDiaryStudio(props: Props)
       <View style={{ gap: space.lg }}>
         {alertSlot}
 
-        <Card tone="elevated" style={{ gap: space.md, padding: 16 }}>
-          <View style={{ gap: 2 }}>
-            <Text variant="caption" muted>{dateLine}</Text>
-            <Text variant="section" style={{ fontSize: 20, lineHeight: 26 }}>{moodHeadline}</Text>
-            <Text variant="caption" muted>{weekLine}</Text>
-          </View>
+        <View style={{ gap: space.md }}>
+          <Text variant="caption" muted>{dateLine}</Text>
+          <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>{moodHeadline}</Text>
           <MoodFaceRow value={last?.humor} onChange={onMood} onWidget />
           <Field
             label={prompt}
@@ -342,7 +339,7 @@ export function HealthDiaryStudio(props: Props)
               onPress={onSaveNote}
             />
           ) : null}
-        </Card>
+        </View>
 
         {comNota.length > 0 ? (
           <View style={{ gap: 8 }}>
@@ -413,7 +410,7 @@ export function HealthDiaryStudio(props: Props)
               onPress={() => router.push('/relatorio' as never)}
             />
           </GroupedList>
-          {sectionBody ? <Card tone="elevated" style={{ padding: 16 }}>{sectionBody}</Card> : null}
+          {sectionBody}
         </View>
       </View>
     )
@@ -429,7 +426,7 @@ export function HealthDiaryStudio(props: Props)
           <Text variant="caption" muted>
             {dateLine}
           </Text>
-          <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.4 }}>
+          <Text variant="hero" style={{ fontSize: 24, lineHeight: 30, letterSpacing: -0.4 }}>
             {moodHeadline}
           </Text>
           <Text variant="caption" muted>

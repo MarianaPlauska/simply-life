@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 import { Modal } from '../../ui/Modal'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -26,6 +26,8 @@ import { FinanceIcon } from '../../lib/financeIcons'
 type Props = {
   visible: boolean
   onClose: () => void
+  /** Abre direto no formulário, vindo de A pagar. */
+  create?: boolean
 }
 
 type Editing = number | 'new' | null
@@ -36,7 +38,7 @@ function parseMoney(raw: string): number
 }
 
 /** Editar contas fixas: nome, valor, vencimento, cor e urgência */
-export function FinanceFixasSheet({ visible, onClose }: Props)
+export function FinanceFixasSheet({ visible, onClose, create = false }: Props)
 {
   const { colors, space, radius, chart } = useTheme()
   const insets = useSafeAreaInsets()
@@ -59,12 +61,29 @@ export function FinanceFixasSheet({ visible, onClose }: Props)
   const [urgencia, setUrgencia] = useState<FixaUrgencia>(2)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const openedNew = useRef(false)
 
   useEffect(() =>
   {
-    if (visible) void hydrate()
-    else setEditing(null)
-  }, [visible, hydrate])
+    if (!visible)
+    {
+      setEditing(null)
+      openedNew.current = false
+      return
+    }
+    void hydrate()
+    if (!create || openedNew.current) return
+    openedNew.current = true
+    setEditing('new')
+    setNome('')
+    setValor('')
+    setDia(String(new Date().getDate()))
+    setCategoria('outros')
+    setColor(defaultFixaColor('outros'))
+    setIcon(defaultFixaIcon('outros'))
+    setUrgencia(2)
+    setError(null)
+  }, [visible, hydrate, create])
 
   useEffect(() =>
   {

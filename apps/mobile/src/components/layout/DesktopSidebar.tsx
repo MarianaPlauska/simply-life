@@ -123,7 +123,7 @@ export function DesktopSidebar()
             <View style={{ flex: 1 }}>
               <SunFyWordmark
                 color={CREAM}
-                style={{ fontFamily: 'Fraunces_500Medium', fontSize: 15, lineHeight: 20, letterSpacing: -0.2 }}
+                style={{ fontFamily: 'Fraunces_500Medium', fontSize: 16, lineHeight: 20, letterSpacing: -0.2 }}
               />
             </View>
           ) : null}
@@ -159,7 +159,7 @@ export function DesktopSidebar()
               paddingHorizontal: 14,
               textTransform: 'uppercase',
               letterSpacing: 0.8,
-              fontSize: 11,
+              fontSize: 12,
             }}
           >
             Menu
@@ -367,7 +367,7 @@ export function DesktopSidebar()
             <Text variant="label" numberOfLines={1} style={{ color: CREAM, fontSize: 12 }}>
               {name}
             </Text>
-            <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 11 }}>
+            <Text variant="micro" numberOfLines={1} style={{ color: inkMutedOnBrand, fontSize: 12 }}>
               {isAdmin ? 'Admin' : 'Perfil'}
             </Text>
           </View>

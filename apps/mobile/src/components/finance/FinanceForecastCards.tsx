@@ -135,13 +135,13 @@ export function MonthProjectionCard()
   const desk = useWebDesk()
   const bigNumber = useDeskBigNumber()
 
-  return (
-    <Card tone="elevated" style={{ gap: space.sm }}>
+  const body = (
+    <>
       <Pressable onPress={() => setOpen(!open)} accessibilityRole="button" accessibilityLabel="Ver a conta do fim do mês" style={{ gap: desk ? 12 : 6 }}>
         {desk ? (
           // computador: mesmo cabeçalho dos outros blocos da grade
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Text variant="section" style={{ flex: 1, fontSize: 18, lineHeight: 26 }}>Fim do mês</Text>
+            <Text variant="section" style={{ flex: 1, fontSize: 19, lineHeight: 26 }}>Fim do mês</Text>
             <Text variant="caption" muted>dia {projection.fimDoMes.slice(8, 10)}</Text>
             <Icon name={open ? 'chevron-up' : 'chevron-down'} size={18} color={colors.inkMuted} />
           </View>
@@ -153,7 +153,7 @@ export function MonthProjectionCard()
         )}
         <Text
           variant="title"
-          style={desk ? { fontFamily: WEB_DISPLAY_FONT, ...bigNumber, fontVariant: ['tabular-nums'] } : { fontSize: 26 }}
+          style={desk ? { fontFamily: WEB_DISPLAY_FONT, ...bigNumber, fontVariant: ['tabular-nums'] } : { fontSize: 28 }}
           color={tone}
         >
           {projection.sobra >= 0 ? `Sobra ~${formatBRL(projection.sobra)}` : `Faltam ~${formatBRL(Math.abs(projection.sobra))}`}
@@ -233,6 +233,17 @@ export function MonthProjectionCard()
           </Text>
         </View>
       ) : null}
-    </Card>
+    </>
+  )
+
+  if (desk)
+  {
+    return <Card tone="elevated" style={{ gap: space.sm }}>{body}</Card>
+  }
+
+  return (
+    <View style={{ gap: 6, paddingBottom: space.md }}>
+      {body}
+    </View>
   )
 }

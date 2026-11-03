@@ -143,10 +143,10 @@ export type ColorTokens = {
 
 export const COLOR_DARK: ColorTokens = {
   /**
-   * O fundo é o petróleo do logo (#1F3A3D). Cartão um degrau mais claro, na mesma tinta.
-   * Um fundo #122226 lia como preto e sumia com a marca.
+   * Fundo mais fundo que o petróleo do logo (#1F3A3D), ainda verde-azulado.
+   * #122226 lia como preto. O modo claro não usa esta cor.
    */
-  canvas: BRAND.petroleo,
+  canvas: '#10282C',
   chrome: '#244246',
   surface: '#244246',
   elevated: '#244246',

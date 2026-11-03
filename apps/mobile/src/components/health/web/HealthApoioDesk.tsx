@@ -106,7 +106,7 @@ export function HealthApoioDesk()
         <View style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Icon name="heart-outline" size={18} color={colors.danger} />
-            <Text variant="section" style={{ fontSize: 18, lineHeight: 26 }}>
+            <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>
               Apoio emocional 24h
             </Text>
           </View>

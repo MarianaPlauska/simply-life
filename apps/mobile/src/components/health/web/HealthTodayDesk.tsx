@@ -60,7 +60,7 @@ export function HealthTodayDesk({ onGoCuidados, onGoApoio, onGoDiario }: Props)
                 <Text variant="caption" muted>
                   {hoje ? 'Humor de hoje' : 'Check-in rápido'}
                 </Text>
-                <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, letterSpacing: -0.3, color: colors.ink }}>
+                <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, letterSpacing: -0.3, color: colors.ink }}>
                   {hoje ? moodLabel(hoje.humor) : 'Como você está?'}
                 </Text>
               </View>

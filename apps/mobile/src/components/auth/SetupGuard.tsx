@@ -20,8 +20,11 @@ export function SetupGuard({ children }: { children: ReactNode })
   useEffect(() =>
   {
     if (!loaded || setupAt || confirmed !== 'pending') return
-    void usePrefsStore.getState().hydrate()
-      .then((p) => setConfirmed(p.setup_completed_at ? 'done' : 'missing'))
+    void Promise.race([
+      usePrefsStore.getState().hydrate(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 12000)),
+    ])
+      .then((p) => setConfirmed(p?.setup_completed_at ? 'done' : 'missing'))
       .catch(() => setConfirmed('missing'))
   }, [loaded, setupAt, confirmed])
 

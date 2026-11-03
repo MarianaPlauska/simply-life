@@ -46,18 +46,18 @@ export function visibleCuidadosTabs(on: (id: AppModuleId) => boolean)
 export const HEALTH_SECTION_INTRO: Record<HealthSection, { title: string; subtitle: string }> = {
   diario: {
     title: 'Diário',
-    subtitle: 'Escreva o dia. Gráficos e notas ficam recolhidos, um de cada vez.',
+    subtitle: 'Humor e uma frase do dia.',
   },
   hoje: {
     title: 'Hoje',
-    subtitle: 'Marque o humor. O que falta aparece em seguida. O detalhe abre em Cuidados.',
+    subtitle: 'O que falta agora.',
   },
   cuidados: {
     title: 'Cuidados',
-    subtitle: 'Uma aba por cuidado. Registre só o que está aberto.',
+    subtitle: 'Água, comida, sono, treino e remédio.',
   },
   apoio: {
     title: 'Apoio',
-    subtitle: 'Se estiver intenso, o CVV fica no topo. O resto é opcional.',
+    subtitle: 'Se estiver intenso, o CVV fica no topo.',
   },
 }

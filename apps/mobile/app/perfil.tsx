@@ -19,7 +19,7 @@ import {
 } from '../src/components/profile/ProfileSettingsRow'
 import { BRAND, COLOR_DARK } from '@simply-life/ui-tokens'
 import { useTheme } from '../src/theme/ThemeProvider'
-import { useAuthStore } from '../src/store/authStore'
+import { isFounderEmail, useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { resolveAxelName } from '../src/lib/axelName'
@@ -37,7 +37,8 @@ export default function PerfilScreen()
   const userId = useAuthStore((s) => s.userId)
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
-  const isAdmin = useAuthStore((s) => s.isAdmin)
+  const isAdminStored = useAuthStore((s) => s.isAdmin)
+  const isAdmin = isAdminStored || isFounderEmail(email)
   const signOut = useAuthStore((s) => s.signOut)
   const refreshAdmin = useAuthStore((s) => s.refreshAdminFlag)
   const prefs = usePrefsStore((s) => s.prefs)
@@ -149,7 +150,7 @@ export default function PerfilScreen()
             </Pressable>
           </View>
           <View style={{ alignItems: 'center', gap: 6 }}>
-            <Text variant="title" style={{ fontSize: 22 }}>
+            <Text variant="title" style={{ fontSize: 24 }}>
               {displayName}
             </Text>
             <Text variant="caption" muted>

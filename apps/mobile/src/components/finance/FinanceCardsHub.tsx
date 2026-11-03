@@ -283,15 +283,15 @@ export function FinanceCardsHub({
                       cursor: 'pointer',
                     })}
                   >
-                    <Text variant="body" style={{ fontSize: 15, lineHeight: 22 }} numberOfLines={1}>
+                    <Text variant="body" style={{ fontSize: 16, lineHeight: 22 }} numberOfLines={1}>
                       {card.nome}{card.status === 'ativo' ? '' : ' (bloqueado)'}
                     </Text>
                     <Text variant="caption" muted>{card.bandeira === 'visa' ? 'Visa' : 'Mastercard'}</Text>
                     <Text variant="caption" muted>Dia {String(card.diaVencimento).padStart(2, '0')}</Text>
-                    <Text variant="body" style={{ fontSize: 15, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
+                    <Text variant="body" style={{ fontSize: 16, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
                       {formatBRL(cardFaturaAbertaDisplay(card, txs))}
                     </Text>
-                    <Text variant="body" style={{ fontSize: 15, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
+                    <Text variant="body" style={{ fontSize: 16, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
                       {formatBRL(card.limite)}
                     </Text>
                   </WebHoverable>
@@ -362,7 +362,7 @@ export function FinanceCardsHub({
             >
               <Icon name={a.icon} size={20} color={colors.ink} />
             </View>
-            <Text variant="micro" muted style={{ fontSize: 11 }}>
+            <Text variant="micro" muted style={{ fontSize: 12 }}>
               {a.label}
             </Text>
           </PressableScale>
@@ -380,7 +380,7 @@ export function FinanceCardsHub({
               <Text variant="caption" muted>
                 Disponível
               </Text>
-              <Text variant="title" color={colors.health} style={{ fontSize: 20 }}>
+              <Text variant="title" color={colors.health} style={{ fontSize: 19 }}>
                 {formatBRL(Math.max(0, primary.limite - faturaPrimary))}
               </Text>
             </View>
@@ -388,7 +388,7 @@ export function FinanceCardsHub({
               <Text variant="caption" muted>
                 Fatura aberta
               </Text>
-              <Text variant="title" color={colors.finance} style={{ fontSize: 20 }}>
+              <Text variant="title" color={colors.finance} style={{ fontSize: 19 }}>
                 {formatBRL(faturaPrimary)}
               </Text>
             </View>

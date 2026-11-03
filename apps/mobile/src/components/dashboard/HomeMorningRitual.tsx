@@ -206,7 +206,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
             <Text variant="caption" muted>
               Ritual da manhã
             </Text>
-            <Text variant="section" style={{ fontSize: 18 }} numberOfLines={1}>
+            <Text variant="section" style={{ fontSize: 19 }} numberOfLines={1}>
               {showSleepStep ? 'Como foi a noite?' : 'Como você está agora?'}
             </Text>
           </View>
@@ -277,7 +277,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
                   >
                     <Text
                       variant="bodyStrong"
-                      style={{ fontSize: 20, lineHeight: 24, color: active ? colors.axelOnFill : colors.ink }}
+                      style={{ fontSize: 19, lineHeight: 24, color: active ? colors.axelOnFill : colors.ink }}
                     >
                       {Math.floor(h)}h
                     </Text>
@@ -364,7 +364,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
               textAlignVertical: 'top',
               borderRadius: 16,
               padding: 16,
-              fontSize: 15,
+              fontSize: 16,
               color: colors.ink,
               backgroundColor: colors.fill,
               borderWidth: 1,

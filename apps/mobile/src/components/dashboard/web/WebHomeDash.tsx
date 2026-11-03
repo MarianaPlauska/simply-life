@@ -77,7 +77,7 @@ export function DashGreeting({ greet, name, dateLabel, onMore }: { greet: string
       <View style={{ gap: 4 }}>
         <Text variant="caption" muted>{greet},</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, color: colors.ink }}>{name}</Text>
+          <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, color: colors.ink }}>{name}</Text>
           <Icon name="sunny" size={20} color={colors.attention} />
         </View>
         <Text variant="caption" muted>Uma coisa de cada vez. Você está indo bem.</Text>
@@ -149,8 +149,8 @@ export function DashHero()
     >
       <View style={{ flex: 1, gap: 10, minWidth: 0, zIndex: 1 }}>
         <Text style={{ fontSize: 13, fontFamily: 'Lexend_600SemiBold', color: creamSoft }}>Axel</Text>
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, color: cream }}>{brief.headline}</Text>
-        <Text numberOfLines={2} style={{ fontSize: 14, lineHeight: 21, fontFamily: 'Lexend_400Regular', color: creamSoft, maxWidth: 520 }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, color: cream }}>{brief.headline}</Text>
+        <Text numberOfLines={2} style={{ fontSize: 14, lineHeight: 36, fontFamily: 'Lexend_400Regular', color: creamSoft, maxWidth: 520 }}>
           {brief.voice}
         </Text>
         {step ? (
@@ -312,7 +312,7 @@ export function DashWellness({ doneToday, totalToday, onCustomize }: { doneToday
               <Icon name={it.icon} size={15} color={it.color} />
             </View>
             <View style={{ gap: 2 }}>
-              <Text numberOfLines={1} style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 21, lineHeight: 28, color: colors.ink }}>{it.value}</Text>
+              <Text numberOfLines={1} style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 19, lineHeight: 28, color: colors.ink }}>{it.value}</Text>
               <Text variant="caption" muted numberOfLines={1}>{it.unit ? `${it.label} · ${it.unit}` : it.label}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -468,7 +468,7 @@ export function DashForYou()
             </View>
             <View style={{ padding: 14, gap: 4, flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ flex: 1, gap: 4 }}>
-                <Text variant="bodyStrong" style={{ fontSize: 15 }}>{c.title}</Text>
+                <Text variant="bodyStrong" style={{ fontSize: 16 }}>{c.title}</Text>
                 <Text variant="caption" muted numberOfLines={2}>{c.text}</Text>
               </View>
               <Icon name="chevron-forward" size={16} color={colors.inkMuted} />

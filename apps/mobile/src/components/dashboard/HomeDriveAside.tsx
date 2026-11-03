@@ -148,7 +148,7 @@ export function AxelDayBrief()
 
       {open ? (
         <>
-          <Text variant="body" style={{ fontSize: 15, lineHeight: 22 }} numberOfLines={details ? 6 : 3}>
+          <Text variant="body" style={{ fontSize: 16, lineHeight: 22 }} numberOfLines={details ? 6 : 3}>
             {brief.voice}
           </Text>
 
@@ -163,7 +163,7 @@ export function AxelDayBrief()
               <Text variant="caption" muted>
                 Próximo
               </Text>
-              <Text variant="bodyStrong" style={{ fontSize: 15, lineHeight: 22 }}>
+              <Text variant="bodyStrong" style={{ fontSize: 16, lineHeight: 22 }}>
                 {primaryStep}
               </Text>
             </View>
@@ -230,7 +230,7 @@ export function ProgressPanel()
   return (
     <Card tone="elevated" style={{ gap: space.sm, borderRadius: 14, padding: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 15 }}>
+        <Text variant="section" style={{ fontSize: 16 }}>
           Hidratação
         </Text>
         <PrimaryButton
@@ -240,7 +240,7 @@ export function ProgressPanel()
           onPress={() => router.push('/(tabs)/saude')}
         />
       </View>
-      <Text variant="title" color={colors.health} style={{ fontSize: 22 }}>
+      <Text variant="title" color={colors.health} style={{ fontSize: 24 }}>
         {agua ? `${agua.progressoAtual}/${agua.metaDiaria}` : '-'} · {pct}%
       </Text>
     </Card>

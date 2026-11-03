@@ -108,7 +108,7 @@ export function WebCalendarPane({ tasks }: { tasks: MobileTask[] })
   const grid = (
     <View style={{ gap: 12, minWidth: 0 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <Text style={{ flex: 1, fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, color: colors.ink }}>
+        <Text style={{ flex: 1, fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, color: colors.ink }}>
           {monthName.charAt(0).toUpperCase() + monthName.slice(1)}
         </Text>
         <WebHoverable
@@ -252,7 +252,7 @@ export function WebCalendarPane({ tasks }: { tasks: MobileTask[] })
       {dayList.length === 0 ? (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingTop: 4, paddingBottom: 18 }}>
           <Icon name="sunny-outline" size={18} color={colors.inkMuted} />
-          <Text style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.inkMuted }]}>Dia livre. Nada com prazo neste dia.</Text>
+          <Text style={[LEX.regular, { fontSize: 16, lineHeight: 22, color: colors.inkMuted }]}>Dia livre. Nada com prazo neste dia.</Text>
         </View>
       ) : (
         dayList.map((t) => (

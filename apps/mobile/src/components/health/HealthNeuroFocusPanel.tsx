@@ -18,7 +18,7 @@ export function HealthNeuroFocusPanel({ bare = false }: { bare?: boolean } = {})
   const desk = useWebDesk()
   const body = (
     <>
-      <Text variant="section" style={desk ? { fontSize: 18, lineHeight: 26 } : undefined}>Foco e neurodivergência</Text>
+      <Text variant="section" style={desk ? { fontSize: 19, lineHeight: 26 } : undefined}>Foco e neurodivergência</Text>
       <Text variant="caption" muted>
         Não é diagnóstico. Ajusta quebra de tarefas, linha do dia na Home e gamificação
         opcional. Também aparece no onboarding inicial.

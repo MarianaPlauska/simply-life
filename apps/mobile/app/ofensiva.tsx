@@ -11,6 +11,7 @@ import {
   nextStreakMilestone,
 } from '@simply-life/shared'
 import { Screen, Text, PillTabs, PrimaryButton } from '../src/ui'
+import { safeBack } from '../src/lib/safeBack'
 import { StreakWeekRow } from '../src/components/streak/StreakWeekRow'
 import { EloHeatmap } from '../src/components/streak/EloHeatmap'
 import { useTheme } from '../src/theme/ThemeProvider'
@@ -76,7 +77,7 @@ export default function OfensivaScreen()
     <Screen scroll tabBarInset={false}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeBack(router, '/(tabs)')}
           accessibilityLabel="Voltar"
           style={{
             width: 44,

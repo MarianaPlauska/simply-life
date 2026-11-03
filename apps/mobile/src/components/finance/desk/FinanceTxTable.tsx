@@ -179,7 +179,7 @@ function TxRow({
     >
       <Text variant="caption" muted style={{ fontVariant: ['tabular-nums'] }}>{date}</Text>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minWidth: 0 }}>
-        <Text variant="body" numberOfLines={1} style={{ fontSize: 15, lineHeight: 22, flexShrink: 1 }}>
+        <Text variant="body" numberOfLines={1} style={{ fontSize: 16, lineHeight: 22, flexShrink: 1 }}>
           {tx.cardId ? cleanTxTitle(tx.titulo) : tx.titulo}
         </Text>
         {extra ? <Text variant="label" muted>{extra}</Text> : null}
@@ -194,7 +194,7 @@ function TxRow({
       <Text
         variant="body"
         style={{
-          fontSize: 15,
+          fontSize: 16,
           lineHeight: 22,
           textAlign: 'right',
           fontFamily: 'Lexend_500Medium',

@@ -22,6 +22,7 @@ import {
   type EveningCheckin,
   type PlanItem,
   type TaskEnergy,
+  type DumpItem,
   type TaskPromptDraft,
   type TomorrowPlan,
 } from '@simply-life/shared'
@@ -37,7 +38,10 @@ import { usePlanLogStore } from '../src/store/planLogStore'
 import { useCalendarStore } from '../src/store/calendarStore'
 import { useActionableTasks } from '../src/hooks/useActionableTasks'
 import { useOrchestratorContext } from '../src/components/TaskPromptComposer'
-import { readTaskPromptLocally, refineTaskPromptWithAi } from '../src/lib/taskPromptApi'
+import { readDumpLocally, refineDumpWithAi } from '../src/lib/dumpCaptureApi'
+import { addPhoneCalendarEvent } from '../src/lib/phoneCalendar'
+import { dumpItemsMissingValue, dumpSummary } from '../src/components/DumpReview'
+import { TomorrowPlanEditor, type EditableStep } from '../src/components/plan/TomorrowPlanEditor'
 import { insertDecisionEvents } from '../src/lib/sync/decisionLog'
 import { scheduleMorningFirstStep } from '../src/lib/pushNotifications'
 import { safeBack } from '../src/lib/safeBack'
@@ -62,6 +66,7 @@ export default function PlanTomorrowScreen()
   const source = useDataStore((s) => s.source)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const addTask = useDataStore((s) => s.addTask)
+  const commitDumpItems = useDataStore((s) => s.commitDumpItems)
   const patchTask = useDataStore((s) => s.patchTask)
   const setTaskStatus = useDataStore((s) => s.setTaskStatus)
   const addHumor = useDataStore((s) => s.addHumor)
@@ -84,6 +89,10 @@ export default function PlanTomorrowScreen()
   const [promptText, setPromptText] = useState('')
   const [drafts, setDrafts] = useState<TaskPromptDraft[]>([])
   const [refining, setRefining] = useState(false)
+  const [addedNote, setAddedNote] = useState('')
+  const [hiddenKeys, setHiddenKeys] = useState<string[]>([])
+  const [seqTimes, setSeqTimes] = useState<Record<string, number>>({})
+  const [seqLabels, setSeqLabels] = useState<Record<string, string>>({})
   const [lighter, setLighter] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -113,28 +122,117 @@ export default function PlanTomorrowScreen()
     () => buildTomorrowPlan({ tasks: actionable, drafts, carry, checkin, ctx, lighter, events: calendarEvents }),
     [actionable, drafts, carry, checkin, ctx, lighter, calendarEvents],
   )
+  const sequenceRows = useMemo<EditableStep[]>(() =>
+  {
+    return plan.sequence.flatMap((s) =>
+    {
+      const id = s.itemKey ?? `${s.kind}:${s.inicio}`
+      if (hiddenKeys.includes(id)) return []
+      return [{
+        ...s,
+        id,
+        inicio: seqTimes[id] ?? s.inicio,
+        label: seqLabels[id] ?? s.label,
+      }]
+    })
+  }, [plan.sequence, hiddenKeys, seqTimes, seqLabels])
+
+  const hidePlanKey = (id: string) =>
+  {
+    setHiddenKeys((prev) => (prev.includes(id) ? prev : [...prev, id]))
+  }
+
+  const applyRowTime = (id: string, minutes: number) =>
+  {
+    setSeqTimes((prev) => ({ ...prev, [id]: minutes }))
+    const item = [...plan.compromissos, ...plan.essentials, ...plan.ifEnergy].find((i) => i.key === id)
+    if (item?.taskId) void patchTask(item.taskId, { horaMinutos: minutes }, isGuest)
+    if (item?.draftKey)
+    {
+      setDrafts((prev) => prev.map((d) => (d.key === item.draftKey ? { ...d, horaMinutos: minutes } : d)))
+    }
+  }
+
+  const applyRowLabel = (id: string, label: string) =>
+  {
+    setSeqLabels((prev) => ({ ...prev, [id]: label }))
+    const item = [...plan.compromissos, ...plan.essentials, ...plan.ifEnergy].find((i) => i.key === id)
+    const titulo = label.trim()
+    if (!titulo) return
+    if (item?.taskId) void patchTask(item.taskId, { titulo }, isGuest)
+    if (item?.draftKey)
+    {
+      setDrafts((prev) => prev.map((d) => (d.key === item.draftKey ? { ...d, titulo } : d)))
+    }
+  }
+
+  const stampTomorrow = (item: DumpItem): DumpItem =>
+  {
+    if ((item.kind === 'tarefa' || item.kind === 'lembrete') && !item.data)
+    {
+      return { ...item, data: tomorrow }
+    }
+    return item
+  }
 
   const addFromPrompt = async () =>
   {
     const text = promptText.trim()
-    if (text.length < 2) return
-    const local = readTaskPromptLocally(text, ctx.promptCtx)
-    // sem data = amanhã (é o ritual de amanhã); "quando der" continua sem data
-    const withTomorrow = (list: TaskPromptDraft[]) => list.map((d) =>
-      (d.dataVencimento || d.prioridade === 3 ? d : { ...d, dataVencimento: tomorrow }))
-    const localDrafts = withTomorrow(local.drafts)
-    setDrafts((prev) => [...prev, ...localDrafts])
-    setPromptText('')
-    hapticLight()
-    if (isGuest) return
+    if (text.length < 2 || refining) return
+    setError(null)
     setRefining(true)
-    const refined = await refineTaskPromptWithAi(text, ctx.promptCtx, local, { isGuest })
-    if (!alive.current) return
-    setRefining(false)
-    if (refined.source !== 'local')
+    try
     {
-      const keys = new Set(localDrafts.map((d) => d.key))
-      setDrafts((prev) => [...prev.filter((d) => !keys.has(d.key)), ...withTomorrow(refined.drafts)])
+      // Leitura local na hora. A IA não pode deixar o botão girando se a rede travar.
+      const local = readDumpLocally(text).map(stampTomorrow)
+      const refined = await Promise.race([
+        refineDumpWithAi(local, { isGuest }),
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
+      ])
+      if (!alive.current) return
+      const items = (refined?.items ?? local).map(stampTomorrow)
+      if (dumpItemsMissingValue(items) > 0)
+      {
+        setError('Falta o valor em algum gasto ou conta.')
+        return
+      }
+      const res = await Promise.race([
+        commitDumpItems(items, isGuest),
+        new Promise<Awaited<ReturnType<typeof commitDumpItems>>>((resolve) =>
+          setTimeout(() => resolve({
+            ok: false,
+            error: 'A gravação demorou. Tente de novo.',
+            count: 0,
+            counts: { tarefa: 0, lembrete: 0, gasto: 0, receita: 0, conta: 0 },
+          }), 8000)),
+      ])
+      if (!alive.current) return
+      if (!res.ok)
+      {
+        setError(res.error ?? 'Não consegui guardar.')
+        return
+      }
+      for (const item of items)
+      {
+        if (item.kind !== 'tarefa' && item.kind !== 'lembrete') continue
+        void addPhoneCalendarEvent({
+          title: item.titulo,
+          date: item.data ?? tomorrow,
+          horaMinutos: item.horaMinutos,
+          minutes: 30,
+        }).catch(() => undefined)
+      }
+      setPromptText('')
+      setAddedNote(dumpSummary(res.counts, true) || 'Guardado')
+      hapticLight()
+    }
+    catch
+    {
+      if (alive.current) setError('Não consegui ler isso. Tente de novo.')
+    }
+    finally
+    {
+      if (alive.current) setRefining(false)
     }
   }
 
@@ -178,8 +276,28 @@ export default function PlanTomorrowScreen()
         }
       }
 
-      for (const i of [...plan.compromissos, ...plan.essentials, ...plan.ifEnergy]) await placeOnDay(i, tomorrow)
-      for (const l of plan.later) await placeOnDay(l.item, l.to)
+      const visible = (i: PlanItem) => !hiddenKeys.includes(i.key)
+      for (const i of [...plan.compromissos, ...plan.essentials, ...plan.ifEnergy].filter(visible)) await placeOnDay(i, tomorrow)
+      for (const l of plan.later) if (visible(l.item)) await placeOnDay(l.item, l.to)
+      for (const row of sequenceRows)
+      {
+        if (row.itemKey) continue
+        const edited = seqTimes[row.id] != null || (seqLabels[row.id] != null && seqLabels[row.id].trim() !== '')
+        if (!edited || row.kind === 'pausa') continue
+        const titulo = row.label.trim()
+        if (!titulo) continue
+        await addTask(titulo, isGuest, undefined, {
+          dataVencimento: tomorrow,
+          horaMinutos: row.inicio,
+          estimativaMinutos: row.minutos,
+        })
+        await addPhoneCalendarEvent({
+          title: titulo,
+          date: tomorrow,
+          horaMinutos: row.inicio,
+          minutes: row.minutos,
+        })
+      }
       // rascunhos com data própria (depois de amanhã) e "quando der"
       const placed = new Set([...plan.compromissos, ...plan.essentials, ...plan.ifEnergy, ...plan.later.map((l) => l.item)]
         .map((i) => i.draftKey).filter(Boolean))
@@ -352,14 +470,19 @@ export default function PlanTomorrowScreen()
               onChangeText={setPromptText}
               style={{ minHeight: 80, textAlignVertical: 'top', paddingTop: 14 }}
             />
-            <PrimaryButton
-              label="Adicionar"
+              <PrimaryButton
+              label={refining ? 'Lendo...' : 'Adicionar ao dia'}
               variant="secondary"
               size="sm"
+              loading={refining}
               disabled={promptText.trim().length < 2}
               onPress={() => void addFromPrompt()}
             />
-            {refining ? <Text variant="caption" muted>A IA do Axel está refinando…</Text> : null}
+            <Text variant="caption" muted>
+              A mesma leitura do Dump: tarefa vai para Tarefas e para o calendário. Gasto e conta vão para a carteira.
+            </Text>
+            {addedNote ? <Text variant="caption" color={colors.health}>{addedNote}</Text> : null}
+            {error ? <Text variant="caption" color={colors.danger}>{error}</Text> : null}
             {drafts.map((d) => (
               <View key={d.key} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                 <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
@@ -395,7 +518,7 @@ export default function PlanTomorrowScreen()
             {plan.compromissos.length ? (
               <Card tone="elevated" style={{ gap: 8 }}>
                 <Text variant="caption" muted>Compromissos</Text>
-                {plan.compromissos.map((i) => (
+                {plan.compromissos.filter((i) => !hiddenKeys.includes(i.key)).map((i) => (
                   <Text key={i.key} variant="bodyStrong" style={{ fontSize: 14 }}>
                     {formatHourPt(i.hora ?? 0)} · {i.titulo}
                   </Text>
@@ -407,14 +530,14 @@ export default function PlanTomorrowScreen()
               <Text variant="caption" muted>
                 {plan.essentials.length === 0 ? 'Essenciais' : plan.essentials.length === 1 ? 'O essencial' : `Os ${plan.essentials.length} essenciais`}
               </Text>
-              {plan.essentials.length === 0 ? (
+              {plan.essentials.filter((i) => !hiddenKeys.includes(i.key)).length === 0 ? (
                 <Text variant="body">
                   {plan.compromissos.length
                     ? 'Nenhuma tarefa obrigatória além dos compromissos. Descansar também é plano.'
                     : 'Nada obrigatório amanhã. Descansar também é plano.'}
                 </Text>
               ) : null}
-              {plan.essentials.map((i) => (
+              {plan.essentials.filter((i) => !hiddenKeys.includes(i.key)).map((i) => (
                 <View key={i.key} style={{ gap: 4, paddingLeft: 10, borderLeftWidth: 3, borderLeftColor: colors.axel }}>
                   <Text variant="bodyStrong">{i.titulo}</Text>
                   <Text variant="caption" muted>{i.why} · {formatMinutesPt(i.minutos)}</Text>
@@ -434,7 +557,7 @@ export default function PlanTomorrowScreen()
             {plan.ifEnergy.length ? (
               <Card tone="elevated" style={{ gap: 6 }}>
                 <Text variant="caption" muted>Só se sobrar energia (sem cobrança)</Text>
-                {plan.ifEnergy.map((i) => (
+                {plan.ifEnergy.filter((i) => !hiddenKeys.includes(i.key)).map((i) => (
                   <Text key={i.key} variant="body" style={{ fontSize: 14 }}>· {i.titulo}</Text>
                 ))}
               </Card>
@@ -451,22 +574,14 @@ export default function PlanTomorrowScreen()
               </Card>
             ) : null}
 
-            {plan.sequence.length ? (
+            {sequenceRows.length ? (
               <Card tone="elevated" style={{ gap: 8 }}>
-                <Text variant="caption" muted>Um jeito de encaixar o dia (horários são sugestão)</Text>
-                {plan.sequence.map((s, idx) => (
-                  <View key={`${s.kind}-${idx}`} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-                    <Text variant="caption" muted style={{ width: 44 }}>{formatHourPt(s.inicio)}</Text>
-                    <Icon
-                      name={s.kind === 'pausa' ? 'cafe-outline' : s.kind === 'cuidado' ? 'heart-outline' : s.kind === 'compromisso' ? 'time-outline' : 'ellipse-outline'}
-                      size={14}
-                      color={s.kind === 'tarefa' ? colors.axel : colors.inkMuted}
-                    />
-                    <Text variant="body" style={{ flex: 1, fontSize: 14 }} muted={s.kind === 'pausa'}>
-                      {s.label} · {formatMinutesPt(s.minutos)}
-                    </Text>
-                  </View>
-                ))}
+                <TomorrowPlanEditor
+                  rows={sequenceRows}
+                  onTime={applyRowTime}
+                  onLabel={applyRowLabel}
+                  onRemove={hidePlanKey}
+                />
               </Card>
             ) : null}
 

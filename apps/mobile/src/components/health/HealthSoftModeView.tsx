@@ -60,7 +60,7 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
       <Card tone="elevated" style={{ gap: space.md, padding: 16 }}>
         <View style={{ gap: 2 }}>
           <Text variant="caption" muted>Check-in</Text>
-          <Text variant="section" style={{ fontSize: 20, lineHeight: 26 }}>{moodHeadline}</Text>
+          <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>{moodHeadline}</Text>
           <Text variant="caption" muted>Pode atualizar se o sentimento mudar.</Text>
         </View>
         <MoodFaceRow

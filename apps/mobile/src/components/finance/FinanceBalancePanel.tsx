@@ -90,7 +90,7 @@ export function FinanceBalancePanel()
   const deskView = (
     <View style={{ gap: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-        <Text variant="section" style={{ fontSize: 18, lineHeight: 26 }}>Saldo da conta</Text>
+        <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>Saldo da conta</Text>
         <WebHoverable
           onPress={openSheet}
           accessibilityLabel={noData ? 'Informar saldo de hoje' : 'Ajustar saldo de hoje'}
@@ -155,7 +155,7 @@ export function FinanceBalancePanel()
                   {noData ? 'Informar' : 'Ajustar'}
                 </Text>
               </View>
-              <Text variant="bodyStrong" style={{ fontSize: 22, lineHeight: 28, fontVariant: ['tabular-nums'] }}>
+              <Text variant="bodyStrong" style={{ fontSize: 24, lineHeight: 28, fontVariant: ['tabular-nums'] }}>
                 {noData ? 'Informe seu saldo' : formatBRL(pos.disponivel)}
               </Text>
               <Text variant="caption" muted numberOfLines={2}>

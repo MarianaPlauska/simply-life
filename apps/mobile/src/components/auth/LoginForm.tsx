@@ -61,6 +61,8 @@ export function LoginForm({
   const isWave = variant === 'wave'
   const signIn = useAuthStore((s) => s.signIn)
   const signUp = useAuthStore((s) => s.signUp)
+  const verifyEmailCode = useAuthStore((s) => s.verifyEmailCode)
+  const resendSignupEmail = useAuthStore((s) => s.resendSignupEmail)
   const enterGuest = useAuthStore((s) => s.enterGuest)
   const signInWithGoogle = useAuthStore((s) => s.signInWithGoogle)
   const verifyMfa = useAuthStore((s) => s.verifyMfa)
@@ -80,6 +82,8 @@ export function LoginForm({
   const [info, setInfo] = useState('')
   const [loading, setLoading] = useState(false)
   const [forgotOpen, setForgotOpen] = useState(false)
+  const [emailPending, setEmailPending] = useState(false)
+  const [emailCode, setEmailCode] = useState('')
 
   useEffect(() =>
   {
@@ -137,12 +141,16 @@ export function LoginForm({
       return
     }
 
-    const res = await signUp(email, password, nome)
+    const res = await Promise.race([
+      signUp(email, password, nome),
+      new Promise<{ error?: string; needsConfirm?: boolean }>((resolve) =>
+        setTimeout(() => resolve({ error: 'A criação da conta demorou. Tente de novo em instantes.' }), 12000)),
+    ])
     if (res.error) setError(res.error)
     else if (res.needsConfirm)
     {
-      setInfo('Conta criada. Confirme o email antes de entrar.')
-      onModeChange('login')
+      setEmailPending(true)
+      setInfo('Se o link do e-mail não abrir, digite aqui os 6 números que chegaram.')
     }
     setLoading(false)
   }
@@ -178,7 +186,61 @@ export function LoginForm({
 
   const fieldGap = compact ? 10 : space.md
 
-  const fields = (
+  const fields = emailPending ? (
+    <View style={{ gap: fieldGap }}>
+      <Text variant="body" muted>
+        Digite os 6 números do e-mail. O link e o código fazem a mesma coisa.
+      </Text>
+      <AuthField
+        label="Código do e-mail"
+        leadingIcon="mail-outline"
+        placeholder="000000"
+        keyboardType="number-pad"
+        autoComplete="one-time-code"
+        compact={compact}
+        value={emailCode}
+        onChangeText={(t) => setEmailCode(t.replace(/\D/g, '').slice(0, 8))}
+      />
+      {error ? <Text variant="caption" color={colors.danger}>{error}</Text> : null}
+      {info ? <Text variant="caption" muted>{info}</Text> : null}
+      <PrimaryButton
+        label="Confirmar e entrar"
+        loading={loading}
+        onPress={() =>
+        {
+          void (async () =>
+          {
+            setLoading(true)
+            setError('')
+            const res = await Promise.race([
+              verifyEmailCode(email, emailCode),
+              new Promise<{ error: string }>((resolve) =>
+                setTimeout(() => resolve({ error: 'A confirmação demorou. Tente de novo em instantes.' }), 12000)),
+            ])
+            if (res.error) setError(res.error)
+            setLoading(false)
+          })()
+        }}
+        style={{ width: '100%', borderRadius: 999 }}
+      />
+      <Pressable
+        onPress={() =>
+        {
+          void (async () =>
+          {
+            setError('')
+            const res = await resendSignupEmail(email)
+            setInfo(res.error ? '' : 'Enviei de novo. Olhe a caixa de entrada e o spam.')
+            if (res.error) setError(res.error)
+          })()
+        }}
+        accessibilityRole="button"
+        style={{ minHeight: 44, alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Text variant="label" color={colors.inkMuted}>Enviar o e-mail de novo</Text>
+      </Pressable>
+    </View>
+  ) : (
     <View style={{ gap: fieldGap }}>
       {!supabaseConfigured ? (
         <Text variant="caption" muted>
@@ -538,7 +600,7 @@ export function LoginForm({
             </Text>
           </Pressable>
         </View>
-        <Text variant="caption" muted style={{ textAlign: 'center', fontSize: 11 }}>
+        <Text variant="caption" muted style={{ textAlign: 'center', fontSize: 12 }}>
           {`SunFy v${Constants.expoConfig?.version ?? '1.1.0'} · © ${new Date().getFullYear()} Mariana Plauska. Todos os direitos reservados.`}
         </Text>
       </View>

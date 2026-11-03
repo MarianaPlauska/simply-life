@@ -7,7 +7,7 @@ import {
   formatSaldo,
   seriesColor,
 } from '@simply-life/shared'
-import { Card, Text, SectionHeader, ListRow, EmptyState, SubNavTabs, PrimaryButton } from '../../ui'
+import { Card, Text, SectionHeader, ListRow, EmptyState, SubNavTabs, PrimaryButton, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useFixaMetaStore } from '../../store/fixaMetaStore'
@@ -34,6 +34,10 @@ type Props = {
   subTab: ContasSubTab
   onSubTabChange: (tab: ContasSubTab) => void
   onGoMovimentos?: () => void
+  /** tela propria de um item (celular): sem as abas */
+  hideTabs?: boolean
+  /** celular: abre a tela do item tocado na lista */
+  onOpenSub?: (tab: ContasSubTab) => void
 }
 
 /** Vencimento em texto: paga, venceu (em aberto e atrasada) ou vence. */
@@ -44,7 +48,7 @@ function billSubtitle(status: 'aberta' | 'paga', iso: string): string
   return iso < todayIso() ? `Venceu ${day}` : `Vence ${day}`
 }
 
-export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Props)
+export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos, hideTabs, onOpenSub }: Props)
 {
   const { colors, space, chart } = useTheme()
   const txs = useDataStore((s) => s.finance)
@@ -55,6 +59,17 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
   const pos = computeSaldoDisponivel(cash, txs, fixas)
   const [catsOpen, setCatsOpen] = useState(false)
   const [fixasOpen, setFixasOpen] = useState(false)
+  const [fixasCreate, setFixasCreate] = useState(false)
+  const openFixas = (create = false) =>
+  {
+    setFixasCreate(create)
+    setFixasOpen(true)
+  }
+  const closeFixas = () =>
+  {
+    setFixasOpen(false)
+    setFixasCreate(false)
+  }
   const hydrateFixas = useFixaMetaStore((s) => s.hydrate)
   const resolveFixa = useFixaMetaStore((s) => s.resolve)
   const fixaMap = useFixaMetaStore((s) => s.map)
@@ -73,24 +88,64 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
     void hydrateFixas()
   }, [hydrateFixas])
 
+  const subIcon = (id: ContasSubTab) =>
+    id === 'conta' ? 'wallet' as const
+      : id === 'salario' ? 'cash' as const
+        : id === 'cartoes' ? 'card' as const
+          : id === 'faturas' ? 'receipt' as const
+            : 'repeat' as const
+  const subCount = (id: ContasSubTab) =>
+    id === 'cartoes' && cards.length
+      ? cards.length
+      : id === 'faturas' && bills.some((b) => b.status === 'aberta')
+        ? bills.filter((b) => b.status === 'aberta').length
+        : id === 'contas-fixas' && fixas.some((c) => c.ativa)
+          ? fixas.filter((c) => c.ativa).length
+          : undefined
+
+  // celular: lista com seta; cada item abre a sua tela (sem abas dentro de abas)
+  if (!desk && !hideTabs)
+  {
+    return (
+      <GroupedList>
+        {subTabs.map((t) => (
+          <GroupedRow
+            key={t.id}
+            leading={<RowGlyph name={subIcon(t.id)} color={colors.finance} />}
+            title={t.label}
+            value={subCount(t.id) != null ? String(subCount(t.id)) : undefined}
+            onPress={() => onOpenSub?.(t.id)}
+            chevron
+          />
+        ))}
+      </GroupedList>
+    )
+  }
+
   return (
     <View style={{ gap: space.md }}>
-      <SubNavTabs
+      {hideTabs ? null : <SubNavTabs
         tabs={subTabs.map((t) => ({
           ...t,
+          icon:
+            t.id === 'conta' ? 'wallet' as const
+              : t.id === 'salario' ? 'cash' as const
+                : t.id === 'cartoes' ? 'card' as const
+                  : t.id === 'faturas' ? 'receipt' as const
+                    : 'repeat' as const,
           count:
-            t.id === 'cartoes'
+            t.id === 'cartoes' && cards.length
               ? cards.length
-              : t.id === 'faturas'
+              : t.id === 'faturas' && bills.some((b) => b.status === 'aberta')
                 ? bills.filter((b) => b.status === 'aberta').length
-                : t.id === 'contas-fixas'
+                : t.id === 'contas-fixas' && fixas.some((c) => c.ativa)
                   ? fixas.filter((c) => c.ativa).length
                   : undefined,
         }))}
         value={subTab}
         onChange={onSubTabChange}
         accent="finance"
-      />
+      />}
 
       {subTab === 'conta' && desk && (
         // computador: saldo, categorias e convite lado a lado na grade
@@ -225,8 +280,16 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
         <Panel>
           <View>
             <DeskPanelHeader title="A pagar" subtitle="Em aberto primeiro, por vencimento" />
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 8 }}>
+              <PrimaryButton label="Nova conta fixa" variant="secondary" size="sm" onPress={() => openFixas(true)} />
+            </View>
+            {fixas.filter((c) => c.ativa).length ? (
+              <Text variant="caption" muted style={{ marginBottom: 8 }}>
+                {fixas.filter((c) => c.ativa).length} contas se repetem todo mês. Elas ficam em Fixas.
+              </Text>
+            ) : null}
             {bills.length === 0 ? (
-              <EmptyState title="Nada a pagar" body="Contas e faturas aparecem aqui." />
+              <EmptyState title="Nada a pagar neste mês" body="Uma conta fixa entra todo mês. Toque em Nova conta fixa para cadastrar." />
             ) : (
               <DeskTable
                 cols="minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 140px"
@@ -242,14 +305,14 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                     return {
                       key: String(bill.id),
                       cells: [
-                        <Text key="t" variant="body" numberOfLines={1} style={{ fontSize: 15, lineHeight: 22 }}>{bill.titulo}</Text>,
+                        <Text key="t" variant="body" numberOfLines={1} style={{ fontSize: 16, lineHeight: 22 }}>{bill.titulo}</Text>,
                         <Text key="v" variant="caption" muted>
                           {new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
                         </Text>,
                         <Text key="s" variant="caption" color={late ? colors.danger : bill.status === 'paga' ? colors.health : colors.inkMuted}>
                           {bill.status === 'paga' ? 'Paga' : late ? 'Venceu' : 'Em aberto'}
                         </Text>,
-                        <Text key="r" variant="body" style={{ fontSize: 15, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
+                        <Text key="r" variant="body" style={{ fontSize: 16, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
                           {formatBRL(bill.valor)}
                         </Text>,
                       ],
@@ -263,8 +326,20 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
 
       {subTab === 'faturas' && !desk && (
         <Card tone="elevated" style={{ paddingVertical: space.sm }}>
+          <SectionHeader
+            title="A pagar"
+            subtitle="Contas deste mês e as que se repetem"
+            action={
+              <PrimaryButton
+                label="Conta fixa"
+                variant="link"
+                size="sm"
+                onPress={() => openFixas(true)}
+              />
+            }
+          />
           {bills.length === 0 ? (
-            <EmptyState title="Nada a pagar" body="Contas e faturas aparecem aqui." />
+            <EmptyState title="Nada a pagar neste mês" body="Cadastre uma conta fixa para ela voltar todo mês." />
           ) : (
             // em aberto primeiro, por vencimento; pagas no fim, marcadas como pagas
             [...bills]
@@ -291,7 +366,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
               title="Contas fixas"
               subtitle={`${formatBRL(fixas.filter((c) => c.ativa).reduce((a, c) => a + c.valor, 0))} por mês`}
               actionLabel="Editar"
-              onAction={() => setFixasOpen(true)}
+              onAction={() => openFixas(false)}
             />
             {fixas.length === 0 ? (
               <EmptyState title="Sem contas fixas" body="Aluguel, internet e assinaturas ficam aqui." />
@@ -299,7 +374,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
               <DeskTable
                 cols="minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) 140px"
                 head={['Conta', 'Vencimento', 'Urgência', 'Valor']}
-                onRowPress={() => setFixasOpen(true)}
+                onRowPress={() => openFixas(false)}
                 rows={fixas.map((conta) =>
                 {
                   const meta = resolveFixa(conta.id, conta.categoria)
@@ -311,11 +386,11 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                         <View style={{ width: 32, height: 32, borderRadius: 999, alignItems: 'center', justifyContent: 'center', backgroundColor: `${tint}22` }}>
                           <FinanceIcon name={meta.icon} size={16} color={tint} />
                         </View>
-                        <Text variant="body" numberOfLines={1} style={{ fontSize: 15, lineHeight: 22, flexShrink: 1 }}>{conta.nome}</Text>
+                        <Text variant="body" numberOfLines={1} style={{ fontSize: 16, lineHeight: 22, flexShrink: 1 }}>{conta.nome}</Text>
                       </View>,
                       <Text key="d" variant="caption" muted>Dia {conta.diaVencimento}</Text>,
                       <Text key="u" variant="caption" muted>{FIXA_URGENCIA_LABELS[meta.urgencia]}</Text>,
-                      <Text key="v" variant="body" style={{ fontSize: 15, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
+                      <Text key="v" variant="body" style={{ fontSize: 16, lineHeight: 22, textAlign: 'right', fontVariant: ['tabular-nums'] }}>
                         {formatBRL(conta.valor)}
                       </Text>,
                     ],
@@ -324,7 +399,6 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
               />
             )}
           </View>
-          <FinanceFixasSheet visible={fixasOpen} onClose={() => setFixasOpen(false)} />
         </Panel>
       )}
 
@@ -339,7 +413,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                   label="Editar"
                   variant="link"
                   size="sm"
-                  onPress={() => setFixasOpen(true)}
+                  onPress={() => openFixas(false)}
                 />
               }
             />
@@ -373,7 +447,7 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
                         subtitle={`Dia ${conta.diaVencimento} · ${FIXA_URGENCIA_LABELS[meta.urgencia]}`}
                         right={formatBRL(conta.valor)}
                         showSeparator={i < fixas.length - 1}
-                        onPress={() => setFixasOpen(true)}
+                        onPress={() => openFixas(false)}
                       />
                     </View>
                   </View>
@@ -381,9 +455,9 @@ export function FinanceContasTab({ subTab, onSubTabChange, onGoMovimentos }: Pro
               })
             )}
           </Card>
-          <FinanceFixasSheet visible={fixasOpen} onClose={() => setFixasOpen(false)} />
         </>
       )}
+      <FinanceFixasSheet visible={fixasOpen} create={fixasCreate} onClose={closeFixas} />
     </View>
   )
 }

@@ -1,4 +1,5 @@
-import { View, type ViewProps } from 'react-native'
+import { StyleSheet, View, type ViewProps } from 'react-native'
+import { FlatCardScope, useInFlatCard, useInSheet } from './surface'
 import { COMPONENT_SPEC, type ColorTokens } from '@simply-life/ui-tokens'
 import { useWebBox } from '../components/dashboard/web/webBox'
 import { useInPanel } from './Panel'
@@ -24,9 +25,11 @@ function accentColor(colors: ColorTokens, key: ModuleAccent): string
 
 export function Card({ children, style, tone = 'default', accentTop, bare, ...rest }: Props)
 {
-  const { colors, radius, elevation, mode } = useTheme()
+  const { colors, radius, elevation, mode, space } = useTheme()
   const webBox = useWebBox()
   const inPanel = useInPanel()
+  const inSheet = useInSheet()
+  const inFlatCard = useInFlatCard()
   const widget = tone === 'widget'
   const elevated = tone === 'elevated'
   const hero = tone === 'hero'
@@ -74,6 +77,31 @@ export function Card({ children, style, tone = 'default', accentTop, bare, ...re
       <View style={[{ ...webBox, overflow: 'hidden', ...accentStripe }, style]} {...rest}>
         {children}
       </View>
+    )
+  }
+
+  // celular: o bloco fica direto no fundo da tela, separado por uma linha fina.
+  // Caixa só no hero, no widget, em fichas e quando a tela pinta o fundo do cartão.
+  const ownBg = StyleSheet.flatten(style)?.backgroundColor != null
+  if (!hero && !widget && !inSheet && !ownBg)
+  {
+    if (inFlatCard) return <View style={style} {...rest}>{children}</View>
+    return (
+      <FlatCardScope value>
+        <View
+          style={[
+            {
+              paddingTop: space.md,
+              borderTopWidth: StyleSheet.hairlineWidth,
+              borderTopColor: colors.hairline,
+            },
+            style,
+          ]}
+          {...rest}
+        >
+          {children}
+        </View>
+      </FlatCardScope>
     )
   }
 

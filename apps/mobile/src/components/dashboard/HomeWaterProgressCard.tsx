@@ -131,10 +131,10 @@ export function HomeWaterProgressCard({ compact }: Props)
           <Text variant="caption" muted>
             Hidratação
           </Text>
-          <Text variant="title" style={{ fontSize: 22, letterSpacing: -0.5, lineHeight: 26 }}>
+          <Text variant="title" style={{ fontSize: 24, letterSpacing: -0.5, lineHeight: 31 }}>
             {atual} de {meta} copos
           </Text>
-          <Text variant="caption" muted style={{ fontSize: 13, lineHeight: 18 }}>
+          <Text variant="caption" muted style={{ fontSize: 13, lineHeight: 31 }}>
             {mlAtual} / {mlMeta} ml · {aguaCoachLine(pct, left)}
           </Text>
         </View>
@@ -167,7 +167,7 @@ export function HomeWaterProgressCard({ compact }: Props)
           ).map((row) => (
             <View key={row.label} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name={row.icon} size={13} color={colors.axel} />
-              <Text variant="micro" muted style={{ fontSize: 11 }} numberOfLines={1}>
+              <Text variant="micro" muted style={{ fontSize: 12 }} numberOfLines={1}>
                 {row.label}
               </Text>
             </View>
@@ -209,7 +209,7 @@ export function HomeWaterProgressCard({ compact }: Props)
                   style={{
                     color: isToday ? colors.health : colors.inkMuted,
                     fontWeight: isToday ? '700' : '500',
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 >
                   {WEEKDAYS[new Date(`${iso}T12:00:00`).getDay()]}

@@ -13,6 +13,7 @@ import {
   addNativePushResponseListener,
   cancelCuriosityCard,
   getLastNativePushResponse,
+  scheduleCadenceAlerts,
   scheduleCuriosityCard,
 } from '../lib/pushNotifications'
 
@@ -46,13 +47,17 @@ export function usePushBootstrap(): void
       registeredFor.current = null
       void unregisterExpoPushAsync()
       void cancelCuriosityCard()
+      void scheduleCadenceAlerts('off')
       return
     }
 
     if (registeredFor.current === userId) return
     registeredFor.current = userId
     // web: sem toque da pessoa, só renova se a permissão já foi dada
-    void registerExpoPushAsync(Platform.OS !== 'web')
+    void registerExpoPushAsync(Platform.OS !== 'web').then((res) =>
+    {
+      if (res.ok) void scheduleCadenceAlerts(notifyCadence || 'off')
+    })
     if (Platform.OS !== 'web') void scheduleCuriosityCard()
   }, [userId, isGuest, prefsLoaded, notifyCadence])
 

@@ -104,7 +104,7 @@ export function WebKanbanRow({
           style={[
             LEX.regular,
             {
-              fontSize: 15,
+              fontSize: 16,
               lineHeight: 22,
               color: done ? colors.inkMuted : colors.ink,
               textDecorationLine: done ? 'line-through' : 'none',

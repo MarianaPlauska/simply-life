@@ -70,7 +70,7 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
             variant="micro"
             muted
             numberOfLines={2}
-            style={{ fontSize: 11, textAlign: 'center', fontWeight: '600', lineHeight: 14, maxWidth: '100%' }}
+            style={{ fontSize: 12, textAlign: 'center', fontWeight: '600', lineHeight: 14, maxWidth: '100%' }}
           >
             {a.label}
           </Text>

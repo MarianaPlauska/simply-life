@@ -118,7 +118,7 @@ export function WebSidebar()
             {!collapsed ? (
               <SunFyWordmark
                 color={CREAM}
-                style={{ fontFamily: 'Fraunces_500Medium', fontSize: 20, lineHeight: 26, letterSpacing: -0.2 }}
+                style={{ fontFamily: 'Fraunces_500Medium', fontSize: 19, lineHeight: 26, letterSpacing: -0.2 }}
               />
             ) : null}
           </View>
@@ -292,7 +292,7 @@ export function WebSidebar()
           >
             <Icon name="add" size={18} color={colors.axelOnFill} />
             {!collapsed ? (
-              <Text style={{ fontSize: 15, fontFamily: 'Lexend_600SemiBold', color: colors.axelOnFill }}>
+              <Text style={{ fontSize: 16, fontFamily: 'Lexend_600SemiBold', color: colors.axelOnFill }}>
                 Capturar
               </Text>
             ) : null}
@@ -332,7 +332,7 @@ export function WebSidebar()
         </View>
         {!collapsed ? (
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text numberOfLines={1} style={{ fontSize: 15, fontFamily: 'Lexend_600SemiBold', color: CREAM }}>
+            <Text numberOfLines={1} style={{ fontSize: 16, fontFamily: 'Lexend_600SemiBold', color: CREAM }}>
               {name}
             </Text>
             <Text numberOfLines={1} style={{ fontSize: 13, fontFamily: 'Lexend_500Medium', color: inkMutedOnBrand }}>

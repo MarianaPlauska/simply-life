@@ -25,7 +25,7 @@ export function ScreenIntro({
   return (
     <View style={{ gap: space.sm }}>
       {showRail ? (
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, letterSpacing: -0.4 }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 38, letterSpacing: -0.4 }}>
           {title}
         </Text>
       ) : (

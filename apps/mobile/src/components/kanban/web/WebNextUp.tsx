@@ -30,7 +30,7 @@ export function WebNextUp({ tasks, inline }: { tasks: MobileTask[]; inline?: boo
     return (
       <View style={{ gap: 6 }}>
         <Text style={[SECTION_LABEL, { color: colors.inkMuted }]}>Agora</Text>
-        <Text style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.ink }]}>Nada pendente. Aproveite o respiro.</Text>
+        <Text style={[LEX.regular, { fontSize: 16, lineHeight: 22, color: colors.ink }]}>Nada pendente. Aproveite o respiro.</Text>
       </View>
     )
   }

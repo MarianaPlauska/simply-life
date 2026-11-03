@@ -136,7 +136,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
             variant="hero"
             numberOfLines={1}
             adjustsFontSizeToFit
-            style={{ color: INK, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, fontVariant: ['tabular-nums'] }}
+            style={{ color: INK, fontSize: 28, lineHeight: 32, letterSpacing: -0.6, fontVariant: ['tabular-nums'] }}
           >
             {formatBRL(disponivel)}
           </Text>

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { View } from 'react-native'
 import { ACADEMY_WEEK_DAYS, formatSleepHours, validateMedDraft } from '@simply-life/shared'
-import { Text, Chip, Field, PrimaryButton } from '../../ui'
+import { Text, Chip, CheckRow, Field, PrimaryButton } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { isModuleOn, type AppModuleId } from '../../lib/appModules'
 import { OnbBlock } from './OnbStep'
 import { OnbNumber } from './OnbNumber'
+import { MedTimeField } from '../health/MedTimeField'
 import type { HealthDraft } from './startDrafts'
 
 type Props = {
@@ -24,6 +25,8 @@ export function HealthStartForm({ value, onChange, enabled, showMeds = true }: P
   const on = (id: AppModuleId) => isModuleOn(enabled, id)
   const [medName, setMedName] = useState('')
   const [medTime, setMedTime] = useState('08:00')
+  const [segundo, setSegundo] = useState(false)
+  const [medTime2, setMedTime2] = useState('')
   const [medError, setMedError] = useState('')
 
   return (
@@ -127,9 +130,16 @@ export function HealthStartForm({ value, onChange, enabled, showMeds = true }: P
               <Field label="Nome" value={medName} onChangeText={setMedName} placeholder="Xarope de exemplo" />
             </View>
             <View style={{ flex: 1 }}>
-              <Field label="Horário" value={medTime} onChangeText={setMedTime} placeholder="08:00" />
+              <MedTimeField label="Horário" value={medTime} onChange={setMedTime} />
             </View>
           </View>
+          <CheckRow
+            title="Outro horário no mesmo dia"
+            done={segundo}
+            onPress={() => setSegundo((v) => !v)}
+            onToggle={() => setSegundo((v) => !v)}
+          />
+          {segundo ? <MedTimeField label="Segundo horário" value={medTime2} onChange={setMedTime2} /> : null}
           {medError ? (
             <Text variant="caption" color={colors.danger}>
               {medError}
@@ -142,15 +152,26 @@ export function HealthStartForm({ value, onChange, enabled, showMeds = true }: P
             icon="add"
             onPress={() =>
             {
-              const err = validateMedDraft({ nome: medName, horario: medTime })
-              if (err)
+              const times = [medTime, ...(segundo ? [medTime2] : [])]
+              for (const time of times)
               {
-                setMedError(err)
-                return
+                const err = validateMedDraft({ nome: medName, horario: time })
+                if (err)
+                {
+                  setMedError(err)
+                  return
+                }
               }
               setMedError('')
-              set({ meds: [...value.meds, { nome: medName.trim(), horario: medTime.trim() }] })
+              set({
+                meds: [
+                  ...value.meds,
+                  ...times.map((time) => ({ nome: medName.trim(), horario: time.trim() })),
+                ],
+              })
               setMedName('')
+              setMedTime2('')
+              setSegundo(false)
             }}
           />
         </OnbBlock>

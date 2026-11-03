@@ -66,11 +66,11 @@ export function ExpandableSection({
           }}
         />
         <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
-          <Text variant="section" style={{ fontSize: 15 }}>
+          <Text variant="section" style={{ fontSize: 16 }}>
             {title}
           </Text>
           {subtitle ? (
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 11 }}>
+            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 12 }}>
               {subtitle}
             </Text>
           ) : null}

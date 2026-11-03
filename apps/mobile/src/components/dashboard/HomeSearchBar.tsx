@@ -75,7 +75,7 @@ export function HomeSearchBar({ tasks, finance, onSearching, autoFocus }: Props)
           autoFocus={autoFocus}
           style={{
             flex: 1,
-            fontSize: 15,
+            fontSize: 16,
             color: colors.ink,
             paddingVertical: 10,
           }}
@@ -112,7 +112,7 @@ export function HomeSearchBar({ tasks, finance, onSearching, autoFocus }: Props)
           </View>
 
           {hits.length === 0 ? (
-            <Text variant="title" style={{ color: colors.featureInk, fontSize: 18 }}>
+            <Text variant="title" style={{ color: colors.featureInk, fontSize: 19 }}>
               {`Nenhum resultado para “${query.trim()}”`}
             </Text>
           ) : (

@@ -190,7 +190,7 @@ function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number;
         <Text variant="caption" muted style={{ flex: 1 }}>Agora · {meta.label}</Text>
         <Text variant="caption" muted>{hhmm(block.inicio)} às {hhmm(block.fim)}</Text>
       </View>
-      <Text variant="title" style={{ fontSize: 20 }}>{block.titulo}</Text>
+      <Text variant="title" style={{ fontSize: 19 }}>{block.titulo}</Text>
       {/* tempo visível (cegueira temporal): barra que enche + minutos restantes em texto */}
       <View
         accessibilityLabel={`Restam ${left} minutos`}

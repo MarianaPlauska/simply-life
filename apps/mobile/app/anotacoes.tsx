@@ -136,7 +136,7 @@ export default function AnotacoesScreen()
                 minHeight: 44,
                 color: colors.ink,
                 fontFamily: 'Lexend_600SemiBold',
-                fontSize: 18,
+                fontSize: 19,
               }}
             />
             <TextInput

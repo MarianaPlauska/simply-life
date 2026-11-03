@@ -67,7 +67,7 @@ export function HomeTodayDashboard({
               />
               <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
                 <Text variant="caption" muted>Hoje</Text>
-                <Text variant="bodyStrong" style={{ fontSize: 18, lineHeight: 24 }} numberOfLines={1}>
+                <Text variant="bodyStrong" style={{ fontSize: 19, lineHeight: 24 }} numberOfLines={1}>
                   {todayTotal > 0
                     ? `${doneToday} de ${todayTotal} concluídas`
                     : pending > 0
@@ -100,7 +100,7 @@ export function HomeTodayDashboard({
                     borderLeftColor: colors.hairline,
                   }}
                 >
-                  <Text variant="bodyStrong" style={{ fontSize: 20, lineHeight: 26 }}>
+                  <Text variant="bodyStrong" style={{ fontSize: 19, lineHeight: 26 }}>
                     {s.value}
                   </Text>
                   <Text variant="micro" muted numberOfLines={1}>

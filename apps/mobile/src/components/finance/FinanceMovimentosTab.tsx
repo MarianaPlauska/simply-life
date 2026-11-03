@@ -10,7 +10,14 @@ import {
   SubNavTabs,
   Text,
   Icon,
+  SwipeRow,
+  GroupedList,
+  GroupedRow,
+  RowGlyph,
 } from '../../ui'
+import { useRouter } from 'expo-router'
+import { confirmDestructive } from '../../lib/confirmDestructive'
+import { useAuthStore } from '../../store/authStore'
 import { Panel } from '../../ui/Panel'
 import { useWebDesk } from '../dashboard/web/webBox'
 import { WebHoverable } from '../dashboard/web/WebHoverable'
@@ -26,6 +33,9 @@ import { MOVIMENTOS_SUB_TABS, type MovimentosSubTab } from './financeNav'
 import { financeTxSubtitle } from '../../lib/financeTxLabel'
 import { FinanceTxEditSheet } from './FinanceTxEditSheet'
 
+/** quantos lançamentos aparecem de cada vez no celular */
+const PAGE = 40
+
 type Props = {
   subTab: MovimentosSubTab
   onSubTabChange: (tab: MovimentosSubTab) => void
@@ -35,7 +45,11 @@ type Props = {
 
 export function FinanceMovimentosTab({ subTab, onSubTabChange, summary }: Props)
 {
-  const { space } = useTheme()
+  const { space, colors } = useTheme()
+  const router = useRouter()
+  const isGuest = useAuthStore((s) => s.isGuest)
+  const removeFinanceTx = useDataStore((s) => s.removeFinanceTx)
+  const [limit, setLimit] = useState(PAGE)
   const openCapture = useCaptureStore((s) => s.openCapture)
   const txs = useDataStore((s) => s.finance)
   const [editingTx, setEditingTx] = useState<string | null>(null)
@@ -56,27 +70,14 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange, summary }: Props)
     )
   }
 
+  const shown = rows.slice(0, limit)
+  // celular: um nível só. A lista fica direto; Planilha e Pastas abrem em tela própria.
   return (
     <View style={{ gap: space.md }}>
-      <SubNavTabs
-        tabs={MOVIMENTOS_SUB_TABS}
-        value={subTab}
-        onChange={onSubTabChange}
-        accent="finance"
-      />
-
       {summary}
 
       <SectionHeader
-        title={
-          subTab === 'diario' || subTab === 'lista'
-            ? 'Lançamentos'
-            : subTab === 'planilha'
-              ? 'Planilha'
-              : subTab === 'pastas'
-                ? 'Pastas de gastos'
-                : 'Lista'
-        }
+        title="Lançamentos"
         action={
           <View style={{ flexDirection: 'row', gap: 12 }}>
             <PrimaryButton
@@ -95,45 +96,58 @@ export function FinanceMovimentosTab({ subTab, onSubTabChange, summary }: Props)
         }
       />
 
-      {subTab === 'pastas' ? (
-        <FinanceFoldersPane />
-      ) : subTab === 'planilha' ? (
-        <>
-          <FinanceSpreadsheetPane />
-          <FinanceCsvPanel />
-        </>
+      {rows.length === 0 ? (
+        <EmptyState
+          title="Nenhum lançamento"
+          body="Ex.: lanche 8,00 na conta, compra no crédito ou reembolso 75."
+        />
       ) : (
-      <Card tone="elevated" style={{ paddingVertical: space.sm }}>
-        {rows.length === 0 ? (
-          <EmptyState
-            title="Nenhum lançamento"
-            body="Ex.: lanche 8,00 na conta, compra no crédito ou reembolso 75."
-          />
-        ) : subTab === 'diario' ? (
-          rows.map((t, i, arr) => (
-            <ListRow
+        <View>
+          {shown.map((t, i, arr) => (
+            <SwipeRow
               key={t.id}
-              title={t.titulo}
-              subtitle={financeTxSubtitle(t)}
-              right={`${t.tipo === 'receita' ? '+' : '-'}${formatBRL(t.valor)}`}
-              onPress={() => setEditingTx(t.id)}
-              showSeparator={i < arr.length - 1}
+              right={{
+                label: 'Apagar',
+                icon: 'trash-outline',
+                color: colors.danger,
+                onPress: () =>
+                  confirmDestructive('Apagar lançamento?', t.titulo, () => void removeFinanceTx(t.id, isGuest), 'Apagar'),
+              }}
+            >
+              <ListRow
+                title={t.titulo}
+                subtitle={financeTxSubtitle(t)}
+                right={`${formatBRL(t.valor)}`}
+                onPress={() => setEditingTx(t.id)}
+                showSeparator={i < arr.length - 1}
+              />
+            </SwipeRow>
+          ))}
+          {rows.length > limit ? (
+            <PrimaryButton
+              label={`Mostrar mais (${rows.length - limit})`}
+              variant="link"
+              onPress={() => setLimit(limit + PAGE)}
             />
-          ))
-        ) : (
-          rows.map((t, i, arr) => (
-            <ListRow
-              key={t.id}
-              title={t.titulo}
-              subtitle={financeTxSubtitle(t)}
-              right={`${t.tipo === 'receita' ? '+' : '-'}${formatBRL(t.valor)}`}
-              onPress={() => setEditingTx(t.id)}
-              showSeparator={i < arr.length - 1}
-            />
-          ))
-        )}
-      </Card>
+          ) : null}
+        </View>
       )}
+
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph name="grid" color={colors.finance} />}
+          title="Planilha"
+          subtitle="Editar em grade e importar CSV"
+          onPress={() => router.push('/financas/planilha' as never)}
+          chevron
+        />
+        <GroupedRow
+          leading={<RowGlyph name="folder" color={colors.finance} />}
+          title="Pastas de gastos"
+          onPress={() => router.push('/financas/pastas' as never)}
+          chevron
+        />
+      </GroupedList>
       <FinanceTxEditSheet txId={editingTx} onClose={() => setEditingTx(null)} />
     </View>
   )
@@ -246,7 +260,7 @@ function FinanceMovimentosDesk({
                 style={webStyle({
                   flex: 1,
                   minWidth: 0,
-                  fontSize: 15,
+                  fontSize: 16,
                   fontFamily: 'Lexend_400Regular',
                   color: colors.ink,
                   outlineStyle: 'none',

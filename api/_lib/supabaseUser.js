@@ -6,33 +6,43 @@ import { applyCors } from './cors.js';
  */
 export async function getUserFromBearer(req)
 {
+  const explained = await explainBearer(req);
+  return explained.user;
+}
+
+/**
+ * Igual ao getUserFromBearer, mas devolve o motivo.
+ * Sem isso a exclusão de conta diz só "Não autenticado".
+ */
+export async function explainBearer(req)
+{
   const header = req.headers.authorization || req.headers.Authorization || '';
   if (!header.startsWith('Bearer '))
   {
-    return null;
+    return { user: null, error: 'Não autenticado' };
   }
 
   const token = header.slice(7).trim();
   const supabase = getSupabaseAdmin();
   if (!supabase)
   {
-    return null;
+    return { user: null, error: 'Serviço indisponível' };
   }
 
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data?.user)
   {
-    return null;
+    return { user: null, error: 'Sessão expirada. Entre de novo para excluir.' };
   }
 
   // Duas etapas valem no servidor, não só no app: quem tem fator TOTP
   // verificado precisa de sessão aal2. Senha sozinha não passa daqui.
   if (hasVerifiedFactor(data.user) && tokenAal(token) !== 'aal2')
   {
-    return null;
+    return { user: null, error: 'Confirme o código do autenticador e tente excluir de novo.' };
   }
 
-  return data.user;
+  return { user: data.user, error: null };
 }
 
 /** Nível de autenticação do JWT (aal1 = só senha, aal2 = com a segunda etapa). */

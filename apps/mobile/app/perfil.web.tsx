@@ -7,6 +7,7 @@ import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/
 import { createFriendInvite } from '@simply-life/shared'
 import { Screen, Text, Card, PrimaryButton, Field } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
+import { safeBack } from '../src/lib/safeBack'
 import { MfaEnrollPanel } from '../src/components/auth/MfaEnrollPanel'
 import { AdminUsersPanel } from '../src/components/auth/AdminUsersPanel'
 import { ForgotPasswordSheet } from '../src/components/auth/ForgotPasswordSheet'
@@ -27,7 +28,7 @@ import { WEB_DISPLAY_FONT } from '../src/components/dashboard/web/webTypography'
 import { BRAND, COLOR_DARK } from '@simply-life/ui-tokens'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useWorkspace } from '../src/layout/useWorkspace'
-import { useAuthStore } from '../src/store/authStore'
+import { isFounderEmail, useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { supabase } from '../src/lib/supabase'
@@ -55,7 +56,8 @@ export default function PerfilScreenWeb()
   const userId = useAuthStore((s) => s.userId)
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
-  const isAdmin = useAuthStore((s) => s.isAdmin)
+  const isAdminStored = useAuthStore((s) => s.isAdmin)
+  const isAdmin = isAdminStored || isFounderEmail(email)
   const signOut = useAuthStore((s) => s.signOut)
   const refreshAdmin = useAuthStore((s) => s.refreshAdminFlag)
   const prefs = usePrefsStore((s) => s.prefs)
@@ -166,7 +168,7 @@ export default function PerfilScreenWeb()
               </Pressable>
             </View>
             <View style={{ alignItems: 'center', gap: 6 }}>
-              <Text variant="title" style={{ fontSize: 22 }}>
+              <Text variant="title" style={{ fontSize: 24 }}>
                 {displayName}
               </Text>
               <Text variant="caption" muted>
@@ -482,7 +484,7 @@ export default function PerfilScreenWeb()
     <Screen scroll tabBarInset={false}>
       <View style={{ maxWidth: 640, width: '100%', alignSelf: 'center', gap: space.lg, paddingTop: space.sm }}>
         <WebHoverable
-          onPress={() => (router.canGoBack() ? router.back() : router.replace('/(tabs)'))}
+          onPress={() => safeBack(router, '/(tabs)')}
           accessibilityLabel="Voltar"
           style={webStyle({ flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'flex-start', cursor: 'pointer' })}
         >
@@ -491,7 +493,7 @@ export default function PerfilScreenWeb()
             Voltar
           </Text>
         </WebHoverable>
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, color: colors.ink }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, color: colors.ink }}>
           Perfil
         </Text>
 

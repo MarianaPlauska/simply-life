@@ -175,7 +175,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
             <Text variant="caption" muted>
               {humorHoje ? 'Humor de hoje' : 'Check-in rápido'}
             </Text>
-            <Text variant="section" style={{ fontSize: 20, lineHeight: 26 }}>
+            <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>
               {moodHeadline}
             </Text>
           </View>

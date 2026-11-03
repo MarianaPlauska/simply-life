@@ -1,5 +1,7 @@
 import { View } from 'react-native'
-import { SubNavTabs } from '../../ui'
+import { useRouter } from 'expo-router'
+import { GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { Icon } from '../../ui/Icon'
 import { Panel } from '../../ui/Panel'
 import type { CuidadosTab } from './healthNav'
 import { CUIDADOS_SUB_TABS } from './healthNav'
@@ -12,7 +14,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useWorkspace } from '../../layout/useWorkspace'
 import { useWebDesk } from '../dashboard/web/webBox'
 import { webStyle } from '../dashboard/web/webStyle'
-import { CareStatusList } from './web/CareStatusList'
+import { CareStatusList, useCareStatus } from './web/CareStatusList'
 import { DeskBlockHeader } from './diary/DeskBlockHeader'
 
 type Props = {
@@ -24,7 +26,9 @@ type Props = {
 
 export function HealthCuidadosTab({ tab, onChange, tabs = CUIDADOS_SUB_TABS }: Props)
 {
-  const { space } = useTheme()
+  const { colors } = useTheme()
+  const router = useRouter()
+  const care = useCareStatus()
   const desk = useWebDesk()
   const { width } = useWorkspace()
 
@@ -62,17 +66,20 @@ export function HealthCuidadosTab({ tab, onChange, tabs = CUIDADOS_SUB_TABS }: P
     )
   }
 
+  // celular: lista dos cuidados; cada um abre a sua tela (sem abas dentro de abas)
   return (
-    <View style={{ gap: space.md }}>
-      <SubNavTabs
-        tabs={tabs}
-        value={tab}
-        onChange={onChange}
-        accent="health"
-      />
-      <View style={{ gap: space.md }}>
-        {panel}
-      </View>
-    </View>
+    <GroupedList>
+      {care.map((c) => (
+        <GroupedRow
+          key={c.id}
+          leading={<RowGlyph name={c.icon.replace('-outline', '') as never} color={colors.health} />}
+          title={c.label}
+          value={c.value}
+          trailing={c.done ? <Icon name="checkmark-circle" size={18} color={colors.health} /> : undefined}
+          onPress={() => router.push(`/cuidado/${c.id}` as never)}
+          chevron
+        />
+      ))}
+    </GroupedList>
   )
 }

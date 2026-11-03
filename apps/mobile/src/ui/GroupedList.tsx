@@ -110,7 +110,7 @@ export function GroupedRow({
         {children}
       </View>
       {value ? (
-        <Text variant="body" muted numberOfLines={1} style={{ fontSize: 15, flexShrink: 1, maxWidth: '45%' }}>
+        <Text variant="body" muted numberOfLines={1} style={{ fontSize: 16, flexShrink: 1, maxWidth: '45%' }}>
           {value}
         </Text>
       ) : null}

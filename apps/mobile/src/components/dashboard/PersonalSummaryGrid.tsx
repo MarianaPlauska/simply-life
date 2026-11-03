@@ -200,7 +200,7 @@ function MetricCard({
       {/* gráfico numa linha própria: o valor ("7h 12min") fica com a largura toda do card */}
       <View style={{ alignItems: 'flex-end' }}>{viz}</View>
       <View style={{ gap: 4 }}>
-        <Text variant="hero" style={{ fontSize: 20, lineHeight: 28 }} numberOfLines={1}>
+        <Text variant="hero" style={{ fontSize: 19, lineHeight: 28 }} numberOfLines={1}>
           {value}
         </Text>
         <Text variant="micro" muted>

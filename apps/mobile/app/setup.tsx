@@ -29,6 +29,8 @@ import {
 } from '../src/lib/homeMetrics'
 import { SETUP_PRIORITY } from '../src/lib/setupOnboarding'
 import { supabaseConfigured } from '../src/lib/supabase'
+import { registerExpoPushAsync } from '../src/lib/pushRegister'
+import { scheduleCadenceAlerts } from '../src/lib/pushNotifications'
 import { acceptFriendCode, createFriendInviteLink } from '../src/lib/sync/friends'
 import {
   ALL_APP_MODULES,
@@ -91,30 +93,12 @@ const AXEL_INTRO: { title: string; hint: string }[] = [
 ]
 
 const SUNFY_GUIDE: { title: string; hint: string }[] = [
-  {
-    title: 'Início',
-    hint: 'É a primeira tela. Toque na carinha para dizer como você está. O botão + tira da cabeça o que está pendente: uma coisa por linha, sem escolher categoria.',
-  },
-  {
-    title: 'Tarefas',
-    hint: 'A lista do que fazer. Marque o que terminou. Uma tarefa grande pode virar passos pequenos. O AXEL sugere uma ordem e diz o motivo. A decisão continua sua.',
-  },
-  {
-    title: 'Saúde',
-    hint: 'Três partes. Hoje mostra o cuidado do dia. Cuidados tem água, comida, academia e remédios. Diário guarda humor, sono e o que você anotou. O app mostra o quanto falta e não cobra sequência de dias.',
-  },
-  {
-    title: 'Carteira',
-    hint: 'Quatro abas. Carteira é o dinheiro da conta. Extrato é a lista do que entrou e saiu. Contas guarda salário, faturas e o que se repete todo mês. Análise mostra para onde o dinheiro foi. Compra no cartão só muda o saldo quando a fatura é paga.',
-  },
-  {
-    title: 'Calendário',
-    hint: 'O mês inteiro, com o que já está marcado. Dá para ligar a agenda do Google, do Outlook ou do Teams.',
-  },
-  {
-    title: 'Mais',
-    hint: 'Perfil, preferências, tema e histórico. Sair da conta encerra a sessão neste aparelho. Fechar só esconde o menu. O Elo, os dias seguidos, também fica por aqui. Os pontos de nível ficam no Perfil e não são dinheiro.',
-  },
+  { title: 'Início', hint: 'Humor e o botão + para tirar o dia da cabeça.' },
+  { title: 'Tarefas', hint: 'A lista. Marque o que terminou.' },
+  { title: 'Saúde', hint: 'Hoje, Cuidados e Diário. Água, comida, academia e remédios.' },
+  { title: 'Carteira', hint: 'Saldo, extrato, contas e para onde o dinheiro foi.' },
+  { title: 'Calendário', hint: 'O mês e a agenda, se você ligar.' },
+  { title: 'Mais', hint: 'Perfil, preferências e sair. Fechar só esconde o menu.' },
 ]
 
 const PRIORITY_MODULES: Record<DashboardPriority, AppModuleId[]> = {
@@ -174,6 +158,8 @@ export default function SetupScreen()
   const [circleMsg, setCircleMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [joinedCount, setJoinedCount] = useState(0)
   const [invitesSent, setInvitesSent] = useState(0)
+  const [reviewing, setReviewing] = useState(false)
+  const [editing, setEditing] = useState<StepId | null>(null)
 
   useEffect(() =>
   {
@@ -204,7 +190,7 @@ export default function SetupScreen()
   const on = (id: AppModuleId) => isModuleOn(modules, id)
   const steps = useMemo<StepId[]>(() =>
   {
-    const list: StepId[] = ['welcome', 'name', 'axel', 'guide', 'modules']
+    const list: StepId[] = ['welcome', 'name', 'axel', 'modules']
     if (on('tasks') || on('routine')) list.push('tasks')
     if (on('water') || on('sleep') || on('food') || on('gym') || on('meds')) list.push('health')
     if (on('spend') || on('bills') || on('goals')) list.push('finance')
@@ -222,9 +208,34 @@ export default function SetupScreen()
 
   const current = steps[Math.min(step, steps.length - 1)]
   const total = steps.length
-  const goTo = (id: StepId) => setStep(Math.max(0, steps.indexOf(id)))
-  const next = () => setStep((s) => Math.min(total - 1, s + 1))
-  const back = () => setStep((s) => Math.max(0, s - 1))
+  const goSummary = () =>
+  {
+    setReviewing(false)
+    setStep(Math.max(0, steps.indexOf('summary')))
+  }
+  const goTo = (id: StepId) =>
+  {
+    setReviewing(true)
+    setStep(Math.max(0, steps.indexOf(id)))
+  }
+  const next = () =>
+  {
+    if (reviewing)
+    {
+      goSummary()
+      return
+    }
+    setStep((s) => Math.min(total - 1, s + 1))
+  }
+  const back = () =>
+  {
+    if (reviewing)
+    {
+      goSummary()
+      return
+    }
+    setStep((s) => Math.max(0, s - 1))
+  }
 
   const toggleModule = (id: AppModuleId) =>
     setModules((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -270,8 +281,17 @@ export default function SetupScreen()
 
   const startOwn = async () =>
   {
+    setSaving(true)
+    try
+    {
     // só na primeira vez: voltar e tocar de novo não apaga o que já foi cadastrado
-    if (isGuest && !guestOwnData) await startGuestOwnData()
+    if (isGuest && !guestOwnData)
+    {
+      await Promise.race([
+        startGuestOwnData(),
+        new Promise((resolve) => setTimeout(resolve, 8000)),
+      ])
+    }
     // conta nova começa sem cartão; Nubank/Inter de exemplo não entram
     const leftover = useDataStore.getState().financeCards.filter(isDemoFinanceCard)
     for (const card of leftover)
@@ -279,13 +299,27 @@ export default function SetupScreen()
       removeCard(card.id)
     }
     next()
+    }
+    finally
+    {
+      setSaving(false)
+    }
   }
 
   const finish = async () =>
   {
     setSaving(true)
+    if (notifyCadence !== 'off')
+    {
+      void registerExpoPushAsync(true).then((res) =>
+      {
+        if (res.ok) void scheduleCadenceAlerts(notifyCadence)
+      })
+    }
     const finalOrder: DashboardPriority[] = order.length ? order : ['tasks', 'health', 'finance']
     const trimmed = name.trim()
+    try
+    {
     await patch({
       axel_calls_you: trimmed,
       display_name: trimmed,
@@ -301,21 +335,37 @@ export default function SetupScreen()
       notify_cadence: notifyCadence,
       adhd_support: adhdSupport,
       gamification_mode: gamificationMode,
+      setup_completed_at: new Date().toISOString(),
     })
-    await applyHealthDraft(healthDraft, modules, isGuest)
-    await applyTasksDraft(tasksDraft, modules, isGuest)
-    const issues = await applyFinanceDraft(financeDraft, modules, isGuest)
-    await patch({ setup_completed_at: new Date().toISOString() })
+    await Promise.race([
+      applyHealthDraft(healthDraft, modules, isGuest),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ])
+    await Promise.race([
+      applyTasksDraft(tasksDraft, modules, isGuest),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ])
+    const issues = await Promise.race([
+      applyFinanceDraft(financeDraft, modules, isGuest),
+      new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 8000)),
+    ])
     logEvent('setup', 'Boas-vindas concluídas', trimmed || 'setup')
     grantXp(15, 'Configuração concluída', 'Onboarding')
-    setSaving(false)
     if (issues.length)
     {
-      // não trava a entrada: mostra o que falhou e deixa seguir
       setProblems(issues)
       return
     }
     router.replace('/(tabs)')
+    }
+    catch
+    {
+      router.replace('/(tabs)')
+    }
+    finally
+    {
+      setSaving(false)
+    }
   }
 
   const joinFriend = async () =>
@@ -353,9 +403,10 @@ export default function SetupScreen()
   }
 
   const stepProps = {
+    reviewing,
     step: Math.min(step, total - 1),
     total,
-    onBack: step > 0 ? back : undefined,
+    onBack: reviewing || step > 0 ? back : undefined,
   }
 
   const summaryRows: { label: string; value: string; step: StepId }[] = [
@@ -436,7 +487,8 @@ export default function SetupScreen()
             title="Boas-vindas ao SunFy"
             subtitle="Tarefas, saúde e dinheiro num lugar só. Você escolhe o que usar e o app se monta com os seus dados."
             nextLabel="Começar"
-            onNext={() => void startOwn()}
+            loading={saving}
+            onNext={() => (reviewing ? next() : void startOwn())}
             onSkip={isGuest ? () => void exploreDemo() : undefined}
             skipLabel="Só explorar com dados de exemplo"
           >
@@ -512,23 +564,7 @@ export default function SetupScreen()
                 </View>
               ))}
             </OnbBlock>
-            <Text variant="caption" muted>
-              Ele lê só o que você registra no app, e o texto vai para a IA só na hora de responder. Nada é usado para treinar
-              modelos. Você pode desligar o AXEL em Configurações.
-            </Text>
-          </OnbStep>
-        ) : null}
-
-        {current === 'guide' ? (
-          <OnbStep
-            {...stepProps}
-            kicker="Como usar"
-            title="Cada parte faz uma coisa"
-            subtitle="Não precisa abrir tudo no mesmo dia. Estas são as seções do SunFy e o que fazer em cada uma."
-            onNext={next}
-            nextLabel="Entendi"
-          >
-            <OnbBlock title="As seções">
+            <OnbBlock title="Onde fica cada coisa">
               {SUNFY_GUIDE.map((item) => (
                 <View key={item.title} style={{ gap: 2, paddingVertical: 4 }}>
                   <Text variant="bodyStrong">{item.title}</Text>
@@ -801,7 +837,7 @@ export default function SetupScreen()
           <OnbStep
             {...stepProps}
             title="Tudo pronto"
-            subtitle="Confira antes de começar. Toque em Editar para voltar a qualquer passo."
+            subtitle="Toque em Editar e mude aqui mesmo. Não precisa refazer os outros passos."
             nextLabel={problems.length ? 'Entrar mesmo assim' : 'Começar'}
             loading={saving}
             onNext={() => (problems.length ? router.replace('/(tabs)') : void finish())}
@@ -831,10 +867,93 @@ export default function SetupScreen()
                     <Text variant="caption" muted>{row.label}</Text>
                     <Text variant="body">{row.value}</Text>
                   </View>
-                  <PrimaryButton label="Editar" variant="link" size="sm" onPress={() => goTo(row.step)} />
+                  <PrimaryButton
+                    label={editing === row.step ? 'Fechar' : 'Editar'}
+                    variant="link"
+                    size="sm"
+                    onPress={() => setEditing((cur) => (cur === row.step ? null : row.step))}
+                  />
                 </View>
               ))}
             </View>
+            {editing === 'name' ? (
+              <View style={{ gap: space.sm }}>
+                <AvatarIconPicker selected={avatarIcon} onSelect={setAvatarIcon} level={1} owned={[]} startersOnly />
+                <Field label="Nome ou apelido" value={name} onChangeText={setName} placeholder="Seu nome" autoCapitalize="words" />
+              </View>
+            ) : null}
+            {editing === 'welcome' ? (
+              <View style={{ gap: space.sm }}>
+                <OnbChoice kind="radio" icon="sunny" title="Clara" selected={mode === 'light'} onPress={() => setMode('light')} />
+                <OnbChoice kind="radio" icon="moon" title="Escura" selected={mode === 'dark'} onPress={() => setMode('dark')} />
+              </View>
+            ) : null}
+            {editing === 'modules' ? <ModulePicker value={modules} onToggle={toggleModule} onGroup={setGroup} /> : null}
+            {editing === 'tasks' ? <TasksStartForm value={tasksDraft} onChange={setTasksDraft} enabled={modules} /> : null}
+            {editing === 'health' ? (
+              <HealthStartForm
+                value={healthDraft}
+                onChange={(d) =>
+                {
+                  setHealthTouched(true)
+                  setHealthDraft(d)
+                }}
+                enabled={modules}
+              />
+            ) : null}
+            {editing === 'finance' ? <FinanceStartForm value={financeDraft} onChange={setFinanceDraft} enabled={modules} /> : null}
+            {editing === 'rhythm' ? (
+              <View style={{ gap: space.sm }}>
+                {CARE_PACE_OPTIONS.map((opt) => (
+                  <OnbChoice key={opt.id} kind="radio" title={opt.label} hint={opt.hint} selected={pace === opt.id} onPress={() => setPace(opt.id)} />
+                ))}
+                {NOTIFY_CADENCE_OPTIONS.map((opt) => (
+                  <OnbChoice key={opt.id} kind="radio" title={opt.label} hint={opt.hint} selected={notifyCadence === opt.id} onPress={() => setNotifyCadence(opt.id)} />
+                ))}
+                <OnbChoice kind="radio" title="Quero apoio de foco" selected={adhdSupport} onPress={() => setAdhdSupport(true)} />
+                <OnbChoice kind="radio" title="Prefiro o modo padrão" selected={!adhdSupport} onPress={() => setAdhdSupport(false)} />
+                {GAMIFICATION_MODE_OPTIONS.map((opt) => (
+                  <OnbChoice key={opt.id} kind="radio" title={opt.label} hint={opt.hint} selected={gamificationMode === opt.id} onPress={() => setGamificationMode(opt.id)} />
+                ))}
+              </View>
+            ) : null}
+            {editing === 'cards' ? (
+              <View style={{ gap: space.sm }}>
+                {cards.map((c) => (
+                  <Text key={c.id} variant="body">{c.nome}</Text>
+                ))}
+                {cardFormOpen ? (
+                  <View style={{ gap: space.sm }}>
+                    <FinanceCardForm value={cardDraft} onChange={setCardDraft} previewWidth={280} />
+                    {cardMsg ? <Text variant="caption" color={colors.danger}>{cardMsg}</Text> : null}
+                    <PrimaryButton label="Salvar cartão" variant="secondary" onPress={saveCard} />
+                  </View>
+                ) : (
+                  <PrimaryButton label="Adicionar cartão" variant="secondary" onPress={() => setCardFormOpen(true)} />
+                )}
+              </View>
+            ) : null}
+            {editing === 'circle' ? (
+              <View style={{ gap: space.sm }}>
+                <Field label="Código do convite" value={friendCode} onChangeText={setFriendCode} placeholder="Ex.: K7M2QX9P" autoCapitalize="characters" />
+                <PrimaryButton label="Entrar no Círculo" variant="secondary" loading={circleBusy} disabled={!friendCode.trim()} onPress={() => void joinFriend()} />
+                {circleMsg ? <Text variant="caption" color={circleMsg.ok ? colors.health : colors.danger}>{circleMsg.text}</Text> : null}
+              </View>
+            ) : null}
+            {editing === 'home' ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+                {HOME_METRIC_CATALOG.filter((m) => metricAllowed(modules, m.id)).map((m) => (
+                  <OnbChoice
+                    key={m.id}
+                    half
+                    title={m.label}
+                    hint={m.hint}
+                    selected={metrics.includes(m.id)}
+                    onPress={() => setMetrics((prev) => toggleHomeMetric(prev, m.id))}
+                  />
+                ))}
+              </View>
+            ) : null}
             {problems.length ? (
               <View style={{ gap: 4 }}>
                 <Text variant="bodyStrong" color={colors.danger}>Algumas coisas não foram salvas</Text>

@@ -46,7 +46,7 @@ export function WebStatRow({ items }: { items: WebStatItem[] })
                   numberOfLines={1}
                   style={{
                     fontFamily: WEB_DISPLAY_FONT,
-                    fontSize: 22,
+                    fontSize: 24,
                     lineHeight: 30,
                     color: hovered && item.onPress ? item.color : colors.ink,
                   }}

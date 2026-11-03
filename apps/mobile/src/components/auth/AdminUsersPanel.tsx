@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { ScrollView, useWindowDimensions, View } from 'react-native'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { UsersIcon as Users } from 'phosphor-react-native/src/icons/Users'
 import { Card, Text, PrimaryButton, Field, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { supabase, supabaseConfigured } from '../../lib/supabase'
-import { getApiBaseUrl } from '../../lib/apiBase'
+import { getApiBaseUrl, apiFetch } from '../../lib/apiBase'
 import { isUserConnected } from '@simply-life/shared'
 
 function sortDirectory(rows: AdminCard[]): AdminCard[]
@@ -76,6 +76,9 @@ function whenLabel(iso: string | null | undefined): string
 export function AdminUsersPanel()
 {
   const { space, colors } = useTheme()
+  const { height } = useWindowDimensions()
+  // cabe na folha de 85% e ainda deixa o título e o Fechar de fora da rolagem
+  const listMax = Math.max(240, Math.round(height * 0.85) - 210)
   const [rows, setRows] = useState<AdminCard[]>([])
   const [editing, setEditing] = useState<AdminCard | null>(null)
   const [name, setName] = useState('')
@@ -85,17 +88,18 @@ export function AdminUsersPanel()
   const load = useCallback(async () =>
   {
     if (!supabaseConfigured) return
+    const rpc = await supabase.rpc('admin_list_directory')
+    if (!rpc.error && Array.isArray(rpc.data))
+    {
+      setRows(sortDirectory(rpc.data as AdminCard[]))
+      setMsg('')
+      return
+    }
     const fromApi = await loadDirectoryFromApi()
     if (fromApi)
     {
       setRows(sortDirectory(fromApi))
       setMsg('')
-      return
-    }
-    const rpc = await supabase.rpc('admin_list_directory')
-    if (!rpc.error && Array.isArray(rpc.data))
-    {
-      setRows(sortDirectory(rpc.data as AdminCard[]))
       return
     }
     const { data, error } = await supabase
@@ -143,21 +147,44 @@ export function AdminUsersPanel()
   const deleteUser = async (userId: string) =>
   {
     setBusy(true)
+    setMsg('')
+    const viaDb = await supabase.rpc('admin_delete_user', { target: userId })
+    if (!viaDb.error)
+    {
+      setBusy(false)
+      setMsg('Conta excluída')
+      void load()
+      return
+    }
+    const missing = /admin_delete_user|schema cache|PGRST202/i.test(viaDb.error.message)
+    if (!missing)
+    {
+      setBusy(false)
+      setMsg(viaDb.error.message)
+      return
+    }
+
+    const refreshed = await supabase.auth.getUser()
     const { data: session } = await supabase.auth.getSession()
     const token = session.session?.access_token
-    const res = await fetch(`${getApiBaseUrl()}/api/axel/admin-users`, {
+    if (refreshed.error || !token)
+    {
+      setBusy(false)
+      setMsg('A sessão expirou. Saia e entre de novo para excluir.')
+      return
+    }
+    const res = await apiFetch('/api/axel/admin-users', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ action: 'delete', userId }),
+      token,
+      body: { action: 'delete', userId },
     })
     const body = (await res.json().catch(() => ({}))) as { error?: string }
     setBusy(false)
     if (!res.ok)
     {
-      setMsg(body.error || 'Falha ao excluir')
+      setMsg(body.error && !missing
+        ? body.error
+        : 'A exclusão pelo site recusou esta sessão. Falta criar a função admin_delete_user no banco do SunFy.')
       return
     }
     setMsg('Conta excluída')
@@ -201,6 +228,12 @@ export function AdminUsersPanel()
           {msg}
         </Text>
       ) : null}
+      <ScrollView
+        style={{ maxHeight: listMax }}
+        contentContainerStyle={{ gap: space.md }}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled
+      >
       {rows.length === 0 ? (
         <EmptyState
           title="Nenhum usuário visível"
@@ -270,6 +303,7 @@ export function AdminUsersPanel()
           <PrimaryButton label="Cancelar" variant="ghost" onPress={() => setEditing(null)} />
         </Card>
       ) : null}
+      </ScrollView>
     </View>
   )
 }

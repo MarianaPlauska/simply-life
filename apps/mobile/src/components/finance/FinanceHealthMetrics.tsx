@@ -69,7 +69,7 @@ export function FinanceHealthMetrics({
           <Text variant="caption" muted>
             Score
           </Text>
-          <Text variant="title" color={scoreColor} style={{ fontSize: 22 }}>
+          <Text variant="title" color={scoreColor} style={{ fontSize: 24 }}>
             {scoreLabel}
           </Text>
           <Text variant="caption" muted>
@@ -80,7 +80,7 @@ export function FinanceHealthMetrics({
           <Text variant="caption" muted>
             Disponível
           </Text>
-          <Text variant="title" color={colors.ink} style={{ fontSize: 22 }}>
+          <Text variant="title" color={colors.ink} style={{ fontSize: 24 }}>
             {formatBRL(disponivel)}
           </Text>
           <Text variant="caption" muted>
@@ -91,7 +91,7 @@ export function FinanceHealthMetrics({
           <Text variant="caption" muted>
             Receitas
           </Text>
-          <Text variant="title" color={colors.health} style={{ fontSize: 22 }}>
+          <Text variant="title" color={colors.health} style={{ fontSize: 24 }}>
             {formatBRL(receitas)}
           </Text>
           <Text variant="caption" muted>

@@ -1,10 +1,15 @@
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
+import type { NotifyCadence } from '@simply-life/shared'
 
 const AXEL_CATEGORY = 'axel-actions'
 
-/** Canal novo: o canal "default" já criado não aceita mudar o Não perturbe. */
-const ALERT_CHANNEL = 'sunfy-avisos'
+/**
+ * Canal próprio. O Android congela importância e Não perturbe no primeiro uso,
+ * então um id novo vale mais do que editar o canal antigo.
+ * HIGH é notificação de app (ícone e texto). Não é alarme do relógio.
+ */
+const ALERT_CHANNEL = 'sunfy-avisos-2'
 
 function withAlertChannel(trigger: Notifications.NotificationTriggerInput): Notifications.NotificationTriggerInput
 {
@@ -68,9 +73,10 @@ export async function setNativeAndroidChannel(): Promise<void>
   })
   await Notifications.setNotificationChannelAsync(ALERT_CHANNEL, {
     name: 'Avisos do SunFy',
-    importance: Notifications.AndroidImportance.MAX,
-    vibrationPattern: [0, 280, 180, 280],
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 180, 120, 180],
     sound: 'default',
+    // Só passa no Não perturbe depois que a pessoa liga o SunFy na tela do sistema.
     bypassDnd: true,
     enableVibrate: true,
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
@@ -86,8 +92,9 @@ export async function sendTestAlert(): Promise<boolean>
   await Notifications.scheduleNotificationAsync({
     content: {
       title: 'SunFy',
-      body: 'Aviso de teste. No Não perturbe, o Android precisa deixar o canal Avisos do SunFy passar.',
+      body: 'Aviso de teste. Ícone e texto, como qualquer app.',
       sound: 'default',
+      color: '#E8734A',
     },
     trigger: withAlertChannel({
       type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -343,4 +350,44 @@ export async function scheduleTaskReminder(input: {
 export async function cancelTaskReminder(id: string): Promise<void>
 {
   await Notifications.cancelScheduledNotificationAsync(`${TASK_REMINDER_PREFIX}${id}`).catch(() => undefined)
+}
+
+const CADENCE_IDS = ['axel-cadence-9', 'axel-cadence-11', 'axel-cadence-15', 'axel-cadence-21']
+
+/** Avisos locais do ritmo escolhido. O servidor também envia, se o aparelho estiver inscrito. */
+export async function scheduleCadenceAlerts(cadence: NotifyCadence): Promise<void>
+{
+  for (const id of CADENCE_IDS)
+  {
+    await Notifications.cancelScheduledNotificationAsync(id).catch(() => undefined)
+  }
+  if (cadence === 'off') return
+  await setNativeAndroidChannel()
+  const perm = await Notifications.getPermissionsAsync()
+  if (!perm.granted) return
+  const slots = cadence === 'once'
+    ? [{ id: 'axel-cadence-11', hour: 11, body: 'O essencial está organizado. Abra quando fizer sentido.' }]
+    : [
+        { id: 'axel-cadence-9', hour: 9, body: 'Quando quiser, o dia cabe em um toque.' },
+        { id: 'axel-cadence-15', hour: 15, body: 'Se couber, um olhar no que ficou para hoje.' },
+        { id: 'axel-cadence-21', hour: 21, body: 'O essencial está organizado. Amanhã continua de onde parou.' },
+      ]
+  for (const slot of slots)
+  {
+    await Notifications.scheduleNotificationAsync({
+      identifier: slot.id,
+      content: {
+        title: 'SunFy',
+        body: slot.body,
+        sound: 'default',
+        color: '#E8734A',
+        data: { url: '/' },
+      },
+      trigger: withAlertChannel({
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: slot.hour,
+        minute: 0,
+      }),
+    })
+  }
 }

@@ -44,7 +44,7 @@ function FolderRow({ scope, onPress, label }: { scope: ScopeSnapshot; onPress: (
     >
       <FolderGlyph color={scope.color} size={26} />
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text numberOfLines={1} style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.ink }]}>
+        <Text numberOfLines={1} style={[LEX.regular, { fontSize: 16, lineHeight: 22, color: colors.ink }]}>
           {label ?? scope.name}
         </Text>
         <Text style={[LEX.regular, { fontSize: 13, lineHeight: 18, color: colors.inkMuted }]}>
@@ -226,7 +226,7 @@ export function WebFoldersPane({ tasks }: { tasks: MobileTask[] })
               <Icon name="document-text-outline" size={17} color={colors.inkMuted} />
             </View>
             <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-              <Text numberOfLines={1} style={[LEX.medium, { fontSize: 15, lineHeight: 22, color: colors.ink }]}>{task.titulo}</Text>
+              <Text numberOfLines={1} style={[LEX.medium, { fontSize: 16, lineHeight: 22, color: colors.ink }]}>{task.titulo}</Text>
               <Text numberOfLines={3} style={[LEX.regular, { fontSize: 14, lineHeight: 20, color: colors.inkMuted }]}>{text}</Text>
             </View>
           </WebHoverable>

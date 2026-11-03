@@ -55,13 +55,13 @@ export function FinanceCategoryList({ rows, onPress }: { rows: CategorySpend[]; 
           </View>
           <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
-              <Text variant="body" numberOfLines={1} style={{ flex: 1, fontSize: 15, lineHeight: 22 }}>
+              <Text variant="body" numberOfLines={1} style={{ flex: 1, fontSize: 16, lineHeight: 22 }}>
                 {row.label}
               </Text>
               <Text variant="caption" muted style={{ fontVariant: ['tabular-nums'] }}>{row.pct}%</Text>
               <Text
                 variant="body"
-                style={{ fontSize: 15, lineHeight: 22, fontFamily: 'Lexend_500Medium', fontVariant: ['tabular-nums'], minWidth: 96, textAlign: 'right' }}
+                style={{ fontSize: 16, lineHeight: 22, fontFamily: 'Lexend_500Medium', fontVariant: ['tabular-nums'], minWidth: 96, textAlign: 'right' }}
               >
                 {formatBRL(row.total)}
               </Text>

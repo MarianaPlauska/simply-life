@@ -100,3 +100,8 @@ export async function scheduleTaskReminder(_input: {
 export async function cancelTaskReminder(_id: string): Promise<void>
 {
 }
+
+/** No navegador o aviso chega pelo servidor, não por um alarme local. */
+export async function scheduleCadenceAlerts(_cadence: 'off' | 'once' | 'batch3'): Promise<void>
+{
+}

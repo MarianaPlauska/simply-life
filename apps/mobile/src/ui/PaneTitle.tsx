@@ -23,7 +23,7 @@ export function PaneTitle({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 12 }}>
       <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-        <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.25 }}>
+        <Text variant="hero" style={{ fontSize: 24, lineHeight: 30, letterSpacing: -0.25 }}>
           {title}
         </Text>
         {subtitle ? (

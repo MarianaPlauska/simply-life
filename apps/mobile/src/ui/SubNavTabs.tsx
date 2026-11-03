@@ -3,6 +3,7 @@ import { useWebDesk } from '../components/dashboard/web/webBox'
 import { useRipple } from './ripple'
 import { Text } from './Text'
 import { PressableScale } from './PressableScale'
+import { Icon, type IconName } from './Icon'
 import { useTheme } from '../theme/ThemeProvider'
 import { hapticSelect } from '../lib/haptics'
 
@@ -10,6 +11,7 @@ export type SubNavTab<T extends string> = {
   id: T
   label: string
   count?: number
+  icon?: IconName
 }
 
 /** Sub-navegação com divisória fina - padrão web AXEL */
@@ -30,6 +32,78 @@ export function SubNavTabs<T extends string>({
   const accentColor =
     accent === 'finance' ? colors.finance : accent === 'axel' ? colors.axel : colors.health
   const desk = useWebDesk()
+
+  // celular com ícone: fileira de toque, sem texto correndo para o lado
+  if (!desk && tabs.some((tab) => tab.icon))
+  {
+    return (
+      <View style={{ flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.hairline }}>
+        {tabs.map((tab) =>
+        {
+          const active = tab.id === value
+          return (
+            <Pressable
+              key={tab.id}
+              onPress={() =>
+              {
+                hapticSelect()
+                onChange(tab.id)
+              }}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={tab.count ? `${tab.label}, ${tab.count}` : tab.label}
+              android_ripple={ripple}
+              style={{ flex: 1, minHeight: 72, alignItems: 'center', justifyContent: 'center', gap: 4, paddingTop: 6 }}
+            >
+              <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center' }}>
+                {tab.icon ? (
+                  <Icon name={tab.icon} size={22} color={active ? accentColor : colors.inkMuted} />
+                ) : null}
+                {tab.count ? (
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: -4,
+                      right: -8,
+                      minWidth: 16,
+                      height: 16,
+                      paddingHorizontal: 3,
+                      borderRadius: 999,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: active ? accentColor : colors.fill,
+                    }}
+                  >
+                    <Text variant="micro" color={active ? colors.axelOnFill : colors.ink} style={{ fontSize: 12, lineHeight: 16 }}>
+                      {tab.count}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+              <Text
+                variant="label"
+                numberOfLines={1}
+                color={active ? colors.ink : colors.inkMuted}
+                style={{ fontSize: 12, lineHeight: 14, fontWeight: active ? '600' : '500', textAlign: 'center' }}
+              >
+                {tab.label}
+              </Text>
+              <View
+                style={{
+                  height: 3,
+                  width: '50%',
+                  marginTop: 4,
+                  borderTopLeftRadius: 3,
+                  borderTopRightRadius: 3,
+                  backgroundColor: active ? accentColor : 'transparent',
+                }}
+              />
+            </Pressable>
+          )
+        })}
+      </View>
+    )
+  }
 
   // celular com poucas abas: abas fixas de largura igual (Material 3, "primary tabs")
   if (!desk && tabs.length <= 4)
@@ -57,7 +131,7 @@ export function SubNavTabs<T extends string>({
                 color={active ? colors.ink : colors.inkMuted}
                 style={{ fontWeight: active ? '600' : '500', paddingBottom: 12, textAlign: 'center', paddingHorizontal: 4 }}
               >
-                {typeof tab.count === 'number' ? `${tab.label} · ${tab.count}` : tab.label}
+                {tab.count ? `${tab.label} · ${tab.count}` : tab.label}
               </Text>
               <View
                 style={{
@@ -82,10 +156,7 @@ export function SubNavTabs<T extends string>({
           {tabs.map((tab) =>
           {
             const active = tab.id === value
-            const label =
-              typeof tab.count === 'number'
-                ? `${tab.label} · ${tab.count}`
-                : tab.label
+            const label = tab.count ? `${tab.label} · ${tab.count}` : tab.label
             return (
               <PressableScale
                 key={tab.id}

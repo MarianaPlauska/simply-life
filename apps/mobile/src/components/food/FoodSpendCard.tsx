@@ -12,6 +12,7 @@ import {
 import { Card, Text } from '../../ui'
 import { Icon } from '../../ui/Icon'
 import { useTheme } from '../../theme/ThemeProvider'
+import { useWebDesk } from '../dashboard/web/webBox'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { useFoodLogStore } from '../../store/foodLogStore'
@@ -36,6 +37,7 @@ export function useFoodMoneyRows(month = localTodayIso().slice(0, 7))
 export function FoodSpendCard({ embedded = false, limit = 5 }: { embedded?: boolean; limit?: number })
 {
   const { colors, space, radius } = useTheme()
+  const desk = useWebDesk()
   const router = useRouter()
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -90,8 +92,7 @@ export function FoodSpendCard({ embedded = false, limit = 5 }: { embedded?: bool
 
   if (embedded) return body
 
-  return (
-    <Card tone="elevated" style={{ gap: space.sm }}>
+  const head = (
       <Pressable
         onPress={() => router.push('/comida')}
         accessibilityRole="button"
@@ -102,7 +103,22 @@ export function FoodSpendCard({ embedded = false, limit = 5 }: { embedded?: bool
         <Text variant="section" style={{ flex: 1 }}>Onde vai o dinheiro da comida</Text>
         <Icon name="chevron-forward" size={16} color={colors.inkMuted} />
       </Pressable>
+  )
+
+  if (desk)
+  {
+    return (
+      <Card tone="elevated" style={{ gap: space.sm }}>
+        {head}
+        {body}
+      </Card>
+    )
+  }
+
+  return (
+    <View style={{ gap: space.sm, paddingTop: space.md, borderTopWidth: 1, borderTopColor: colors.hairline }}>
+      {head}
       {body}
-    </Card>
+    </View>
   )
 }

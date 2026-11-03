@@ -85,7 +85,7 @@ export function SettingsToggleRow({
         <Icon name={icon} size={20} color={colors.axel} />
       </View>
       <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-        <Text variant="bodyStrong" style={{ fontSize: 15 }}>
+        <Text variant="bodyStrong" style={{ fontSize: 16 }}>
           {title}
         </Text>
         <Text variant="caption" muted numberOfLines={2}>

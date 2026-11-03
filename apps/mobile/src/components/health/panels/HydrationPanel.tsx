@@ -120,7 +120,7 @@ export function HydrationPanel()
           <Text variant="caption" muted>
             Hidratação
           </Text>
-          <Text variant="bodyStrong" style={{ fontSize: 18, lineHeight: 24 }}>
+          <Text variant="bodyStrong" style={{ fontSize: 19, lineHeight: 24 }}>
             {atual} de {meta} copos
           </Text>
           <Text variant="caption" muted>

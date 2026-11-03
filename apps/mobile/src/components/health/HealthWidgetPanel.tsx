@@ -68,7 +68,7 @@ export function HealthWidgetSection({
             </Text>
           ) : null}
           {lead ? (
-            <Text variant="title" style={{ color: colors.featureInk, fontSize: 22, lineHeight: 28 }}>
+            <Text variant="title" style={{ color: colors.featureInk, fontSize: 24, lineHeight: 28 }}>
               {lead}
             </Text>
           ) : null}

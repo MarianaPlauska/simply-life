@@ -1,7 +1,7 @@
 // POST /api/axel/admin-users - exclusão de conta (somente admin)
 
 import { getSupabaseAdmin } from '../../supabaseAdmin.js';
-import { getUserFromBearer, corsJson } from '../../supabaseUser.js';
+import { explainBearer, corsJson } from '../../supabaseUser.js';
 
 const FOUNDER_ADMIN_EMAILS = new Set([
   'marianaplauska.c@gmail.com',
@@ -95,11 +95,13 @@ export default async function handler(req, res)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const caller = await getUserFromBearer(req);
-  if (!caller)
+  const auth = await explainBearer(req);
+  if (!auth.user)
   {
-    return res.status(401).json({ error: 'Não autenticado' });
+    const status = auth.error === 'Serviço indisponível' ? 503 : 401;
+    return res.status(status).json({ error: auth.error || 'Não autenticado' });
   }
+  const caller = auth.user;
 
   const admin = getSupabaseAdmin();
   if (!admin)

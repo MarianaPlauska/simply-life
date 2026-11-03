@@ -58,7 +58,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
             <Text variant="bodyStrong">{cell.dayNum}</Text>
             {/* no computador o mês já está na barra da semana */}
             {desk ? null : (
-              <Text variant="micro" muted style={{ fontSize: 11, lineHeight: 14 }}>
+              <Text variant="micro" muted style={{ fontSize: 12, lineHeight: 14 }}>
                 {new Date(`${cell.iso}T12:00:00`).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}
               </Text>
             )}

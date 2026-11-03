@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { formatBRL, cashExpenseTotal, creditExpenseTotal, monthIncomeTotal } from '@simply-life/shared'
 import { Screen, SubNavTabs } from '../../src/ui'
 import { useDataStore } from '../../src/store/dataStore'
@@ -30,6 +30,9 @@ export default function FinanceiroScreen()
 {
   const { colors } = useTheme()
   const desk = useWebDesk()
+  const router = useRouter()
+  // celular: item de Contas ou Analise abre em tela propria
+  const openSub = (sub: string) => router.push(`/financas/${sub}` as never)
   const [tab, setTab] = useSectionState<FinanceMainTab>('financeiro', 'inicio')
   const [cardsFocus, setCardsFocus] = useState(false)
   const [movSub, setMovSub] = useState<MovimentosSubTab>('diario')
@@ -55,6 +58,7 @@ export default function FinanceiroScreen()
       setCardsFocus(false)
       setTab(hit.tab)
       setContasSub(hit.contasSub)
+      if (!desk && hit.tab === 'contas') openSub(hit.contasSub)
     }, []),
   )
 
@@ -68,6 +72,7 @@ export default function FinanceiroScreen()
       setCardsFocus(false)
       setTab(hit.tab)
       setContasSub(hit.contasSub)
+      if (!desk && hit.tab === 'contas') openSub(hit.contasSub)
     }), [])
 
   const despesas = cashExpenseTotal(txs)
@@ -76,7 +81,7 @@ export default function FinanceiroScreen()
   const movCount = txs.filter((t) => t.tipo === 'despesa' || t.tipo === 'receita').length
   const tabsWithCount = mainTabs.map((t) => ({
     ...t,
-    count: t.id === 'movimentos' ? movCount : undefined,
+    count: t.id === 'movimentos' && movCount > 0 ? movCount : undefined,
   }))
   // computador: as abas principais ficam na barra lateral, como subitens de Finanças
   usePublishSectionTabs('financeiro', tabsWithCount)
@@ -128,6 +133,7 @@ export default function FinanceiroScreen()
                 setCardsFocus(false)
                 setTab('contas')
                 setContasSub('cartoes')
+                if (!desk) openSub('cartoes')
               }}
               onGoAnalise={() =>
               {
@@ -182,10 +188,11 @@ export default function FinanceiroScreen()
               subTab={contasSub}
               onSubTabChange={setContasSub}
               onGoMovimentos={() => setTab('movimentos')}
+              onOpenSub={openSub}
             />
           )}
           {tab === 'analise' && (
-            <FinanceAnaliseTab subTab={analiseSub} onSubTabChange={setAnaliseSub} />
+            <FinanceAnaliseTab subTab={analiseSub} onSubTabChange={setAnaliseSub} onOpenSub={openSub} />
           )}
         </View>
       </TabShell>

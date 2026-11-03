@@ -59,7 +59,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
       <FlexWidget style={{ width: 'match_parent', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
         <FlexWidget clickAction="OPEN_APP" style={{ flexDirection: 'column' }}>
           <TextWidget text="Água hoje" style={{ fontSize: 12, color: MUTED }} />
-          <TextWidget text={`${data.waterDone}/${data.waterGoal} copos`} style={{ fontSize: 18, color: INK, fontWeight: '700' }} />
+          <TextWidget text={`${data.waterDone}/${data.waterGoal} copos`} style={{ fontSize: 19, color: INK, fontWeight: '700' }} />
         </FlexWidget>
         <FlexWidget
           clickAction="WATER"
@@ -109,7 +109,7 @@ export function SunFyWidget({ data }: { data: SunFyWidgetData })
           clickActionData={{ uri: data.task ? `simplylife://task/${data.task.id}` : 'simplylife://kanban' }}
           style={{ flex: 1, flexDirection: 'column' }}
         >
-          <TextWidget text="Próxima tarefa" style={{ fontSize: 11, color: MUTED }} />
+          <TextWidget text="Próxima tarefa" style={{ fontSize: 12, color: MUTED }} />
           <TextWidget
             text={data.task?.titulo ?? 'Nada para hoje'}
             maxLines={1}

@@ -104,14 +104,14 @@ export function WebDonePane({ tasks }: { tasks: MobileTask[] })
       </View>
 
       <View style={{ flex: 1, minWidth: 0, gap: 16 }}>
-        <Text style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.inkMuted, paddingHorizontal: 4 }]}>
+        <Text style={[LEX.regular, { fontSize: 16, lineHeight: 22, color: colors.inkMuted, paddingHorizontal: 4 }]}>
           {done.length} feita{done.length === 1 ? '' : 's'}
         </Text>
         <ListSurface>
           {done.length === 0 ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 20 }}>
               <Icon name="checkmark-circle-outline" size={18} color={colors.inkMuted} />
-              <Text style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.inkMuted }]}>
+              <Text style={[LEX.regular, { fontSize: 16, lineHeight: 22, color: colors.inkMuted }]}>
                 Nada concluído ainda. Na Lista, a caixinha marca a tarefa como feita e ela aparece aqui.
               </Text>
             </View>
