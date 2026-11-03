@@ -1,8 +1,8 @@
 import { Children, createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { View, type StyleProp, type ViewStyle } from 'react-native'
 import { useWebDesk } from '../components/dashboard/web/webBox'
-import { SurfaceGlow } from './SurfaceGlow'
 import { useTheme } from '../theme/ThemeProvider'
+import { useInSheet } from './surface'
 
 const InPanel = createContext(false)
 
@@ -21,6 +21,9 @@ export function Panel({ children, style }: { children: ReactNode; style?: StyleP
 {
   const { colors } = useTheme()
   const desk = useWebDesk()
+  // celular: sem caixa, so as linhas finas entre os blocos (fichas mantem a caixa)
+  const inSheet = useInSheet()
+  const boxed = desk || inSheet
   const items = Children.toArray(children)
   const [filled, setFilled] = useState<Record<number, boolean>>({})
   const any = items.some((_c, i) => filled[i] === true)
@@ -39,19 +42,18 @@ export function Panel({ children, style }: { children: ReactNode; style?: StyleP
     <View
       style={[
         {
-          borderRadius: desk ? 16 : 20,
-          backgroundColor: any ? colors.elevated : 'transparent',
-          borderWidth: any ? 1 : 0,
-          borderColor: desk ? colors.cardRim : colors.hairline,
+          borderRadius: 16,
+          backgroundColor: any && boxed ? colors.elevated : 'transparent',
+          borderWidth: any && desk ? 1 : 0,
+          borderColor: colors.cardRim,
           overflow: 'hidden',
         },
         style,
       ]}
     >
-      {any && !desk ? <SurfaceGlow /> : null}
       <InPanel.Provider value>
         {items.map((child, i) => (
-          <PanelItem key={i} index={i} divider={i !== first} onFilled={report}>
+          <PanelItem key={i} index={i} divider={i !== first} boxed={boxed} onFilled={report}>
             {child}
           </PanelItem>
         ))}
@@ -64,11 +66,13 @@ function PanelItem({
   children,
   index,
   divider,
+  boxed,
   onFilled,
 }: {
   children: ReactNode
   index: number
   divider: boolean
+  boxed: boolean
   onFilled: (i: number, has: boolean) => void
 })
 {
@@ -82,7 +86,7 @@ function PanelItem({
       style={
         has
           ? {
-              paddingHorizontal: 20,
+              paddingHorizontal: boxed ? 20 : 0,
               paddingVertical: 16,
               borderTopWidth: divider ? 1 : 0,
               borderTopColor: colors.hairline,
@@ -112,7 +116,10 @@ function PanelItem({
 export function usePanelBox(style: ViewStyle, flush = false): ViewStyle
 {
   const inPanel = useInPanel()
+  const desk = useWebDesk()
+  const inSheet = useInSheet()
+  const boxed = desk || inSheet
   if (!inPanel) return style
   const { borderRadius: _r, backgroundColor: _b, borderWidth: _w, borderColor: _c, padding: _p, ...rest } = style
-  return { ...rest, ...(flush ? { marginHorizontal: -20 } : null) }
+  return { ...rest, ...(flush && boxed ? { marginHorizontal: -20 } : null) }
 }

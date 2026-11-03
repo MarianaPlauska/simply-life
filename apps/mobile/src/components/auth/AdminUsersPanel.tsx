@@ -1,12 +1,51 @@
 import { useCallback, useEffect, useState } from 'react'
-import { View } from 'react-native'
+import { ScrollView, useWindowDimensions, View } from 'react-native'
 import { ShieldCheckIcon as ShieldCheck } from 'phosphor-react-native/src/icons/ShieldCheck'
 import { UsersIcon as Users } from 'phosphor-react-native/src/icons/Users'
 import { Card, Text, PrimaryButton, Field, EmptyState } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { supabase, supabaseConfigured } from '../../lib/supabase'
-import { getApiBaseUrl } from '../../lib/apiBase'
+import { getApiBaseUrl, apiFetch } from '../../lib/apiBase'
 import { isUserConnected } from '@simply-life/shared'
+
+function sortDirectory(rows: AdminCard[]): AdminCard[]
+{
+  return [...rows].sort((a, b) =>
+  {
+    const ac = isUserConnected(a.last_seen_at) ? 1 : 0
+    const bc = isUserConnected(b.last_seen_at) ? 1 : 0
+    if (ac !== bc)
+    {
+      return bc - ac
+    }
+    return String(b.last_seen_at || b.last_sign_in_at || '').localeCompare(String(a.last_seen_at || a.last_sign_in_at || ''))
+  })
+}
+
+async function loadDirectoryFromApi(): Promise<AdminCard[] | null>
+{
+  const { data: session } = await supabase.auth.getSession()
+  const token = session.session?.access_token
+  if (!token) return null
+  try
+  {
+    const res = await fetch(`${getApiBaseUrl()}/api/axel/admin-users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ action: 'list' }),
+    })
+    if (!res.ok) return null
+    const body = (await res.json()) as { users?: AdminCard[] }
+    return Array.isArray(body.users) ? body.users : null
+  }
+  catch
+  {
+    return null
+  }
+}
 
 type AdminCard = {
   user_id: string
@@ -37,6 +76,9 @@ function whenLabel(iso: string | null | undefined): string
 export function AdminUsersPanel()
 {
   const { space, colors } = useTheme()
+  const { height } = useWindowDimensions()
+  // cabe na folha de 85% e ainda deixa o título e o Fechar de fora da rolagem
+  const listMax = Math.max(240, Math.round(height * 0.85) - 210)
   const [rows, setRows] = useState<AdminCard[]>([])
   const [editing, setEditing] = useState<AdminCard | null>(null)
   const [name, setName] = useState('')
@@ -49,7 +91,15 @@ export function AdminUsersPanel()
     const rpc = await supabase.rpc('admin_list_directory')
     if (!rpc.error && Array.isArray(rpc.data))
     {
-      setRows(rpc.data as AdminCard[])
+      setRows(sortDirectory(rpc.data as AdminCard[]))
+      setMsg('')
+      return
+    }
+    const fromApi = await loadDirectoryFromApi()
+    if (fromApi)
+    {
+      setRows(sortDirectory(fromApi))
+      setMsg('')
       return
     }
     const { data, error } = await supabase
@@ -61,7 +111,7 @@ export function AdminUsersPanel()
       setMsg(error.message)
       return
     }
-    setRows((data ?? []) as AdminCard[])
+    setRows(sortDirectory((data ?? []) as AdminCard[]))
   }, [])
 
   useEffect(() =>
@@ -97,21 +147,44 @@ export function AdminUsersPanel()
   const deleteUser = async (userId: string) =>
   {
     setBusy(true)
+    setMsg('')
+    const viaDb = await supabase.rpc('admin_delete_user', { target: userId })
+    if (!viaDb.error)
+    {
+      setBusy(false)
+      setMsg('Conta excluída')
+      void load()
+      return
+    }
+    const missing = /admin_delete_user|schema cache|PGRST202/i.test(viaDb.error.message)
+    if (!missing)
+    {
+      setBusy(false)
+      setMsg(viaDb.error.message)
+      return
+    }
+
+    const refreshed = await supabase.auth.getUser()
     const { data: session } = await supabase.auth.getSession()
     const token = session.session?.access_token
-    const res = await fetch(`${getApiBaseUrl()}/api/axel/admin-users`, {
+    if (refreshed.error || !token)
+    {
+      setBusy(false)
+      setMsg('A sessão expirou. Saia e entre de novo para excluir.')
+      return
+    }
+    const res = await apiFetch('/api/axel/admin-users', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ action: 'delete', userId }),
+      token,
+      body: { action: 'delete', userId },
     })
     const body = (await res.json().catch(() => ({}))) as { error?: string }
     setBusy(false)
     if (!res.ok)
     {
-      setMsg(body.error || 'Falha ao excluir')
+      setMsg(body.error && !missing
+        ? body.error
+        : 'A exclusão pelo site recusou esta sessão. Falta criar a função admin_delete_user no banco do SunFy.')
       return
     }
     setMsg('Conta excluída')
@@ -148,13 +221,19 @@ export function AdminUsersPanel()
         </View>
       </View>
       <Text variant="caption" muted>
-        Contas que criaram login e estão com o app aberto aparecem como conectadas.
+        Toda conta aparece aqui. Quem está com o app aberto fica no topo, como conectada.
       </Text>
       {msg ? (
         <Text variant="caption" color={colors.axel}>
           {msg}
         </Text>
       ) : null}
+      <ScrollView
+        style={{ maxHeight: listMax }}
+        contentContainerStyle={{ gap: space.md }}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled
+      >
       {rows.length === 0 ? (
         <EmptyState
           title="Nenhum usuário visível"
@@ -224,6 +303,7 @@ export function AdminUsersPanel()
           <PrimaryButton label="Cancelar" variant="ghost" onPress={() => setEditing(null)} />
         </Card>
       ) : null}
+      </ScrollView>
     </View>
   )
 }

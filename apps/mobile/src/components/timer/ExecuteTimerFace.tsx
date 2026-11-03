@@ -53,7 +53,7 @@ export function ExecuteTimerFace({
 
   return (
     <View style={{ alignItems: 'center', gap: 28 }}>
-      <Text variant="section" style={{ fontSize: 18 }}>
+      <Text variant="section" style={{ fontSize: 19 }}>
         {title}
       </Text>
       <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>

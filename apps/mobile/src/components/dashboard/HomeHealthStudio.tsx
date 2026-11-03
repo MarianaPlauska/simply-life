@@ -103,7 +103,7 @@ export function HomeHealthStudio()
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <ProgressRing progress={pct} size={56} strokeWidth={5} color={colors.health} />
           <View style={{ flex: 1, gap: 6 }}>
-            <Text variant="title" color={colors.health} style={{ fontSize: 22 }}>
+            <Text variant="title" color={colors.health} style={{ fontSize: 24 }}>
               {mlAtual} ml
             </Text>
             <Text variant="caption" muted>
@@ -148,7 +148,7 @@ export function HomeHealthStudio()
                 showLabel={false}
               />
             </View>
-            <Text variant="bodyStrong" color={k.color} style={{ fontSize: 18 }}>
+            <Text variant="bodyStrong" color={k.color} style={{ fontSize: 19 }}>
               {k.value}
             </Text>
             <Text variant="micro" muted>
@@ -168,7 +168,7 @@ export function HomeHealthStudio()
         }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Text variant="section" style={{ fontSize: 15 }}>
+          <Text variant="section" style={{ fontSize: 16 }}>
             Copos de hoje
           </Text>
           <StatusPill label={`${atual} de ${meta}`} color={colors.health} />

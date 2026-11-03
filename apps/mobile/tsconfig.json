@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "module": "esnext",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["./src/*"],
       "@simply-life/ui-tokens": ["../../packages/ui-tokens/src/index.ts"],

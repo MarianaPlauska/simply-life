@@ -7,6 +7,9 @@ import {
   SectionHeader,
   EmptyState,
   SubNavTabs,
+  GroupedList,
+  GroupedRow,
+  RowGlyph,
   Field,
   PrimaryButton,
 } from '../../ui'
@@ -18,7 +21,9 @@ import { FinanceGoalWizard } from './FinanceGoalWizard'
 import { FinanceCoachCards } from './FinanceCoachCards'
 import { FinancePlanningPanel } from './FinancePlanningPanel'
 import { FinanceMonthReport } from './FinanceMonthReport'
+import { MonthProjectionCard } from './FinanceForecastCards'
 import { FoodSpendCard } from '../food/FoodSpendCard'
+import { FinanceCareMoney } from './FinanceCareMoney'
 import { visibleAnaliseTabs, type AnaliseSubTab } from './financeNav'
 import { useModules } from '../../hooks/useModules'
 import { Panel } from '../../ui/Panel'
@@ -29,9 +34,13 @@ import { useFinanceDeskGrid } from './desk/deskLayout'
 type Props = {
   subTab: AnaliseSubTab
   onSubTabChange: (tab: AnaliseSubTab) => void
+  /** tela propria de um item (celular): sem as abas */
+  hideTabs?: boolean
+  /** celular: abre a tela do item tocado na lista */
+  onOpenSub?: (tab: AnaliseSubTab) => void
 }
 
-export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
+export function FinanceAnaliseTab({ subTab, onSubTabChange, hideTabs, onOpenSub }: Props)
 {
   const { colors, space, radius } = useTheme()
   const goals = useDataStore((s) => s.financeGoals)
@@ -62,17 +71,44 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
     void hydrateCats()
   }, [hydrateCats])
 
+  // celular: lista com seta; cada item abre a sua tela (sem abas dentro de abas)
+  if (!desk && !hideTabs)
+  {
+    return (
+      <GroupedList>
+        {subTabs.map((t) => (
+          <GroupedRow
+            key={t.id}
+            leading={
+              <RowGlyph
+                name={t.id === 'visao-geral' ? 'analytics' : t.id === 'orcamentos' ? 'wallet' : t.id === 'metas' ? 'flag' : 'sparkles'}
+                color={colors.finance}
+              />
+            }
+            title={t.id === 'visao-geral' ? 'Visão do mês' : t.label}
+            onPress={() => onOpenSub?.(t.id)}
+            chevron
+          />
+        ))}
+      </GroupedList>
+    )
+  }
+
   return (
     <View style={{ gap: space.md }}>
-      <SubNavTabs
-        tabs={subTabs}
-        value={subTab}
-        onChange={onSubTabChange}
-        accent="finance"
-      />
+      {hideTabs ? null : (
+        <SubNavTabs
+          tabs={subTabs}
+          value={subTab}
+          onChange={onSubTabChange}
+          accent="finance"
+        />
+      )}
 
+      {subTab === 'visao-geral' && <MonthProjectionCard />}
       {subTab === 'visao-geral' && <FinanceMonthReport />}
       {subTab === 'visao-geral' && <FoodSpendCard />}
+      {subTab === 'visao-geral' && <FinanceCareMoney />}
 
       {subTab === 'orcamentos' && <FinancePlanningPanel />}
 
@@ -87,7 +123,7 @@ export function FinanceAnaliseTab({ subTab, onSubTabChange }: Props)
                 <Panel key={goal.id}>
                   <View style={{ gap: 12 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
-                      <Text variant="section" numberOfLines={1} style={{ flex: 1, fontSize: 18, lineHeight: 26 }}>{goal.titulo}</Text>
+                      <Text variant="section" numberOfLines={1} style={{ flex: 1, fontSize: 19, lineHeight: 26 }}>{goal.titulo}</Text>
                       <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 36, color: colors.ink }}>{pct}%</Text>
                     </View>
                     <View style={{ height: 8, borderRadius: radius.pill, backgroundColor: colors.hairline, overflow: 'hidden' }}>

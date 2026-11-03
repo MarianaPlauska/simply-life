@@ -23,6 +23,7 @@ venv/
 # Build outputs
 frontend/dist/
 frontend/coverage/
+test-results/
 *.log
 
 # IDE

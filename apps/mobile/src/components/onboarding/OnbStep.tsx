@@ -17,10 +17,12 @@ type Props = {
   onSkip?: () => void
   skipLabel?: string
   onBack?: () => void
+  /** Veio do resumo: o botão volta para lá, sem percorrer os outros passos. */
+  reviewing?: boolean
 }
 
 /**
- * Moldura de cada passo das boas-vindas: progresso fino, título Fraunces,
+ * Moldura de cada passo das boas-vindas: progresso fino, título,
  * conteúdo e rodapé fixo (Continuar em coral, Pular e Voltar discretos).
  */
 export function OnbStep({
@@ -37,10 +39,12 @@ export function OnbStep({
   onSkip,
   skipLabel = 'Pular',
   onBack,
+  reviewing,
 }: Props)
 {
   const { colors, space, radius, mode } = useTheme()
   const done = mode === 'dark' ? colors.brandInk : colors.brand
+  const actionLabel = reviewing ? 'Voltar ao resumo' : nextLabel
 
   return (
     <View style={{ gap: space.lg }}>
@@ -68,7 +72,7 @@ export function OnbStep({
       </View>
 
       <View style={{ gap: space.xs }}>
-        <Text variant="hero" style={{ fontSize: 26, lineHeight: 34, letterSpacing: -0.25 }}>
+        <Text variant="hero" style={{ fontSize: 28, lineHeight: 34, letterSpacing: -0.25 }}>
           {title}
         </Text>
         {subtitle ? (
@@ -81,7 +85,7 @@ export function OnbStep({
       <View style={{ gap: space.md }}>{children}</View>
 
       <View style={{ gap: space.sm, marginTop: space.sm }}>
-        <PrimaryButton label={nextLabel} disabled={!canNext} loading={loading} onPress={onNext} />
+        <PrimaryButton label={actionLabel} disabled={!canNext} loading={loading} onPress={onNext} />
         <View style={{ flexDirection: 'row', justifyContent: onBack ? 'space-between' : 'center', alignItems: 'center' }}>
           {onBack ? <PrimaryButton label="Voltar" variant="link" size="sm" icon="chevron-back" onPress={onBack} /> : null}
           {onSkip ? <PrimaryButton label={skipLabel} variant="link" size="sm" onPress={onSkip} /> : null}

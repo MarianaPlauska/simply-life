@@ -83,10 +83,16 @@ export function eloSegundaDe(iso: string): string
 
 export function calcularElo(
   diasCumpridos: Iterable<string>,
-  opts: { ref?: Date; recordeSalvo?: number } = {},
+  opts: { ref?: Date; recordeSalvo?: number; proteger?: Iterable<string> } = {},
 ): EloResumo
 {
   const hoje = localTodayIso(opts.ref ?? new Date())
+  const proteger = new Set<string>()
+  for (const raw of opts.proteger ?? [])
+  {
+    const iso = String(raw ?? '').slice(0, 10)
+    if (ISO_RE.test(iso)) proteger.add(iso)
+  }
   const set = new Set<string>()
   for (const raw of diasCumpridos)
   {
@@ -99,6 +105,7 @@ export function calcularElo(
   const inicio = set.size ? [...set].sort()[0]! : null
   let recorde = 0
   let run = 0
+  const livres = new Set<string>()
   if (inicio)
   {
     let semana = ''
@@ -121,10 +128,16 @@ export function calcularElo(
       {
         st = 'pendente'
       }
+      else if (proteger.has(iso))
+      {
+        // descanso extra do modo burnout: não gasta o descanso livre da semana
+        st = 'descanso'
+      }
       else if (!descansoNaSemana)
       {
         st = 'descanso'
         descansoNaSemana = true
+        livres.add(iso)
       }
       else
       {
@@ -148,7 +161,7 @@ export function calcularElo(
   for (let iso = segunda; iso <= hoje; iso = eloSomarDias(iso, 1))
   {
     if (dias[iso] === 'cumprido') cumpridosNaSemana += 1
-    if (dias[iso] === 'descanso') descansoUsadoNestaSemana = true
+    if (livres.has(iso)) descansoUsadoNestaSemana = true
   }
 
   const atual = run
@@ -157,7 +170,7 @@ export function calcularElo(
     atual,
     recorde: Math.max(recorde, atual, Math.max(0, Math.floor(opts.recordeSalvo ?? 0))),
     cumpridoHoje,
-    emRisco: atual > 0 && !cumpridoHoje && descansoUsadoNestaSemana,
+    emRisco: atual > 0 && !cumpridoHoje && descansoUsadoNestaSemana && !proteger.has(hoje),
     descansoUsadoNestaSemana,
     cumpridosNaSemana,
     hoje,

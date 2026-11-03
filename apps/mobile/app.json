@@ -2,10 +2,19 @@
   "expo": {
     "name": "SunFy",
     "slug": "simply-life",
-    "version": "1.0.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "owner": "marianaplauska",
+    "extra": {
+      "eas": {
+        "projectId": "71a668d6-d410-4b6f-83c5-2d58723bd183"
+      }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/71a668d6-d410-4b6f-83c5-2d58723bd183"
     },
     "scheme": "simplylife",
     "userInterfaceStyle": "automatic",
@@ -21,7 +30,8 @@
         "backgroundColor": "#1F3A3D"
       },
       "package": "app.sunfy",
-      "versionCode": 1
+      "versionCode": 1,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
@@ -41,7 +51,7 @@
           "backgroundColor": "#1F3A3D",
           "dark": {
             "image": "./assets/splash-icon.png",
-            "backgroundColor": "#111615"
+            "backgroundColor": "#1F3A3D"
           }
         }
       ],
@@ -60,7 +70,31 @@
           "defaultChannel": "default"
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "O SunFy coloca na agenda do celular o que você marcar para amanhã."
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "SunFyHoje",
+              "label": "SunFy - Hoje",
+              "description": "Água, humor e próxima tarefa sem abrir o app",
+              "minWidth": "250dp",
+              "minHeight": "160dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

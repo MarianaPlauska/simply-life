@@ -25,17 +25,24 @@ import { useDataStore } from '../src/store/dataStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { ExecuteTimerFace } from '../src/components/timer/ExecuteTimerFace'
 import { useNeuroStore } from '../src/store/neuroStore'
+import { useCareExtrasStore } from '../src/store/careExtrasStore'
 import { useCalendarStore } from '../src/store/calendarStore'
 import { useActionableTasks } from '../src/hooks/useActionableTasks'
 import { cancelFocusEnd, scheduleFocusEnd } from '../src/lib/pushNotifications'
 import { hapticLight } from '../src/lib/haptics'
 import { useTimeLearning } from '../src/lib/timeLearning'
+import { BodyCheckRow } from '../src/components/care/BodyCheckRow'
+import { SilentFocusRow } from '../src/components/care/SilentFocusRow'
+import { useCircleStore } from '../src/store/circleStore'
 
 const PRESETS = [10, 15, 25, 30, 45, 60]
 
 export default function FocoScreen()
 {
   const { colors } = useTheme()
+  const [bodyOpen, setBodyOpen] = useState(false)
+  const buffer = useCareExtrasStore((s) => s.transitionBufferMin)
+  const friends = useCircleStore((s) => s.friends)
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const router = useRouter()
@@ -149,9 +156,15 @@ export default function FocoScreen()
   // o que vem depois (agenda + tarefas encaixadas): transição sem susto
   const upcoming = useMemo(() =>
   {
-    const day = buildVisualDay({ date: localTodayIso(), tasks, events: calendarEvents, estimateFactor })
+    const day = buildVisualDay({
+      date: localTodayIso(),
+      tasks,
+      events: calendarEvents,
+      estimateFactor,
+      transitionBufferMin: buffer,
+    })
     return nowAndNext(day, new Date(), 2).next.find((b) => b.taskId !== currentTask?.id) ?? null
-  }, [tasks, calendarEvents, estimateFactor, currentTask?.id])
+  }, [tasks, calendarEvents, estimateFactor, currentTask?.id, buffer])
   const taskMinutes = currentTask
     ? Math.max(5, Math.round((currentTask.estimativaMinutos || 25) * (1 - (currentTask.progresso || 0))
       * learnedFactorFor(currentTask.titulo, learning, estimateFactor) / 5) * 5)
@@ -262,6 +275,16 @@ export default function FocoScreen()
             <Icon name="close" size={16} color={colors.dismiss} />
           </Pressable>
         ) : null}
+
+        {milestone === 'hiperfoco' || bodyOpen ? (
+          <BodyCheckRow />
+        ) : (
+          <Pressable accessibilityRole="button" onPress={() => setBodyOpen(true)} style={{ minHeight: 44, justifyContent: 'center' }}>
+            <Text variant="body">Checar o corpo</Text>
+          </Pressable>
+        )}
+
+        <SilentFocusRow friends={friends} compact />
 
         {phase === 'focus' && durationSec > 0 ? (
           <Text variant="bodyStrong" accessibilityLiveRegion="polite">

@@ -3,6 +3,7 @@ import { useActivityStore } from '../store/activityStore'
 import { useNeuroStore } from '../store/neuroStore'
 import { useRewardPulseStore } from '../store/rewardPulseStore'
 import { hapticRestDone } from './haptics'
+import { fillAdventureEnergy } from './adventureEnergy'
 
 export const XP_TASK_DONE = 12
 
@@ -17,6 +18,7 @@ export function rewardTaskDone(titulo: string): void
   const xp = gam.grantXp(XP_TASK_DONE, 'Tarefa concluída', titulo)
   gam.unlockIf('first_task')
   useActivityStore.getState().markAction('task')
+  fillAdventureEnergy('task')
   hapticRestDone()
   if (useNeuroStore.getState().quietCelebrations) return
   useRewardPulseStore.getState().show({ title: 'Tarefa concluída', detail: titulo, xp })

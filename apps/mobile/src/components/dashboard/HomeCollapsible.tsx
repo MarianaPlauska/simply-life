@@ -28,15 +28,14 @@ export function HomeCollapsible({
 {
   const { colors, space } = useTheme()
   const [open, setOpen] = useState(defaultOpen)
-  const leftAccent = pillColor ?? colors.axel
-
   return (
     <Card
       tone="elevated"
       style={{
-        borderRadius: 20,
-        gap: open ? space.sm : space.xs,
-        padding: 20,
+        borderRadius: 16,
+        gap: open ? space.sm : 0,
+        paddingHorizontal: 16,
+        paddingVertical: 8,
       }}
     >
       <Pressable
@@ -48,45 +47,25 @@ export function HomeCollapsible({
           flexDirection: 'row',
           alignItems: 'center',
           gap: 12,
-          minHeight: 40,
+          minHeight: 48,
         }}
       >
-        <View
-          style={{
-            width: 3,
-            alignSelf: 'stretch',
-            borderRadius: 999,
-            backgroundColor: leftAccent,
-            minHeight: 28,
-          }}
-        />
-        <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
-          <Text variant="section" style={{ fontSize: 15 }}>
+        <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
+          <Text variant="body" style={{ fontSize: 16 }}>
             {title}
           </Text>
           {subtitle ? (
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 11 }}>
+            <Text variant="caption" muted numberOfLines={1}>
               {subtitle}
             </Text>
           ) : null}
         </View>
         {pill ? <StatusPill label={pill} color={pillColor ?? colors.axel} /> : null}
-        <View
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            backgroundColor: colors.fill,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Icon
-            name={open ? 'chevron-up' : 'chevron-down'}
-            size={16}
-            color={colors.inkMuted}
-          />
-        </View>
+        <Icon
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={colors.inkFaint}
+        />
       </Pressable>
 
       {open ? <View style={{ gap: space.sm }}>{children}</View> : null}

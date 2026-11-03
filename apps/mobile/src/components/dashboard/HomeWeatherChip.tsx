@@ -373,7 +373,7 @@ export function HomeWeatherChip({ compact = false }: Props)
                       minHeight: 48,
                       borderRadius: 14,
                       paddingHorizontal: 14,
-                      fontSize: 15,
+                      fontSize: 16,
                       color: colors.ink,
                       backgroundColor: colors.fill,
                     }}

@@ -10,7 +10,9 @@ import {
   moodGoalPeriodStats,
   type HumorRegistro,
 } from '@simply-life/shared'
-import { Text } from '../../ui'
+import { Text, GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { confirmDestructive } from '../../lib/confirmDestructive'
+import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { usePrefsStore } from '../../store/prefsStore'
@@ -48,8 +50,10 @@ function humorIso(h: HumorRegistro): string
 export function HealthDiaryTab()
 {
   const router = useRouter()
+  const { colors } = useTheme()
   const humor = useDataStore((s) => s.humor)
   const addHumor = useDataStore((s) => s.addHumor)
+  const clearHumorNote = useDataStore((s) => s.clearHumorNote)
   const waterWeekDays = useDataStore((s) => s.waterWeekDays)
   const sleepHours = useBodyWeekStore((s) => s.sleepHours)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -114,15 +118,30 @@ export function HealthDiaryTab()
     setNota('')
   }
 
+  const clearNote = (id: number) =>
+  {
+    confirmDestructive(
+      'Apagar este texto',
+      'O humor do dia fica. Só sai o que você escreveu.',
+      () =>
+      {
+        void clearHumorNote(id, isGuest)
+      },
+      'Apagar',
+    )
+  }
+
   const softMode = isSoftMoodDay(humor)
 
   const alertSlot = softMode ? (
-    <View style={{ gap: 8 }}>
-      <Text variant="bodyStrong">Modo suave ativo na aba Hoje</Text>
-      <Text variant="caption" muted>
-        Menos metas, mais espaço. Cuidados e apoio continuam nas outras abas.
-      </Text>
-    </View>
+    <GroupedList>
+      <GroupedRow
+        leading={<RowGlyph name="leaf" color={colors.health} />}
+        title="Modo suave ativo na aba Hoje"
+        subtitle="Menos metas, mais espaço. Cuidados e apoio continuam nas outras abas."
+        subtitleLines={2}
+      />
+    </GroupedList>
   ) : undefined
 
   const studioProps = {
@@ -135,6 +154,7 @@ export function HealthDiaryTab()
     onMood: (m: number) => void addHumor(m, nota.trim() || undefined, isGuest),
     onSaveNote: saveNote,
     onOpenNotes: () => router.push('/anotacoes'),
+    onClearNote: clearNote,
     total,
     slices,
     days: agregados,
@@ -171,6 +191,7 @@ export function HealthDiaryTab()
         onMood={(m) => void addHumor(m, nota.trim() || undefined, isGuest)}
         onSaveNote={saveNote}
         onOpenNotes={() => router.push('/anotacoes')}
+        onClearNote={clearNote}
         total={total}
         slices={slices}
         days={agregados}

@@ -1,5 +1,6 @@
 import { View } from 'react-native'
 import type { HeatCell } from '@simply-life/shared'
+import { useTheme } from '../../theme/ThemeProvider'
 
 type Props = {
   cells: HeatCell[]
@@ -10,6 +11,7 @@ type Props = {
 /** Quadriculado tipo GitHub: dias preenchidos na cor do hábito. */
 export function HabitHeatmap({ cells, color, rows = 4 }: Props)
 {
+  const { colors } = useTheme()
   const cols = Math.max(1, Math.ceil(cells.length / rows))
   const size = 8
   const gap = 2
@@ -29,7 +31,7 @@ export function HabitHeatmap({ cells, color, rows = 4 }: Props)
               ? 'transparent'
               : cell.filled
                 ? color
-                : 'rgba(168, 162, 158, 0.14)'
+                : colors.fill
             return (
               <View
                 key={cell.iso}

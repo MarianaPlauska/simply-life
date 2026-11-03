@@ -30,7 +30,7 @@ export function SiteSection({ title, subtitle, children }: { title: string; subt
   return (
     <View style={{ gap: 24, paddingTop: 40 }}>
       <View style={{ alignItems: 'center', gap: 8 }}>
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, color: colors.ink, textAlign: 'center' }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 38, color: colors.ink, textAlign: 'center' }}>
           {title}
         </Text>
         <View style={{ width: 40, height: 3, borderRadius: 2, backgroundColor: colors.axelFill }} />
@@ -72,7 +72,7 @@ function pillButton(
       })}
     >
       {icon ? <Icon name={icon} size={16} color={ink} /> : null}
-      <Text style={{ fontSize: 15, fontFamily: 'Lexend_600SemiBold', color: ink }}>{label}</Text>
+      <Text style={{ fontSize: 16, fontFamily: 'Lexend_600SemiBold', color: ink }}>{label}</Text>
     </WebHoverable>
   )
 }
@@ -248,7 +248,7 @@ export function SiteNumbers({ items }: { items: WebStatItem[] })
           >
             {(hovered: boolean) => (
               <>
-                <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, color: hovered && item.onPress ? item.color : colors.ink }}>
+                <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 38, color: hovered && item.onPress ? item.color : colors.ink }}>
                   {item.value}
                 </Text>
                 <Text variant="caption" muted>
@@ -316,7 +316,7 @@ export function SiteNotes({ wide = true }: { wide?: boolean })
               <View style={{ width: 10, height: 10, borderRadius: 999, backgroundColor: moodColor(h.humor) }} />
               <Text variant="caption" style={{ fontWeight: '700' }}>{moodLabel(h.humor)}</Text>
             </View>
-            <Text variant="body" numberOfLines={4} style={{ fontSize: 15, lineHeight: 22 }}>
+            <Text variant="body" numberOfLines={4} style={{ fontSize: 16, lineHeight: 22 }}>
               “{h.nota}”
             </Text>
             <Text variant="caption" muted>{when}</Text>
@@ -348,10 +348,10 @@ export function SiteCta()
       }}
     >
       <View style={{ gap: 8, flexShrink: 1 }}>
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, color: colors.onBrand }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 38, color: colors.onBrand }}>
           Amanhã começa hoje à noite
         </Text>
-        <Text style={{ fontSize: 16, lineHeight: 24, fontFamily: 'Lexend_400Regular', color: `${colors.onBrand}C7` }}>
+        <Text style={{ fontSize: 16, lineHeight: 36, fontFamily: 'Lexend_400Regular', color: `${colors.onBrand}C7` }}>
           Escolha as três coisas de amanhã em dois minutos e durma mais leve.
         </Text>
       </View>
@@ -400,7 +400,7 @@ export function SiteFooter()
       <View style={{ gap: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
           <BrandMark size={28} />
-          <SunFyWordmark color={colors.ink} style={{ fontFamily: 'Fraunces_500Medium', fontSize: 20, lineHeight: 26 }} />
+          <SunFyWordmark color={colors.ink} style={{ fontFamily: 'Fraunces_500Medium', fontSize: 19, lineHeight: 26 }} />
         </View>
         <Text variant="caption" muted style={{ maxWidth: 260 }}>
           Tarefas, saúde e dinheiro num lugar só, no seu ritmo.

@@ -32,7 +32,7 @@ export function StreakWeekRow({ cells }: Props)
         const future = cell.kind === 'future'
         return (
           <View key={cell.iso} style={{ flex: 1, alignItems: 'center', gap: 8 }}>
-            <Text variant="caption" muted style={{ fontSize: 11 }}>
+            <Text variant="caption" muted style={{ fontSize: 12 }}>
               {cell.label}
             </Text>
             <View

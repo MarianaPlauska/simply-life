@@ -11,9 +11,9 @@ export interface Medicamento
 export function demoMedicamentos(): Medicamento[]
 {
   return [
-    { id: 1, nome: 'Vitamina D', horario: '08:00', tomado: true },
-    { id: 2, nome: 'Ômega 3', horario: '12:00', tomado: false },
-    { id: 3, nome: 'Melatonina', horario: '22:00', tomado: false },
+    { id: 1, nome: 'Xarope de exemplo', horario: '09:40', tomado: true },
+    { id: 2, nome: 'Comprimido modelo', horario: '14:20', tomado: false },
+    { id: 3, nome: 'Spray de demonstração', horario: '19:05', tomado: false },
   ]
 }
 

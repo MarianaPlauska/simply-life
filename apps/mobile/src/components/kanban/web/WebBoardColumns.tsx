@@ -76,7 +76,7 @@ function BoardCard({ task, onToggle, onMove }: { task: MobileTask; onToggle: () 
                 LEX.regular,
                 {
                   flex: 1,
-                  fontSize: 15,
+                  fontSize: 16,
                   lineHeight: 21,
                   color: done ? colors.inkMuted : colors.ink,
                   textDecorationLine: done ? 'line-through' : 'none',
@@ -160,7 +160,7 @@ export function WebBoardColumns({
               borderBottomColor: g.id === 'vencido' && g.tasks.length > 0 ? colors.danger : colors.hairline,
             }}
           >
-            <Text numberOfLines={1} style={[LEX.medium, { fontSize: 15, lineHeight: 22, color: colors.ink, flexShrink: 1 }]}>
+            <Text numberOfLines={1} style={[LEX.medium, { fontSize: 16, lineHeight: 22, color: colors.ink, flexShrink: 1 }]}>
               {g.label}
             </Text>
             <Text style={[LEX.regular, { fontSize: 14, lineHeight: 20, color: colors.inkFaint }]}>{g.tasks.length}</Text>

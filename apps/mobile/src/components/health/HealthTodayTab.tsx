@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from 'react'
-import { View, StyleSheet } from 'react-native'
-import { useFocusEffect } from 'expo-router'
+import { View } from 'react-native'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import {
   findHabit,
@@ -10,15 +10,14 @@ import {
   moodLabel,
   isSoftMoodDay,
 } from '@simply-life/shared'
-import { Text, PressableScale, IconBadge, StatusPill } from '../../ui'
+import { Text, Card, GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { AxelSun } from '../AxelSun'
 import { MoodFaceRow } from '../MoodFace'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import type { CuidadosTab } from './healthNav'
 import { HealthSoftModeView } from './HealthSoftModeView'
-import { HealthScreenSection } from './HealthScreenSection'
-import { HealthAxelStrip } from './HealthAxelStrip'
 import { useCalmFabSuppressStore } from '../../store/calmFabSuppressStore'
 import { useModules } from '../../hooks/useModules'
 import { CARE_MODULE, CUIDADOS_SUB_TABS } from './healthNav'
@@ -56,6 +55,7 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   const addHumor = useDataStore((s) => s.addHumor)
   const isGuest = useAuthStore((s) => s.isGuest)
   const desk = useWebDesk()
+  const router = useRouter()
 
   const agua = findHabit(habits, 'agua')
   const proteina = findHabit(habits, 'proteina')
@@ -158,128 +158,103 @@ export function HealthTodayTab({ onGoCuidados, onGoApoio, onGoDiario }: Props)
   const moodHeadline = humorHoje ? moodLabel(humorHoje.humor) : 'Como você está?'
   const firstCare = CUIDADOS_SUB_TABS.find((t) => modules.on(CARE_MODULE[t.id]))?.id ?? 'hidratacao'
 
+  const tileColor: Record<CuidadosTab, string> = {
+    hidratacao: colors.health,
+    alimentacao: colors.finance,
+    sono: colors.tasks,
+    academia: colors.axelFill,
+    medicamentos: colors.attention,
+  }
+
+  // celular: check-in num cartão e o resto como listas do sistema (resumo estilo Fitbit/Health)
   return (
     <View style={{ gap: space.lg }}>
-      {/* 1. Agora: check-in de humor (ação principal), se usa o diário */}
       {modules.on('mood') ? (
-      <HealthScreenSection>
-        <View style={{ gap: 4 }}>
-          <Text variant="caption" muted>
-            {humorHoje ? 'Humor de hoje' : 'Check-in rápido'}
-          </Text>
-          <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.4 }}>
-            {moodHeadline}
-          </Text>
-          {!humorHoje ? (
+        <Card tone="elevated" style={{ gap: space.md, padding: 16 }}>
+          <View style={{ gap: 2 }}>
             <Text variant="caption" muted>
-              Toque se quiser registrar.
+              {humorHoje ? 'Humor de hoje' : 'Check-in rápido'}
             </Text>
-          ) : null}
-        </View>
-        <MoodFaceRow
-          value={humorHoje?.humor}
-          onChange={(m) => void addHumor(m, undefined, isGuest)}
-        />
-        <PressableScale onPress={onGoDiario} accessibilityRole="button">
-          <Text variant="caption" color={colors.axel} style={{ fontWeight: '600' }}>
-            Abrir diário completo
-          </Text>
-        </PressableScale>
-      </HealthScreenSection>
+            <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>
+              {moodHeadline}
+            </Text>
+          </View>
+          <MoodFaceRow
+            value={humorHoje?.humor}
+            onChange={(m) => void addHumor(m, undefined, isGuest)}
+          />
+        </Card>
       ) : null}
 
-      {/* 2. Registros pendentes, só o que falta */}
-      {pendingTiles.length > 0 ? (
-        <HealthScreenSection
-          dividerTop
-          title="Se quiser registrar"
-          subtitle="Só o que fizer sentido agora"
-        >
-          {pendingTiles.slice(0, 2).map((tile, index, arr) =>
-          {
-            const { pillLabel, done } = tileDetail(tile)
-            const last = index === arr.length - 1
-            return (
-              <PressableScale key={tile.id} onPress={() => onGoCuidados(tile.id)}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: space.md,
-                    paddingVertical: 12,
-                    borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
-                    borderBottomColor: colors.hairline,
-                  }}
-                >
-                  <IconBadge
-                    name={tile.icon}
-                    color={colors.health}
-                    size={40}
-                    iconSize={20}
-                  />
-                  <View style={{ flex: 1, gap: 8, minWidth: 0 }}>
-                    <Text variant="bodyStrong">{tile.label}</Text>
-                    <StatusPill
-                      label={pillLabel}
-                      color={done ? colors.health : colors.axel}
-                    />
-                  </View>
-                  <Icon name="chevron-forward" size={18} color={colors.inkFaint} />
-                </View>
-              </PressableScale>
-            )
-          })}
-        </HealthScreenSection>
-      ) : (
-        <HealthScreenSection dividerTop>
-          <Text variant="bodyStrong">Você já registrou o essencial hoje</Text>
-          <Text variant="caption" muted>
-            Pode descansar ou revisar no diário quando quiser.
-          </Text>
-        </HealthScreenSection>
-      )}
+      <View style={{ gap: 8 }}>
+        <Text variant="caption" muted style={{ marginLeft: 4 }}>
+          {pendingTiles.length > 0 ? 'Se quiser registrar' : 'Hoje'}
+        </Text>
+        <GroupedList>
+          {pendingTiles.length > 0
+            ? pendingTiles.slice(0, 2).map((tile) =>
+            {
+              const { pillLabel } = tileDetail(tile)
+              return (
+                <GroupedRow
+                  key={tile.id}
+                  leading={<RowGlyph name={tile.icon} color={tileColor[tile.id]} />}
+                  title={tile.label}
+                  value={pillLabel}
+                  onPress={() => onGoCuidados(tile.id)}
+                />
+              )
+            })
+            : (
+              <GroupedRow
+                leading={<RowGlyph name="checkmark-circle" color={colors.health} />}
+                title="Você já registrou o essencial hoje"
+                subtitle="Pode descansar ou revisar no diário quando quiser"
+              />
+            )}
+          {anyCare ? (
+            <GroupedRow
+              leading={<RowGlyph name="leaf" color={colors.health} />}
+              title="Ver todos os cuidados"
+              onPress={() => onGoCuidados(firstCare)}
+            />
+          ) : null}
+        </GroupedList>
+      </View>
 
-      {/* 3. Referência: mensagem do AXEL, todos os cuidados e apoio */}
-      <HealthScreenSection dividerTop>
-        <HealthAxelStrip
-          message={lastAxelCare || 'Sem pressa. Um passo de cada vez já conta.'}
-        />
-        {anyCare ? (
-        <PressableScale
-          onPress={() => onGoCuidados(firstCare)}
-          accessibilityRole="button"
-          style={{
-            minHeight: 48,
-            paddingHorizontal: space.md,
-            borderRadius: 999,
-            borderWidth: 1.5,
-            borderColor: colors.health,
-            backgroundColor: 'transparent',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 12,
-          }}
-        >
-          <Icon name="leaf-outline" size={18} color={colors.health} />
-          <Text variant="bodyStrong" color={colors.health}>
-            Ver todos os cuidados
-          </Text>
-        </PressableScale>
-        ) : null}
-
-        {modules.on('support') ? (
-          <PressableScale onPress={onGoApoio} accessibilityRole="button">
-            <Text variant="caption" muted style={{ textAlign: 'center' }}>
-              Precisa de apoio? CVV, TCC e foco estão na aba Apoio.
-            </Text>
-          </PressableScale>
-        ) : (
-          <Text variant="caption" muted style={{ textAlign: 'center' }}>
-            Em sofrimento intenso, ligue para o CVV: 188, de graça, 24 horas.
-          </Text>
-        )}
-      </HealthScreenSection>
+      <View style={{ gap: 8 }}>
+        <Text variant="caption" muted style={{ marginLeft: 4 }}>Mais</Text>
+        <GroupedList>
+          <GroupedRow
+            leading={<RowGlyph color="transparent"><AxelSun size={30} mood="calm" /></RowGlyph>}
+            title="Seu AXEL"
+            subtitle={lastAxelCare || 'Quem sugere o próximo passo. Toque para ver o jogo e os ícones.'}
+            subtitleLines={2}
+            onPress={() => router.push('/seu-axel')}
+          />
+          {modules.on('mood') ? (
+            <GroupedRow
+              leading={<RowGlyph name="book" color={colors.finance} />}
+              title="Abrir diário completo"
+              onPress={onGoDiario}
+            />
+          ) : null}
+          {modules.on('support') ? (
+            <GroupedRow
+              leading={<RowGlyph name="heart" color={colors.dismiss} />}
+              title="Precisa de apoio?"
+              subtitle="CVV, TCC e foco"
+              onPress={onGoApoio}
+            />
+          ) : (
+            <GroupedRow
+              leading={<RowGlyph name="call" color={colors.dismiss} />}
+              title="Em sofrimento intenso, ligue 188"
+              subtitle="CVV, de graça, 24 horas"
+            />
+          )}
+        </GroupedList>
+      </View>
     </View>
   )
 }

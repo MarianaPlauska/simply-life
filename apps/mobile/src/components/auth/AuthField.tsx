@@ -33,7 +33,7 @@ export function AuthField({
       <Text
         variant="label"
         color={focused ? colors.axel : colors.inkMuted}
-        style={{ letterSpacing: 0.8, textTransform: 'uppercase', fontSize: 11 }}
+        style={{ letterSpacing: 0.8, textTransform: 'uppercase', fontSize: 12 }}
       >
         {label}
       </Text>

@@ -8,12 +8,12 @@ import {
   humorDoDia,
   type MobileTask,
 } from '@simply-life/shared'
-import { Text, Card, PrimaryButton } from '../../ui'
+import { Text, Card, PrimaryButton, GroupedList, GroupedRow, RowGlyph, Icon } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { usePrefsStore } from '../../store/prefsStore'
 import { useWorkspace } from '../../layout/useWorkspace'
-import { AxelSun } from '../AxelSun'
+import { AxelFaceSun } from '../play/AxelFaceSun'
 import { useInPanel } from '../../ui/Panel'
 import { useWebDesk } from './web/webBox'
 
@@ -58,15 +58,65 @@ export function AxelDayBrief()
 
   const primaryStep = brief.nextSteps[0]
   const open = !collapsed
-  const sunMood = moodLevel != null && moodLevel <= 2
-    ? 'care'
-    : moodLevel != null && moodLevel >= 4
-      ? 'happy'
-      : 'calm'
 
   const toggleOpen = () =>
   {
     void patchPrefs({ axel_home_collapsed: open })
+  }
+
+  // celular: lista no padrão do sistema, sem caixa própria com botões de texto
+  if (!desk && !inPanel)
+  {
+    return (
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph color="transparent"><AxelFaceSun size={32} /></RowGlyph>}
+          title={brief.headline}
+          subtitle={brief.voice}
+          subtitleLines={2}
+          onPress={() => setDetails((v) => !v)}
+          chevron={false}
+          trailing={<Icon name={details ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkFaint} />}
+        />
+        {primaryStep ? (
+          <GroupedRow
+            leading={<RowGlyph name="sparkles" color={colors.health} />}
+            title={primaryStep}
+            subtitle="Próximo passo"
+            onPress={() =>
+            {
+              if (brief.focusTaskId)
+              {
+                router.push(`/task/${brief.focusTaskId}`)
+                return
+              }
+              router.push('/(tabs)/saude')
+            }}
+          />
+        ) : null}
+        {details ? (
+          <GroupedRow
+            leading={<RowGlyph name="checkbox" color={colors.tasks} />}
+            title="Tarefas"
+            onPress={() => router.push('/(tabs)/kanban')}
+          />
+        ) : null}
+        {details ? (
+          <GroupedRow
+            leading={<RowGlyph name="heart" color={colors.health} />}
+            title="Saúde"
+            onPress={() => router.push('/(tabs)/saude')}
+          />
+        ) : null}
+        {details ? (
+          <GroupedRow
+            leading={<RowGlyph name="wallet" color={colors.finance} />}
+            title="Carteira"
+            onPress={() => router.push('/(tabs)/financeiro')}
+          />
+        ) : null}
+      </GroupedList>
+    )
   }
 
   return (
@@ -82,7 +132,7 @@ export function AxelDayBrief()
         accessibilityLabel={open ? 'Fechar Axel' : 'Abrir Axel'}
         style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}
       >
-        <AxelSun size={40} mood={sunMood} />
+        <AxelFaceSun size={40} />
         <View style={{ flex: 1, gap: 2, minWidth: 0 }}>
           <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
             Axel
@@ -98,7 +148,7 @@ export function AxelDayBrief()
 
       {open ? (
         <>
-          <Text variant="body" style={{ fontSize: 15, lineHeight: 22 }} numberOfLines={details ? 6 : 3}>
+          <Text variant="body" style={{ fontSize: 16, lineHeight: 22 }} numberOfLines={details ? 6 : 3}>
             {brief.voice}
           </Text>
 
@@ -113,7 +163,7 @@ export function AxelDayBrief()
               <Text variant="caption" muted>
                 Próximo
               </Text>
-              <Text variant="bodyStrong" style={{ fontSize: 15, lineHeight: 22 }}>
+              <Text variant="bodyStrong" style={{ fontSize: 16, lineHeight: 22 }}>
                 {primaryStep}
               </Text>
             </View>
@@ -180,7 +230,7 @@ export function ProgressPanel()
   return (
     <Card tone="elevated" style={{ gap: space.sm, borderRadius: 14, padding: 12 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text variant="section" style={{ fontSize: 15 }}>
+        <Text variant="section" style={{ fontSize: 16 }}>
           Hidratação
         </Text>
         <PrimaryButton
@@ -190,7 +240,7 @@ export function ProgressPanel()
           onPress={() => router.push('/(tabs)/saude')}
         />
       </View>
-      <Text variant="title" color={colors.health} style={{ fontSize: 22 }}>
+      <Text variant="title" color={colors.health} style={{ fontSize: 24 }}>
         {agua ? `${agua.progressoAtual}/${agua.metaDiaria}` : '-'} · {pct}%
       </Text>
     </Card>

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { Redirect, usePathname } from 'expo-router'
 import { ActivityIndicator, View } from 'react-native'
 import { useAuthStore } from '../../store/authStore'
@@ -13,10 +13,24 @@ export function SetupGuard({ children }: { children: ReactNode })
   const mfaPending = useAuthStore((s) => s.mfaPendingFactorId)
   const loaded = usePrefsStore((s) => s.loaded)
   const setupAt = usePrefsStore((s) => s.prefs.setup_completed_at)
+  // logo após o login as prefs podem vir do aparelho, sem o setup feito na conta:
+  // confere de novo no servidor antes de mandar para as boas-vindas
+  const [confirmed, setConfirmed] = useState<'pending' | 'done' | 'missing'>('pending')
+
+  useEffect(() =>
+  {
+    if (!loaded || setupAt || confirmed !== 'pending') return
+    void Promise.race([
+      usePrefsStore.getState().hydrate(),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), 12000)),
+    ])
+      .then((p) => setConfirmed(p?.setup_completed_at ? 'done' : 'missing'))
+      .catch(() => setConfirmed('missing'))
+  }, [loaded, setupAt, confirmed])
 
   if (mfaPending) return <Redirect href="/login" />
 
-  if (!loaded)
+  if (!loaded || (!setupAt && confirmed === 'pending'))
   {
     return (
       <View
@@ -32,7 +46,7 @@ export function SetupGuard({ children }: { children: ReactNode })
     )
   }
 
-  if (loaded && !setupAt && pathname !== '/setup')
+  if (!setupAt && confirmed === 'missing' && pathname !== '/setup')
   {
     return <Redirect href="/setup" />
   }

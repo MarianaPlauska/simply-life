@@ -115,7 +115,7 @@ export function KanbanDateStrip({ days, selectedIso, onSelect }: Props)
             <Text
               variant="bodyStrong"
               style={{
-                fontSize: 18,
+                fontSize: 19,
                 color: active ? colors.axelOnFill : colors.ink,
               }}
             >

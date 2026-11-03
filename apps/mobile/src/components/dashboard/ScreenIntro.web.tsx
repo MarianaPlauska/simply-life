@@ -25,16 +25,16 @@ export function ScreenIntro({
   return (
     <View style={{ gap: space.sm }}>
       {showRail ? (
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 30, lineHeight: 38, letterSpacing: -0.4 }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 38, letterSpacing: -0.4 }}>
           {title}
         </Text>
       ) : (
-        <Text variant="hero">
+        <Text variant="section" style={{ fontSize: 28, lineHeight: 34 }}>
           {title}
         </Text>
       )}
       {subtitle ? (
-        <Text variant="body" muted style={{ maxWidth: 600 }}>
+        <Text variant="caption" muted style={{ maxWidth: 600 }}>
           {subtitle}
         </Text>
       ) : null}

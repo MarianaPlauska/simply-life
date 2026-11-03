@@ -24,7 +24,7 @@ export function KanbanFolderCard({ scope, onPress, onToggle }: Props)
   const { colors, mode } = useTheme()
   const complete = scope.total > 0 && scope.open === 0
   const days = daysUntilDue(scope.latestDue)
-  const cardBg = mode === 'dark' ? 'rgba(28, 28, 30, 0.72)' : colors.elevated
+  const cardBg = colors.elevated
 
   return (
     <Pressable

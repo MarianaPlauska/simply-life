@@ -12,7 +12,7 @@ type Props = {
 
 export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
 {
-  const { space } = useTheme()
+  const { colors, space } = useTheme()
   const groups = groupDecisionsByKind(events)
 
   return (
@@ -21,7 +21,7 @@ export function KanbanDecisionLogSheet({ visible, events, onClose }: Props)
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(26, 24, 22, 0.72)',
+          backgroundColor: colors.overlay,
           justifyContent: 'flex-end',
         }}
       >

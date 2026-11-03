@@ -317,7 +317,7 @@ export default function ComidaScreen()
               returnKeyType="done"
               onSubmitEditing={() => void save()}
               accessibilityLabel="O que você comeu"
-              style={{ flex: 1, minHeight: 48, color: colors.ink, fontFamily: 'Lexend_400Regular', fontSize: 15 }}
+              style={{ flex: 1, minHeight: 48, color: colors.ink, fontFamily: 'Lexend_400Regular', fontSize: 16 }}
             />
             <Pressable
               onPress={() => setScanOpen(true)}

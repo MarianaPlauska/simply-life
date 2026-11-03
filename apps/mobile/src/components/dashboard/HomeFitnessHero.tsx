@@ -8,6 +8,9 @@ import { useWorkspace } from '../../layout/useWorkspace'
 import { HomeWeatherChip } from './HomeWeatherChip'
 import { CircleCornerButton } from '../social/CircleCornerButton'
 import { ProfileAvatarBadge } from '../social/ProfileAvatarBadge'
+import { HomeXpBar } from '../play/HomeXpBar'
+import { HomePlay } from '../play/HomePlay'
+import { HomeSearchButton } from './HomeSearchButton'
 
 type Props = {
   greet: string
@@ -55,12 +58,15 @@ export function HomeFitnessHero({
           <Text
             variant="hero"
             numberOfLines={1}
-            style={{ fontSize: 26, letterSpacing: -0.5, lineHeight: 34 }}
+            style={{ fontSize: 28, letterSpacing: -0.5, lineHeight: 34 }}
           >
             {title}
           </Text>
         </View>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <HomeXpBar />
+        <HomePlay />
+        <HomeSearchButton />
         <CircleCornerButton size={SIDE} />
         <PressableScale
           onPress={onAccount}
@@ -71,15 +77,30 @@ export function HomeFitnessHero({
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
+            backgroundColor: colors.elevated,
             ...elevation.card,
           }}
         >
+          <ProfileAvatarBadge size={SIDE} />
           {isAdmin ? (
-            <Icon name="shield-checkmark" size={16} color={colors.axel} />
-          ) : (
-            <ProfileAvatarBadge size={SIDE} />
-          )}
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 18,
+                height: 18,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.axelFill,
+                borderWidth: 2,
+                borderColor: colors.canvas,
+              }}
+            >
+              <Icon name="shield-checkmark" size={10} color={colors.axelOnFill} />
+            </View>
+          ) : null}
         </PressableScale>
         </View>
       </View>
@@ -89,20 +110,17 @@ export function HomeFitnessHero({
   // Celular: leitura de cima para baixo, alinhada à esquerda. Data pequena e saudação
   // formam um grupo só; a conta fica no canto, fora do grupo.
   return (
-    <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
-        <View style={{ flex: 1, minWidth: 0, gap: space.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
-            <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
-              {dateLabel}
-            </Text>
-            <HomeWeatherChip compact />
-          </View>
-          <Text variant="title" numberOfLines={2}>
-            {title}
+    <View style={{ paddingTop: topPad, gap: space.sm, marginBottom: space.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+        <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
+          <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
+            {dateLabel}
           </Text>
+          <HomeWeatherChip compact />
         </View>
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <HomePlay />
+        <HomeSearchButton />
         <CircleCornerButton />
         <PressableScale
           onPress={onAccount}
@@ -113,17 +131,38 @@ export function HomeFitnessHero({
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
+            backgroundColor: colors.elevated,
             ...elevation.card,
           }}
         >
+          <ProfileAvatarBadge size={44} />
           {isAdmin ? (
-            <Icon name="shield-checkmark" size={18} color={colors.axel} />
-          ) : (
-            <ProfileAvatarBadge size={44} />
-          )}
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 18,
+                height: 18,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.axelFill,
+                borderWidth: 2,
+                borderColor: colors.canvas,
+              }}
+            >
+              <Icon name="shield-checkmark" size={10} color={colors.axelOnFill} />
+            </View>
+          ) : null}
         </PressableScale>
         </View>
+      </View>
+      <Text variant="section" numberOfLines={2} style={{ fontSize: 24, lineHeight: 30 }}>
+        {title}
+      </Text>
+      <View style={{ maxWidth: 220 }}>
+        <HomeXpBar />
       </View>
       <SyncHint />
     </View>

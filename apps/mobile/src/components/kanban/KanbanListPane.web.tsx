@@ -188,7 +188,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                 paddingHorizontal: 14,
                 color: colors.ink,
                 backgroundColor: colors.surface,
-                fontSize: 15,
+                fontSize: 16,
               }}
               onSubmitEditing={() =>
               {
@@ -315,7 +315,7 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
                     backgroundColor: p.tint,
                   }}
                 >
-                  <Text variant="caption" style={{ color: p.ink, fontWeight: '700', fontSize: 11 }}>
+                  <Text variant="caption" style={{ color: p.ink, fontWeight: '700', fontSize: 12 }}>
                     {p.label} ({list.length})
                   </Text>
                 </View>

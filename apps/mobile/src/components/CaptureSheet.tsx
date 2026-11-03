@@ -67,6 +67,8 @@ import { useNotesStore } from '../store/notesStore'
 import { DumpReview, dumpItemsMissingValue, dumpSummary } from './DumpReview'
 import { readDumpLocally, refineDumpWithAi } from '../lib/dumpCaptureApi'
 import { evaluateSpend, guardSpend } from '../lib/spendGuard'
+import { useCareExtrasStore } from '../store/careExtrasStore'
+import { shouldHoldImpulse } from '@simply-life/shared'
 import { useMonthProjection } from './finance/FinanceForecastCards'
 import { SpendGuardHost } from './finance/SpendGuardHost'
 
@@ -78,9 +80,9 @@ const TABS: { id: CaptureKind; label: string }[] = [
 ]
 
 const PLACEHOLDERS: Record<CaptureKind, string> = {
-  dump: 'Uma coisa por linha. Ex.: dentista amanhã 9h, café 12,50, lembrar mãe de pagar conta',
+  dump: 'Uma coisa por linha. Ex.: devolver o livro amanhã 16h, lanche 8,00, lembrar de levar a garrafa',
   task: 'O que precisa ser feito?',
-  expense: 'Ex: café 12,50',
+  expense: 'Ex: lanche 8,00',
   note: 'Escreva o que ficou do dia',
 }
 
@@ -447,7 +449,7 @@ export function CaptureSheet()
         const parsed = parseExpenseQuick(text)
         if (!parsed)
         {
-          setError(lancamento === 'receita' ? 'Informe valor, ex: salário 4500' : 'Informe valor, ex: café 12,50')
+          setError(lancamento === 'receita' ? 'Informe valor, ex: reembolso 75' : 'Informe valor, ex: lanche 8,00')
           setSaving(false)
           return
         }
@@ -488,6 +490,28 @@ export function CaptureSheet()
           const seguir = await guardSpend({ launches: plan, cardId: pagamento === 'cartao' ? cardId : null, host: 'capture' })
           if (!seguir)
           {
+            setSaving(false)
+            return
+          }
+          const planejado = plan.length > 1 || salvarFixa || recorrencia !== 'nenhuma'
+          const care = useCareExtrasStore.getState()
+          if (shouldHoldImpulse(care.impulseEnabled, care.impulseThreshold, {
+            titulo,
+            valor: parsed.valor,
+            planejado,
+          }))
+          {
+            care.pushHold({
+              titulo,
+              valor: parsed.valor,
+              data,
+              categoria,
+              cardId: pagamento === 'cartao' ? cardId : null,
+              forma: pagamento === 'cartao' ? 'cartao' : pagamento === 'boleto' ? 'boleto' : 'debito',
+              folderId: folderId ?? null,
+            })
+            setSavedLabel('Guardado por 24 horas. A decisão fica na Carteira, em Análise.')
+            setSaved(true)
             setSaving(false)
             return
           }

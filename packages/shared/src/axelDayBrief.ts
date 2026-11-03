@@ -29,6 +29,8 @@ export type AxelDayBriefResult = {
   chips: string[]
   moodTone: AxelMoodTone
   moodLevel: MoodLevel | null
+  /** Tarefa do primeiro passo, quando o passo é uma tarefa de verdade. */
+  focusTaskId: string | null
 }
 
 function clampMood(level?: number | null): MoodLevel | null
@@ -193,5 +195,6 @@ export function buildAxelDayBrief(input: AxelDayBriefInput): AxelDayBriefResult
     chips: chips.slice(0, 3),
     moodTone,
     moodLevel,
+    focusTaskId: topTask?.id ?? null,
   }
 }

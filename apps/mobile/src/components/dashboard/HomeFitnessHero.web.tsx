@@ -82,16 +82,31 @@ export function HomeFitnessHero({
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
+            backgroundColor: colors.elevated,
             borderWidth: 1,
             borderColor: colors.hairline,
           }}
         >
+          <ProfileAvatarBadge size={SIDE} />
           {isAdmin ? (
-            <Icon name="shield-checkmark" size={16} color={colors.axel} />
-          ) : (
-            <ProfileAvatarBadge size={SIDE} />
-          )}
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 18,
+                height: 18,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.axelFill,
+                borderWidth: 2,
+                borderColor: colors.canvas,
+              }}
+            >
+              <Icon name="shield-checkmark" size={10} color={colors.axelOnFill} />
+            </View>
+          ) : null}
         </PressableScale>
         </View>
       </View>
@@ -110,7 +125,7 @@ export function HomeFitnessHero({
             </Text>
             <HomeWeatherChip compact />
           </View>
-          <Text variant="title" numberOfLines={2}>
+          <Text variant="section" numberOfLines={2} style={{ fontSize: 24, lineHeight: 30 }}>
             {title}
           </Text>
         </View>
@@ -125,15 +140,30 @@ export function HomeFitnessHero({
             borderRadius: 999,
             alignItems: 'center',
             justifyContent: 'center',
-            backgroundColor: isAdmin ? colors.axelMuted : colors.elevated,
+            backgroundColor: colors.elevated,
             ...elevation.card,
           }}
         >
+          <ProfileAvatarBadge size={44} />
           {isAdmin ? (
-            <Icon name="shield-checkmark" size={18} color={colors.axel} />
-          ) : (
-            <ProfileAvatarBadge size={44} />
-          )}
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 18,
+                height: 18,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: colors.axelFill,
+                borderWidth: 2,
+                borderColor: colors.canvas,
+              }}
+            >
+              <Icon name="shield-checkmark" size={10} color={colors.axelOnFill} />
+            </View>
+          ) : null}
         </PressableScale>
         </View>
       </View>

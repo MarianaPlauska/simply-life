@@ -7,6 +7,7 @@ export type HomeMetricId =
   | 'finance'
   | 'goals'
   | 'stats'
+  | 'pledge'
 
 export const HOME_METRIC_CATALOG: {
   id: HomeMetricId
@@ -22,6 +23,7 @@ export const HOME_METRIC_CATALOG: {
   { id: 'finance', label: 'Gastos', hint: 'Mês + sparkline.', glanceId: 'g-finance' },
   { id: 'goals', label: 'Metas do dia', hint: 'Feitas / total.', glanceId: 'g-goals' },
   { id: 'stats', label: 'Desempenho', hint: 'Estatísticas e evolução semanal.', glanceId: 'g-stats' },
+  { id: 'pledge', label: 'Meta longa', hint: 'Dias de uma promessa.', glanceId: 'g-pledge' },
 ]
 
 export const DEFAULT_HOME_METRICS: HomeMetricId[] = ['humor', 'sleep', 'water', 'tasks']

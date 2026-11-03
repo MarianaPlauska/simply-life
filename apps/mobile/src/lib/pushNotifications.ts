@@ -37,6 +37,12 @@ export async function setNativeAndroidChannel(): Promise<void>
 {
 }
 
+/** Web não dispara aviso do sistema. */
+export async function sendTestAlert(): Promise<boolean>
+{
+  return false
+}
+
 /** Web: sem notificação local agendada (o card da noite aparece na Home). */
 export async function scheduleEveningPlanReminder(_hour: number, _minute: number): Promise<boolean>
 {
@@ -48,6 +54,14 @@ export async function cancelEveningPlanReminder(): Promise<void>
 }
 
 export async function scheduleMorningFirstStep(_when: Date, _firstStep: string): Promise<void>
+{
+}
+
+export async function scheduleCuriosityCard(): Promise<void>
+{
+}
+
+export async function cancelCuriosityCard(): Promise<void>
 {
 }
 
@@ -84,5 +98,10 @@ export async function scheduleTaskReminder(_input: {
 }
 
 export async function cancelTaskReminder(_id: string): Promise<void>
+{
+}
+
+/** No navegador o aviso chega pelo servidor, não por um alarme local. */
+export async function scheduleCadenceAlerts(_cadence: 'off' | 'once' | 'batch3'): Promise<void>
 {
 }

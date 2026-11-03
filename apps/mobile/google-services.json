@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "682364319686",
+    "project_id": "appsunfy",
+    "storage_bucket": "appsunfy.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682364319686:android:8d9ba6fbcb8601ca6a64c7",
+        "android_client_info": {
+          "package_name": "app.sunfy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASPQZhNC2jSlvSBMKDcckEaaapS08ME5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

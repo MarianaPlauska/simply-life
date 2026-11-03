@@ -389,8 +389,8 @@ export function WebHomeHero({
       }}
     >
       <View style={{ gap: 2, minWidth: 0 }}>
-        <Text style={{ fontSize: 14, lineHeight: 20, fontFamily: 'Lexend_500Medium', color: creamSoft }}>{greet},</Text>
-        <Text numberOfLines={1} style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 34, lineHeight: 42, color: cream }}>
+        <Text style={{ fontSize: 14, lineHeight: 42, fontFamily: 'Lexend_500Medium', color: creamSoft }}>{greet},</Text>
+        <Text numberOfLines={1} style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 32, lineHeight: 42, color: cream }}>
           {name}
         </Text>
       </View>

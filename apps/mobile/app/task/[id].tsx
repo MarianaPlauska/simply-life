@@ -139,7 +139,7 @@ export default function TaskDetailScreen()
               style={{
                 fontSize: 32,
                 letterSpacing: -0.8,
-                fontFamily: 'Fraunces_500Medium',
+                fontFamily: 'Lexend_600SemiBold',
               }}
             >
               Dashboard
@@ -190,7 +190,7 @@ export default function TaskDetailScreen()
                   style={{
                     fontSize: 52,
                     letterSpacing: -2,
-                    fontFamily: 'Fraunces_500Medium',
+                    fontFamily: 'Lexend_600SemiBold',
                   }}
                 >
                   {progress}%
@@ -226,7 +226,7 @@ export default function TaskDetailScreen()
                 <Text variant="caption" muted>
                   Semana atual
                 </Text>
-                <Text variant="bodyStrong" style={{ fontSize: 20, letterSpacing: -0.3 }}>
+                <Text variant="bodyStrong" style={{ fontSize: 19, letterSpacing: -0.3 }}>
                   {weekLabel()}
                 </Text>
               </View>
@@ -247,7 +247,7 @@ export default function TaskDetailScreen()
                 <Text
                   variant="bodyStrong"
                   style={{
-                    fontSize: 20,
+                    fontSize: 19,
                     letterSpacing: -0.3,
                     color: remaining != null && remaining < 0 ? colors.danger : colors.ink,
                   }}
@@ -271,7 +271,7 @@ export default function TaskDetailScreen()
               <Text variant="caption" muted>
                 Próximo prazo
               </Text>
-              <Text variant="bodyStrong" style={{ fontSize: 18, letterSpacing: -0.2 }}>
+              <Text variant="bodyStrong" style={{ fontSize: 19, letterSpacing: -0.2 }}>
                 {task.dataVencimento?.slice(0, 10) ?? 'Sem data definida'}
               </Text>
               <Text variant="caption" muted>

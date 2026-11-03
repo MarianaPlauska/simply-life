@@ -151,7 +151,7 @@ export function WebBodyMetrics()
               {row.label}
             </Text>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-              <Text variant="bodyStrong" style={{ fontSize: 15 }}>
+              <Text variant="bodyStrong" style={{ fontSize: 16 }}>
                 {row.value}
               </Text>
               <Text variant="micro" muted>

@@ -1,18 +1,23 @@
 import { useEffect } from 'react'
 import { View, ActivityIndicator, AppState, Platform } from 'react-native'
 import { Stack, usePathname } from 'expo-router'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { StatusBar } from 'expo-status-bar'
 import * as SplashScreen from 'expo-splash-screen'
 import * as NavigationBar from 'expo-navigation-bar'
 import { useFonts, Lexend_400Regular, Lexend_500Medium, Lexend_600SemiBold, Lexend_700Bold } from '@expo-google-fonts/lexend'
-import { Fraunces_500Medium, Fraunces_600SemiBold } from '@expo-google-fonts/fraunces'
+import { Fraunces_500Medium } from '@expo-google-fonts/fraunces'
 import { colorsFor } from '@simply-life/ui-tokens'
 import { ThemeProvider, useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { pingPresence } from '../src/lib/presence'
 import { useFocusPresence } from '../src/hooks/useFocusPresence'
 import { useGamificationStore } from '../src/store/gamificationStore'
+import { usePlayStore } from '../src/store/playStore'
+import { useLifePledgeStore } from '../src/store/lifePledgeStore'
+import { useHabitTrackStore } from '../src/store/habitTrackStore'
 import { useActivityStore } from '../src/store/activityStore'
+import { useCareExtrasStore } from '../src/store/careExtrasStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { readColorSchemeSync } from '../src/lib/sync/prefs'
 import { CelebrationOverlay } from '../src/components/dashboard/CelebrationOverlay'
@@ -21,6 +26,7 @@ import { TaskEvolveSheet } from '../src/components/kanban/TaskEvolveSheet'
 import { ConfirmDialogHost } from '../src/components/ConfirmDialogHost'
 import { SpendGuardHost } from '../src/components/finance/SpendGuardHost'
 import { usePushBootstrap } from '../src/hooks/usePushBootstrap'
+import { registerServiceWorker } from '../src/lib/webPush'
 import { useEloSync } from '../src/hooks/useEloSync'
 import { WebTopNav } from '../src/components/layout/WebTopNav'
 import { useWorkspace } from '../src/layout/useWorkspace'
@@ -29,7 +35,7 @@ import { useWorkspace } from '../src/layout/useWorkspace'
 void SplashScreen.preventAutoHideAsync().catch(() => undefined)
 
 /** Telas sem barra lateral: entrada, cadastro e telas de tela cheia */
-const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao', '/privacidade']
+const NO_SIDEBAR = ['/login', '/setup', '/auth', '/reset-password', '/join', '/parceiro', '/google-callback', '/tokens-preview', '/academia/sessao', '/privacidade', '/termos']
 
 function RootNavigator()
 {
@@ -38,9 +44,13 @@ function RootNavigator()
   const ready = useAuthStore((s) => s.ready)
   const prefsLoaded = usePrefsStore((s) => s.loaded)
   const hydrateXp = useGamificationStore((s) => s.hydrate)
+  const hydratePlay = usePlayStore((s) => s.hydrate)
+  const hydratePledges = useLifePledgeStore((s) => s.hydrate)
+  const hydrateHabits = useHabitTrackStore((s) => s.hydrate)
   const userId = useAuthStore((s) => s.userId)
   const isGuest = useAuthStore((s) => s.isGuest)
   const hydrateActivity = useActivityStore((s) => s.hydrate)
+  const hydrateCare = useCareExtrasStore((s) => s.hydrate)
   const markOpen = useActivityStore((s) => s.markOpen)
   usePushBootstrap()
   const pathname = usePathname()
@@ -52,8 +62,13 @@ function RootNavigator()
   {
     void hydrate()
     hydrateXp()
+    hydratePlay()
+    hydratePledges()
+    hydrateHabits()
     hydrateActivity()
-  }, [hydrate, hydrateXp, hydrateActivity])
+    void hydrateCare()
+    registerServiceWorker()
+  }, [hydrate, hydrateXp, hydratePlay, hydratePledges, hydrateHabits, hydrateActivity, hydrateCare])
 
   useEffect(() =>
   {
@@ -79,6 +94,19 @@ function RootNavigator()
     void NavigationBar.setBackgroundColorAsync(colors.navBg).catch(() => undefined)
     void NavigationBar.setButtonStyleAsync(mode === 'dark' ? 'light' : 'dark').catch(() => undefined)
   }, [mode, colors.navBg])
+
+  // O widget só ganha fundo quando o app redesenha. Abrir o app (ou voltar a ele) faz isso.
+  useEffect(() =>
+  {
+    if (Platform.OS !== 'android') return
+    const { refreshHomeWidget } = require('../src/widget/widgetSetup') as typeof import('../src/widget/widgetSetup')
+    refreshHomeWidget()
+    const sub = AppState.addEventListener('change', (state) =>
+    {
+      if (state === 'active') refreshHomeWidget()
+    })
+    return () => sub.remove()
+  }, [])
 
   // elo igual em todos os aparelhos, recorde e cartão público
   useEloSync()
@@ -135,6 +163,8 @@ function RootNavigator()
             <Stack.Screen name="perfil" />
             <Stack.Screen name="configuracoes" />
             <Stack.Screen name="axel/historico" />
+            <Stack.Screen name="seu-axel" />
+            <Stack.Screen name="mais-do-dia" />
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="preferencias" />
             <Stack.Screen
@@ -151,12 +181,18 @@ function RootNavigator()
               options={{ presentation: 'fullScreenModal', headerShown: false, animation: 'fade' }}
             />
             <Stack.Screen name="ofensiva" />
+            <Stack.Screen name="cartas" />
+            <Stack.Screen name="metas-vida" />
+            <Stack.Screen name="habitos" />
             <Stack.Screen name="relatorio" />
             <Stack.Screen name="juntos" />
             <Stack.Screen name="colecao" />
             <Stack.Screen name="desbloqueios" />
             <Stack.Screen name="calm/box-breathing" />
             <Stack.Screen name="calm/grounding" />
+            <Stack.Screen name="sobrecarga" />
+            <Stack.Screen name="lugares" />
+            <Stack.Screen name="apoio" />
             <Stack.Screen name="tcc/thought-record" />
             <Stack.Screen name="tcc/behavioral-activation" />
             <Stack.Screen name="tcc/gradual-exposure" />
@@ -192,7 +228,6 @@ export default function RootLayout()
     Lexend_600SemiBold,
     Lexend_700Bold,
     Fraunces_500Medium,
-    Fraunces_600SemiBold,
   })
 
   const splash = colorsFor(readColorSchemeSync() ?? 'light')
@@ -207,8 +242,10 @@ export default function RootLayout()
   }
 
   return (
-    <ThemeProvider>
-      <RootNavigator />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
+        <RootNavigator />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   )
 }

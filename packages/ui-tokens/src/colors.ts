@@ -106,12 +106,8 @@ export type ColorTokens = {
   attentionMuted: string
   done: string
   overlay: string
-  /** @deprecated use `featureBg` (mesmo valor) */
-  widget: string
-  /** @deprecated use `featureInk` */
-  widgetInk: string
-  /** @deprecated use `featureMuted` */
-  widgetMuted: string
+  /** Ícone sobre um preenchimento de cor de módulo (quadradinho de lista) */
+  glyphInk: string
   /** Barra de abas / sidebar: fundo */
   navBg: string
   /** Contorno fino da barra (claro); transparente no escuro */
@@ -146,24 +142,31 @@ export type ColorTokens = {
 }
 
 export const COLOR_DARK: ColorTokens = {
-  /** Escuro: profundidade por tom, um degrau visível por camada (sem sombra) */
-  canvas: '#111615',
-  chrome: '#1A2120',
-  surface: '#1A2120',
-  elevated: '#242E2D',
-  fill: '#2E3A38',
-  ink: '#EEF2F0',
-  inkMuted: '#A3B3AF',
-  inkFaint: '#8A9996',
-  hairline: '#33403E',
-  hairlineStrong: 'rgba(238, 242, 240, 0.22)',
-  cardRim: 'rgba(238, 242, 240, 0.07)',
+  /**
+   * Fundo mais fundo que o petróleo do logo (#1F3A3D), ainda verde-azulado.
+   * #122226 lia como preto. O modo claro não usa esta cor.
+   */
+  canvas: '#10282C',
+  chrome: '#244246',
+  surface: '#244246',
+  elevated: '#244246',
+  fill: '#2A4E52',
+  /** 9,6:1 no cartão */
+  ink: BRAND.creme,
+  /** 5,7:1 no cartão */
+  inkMuted: '#A9C2BC',
+  /** 4,8:1 no cartão */
+  inkFaint: '#8FB3AE',
+  hairline: '#4A6E72',
+  hairlineStrong: 'rgba(185, 207, 202, 0.40)',
+  cardRim: 'rgba(185, 207, 202, 0.32)',
   brand: BRAND.petroleo,
   brandInk: BRAND.menta,
   onBrand: '#EEF2F0',
-  brandDeep: '#152B2D',
-  brandMuted: BRAND.petroleo,
-  axel: BRAND.coral,
+  brandDeep: '#1A3336',
+  brandMuted: '#2F565A',
+  /** Coral clareado: 4,6:1 no cartão petróleo claro */
+  axel: '#F6A48A',
   axelFill: BRAND.coral,
   axelHover: '#C45A32',
   axelMuted: 'rgba(232, 115, 74, 0.18)',
@@ -175,45 +178,46 @@ export const COLOR_DARK: ColorTokens = {
   financeMuted: 'rgba(215, 183, 147, 0.16)',
   tasks: '#8DB2D6',
   tasksMuted: 'rgba(141, 178, 214, 0.16)',
-  /** Rosa-vermelho: erro não pode parecer botão */
-  danger: '#EC5B73',
+  /** Rosa-vermelho: erro não pode parecer botão (5,2:1 no cartão petróleo) */
+  danger: '#F48A9B',
   attention: '#E8B04B',
-  dangerMuted: 'rgba(236, 91, 115, 0.16)',
+  dangerMuted: 'rgba(244, 138, 155, 0.16)',
   attentionMuted: 'rgba(232, 176, 75, 0.16)',
   done: '#6CC79B',
-  overlay: 'rgba(0, 0, 0, 0.72)',
-  widget: '#242E2D',
-  widgetInk: '#EEF2F0',
-  widgetMuted: '#9FB0AC',
+  overlay: 'rgba(16, 40, 42, 0.62)',
+  glyphInk: '#102426',
+  /** Barra de abas na cor do logo, separada do fundo por um fio de menta */
   navBg: BRAND.petroleo,
-  navBorder: 'transparent',
+  navBorder: '#4A6E72',
   navInk: BRAND.menta,
-  /** Sem caixa: a aba ativa é ícone cheio, rótulo em negrito e o pontinho coral */
+  /** Sem caixa: a aba ativa é ícone cheio em cobre, rótulo em negrito e o pontinho */
   navActiveBg: 'transparent',
-  navActiveInk: '#EEF2F0',
+  navActiveInk: '#F08A65',
   navActiveDot: BRAND.coral,
   dismiss: '#C889BD',
   dismissMuted: 'rgba(200, 137, 189, 0.16)',
-  featureBg: '#242E2D',
-  featureInk: '#EEF2F0',
-  featureMuted: '#9FB0AC',
-  featureTrack: 'rgba(238, 242, 240, 0.16)',
+  featureBg: '#2A4E52',
+  featureInk: BRAND.creme,
+  featureMuted: '#A9C2BC',
+  featureTrack: 'rgba(185, 207, 202, 0.24)',
+  /** Faixa de marca no petróleo do logo */
   heroBg: BRAND.petroleo,
-  heroBgDeep: '#152B2D',
+  heroBgDeep: '#1A3336',
   heroInk: '#EEF2F0',
+  /** 7:1 no petróleo */
   heroMuted: BRAND.menta,
 }
 
 export const COLOR_LIGHT: ColorTokens = {
-  canvas: '#F4F2EE',
+  canvas: '#F4F3F0',
   chrome: '#FFFFFF',
-  surface: '#FAF9F6',
+  surface: '#F7F6F3',
   elevated: '#FFFFFF',
-  fill: '#EDF1EF',
+  fill: '#EEF0EE',
   ink: '#1F2A2A',
   inkMuted: '#5E6B69',
   inkFaint: '#7D8987',
-  hairline: '#DCE2DF',
+  hairline: '#E3E6E3',
   hairlineStrong: 'rgba(31, 58, 61, 0.28)',
   cardRim: 'rgba(31, 58, 61, 0.08)',
   brand: BRAND.petroleo,
@@ -238,9 +242,7 @@ export const COLOR_LIGHT: ColorTokens = {
   attentionMuted: 'rgba(138, 94, 14, 0.12)',
   done: '#2B7454',
   overlay: 'rgba(31, 42, 42, 0.40)',
-  widget: '#E4EDEA',
-  widgetInk: BRAND.petroleo,
-  widgetMuted: '#4A5E5B',
+  glyphInk: '#FFFFFF',
   /** Claro: barra branca com contorno fino, nada de bloco petróleo */
   navBg: '#FFFFFF',
   navBorder: 'rgba(31, 58, 61, 0.10)',
@@ -253,7 +255,7 @@ export const COLOR_LIGHT: ColorTokens = {
   navActiveDot: BRAND.coral,
   dismiss: '#832E65',
   dismissMuted: 'rgba(131, 46, 101, 0.10)',
-  featureBg: '#E4EDEA',
+  featureBg: '#FFFFFF',
   /** 10,2:1 */
   featureInk: BRAND.petroleo,
   /** 5,8:1 */

@@ -1,7 +1,21 @@
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
+import type { NotifyCadence } from '@simply-life/shared'
 
 const AXEL_CATEGORY = 'axel-actions'
+
+/**
+ * Canal próprio. O Android congela importância e Não perturbe no primeiro uso,
+ * então um id novo vale mais do que editar o canal antigo.
+ * HIGH é notificação de app (ícone e texto). Não é alarme do relógio.
+ */
+const ALERT_CHANNEL = 'sunfy-avisos-2'
+
+function withAlertChannel(trigger: Notifications.NotificationTriggerInput): Notifications.NotificationTriggerInput
+{
+  if (Platform.OS !== 'android' || !trigger) return trigger
+  return { ...trigger, channelId: ALERT_CHANNEL } as Notifications.NotificationTriggerInput
+}
 
 function readData(notification: Notifications.Notification): {
   url: string | null
@@ -55,7 +69,39 @@ export async function setNativeAndroidChannel(): Promise<void>
     name: 'SunFy',
     importance: Notifications.AndroidImportance.HIGH,
     vibrationPattern: [0, 250, 250, 250],
+    sound: 'default',
   })
+  await Notifications.setNotificationChannelAsync(ALERT_CHANNEL, {
+    name: 'Avisos do SunFy',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 180, 120, 180],
+    sound: 'default',
+    // Só passa no Não perturbe depois que a pessoa liga o SunFy na tela do sistema.
+    bypassDnd: true,
+    enableVibrate: true,
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+  })
+}
+
+/** Aviso imediato para a pessoa confirmar que o celular recebeu. */
+export async function sendTestAlert(): Promise<boolean>
+{
+  const granted = await requestNativePushPermission()
+  if (!granted) return false
+  await setNativeAndroidChannel()
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: 'SunFy',
+      body: 'Aviso de teste. Ícone e texto, como qualquer app.',
+      sound: 'default',
+      color: '#E8734A',
+    },
+    trigger: withAlertChannel({
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 2,
+    }),
+  })
+  return true
 }
 
 export async function getNativeExpoPushToken(projectId?: string): Promise<string>
@@ -130,11 +176,11 @@ export async function scheduleEveningPlanReminder(hour: number, minute: number):
       body: 'Uns 3 minutos para o Axel deixar o seu amanhã do tamanho certo.',
       data: { url: '/planejar-amanha' },
     },
-    trigger: {
+    trigger: withAlertChannel({
       type: Notifications.SchedulableTriggerInputTypes.DAILY,
       hour,
       minute,
-    },
+    }),
   })
   return true
 }
@@ -158,11 +204,38 @@ export async function scheduleMorningFirstStep(when: Date, firstStep: string): P
       body: firstStep,
       data: { url: '/' },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+    trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: when }),
   })
 }
 
 const FOCUS_END_ID = 'axel-focus-end'
+const CURIOSITY_ID = 'axel-curiosity-card'
+
+/** Aviso diário que abre a carta. Não mexe no lembrete da noite. */
+export async function scheduleCuriosityCard(): Promise<void>
+{
+  const perm = await Notifications.getPermissionsAsync()
+  if (!perm.granted) return
+  await Notifications.cancelScheduledNotificationAsync(CURIOSITY_ID).catch(() => undefined)
+  await Notifications.scheduleNotificationAsync({
+    identifier: CURIOSITY_ID,
+    content: {
+      title: 'O AXEL descobriu uma coisa sobre a sua semana',
+      body: 'Se quiser ler, ela está aqui. Sem pressa.',
+      data: { url: '/?carta=1' },
+    },
+    trigger: withAlertChannel({
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: 16,
+      minute: 0,
+    }),
+  })
+}
+
+export async function cancelCuriosityCard(): Promise<void>
+{
+  await Notifications.cancelScheduledNotificationAsync(CURIOSITY_ID).catch(() => undefined)
+}
 
 /** Aviso de fim do timer mesmo com o app em segundo plano. */
 export async function scheduleFocusEnd(seconds: number, taskTitle: string | null): Promise<void>
@@ -178,7 +251,10 @@ export async function scheduleFocusEnd(seconds: number, taskTitle: string | null
       body: taskTitle ? `${taskTitle}: pode parar aqui ou continuar mais um pouco.` : 'Pode parar aqui ou continuar mais um pouco.',
       data: { url: '/foco' },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: Math.round(seconds) },
+    trigger: withAlertChannel({
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: Math.round(seconds),
+    }),
   })
 }
 
@@ -207,7 +283,7 @@ export async function scheduleTransitionAlerts(alerts: { at: Date; title: string
     await Notifications.scheduleNotificationAsync({
       identifier: `${TRANSITION_PREFIX}${i}`,
       content: { title: a.title, body: a.body, data: { url: '/' } },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: a.at },
+      trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: a.at }),
     })
     i += 1
     if (i >= 20) break
@@ -222,7 +298,14 @@ export async function showStickyPlan(title: string, body: string): Promise<void>
   if (!perm.granted) return
   await Notifications.scheduleNotificationAsync({
     identifier: STICKY_ID,
-    content: { title, body, sticky: true, autoDismiss: false, data: { url: '/' } },
+    content: {
+      title,
+      body,
+      sticky: true,
+      autoDismiss: false,
+      data: { url: '/' },
+      ...(Platform.OS === 'android' ? { channelId: ALERT_CHANNEL } : {}),
+    },
     trigger: null,
   })
 }
@@ -259,7 +342,7 @@ export async function scheduleTaskReminder(input: {
       sound: input.quiet ? false : 'default',
       data: { url: `/task/${input.id}` },
     },
-    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: input.at },
+    trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: input.at }),
   })
   return true
 }
@@ -267,4 +350,44 @@ export async function scheduleTaskReminder(input: {
 export async function cancelTaskReminder(id: string): Promise<void>
 {
   await Notifications.cancelScheduledNotificationAsync(`${TASK_REMINDER_PREFIX}${id}`).catch(() => undefined)
+}
+
+const CADENCE_IDS = ['axel-cadence-9', 'axel-cadence-11', 'axel-cadence-15', 'axel-cadence-21']
+
+/** Avisos locais do ritmo escolhido. O servidor também envia, se o aparelho estiver inscrito. */
+export async function scheduleCadenceAlerts(cadence: NotifyCadence): Promise<void>
+{
+  for (const id of CADENCE_IDS)
+  {
+    await Notifications.cancelScheduledNotificationAsync(id).catch(() => undefined)
+  }
+  if (cadence === 'off') return
+  await setNativeAndroidChannel()
+  const perm = await Notifications.getPermissionsAsync()
+  if (!perm.granted) return
+  const slots = cadence === 'once'
+    ? [{ id: 'axel-cadence-11', hour: 11, body: 'O essencial está organizado. Abra quando fizer sentido.' }]
+    : [
+        { id: 'axel-cadence-9', hour: 9, body: 'Quando quiser, o dia cabe em um toque.' },
+        { id: 'axel-cadence-15', hour: 15, body: 'Se couber, um olhar no que ficou para hoje.' },
+        { id: 'axel-cadence-21', hour: 21, body: 'O essencial está organizado. Amanhã continua de onde parou.' },
+      ]
+  for (const slot of slots)
+  {
+    await Notifications.scheduleNotificationAsync({
+      identifier: slot.id,
+      content: {
+        title: 'SunFy',
+        body: slot.body,
+        sound: 'default',
+        color: '#E8734A',
+        data: { url: '/' },
+      },
+      trigger: withAlertChannel({
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: slot.hour,
+        minute: 0,
+      }),
+    })
+  }
 }

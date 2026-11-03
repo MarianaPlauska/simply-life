@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { ScrollView, Share, View } from 'react-native'
 import { Redirect, useRouter } from 'expo-router'
 import {
   CARE_PACE_OPTIONS,
@@ -13,6 +13,8 @@ import {
   type GamificationMode,
 } from '@simply-life/shared'
 import { Screen, Text, PrimaryButton, Field } from '../src/ui'
+import { AdventurePreview } from '../src/components/play/AdventurePreview'
+import { AvatarIconPicker } from '../src/components/profile/AvatarIconPicker'
 import { useTheme } from '../src/theme/ThemeProvider'
 import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
@@ -26,6 +28,10 @@ import {
   type HomeMetricId,
 } from '../src/lib/homeMetrics'
 import { SETUP_PRIORITY } from '../src/lib/setupOnboarding'
+import { supabaseConfigured } from '../src/lib/supabase'
+import { registerExpoPushAsync } from '../src/lib/pushRegister'
+import { scheduleCadenceAlerts } from '../src/lib/pushNotifications'
+import { acceptFriendCode, createFriendInviteLink } from '../src/lib/sync/friends'
 import {
   ALL_APP_MODULES,
   filterMetrics,
@@ -45,6 +51,7 @@ import {
   type CardDraft,
 } from '../src/components/finance/FinanceCardForm'
 import { OnbStep, OnbBlock } from '../src/components/onboarding/OnbStep'
+import { AxelSun } from '../src/components/AxelSun'
 import { OnbChoice } from '../src/components/onboarding/OnbChoice'
 import { ModulePicker } from '../src/components/onboarding/ModulePicker'
 import { HealthStartForm } from '../src/components/onboarding/HealthStartForm'
@@ -65,14 +72,34 @@ import {
 type StepId =
   | 'welcome'
   | 'name'
+  | 'axel'
+  | 'guide'
   | 'modules'
   | 'tasks'
   | 'health'
   | 'finance'
   | 'cards'
   | 'rhythm'
+  | 'circle'
   | 'home'
   | 'summary'
+
+const AXEL_INTRO: { title: string; hint: string }[] = [
+  { title: 'Organiza o seu dia', hint: 'Monta o plano de hoje com o que vence primeiro e replaneja quando o dia sai do roteiro.' },
+  { title: 'Tira tudo da cabeça', hint: 'Escreva do seu jeito, "pagar luz sexta e comprar pão 8 reais", e ele separa em tarefa e gasto.' },
+  { title: 'Cuida sem julgar', hint: 'Lembra de água, remédio e pausa, e no fim da semana mostra como foi o seu humor.' },
+  { title: 'Ajuda com o dinheiro', hint: 'Diz se uma compra cabe no mês e avisa antes de a conta vencer.' },
+  { title: 'Descobre o que mexe com você', hint: 'Com o tempo, mostra padrões entre sono, humor, treino, gastos e tarefas.' },
+]
+
+const SUNFY_GUIDE: { title: string; hint: string }[] = [
+  { title: 'Início', hint: 'Humor e o botão + para tirar o dia da cabeça.' },
+  { title: 'Tarefas', hint: 'A lista. Marque o que terminou.' },
+  { title: 'Saúde', hint: 'Hoje, Cuidados e Diário. Água, comida, academia e remédios.' },
+  { title: 'Carteira', hint: 'Saldo, extrato, contas e para onde o dinheiro foi.' },
+  { title: 'Calendário', hint: 'O mês e a agenda, se você ligar.' },
+  { title: 'Mais', hint: 'Perfil, preferências e sair. Fechar só esconde o menu.' },
+]
 
 const PRIORITY_MODULES: Record<DashboardPriority, AppModuleId[]> = {
   tasks: ['tasks', 'routine'],
@@ -109,6 +136,7 @@ export default function SetupScreen()
 
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
+  const [avatarIcon, setAvatarIcon] = useState(prefs.profile_avatar_icon || 'initials')
   const [modules, setModules] = useState<AppModuleId[]>(prefs.enabled_modules ?? ALL_APP_MODULES)
   const [tasksDraft, setTasksDraft] = useState<TasksDraft>(EMPTY_TASKS_DRAFT)
   const [healthDraft, setHealthDraft] = useState<HealthDraft>(() => healthDraftFrom(habits))
@@ -125,6 +153,13 @@ export default function SetupScreen()
   const [cardMsg, setCardMsg] = useState('')
   const [saving, setSaving] = useState(false)
   const [problems, setProblems] = useState<string[]>([])
+  const [friendCode, setFriendCode] = useState('')
+  const [circleBusy, setCircleBusy] = useState(false)
+  const [circleMsg, setCircleMsg] = useState<{ ok: boolean; text: string } | null>(null)
+  const [joinedCount, setJoinedCount] = useState(0)
+  const [invitesSent, setInvitesSent] = useState(0)
+  const [reviewing, setReviewing] = useState(false)
+  const [editing, setEditing] = useState<StepId | null>(null)
 
   useEffect(() =>
   {
@@ -155,24 +190,52 @@ export default function SetupScreen()
   const on = (id: AppModuleId) => isModuleOn(modules, id)
   const steps = useMemo<StepId[]>(() =>
   {
-    const list: StepId[] = ['welcome', 'name', 'modules']
+    const list: StepId[] = ['welcome', 'name', 'axel', 'modules']
     if (on('tasks') || on('routine')) list.push('tasks')
     if (on('water') || on('sleep') || on('food') || on('gym') || on('meds')) list.push('health')
     if (on('spend') || on('bills') || on('goals')) list.push('finance')
     if (on('cards')) list.push('cards')
-    list.push('rhythm', 'home', 'summary')
+    list.push('rhythm')
+    // Círculo precisa de conta: convidado não vê este passo
+    if (!isGuest && supabaseConfigured) list.push('circle')
+    list.push('home', 'summary')
     return list
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modules])
+  }, [modules, isGuest])
 
   if (!userId) return <Redirect href="/login" />
   if (loaded && prefs.setup_completed_at && !saving && !problems.length) return <Redirect href="/(tabs)" />
 
   const current = steps[Math.min(step, steps.length - 1)]
   const total = steps.length
-  const goTo = (id: StepId) => setStep(Math.max(0, steps.indexOf(id)))
-  const next = () => setStep((s) => Math.min(total - 1, s + 1))
-  const back = () => setStep((s) => Math.max(0, s - 1))
+  const goSummary = () =>
+  {
+    setReviewing(false)
+    setStep(Math.max(0, steps.indexOf('summary')))
+  }
+  const goTo = (id: StepId) =>
+  {
+    setReviewing(true)
+    setStep(Math.max(0, steps.indexOf(id)))
+  }
+  const next = () =>
+  {
+    if (reviewing)
+    {
+      goSummary()
+      return
+    }
+    setStep((s) => Math.min(total - 1, s + 1))
+  }
+  const back = () =>
+  {
+    if (reviewing)
+    {
+      goSummary()
+      return
+    }
+    setStep((s) => Math.max(0, s - 1))
+  }
 
   const toggleModule = (id: AppModuleId) =>
     setModules((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -218,8 +281,17 @@ export default function SetupScreen()
 
   const startOwn = async () =>
   {
+    setSaving(true)
+    try
+    {
     // só na primeira vez: voltar e tocar de novo não apaga o que já foi cadastrado
-    if (isGuest && !guestOwnData) await startGuestOwnData()
+    if (isGuest && !guestOwnData)
+    {
+      await Promise.race([
+        startGuestOwnData(),
+        new Promise((resolve) => setTimeout(resolve, 8000)),
+      ])
+    }
     // conta nova começa sem cartão; Nubank/Inter de exemplo não entram
     const leftover = useDataStore.getState().financeCards.filter(isDemoFinanceCard)
     for (const card of leftover)
@@ -227,16 +299,31 @@ export default function SetupScreen()
       removeCard(card.id)
     }
     next()
+    }
+    finally
+    {
+      setSaving(false)
+    }
   }
 
   const finish = async () =>
   {
     setSaving(true)
+    if (notifyCadence !== 'off')
+    {
+      void registerExpoPushAsync(true).then((res) =>
+      {
+        if (res.ok) void scheduleCadenceAlerts(notifyCadence)
+      })
+    }
     const finalOrder: DashboardPriority[] = order.length ? order : ['tasks', 'health', 'finance']
     const trimmed = name.trim()
+    try
+    {
     await patch({
       axel_calls_you: trimmed,
       display_name: trimmed,
+      profile_avatar_icon: avatarIcon,
       color_scheme: mode,
       enabled_modules: modules,
       dashboard_priority: finalOrder[0] ?? 'tasks',
@@ -247,28 +334,79 @@ export default function SetupScreen()
       care_pace: pace,
       notify_cadence: notifyCadence,
       adhd_support: adhdSupport,
-      gamification_mode: adhdSupport ? gamificationMode : 'calm',
+      gamification_mode: gamificationMode,
+      setup_completed_at: new Date().toISOString(),
     })
-    await applyHealthDraft(healthDraft, modules, isGuest)
-    await applyTasksDraft(tasksDraft, modules, isGuest)
-    const issues = await applyFinanceDraft(financeDraft, modules, isGuest)
-    await patch({ setup_completed_at: new Date().toISOString() })
+    await Promise.race([
+      applyHealthDraft(healthDraft, modules, isGuest),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ])
+    await Promise.race([
+      applyTasksDraft(tasksDraft, modules, isGuest),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ])
+    const issues = await Promise.race([
+      applyFinanceDraft(financeDraft, modules, isGuest),
+      new Promise<string[]>((resolve) => setTimeout(() => resolve([]), 8000)),
+    ])
     logEvent('setup', 'Boas-vindas concluídas', trimmed || 'setup')
     grantXp(15, 'Configuração concluída', 'Onboarding')
-    setSaving(false)
     if (issues.length)
     {
-      // não trava a entrada: mostra o que falhou e deixa seguir
       setProblems(issues)
       return
     }
     router.replace('/(tabs)')
+    }
+    catch
+    {
+      router.replace('/(tabs)')
+    }
+    finally
+    {
+      setSaving(false)
+    }
+  }
+
+  const joinFriend = async () =>
+  {
+    setCircleBusy(true)
+    const res = await acceptFriendCode(friendCode)
+    setCircleBusy(false)
+    setCircleMsg({ ok: res.ok, text: res.message })
+    if (res.ok)
+    {
+      setJoinedCount((n) => n + 1)
+      setFriendCode('')
+    }
+  }
+
+  const inviteFriends = async () =>
+  {
+    setCircleBusy(true)
+    const res = await createFriendInviteLink()
+    setCircleBusy(false)
+    if (!res)
+    {
+      setCircleMsg({ ok: false, text: 'Não deu para gerar o convite agora' })
+      return
+    }
+    try
+    {
+      await Share.share({ message: `Vem para o meu Círculo no SunFy: ${res.url}`, url: res.url })
+      setInvitesSent((n) => n + 1)
+    }
+    catch
+    {
+      /* a pessoa fechou o compartilhar */
+    }
   }
 
   const stepProps = {
+    reviewing,
     step: Math.min(step, total - 1),
     total,
-    onBack: step > 0 ? back : undefined,
+    onBack: reviewing || step > 0 ? back : undefined,
   }
 
   const summaryRows: { label: string; value: string; step: StepId }[] = [
@@ -322,6 +460,16 @@ export default function SetupScreen()
       ].filter(Boolean).join(', '),
       step: 'rhythm',
     },
+    ...(steps.includes('circle')
+      ? [{
+          label: 'Círculo',
+          value: [
+            joinedCount ? `${joinedCount} amigo(s) conectado(s)` : '',
+            invitesSent ? `${invitesSent} convite(s) enviado(s)` : '',
+          ].filter(Boolean).join(', ') || 'Ninguém por enquanto',
+          step: 'circle' as StepId,
+        }]
+      : []),
     {
       label: 'Início',
       value: homeMetrics.map((id) => HOME_METRIC_CATALOG.find((m) => m.id === id)?.label).join(', ') || 'Padrão',
@@ -339,7 +487,8 @@ export default function SetupScreen()
             title="Boas-vindas ao SunFy"
             subtitle="Tarefas, saúde e dinheiro num lugar só. Você escolhe o que usar e o app se monta com os seus dados."
             nextLabel="Começar"
-            onNext={() => void startOwn()}
+            loading={saving}
+            onNext={() => (reviewing ? next() : void startOwn())}
             onSkip={isGuest ? () => void exploreDemo() : undefined}
             skipLabel="Só explorar com dados de exemplo"
           >
@@ -374,10 +523,17 @@ export default function SetupScreen()
           <OnbStep
             {...stepProps}
             title="Como quer ser chamado?"
-            subtitle="Aparece só para você, na tela inicial e nas mensagens do AXEL."
+            subtitle="O nome aparece na tela inicial. O ícone é o seu rosto no app. No começo são poucos. Os outros abrem com o nível."
             onNext={next}
             canNext={Boolean(name.trim())}
           >
+            <AvatarIconPicker
+              selected={avatarIcon}
+              onSelect={setAvatarIcon}
+              level={1}
+              owned={[]}
+              startersOnly
+            />
             <Field
               label="Nome ou apelido"
               value={name}
@@ -385,6 +541,37 @@ export default function SetupScreen()
               placeholder="Seu nome"
               autoCapitalize="words"
             />
+          </OnbStep>
+        ) : null}
+
+        {current === 'axel' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Conheça o AXEL"
+            title={name.trim() ? `${name.trim()}, este é o AXEL` : 'Este é o AXEL'}
+            subtitle="O girassol que acompanha você no SunFy. Ele usa inteligência artificial para pensar junto, nunca para cobrar."
+            onNext={next}
+            nextLabel="Entendi"
+          >
+            <View style={{ alignItems: 'center', paddingVertical: space.sm }}>
+              <AxelSun size={88} mood="happy" />
+            </View>
+            <OnbBlock title="O que ele faz por você">
+              {AXEL_INTRO.map((b) => (
+                <View key={b.title} style={{ gap: 2, paddingVertical: 4 }}>
+                  <Text variant="bodyStrong">{b.title}</Text>
+                  <Text variant="caption" muted>{b.hint}</Text>
+                </View>
+              ))}
+            </OnbBlock>
+            <OnbBlock title="Onde fica cada coisa">
+              {SUNFY_GUIDE.map((item) => (
+                <View key={item.title} style={{ gap: 2, paddingVertical: 4 }}>
+                  <Text variant="bodyStrong">{item.title}</Text>
+                  <Text variant="caption" muted>{item.hint}</Text>
+                </View>
+              ))}
+            </OnbBlock>
           </OnbStep>
         ) : null}
 
@@ -532,18 +719,19 @@ export default function SetupScreen()
                 selected={!adhdSupport}
                 onPress={() => setAdhdSupport(false)}
               />
-              {adhdSupport
-                ? GAMIFICATION_MODE_OPTIONS.map((opt) => (
-                    <OnbChoice
-                      key={opt.id}
-                      kind="radio"
-                      title={opt.label}
-                      hint={opt.hint}
-                      selected={gamificationMode === opt.id}
-                      onPress={() => setGamificationMode(opt.id)}
-                    />
-                  ))
-                : null}
+            </OnbBlock>
+            <OnbBlock title="Como o dia aparece" hint="O jogo é opcional. Os pontos existem nos dois modos.">
+              {GAMIFICATION_MODE_OPTIONS.map((opt) => (
+                <OnbChoice
+                  key={opt.id}
+                  kind="radio"
+                  title={opt.label}
+                  hint={opt.hint}
+                  selected={gamificationMode === opt.id}
+                  onPress={() => setGamificationMode(opt.id)}
+                />
+              ))}
+              {gamificationMode === 'rpg' ? <AdventurePreview /> : null}
             </OnbBlock>
             <OnbBlock title="Avisos no celular" hint="Nunca à noite: silêncio das 22h às 8h.">
               {NOTIFY_CADENCE_OPTIONS.map((opt) => (
@@ -557,6 +745,49 @@ export default function SetupScreen()
                 />
               ))}
             </OnbBlock>
+          </OnbStep>
+        ) : null}
+
+        {current === 'circle' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Círculo"
+            title="Traga quem caminha com você"
+            subtitle="Amigos veem só seu nome, avatar e Elo. Nunca seus registros de humor, saúde ou dinheiro."
+            onNext={next}
+            onSkip={next}
+            nextLabel={joinedCount || invitesSent ? 'Continuar' : 'Pular por agora'}
+          >
+            <OnbBlock title="Recebeu um convite?" hint="Cole o código ou o link que seu amigo mandou.">
+              <Field
+                label="Código do convite"
+                value={friendCode}
+                onChangeText={setFriendCode}
+                placeholder="Ex.: K7M2QX9P"
+                autoCapitalize="characters"
+              />
+              <PrimaryButton
+                label="Entrar no Círculo"
+                variant="secondary"
+                loading={circleBusy}
+                disabled={!friendCode.trim()}
+                onPress={() => void joinFriend()}
+              />
+            </OnbBlock>
+            <OnbBlock title="Chamar alguém" hint="O link vale por 7 dias. Quando aceitarem, vocês aparecem um na linha do tempo do outro.">
+              <PrimaryButton
+                label="Convidar amigos"
+                icon="person-add-outline"
+                variant="secondary"
+                loading={circleBusy}
+                onPress={() => void inviteFriends()}
+              />
+            </OnbBlock>
+            {circleMsg ? (
+              <Text variant="caption" color={circleMsg.ok ? colors.health : colors.danger}>
+                {circleMsg.text}
+              </Text>
+            ) : null}
           </OnbStep>
         ) : null}
 
@@ -606,7 +837,7 @@ export default function SetupScreen()
           <OnbStep
             {...stepProps}
             title="Tudo pronto"
-            subtitle="Confira antes de começar. Toque em Editar para voltar a qualquer passo."
+            subtitle="Toque em Editar e mude aqui mesmo. Não precisa refazer os outros passos."
             nextLabel={problems.length ? 'Entrar mesmo assim' : 'Começar'}
             loading={saving}
             onNext={() => (problems.length ? router.replace('/(tabs)') : void finish())}
@@ -636,10 +867,93 @@ export default function SetupScreen()
                     <Text variant="caption" muted>{row.label}</Text>
                     <Text variant="body">{row.value}</Text>
                   </View>
-                  <PrimaryButton label="Editar" variant="link" size="sm" onPress={() => goTo(row.step)} />
+                  <PrimaryButton
+                    label={editing === row.step ? 'Fechar' : 'Editar'}
+                    variant="link"
+                    size="sm"
+                    onPress={() => setEditing((cur) => (cur === row.step ? null : row.step))}
+                  />
                 </View>
               ))}
             </View>
+            {editing === 'name' ? (
+              <View style={{ gap: space.sm }}>
+                <AvatarIconPicker selected={avatarIcon} onSelect={setAvatarIcon} level={1} owned={[]} startersOnly />
+                <Field label="Nome ou apelido" value={name} onChangeText={setName} placeholder="Seu nome" autoCapitalize="words" />
+              </View>
+            ) : null}
+            {editing === 'welcome' ? (
+              <View style={{ gap: space.sm }}>
+                <OnbChoice kind="radio" icon="sunny" title="Clara" selected={mode === 'light'} onPress={() => setMode('light')} />
+                <OnbChoice kind="radio" icon="moon" title="Escura" selected={mode === 'dark'} onPress={() => setMode('dark')} />
+              </View>
+            ) : null}
+            {editing === 'modules' ? <ModulePicker value={modules} onToggle={toggleModule} onGroup={setGroup} /> : null}
+            {editing === 'tasks' ? <TasksStartForm value={tasksDraft} onChange={setTasksDraft} enabled={modules} /> : null}
+            {editing === 'health' ? (
+              <HealthStartForm
+                value={healthDraft}
+                onChange={(d) =>
+                {
+                  setHealthTouched(true)
+                  setHealthDraft(d)
+                }}
+                enabled={modules}
+              />
+            ) : null}
+            {editing === 'finance' ? <FinanceStartForm value={financeDraft} onChange={setFinanceDraft} enabled={modules} /> : null}
+            {editing === 'rhythm' ? (
+              <View style={{ gap: space.sm }}>
+                {CARE_PACE_OPTIONS.map((opt) => (
+                  <OnbChoice key={opt.id} kind="radio" title={opt.label} hint={opt.hint} selected={pace === opt.id} onPress={() => setPace(opt.id)} />
+                ))}
+                {NOTIFY_CADENCE_OPTIONS.map((opt) => (
+                  <OnbChoice key={opt.id} kind="radio" title={opt.label} hint={opt.hint} selected={notifyCadence === opt.id} onPress={() => setNotifyCadence(opt.id)} />
+                ))}
+                <OnbChoice kind="radio" title="Quero apoio de foco" selected={adhdSupport} onPress={() => setAdhdSupport(true)} />
+                <OnbChoice kind="radio" title="Prefiro o modo padrão" selected={!adhdSupport} onPress={() => setAdhdSupport(false)} />
+                {GAMIFICATION_MODE_OPTIONS.map((opt) => (
+                  <OnbChoice key={opt.id} kind="radio" title={opt.label} hint={opt.hint} selected={gamificationMode === opt.id} onPress={() => setGamificationMode(opt.id)} />
+                ))}
+              </View>
+            ) : null}
+            {editing === 'cards' ? (
+              <View style={{ gap: space.sm }}>
+                {cards.map((c) => (
+                  <Text key={c.id} variant="body">{c.nome}</Text>
+                ))}
+                {cardFormOpen ? (
+                  <View style={{ gap: space.sm }}>
+                    <FinanceCardForm value={cardDraft} onChange={setCardDraft} previewWidth={280} />
+                    {cardMsg ? <Text variant="caption" color={colors.danger}>{cardMsg}</Text> : null}
+                    <PrimaryButton label="Salvar cartão" variant="secondary" onPress={saveCard} />
+                  </View>
+                ) : (
+                  <PrimaryButton label="Adicionar cartão" variant="secondary" onPress={() => setCardFormOpen(true)} />
+                )}
+              </View>
+            ) : null}
+            {editing === 'circle' ? (
+              <View style={{ gap: space.sm }}>
+                <Field label="Código do convite" value={friendCode} onChangeText={setFriendCode} placeholder="Ex.: K7M2QX9P" autoCapitalize="characters" />
+                <PrimaryButton label="Entrar no Círculo" variant="secondary" loading={circleBusy} disabled={!friendCode.trim()} onPress={() => void joinFriend()} />
+                {circleMsg ? <Text variant="caption" color={circleMsg.ok ? colors.health : colors.danger}>{circleMsg.text}</Text> : null}
+              </View>
+            ) : null}
+            {editing === 'home' ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+                {HOME_METRIC_CATALOG.filter((m) => metricAllowed(modules, m.id)).map((m) => (
+                  <OnbChoice
+                    key={m.id}
+                    half
+                    title={m.label}
+                    hint={m.hint}
+                    selected={metrics.includes(m.id)}
+                    onPress={() => setMetrics((prev) => toggleHomeMetric(prev, m.id))}
+                  />
+                ))}
+              </View>
+            ) : null}
             {problems.length ? (
               <View style={{ gap: 4 }}>
                 <Text variant="bodyStrong" color={colors.danger}>Algumas coisas não foram salvas</Text>

@@ -104,7 +104,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
           <Text
             variant="label"
             numberOfLines={1}
-            style={{ color: INK, fontFamily: 'Fraunces_500Medium', fontSize: 16, flexShrink: 1 }}
+            style={{ color: INK, fontFamily: 'Lexend_600SemiBold', fontSize: 16, flexShrink: 1 }}
           >
             {card.nome}
           </Text>
@@ -136,7 +136,7 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
             variant="hero"
             numberOfLines={1}
             adjustsFontSizeToFit
-            style={{ color: INK, fontSize: 26, lineHeight: 32, letterSpacing: -0.6, fontVariant: ['tabular-nums'] }}
+            style={{ color: INK, fontSize: 28, lineHeight: 32, letterSpacing: -0.6, fontVariant: ['tabular-nums'] }}
           >
             {formatBRL(disponivel)}
           </Text>

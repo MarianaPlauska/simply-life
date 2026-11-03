@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { DAY_PLAN_MODE_COPY, addDaysIso, firstTinyStep, localTodayIso } from '@simply-life/shared'
-import { Card, Text, PrimaryButton } from '../../ui'
+import { GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
@@ -17,7 +17,7 @@ const EVENING_HOUR = 18
  */
 export function DayPlanHomeCard()
 {
-  const { colors, space } = useTheme()
+  const { colors } = useTheme()
   const router = useRouter()
   const isGuest = useAuthStore((s) => s.isGuest)
   const tasks = useDataStore((s) => s.tasks) ?? []
@@ -44,31 +44,37 @@ export function DayPlanHomeCard()
     if (planTomorrow)
     {
       return (
-        <Pressable onPress={() => router.push('/planejar-amanha')} accessibilityRole="button">
-          <Card tone="elevated" style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <Icon name="moon-outline" size={18} color={colors.axel} />
-            <Text variant="body" style={{ flex: 1, fontSize: 14 }}>
-              Amanhã já está planejado ({DAY_PLAN_MODE_COPY[planTomorrow.mode].label.toLowerCase()}). Bom descanso.
-            </Text>
-          </Card>
-        </Pressable>
+        <GroupedList>
+          <GroupedRow
+            leading={<RowGlyph name="moon" color={colors.tasks} />}
+            title="Amanhã já está planejado"
+            subtitle={`${DAY_PLAN_MODE_COPY[planTomorrow.mode].label}. Bom descanso.`}
+            onPress={() => router.push('/planejar-amanha')}
+          />
+        </GroupedList>
       )
     }
     if (dismissed === today) return null
     return (
-      <Card tone="elevated" accentTop="axel" style={{ gap: space.sm }}>
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-          <Icon name="moon-outline" size={20} color={colors.axel} />
-          <Text variant="section" style={{ flex: 1 }}>Planejar amanhã</Text>
-        </View>
-        <Text variant="body" muted>
-          Uns 3 minutos. Você conta como está e o que tem; o Axel deixa o amanhã do tamanho certo, com pausas.
-        </Text>
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <PrimaryButton label="Agora não" variant="ghost" size="sm" onPress={() => dismissEvening(today)} style={{ flex: 1 }} />
-          <PrimaryButton label="Planejar" size="sm" onPress={() => router.push('/planejar-amanha')} style={{ flex: 2 }} />
-        </View>
-      </Card>
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph name="moon" color={colors.tasks} />}
+          title="Planejar amanhã"
+          subtitle="Uns 3 minutos com o Axel"
+          onPress={() => router.push('/planejar-amanha')}
+          chevron={false}
+          trailing={(
+            <Pressable
+              onPress={() => dismissEvening(today)}
+              accessibilityLabel="Agora não"
+              hitSlop={8}
+              style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name="close" size={18} color={colors.inkFaint} />
+            </Pressable>
+          )}
+        />
+      </GroupedList>
     )
   }
 
@@ -80,43 +86,39 @@ export function DayPlanHomeCard()
   const doneCount = essentials.filter((t) => t.status === 'done').length
 
   return (
-    <Card tone="elevated" accentTop="axel" style={{ gap: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Text variant="section" style={{ flex: 1 }}>Seu plano de hoje</Text>
-        <Text variant="caption" muted>{DAY_PLAN_MODE_COPY[planToday.mode].label}</Text>
-      </View>
+    <GroupedList>
+      <GroupedRow
+        leading={<RowGlyph name="today" color={colors.axelFill} />}
+        title="Seu plano de hoje"
+        subtitle={
+          next
+            ? `Próximo passo: ${firstTinyStep(next.titulo, next.checklist).toLowerCase()}`
+            : doneCount === essentials.length
+              ? 'Essenciais feitos. O resto é bônus.'
+              : undefined
+        }
+        value={DAY_PLAN_MODE_COPY[planToday.mode].label}
+        onPress={() => router.push('/ritmo')}
+      />
       {essentials.map((t) => (
-        <Pressable
+        <GroupedRow
           key={t.id}
+          leading={(
+            <RowGlyph color="transparent">
+              <Icon
+                name={t.status === 'done' ? 'checkmark-circle' : 'ellipse-outline'}
+                size={24}
+                color={t.status === 'done' ? colors.health : colors.inkMuted}
+              />
+            </RowGlyph>
+          )}
+          title={t.titulo}
+          muted={t.status === 'done'}
+          chevron={false}
+          accessibilityLabel={`${t.titulo}, ${t.status === 'done' ? 'feita' : 'a fazer'}`}
           onPress={() => void toggleTaskDone(t.id, isGuest)}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: t.status === 'done' }}
-          style={{ flexDirection: 'row', gap: 12, alignItems: 'center', minHeight: 40 }}
-        >
-          <Icon
-            name={t.status === 'done' ? 'checkmark-circle' : 'ellipse-outline'}
-            size={22}
-            color={t.status === 'done' ? colors.axel : colors.inkMuted}
-          />
-          <Text
-            variant="body"
-            style={{ flex: 1, fontSize: 15, textDecorationLine: t.status === 'done' ? 'line-through' : 'none' }}
-            muted={t.status === 'done'}
-          >
-            {t.titulo}
-          </Text>
-        </Pressable>
+        />
       ))}
-      <Text variant="caption" muted>
-        {next
-          ? `Próximo passo: ${firstTinyStep(next.titulo, next.checklist).toLowerCase()}.`
-          : doneCount === essentials.length
-            ? 'Essenciais de hoje feitos. O resto é bônus, e descansar também conta.'
-            : ''}
-      </Text>
-      <Pressable onPress={() => router.push('/ritmo')} accessibilityRole="button" hitSlop={6}>
-        <Text variant="caption" color={colors.axel} style={{ fontWeight: '600' }}>Ver meu ritmo</Text>
-      </Pressable>
-    </Card>
+    </GroupedList>
   )
 }

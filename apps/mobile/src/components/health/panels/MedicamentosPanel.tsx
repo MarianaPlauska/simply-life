@@ -13,6 +13,7 @@ import { useAuthStore } from '../../../store/authStore'
 import { medsTakenCount, sortMedsByTime, validateMedDraft } from '@simply-life/shared'
 import { HealthPanelHero } from '../HealthPanelHero'
 import { HealthScreenSection } from '../HealthScreenSection'
+import { MedTimeField } from '../MedTimeField'
 
 export function MedicamentosPanel()
 {
@@ -24,6 +25,8 @@ export function MedicamentosPanel()
   const isGuest = useAuthStore((s) => s.isGuest)
   const [nome, setNome] = useState('')
   const [horario, setHorario] = useState('08:00')
+  const [segundo, setSegundo] = useState(false)
+  const [horario2, setHorario2] = useState('')
   const [error, setError] = useState('')
   const [editing, setEditing] = useState(false)
   const [adding, setAdding] = useState(false)
@@ -100,13 +103,15 @@ export function MedicamentosPanel()
 
       {adding || total === 0 ? (
       <HealthScreenSection dividerTop title="Novo medicamento">
-        <Field label="Nome" value={nome} onChangeText={setNome} placeholder="Vitamina D" />
-        <Field
-          label="Horário (HH:MM)"
-          value={horario}
-          onChangeText={setHorario}
-          placeholder="08:00"
+        <Field label="Nome" value={nome} onChangeText={setNome} placeholder="Xarope de exemplo" />
+        <MedTimeField label="Horário" value={horario} onChange={setHorario} />
+        <CheckRow
+          title="Outro horário no mesmo dia"
+          done={segundo}
+          onPress={() => setSegundo((v) => !v)}
+          onToggle={() => setSegundo((v) => !v)}
         />
+        {segundo ? <MedTimeField label="Segundo horário" value={horario2} onChange={setHorario2} /> : null}
         {error ? (
           <Text variant="caption" color={colors.danger}>
             {error}
@@ -117,15 +122,21 @@ export function MedicamentosPanel()
           style={pillBtn}
           onPress={() =>
           {
-            const err = validateMedDraft({ nome, horario })
-            if (err)
+            const times = [horario, ...(segundo ? [horario2] : [])]
+            for (const time of times)
             {
-              setError(err)
-              return
+              const err = validateMedDraft({ nome, horario: time })
+              if (err)
+              {
+                setError(err)
+                return
+              }
             }
             setError('')
-            void addMedicamento(nome.trim(), horario.trim(), isGuest)
+            for (const time of times) void addMedicamento(nome.trim(), time.trim(), isGuest)
             setNome('')
+            setHorario2('')
+            setSegundo(false)
             setAdding(false)
           }}
         />

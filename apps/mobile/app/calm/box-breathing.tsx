@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { BOX_CYCLE_COUNT, boxElapsedSec, boxTotalSec, calmExerciseById } from '@simply-life/shared'
@@ -7,6 +7,8 @@ import { CalmExerciseChrome } from '../../src/components/calm/CalmExerciseChrome
 import { CalmBreathVisual } from '../../src/components/calm/CalmBreathVisual'
 import { useCalmStore } from '../../src/store/calmStore'
 import { useTheme } from '../../src/theme/ThemeProvider'
+import { fillAdventureEnergy } from '../../src/lib/adventureEnergy'
+import { usePrefsStore } from '../../src/store/prefsStore'
 
 /** Respiração box: 4 tempos de 4 s, cerca de 2 minutos. */
 export default function BoxBreathingScreen()
@@ -23,6 +25,15 @@ export default function BoxBreathingScreen()
   const resume = useCalmStore((s) => s.resume)
   const tick = useCalmStore((s) => s.tick)
   const reset = useCalmStore((s) => s.reset)
+  const rpg = usePrefsStore((s) => s.prefs.gamification_mode) === 'rpg'
+  const rewarded = useRef(false)
+
+  useEffect(() =>
+  {
+    if (status !== 'done' || rewarded.current) return
+    rewarded.current = true
+    fillAdventureEnergy('breathe')
+  }, [status])
 
   useEffect(() =>
   {
@@ -48,7 +59,9 @@ export default function BoxBreathingScreen()
         <View style={{ gap: space.md }}>
           <Text variant="bodyStrong">Pronto. Você pode voltar quando quiser.</Text>
           <Text variant="body" muted>
-            Se o aperto voltar, o exercício está em Apoio e no botão Acalmar.
+            {rpg
+              ? 'A energia do AXEL encheu um pouco. Se o aperto voltar, o exercício está em Apoio.'
+              : 'Se o aperto voltar, o exercício está em Apoio e no botão Acalmar.'}
           </Text>
           <PrimaryButton label="Voltar" onPress={() => router.back()} />
         </View>

@@ -1,5 +1,5 @@
 export const RADIUS = {
-  card: 20,
+  card: 16,
   control: 14,
   pill: 999,
   sheet: 28,

@@ -1,5 +1,5 @@
 import { Linking, Platform, View } from 'react-native'
-import { Card, Text, PrimaryButton, SectionHeader } from '../../ui'
+import { Card, Text, PrimaryButton, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 
 const CVV_NUMBER = '188'
@@ -19,18 +19,14 @@ export function CrisisSupportCard({ compact = false }: { compact?: boolean })
   }
 
   return (
-    <Card
-      tone="elevated"
-      style={{
-        gap: space.sm,
-        borderLeftWidth: 3,
-        borderLeftColor: colors.danger,
-      }}
-    >
-      <SectionHeader
-        title="Apoio emocional 24h"
-        subtitle="CVV, Centro de Valorização da Vida"
-      />
+    <Card tone="elevated" style={{ gap: space.sm, padding: 16 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <RowGlyph name="call" color={colors.danger} />
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <Text variant="bodyStrong">Apoio emocional 24h</Text>
+          <Text variant="caption" muted>CVV, Centro de Valorização da Vida</Text>
+        </View>
+      </View>
       <Text variant="body" muted>
         Se o momento está difícil, você pode ligar gratuitamente para o CVV ({CVV_NUMBER}).
         O SunFy organiza a rotina; não substitui atendimento profissional nem emergência

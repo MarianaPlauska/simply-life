@@ -162,7 +162,7 @@ export function WebMoodCheckIn({ needSleep, needMood }: Props)
                 maxWidth: 560,
                 borderRadius: 14,
                 paddingHorizontal: 14,
-                fontSize: 15,
+                fontSize: 16,
                 fontFamily: 'Lexend_400Regular',
                 color: colors.ink,
                 backgroundColor: colors.fill,

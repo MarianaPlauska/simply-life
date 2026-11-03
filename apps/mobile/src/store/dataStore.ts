@@ -45,7 +45,7 @@ import {
   type DumpItem,
   type DumpKind,
 } from '@simply-life/shared'
-import { fetchHumorMes, registrarHumor } from '../lib/sync/humor'
+import { fetchHumorMes, limparNotaHumor, registrarHumor } from '../lib/sync/humor'
 import { createTarefa, fetchTarefas, insertSubtarefa, archiveTarefa, patchTarefa, persistTaskStatus, toggleSubtarefa, updateTarefaDue, updateTarefaStatus } from '../lib/sync/tasks'
 import {
   addDespesa,
@@ -105,6 +105,7 @@ import { loadOfflineBundle, saveOfflineBundle } from '../lib/offlineCache'
 import { supabaseConfigured } from '../lib/supabase'
 import { hapticLight } from '../lib/haptics'
 import { rewardTaskDone } from '../lib/taskReward'
+import { fillAdventureEnergy } from '../lib/adventureEnergy'
 import { useGamificationStore } from './gamificationStore'
 import { useWaterLogStore } from './waterLogStore'
 import { useBodyWeekStore } from './bodyWeekStore'
@@ -171,6 +172,7 @@ type DataState = {
   refreshAll: (opts: { isGuest: boolean }) => Promise<void>
   reset: () => void
   addHumor: (humor: number, nota?: string, isGuest?: boolean) => Promise<void>
+  clearHumorNote: (id: number, isGuest?: boolean) => Promise<void>
   addTask: (
     titulo: string,
     isGuest?: boolean,
@@ -708,6 +710,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       set({ humor: next, lastAxelCare: care })
       await writeOffline(get())
       useActivityStore.getState().markAction('mood')
+      fillAdventureEnergy('mood')
       return
     }
     const saved = await registrarHumor({ humor, nota })
@@ -718,6 +721,21 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     await writeOffline(get())
     useActivityStore.getState().markAction('mood')
+    fillAdventureEnergy('mood')
+  },
+
+  clearHumorNote: async (id, isGuest) =>
+  {
+    const next = get().humor.map((h) => (h.id === id ? { ...h, nota: null } : h))
+    if (useLocal(isGuest))
+    {
+      set({ humor: next })
+      await writeOffline(get())
+      return
+    }
+    await limparNotaHumor(id)
+    set({ humor: next })
+    await writeOffline(get())
   },
 
   addTask: async (titulo, isGuest, notas, extra) =>
@@ -773,7 +791,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     const parsed = opts?.lido && opts.lido.valor > 0
       ? { titulo: opts.lido.titulo.trim() || (opts.tipo === 'receita' ? 'Receita' : 'Gasto'), valor: opts.lido.valor }
       : parseExpenseQuick(text)
-    if (!parsed) return { ok: false, error: 'Informe valor, ex: café 12,50' }
+    if (!parsed) return { ok: false, error: 'Informe valor, ex: lanche 8,00' }
 
     const tipo = opts?.tipo === 'receita' ? 'receita' : 'despesa'
     const formaPagamento = opts?.formaPagamento
@@ -1042,6 +1060,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     useWaterLogStore.getState().recordSip(updated.progressoAtual)
     void saveHabitDay('agua', updated.progressoAtual, { habitoId: updated.id, remote: !useLocal(isGuest), iso: today })
     useActivityStore.getState().markAction('water')
+    fillAdventureEnergy('water')
 
     // aparelho primeiro: o copo nunca se perde se o servidor falhar
     await writeOffline(get())

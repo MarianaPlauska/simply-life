@@ -119,7 +119,7 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
                     paddingTop: 2,
                   }}
                 >
-                  <Text variant="caption" muted style={{ fontSize: 11 }}>
+                  <Text variant="caption" muted style={{ fontSize: 12 }}>
                     {formatTimelineHour(h)}
                   </Text>
                 </View>

@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { safeBack } from '../../lib/safeBack'
 import {
   fetchWeather,
   isWeatherFresh,
@@ -94,7 +95,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <Pressable
-                onPress={() => router.back()}
+                onPress={() => safeBack(router, '/(tabs)')}
                 accessibilityRole="button"
                 accessibilityLabel="Voltar"
                 style={{
@@ -154,7 +155,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
               <Text
                 variant="micro"
                 muted
-                style={{ letterSpacing: 1.4, textTransform: 'uppercase', fontSize: 11 }}
+                style={{ letterSpacing: 1.4, textTransform: 'uppercase', fontSize: 12 }}
               >
                 Céu de hoje
               </Text>
@@ -217,7 +218,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
           <Text
             variant="micro"
             muted
-            style={{ letterSpacing: 1.1, textTransform: 'uppercase', fontSize: 11 }}
+            style={{ letterSpacing: 1.1, textTransform: 'uppercase', fontSize: 12 }}
           >
             % visibilidade
           </Text>
@@ -238,7 +239,7 @@ export function SettingsHero({ title = 'Configurações' }: Props)
                 style={{ flex: 1 }}
               />
             </View>
-            <Text variant="micro" style={{ fontSize: 11, color: colors.ink, paddingLeft: 14 }}>
+            <Text variant="micro" style={{ fontSize: 12, color: colors.ink, paddingLeft: 14 }}>
               {vis}
             </Text>
           </View>
@@ -261,10 +262,10 @@ function MeterLine({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
       <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-        <Text variant="micro" muted style={{ letterSpacing: 0.7, textTransform: 'uppercase', fontSize: 11 }}>
+        <Text variant="micro" muted style={{ letterSpacing: 0.7, textTransform: 'uppercase', fontSize: 12 }}>
           {label}
         </Text>
-        <Text variant="bodyStrong" style={{ fontSize: 15 }} numberOfLines={1}>
+        <Text variant="bodyStrong" style={{ fontSize: 16 }} numberOfLines={1}>
           {value}
         </Text>
       </View>

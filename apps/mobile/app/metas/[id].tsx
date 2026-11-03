@@ -290,7 +290,7 @@ export default function MetaDetailScreen()
                   color: colors.ink,
                   paddingHorizontal: space.md,
                   fontFamily: 'Lexend_500Medium',
-                  fontSize: 18,
+                  fontSize: 19,
                 }}
               />
               <PrimaryButton

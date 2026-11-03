@@ -111,7 +111,7 @@ export function CareStatusList({ onPick, layout = 'list', current }: Props)
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flex: row ? undefined : 1, minWidth: 0 }}>
               <Icon name={c.icon} size={18} color={colors.health} />
-              <Text variant="body" style={{ fontSize: 15 }}>
+              <Text variant="body" style={{ fontSize: 16 }}>
                 {c.label}
               </Text>
             </View>

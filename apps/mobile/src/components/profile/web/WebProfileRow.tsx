@@ -65,7 +65,7 @@ export function WebProfileSection({
           paddingBottom: 6,
           textTransform: 'uppercase',
           letterSpacing: 0.6,
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: '700',
         }}
       >

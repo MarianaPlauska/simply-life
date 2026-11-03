@@ -112,6 +112,7 @@ const METRIC_MODULE: Record<HomeMetricId, AppModuleId> = {
   finance: 'spend',
   goals: 'tasks',
   stats: 'tasks',
+  pledge: 'tasks',
 }
 
 const WIDGET_MODULE: Record<DashboardWidgetId, AppModuleId> = {
@@ -121,6 +122,7 @@ const WIDGET_MODULE: Record<DashboardWidgetId, AppModuleId> = {
   critical_tasks: 'tasks',
   finance_brief: 'spend',
   quick_spend: 'spend',
+  life_pledge: 'tasks',
 }
 
 const PRIORITY_GROUP: Record<DashboardPriority, AppModuleGroup> = {
@@ -131,6 +133,8 @@ const PRIORITY_GROUP: Record<DashboardPriority, AppModuleGroup> = {
 
 export function metricAllowed(enabled: AppModuleId[] | undefined, id: HomeMetricId): boolean
 {
+  // meta de tempo não depende da carteira nem das tarefas do dia
+  if (id === 'pledge') return true
   return isModuleOn(enabled, METRIC_MODULE[id])
 }
 
@@ -141,7 +145,7 @@ export function filterMetrics(enabled: AppModuleId[] | undefined, ids: HomeMetri
 
 export function filterWidgets(enabled: AppModuleId[] | undefined, ids: DashboardWidgetId[]): DashboardWidgetId[]
 {
-  return ids.filter((id) => isModuleOn(enabled, WIDGET_MODULE[id]))
+  return ids.filter((id) => id === 'life_pledge' || isModuleOn(enabled, WIDGET_MODULE[id]))
 }
 
 export function filterPriorities(enabled: AppModuleId[] | undefined, ids: DashboardPriority[]): DashboardPriority[]

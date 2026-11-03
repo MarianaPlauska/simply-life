@@ -324,7 +324,7 @@ export function KanbanRoutinePane()
           />
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             {deskArrow(-1)}
-            <Text style={[LEX.medium, { fontSize: 15, lineHeight: 22, color: colors.ink, minWidth: 180, textAlign: 'center' }]}>
+            <Text style={[LEX.medium, { fontSize: 16, lineHeight: 22, color: colors.ink, minWidth: 180, textAlign: 'center' }]}>
               {weekTitle.charAt(0).toUpperCase() + weekTitle.slice(1)}
             </Text>
             {deskArrow(1)}
@@ -372,7 +372,7 @@ export function KanbanRoutinePane()
                 }}
               >
                 <Icon name="sunny-outline" size={18} color={colors.inkMuted} />
-                <Text style={[LEX.regular, { flex: 1, fontSize: 15, lineHeight: 22, color: colors.inkMuted }]}>
+                <Text style={[LEX.regular, { flex: 1, fontSize: 16, lineHeight: 22, color: colors.inkMuted }]}>
                   Sem rotina ainda. Crie um hábito diário ou uma rotina com vários passos.
                 </Text>
                 {deskBtn('Novo hábito', () => openCreate('habit'), true)}

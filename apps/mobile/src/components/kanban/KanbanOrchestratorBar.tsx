@@ -47,7 +47,7 @@ export function KanbanOrchestratorBar({ tasks }: Props)
           <Text variant="caption" muted style={{ fontWeight: '700' }}>
             Agora
           </Text>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1, fontSize: 15 }}>
+          <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1, fontSize: 16 }}>
             {top.titulo}
           </Text>
           {overdue > 0 ? (

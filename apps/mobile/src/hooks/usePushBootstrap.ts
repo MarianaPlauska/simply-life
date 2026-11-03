@@ -11,7 +11,10 @@ import {
 import { mapPushUrlToRoute } from '../lib/pushDeepLink'
 import {
   addNativePushResponseListener,
+  cancelCuriosityCard,
   getLastNativePushResponse,
+  scheduleCadenceAlerts,
+  scheduleCuriosityCard,
 } from '../lib/pushNotifications'
 
 function navigateFromPush(
@@ -36,19 +39,26 @@ export function usePushBootstrap(): void
 
   useEffect(() =>
   {
-    if (!userId || isGuest || Platform.OS === 'web') return
+    if (!userId || isGuest) return
     if (!prefsLoaded) return
 
     if (notifyCadence === 'off')
     {
       registeredFor.current = null
       void unregisterExpoPushAsync()
+      void cancelCuriosityCard()
+      void scheduleCadenceAlerts('off')
       return
     }
 
     if (registeredFor.current === userId) return
     registeredFor.current = userId
-    void registerExpoPushAsync()
+    // web: sem toque da pessoa, só renova se a permissão já foi dada
+    void registerExpoPushAsync(Platform.OS !== 'web').then((res) =>
+    {
+      if (res.ok) void scheduleCadenceAlerts(notifyCadence || 'off')
+    })
+    if (Platform.OS !== 'web') void scheduleCuriosityCard()
   }, [userId, isGuest, prefsLoaded, notifyCadence])
 
   useEffect(() =>

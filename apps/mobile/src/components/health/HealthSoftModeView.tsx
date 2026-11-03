@@ -1,7 +1,7 @@
-import { Linking, View, StyleSheet } from 'react-native'
+import { Linking, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { CALM_EXERCISES, humorDoDia, localTodayIso, moodColor, moodLabel } from '@simply-life/shared'
-import { Text, PressableScale, PrimaryButton } from '../../ui'
+import { Text, Card, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { Icon, type IconName } from '../../ui/Icon'
 import { Panel } from '../../ui/Panel'
 import { AxelSun } from '../AxelSun'
@@ -15,8 +15,6 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { CrisisSupportCard } from './CrisisSupportCard'
-import { HealthScreenSection } from './HealthScreenSection'
-import { HealthAxelStrip } from './HealthAxelStrip'
 
 type Props = {
   onGoApoio: () => void
@@ -47,79 +45,68 @@ export function HealthSoftModeView({ onGoApoio, onGoDiario }: Props)
     )
   }
 
+  // celular: mesma linguagem das listas do sistema, cores baixas (dia difícil não pede tela gritando)
   return (
-    <View style={{ gap: space.md }}>
-      <HealthAxelStrip message="Hoje pesa. Está tudo bem ir devagar. Só o que couber agora." />
+    <View style={{ gap: space.lg }}>
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph color="transparent"><AxelSun size={30} mood="care" /></RowGlyph>}
+          title="Hoje pesa"
+          subtitle="Está tudo bem ir devagar. Só o que couber agora."
+          subtitleLines={2}
+        />
+      </GroupedList>
 
-      <HealthScreenSection dividerTop>
-        <View style={{ gap: 4 }}>
+      <Card tone="elevated" style={{ gap: space.md, padding: 16 }}>
+        <View style={{ gap: 2 }}>
           <Text variant="caption" muted>Check-in</Text>
-          <Text variant="hero" style={{ fontSize: 28, letterSpacing: -0.8 }}>
-            {moodHeadline}
-          </Text>
-          <Text variant="caption" muted>
-            Pode atualizar se o sentimento mudar.
-          </Text>
+          <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>{moodHeadline}</Text>
+          <Text variant="caption" muted>Pode atualizar se o sentimento mudar.</Text>
         </View>
         <MoodFaceRow
           value={humorHoje?.humor}
           onChange={(m) => void addHumor(m, undefined, isGuest)}
         />
-        <PressableScale onPress={onGoDiario} accessibilityRole="button">
-          <Text variant="caption" color={colors.axel} style={{ fontWeight: '600' }}>
-            Abrir diário completo
-          </Text>
-        </PressableScale>
-      </HealthScreenSection>
+      </Card>
 
-      <HealthScreenSection
-        dividerTop
-        title="Baixar o ritmo"
-        subtitle="Um guia curto. Não precisa fazer os dois."
-      >
-        {CALM_EXERCISES.map((ex, index) =>
-        {
-          const last = index === CALM_EXERCISES.length - 1
-          return (
-            <PressableScale
+      <View style={{ gap: 8 }}>
+        <Text variant="caption" muted style={{ marginLeft: 4 }}>Baixar o ritmo</Text>
+        <GroupedList>
+          {CALM_EXERCISES.map((ex) => (
+            <GroupedRow
               key={ex.id}
-              onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding')}
-            >
-              <View
-                style={{
-                  gap: 6,
-                  paddingVertical: 12,
-                  borderBottomWidth: last ? 0 : StyleSheet.hairlineWidth,
-                  borderBottomColor: colors.hairline,
-                }}
-              >
-                <Text variant="bodyStrong">{ex.title}</Text>
-                <Text variant="caption" muted>
-                  {ex.subtitle}
-                </Text>
-                <Text variant="caption" color={colors.axel}>
-                  Cerca de {ex.durationMin} min
-                </Text>
-              </View>
-            </PressableScale>
-          )
-        })}
-      </HealthScreenSection>
+              leading={<RowGlyph name={calmIcon(ex.route)} color={colors.health} />}
+              title={ex.title}
+              subtitle={`Cerca de ${ex.durationMin} min`}
+              onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding' | '/sobrecarga')}
+            />
+          ))}
+          <GroupedRow
+            leading={<RowGlyph name="book" color={colors.finance} />}
+            title="Abrir diário completo"
+            onPress={onGoDiario}
+          />
+        </GroupedList>
+      </View>
 
-      <HealthScreenSection dividerTop>
-        <CrisisSupportCard compact />
-        <PrimaryButton
-          label="Ver apoio completo"
-          variant="ghost"
+      <CrisisSupportCard compact />
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph name="heart" color={colors.dismiss} />}
+          title="Ver apoio completo"
           onPress={onGoApoio}
         />
-      </HealthScreenSection>
+      </GroupedList>
     </View>
   )
 }
 
 // ícone pelo exercício (rota): respiração e volta ao corpo
-const calmIcon = (route: string): IconName => (route.includes('grounding') ? 'body-outline' : 'leaf-outline')
+const calmIcon = (route: string): IconName =>
+{
+  if (route.includes('sobrecarga')) return 'volume-mute'
+  return route.includes('grounding') ? 'body-outline' : 'leaf-outline'
+}
 
 /**
  * Modo suave no computador: duas colunas compactas e cores baixas (dia difícil não
@@ -226,7 +213,7 @@ function SoftModeDesk({
               {CALM_EXERCISES.map((ex) => (
                 <WebHoverable
                   key={ex.id}
-                  onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding')}
+                  onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding' | '/sobrecarga')}
                   accessibilityLabel={ex.title}
                   style={(hovered) => webStyle({
                     flexDirection: 'row',

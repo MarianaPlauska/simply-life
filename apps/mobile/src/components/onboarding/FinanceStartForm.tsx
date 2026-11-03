@@ -112,7 +112,7 @@ export function FinanceStartForm({ value, onChange, enabled, compact }: Props)
 
       {on('goals') && !compact ? (
         <OnbBlock title="Uma meta para guardar" hint="Reserva, viagem, um curso. Você acompanha em Carteira → Análise.">
-          <Field label="Para quê" value={value.goalTitle} onChangeText={(v) => set({ goalTitle: v })} placeholder="Reserva de emergência" />
+          <Field label="Para quê" value={value.goalTitle} onChangeText={(v) => set({ goalTitle: v })} placeholder="Estante de quadrinhos" />
           <Field
             label="Quanto (R$)"
             keyboardType="decimal-pad"

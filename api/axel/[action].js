@@ -34,7 +34,7 @@ const ROUTES = {
   'process-event': withUser(processEvent, { route: 'process-event', limit: 120 }),
   'finance-coach': withUser(financeCoach, { route: 'finance-coach', limit: 40 }),
   'finance-purchase-check': withUser(financePurchaseCheck, { route: 'finance-purchase-check', limit: 40 }),
-  'fetch-news': fetchNews,
+  'fetch-news': withUser(fetchNews, { route: 'fetch-news', limit: 30, methods: 'GET, OPTIONS' }),
   'generate-greeting': withUser(generateGreeting, { route: 'generate-greeting', limit: 30 }),
   'admin-users': adminUsers,
   'today-verdict': withUser(todayVerdict, { route: 'today-verdict', limit: 40 }),

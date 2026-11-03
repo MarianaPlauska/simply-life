@@ -19,6 +19,7 @@ import { recentKindLabel, recentLabel } from './tccRecent'
 const CALM_ICONS: Record<string, keyof typeof Icon.glyphMap> = {
   box_breathing: 'pulse',
   grounding_54321: 'leaf-outline',
+  sobrecarga: 'volume-mute',
 }
 
 const TCC_ICONS: Record<string, keyof typeof Icon.glyphMap> = {
@@ -105,7 +106,7 @@ export function HealthApoioDesk()
         <View style={{ gap: 12 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
             <Icon name="heart-outline" size={18} color={colors.danger} />
-            <Text variant="section" style={{ fontSize: 18, lineHeight: 26 }}>
+            <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>
               Apoio emocional 24h
             </Text>
           </View>
@@ -131,7 +132,7 @@ export function HealthApoioDesk()
                 title={ex.title}
                 subtitle={ex.subtitle}
                 meta={`${ex.durationMin} min`}
-                onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding')}
+                onPress={() => router.push(ex.route as '/calm/box-breathing' | '/calm/grounding' | '/sobrecarga')}
               />
             ))}
           </View>

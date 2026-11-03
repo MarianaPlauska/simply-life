@@ -7,6 +7,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 const ICONS: Record<string, IconName> = {
   box_breathing: 'pulse',
   grounding_54321: 'leaf-outline',
+  sobrecarga: 'volume-mute',
 }
 
 /**

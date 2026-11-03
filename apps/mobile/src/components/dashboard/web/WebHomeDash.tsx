@@ -14,7 +14,7 @@ import {
 import { Text } from '../../../ui'
 import { Icon, type IconName } from '../../../ui/Icon'
 import { ProgressRing } from '../../../ui/ProgressRing'
-import { AxelSun } from '../../AxelSun'
+import { AxelFaceSun } from '../../play/AxelFaceSun'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { webBandColor } from '../../../theme/webPalette'
 import { useDataStore } from '../../../store/dataStore'
@@ -24,6 +24,7 @@ import { useElo } from '../../../hooks/useElo'
 import { WebHoverable } from './WebHoverable'
 import { webStyle } from './webStyle'
 import { WEB_DISPLAY_FONT } from './webTypography'
+import { HomeXpBar } from '../../play/HomeXpBar'
 
 /*
  * Início da web como painel de bem-estar (não a pilha do app): destaque grande do Axel
@@ -76,12 +77,13 @@ export function DashGreeting({ greet, name, dateLabel, onMore }: { greet: string
       <View style={{ gap: 4 }}>
         <Text variant="caption" muted>{greet},</Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, color: colors.ink }}>{name}</Text>
+          <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, color: colors.ink }}>{name}</Text>
           <Icon name="sunny" size={20} color={colors.attention} />
         </View>
         <Text variant="caption" muted>Uma coisa de cada vez. Você está indo bem.</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <HomeXpBar />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 40, paddingHorizontal: 14, borderRadius: 999, backgroundColor: colors.elevated, borderWidth: 1, borderColor: colors.cardRim }}>
           <Icon name="calendar-outline" size={15} color={colors.inkMuted} />
           <Text variant="caption">{dateLabel}</Text>
@@ -147,8 +149,8 @@ export function DashHero()
     >
       <View style={{ flex: 1, gap: 10, minWidth: 0, zIndex: 1 }}>
         <Text style={{ fontSize: 13, fontFamily: 'Lexend_600SemiBold', color: creamSoft }}>Axel</Text>
-        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 34, color: cream }}>{brief.headline}</Text>
-        <Text numberOfLines={2} style={{ fontSize: 14, lineHeight: 21, fontFamily: 'Lexend_400Regular', color: creamSoft, maxWidth: 520 }}>
+        <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 34, color: cream }}>{brief.headline}</Text>
+        <Text numberOfLines={2} style={{ fontSize: 14, lineHeight: 36, fontFamily: 'Lexend_400Regular', color: creamSoft, maxWidth: 520 }}>
           {brief.voice}
         </Text>
         {step ? (
@@ -202,7 +204,7 @@ export function DashHero()
             style={{ position: 'absolute', width: d, height: d, borderRadius: 999, backgroundColor: `${colors.onBrand}0F` }}
           />
         ))}
-        <AxelSun size={76} mood={moodLevel != null && moodLevel <= 2 ? 'care' : moodLevel != null && moodLevel >= 4 ? 'happy' : 'calm'} />
+        <AxelFaceSun size={76} />
       </View>
     </View>
   )
@@ -310,7 +312,7 @@ export function DashWellness({ doneToday, totalToday, onCustomize }: { doneToday
               <Icon name={it.icon} size={15} color={it.color} />
             </View>
             <View style={{ gap: 2 }}>
-              <Text numberOfLines={1} style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 21, lineHeight: 28, color: colors.ink }}>{it.value}</Text>
+              <Text numberOfLines={1} style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 19, lineHeight: 28, color: colors.ink }}>{it.value}</Text>
               <Text variant="caption" muted numberOfLines={1}>{it.unit ? `${it.label} · ${it.unit}` : it.label}</Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -466,7 +468,7 @@ export function DashForYou()
             </View>
             <View style={{ padding: 14, gap: 4, flexDirection: 'row', alignItems: 'center' }}>
               <View style={{ flex: 1, gap: 4 }}>
-                <Text variant="bodyStrong" style={{ fontSize: 15 }}>{c.title}</Text>
+                <Text variant="bodyStrong" style={{ fontSize: 16 }}>{c.title}</Text>
                 <Text variant="caption" muted numberOfLines={2}>{c.text}</Text>
               </View>
               <Icon name="chevron-forward" size={16} color={colors.inkMuted} />

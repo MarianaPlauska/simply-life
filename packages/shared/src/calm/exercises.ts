@@ -1,6 +1,6 @@
 /** Exercícios de acalmar — opt-in, sem gamificação, não substituem emergência. */
 
-export type CalmExerciseId = 'box_breathing' | 'grounding_54321'
+export type CalmExerciseId = 'box_breathing' | 'grounding_54321' | 'sobrecarga'
 
 export type CalmExercise = {
   id: CalmExerciseId
@@ -24,6 +24,13 @@ export const CALM_EXERCISES: CalmExercise[] = [
     subtitle: '5 coisas que vê, 4 que sente, 3 sons, 2 cheiros, 1 sabor. Traz o corpo de volta.',
     durationMin: 2,
     route: '/calm/grounding',
+  },
+  {
+    id: 'sobrecarga',
+    title: 'Está demais',
+    subtitle: 'Um roteiro curto para sobrecarga. Não é emergência e não entra na pontuação.',
+    durationMin: 3,
+    route: '/sobrecarga',
   },
 ]
 

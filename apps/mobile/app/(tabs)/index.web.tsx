@@ -4,34 +4,31 @@ import { Modal } from '../../src/ui/Modal'
 import { useRouter } from 'expo-router'
 import {
   partitionTodayTimeline,
-  monthExpenseTotal,
   findHabit,
-  moodLabel,
   humorDoDia,
-  AGUA_META_COPOS,
-  classifyDueBucket,
+  priorityTodayTasks,
 } from '@simply-life/shared'
-import { Screen, Text, Card, PrimaryButton, ListRow, SectionHeader } from '../../src/ui'
+import { Screen, Text, Card, ListRow, SectionHeader, GroupedList, GroupedRow, RowGlyph } from '../../src/ui'
+import { MoreMenuExit } from '../../src/components/dashboard/MoreMenuExit'
 import { useTheme } from '../../src/theme/ThemeProvider'
 import { useAuthStore } from '../../src/store/authStore'
 import { useDataStore } from '../../src/store/dataStore'
+import { AxelSun } from '../../src/components/AxelSun'
 import { HomeFitnessHero } from '../../src/components/dashboard/HomeFitnessHero'
-import { HomeWaterProgressCard } from '../../src/components/dashboard/HomeWaterProgressCard'
+import { HomePlay } from '../../src/components/play/HomePlay'
+import { AdventureHud } from '../../src/components/play/AdventureHud'
+import { AdventureStage } from '../../src/components/play/AdventureStage'
 import { HomeMorningRitual } from '../../src/components/dashboard/HomeMorningRitual'
-import { AxelDayBrief } from '../../src/components/dashboard/HomeDriveAside'
 import { MoodWeekReportGate, isMoodWeekReportVisible } from '../../src/components/dashboard/MoodWeekReportCard'
 import { DayPlanHomeCard } from '../../src/components/rhythm/DayPlanHomeCard'
-import { VisualDayCard } from '../../src/components/rhythm/VisualDayCard'
+import { CareHomeStrip } from '../../src/components/care/CareHomeStrip'
 import { SalaryConfirmCard } from '../../src/components/finance/FinanceForecastCards'
 import { HomeMetricShortcuts } from '../../src/components/dashboard/HomeMetricShortcuts'
-import { HomeKpiSquares } from '../../src/components/dashboard/HomeKpiSquares'
-import { HomeDayTimeline } from '../../src/components/dashboard/HomeDayTimeline'
-import { HomeTodayDashboard } from '../../src/components/dashboard/HomeTodayDashboard'
-import { HomeCollapsible } from '../../src/components/dashboard/HomeCollapsible'
-import { EloHeatmap } from '../../src/components/streak/EloHeatmap'
+import { HomeNowCard } from '../../src/components/dashboard/HomeNowCard'
+import { HomeDayList } from '../../src/components/dashboard/HomeDayList'
 import { TabShell, DESKTOP_PAD_H } from '../../src/components/dashboard/TabShell'
 import { Panel } from '../../src/ui/Panel'
-import { type WebStatItem } from '../../src/components/dashboard/web/WebStatRow'
+import { useActionableTasks } from '../../src/hooks/useActionableTasks'
 import { WebAgendaBlock, WebBillsBlock, WebCategoryBlock } from '../../src/components/dashboard/web/WebHomeBlocks'
 import { DashGreeting, DashHero, DashProgress, DashWellness, DashQuickActions, DashUpcoming, DashForYou, DashFooter } from '../../src/components/dashboard/web/WebHomeDash'
 import { WEB_DISPLAY_FONT } from '../../src/components/dashboard/web/webTypography'
@@ -77,26 +74,23 @@ export default function DashboardScreenWeb()
   const loading = useDataStore((s) => s.loading)
   const refreshAll = useDataStore((s) => s.refreshAll)
   const prefs = usePrefsStore((s) => s.prefs)
+  const rpgMode = prefs.gamification_mode === 'rpg'
   const financeOn = useModules().group('carteira')
   const hydratePrefs = usePrefsStore((s) => s.hydrate)
 
   const today = useMemo(() => partitionTodayTimeline(tasks), [tasks])
   const todayIso = new Date().toISOString().slice(0, 10)
-  const openTasks = useMemo(() => tasks.filter((t) => t.status !== 'done'), [tasks])
   const doneToday = useMemo(
     () => tasks.filter((t) => t.status === 'done' && t.dataVencimento?.slice(0, 10) === todayIso).length,
     [tasks, todayIso],
   )
-  const overdueToday = useMemo(
-    () => openTasks.filter((t) => classifyDueBucket(t.dataVencimento, t.status) === 'vencido').length,
-    [openTasks],
+  const actionable = useActionableTasks(tasks)
+  const focusTask = useMemo(
+    () => priorityTodayTasks(actionable, new Date(), 1)[0]?.task ?? null,
+    [actionable],
   )
-  const gastosMes = monthExpenseTotal(finance) ?? 0
-  const agua = findHabit(habits, 'agua')
   const sono = findHabit(habits, 'sono')
-  const waterLabel = agua ? `${agua.progressoAtual}/${agua.metaDiaria ?? AGUA_META_COPOS}` : '-'
   const homeMetrics = filterMetrics(prefs.enabled_modules, normalizeHomeMetrics(prefs.home_metric_cards))
-  const waterOnHome = homeMetrics.includes('water')
   const humorOnHome = homeMetrics.includes('humor')
   const sleepOnHome = homeMetrics.includes('sleep')
   const isMorning = new Date().getHours() < 14
@@ -107,7 +101,7 @@ export default function DashboardScreenWeb()
   const showMoodForm = humorOnHome && !moodDone
   const showMorningRitual = showSleepForm || showMoodForm
   const showMoodWeek = isMoodWeekReportVisible(humor, prefs.mood_report_dismissed_week)
-  const showCareSection = waterOnHome || showMoodWeek
+  const showCareSection = showMorningRitual || showMoodWeek
 
   const [menuOpen, setMenuOpen] = useState(false)
   const name = resolveAxelName({
@@ -128,53 +122,6 @@ export default function DashboardScreenWeb()
     void hydratePrefs()
     void refreshAdminFlag()
   }, [hydratePrefs, refreshAdminFlag])
-
-  const statItems: WebStatItem[] = [
-    {
-      id: 'tasks',
-      label: 'Tarefas abertas',
-      value: String(openTasks.length),
-      hint: overdueToday > 0 ? `${overdueToday} atrasada${overdueToday === 1 ? '' : 's'}` : undefined,
-      icon: 'checkbox-outline',
-      color: colors.tasks,
-      onPress: () => router.push('/(tabs)/kanban'),
-    },
-    {
-      id: 'done',
-      label: 'Feitas hoje',
-      value: String(doneToday),
-      icon: 'checkmark-circle-outline',
-      color: colors.axel,
-      onPress: () => router.push('/(tabs)/kanban'),
-    },
-    {
-      id: 'mood',
-      label: 'Humor de hoje',
-      value: humorHoje != null ? moodLabel(humorHoje) : 'Pendente',
-      icon: 'happy-outline',
-      color: colors.health,
-      onPress: () => router.push('/(tabs)/saude'),
-    },
-    {
-      id: 'finance',
-      label: 'Gastos no mês',
-      value:
-        gastosMes >= 1000
-          ? `${(gastosMes / 1000).toFixed(1).replace('.', ',')} mil`
-          : gastosMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }),
-      icon: 'wallet-outline',
-      color: colors.finance,
-      onPress: () => router.push('/(tabs)/financeiro'),
-    },
-    {
-      id: 'water',
-      label: 'Hidratação',
-      value: waterLabel === '-' ? 'Sem meta' : `${waterLabel} copos`,
-      icon: 'water-outline',
-      color: colors.health,
-      onPress: () => router.push('/(tabs)/saude'),
-    },
-  ]
 
   // Menu da conta: precisa existir nas duas composições (estreita e desktop)
   const accountMenu = (
@@ -215,25 +162,28 @@ export default function DashboardScreenWeb()
           <Card tone="elevated" style={{ paddingVertical: space.xs, borderRadius: 20 }}>
             {(
               [
+                { label: 'Apoio do dia', subtitle: 'Energia, burnout, lugares e espera de gasto', href: '/apoio' },
                 { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
                 { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
+                { label: 'Seu AXEL', subtitle: 'Formas, roupas e o jogo', href: '/seu-axel' },
+                { label: 'Mais do dia', subtitle: 'Plano, mapas e resumos', href: '/mais-do-dia' },
                 { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },
                 { label: 'Personalizar Início', subtitle: 'Atalhos da Home', href: '/personalizar-inicio' },
                 { label: 'Preferências', subtitle: 'O que eu uso, metas e alertas', href: '/preferencias' },
                 { label: 'Relatórios', subtitle: 'Resumos semanais', href: '/relatorios' },
                 { label: 'Calendário', subtitle: 'Agenda visual', href: '/calendario' },
                 { label: 'Anotações', subtitle: 'Notas rápidas', href: '/anotacoes' },
-                { label: 'Elo', subtitle: 'Dias seguidos, álbum e prêmios', href: '/ofensiva' },
+                { label: 'Elo', subtitle: 'Dias seguidos. O placar de pontos fica no Perfil.', href: '/ofensiva' },
                 { label: 'Relatório', subtitle: 'Tudo de um período, em PDF', href: '/relatorio' },
                 { label: 'Modo foco', subtitle: 'Timer e prioridade', href: '/foco' },
               ] as const
-            ).map((item, i, arr) => (
+            ).map((item) => (
               <ListRow
                 key={item.href}
                 title={item.label}
                 subtitle={item.subtitle}
                 right="›"
-                showSeparator={i < arr.length - 1}
+                showSeparator
                 onPress={() =>
                 {
                   setMenuOpen(false)
@@ -241,18 +191,37 @@ export default function DashboardScreenWeb()
                 }}
               />
             ))}
+            <ListRow
+              title="Hábitos"
+              subtitle="Marque o dia. A semana fica na fileira."
+              right="›"
+              showSeparator
+              onPress={() =>
+              {
+                setMenuOpen(false)
+                router.push('/habitos' as never)
+              }}
+            />
+            <ListRow
+              title="Metas importantes"
+              subtitle="Um ano sem beber, se for o seu caso."
+              right="›"
+              onPress={() =>
+              {
+                setMenuOpen(false)
+                router.push('/metas-vida' as never)
+              }}
+            />
           </Card>
-          <PrimaryButton
-            label="Sair"
-            variant="ghost"
-            onPress={() =>
+          <MoreMenuExit
+            onClose={() => setMenuOpen(false)}
+            onSignOut={() =>
             {
               setMenuOpen(false)
               void signOut()
               router.replace('/login')
             }}
           />
-          <PrimaryButton label="Fechar" variant="dismiss" onPress={() => setMenuOpen(false)} />
         </ScrollView>
       </View>
     </Modal>
@@ -265,56 +234,42 @@ export default function DashboardScreenWeb()
       <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
         <TabShell>
           <HomeFitnessHero greet={greet} name={name} dateLabel={dateLabel} isAdmin={isAdmin} onAccount={() => setMenuOpen(true)} />
-          <HomeTodayDashboard
-            tasks={tasks}
-            finance={finance}
-            pending={openTasks.length}
-            doneToday={doneToday}
-            ritualSlot={
-              showMorningRitual ? (
-                <HomeMorningRitual needSleep={showSleepForm} needMood={showMoodForm} />
-              ) : null
-            }
-          />
-          {/* Abaixo do destaque, seções: um painel por assunto, blocos separados por linha */}
-          <View>
-            <SectionHeader title="Agora" />
-            <Panel>
-              <AxelDayBrief />
-              <DayPlanHomeCard />
-              <VisualDayCard />
-              <SalaryConfirmCard />
-            </Panel>
-          </View>
+          {rpgMode ? <AdventureHud /> : null}
+          {rpgMode ? <AdventureStage /> : null}
+          <HomeMetricShortcuts />
+          <HomeNowCard task={focusTask} />
+          <SalaryConfirmCard />
+          <HomeDayList />
 
           {showCareSection ? (
-            <View>
-              <SectionHeader title="Cuidar de você" />
-              <Panel>
-                {waterOnHome ? <HomeWaterProgressCard /> : null}
-                {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
-              </Panel>
+            <View style={{ gap: 12 }}>
+              <Text variant="section">Cuidar de você</Text>
+              {showMorningRitual ? (
+                <HomeMorningRitual needSleep={showSleepForm} needMood={showMoodForm} />
+              ) : null}
+              {showMoodWeek ? <MoodWeekReportGate humor={humor} /> : null}
             </View>
           ) : null}
 
-          {/* O que é consulta fica recolhido: a tela abre só com o que importa agora */}
-          <HomeCollapsible title="Mais do seu dia" subtitle="Linha do dia, mapa de dias e atalhos" pill="abrir" defaultOpen={false}>
-            <View style={{ gap: 24, paddingTop: 8 }}>
-              <HomeDayTimeline tasks={today} />
-              <HomeKpiSquares
-                items={statItems.slice(0, 4).map((s) => ({
-                  id: s.id,
-                  label: s.label,
-                  value: s.value,
-                  icon: s.icon,
-                  color: s.color,
-                  onPress: s.onPress,
-                }))}
+          <View style={{ gap: 8 }}>
+            <Text variant="caption" muted style={{ marginLeft: 4 }}>
+              Quando quiser entender
+            </Text>
+            <GroupedList>
+              <GroupedRow
+                leading={<RowGlyph color="transparent"><AxelSun size={30} mood="calm" /></RowGlyph>}
+                title="Seu AXEL"
+                subtitle="Como o app funciona, o jogo e os ícones"
+                onPress={() => router.push('/seu-axel')}
               />
-              <EloHeatmap semanas={12} compact />
-              <HomeMetricShortcuts />
-            </View>
-          </HomeCollapsible>
+              <GroupedRow
+                leading={<RowGlyph name="layers" color={colors.brandDeep} />}
+                title="Mais do dia"
+                subtitle="Plano, mapas e os resumos"
+                onPress={() => router.push('/mais-do-dia')}
+              />
+            </GroupedList>
+          </View>
         </TabShell>
         {accountMenu}
       </Screen>
@@ -352,10 +307,15 @@ export default function DashboardScreenWeb()
     <Screen wide scroll refreshing={loading} onRefresh={() => void refreshAll({ isGuest })}>
       <TabShell>
         <DashGreeting greet={greet} name={name} dateLabel={dateLabel} onMore={() => setMenuOpen(true)} />
+        {rpgMode ? <AdventureHud /> : null}
+        <HomePlay />
+        {rpgMode ? <AdventureStage /> : null}
+        <HomeMetricShortcuts />
 
         {/* avisos que só aparecem às vezes */}
         <SalaryConfirmCard />
         <DayPlanHomeCard />
+        <CareHomeStrip />
         <MoodWeekReportGate humor={humor} />
 
         <View

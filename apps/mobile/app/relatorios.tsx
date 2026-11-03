@@ -68,7 +68,7 @@ export default function RelatoriosScreen()
             </Text>
           ) : (
             <>
-              <Text variant="title" style={{ fontSize: 22 }}>
+              <Text variant="title" style={{ fontSize: 24 }}>
                 Média {moodWeek.avg.toFixed(1)} / 5
               </Text>
               <Text variant="caption" muted>

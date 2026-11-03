@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { formatMinutesPt, nowAndNext, type DayBlock } from '@simply-life/shared'
-import { Card, Text, PrimaryButton } from '../../ui'
+import { Card, Text, PrimaryButton, GroupedList, GroupedRow, RowGlyph } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useNeuroStore } from '../../store/neuroStore'
+import { useCareExtrasStore } from '../../store/careExtrasStore'
 import { useAgendaPromptStore, useShowAgendaPrompt } from '../../store/agendaPromptStore'
 import { useWebDesk } from '../dashboard/web/webBox'
 import { useMinuteClock, useVisualDay } from '../../hooks/useTodayVisualDay'
@@ -18,6 +19,8 @@ const KIND_META: Record<DayBlock['kind'], { icon: keyof typeof Icon.glyphMap; la
   compromisso: { icon: 'time-outline', label: 'Horário marcado' },
   tarefa: { icon: 'ellipse-outline', label: 'Sugerido pelo Axel' },
   pausa: { icon: 'cafe-outline', label: 'Pausa' },
+  troca: { icon: 'time-outline', label: 'Tempo para trocar' },
+  espera: { icon: 'time-outline', label: 'Até o compromisso' },
 }
 
 /**
@@ -33,6 +36,8 @@ export function VisualDayCard()
   const webDesk = useWebDesk()
   const day = useVisualDay(undefined, now)
   const maxVisible = useNeuroStore((s) => s.maxVisibleTasks)
+  const buffer = useCareExtrasStore((s) => s.transitionBufferMin)
+  const setBuffer = useCareExtrasStore((s) => s.setTransitionBuffer)
   const source = useCalendarStore((s) => s.source)
   const [expanded, setExpanded] = useState(false)
   const showAgendaPrompt = useShowAgendaPrompt() && !source
@@ -44,6 +49,32 @@ export function VisualDayCard()
   // sem nada no dia, o card só aparece para convidar a conectar a agenda; com agenda
   // conectada ou depois de "Conectar depois", ele some em vez de mostrar um card vazio
   if (nothing && !showAgendaPrompt) return null
+
+  if (nothing)
+  {
+    return (
+      <GroupedList>
+        <GroupedRow
+          leading={<RowGlyph name="calendar" color={colors.tasks} />}
+          title="Conectar agenda"
+          subtitle="O Axel encaixa as tarefas entre seus compromissos"
+          subtitleLines={2}
+          onPress={() => router.push('/agenda')}
+          chevron={false}
+          trailing={(
+            <Pressable
+              onPress={snoozeAgenda}
+              accessibilityLabel="Conectar depois"
+              hitSlop={8}
+              style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name="close" size={18} color={colors.inkFaint} />
+            </Pressable>
+          )}
+        />
+      </GroupedList>
+    )
+  }
 
   return (
     <Card tone="elevated" style={{ gap: space.sm }}>
@@ -125,6 +156,12 @@ export function VisualDayCard()
             onPress={() => setExpanded(!expanded)}
           />
         ) : null}
+        <PrimaryButton
+          label={buffer > 0 ? `Troca de ${buffer} min ligada` : 'Reservar tempo de troca'}
+          variant="ghost"
+          size="sm"
+          onPress={() => setBuffer(buffer > 0 ? 0 : 10)}
+        />
         <PrimaryButton label="Ajustar ao meu jeito" variant="ghost" size="sm" onPress={() => router.push('/meu-jeito')} />
       </View>
     </Card>
@@ -153,7 +190,7 @@ function NowBlock({ block, nowMin, onStart }: { block: DayBlock; nowMin: number;
         <Text variant="caption" muted style={{ flex: 1 }}>Agora · {meta.label}</Text>
         <Text variant="caption" muted>{hhmm(block.inicio)} às {hhmm(block.fim)}</Text>
       </View>
-      <Text variant="title" style={{ fontSize: 20 }}>{block.titulo}</Text>
+      <Text variant="title" style={{ fontSize: 19 }}>{block.titulo}</Text>
       {/* tempo visível (cegueira temporal): barra que enche + minutos restantes em texto */}
       <View
         accessibilityLabel={`Restam ${left} minutos`}

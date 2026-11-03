@@ -17,6 +17,7 @@ import { useWorkspace } from '../../layout/useWorkspace'
 import { MoodFaceRow } from '../MoodFace'
 import { resolveDashboardWidgets, type DashboardWidgetId } from '../../lib/dashboardWidgets'
 import { filterWidgets } from '../../lib/appModules'
+import { PledgeWidget } from './PledgeWidget'
 
 function WellbeingWidget()
 {
@@ -205,6 +206,8 @@ function WidgetById({ id }: { id: DashboardWidgetId })
     case 'finance_brief':
     case 'quick_spend':
       return <FinanceWidget />
+    case 'life_pledge':
+      return <PledgeWidget />
     default:
       return null
   }

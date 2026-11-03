@@ -31,6 +31,8 @@ type AuthState = {
     password: string,
     nome?: string,
   ) => Promise<{ error?: string; needsConfirm?: boolean }>
+  verifyEmailCode: (email: string, code: string) => Promise<{ error?: string }>
+  resendSignupEmail: (email: string) => Promise<{ error?: string }>
   resetPassword: (email: string) => Promise<{ error?: string }>
   verifyRecoveryInput: (email: string, rawInput: string) => Promise<{ error?: string }>
   updatePassword: (password: string) => Promise<{ error?: string }>
@@ -46,6 +48,13 @@ const FOUNDER_ADMIN_EMAILS = new Set([
   'marianaplauska.c@gmail.com',
   'marianaplauska.cf@gmail.com',
 ])
+
+/** A conta de fundadora é admin mesmo se o banco ainda não marcou is_admin. */
+export function isFounderEmail(email: string | null | undefined): boolean
+{
+  const normalized = email?.trim().toLowerCase()
+  return Boolean(normalized && FOUNDER_ADMIN_EMAILS.has(normalized))
+}
 
 /** Traduz mensagens de erro do Supabase Auth (GoTrue) para PT-BR claro. */
 export function translateAuthError(raw: string): string
@@ -97,8 +106,28 @@ export function translateAuthError(raw: string): string
   return msg
 }
 
+async function sessionEmail(): Promise<string | null>
+{
+  try
+  {
+    const { data } = await supabase.auth.getSession()
+    return data.session?.user?.email?.toLowerCase() ?? null
+  }
+  catch
+  {
+    return null
+  }
+}
+
 async function loadIsAdmin(userId: string): Promise<boolean>
 {
+  // A sessão já tem o e-mail. Não espera o banco nem um getUser que pode travar.
+  const known = await sessionEmail()
+  if (known && FOUNDER_ADMIN_EMAILS.has(known))
+  {
+    return true
+  }
+
   try
   {
     const { data: rpcAdmin, error: rpcError } = await supabase.rpc('is_admin_user')
@@ -187,15 +216,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return { needsMfa: true }
     }
 
-    const admin = await loadIsAdmin(user.id)
+    const email = user.email ?? null
+    const founder = isFounderEmail(email)
     set({
       isGuest: false,
       userId: user.id,
-      sessionEmail: user.email ?? null,
-      isAdmin: admin,
+      sessionEmail: email,
+      isAdmin: founder,
       mfaPendingFactorId: null,
       ready: true,
     })
+    const admin = founder || await loadIsAdmin(user.id)
+    if (get().userId === user.id) set({ isAdmin: admin })
     return {}
   },
 
@@ -257,6 +289,40 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return get().applySession()
     }
     return { needsConfirm: true }
+  },
+
+  verifyEmailCode: async (email, code) =>
+  {
+    if (!supabaseConfigured) return { error: 'Confirmação indisponível offline.' }
+    const token = code.replace(/\D/g, '')
+    if (token.length < 6) return { error: 'Digite os 6 números do e-mail.' }
+    const signup = await supabase.auth.verifyOtp({
+      email: email.trim(),
+      token,
+      type: 'signup',
+    })
+    if (signup.error)
+    {
+      const magic = await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token,
+        type: 'email',
+      })
+      if (magic.error) return { error: translateAuthError(magic.error.message) }
+    }
+    return get().applySession()
+  },
+
+  resendSignupEmail: async (email) =>
+  {
+    if (!supabaseConfigured) return { error: 'Reenvio indisponível offline.' }
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: { emailRedirectTo: buildAuthCallbackUrl(appOrigin(), '/auth/callback') },
+    })
+    if (error) return { error: translateAuthError(error.message) }
+    return {}
   },
 
   resetPassword: async (email) =>
@@ -502,6 +568,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   {
     const uid = get().userId
     if (!uid || get().isGuest) return
+    if (isFounderEmail(get().sessionEmail))
+    {
+      set({ isAdmin: true })
+      return
+    }
     const admin = await loadIsAdmin(uid)
     set({ isAdmin: admin })
   },

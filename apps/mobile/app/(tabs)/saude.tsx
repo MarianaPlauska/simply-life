@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
-import { useLocalSearchParams } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Screen, SubNavTabs } from '../../src/ui'
 import { useDataStore } from '../../src/store/dataStore'
 import { useAuthStore } from '../../src/store/authStore'
@@ -36,6 +36,7 @@ export default function SaudeScreen()
   const careTabs = visibleCuidadosTabs(modules.on)
   // computador: as abas principais ficam na barra lateral, como subitens de Saúde
   const desk = useWebDesk()
+  const router = useRouter()
   usePublishSectionTabs('saude', mainTabs)
 
   // aba escolhida que ficou escondida: vai para a primeira que aparece
@@ -61,13 +62,16 @@ export default function SaudeScreen()
     {
       setCuidadosTab(care)
       setSection('cuidados')
+      if (!desk) router.push(`/cuidado/${care}` as never)
     }
   }, [params.section, params.care])
 
   const goCuidados = (tab: CuidadosTab) =>
   {
     setCuidadosTab(tab)
-    setSection('cuidados')
+    // celular: o cuidado abre em tela propria; no computador fica ao lado da lista
+    if (desk) setSection('cuidados')
+    else router.push(`/cuidado/${tab}` as never)
   }
 
   const goApoio = () => setSection('apoio')
@@ -87,7 +91,14 @@ export default function SaudeScreen()
         {desk ? null : (
           <SubNavTabs
             accent="health"
-            tabs={mainTabs}
+            tabs={mainTabs.map((t) => ({
+              ...t,
+              icon:
+                t.id === 'diario' ? 'book' as const
+                  : t.id === 'hoje' ? 'sunny' as const
+                    : t.id === 'cuidados' ? 'heart' as const
+                      : 'leaf' as const,
+            }))}
             value={section}
             onChange={setSection}
           />

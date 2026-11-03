@@ -21,7 +21,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
   const { colors } = useTheme()
   const tint = danger ? colors.danger : (accent ?? colors.axel)
   const badgeBg = danger
-    ? 'rgba(224,122,106,0.12)'
+    ? colors.dangerMuted
     : accent
       ? `${accent}22`
       : colors.axelMuted
@@ -55,7 +55,7 @@ export function ProfileSettingsRow({ icon, label, value, onPress, danger, accent
       </View>
       <Text
         variant="bodyStrong"
-        style={{ flex: 1, fontSize: 15, color: danger ? colors.danger : colors.ink }}
+        style={{ flex: 1, fontSize: 16, color: danger ? colors.danger : colors.ink }}
       >
         {label}
       </Text>
@@ -109,7 +109,7 @@ export function ProfileSection({
           paddingHorizontal: 4,
           textTransform: 'uppercase',
           letterSpacing: 0.4,
-          fontSize: 11,
+          fontSize: 12,
         }}
       >
         {title}

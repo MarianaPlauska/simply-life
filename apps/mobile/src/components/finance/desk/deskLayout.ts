@@ -41,7 +41,7 @@ export function useDeskMicro(): 'label' | 'micro'
   return useWebDesk() ? 'label' : 'micro'
 }
 
-/** Tamanho do número grande (Fraunces) nos blocos: menor quando a coluna é estreita. */
+/** Tamanho do número grande nos blocos: menor quando a coluna é estreita. */
 export function useDeskBigNumber(): { fontSize: number; lineHeight: number }
 {
   const { width } = useWorkspace()

@@ -39,7 +39,7 @@ export function WebTodayAgenda({ tasks, overdueCount }: Props)
         }}
       >
         <View style={{ gap: 4 }}>
-          <Text variant="section" style={{ fontSize: 18 }}>
+          <Text variant="section" style={{ fontSize: 19 }}>
             Agenda de hoje
           </Text>
           <Text variant="caption" muted>

@@ -9,6 +9,8 @@ import { StackHeader } from '../src/components/layout/StackHeader'
 import { MfaEnrollPanel } from '../src/components/auth/MfaEnrollPanel'
 import { AdminUsersPanel } from '../src/components/auth/AdminUsersPanel'
 import { GamificationPanel } from '../src/components/dashboard/GamificationPanel'
+import { AvatarIconPicker } from '../src/components/profile/AvatarIconPicker'
+import { gamificationLevel } from '../src/store/gamificationStore'
 import { PersonalSummaryGrid } from '../src/components/dashboard/PersonalSummaryGrid'
 import { ChamaAlbumCard, PersonalDivisionCard, WalletRow } from '../src/components/rewards/TrilhaCards'
 import {
@@ -17,7 +19,7 @@ import {
 } from '../src/components/profile/ProfileSettingsRow'
 import { BRAND, COLOR_DARK } from '@simply-life/ui-tokens'
 import { useTheme } from '../src/theme/ThemeProvider'
-import { useAuthStore } from '../src/store/authStore'
+import { isFounderEmail, useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
 import { resolveAxelName } from '../src/lib/axelName'
@@ -35,13 +37,17 @@ export default function PerfilScreen()
   const userId = useAuthStore((s) => s.userId)
   const email = useAuthStore((s) => s.sessionEmail)
   const isGuest = useAuthStore((s) => s.isGuest)
-  const isAdmin = useAuthStore((s) => s.isAdmin)
+  const isAdminStored = useAuthStore((s) => s.isAdmin)
+  const isAdmin = isAdminStored || isFounderEmail(email)
   const signOut = useAuthStore((s) => s.signOut)
   const refreshAdmin = useAuthStore((s) => s.refreshAdminFlag)
   const prefs = usePrefsStore((s) => s.prefs)
   const patch = usePrefsStore((s) => s.patch)
   const hydrate = usePrefsStore((s) => s.hydrate)
   const history = useGamificationStore((s) => s.history)
+  const totalXp = useGamificationStore((s) => s.totalXp)
+  const owned = useGamificationStore((s) => s.owned)
+  const level = gamificationLevel(totalXp).level
   const [sheet, setSheet] = useState<Sheet>(null)
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -83,7 +89,7 @@ export default function PerfilScreen()
 
   return (
     <Screen scroll tabBarInset={false}>
-      <StackHeader title="Perfil" subtitle="Conta, acessibilidade e sync" />
+      <StackHeader title="Perfil" subtitle="Seus dados, seu ícone e o app" />
 
       <View style={{ gap: space.lg }}>
         {/* Hero avatar - ref perfil com anel pontilhado suave */}
@@ -144,7 +150,7 @@ export default function PerfilScreen()
             </Pressable>
           </View>
           <View style={{ alignItems: 'center', gap: 6 }}>
-            <Text variant="title" style={{ fontSize: 22 }}>
+            <Text variant="title" style={{ fontSize: 24 }}>
               {displayName}
             </Text>
             <Text variant="caption" muted>
@@ -161,15 +167,7 @@ export default function PerfilScreen()
           </View>
         </View>
 
-        <PersonalSummaryGrid />
-
-        {/* trilha: divisão da semana, álbum e histórico */}
-        <WalletRow />
-        <PersonalDivisionCard />
-        <ChamaAlbumCard />
-
-        {/* Dados - prontos para sync nuvem */}
-        <ProfileSection title="Dados">
+        <ProfileSection title="Você">
           <ProfileSettingsRow
             icon="mail-outline"
             label="E-mail"
@@ -203,32 +201,76 @@ export default function PerfilScreen()
             accent={colors.axel}
             onPress={() => setSheet('nome')}
           />
+        </ProfileSection>
+
+        <ProfileSection title="Seu ícone">
+          <View style={{ paddingHorizontal: 16, paddingTop: 12, gap: 8 }}>
+            <AvatarIconPicker
+              selected={prefs.profile_avatar_icon || 'initials'}
+              onSelect={(value) => void patch({ profile_avatar_icon: value })}
+              level={level}
+              owned={owned}
+            />
+          </View>
+          <ProfileSettingsRow
+            icon="lock-open-outline"
+            label="Ícones que ainda vão abrir"
+            value={`Nível ${level}`}
+            onPress={() => router.push('/desbloqueios' as never)}
+          />
+        </ProfileSection>
+
+        <ProfileSection title="Seu placar">
+          <View style={{ padding: 16, gap: space.md }}>
+            <PersonalSummaryGrid />
+            <WalletRow />
+            <PersonalDivisionCard />
+            <ChamaAlbumCard />
+          </View>
+          <ProfileSettingsRow
+            icon="sparkles-outline"
+            label="Pontos"
+            value="Nível, moedas e elo"
+            onPress={() => setSheet('xp')}
+          />
+          <ProfileSettingsRow
+            icon="albums"
+            label="Cartas"
+            value="Coleção do dia"
+            onPress={() => router.push('/cartas' as never)}
+          />
+          <ProfileSettingsRow
+            icon="flag-outline"
+            label="Metas importantes"
+            value="Dias de uma promessa"
+            onPress={() => router.push('/metas-vida' as never)}
+          />
+          <ProfileSettingsRow
+            icon="checkbox-outline"
+            label="Hábitos"
+            value="Dias marcados"
+            onPress={() => router.push('/habitos' as never)}
+          />
+          <ProfileSettingsRow
+            icon="flame-outline"
+            label="Elo"
+            value="Dias seguidos"
+            onPress={() => router.push('/ofensiva' as never)}
+          />
+        </ProfileSection>
+
+        <ProfileSection title="O app">
           <ProfileSettingsRow
             icon="cloud-outline"
             label="Sincronização na nuvem"
-            value={prefs.cloud_sync_opt_in ? 'Opt-in' : 'Local'}
+            value={prefs.cloud_sync_opt_in ? 'Ligada' : 'Só neste aparelho'}
             accent={colors.tasks}
             onPress={() =>
             {
               void patch({ cloud_sync_opt_in: !prefs.cloud_sync_opt_in })
             }}
           />
-        </ProfileSection>
 
-        {prefs.cloud_sync_opt_in ? (
-          <Card tone="elevated" style={{ borderRadius: 14, gap: 8 }}>
-            <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
-              Sync preparado
-            </Text>
-            <Text variant="caption" muted>
-              Seus dados de perfil e preferências ficam prontos para sincronizar na nuvem
-              quando a fila estiver disponível. Hoje tudo persiste neste aparelho.
-            </Text>
-          </Card>
-        ) : null}
-
-        {/* Configurações */}
-        <ProfileSection title="Configurações">
           <ProfileSettingsRow
             icon="accessibility-outline"
             label="Acessibilidade"
@@ -264,6 +306,14 @@ export default function PerfilScreen()
             label="Configurações e integrações"
             onPress={() => router.push('/configuracoes')}
           />
+          {prefs.cloud_sync_opt_in ? (
+            <Text variant="caption" muted style={{ paddingHorizontal: 16, paddingBottom: 12 }}>
+              A sincronização está ligada. Os dados continuam neste aparelho até a nuvem terminar de guardar.
+            </Text>
+          ) : null}
+        </ProfileSection>
+
+        <ProfileSection title="Pessoas">
           <ProfileSettingsRow
             icon="people-outline"
             label="Círculo"
@@ -275,17 +325,12 @@ export default function PerfilScreen()
             label="Metas juntos"
             onPress={() => router.push(METAS_HREF)}
           />
-          <ProfileSettingsRow
-            icon="sparkles-outline"
-            label="AXEL / XP"
-            onPress={() => setSheet('xp')}
-          />
           {isAdmin ? (
             <ProfileSettingsRow
               icon="shield-checkmark-outline"
               iconNode={<ShieldCheck size={18} color={colors.axel} />}
-              label="Admin"
-              value="Usuários"
+              label="Pessoas no app"
+              value="Quem está conectado"
               onPress={() => setSheet('admin')}
             />
           ) : null}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Pressable, View } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
@@ -84,7 +84,7 @@ export function FinanceSalaryPane()
   if (simple)
   {
     return (
-      <Card tone="elevated" style={{ gap: space.sm }}>
+      <SalaryBlock first>
         <SectionHeader
           title={salary.titulo}
           subtitle={`${formatBRL(salary.base)} por mês · ${payLabel}`}
@@ -94,13 +94,13 @@ export function FinanceSalaryPane()
           Entra previsto na conta do fim do mês e no aviso antes de gastar. No dia, o app pergunta se caiu.
         </Text>
         <Text variant={micro} muted>Faz hora extra? Em Editar, escolha "Com horas extras".</Text>
-      </Card>
+      </SalaryBlock>
     )
   }
 
   return (
-    <View style={{ gap: space.md }}>
-      <Card tone="elevated" style={{ gap: space.sm }}>
+    <View>
+      <SalaryBlock first>
         <SectionHeader
           title={salary.titulo}
           subtitle={`${sched.semanais ?? salary.horasSemanais}h por semana · divisor ${sched.divisor ?? '-'} · sua hora vale ${sched.valorHora ? formatBRL(sched.valorHora) : '-'}`}
@@ -110,10 +110,10 @@ export function FinanceSalaryPane()
           Base {formatBRL(salary.base)} · HE {salary.heUtilPct}% em dia útil, {salary.heFolgaPct}% em domingo/feriado
           {salary.noturnoPct ? ` · noturno ${salary.noturnoPct}%` : ''} · {salary.quintoDiaUtil ? 'paga no 5º dia útil' : `paga dia ${salary.diaRecebimento}`}
         </Text>
-      </Card>
+      </SalaryBlock>
 
       {forecast ? (
-        <Card tone="elevated" style={{ gap: space.sm }}>
+        <SalaryBlock>
           <Text variant="section">Previsão de {competenciaLabel(forecast.competencia)}</Text>
           <Text variant="caption" muted>
             Horas de {describeDayPt(forecast.periodo.inicio)} a {describeDayPt(forecast.periodo.fim)} · pagamento {describeDayPt(forecast.pagamento).toLowerCase()}
@@ -134,10 +134,10 @@ export function FinanceSalaryPane()
           <Text variant={micro} muted>
             Estimativa. Convenção coletiva, faltas e descontos podem mudar o valor; no dia você confirma o que caiu de verdade.
           </Text>
-        </Card>
+        </SalaryBlock>
       ) : null}
 
-      <Card tone="elevated" style={{ gap: space.sm }}>
+      <SalaryBlock>
         <Text variant="section">Horas extras</Text>
         <Field
           style={fieldStyle}
@@ -165,10 +165,10 @@ export function FinanceSalaryPane()
             </View>
           ))
         )}
-      </Card>
+      </SalaryBlock>
 
       {confirmations.length ? (
-        <Card tone="elevated" style={{ gap: 8 }}>
+        <SalaryBlock>
           <Text variant="section">O que caiu</Text>
           {confirmations.slice(0, 6).map((c) => (
             <Row
@@ -182,8 +182,32 @@ export function FinanceSalaryPane()
               Desconto médio aprendido: {(salary.taxaDesconto * 100).toFixed(1).replace('.', ',')}% do bruto.
             </Text>
           ) : null}
-        </Card>
+        </SalaryBlock>
       ) : null}
+    </View>
+  )
+}
+
+/** No celular, uma seção com fio. No computador, o cartão de sempre. */
+function SalaryBlock({ children, first }: { children: ReactNode; first?: boolean })
+{
+  const desk = useDeskMicro() === 'label'
+  const { colors, space } = useTheme()
+  if (desk)
+  {
+    return <Card tone="elevated" style={{ gap: space.sm }}>{children}</Card>
+  }
+  return (
+    <View
+      style={{
+        gap: space.sm,
+        paddingTop: first ? 4 : space.md,
+        marginTop: first ? 0 : space.sm,
+        borderTopWidth: first ? 0 : 1,
+        borderTopColor: colors.hairline,
+      }}
+    >
+      {children}
     </View>
   )
 }

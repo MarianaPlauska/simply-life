@@ -1,4 +1,4 @@
-import { Platform } from 'react-native'
+import { Appearance, Platform } from 'react-native'
 import * as SecureStore from 'expo-secure-store'
 import { parseNotifyCadence, type NotifyCadence } from '@simply-life/shared'
 import { supabase, supabaseConfigured } from '../supabase'
@@ -64,6 +64,8 @@ export type WorkspacePrefs = {
   profile_avatar_icon?: string
   /** Desbloqueios: estilo do anel do avatar */
   profile_avatar_frame?: string
+  /** Acessório equipado no AXEL (laço, cachecol, óculos). Ausente = nenhum. */
+  axel_accessory?: string | null
   /** Desbloqueios: fundo do quadro de tarefas ('nenhum', 'cor:areia', 'padrao:pontos'...) */
   kanban_fundo?: string
   /** Foco junto: mostrar aos amigos do Círculo quando estou focando (padrão: não) */
@@ -241,7 +243,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
   const scheme =
     parseColorScheme(raw?.color_scheme)
     ?? readColorSchemeSync()
-    ?? DEFAULT_WORKSPACE_PREFS.color_scheme
+    ?? (Appearance.getColorScheme() === 'dark' ? 'dark' : 'light')
   return {
     ...DEFAULT_WORKSPACE_PREFS,
     ...raw,
@@ -277,6 +279,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
     share_focus_status: raw?.share_focus_status === true,
     profile_avatar_icon: typeof raw?.profile_avatar_icon === 'string' ? raw.profile_avatar_icon : 'initials',
     profile_avatar_frame: typeof raw?.profile_avatar_frame === 'string' ? raw.profile_avatar_frame : 'lisa',
+    axel_accessory: typeof raw?.axel_accessory === 'string' ? raw.axel_accessory : null,
     kanban_fundo: typeof raw?.kanban_fundo === 'string' ? raw.kanban_fundo : 'nenhum',
     chama_premios: Array.isArray(raw?.chama_premios) ? raw.chama_premios : [],
     life_goals_paused_until: typeof raw?.life_goals_paused_until === 'string' ? raw.life_goals_paused_until : null,
@@ -293,6 +296,19 @@ export function initialWorkspacePrefs(): WorkspacePrefs
   return mergePrefs(readLocalSync())
 }
 
+function withDeadline<T>(work: PromiseLike<T>, ms = 8000): Promise<T>
+{
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const timeout = new Promise<never>((_, reject) =>
+  {
+    timer = setTimeout(() => reject(new Error('tempo esgotado')), ms)
+  })
+  return Promise.race([Promise.resolve(work), timeout]).finally(() =>
+  {
+    if (timer) clearTimeout(timer)
+  })
+}
+
 export async function loadWorkspacePrefs(): Promise<WorkspacePrefs>
 {
   const local = await readLocal()
@@ -305,7 +321,7 @@ export async function loadWorkspacePrefs(): Promise<WorkspacePrefs>
 
   try
   {
-    const uid = (await supabase.auth.getUser()).data.user?.id
+    const uid = (await withDeadline(supabase.auth.getUser())).data.user?.id
     if (!uid)
     {
       const merged = mergePrefs(local)
@@ -313,16 +329,20 @@ export async function loadWorkspacePrefs(): Promise<WorkspacePrefs>
       return merged
     }
 
-    const { data, error } = await supabase
-      .from('user_workspace_prefs')
-      .select('prefs')
-      .eq('user_id', uid)
-      .maybeSingle()
+    const { data, error } = await withDeadline(
+      supabase
+        .from('user_workspace_prefs')
+        .select('prefs')
+        .eq('user_id', uid)
+        .maybeSingle(),
+    )
     if (error) throw error
 
+    // tema e do aparelho: a escolha feita no login nao pode ser trocada pela da conta
     const merged = mergePrefs({
       ...local,
       ...(data?.prefs as Partial<WorkspacePrefs> | undefined),
+      ...(local?.color_scheme ? { color_scheme: local.color_scheme } : null),
     })
     writeLocal(merged)
     return merged
@@ -345,19 +365,21 @@ export async function saveWorkspacePrefs(patch: Partial<WorkspacePrefs>): Promis
 
   try
   {
-    const uid = (await supabase.auth.getUser()).data.user?.id
+    const uid = (await withDeadline(supabase.auth.getUser())).data.user?.id
     if (!uid) return merged
-    await supabase.from('user_workspace_prefs').upsert({
-      user_id: uid,
-      prefs: merged,
-      updated_at: new Date().toISOString(),
-    })
+    await withDeadline(
+      supabase.from('user_workspace_prefs').upsert({
+        user_id: uid,
+        prefs: merged,
+        updated_at: new Date().toISOString(),
+      }),
+    )
     const nome =
       merged.axel_calls_you.trim()
       || merged.display_name.trim()
     if (nome)
     {
-      await supabase
+      await withDeadline(supabase
         .from('user_public_cards')
         .update({
           display_name: merged.display_name.trim() || nome,
@@ -369,7 +391,7 @@ export async function saveWorkspacePrefs(patch: Partial<WorkspacePrefs>): Promis
           ...(merged.profile_avatar_tint ? { accent: merged.profile_avatar_tint } : null),
           updated_at: new Date().toISOString(),
         })
-        .eq('user_id', uid)
+        .eq('user_id', uid))
     }
   }
   catch

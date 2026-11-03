@@ -104,7 +104,7 @@ export function KanbanDayCard({ task, onToggle }: Props)
             <Text variant="bodyStrong" numberOfLines={2} style={{ fontSize: 14 }}>
               {task.titulo}
             </Text>
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 11 }}>
+            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 12 }}>
               {task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : 'Sem horário'}
             </Text>
           </View>

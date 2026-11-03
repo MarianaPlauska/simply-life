@@ -11,7 +11,9 @@ import {
   aguaCoachLine,
   currentWeekIsos,
 } from '@simply-life/shared'
-import { Text, ProgressRing, PressableScale } from '../../ui'
+import { Text, ProgressRing, PressableScale, GroupedList, GroupedRow, RowGlyph } from '../../ui'
+import { useWebDesk } from './web/webBox'
+import { hapticLight } from '../../lib/haptics'
 import { usePanelBox } from '../../ui/Panel'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useAuthStore } from '../../store/authStore'
@@ -40,6 +42,7 @@ export function HomeWaterProgressCard({ compact }: Props)
   const waterWeekDays = useDataStore((s) => s.waterWeekDays)
   const hydrateLog = useWaterLogStore((s) => s.hydrate)
   const [edit, setEdit] = useState(false)
+  const desk = useWebDesk()
 
   useEffect(() =>
   {
@@ -67,6 +70,60 @@ export function HomeWaterProgressCard({ compact }: Props)
     borderColor: colors.cardRim,
   })
 
+  // celular: uma linha de lista com a barra e os botões de copo; a semana fica em Saúde
+  if (!compact && !desk)
+  {
+    const roundBtn = {
+      width: 40,
+      height: 40,
+      borderRadius: 999,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    }
+    return (
+      <View style={{ gap: 12 }}>
+        <GroupedList>
+          <GroupedRow
+            leading={<RowGlyph name="water" color={colors.health} />}
+            title="Água"
+            subtitle={`${atual} de ${meta} copos · ${mlAtual} ml`}
+            onPress={() => setEdit((v) => !v)}
+            chevron={false}
+            accessibilityLabel={`Água: ${atual} de ${meta} copos. Tocar para ajustar a meta`}
+            trailing={(
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                <PressableScale
+                  accessibilityLabel="Remover copo"
+                  disabled={atual <= 0}
+                  onPress={() => void removeWaterCup(isGuest)}
+                  style={{ ...roundBtn, backgroundColor: colors.fill }}
+                >
+                  <Icon name="remove" size={18} color={colors.ink} />
+                </PressableScale>
+                <PressableScale
+                  accessibilityLabel={`Registrar copo de ${ml} ml`}
+                  onPress={() =>
+                  {
+                    hapticLight()
+                    void addWaterCup(isGuest)
+                  }}
+                  style={{ ...roundBtn, backgroundColor: colors.health }}
+                >
+                  <Icon name="add" size={20} color={colors.canvas} />
+                </PressableScale>
+              </View>
+            )}
+          >
+            <View style={{ height: 4, borderRadius: 999, backgroundColor: colors.fill, overflow: 'hidden', marginTop: 6 }}>
+              <View style={{ width: `${Math.min(100, pct)}%`, height: 4, borderRadius: 999, backgroundColor: colors.health }} />
+            </View>
+          </GroupedRow>
+        </GroupedList>
+        {edit ? <WaterGoalEditor onClose={() => setEdit(false)} /> : null}
+      </View>
+    )
+  }
+
   return (
     <View style={box}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
@@ -74,10 +131,10 @@ export function HomeWaterProgressCard({ compact }: Props)
           <Text variant="caption" muted>
             Hidratação
           </Text>
-          <Text variant="title" style={{ fontSize: 22, letterSpacing: -0.5, lineHeight: 26 }}>
+          <Text variant="title" style={{ fontSize: 24, letterSpacing: -0.5, lineHeight: 31 }}>
             {atual} de {meta} copos
           </Text>
-          <Text variant="caption" muted style={{ fontSize: 13, lineHeight: 18 }}>
+          <Text variant="caption" muted style={{ fontSize: 13, lineHeight: 31 }}>
             {mlAtual} / {mlMeta} ml · {aguaCoachLine(pct, left)}
           </Text>
         </View>
@@ -110,7 +167,7 @@ export function HomeWaterProgressCard({ compact }: Props)
           ).map((row) => (
             <View key={row.label} style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
               <Icon name={row.icon} size={13} color={colors.axel} />
-              <Text variant="micro" muted style={{ fontSize: 11 }} numberOfLines={1}>
+              <Text variant="micro" muted style={{ fontSize: 12 }} numberOfLines={1}>
                 {row.label}
               </Text>
             </View>
@@ -152,7 +209,7 @@ export function HomeWaterProgressCard({ compact }: Props)
                   style={{
                     color: isToday ? colors.health : colors.inkMuted,
                     fontWeight: isToday ? '700' : '500',
-                    fontSize: 11,
+                    fontSize: 12,
                   }}
                 >
                   {WEEKDAYS[new Date(`${iso}T12:00:00`).getDay()]}

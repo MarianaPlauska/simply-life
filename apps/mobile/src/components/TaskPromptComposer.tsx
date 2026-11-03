@@ -284,7 +284,7 @@ export function TaskPromptComposer({ state, onChange, organizeRef }: Props)
       <Field
         tone="sand"
         label="Descreva do seu jeito"
-        placeholder="Ex: renovar o seguro do carro até sexta, custa uns 1800, e ligar pro dentista quando der"
+        placeholder="Ex: confirmar a aula de origami até sexta, custa uns 90, e buscar a encomenda quando der"
         multiline
         value={state.prompt}
         onChangeText={(prompt) => onChange({ ...state, prompt })}

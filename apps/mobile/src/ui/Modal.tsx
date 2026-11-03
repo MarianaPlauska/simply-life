@@ -3,6 +3,7 @@ import { Animated, Modal as RNModal, PanResponder, Platform, Pressable, View, ty
 import { useWorkspace } from '../layout/useWorkspace'
 import { useTheme } from '../theme/ThemeProvider'
 import { hapticSelect } from '../lib/haptics'
+import { SheetSurface } from './surface'
 
 /** Largura das fichas no computador: o suficiente para um formulário, sem esticar botões. */
 export const DESKTOP_SHEET_WIDTH = 560
@@ -23,8 +24,9 @@ type Props = ModalProps & {
  * Computador: as fichas (feitas para o celular) ficam numa coluna centrada de
  * DESKTOP_SHEET_WIDTH, presa embaixo; os lados escurecem e fecham ao clicar.
  */
-export function Modal({ children, fullWidth, noDrag, ...props }: Props)
+export function Modal({ children: content, fullWidth, noDrag, ...props }: Props)
 {
+  const children = <SheetSurface value>{content}</SheetSurface>
   const { showRail } = useWorkspace()
   const { colors } = useTheme()
   const close = () => props.onRequestClose?.(undefined as never)

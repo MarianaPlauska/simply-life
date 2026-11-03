@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { ScrollView, View } from 'react-native'
 import {
   cashExpenseTotal,
@@ -13,7 +13,6 @@ import {
   txsInCalendarMonth,
 } from '@simply-life/shared'
 import {
-  Card,
   Chip,
   EmptyState,
   FinanceDonut,
@@ -174,7 +173,7 @@ export function FinanceMonthReport()
   }
 
   return (
-    <View style={{ gap: space.md }}>
+    <View>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={{ flexDirection: 'row', gap: 12 }}>
           {MONTH_OFFSETS.map((n) => (
@@ -188,7 +187,7 @@ export function FinanceMonthReport()
         </View>
       </ScrollView>
 
-      <Card tone="elevated" style={{ gap: space.sm }}>
+      <DashSlice first>
         <SectionHeader title="Relatório do mês" subtitle={monthTitle} />
         <View style={{ flexDirection: 'row', gap: space.sm }}>
           <View style={{ flex: 1, gap: 6 }}>
@@ -240,9 +239,9 @@ export function FinanceMonthReport()
             ? `${pctReceita}% da receita já saiu da conta · saldo do mês ${formatBRL(saldoMes)}`
             : 'Lance uma receita para ver o ritmo do caixa'}
         </Text>
-      </Card>
+      </DashSlice>
 
-      <Card tone="elevated" style={{ gap: space.sm }}>
+      <DashSlice>
         <SectionHeader title="Receita × gastos" subtitle="Linha verde entra, cobre sai" />
         <ExpenseSparkline
           series={series}
@@ -251,30 +250,15 @@ export function FinanceMonthReport()
           color={colors.finance}
           incomeColor={colors.health}
         />
-      </Card>
+      </DashSlice>
 
-      <View
-        style={{
-          flexDirection: isDesktop ? 'row' : 'column',
-          gap: space.md,
-        }}
-      >
-        <Card
-          tone="elevated"
-          style={{
-            flex: isDesktop ? 1 : undefined,
-            alignItems: 'center',
-            gap: space.md,
-            // no celular o card abraça o donut; a altura mínima só alinha com o Ranking lado a lado
-            minHeight: isDesktop ? 260 : undefined,
-          }}
-        >
-          <Text variant="caption" muted>
-            Gastos por categoria
-          </Text>
-          {ranking.length === 0 ? (
-            <EmptyState title="Sem gastos" body="Capture um gasto para ver o donut." />
-          ) : (
+      <DashSlice>
+        <Text variant="caption" muted>
+          Gastos por categoria
+        </Text>
+        {ranking.length === 0 ? (
+          <Text variant="body" muted>Capture um gasto para ver o donut.</Text>
+        ) : (
             <FinanceDonut
               segments={donutSegments}
               centerLabel="Gasto total"
@@ -283,12 +267,12 @@ export function FinanceMonthReport()
               strokeWidth={20}
             />
           )}
-        </Card>
+      </DashSlice>
 
-        <Card tone="elevated" style={{ flex: isDesktop ? 1 : undefined, gap: space.md }}>
+      <DashSlice>
           <SectionHeader title="Ranking" subtitle="Maiores categorias" />
           {ranking.length === 0 ? (
-            <EmptyState title="Sem categorias" body="Os gráficos aparecem com o primeiro gasto." />
+            <Text variant="body" muted>Os gráficos aparecem com o primeiro gasto.</Text>
           ) : (
             ranking.map((row) => (
               <View key={row.categoria} style={{ gap: 8 }}>
@@ -327,8 +311,25 @@ export function FinanceMonthReport()
               </View>
             ))
           )}
-        </Card>
-      </View>
+      </DashSlice>
+    </View>
+  )
+}
+
+/** Faixa do painel no celular: título e número, sem caixa. */
+function DashSlice({ children, first }: { children: ReactNode; first?: boolean })
+{
+  const { colors, space } = useTheme()
+  return (
+    <View
+      style={{
+        gap: space.sm,
+        paddingTop: first ? space.md : space.md,
+        borderTopWidth: first ? 0 : 1,
+        borderTopColor: colors.hairline,
+      }}
+    >
+      {children}
     </View>
   )
 }

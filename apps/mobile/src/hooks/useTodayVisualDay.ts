@@ -18,6 +18,7 @@ import { useOrchestratorPrefsStore } from '../store/orchestratorPrefsStore'
 import { clearStickyPlan, scheduleTransitionAlerts, showStickyPlan } from '../lib/pushNotifications'
 import { useTimeLearning } from '../lib/timeLearning'
 import { useFocusLogStore } from '../store/focusLogStore'
+import { useCareExtrasStore } from '../store/careExtrasStore'
 
 /** Relógio que avança a cada minuto (para "agora" e a linha do tempo). */
 export function useMinuteClock(): Date
@@ -39,6 +40,7 @@ export function useVisualDay(date?: string, now: Date = new Date()): VisualDay
   const estimateFactor = useNeuroStore((s) => s.estimateFactor)
   const plans = usePlanLogStore((s) => s.plans)
   const capacityMinutes = useOrchestratorPrefsStore((s) => s.capacityMinutes)
+  const transitionBufferMin = useCareExtrasStore((s) => s.transitionBufferMin)
   const learning = useTimeLearning()
   const today = localTodayIso(now)
   const iso = date ?? today
@@ -61,10 +63,11 @@ export function useVisualDay(date?: string, now: Date = new Date()): VisualDay
       estimateFactor,
       factorFor: (titulo) => learnedFactorFor(titulo, learning, estimateFactor),
       capacityMinutes: capacity,
+      transitionBufferMin,
     })
     // minuteKey recalcula o encaixe conforme o tempo passa
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [iso, tasks, events, estimateFactor, plans, capacityMinutes, minuteKey, today, learning])
+  }, [iso, tasks, events, estimateFactor, plans, capacityMinutes, minuteKey, today, learning, transitionBufferMin])
 }
 
 const hhmm = (m: number) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`

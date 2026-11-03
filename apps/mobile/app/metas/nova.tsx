@@ -334,7 +334,7 @@ export default function NovaMetaScreen()
                 color: colors.ink,
                 textAlign: 'center',
                 fontFamily: 'Lexend_600SemiBold',
-                fontSize: 20,
+                fontSize: 19,
               }}
             />
             <Pressable

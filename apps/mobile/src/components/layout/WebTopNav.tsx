@@ -84,7 +84,7 @@ export function WebTopNav()
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9 }}>
         <BrandMark size={28} />
-        <SunFyWordmark color={cream} style={{ fontFamily: 'Fraunces_500Medium', fontSize: 20, lineHeight: 26, letterSpacing: -0.2 }} />
+        <SunFyWordmark color={cream} style={{ fontFamily: 'Fraunces_500Medium', fontSize: 19, lineHeight: 26, letterSpacing: -0.2 }} />
       </View>
 
       <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 4, minWidth: 0 }}>

@@ -14,37 +14,43 @@ export type KpiSquare = {
   onPress?: () => void
 }
 
-/** Grade 2×2 no celular; quatro na linha no desktop. */
+/** Celular: grade 2x2 de cartoes. Desktop: quatro na linha. */
 export function HomeKpiSquares({ items }: { items: KpiSquare[] })
 {
-  const { colors } = useTheme()
+  const { colors, elevation } = useTheme()
   const workspace = useWorkspace()
   const dense = Boolean(workspace.isDesktop)
-  const tile = dense
-    ? { flexBasis: '22%' as const, minHeight: 96, borderRadius: 14, padding: 16, gap: 12 }
-    : { flexBasis: '46%' as const, minHeight: 124, borderRadius: 20, padding: 20, gap: 16 }
+  const list = items.slice(0, 4)
 
   return (
-    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-      {items.slice(0, 4).map((item) => (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      {list.map((item) => (
         <Pressable
           key={item.id}
           onPress={item.onPress}
           disabled={!item.onPress}
-          style={{
+          style={({ pressed }) => ({
             flexGrow: 1,
+            flexBasis: dense ? '22%' : '46%',
             width: dense ? '23%' : '47%',
+            minHeight: dense ? 96 : 108,
+            borderRadius: 16,
+            padding: 16,
+            gap: 12,
             backgroundColor: colors.elevated,
+            borderWidth: 1,
+            borderColor: colors.cardRim,
             justifyContent: 'space-between',
-            ...tile,
-          }}
+            opacity: pressed ? 0.85 : 1,
+            ...(dense ? null : elevation.card),
+          })}
         >
-          <IconBadge name={item.icon} color={item.color} size={40} iconSize={18} />
-          <View style={{ gap: 6 }}>
-            <Text variant="bodyStrong" style={{ fontSize: 16 }}>
+          <IconBadge name={item.icon} color={item.color} size={36} iconSize={18} />
+          <View style={{ gap: 2 }}>
+            <Text variant="micro" muted numberOfLines={1}>
               {item.label}
             </Text>
-            <Text variant="caption" muted style={{ fontSize: 13, lineHeight: 18 }}>
+            <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 16 }}>
               {item.value}
             </Text>
           </View>

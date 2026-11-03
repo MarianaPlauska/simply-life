@@ -9,7 +9,7 @@ import {
   type MoodDistributionSlice,
   type DiaHumorAgregado,
 } from '@simply-life/shared'
-import { Text, PrimaryButton, Field } from '../../../ui'
+import { Text, PrimaryButton, Field, Icon, GroupedList, GroupedRow, RowGlyph, type IconName } from '../../../ui'
 import { MoodFaceRow } from '../../MoodFace'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useWorkspace } from '../../../layout/useWorkspace'
@@ -18,6 +18,15 @@ import { MoodTrendChart, MoodYearGrid } from './MoodCharts'
 import { HomeCollapsible } from '../../dashboard/HomeCollapsible'
 
 const NOTES_PER_PAGE = 10
+
+type DiarySectionId = 'dia' | 'padroes' | 'notas'
+
+function moodIcon(m: number): IconName
+{
+  if (m <= 2) return 'sad'
+  if (m === 3) return 'remove'
+  return 'happy'
+}
 
 type WeekReview = {
   avg: number
@@ -40,6 +49,8 @@ type Props = {
   onMood: (m: number) => void
   onSaveNote: () => void
   onOpenNotes: () => void
+  /** Apaga só o texto escrito. O humor do dia fica. */
+  onClearNote?: (id: number) => void
   total: number
   slices: MoodDistributionSlice[]
   /** Humor agregado por dia (todo o histórico) */
@@ -102,7 +113,7 @@ function MoodStackBar({ slices, total }: { slices: MoodDistributionSlice[]; tota
                   backgroundColor: moodColor(m),
                 }}
               />
-              <Text variant="micro" style={{ color: colors.featureMuted, fontSize: 11 }}>
+              <Text variant="micro" style={{ color: colors.featureMuted, fontSize: 12 }}>
                 {moodLabel(m)} {Math.round((count / total) * 100)}%
               </Text>
             </View>
@@ -124,6 +135,7 @@ export function HealthDiaryStudio(props: Props)
     onMood,
     onSaveNote,
     onOpenNotes,
+    onClearNote,
     total,
     slices,
     days,
@@ -138,6 +150,7 @@ export function HealthDiaryStudio(props: Props)
   const { showRail } = useWorkspace()
   const router = useRouter()
   const [page, setPage] = useState(0)
+  const [openSection, setOpenSection] = useState<DiarySectionId | null>(null)
   const canSave = Boolean(last && nota.trim())
   const dateLine = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
@@ -243,6 +256,18 @@ export function HealthDiaryStudio(props: Props)
             <Text variant="body" style={{ lineHeight: 22 }}>
               {h.nota}
             </Text>
+            {onClearNote ? (
+              <Pressable
+                onPress={() => onClearNote(h.id)}
+                accessibilityRole="button"
+                accessibilityLabel="Apagar este texto"
+                style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}
+              >
+                <Text variant="caption" style={{ color: colors.danger, fontWeight: '700' }}>
+                  Apagar
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         )
       })}
@@ -277,6 +302,120 @@ export function HealthDiaryStudio(props: Props)
     'relatório',
   ].filter(Boolean).join(', ')
 
+  // celular: registro num cartão, últimas notas como lista e o resto em linhas que abrem
+  // (padrão Daylio / How We Feel: check-in em cima, entradas e padrões abaixo)
+  if (!showRail)
+  {
+    const sectionBody =
+      openSection === 'dia' ? daySlot
+        : openSection === 'padroes' ? patternsBlock
+          : openSection === 'notas' ? notesBlock
+            : null
+    const toggle = (id: DiarySectionId) => setOpenSection((cur) => (cur === id ? null : id))
+    const caret = (id: DiarySectionId) => (
+      <Icon name={openSection === id ? 'chevron-up' : 'chevron-down'} size={16} color={colors.inkFaint} />
+    )
+
+    return (
+      <View style={{ gap: space.lg }}>
+        {alertSlot}
+
+        <View style={{ gap: space.md }}>
+          <Text variant="caption" muted>{dateLine}</Text>
+          <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>{moodHeadline}</Text>
+          <MoodFaceRow value={last?.humor} onChange={onMood} onWidget />
+          <Field
+            label={prompt}
+            value={nota}
+            onChangeText={onNotaChange}
+            placeholder="Uma frase já vira histórico"
+            multiline
+            tone="widget"
+          />
+          {nota.trim() ? (
+            <PrimaryButton
+              label={canSave ? 'Salvar nota' : 'Escolha um humor para salvar a nota'}
+              disabled={!canSave}
+              onPress={onSaveNote}
+            />
+          ) : null}
+        </View>
+
+        {comNota.length > 0 ? (
+          <View style={{ gap: 8 }}>
+            <Text variant="caption" muted style={{ marginLeft: 4 }}>Últimas anotações</Text>
+            <GroupedList>
+              {comNota.slice(0, 3).map((h) => (
+                <GroupedRow
+                  key={h.id}
+                  leading={<RowGlyph name={moodIcon(h.humor)} color={moodColor(h.humor)} />}
+                  title={h.nota ?? ''}
+                  subtitle={`${formatDayPt((h.data || '').slice(0, 10))} · ${moodLabel(h.humor)}`}
+                  value={onClearNote ? 'Apagar' : undefined}
+                  onPress={onClearNote ? () => onClearNote(h.id) : undefined}
+                  accessibilityLabel="Apagar este texto"
+                />
+              ))}
+              <GroupedRow
+                leading={<RowGlyph name="document-text" color={colors.tasks} />}
+                title="Abrir anotações"
+                onPress={onOpenNotes}
+              />
+            </GroupedList>
+          </View>
+        ) : null}
+
+        <View style={{ gap: 8 }}>
+          <Text variant="caption" muted style={{ marginLeft: 4 }}>Mais do seu diário</Text>
+          <GroupedList>
+            {daySlot ? (
+              <GroupedRow
+                leading={<RowGlyph name="today" color={colors.axelFill} />}
+                title="Seu dia"
+                subtitle="Agenda e o que foi concluído"
+                onPress={() => toggle('dia')}
+                chevron={false}
+                trailing={caret('dia')}
+              />
+            ) : null}
+            <GroupedRow
+              leading={<RowGlyph name="stats-chart" color={colors.health} />}
+              title="Padrões"
+              subtitle={total > 0 ? `${total} registro(s) de humor` : 'Aparecem depois de alguns check-ins'}
+              onPress={() => toggle('padroes')}
+              chevron={false}
+              trailing={caret('padroes')}
+            />
+            {notesBlock ? (
+              <GroupedRow
+                leading={<RowGlyph name="book" color={colors.finance} />}
+                title="O que você escreveu"
+                value={String(comNota.length)}
+                onPress={() => toggle('notas')}
+                chevron={false}
+                trailing={caret('notas')}
+              />
+            ) : null}
+            {comNota.length === 0 ? (
+              <GroupedRow
+                leading={<RowGlyph name="document-text" color={colors.tasks} />}
+                title="Abrir anotações"
+                onPress={onOpenNotes}
+              />
+            ) : null}
+            <GroupedRow
+              leading={<RowGlyph name="download" color={colors.inkMuted} />}
+              title="Relatório por período"
+              subtitle="Humor, gastos, água, sono e tarefas em PDF"
+              onPress={() => router.push('/relatorio' as never)}
+            />
+          </GroupedList>
+          {sectionBody}
+        </View>
+      </View>
+    )
+  }
+
   return (
     <View style={{ gap: space.lg }}>
       {alertSlot ? <View style={{ gap: space.sm }}>{alertSlot}</View> : null}
@@ -287,7 +426,7 @@ export function HealthDiaryStudio(props: Props)
           <Text variant="caption" muted>
             {dateLine}
           </Text>
-          <Text variant="hero" style={{ fontSize: 22, lineHeight: 30, letterSpacing: -0.4 }}>
+          <Text variant="hero" style={{ fontSize: 24, lineHeight: 30, letterSpacing: -0.4 }}>
             {moodHeadline}
           </Text>
           <Text variant="caption" muted>

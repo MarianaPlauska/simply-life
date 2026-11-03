@@ -18,7 +18,7 @@ type Props = {
 
 export function MoveStatusSheet({ visible, onClose, onPick }: Props)
 {
-  const { space } = useTheme()
+  const { colors, space } = useTheme()
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -26,7 +26,7 @@ export function MoveStatusSheet({ visible, onClose, onPick }: Props)
         onPress={onClose}
         style={{
           flex: 1,
-          backgroundColor: 'rgba(26, 24, 22, 0.72)',
+          backgroundColor: colors.overlay,
           justifyContent: 'center',
           padding: space.lg,
         }}

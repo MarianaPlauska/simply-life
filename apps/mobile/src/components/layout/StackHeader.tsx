@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
+import { safeBack } from '../../lib/safeBack'
 
 /** Cabeçalho de telas fora das tabs - Voltar + título. */
 export function StackHeader({
@@ -21,7 +22,7 @@ export function StackHeader({
     <View style={{ gap: space.xs, paddingTop: space.lg, marginBottom: space.xl }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={() => safeBack(router, '/(tabs)')}
           accessibilityRole="button"
           accessibilityLabel="Voltar"
           style={{

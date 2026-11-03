@@ -33,7 +33,7 @@ export function TasksStartForm({ value, onChange, enabled }: Props)
               key={i}
               label={`${i + 1}ª`}
               value={t}
-              placeholder={['Marcar dentista', 'Pagar o IPVA', 'Terminar o relatório'][i]}
+              placeholder={['Devolver o livro', 'Comprar giz de cera', 'Regar a samambaia'][i]}
               onChangeText={(v) => onChange({ ...value, week: value.week.map((x, j) => (j === i ? v : x)) })}
             />
           ))}

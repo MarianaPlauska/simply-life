@@ -11,14 +11,17 @@ import { confirmDestructive } from '../src/lib/confirmDestructive'
 import { appOrigin } from '../src/lib/appOrigin'
 import {
   createFriendInviteLink,
+  fetchCircleTimeline,
   fetchFriends,
   fetchPendingFriendInvites,
   removeFriend,
   revokeFriendInvite,
   setFriendMuted,
+  type CircleMoment,
   type FriendCard,
   type PendingFriendInvite,
 } from '../src/lib/sync/friends'
+import { CircleTimeline } from '../src/components/social/CircleTimeline'
 import { METAS_HREF } from '../src/lib/sharedGoalRoutes'
 
 function daysLeft(iso: string): number
@@ -34,6 +37,7 @@ export default function AmigosScreen()
   const isGuest = useAuthStore((s) => s.isGuest)
   const [friends, setFriends] = useState<FriendCard[]>([])
   const [pending, setPending] = useState<PendingFriendInvite[]>([])
+  const [moments, setMoments] = useState<CircleMoment[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState<string | null>(null)
@@ -48,6 +52,7 @@ export default function AmigosScreen()
       const [f, p] = await Promise.all([fetchFriends(), fetchPendingFriendInvites()])
       setFriends(f)
       setPending(p)
+      setMoments(await fetchCircleTimeline(f).catch(() => []))
     }
     catch
     {
@@ -182,6 +187,11 @@ export default function AmigosScreen()
                   <Text variant="bodyStrong" numberOfLines={1}>
                     {f.displayName}
                   </Text>
+                  {f.streak > 0 ? (
+                    <Text variant="caption" muted>
+                      {f.streak === 1 ? 'Elo de 1 dia' : `Elo de ${f.streak} dias`}
+                    </Text>
+                  ) : null}
                   {f.muted ? (
                     <Text variant="caption" muted>
                       Silenciado: o apoio chega sem aviso.
@@ -227,6 +237,18 @@ export default function AmigosScreen()
             ))
           )}
         </View>
+
+        {moments.length > 0 ? (
+          <View style={{ gap: space.sm }}>
+            <Text variant="section">Linha do tempo</Text>
+            <Text variant="caption" muted>
+              Como tem sido com o seu Círculo. Só aparece o que vocês já compartilham.
+            </Text>
+            <Card>
+              <CircleTimeline moments={moments.slice(0, 20)} />
+            </Card>
+          </View>
+        ) : null}
 
         {pending.length > 0 ? (
           <View style={{ gap: space.sm }}>

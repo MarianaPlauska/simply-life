@@ -364,7 +364,7 @@ export function WebListDesk({ tasks, onSeeDone }: Props)
         ) : (
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 20, paddingTop: 4, paddingBottom: 18 }}>
             <Icon name="sunny-outline" size={18} color={colors.inkMuted} />
-            <Text style={[LEX.regular, { fontSize: 15, lineHeight: 22, color: colors.inkMuted }]}>
+            <Text style={[LEX.regular, { fontSize: 16, lineHeight: 22, color: colors.inkMuted }]}>
               {doneDay.length > 0 ? 'Tudo feito neste dia.' : 'Dia livre. Nada com prazo neste dia.'}
             </Text>
           </View>
@@ -443,8 +443,8 @@ export function WebListDesk({ tasks, onSeeDone }: Props)
 
   const stat = (label: string, value: string, tone?: string) => (
     <View style={{ gap: 2 }}>
-      <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 26, lineHeight: 32, color: tone ?? colors.ink }}>{value}</Text>
-      <Text style={[LEX.regular, { fontSize: 13, lineHeight: 18, color: colors.inkMuted }]}>{label}</Text>
+      <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 28, lineHeight: 32, color: tone ?? colors.ink }}>{value}</Text>
+      <Text style={[LEX.regular, { fontSize: 13, lineHeight: 36, color: colors.inkMuted }]}>{label}</Text>
     </View>
   )
 

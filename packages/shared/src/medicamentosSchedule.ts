@@ -6,6 +6,19 @@ export type MedDraft = {
   dose?: string
 }
 
+/** Só números. Depois de dois dígitos, entra os dois pontos da hora. */
+export function maskMedTime(raw: string): string
+{
+  const digits = raw.replace(/\D/g, '').slice(0, 4)
+  if (digits.length < 2) return digits
+  const hour = Math.min(23, Number(digits.slice(0, 2)))
+  const hh = String(hour).padStart(2, '0')
+  const mm = digits.slice(2)
+  if (!mm) return `${hh}:`
+  if (mm.length === 1) return `${hh}:${mm}`
+  return `${hh}:${String(Math.min(59, Number(mm))).padStart(2, '0')}`
+}
+
 export function validateMedDraft(draft: MedDraft): string | null
 {
   if (!draft.nome.trim()) return 'Informe o nome do remédio'

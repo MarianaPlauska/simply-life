@@ -24,6 +24,7 @@ import { useCircleOverview } from '../src/hooks/useCircleOverview'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { minutesToLabel } from '@simply-life/shared'
 import { AMIGOS_HREF, METAS_HREF, goalHref } from '../src/lib/sharedGoalRoutes'
+import { SilentFocusRow } from '../src/components/care/SilentFocusRow'
 
 /** Uma meta: ícone da métrica, título e o progresso do grupo (nunca número por pessoa). */
 function GoalLine({ item, onPress, last }: { item: CircleGoalItem; onPress: () => void; last?: boolean })
@@ -315,6 +316,7 @@ export default function JuntosScreen()
                   ))}
                 </View>
               ) : null}
+              <SilentFocusRow friends={friends} />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
                 <Text variant="caption" muted style={{ flex: 1 }}>
                   Mostrar aos amigos quando eu estiver focando (só o horário de término)

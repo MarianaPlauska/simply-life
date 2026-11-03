@@ -21,7 +21,7 @@ export function DeskPanelHeader({
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 12 }}>
       <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
-        <Text variant="section" style={{ fontSize: 18, lineHeight: 26 }}>{title}</Text>
+        <Text variant="section" style={{ fontSize: 19, lineHeight: 26 }}>{title}</Text>
         {subtitle ? <Text variant="caption" muted>{subtitle}</Text> : null}
       </View>
       {actionLabel && onAction ? (
