@@ -17,7 +17,8 @@ type Action = {
  * Linha que desliza, como nos apps nativos.
  * Deslizar para a esquerda mostra `right` (ex.: apagar); para a direita mostra `left` (ex.: concluir).
  */
-export function SwipeRow({ children, left, right }: { children: ReactNode; left?: Action; right?: Action })
+/** `bg`: o fundo de onde a linha está (a tela por padrão; numa lista agrupada, colors.elevated) */
+export function SwipeRow({ children, left, right, bg }: { children: ReactNode; left?: Action; right?: Action; bg?: string })
 {
   const { colors } = useTheme()
   const ref = useRef<Swipeable>(null)
@@ -57,7 +58,7 @@ export function SwipeRow({ children, left, right }: { children: ReactNode; left?
       renderRightActions={right ? render(right, 'right') : undefined}
       onSwipeableWillOpen={() => hapticSelect()}
     >
-      <View style={{ backgroundColor: colors.canvas }}>{children}</View>
+      <View style={{ backgroundColor: bg ?? colors.canvas }}>{children}</View>
     </Swipeable>
   )
 }

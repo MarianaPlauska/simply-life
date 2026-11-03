@@ -15,6 +15,7 @@ import { useAuthStore } from '../../src/store/authStore'
 import { useNotesStore } from '../../src/store/notesStore'
 import { useGamificationStore } from '../../src/store/gamificationStore'
 import { saveThoughtRecord } from '../../src/lib/tccPersist'
+import { friendlyError } from '../../src/lib/friendlyError'
 
 const STEP_COUNT = THOUGHT_RECORD_STEPS.length
 
@@ -72,7 +73,7 @@ export default function ThoughtRecordScreen()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não foi possível salvar')
+      setError(friendlyError(e, 'Não foi possível salvar'))
     }
     finally
     {

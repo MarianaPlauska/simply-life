@@ -39,6 +39,7 @@ import { WebKanbanHeader } from '../../src/components/kanban/web/WebKanbanHeader
 import { WebKanbanTabs } from '../../src/components/kanban/web/WebKanbanTabs'
 import { WebBoardActions } from '../../src/components/kanban/web/WebBoardActions'
 import { useSectionState, usePublishSectionTabs } from '../../src/store/sectionNavStore'
+import { friendlyError } from '../../src/lib/friendlyError'
 
 type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'calendario' | 'gantt' | 'relatorios'
 type ReportMode = 'semana' | 'esperas' | 'desempenho' | 'overview' | 'timeline' | 'ritmo'
@@ -162,13 +163,11 @@ export default function KanbanScreen()
           </>
         ) : (
           <>
-            <ScreenIntro title="Tarefas" subtitle="Uma coisa de cada vez, no seu ritmo." />
+            <ScreenIntro
+              title="Tarefas"
+              right={hub === 'board' || hub === 'lista' || hub === 'pastas' ? <KanbanOrchestratorBar tasks={tasks} /> : null}
+            />
 
-            {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
-              <KanbanOrchestratorBar tasks={tasks} />
-            ) : null}
-
-            {/* abas mais perto do título: o conteúdo da aba sobe junto */}
             <View style={{ marginTop: -12 }}>
               <SubNavTabs
                 accent="axel"
@@ -237,7 +236,7 @@ export default function KanbanScreen()
                     }
                     catch (e)
                     {
-                      setSyncMsg(e instanceof Error ? e.message : 'Sync indisponível')
+                      setSyncMsg(friendlyError(e, 'Sync indisponível'))
                     }
                   })()
                 }}

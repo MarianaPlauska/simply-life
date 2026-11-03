@@ -18,6 +18,7 @@ import {
   type MobileBudgetCategory,
 } from '../../lib/sync/financeBudgets'
 import { InvitePartnerCard } from './InvitePartnerCard'
+import { friendlyError } from '../../lib/friendlyError'
 
 const MONTHS = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -58,7 +59,7 @@ export function FinancePlanningPanel()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não consegui salvar o limite')
+      setError(friendlyError(e, 'Não consegui salvar o limite'))
     }
     finally
     {
@@ -92,7 +93,7 @@ export function FinancePlanningPanel()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Falha ao carregar orçamentos')
+      setError(friendlyError(e, 'Falha ao carregar orçamentos'))
     }
     finally
     {

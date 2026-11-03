@@ -1,108 +1,105 @@
+import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import type { MobileTask } from '@simply-life/shared'
 import { Icon } from '../../ui/Icon'
-import { buildOrchestrationHints, classifyDueBucket, type MobileTask } from '@simply-life/shared'
-import { Text } from '../../ui'
+import { GroupedList, GroupedRow, PressableScale, RowGlyph, Text } from '../../ui'
+import { Modal } from '../../ui/Modal'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useBoardReplanStore } from '../../store/boardReplanStore'
 import { useOrchestratorPrefsStore } from '../../store/orchestratorPrefsStore'
-import { useActionableTasks } from '../../hooks/useActionableTasks'
 
 type Props = { tasks: MobileTask[] }
 
-/** Uma próxima ação + reorganizar o quadro com o Axel. */
+/** Ícone na linha do título: abre as ações do quadro numa ficha (reorganizar, planejar amanhã, automático). */
 export function KanbanOrchestratorBar({ tasks }: Props)
 {
-  const { colors } = useTheme()
+  const { colors, space } = useTheme()
   const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const [open, setOpen] = useState(false)
   const running = useBoardReplanStore((s) => s.running)
   const run = useBoardReplanStore((s) => s.run)
   const autoReplan = useOrchestratorPrefsStore((s) => s.autoReplan)
   const patchPrefs = useOrchestratorPrefsStore((s) => s.patch)
-  // próxima ação nunca é algo que está esperando outra pessoa
-  const actionable = useActionableTasks(tasks)
-  const top = buildOrchestrationHints(actionable)[0]
-  const hasOpen = tasks.some((t) => t.status !== 'done')
-  if (!top && !hasOpen) return null
-
-  const overdue = tasks.filter(
-    (t) => t.status !== 'done' && classifyDueBucket(t.dataVencimento, t.status) === 'vencido',
-  ).length
+  if (!tasks.some((t) => t.status !== 'done')) return null
 
   return (
-    <View style={{ gap: 4 }}>
-      {top ? (
+    <>
+      <PressableScale
+        onPress={() => setOpen(true)}
+        accessibilityRole="button"
+        accessibilityLabel="Ações do quadro"
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: 999,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.elevated,
+        }}
+      >
+        <Icon name={running ? 'hourglass-outline' : 'sparkles-outline'} size={20} color={colors.axel} />
+      </PressableScale>
+
+      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
         <Pressable
-          onPress={() => router.push(`/task/${top.taskId}`)}
-          accessibilityLabel="Próxima tarefa"
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-            minHeight: 44,
-            paddingVertical: 4,
-          }}
+          accessibilityLabel="Fechar"
+          onPress={() => setOpen(false)}
+          style={{ flex: 1, backgroundColor: colors.overlay, justifyContent: 'flex-end' }}
         >
-          <Icon name="flash-outline" size={16} color={colors.axel} />
-          <Text variant="caption" muted style={{ fontWeight: '700' }}>
-            Agora
-          </Text>
-          <Text variant="bodyStrong" numberOfLines={1} style={{ flex: 1, fontSize: 16 }}>
-            {top.titulo}
-          </Text>
-          {overdue > 0 ? (
-            <Text variant="caption" color={colors.axel}>
-              {overdue} atrasada{overdue === 1 ? '' : 's'}
-            </Text>
-          ) : null}
-          <Icon name="chevron-forward" size={16} color={colors.inkFaint} />
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: colors.canvas,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              padding: space.lg,
+              paddingBottom: Math.max(insets.bottom, space.lg),
+              gap: space.md,
+            }}
+          >
+            <View style={{ alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: colors.hairline }} />
+            <Text variant="section">Quadro</Text>
+            <GroupedList>
+              <GroupedRow
+                leading={<RowGlyph name="sparkles" color={colors.axel} />}
+                title={running ? 'Reorganizando...' : 'Reorganizar quadro'}
+                subtitle="O Axel encaixa as tarefas no seu dia"
+                onPress={running ? undefined : () =>
+                {
+                  setOpen(false)
+                  void run('manual')
+                }}
+              />
+              <GroupedRow
+                leading={<RowGlyph name="moon" color={colors.tasks} />}
+                title="Planejar amanhã"
+                onPress={() =>
+                {
+                  setOpen(false)
+                  router.push('/planejar-amanha')
+                }}
+                chevron
+              />
+              <GroupedRow
+                leading={<RowGlyph name="repeat" color={colors.health} />}
+                title="Reorganizar sozinho"
+                subtitle={autoReplan ? 'Ligado' : 'Desligado'}
+                onPress={() => patchPrefs({ autoReplan: !autoReplan })}
+                trailing={
+                  <Icon
+                    name={autoReplan ? 'checkmark-circle' : 'ellipse-outline'}
+                    size={22}
+                    color={autoReplan ? colors.axel : colors.inkMuted}
+                  />
+                }
+              />
+            </GroupedList>
+          </Pressable>
         </Pressable>
-      ) : null}
-      {/* ações do quadro: quando quebram de linha, ficam coladas (rowGap menor) e seguem parecendo um grupo */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 20, rowGap: 0, flexWrap: 'wrap' }}>
-        <Pressable
-          onPress={() => void run('manual')}
-          disabled={running}
-          accessibilityRole="button"
-          accessibilityLabel="Reorganizar o quadro com o Axel"
-          hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36, opacity: running ? 0.5 : 1 }}
-        >
-          <Icon name="sparkles-outline" size={15} color={colors.axel} />
-          <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
-            {running ? 'Reorganizando…' : 'Reorganizar quadro'}
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => router.push('/planejar-amanha')}
-          accessibilityRole="button"
-          accessibilityLabel="Planejar amanhã"
-          hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 }}
-        >
-          <Icon name="moon-outline" size={15} color={colors.axel} />
-          <Text variant="caption" color={colors.axel} style={{ fontWeight: '700' }}>
-            Planejar amanhã
-          </Text>
-        </Pressable>
-        <Pressable
-          onPress={() => patchPrefs({ autoReplan: !autoReplan })}
-          accessibilityRole="switch"
-          accessibilityState={{ checked: autoReplan }}
-          accessibilityLabel="Reorganizar automaticamente"
-          hitSlop={6}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 36 }}
-        >
-          <Icon
-            name={autoReplan ? 'checkmark-circle' : 'ellipse-outline'}
-            size={15}
-            color={autoReplan ? colors.axel : colors.inkMuted}
-          />
-          <Text variant="caption" muted>
-            Automático
-          </Text>
-        </Pressable>
-      </View>
-    </View>
+      </Modal>
+    </>
   )
 }

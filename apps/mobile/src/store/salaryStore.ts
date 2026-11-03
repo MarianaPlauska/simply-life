@@ -27,6 +27,7 @@ import {
 } from '../lib/sync/salary'
 import { useAuthStore } from './authStore'
 import { useDataStore } from './dataStore'
+import { friendlyError } from '../lib/friendlyError'
 
 const KEY = 'simply-life-salary-v1'
 const MONTHS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
@@ -157,7 +158,7 @@ export const useSalaryStore = create<State>((set, get) =>
       }
       catch (e)
       {
-        set({ error: e instanceof Error ? e.message : 'Não consegui salvar' })
+        set({ error: friendlyError(e, 'Não consegui salvar') })
         return false
       }
       finally
@@ -182,7 +183,7 @@ export const useSalaryStore = create<State>((set, get) =>
       catch (err)
       {
         commit({ entries: get().entries.filter((x) => x.id !== temp.id) })
-        set({ error: err instanceof Error ? err.message : 'Não consegui salvar as horas' })
+        set({ error: friendlyError(err, 'Não consegui salvar as horas') })
         return false
       }
     },

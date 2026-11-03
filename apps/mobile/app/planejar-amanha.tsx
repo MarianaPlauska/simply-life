@@ -46,6 +46,7 @@ import { insertDecisionEvents } from '../src/lib/sync/decisionLog'
 import { scheduleMorningFirstStep } from '../src/lib/pushNotifications'
 import { safeBack } from '../src/lib/safeBack'
 import { hapticLight } from '../src/lib/haptics'
+import { friendlyError } from '../src/lib/friendlyError'
 
 const STEPS = ['Como você está', 'Amanhã', 'Seu plano', 'Pronto'] as const
 const ENERGY: { id: TaskEnergy; label: string }[] = [
@@ -361,7 +362,7 @@ export default function PlanTomorrowScreen()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não consegui salvar o plano. Tente de novo.')
+      setError(friendlyError(e, 'Não consegui salvar o plano. Tente de novo.'))
     }
     finally
     {

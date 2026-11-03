@@ -11,6 +11,7 @@ import {
 } from '@simply-life/shared'
 import { readLocalJson, writeLocalJson } from '../lib/localJsonStore'
 import { authedApi } from '../lib/integrationsApi'
+import { friendlyError } from '../lib/friendlyError'
 
 /** v1 tinha uma agenda só: a URL antiga é migrada para a lista */
 const LEGACY_URL_KEY = 'simply-life-calendar-ics-url'
@@ -225,7 +226,7 @@ export const useCalendarStore = create<State>((set, get) =>
       }
       catch (e)
       {
-        set({ error: e instanceof Error ? e.message : 'Não consegui ler a agenda.' })
+        set({ error: friendlyError(e, 'Não consegui ler a agenda.') })
         return false
       }
       finally
@@ -253,7 +254,7 @@ export const useCalendarStore = create<State>((set, get) =>
       }
       catch (e)
       {
-        set({ error: e instanceof Error ? e.message : 'Não consegui ler o Google Agenda.' })
+        set({ error: friendlyError(e, 'Não consegui ler o Google Agenda.') })
         return false
       }
       finally

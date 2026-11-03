@@ -112,6 +112,7 @@ import { useBodyWeekStore } from './bodyWeekStore'
 import { useActivityStore } from './activityStore'
 import { useDuePaidStore } from './duePaidStore'
 import { cancelTaskReminder, scheduleTaskReminder } from '../lib/pushNotifications'
+import { friendlyError } from '../lib/friendlyError'
 
 export type DumpCounts = Record<DumpKind, number>
 
@@ -682,7 +683,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
     catch (e)
     {
-      const msg = e instanceof Error ? e.message : 'Falha ao sincronizar'
+      const msg = friendlyError(e, 'Falha ao sincronizar')
       set({
         error: msg,
         loading: false,
@@ -843,7 +844,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
     catch (e)
     {
-      return { ok: false, error: e instanceof Error ? e.message : 'Erro ao salvar' }
+      return { ok: false, error: friendlyError(e, 'Erro ao salvar') }
     }
   },
 
@@ -947,7 +948,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
     catch (e)
     {
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar a conta' }
+      return { ok: false, error: friendlyError(e, 'Não consegui salvar a conta') }
     }
   },
 
@@ -1246,7 +1247,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     const card = get().financeCards.find((c) => c.id === cardId)
     if (card && remoteEnabled())
     {
-      void updateFinanceCardRow(card).catch((e) => set({ error: `Cartão não salvo: ${e instanceof Error ? e.message : 'tente de novo'}` }))
+      void updateFinanceCardRow(card).catch((e) => set({ error: `Cartão não salvo: ${friendlyError(e, 'tente de novo')}` }))
     }
   },
 
@@ -1263,7 +1264,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     const card = get().financeCards.find((c) => c.id === cardId)
     if (persisted && card && remoteEnabled())
     {
-      void updateFinanceCardRow(card).catch((e) => set({ error: `Cartão não salvo: ${e instanceof Error ? e.message : 'tente de novo'}` }))
+      void updateFinanceCardRow(card).catch((e) => set({ error: `Cartão não salvo: ${friendlyError(e, 'tente de novo')}` }))
     }
   },
 
@@ -1292,7 +1293,7 @@ export const useDataStore = create<DataState>((set, get) => ({
         // não conseguiu salvar: tira da tela para não enganar
         set({
           financeCards: get().financeCards.filter((c) => c.id !== card.id),
-          error: `Cartão não salvo: ${e instanceof Error ? e.message : 'tente de novo'}`,
+          error: `Cartão não salvo: ${friendlyError(e, 'tente de novo')}`,
         })
       })
     }
@@ -1310,7 +1311,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     {
       void deleteFinanceCard(cardId).catch((e) => set({
         financeCards: before,
-        error: `Não consegui remover o cartão: ${e instanceof Error ? e.message : 'tente de novo'}`,
+        error: `Não consegui remover o cartão: ${friendlyError(e, 'tente de novo')}`,
       }))
     }
   },
@@ -1390,7 +1391,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     catch (e)
     {
       set({ finance: before })
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar' }
+      return { ok: false, error: friendlyError(e, 'Não consegui salvar') }
     }
   },
 
@@ -1408,7 +1409,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     catch (e)
     {
       set({ finance: before })
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui apagar' }
+      return { ok: false, error: friendlyError(e, 'Não consegui apagar') }
     }
   },
 
@@ -1425,7 +1426,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     catch (e)
     {
       set({ finance: before })
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui apagar' }
+      return { ok: false, error: friendlyError(e, 'Não consegui apagar') }
     }
   },
 
@@ -1445,7 +1446,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       .then((saved) => set({ financeGoals: get().financeGoals.map((g) => (g.id === tempId ? saved : g)) }))
       .catch((e) => set({
         financeGoals: get().financeGoals.filter((g) => g.id !== tempId),
-        error: `Meta não salva: ${e instanceof Error ? e.message : 'tente de novo'}`,
+        error: `Meta não salva: ${friendlyError(e, 'tente de novo')}`,
       }))
   },
 
@@ -1472,7 +1473,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     catch (e)
     {
       set({ financeGoals: before })
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar a meta' }
+      return { ok: false, error: friendlyError(e, 'Não consegui salvar a meta') }
     }
   },
 
@@ -1505,7 +1506,7 @@ export const useDataStore = create<DataState>((set, get) => ({
       }
       catch (e)
       {
-        return { ok: false, error: e instanceof Error ? e.message : 'Não consegui lançar o pagamento' }
+        return { ok: false, error: friendlyError(e, 'Não consegui lançar o pagamento') }
       }
     }
     useDuePaidStore.getState().setPaid(key, true, { titulo: fixa.nome, valor: fixa.valor })
@@ -1546,7 +1547,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     catch (e)
     {
       set({ financeGoals: before })
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui apagar a meta' }
+      return { ok: false, error: friendlyError(e, 'Não consegui apagar a meta') }
     }
   },
 
@@ -1584,7 +1585,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
     catch (e)
     {
-      return { ok: false, error: e instanceof Error ? e.message : 'Erro ao salvar fixa' }
+      return { ok: false, error: friendlyError(e, 'Erro ao salvar fixa') }
     }
   },
 
@@ -1610,7 +1611,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
     catch (e)
     {
-      return { ok: false, error: e instanceof Error ? e.message : 'Erro ao atualizar fixa' }
+      return { ok: false, error: friendlyError(e, 'Erro ao atualizar fixa') }
     }
   },
 
@@ -1843,7 +1844,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     }
     catch (e)
     {
-      return { error: e instanceof Error ? e.message : 'Falha ao salvar' }
+      return { error: friendlyError(e, 'Falha ao salvar') }
     }
   },
 
@@ -1896,7 +1897,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     catch (e)
     {
       set({ cashAccount: before })
-      return { ok: false, error: e instanceof Error ? e.message : 'Não consegui salvar o saldo' }
+      return { ok: false, error: friendlyError(e, 'Não consegui salvar o saldo') }
     }
   },
 

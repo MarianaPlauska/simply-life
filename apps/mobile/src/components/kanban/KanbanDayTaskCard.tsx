@@ -1,5 +1,4 @@
-import { View, Pressable } from 'react-native'
-import { useRouter } from 'expo-router'
+import { View, Pressable, StyleSheet } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
   hasReviewLater,
@@ -16,7 +15,6 @@ import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
-import { openFocusForTask } from '../../lib/openFocus'
 import { TaskWaitBadge } from './TaskWaitPanel'
 
 type Props = {
@@ -32,11 +30,10 @@ function timeRange(task: MobileTask): string
   return `${start} às ${minutesToLabel(endMins % (24 * 60))}`
 }
 
-/** Card de tarefa no estilo agenda: horário | título | flag | checkbox. */
+/** Linha de tarefa, como num app nativo: caixinha | título e hora | marcar para depois. Desliza para concluir. */
 export function KanbanDayTaskCard({ task, onToggle }: Props)
 {
   const { colors, chart } = useTheme()
-  const router = useRouter()
   const openEvolve = useTaskEvolveStore((s) => s.open)
   const patchTask = useDataStore((s) => s.patchTask)
   const isGuest = useAuthStore((s) => s.isGuest)
@@ -45,127 +42,72 @@ export function KanbanDayTaskCard({ task, onToggle }: Props)
   const later = hasReviewLater(task.anotacao)
   const accent = taskHasAccent(task)
   const mark = taskMarkColor(task, lists, colors.danger, chart)
-  const ink = accent ? colors.axelOnFill : colors.ink
-  // Destaque usa o preenchimento coral (igual nos dois modos) com tinta carvão por cima;
-  // `colors.axel` é tom de texto e escurece no modo claro, por isso não serve de fundo.
-  const muted = accent ? `${colors.axelOnFill}CC` : colors.inkMuted
-  const bg = accent ? colors.axelFill : colors.elevated
-  const chipBg = accent ? `${colors.axelOnFill}1F` : colors.canvas
+  const notes = stripTaskDisplayNotes(task.anotacao)
+  const meta = [task.horaMinutos != null ? timeRange(task) : null, notes || null].filter(Boolean).join(' · ')
 
   return (
-    <SwipeRow left={{ label: task.status === 'done' ? 'Reabrir' : 'Feita', icon: 'checkmark', color: colors.health, onPress: onToggle }}>
+    <SwipeRow left={{ label: done ? 'Reabrir' : 'Feita', icon: 'checkmark', color: colors.health, onPress: onToggle }}>
       <Pressable
         onPress={() => openEvolve(task.id)}
-        style={{
+        style={({ pressed }) => ({
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 10,
-          paddingVertical: 16,
-          paddingRight: 14,
-          paddingLeft: 10,
-          borderRadius: 20,
-          backgroundColor: bg,
-          borderWidth: 1,
-          borderColor: accent ? 'transparent' : colors.cardRim,
-          minHeight: 72,
-          overflow: 'hidden',
-        }}
+          gap: 14,
+          minHeight: 60,
+          paddingVertical: 10,
+          backgroundColor: pressed ? colors.fill : 'transparent',
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.hairline,
+        })}
       >
-        <View
+        <PressableScale
+          accessibilityRole='checkbox'
+          accessibilityState={{ checked: done }}
+          accessibilityLabel={done ? 'Devolver à lista' : 'Marcar como feita'}
+          onPress={onToggle}
+          hitSlop={10}
           style={{
-            width: 5,
-            alignSelf: 'stretch',
+            width: 24,
+            height: 24,
             borderRadius: 999,
-            backgroundColor: accent ? colors.axelOnFill : mark,
+            borderWidth: done ? 0 : 2,
+            borderColor: accent ? colors.axelFill : mark,
+            backgroundColor: done ? colors.health : 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-        />
-        <View style={{ width: 72 }}>
-          <Text variant="micro" style={{ color: muted, fontWeight: '600', lineHeight: 16 }}>
-            {timeRange(task)}
-          </Text>
-        </View>
-        <View style={{ flex: 1, minWidth: 0, gap: 6 }}>
+        >
+          {done ? <Icon name='checkmark' size={14} color={colors.canvas} /> : null}
+        </PressableScale>
+        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
           <Text
-            variant="bodyStrong"
+            variant='body'
             numberOfLines={2}
             style={{
-              color: ink,
+              fontWeight: accent ? '700' : '500',
+              color: done ? colors.inkMuted : colors.ink,
               textDecorationLine: done ? 'line-through' : 'none',
-              opacity: done && !later ? 0.65 : 1,
             }}
           >
             {task.titulo}
           </Text>
-          {stripTaskDisplayNotes(task.anotacao) ? (
-            <Text variant="caption" numberOfLines={1} style={{ color: muted }}>
-              {stripTaskDisplayNotes(task.anotacao)}
+          {meta ? (
+            <Text variant='caption' muted numberOfLines={1}>
+              {meta}
             </Text>
           ) : null}
           <TaskWaitBadge task={task} />
         </View>
-        {!done ? (
-          <PressableScale
-            accessibilityRole="button"
-            accessibilityLabel="Focar nesta tarefa"
-            onPress={() => openFocusForTask(router, task.id)}
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 8,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: chipBg,
-            }}
-          >
-            <Icon
-              name="timer-outline"
-              size={14}
-              color={accent ? colors.axelOnFill : colors.axel}
-            />
-          </PressableScale>
-        ) : null}
         <PressableScale
-          accessibilityRole="button"
+          accessibilityRole='button'
           accessibilityLabel={later ? 'Tirar ver depois' : 'Ver depois'}
           onPress={() =>
             void patchTask(task.id, { anotacao: stampReviewLater(task.anotacao, !later) }, isGuest)
           }
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: chipBg,
-          }}
+          hitSlop={10}
+          style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Icon
-            name={later ? 'flag' : 'flag-outline'}
-            size={14}
-            color={accent ? colors.axelOnFill : later ? colors.axel : colors.inkMuted}
-          />
-        </PressableScale>
-        <PressableScale
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: done }}
-          accessibilityLabel={done ? 'Devolver à lista' : 'Marcar como feita'}
-          onPress={onToggle}
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 8,
-            borderWidth: done || accent ? 0 : 1.5,
-            borderColor: colors.ink,
-            backgroundColor: done ? colors.ink : accent ? colors.axelOnFill : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {done ? (
-            <Icon name="checkmark" size={14} color={colors.canvas} />
-          ) : accent ? (
-            <Icon name="checkmark" size={14} color={colors.axelFill} />
-          ) : null}
+          <Icon name={later ? 'flag' : 'flag-outline'} size={18} color={later ? colors.axel : colors.inkFaint} />
         </PressableScale>
       </Pressable>
     </SwipeRow>

@@ -21,6 +21,7 @@ import { useDataStore } from '../../src/store/dataStore'
 import { useNotesStore } from '../../src/store/notesStore'
 import { useGamificationStore } from '../../src/store/gamificationStore'
 import { saveGradualExposure } from '../../src/lib/tccPersist'
+import { friendlyError } from '../../src/lib/friendlyError'
 
 const STEP_COUNT = 4
 const ANXIETY_LEVELS = [2, 4, 6, 8, 10]
@@ -103,7 +104,7 @@ export default function GradualExposureScreen()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não foi possível salvar')
+      setError(friendlyError(e, 'Não foi possível salvar'))
     }
     finally
     {

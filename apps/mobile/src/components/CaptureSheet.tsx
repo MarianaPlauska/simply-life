@@ -9,6 +9,7 @@ import {
 import { Modal } from '../ui/Modal'
 import { useWorkspace } from '../layout/useWorkspace'
 import { Icon } from '../ui/Icon'
+import { useCalmSheetStore } from './calm/CalmQuickFab'
 import { useEffect, useState, Fragment, useRef } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text, PrimaryButton, PillTabs, Field, CloseButton } from '../ui'
@@ -71,6 +72,7 @@ import { useCareExtrasStore } from '../store/careExtrasStore'
 import { shouldHoldImpulse } from '@simply-life/shared'
 import { useMonthProjection } from './finance/FinanceForecastCards'
 import { SpendGuardHost } from './finance/SpendGuardHost'
+import { friendlyError } from '../lib/friendlyError'
 
 const TABS: { id: CaptureKind; label: string }[] = [
   { id: 'dump', label: 'Dump' },
@@ -361,7 +363,7 @@ export function CaptureSheet()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Falha ao salvar')
+      setError(friendlyError(e, 'Falha ao salvar'))
     }
     finally
     {
@@ -610,7 +612,7 @@ export function CaptureSheet()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Falha ao salvar')
+      setError(friendlyError(e, 'Falha ao salvar'))
     }
     finally
     {
@@ -864,7 +866,23 @@ export function CaptureSheet()
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <Text variant="section">Captura rápida</Text>
-              <CloseButton onPress={resetAndClose} label="Fechar captura" />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Acalmar agora"
+                  onPress={() =>
+                  {
+                    resetAndClose()
+                    useCalmSheetStore.getState().setOpen(true)
+                  }}
+                  hitSlop={6}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: 4 }}
+                >
+                  <Icon name="leaf-outline" size={18} color={colors.health} />
+                  <Text variant="label" color={colors.health}>Acalmar</Text>
+                </Pressable>
+                <CloseButton onPress={resetAndClose} label="Fechar captura" />
+              </View>
             </View>
             <PillTabs
               tabs={TABS}
