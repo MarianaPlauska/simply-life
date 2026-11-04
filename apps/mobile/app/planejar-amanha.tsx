@@ -46,6 +46,8 @@ import { insertDecisionEvents } from '../src/lib/sync/decisionLog'
 import { scheduleMorningFirstStep } from '../src/lib/pushNotifications'
 import { safeBack } from '../src/lib/safeBack'
 import { hapticLight } from '../src/lib/haptics'
+import { friendlyError } from '../src/lib/friendlyError'
+import { MundoTomorrowCard } from '../src/components/mundo/MundoTomorrowCard'
 
 const STEPS = ['Como você está', 'Amanhã', 'Seu plano', 'Pronto'] as const
 const ENERGY: { id: TaskEnergy; label: string }[] = [
@@ -361,7 +363,7 @@ export default function PlanTomorrowScreen()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não consegui salvar o plano. Tente de novo.')
+      setError(friendlyError(e, 'Não consegui salvar o plano. Tente de novo.'))
     }
     finally
     {
@@ -374,6 +376,7 @@ export default function PlanTomorrowScreen()
       <StackHeader title="Planejar amanhã" subtitle="Um amanhã do tamanho certo, com pausas" />
       <View style={{ gap: space.md }}>
         <StepDots step={step} />
+        {step === 0 ? <MundoTomorrowCard /> : null}
 
         {step === 0 ? (
           <Card tone="elevated" style={{ gap: space.md }}>

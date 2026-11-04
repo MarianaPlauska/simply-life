@@ -27,6 +27,7 @@ import { KanbanFoldersPane } from '../../src/components/kanban/KanbanFoldersPane
 import { KanbanBackdrop } from '../../src/components/kanban/KanbanBackdrop'
 import { KanbanReportsPane } from '../../src/components/kanban/KanbanReportsPane'
 import { KanbanOverviewPane } from '../../src/components/kanban/KanbanOverviewPane'
+import { MeuMundoPane } from '../../src/components/mundo/MeuMundoPane'
 import { KanbanRoutinePane } from '../../src/components/kanban/KanbanRoutinePane'
 import { WeeklyReviewPane } from '../../src/components/kanban/reports/WeeklyReviewPane'
 import { RitmoInsights } from '../../src/components/kanban/reports/RitmoInsights'
@@ -39,8 +40,9 @@ import { WebKanbanHeader } from '../../src/components/kanban/web/WebKanbanHeader
 import { WebKanbanTabs } from '../../src/components/kanban/web/WebKanbanTabs'
 import { WebBoardActions } from '../../src/components/kanban/web/WebBoardActions'
 import { useSectionState, usePublishSectionTabs } from '../../src/store/sectionNavStore'
+import { friendlyError } from '../../src/lib/friendlyError'
 
-type Hub = 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'calendario' | 'gantt' | 'relatorios'
+type Hub = 'mundo' | 'board' | 'lista' | 'feitas' | 'pastas' | 'rotina' | 'calendario' | 'gantt' | 'relatorios'
 type ReportMode = 'semana' | 'esperas' | 'desempenho' | 'overview' | 'timeline' | 'ritmo'
 
 const REPORT_TABS: { id: ReportMode; label: string }[] = [
@@ -54,7 +56,7 @@ const REPORT_TABS: { id: ReportMode; label: string }[] = [
 
 export default function KanbanScreen()
 {
-  const { relatorio } = useLocalSearchParams<{ relatorio?: string }>()
+  const { relatorio, hub: hubParam, dia: diaParam } = useLocalSearchParams<{ relatorio?: string; hub?: string; dia?: string }>()
   const { space } = useTheme()
   // computador: cabeçalho e barra de abas de site; celular segue igual
   const desk = useWebDesk()
@@ -127,6 +129,7 @@ export default function KanbanScreen()
   // Rotina só com o módulo Rotina; o resto é do módulo Tarefas
   const hubTabs = ([
     { id: 'lista', label: 'Lista' },
+    { id: 'mundo', label: 'Meu Mundo' },
     { id: 'feitas', label: 'Feitas', count: doneCount },
     { id: 'rotina', label: 'Rotina' },
     { id: 'board', label: 'Prazos', count: openCount },
@@ -136,7 +139,7 @@ export default function KanbanScreen()
     { id: 'pastas', label: 'Pastas' },
     { id: 'relatorios', label: 'Relatórios' },
   ] as { id: Hub; label: string; count?: number }[]).filter((t) =>
-    t.id === 'rotina' ? modules.on('routine') : modules.on('tasks'))
+    t.id === 'rotina' ? modules.on('routine') : t.id === 'mundo' ? modules.on('routine') || modules.on('tasks') : modules.on('tasks'))
   // computador: as abas principais ficam na barra lateral, como subitens de Tarefas
   usePublishSectionTabs('kanban', hubTabs)
   const hubShown = hubTabs.some((t) => t.id === hub) ? hub : (hubTabs[0]?.id ?? hub)
@@ -144,6 +147,11 @@ export default function KanbanScreen()
   {
     if (hubShown !== hub) setHub(hubShown)
   }, [hubShown, hub])
+  // aviso do Meu Mundo abre direto na aba
+  useEffect(() =>
+  {
+    if (hubParam === 'mundo') setHub('mundo')
+  }, [hubParam])
 
   return (
     <Screen
@@ -162,13 +170,11 @@ export default function KanbanScreen()
           </>
         ) : (
           <>
-            <ScreenIntro title="Tarefas" subtitle="Uma coisa de cada vez, no seu ritmo." />
+            <ScreenIntro
+              title="Tarefas"
+              right={hub === 'board' || hub === 'lista' || hub === 'pastas' ? <KanbanOrchestratorBar tasks={tasks} /> : null}
+            />
 
-            {hub === 'board' || hub === 'lista' || hub === 'pastas' ? (
-              <KanbanOrchestratorBar tasks={tasks} />
-            ) : null}
-
-            {/* abas mais perto do título: o conteúdo da aba sobe junto */}
             <View style={{ marginTop: -12 }}>
               <SubNavTabs
                 accent="axel"
@@ -237,7 +243,7 @@ export default function KanbanScreen()
                     }
                     catch (e)
                     {
-                      setSyncMsg(e instanceof Error ? e.message : 'Sync indisponível')
+                      setSyncMsg(friendlyError(e, 'Sync indisponível'))
                     }
                   })()
                 }}
@@ -255,6 +261,7 @@ export default function KanbanScreen()
             <KanbanListPane tasks={tasks} onSeeDone={() => setHub('feitas')} />
           ) : null}
           {hub === 'feitas' ? <KanbanDonePane tasks={tasks} /> : null}
+          {hub === 'mundo' ? <MeuMundoPane initialDia={typeof diaParam === 'string' ? diaParam : undefined} /> : null}
           {hub === 'rotina' ? <KanbanRoutinePane /> : null}
           {hub === 'pastas' ? <KanbanFoldersPane tasks={tasks} /> : null}
           {hub === 'board' ? <DueBucketColumns tasks={tasks} /> : null}

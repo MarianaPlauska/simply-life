@@ -19,6 +19,7 @@ import { useDataStore } from '../../src/store/dataStore'
 import { useNotesStore } from '../../src/store/notesStore'
 import { useGamificationStore } from '../../src/store/gamificationStore'
 import { saveBehavioralActivation } from '../../src/lib/tccPersist'
+import { friendlyError } from '../../src/lib/friendlyError'
 
 const STEP_COUNT = 3
 
@@ -81,7 +82,7 @@ export default function BehavioralActivationScreen()
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não foi possível criar a tarefa')
+      setError(friendlyError(e, 'Não foi possível criar a tarefa'))
     }
     finally
     {

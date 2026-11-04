@@ -16,6 +16,7 @@ import { useAuthStore } from '../../store/authStore'
 import { useDataStore } from '../../store/dataStore'
 import { useNotesStore } from '../../store/notesStore'
 import { useBodyWeekStore } from '../../store/bodyWeekStore'
+import { friendlyError } from '../../lib/friendlyError'
 
 const QUICK_HOURS = [5, 5.5, 6, 6.5, 7, 7.5, 8, 8.5, 9]
 
@@ -118,7 +119,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não foi possível registrar o sono')
+      setError(friendlyError(e, 'Não foi possível registrar o sono'))
       return false
     }
     finally
@@ -158,7 +159,7 @@ export function HomeMorningRitual({ needSleep, needMood, onMoodRegistered }: Pro
     }
     catch (e)
     {
-      setError(e instanceof Error ? e.message : 'Não foi possível gravar o humor')
+      setError(friendlyError(e, 'Não foi possível gravar o humor'))
     }
     finally
     {

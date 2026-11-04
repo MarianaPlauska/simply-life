@@ -53,6 +53,7 @@ O SunFy foi feito para o dia difícil:
 |---|---|
 | **Início** | Ver o progresso do dia, registrar sono e humor e saber o próximo passo |
 | **Tarefas** | Listar o que fazer, separar por dia e quebrar tarefas grandes em passos pequenos |
+| **Meu Mundo** | A semana em formato de planilha, com repetição, avisos e alerta de conflito |
 | **Saúde** | Diário de humor, água, alimentação, sono, academia, remédios e exercícios de respiração |
 | **Carteira** | Saldo, cartões, contas a pagar e quanto sobra no fim do mês |
 | **Calendário** | Ver o mês e ligar a agenda do Google, Outlook ou Teams |
@@ -142,6 +143,28 @@ Uma meta importante conta os dias a partir da data em que você começou. Um ano
 2. Marque o que terminou.
 3. Se uma tarefa for grande demais, quebre em passos pequenos.
 4. O horário que o AXEL sugere aparece diferente do que veio da sua agenda.
+
+### Meu Mundo
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/meu-mundo-escuro.png" />
+    <img src="docs/images/app/meu-mundo.png" alt="Meu Mundo: a semana em grade, com academia, trabalho e yoga" width="240" />
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/app/meu-mundo-dia-escuro.png" />
+    <img src="docs/images/app/meu-mundo-dia.png" alt="Meu Mundo: o dia em linha do tempo, com o tempo livre e a linha do agora" width="240" />
+  </picture>
+</p>
+
+A agenda em formato de planilha, dentro de Tarefas.
+
+1. Escreva do seu jeito: "academia seg qua sex 7h" vira um bloco que se repete.
+2. Veja a semana em grade ou o dia em linha do tempo. Toque num horário vazio para criar.
+3. Segure um bloco para arrastar, ou puxe a borda de baixo para mudar a duração.
+4. Se algo bater com outro horário, o app avisa e sugere o próximo horário livre.
+5. Blocos flexíveis ("estudar 1h") são encaixados nos espaços livres com o botão Ajeitar.
+6. O aviso chega antes de cada bloco e, se quiser, pergunta no fim se deu para fazer.
 
 ### Saúde
 
@@ -368,6 +391,7 @@ Com o app rodando no navegador:
 node scripts/readme-shots.mjs   # telas principais
 node scripts/readme-flow.mjs    # passo a passo de uso
 node scripts/readme-rpg.mjs     # modo aventura, como convidado
+node scripts/readme-mundo.mjs   # Meu Mundo, semana e dia
 ```
 
 <p align="center">

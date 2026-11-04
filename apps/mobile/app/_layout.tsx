@@ -30,6 +30,7 @@ import { registerServiceWorker } from '../src/lib/webPush'
 import { useEloSync } from '../src/hooks/useEloSync'
 import { WebTopNav } from '../src/components/layout/WebTopNav'
 import { useWorkspace } from '../src/layout/useWorkspace'
+import { useMeuMundoStore } from '../src/store/meuMundoStore'
 
 // a splash nativa fica até fontes, sessão e preferências carregarem (sem tela de "carregando")
 void SplashScreen.preventAutoHideAsync().catch(() => undefined)
@@ -81,6 +82,12 @@ function RootNavigator()
     })
     return () => sub.remove()
   }, [userId, markOpen])
+
+  // Meu Mundo: carrega e reagenda os avisos dos próximos 7 dias a cada abertura
+  useEffect(() =>
+  {
+    if (ready && (userId || isGuest)) void useMeuMundoStore.getState().hydrate()
+  }, [ready, userId, isGuest])
 
   useEffect(() =>
   {

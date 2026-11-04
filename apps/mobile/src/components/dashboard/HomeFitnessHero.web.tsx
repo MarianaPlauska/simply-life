@@ -9,6 +9,8 @@ import { HomeWeatherChip } from './HomeWeatherChip'
 import { CircleCornerButton } from '../social/CircleCornerButton'
 import { ProfileAvatarBadge } from '../social/ProfileAvatarBadge'
 import { WEB_DISPLAY_FONT } from './web/webTypography'
+import { HomePlay } from '../play/HomePlay'
+import { HomeSearchButton } from './HomeSearchButton'
 
 type Props = {
   greet: string
@@ -117,19 +119,16 @@ export function HomeFitnessHero({
   // formam um grupo só; a conta fica no canto, fora do grupo.
   return (
     <View style={{ paddingTop: topPad, gap: space.md, marginBottom: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: space.md }}>
-        <View style={{ flex: 1, minWidth: 0, gap: space.xs }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
-            <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
-              {dateLabel}
-            </Text>
-            <HomeWeatherChip compact />
-          </View>
-          <Text variant="section" numberOfLines={2} style={{ fontSize: 24, lineHeight: 30 }}>
-            {title}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+        <View style={{ flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44 }}>
+          <Text variant="caption" muted numberOfLines={1} style={{ flexShrink: 1 }}>
+            {dateLabel}
           </Text>
+          <HomeWeatherChip compact />
         </View>
         <View style={{ flexDirection: 'row', gap: 8 }}>
+        <HomePlay />
+        <HomeSearchButton />
         <CircleCornerButton />
         <PressableScale
           onPress={onAccount}
@@ -167,6 +166,9 @@ export function HomeFitnessHero({
         </PressableScale>
         </View>
       </View>
+      <Text variant="section" numberOfLines={2} style={{ fontSize: 24, lineHeight: 30 }}>
+        {title}
+      </Text>
       <SyncHint />
     </View>
   )

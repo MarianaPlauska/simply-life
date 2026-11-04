@@ -101,6 +101,13 @@ export async function cancelTaskReminder(_id: string): Promise<void>
 {
 }
 
+export type BlocoReminder = { key: string; at: Date; title: string; body: string; url: string }
+
+/** Web: avisos do Meu Mundo pelo servidor (fase 2). */
+export async function scheduleBlocoReminders(_items: BlocoReminder[]): Promise<void>
+{
+}
+
 /** No navegador o aviso chega pelo servidor, não por um alarme local. */
 export async function scheduleCadenceAlerts(_cadence: 'off' | 'once' | 'batch3'): Promise<void>
 {

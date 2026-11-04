@@ -9,7 +9,7 @@ import {
   type MoodDistributionSlice,
   type DiaHumorAgregado,
 } from '@simply-life/shared'
-import { Text, PrimaryButton, Field, Icon, GroupedList, GroupedRow, RowGlyph, type IconName } from '../../../ui'
+import { Text, PrimaryButton, Field, Icon, GroupedList, GroupedRow, RowGlyph, SwipeRow, type IconName } from '../../../ui'
 import { MoodFaceRow } from '../../MoodFace'
 import { useTheme } from '../../../theme/ThemeProvider'
 import { useWorkspace } from '../../../layout/useWorkspace'
@@ -346,15 +346,29 @@ export function HealthDiaryStudio(props: Props)
             <Text variant="caption" muted style={{ marginLeft: 4 }}>Últimas anotações</Text>
             <GroupedList>
               {comNota.slice(0, 3).map((h) => (
-                <GroupedRow
-                  key={h.id}
-                  leading={<RowGlyph name={moodIcon(h.humor)} color={moodColor(h.humor)} />}
-                  title={h.nota ?? ''}
-                  subtitle={`${formatDayPt((h.data || '').slice(0, 10))} · ${moodLabel(h.humor)}`}
-                  value={onClearNote ? 'Apagar' : undefined}
-                  onPress={onClearNote ? () => onClearNote(h.id) : undefined}
-                  accessibilityLabel="Apagar este texto"
-                />
+                onClearNote ? (
+                  <SwipeRow
+                    key={h.id}
+                    bg={colors.elevated}
+                    right={{ label: 'Apagar', icon: 'trash-outline', color: colors.danger, onPress: () => onClearNote(h.id) }}
+                  >
+                    <GroupedRow
+                      leading={<RowGlyph name={moodIcon(h.humor)} color={moodColor(h.humor)} />}
+                      title={h.nota ?? ''}
+                      subtitle={`${formatDayPt((h.data || '').slice(0, 10))} · ${moodLabel(h.humor)}`}
+                      onPress={onOpenNotes}
+                    />
+                  </SwipeRow>
+                ) : (
+                  <View key={h.id}>
+                    <GroupedRow
+                      leading={<RowGlyph name={moodIcon(h.humor)} color={moodColor(h.humor)} />}
+                      title={h.nota ?? ''}
+                      subtitle={`${formatDayPt((h.data || '').slice(0, 10))} · ${moodLabel(h.humor)}`}
+                      onPress={onOpenNotes}
+                    />
+                  </View>
+                )
               ))}
               <GroupedRow
                 leading={<RowGlyph name="document-text" color={colors.tasks} />}

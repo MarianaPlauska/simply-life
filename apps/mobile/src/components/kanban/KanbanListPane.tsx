@@ -122,16 +122,10 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
 
   return (
     <View style={{ gap: space.md }}>
-      <PaneTitle title="Hoje" subtitle={`${dayCount} em aberto · ${dateTitle}`}>
-        {dayCount > 0 ? (
-          <Text variant="caption" muted>
-            A caixinha conclui e guarda em Feitas.
-          </Text>
-        ) : null}
-      </PaneTitle>
+      <PaneTitle title="Hoje" subtitle={`${dayCount} em aberto · ${dateTitle}`} />
 
       {/* filtros e dias: um grupo só, perto um do outro, com mais espaço em volta */}
-      <View style={{ gap: 12, marginVertical: space.sm }}>
+      <View style={{ gap: 12 }}>
       <ScrollView
         horizontal
         nestedScrollEnabled

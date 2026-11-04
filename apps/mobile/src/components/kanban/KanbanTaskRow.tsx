@@ -1,4 +1,4 @@
-import { View, Pressable } from 'react-native'
+import { View, Pressable, StyleSheet } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
   minutesToLabel,
@@ -9,7 +9,6 @@ import {
 } from '@simply-life/shared'
 import { Text, PressableScale, SwipeRow } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
-import { MetricTrack } from '../metrics/MetricTrack'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
 import { useTaskEvolveStore } from '../../store/taskEvolveStore'
 import { TaskWaitBadge } from './TaskWaitPanel'
@@ -43,90 +42,61 @@ export function KanbanTaskRow({ task, onToggle, onLongPress }: Props)
       : task.dataVencimento ?? undefined
 
   return (
-    <SwipeRow left={{ label: task.status === 'done' ? 'Reabrir' : 'Feita', icon: 'checkmark', color: colors.health, onPress: onToggle }}>
+    <SwipeRow left={{ label: done ? 'Reabrir' : 'Feita', icon: 'checkmark', color: colors.health, onPress: onToggle }}>
       <Pressable
         onPress={() => openEvolve(task.id)}
         onLongPress={onLongPress}
         delayLongPress={380}
-        style={{
+        style={({ pressed }) => ({
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 12,
-          paddingVertical: 14,
-          paddingRight: 14,
-          paddingLeft: 10,
-          borderRadius: 20,
-          backgroundColor: colors.elevated,
-          borderWidth: 1,
-          borderColor: colors.cardRim,
-          minHeight: 64,
-          overflow: 'hidden',
-        }}
+          gap: 14,
+          minHeight: 60,
+          paddingVertical: 10,
+          backgroundColor: pressed ? colors.fill : 'transparent',
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.hairline,
+        })}
       >
-        <View
-          accessibilityLabel={task.prioridade === 1 ? 'Urgente' : 'Cor da pasta'}
+        <PressableScale
+          accessibilityRole='checkbox'
+          accessibilityState={{ checked: done }}
+          accessibilityLabel={done ? 'Devolver à lista' : 'Marcar como feita'}
+          onPress={onToggle}
+          hitSlop={10}
           style={{
-            width: 5,
-            alignSelf: 'stretch',
+            width: 24,
+            height: 24,
             borderRadius: 999,
-            backgroundColor: accent,
-          }}
-        />
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 999,
-            backgroundColor: `${accent}26`,
+            borderWidth: done ? 0 : 2,
+            borderColor: accent,
+            backgroundColor: done ? colors.health : 'transparent',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Icon name={icon} size={18} color={accent} />
-        </View>
-        <View style={{ flex: 1, minWidth: 0, gap: 8 }}>
+          {done ? <Icon name='checkmark' size={14} color={colors.canvas} /> : null}
+        </PressableScale>
+        <View style={{ flex: 1, minWidth: 0, gap: 2 }}>
           <Text
-            variant="bodyStrong"
+            variant='body'
             numberOfLines={2}
             style={{
-              fontSize: 16,
+              fontWeight: '500',
+              color: done ? colors.inkMuted : colors.ink,
               textDecorationLine: done ? 'line-through' : 'none',
-              opacity: done ? 0.5 : 1,
             }}
           >
             {task.titulo}
           </Text>
           {detail ? (
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 12 }}>
+            <Text variant='caption' muted numberOfLines={1}>
               {detail}
             </Text>
           ) : null}
           <TaskWaitBadge task={task} />
-          <MetricTrack
-            pct={taskProgressPct(task)}
-            currentLabel={`${taskProgressPct(task)}%`}
-            targetLabel={done ? 'Feito' : 'Meta'}
-            fill={accent}
-          />
         </View>
-        <PressableScale
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: done }}
-          accessibilityLabel={done ? 'Devolver à lista' : 'Marcar como feita'}
-          onPress={onToggle}
-          style={{
-            width: 26,
-            height: 26,
-            borderRadius: 999,
-            borderWidth: done ? 0 : 1.5,
-            borderColor: colors.ink,
-            backgroundColor: done ? colors.ink : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {done ? <Icon name="checkmark" size={14} color={colors.canvas} /> : null}
-        </PressableScale>
+        <Icon name={icon} size={18} color={colors.inkFaint} />
       </Pressable>
     </SwipeRow>
   )

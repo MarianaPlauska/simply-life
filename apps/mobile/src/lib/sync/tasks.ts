@@ -107,21 +107,25 @@ export async function createTarefa(
   const dbStatus =
     status === 'done' ? 'concluido' : status === 'doing' ? 'em_andamento' : 'pendente'
 
-  const { data, error } = await supabase
-    .from('tarefas_unificadas')
-    .insert({
-      user_id: uid,
-      titulo: titulo.trim(),
-      notas_locais: notas?.trim() || null,
-      status: dbStatus,
-      origem: 'mobile',
-      score_urgencia: extra?.prioridade === 1 ? 80 : extra?.prioridade === 3 ? 30 : 50,
-      data_vencimento: due,
-      prioridade: extra?.prioridade ?? 2,
-      estimativa_minutos: extra?.estimativaMinutos ?? 30,
-    })
-    .select('*, subtarefas(*)')
-    .single()
+  const row: Record<string, unknown> = {
+    user_id: uid,
+    titulo: titulo.trim(),
+    notas_locais: notas?.trim() || null,
+    status: dbStatus,
+    origem: 'mobile',
+    score_urgencia: extra?.prioridade === 1 ? 80 : extra?.prioridade === 3 ? 30 : 50,
+    data_vencimento: due,
+    prioridade: extra?.prioridade ?? 2,
+    estimativa_minutos: extra?.estimativaMinutos ?? 30,
+  }
+  const insert = () => supabase.from('tarefas_unificadas').insert(row).select('*, subtarefas(*)').single()
+  let { data, error } = await insert()
+  // banco sem a coluna (migracao 082 pendente): salva a tarefa sem o tempo estimado
+  if (error && /estimativa_minutos/i.test(error.message))
+  {
+    delete row.estimativa_minutos
+    ;({ data, error } = await insert())
+  }
 
   if (error) throw new Error(error.message)
   return mapTask(data as Record<string, unknown>)
@@ -175,10 +179,18 @@ export async function patchTarefa(
   },
 ): Promise<void>
 {
-  const { error } = await supabase
+  let { error } = await supabase
     .from('tarefas_unificadas')
     .update(fields)
     .eq('id', Number(taskId))
+  // banco sem a coluna (migracao 082 pendente): grava o resto
+  if (error && /estimativa_minutos/i.test(error.message))
+  {
+    const { estimativa_minutos: _skip, ...rest } = fields
+    error = Object.keys(rest).length
+      ? (await supabase.from('tarefas_unificadas').update(rest).eq('id', Number(taskId))).error
+      : null
+  }
 
   if (error) throw new Error(error.message)
 }

@@ -352,7 +352,39 @@ export async function cancelTaskReminder(id: string): Promise<void>
   await Notifications.cancelScheduledNotificationAsync(`${TASK_REMINDER_PREFIX}${id}`).catch(() => undefined)
 }
 
-const CADENCE_IDS = ['axel-cadence-9', 'axel-cadence-11', 'axel-cadence-15', 'axel-cadence-21']
+const BLOCO_PREFIX = 'mundo-bloco-'
+
+export type BlocoReminder = { key: string; at: Date; title: string; body: string; url: string }
+
+/** Meu Mundo: troca todos os avisos dos blocos pelos da lista (o iOS guarda no máximo 64). */
+export async function scheduleBlocoReminders(items: BlocoReminder[]): Promise<void>
+{
+  const all = await Notifications.getAllScheduledNotificationsAsync().catch(() => [])
+  for (const n of all)
+  {
+    if (n.identifier.startsWith(BLOCO_PREFIX))
+    {
+      await Notifications.cancelScheduledNotificationAsync(n.identifier).catch(() => undefined)
+    }
+  }
+  const upcoming = items
+    .filter((i) => i.at.getTime() > Date.now() + 30000)
+    .sort((a, b) => a.at.getTime() - b.at.getTime())
+    .slice(0, 40)
+  if (!upcoming.length) return
+  const granted = await requestNativePushPermission()
+  if (!granted) return
+  for (const i of upcoming)
+  {
+    await Notifications.scheduleNotificationAsync({
+      identifier: `${BLOCO_PREFIX}${i.key}`,
+      content: { title: i.title, body: i.body, sound: 'default', data: { url: i.url } },
+      trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: i.at }),
+    }).catch(() => undefined)
+  }
+}
+
+const CADENCE_IDS =['axel-cadence-9', 'axel-cadence-11', 'axel-cadence-15', 'axel-cadence-21']
 
 /** Avisos locais do ritmo escolhido. O servidor também envia, se o aparelho estiver inscrito. */
 export async function scheduleCadenceAlerts(cadence: NotifyCadence): Promise<void>
