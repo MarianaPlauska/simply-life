@@ -257,23 +257,11 @@ Uma manhã corrida, em menos de um minuto:
 
 Os prints são do app real, no modo convidado.
 
-## Em que o design se apoia
+## Princípios do design
 
-São referências de produto e de interface que o código cita e segue. Não são estudos clínicos, e o app não promete efeito terapêutico.
+O app organiza a rotina e não promete efeito terapêutico. Estas regras guiam as telas:
 
-| Referência | O que veio dela para o SunFy |
-|---|---|
-| [Tiimo](https://www.tiimoapp.com) (planejador visual para TDAH) | O cartão "Agora e depois": o que é agora, com o tempo restante em barra e em texto, e poucas coisas por vez. A ideia é tornar o tempo visível para quem tem cegueira temporal (dificuldade de perceber o tempo passando), comum no TDAH |
-| [Bearable](https://bearable.app) e [Daylio](https://daylio.net) | Ritual da manhã: sono e humor num toque, escala de 1 a 5, nota opcional. Registro rápido em cima, padrões e histórico abaixo |
-| [How We Feel](https://howwefeel.org) | Check-in de humor como ação principal da aba Saúde, sem exigir texto |
-| [Material Design 3](https://m3.material.io) | Listas agrupadas, abas fixas com indicador, toque com onda no Android, áreas de toque de no mínimo 44 a 48 px |
-| [Nielsen Norman Group](https://www.nngroup.com) | Em telas largas, a escala de texto não cresce: tipo maior só espalha o conteúdo e força rolagem |
-| [Refactoring UI](https://www.refactoringui.com) | Espaçamento em grade de 4 px e hierarquia por peso e cor, não só por tamanho |
-| [WCAG 2.2](https://www.w3.org/TR/WCAG22/) | Contraste mínimo de 4,5:1 para texto (os valores ficam anotados ao lado de cada cor em `packages/ui-tokens/src/colors.ts`), opção de texto maior, alto contraste e menos movimento |
-| [CVV](https://www.cvv.org.br) | O contato de apoio emocional fica na aba Saúde, com destaque no modo suave |
-
-Regras que saíram disso:
-
+* **Leitura fácil.** Texto com contraste mínimo de 4,5:1, opção de texto maior, alto contraste e menos movimento.
 * **Modo suave.** Quando o humor do dia é 1 ou 2, a aba Saúde troca as metas por um check-in, dois exercícios curtos de respiração e o CVV.
 * **Horário sugerido é marcado como sugestão.** O que o Axel encaixa aparece diferente do que veio da agenda.
 * **Exercícios de TCC são opcionais e curtos**, com aviso de que não substituem psicoterapia.
