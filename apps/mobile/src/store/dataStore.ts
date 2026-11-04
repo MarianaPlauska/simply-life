@@ -38,6 +38,7 @@ import {
   currentWeekIsos,
   isDemoHumorRow,
   localTodayIso,
+  parseBlocoFala,
   stampEvoPct,
   invoicePaidKey,
   classifyDump,
@@ -113,6 +114,7 @@ import { useActivityStore } from './activityStore'
 import { useDuePaidStore } from './duePaidStore'
 import { cancelTaskReminder, scheduleTaskReminder } from '../lib/pushNotifications'
 import { friendlyError } from '../lib/friendlyError'
+import { newBlocoId, useMeuMundoStore } from './meuMundoStore'
 
 export type DumpCounts = Record<DumpKind, number>
 
@@ -866,6 +868,26 @@ export const useDataStore = create<DataState>((set, get) => ({
     {
       const titulo = item.titulo.trim() || item.linha.trim()
       if (!titulo) continue
+
+      // "academia seg qua sex 7h": com repetição dita vira bloco do Meu Mundo, não tarefa solta
+      const fala = item.kind === 'tarefa' || item.kind === 'lembrete' ? parseBlocoFala(item.linha) : null
+      if (fala)
+      {
+        await useMeuMundoStore.getState().save({
+          ...fala,
+          id: newBlocoId(),
+          tipo: fala.horaMinutos == null ? 'flexivel' : 'fixo',
+          dataInicio: localTodayIso(),
+          repeteAte: null,
+          avisoMinutos: fala.horaMinutos == null ? null : 10,
+          avisoFim: false,
+          cor: null,
+          categoria: null,
+        })
+        counts.tarefa += 1
+        count += 1
+        continue
+      }
 
       if (item.kind === 'tarefa' || item.kind === 'lembrete')
       {

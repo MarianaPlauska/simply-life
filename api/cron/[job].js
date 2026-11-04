@@ -3,6 +3,7 @@
 import gmailSync from '../_lib/handlers/cron/gmail-sync.js';
 import pushBills from '../_lib/handlers/cron/push-bills.js';
 import pushHealth from '../_lib/handlers/cron/push-health.js';
+import pushBlocos from '../_lib/handlers/cron/push-blocos.js';
 import daily from '../_lib/handlers/cron/daily.js';
 import demoReset from '../_lib/handlers/cron/demo-reset.js';
 import weeklyDigest from '../_lib/handlers/cron/weekly-digest.js';
@@ -12,6 +13,7 @@ const ROUTES = {
   'gmail-sync': gmailSync,
   'push-bills': pushBills,
   'push-health': pushHealth,
+  'push-blocos': pushBlocos,
   'demo-reset': demoReset,
   'weekly-digest': weeklyDigest,
 };
