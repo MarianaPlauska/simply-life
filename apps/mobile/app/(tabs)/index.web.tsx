@@ -164,7 +164,7 @@ export default function DashboardScreenWeb()
               [
                 { label: 'Apoio do dia', subtitle: 'Energia, burnout, lugares e espera de gasto', href: '/apoio' },
                 { label: 'Perfil', subtitle: 'Conta e foto', href: '/perfil' },
-                { label: 'Configurações', subtitle: 'App e integrações', href: '/configuracoes' },
+                { label: 'Configurações', subtitle: 'App, integrações e versão', href: '/configuracoes' },
                 { label: 'Seu AXEL', subtitle: 'Formas, roupas e o jogo', href: '/seu-axel' },
                 { label: 'Mais do dia', subtitle: 'Plano, mapas e resumos', href: '/mais-do-dia' },
                 { label: 'Histórico AXEL', subtitle: 'Briefings e decisões', href: '/axel/historico' },

@@ -19,6 +19,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { HomeQuickActions, type HomeShortcut } from './HomeQuickActions'
 import { filterMetrics } from '../../lib/appModules'
 import { useLifePledgeStore } from '../../store/lifePledgeStore'
+import { useSectionNavStore } from '../../store/sectionNavStore'
 
 function tintFor(id: HomeMetricId, colors: {
   health: string
@@ -257,6 +258,17 @@ export function HomeMetricShortcuts()
           tint: colors.axelFill,
           iconColor: colors.axelOnFill,
           onPress: () => router.push('/apoio' as never),
+        },
+        {
+          id: 'mundo',
+          label: 'Meu Mundo',
+          icon: 'globe-outline',
+          tint: colors.tasks,
+          onPress: () =>
+          {
+            useSectionNavStore.getState().setActive('kanban', 'mundo')
+            router.push('/kanban' as never)
+          },
         },
         ...actions,
       ]}

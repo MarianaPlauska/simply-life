@@ -9,6 +9,7 @@ import {
 } from '@simply-life/shared'
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { appOrigin } from '../lib/appOrigin'
+import { apiFetch } from '../lib/apiBase'
 import { unregisterExpoPushAsync } from '../lib/pushRegister'
 import { stashAndClearUserLocal } from '../lib/userLocalData'
 
@@ -274,6 +275,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         ready: true,
       })
       return {}
+    }
+    // por enquanto sem e-mail de confirmação: o servidor cria a conta já confirmada e entramos com a senha
+    try
+    {
+      const res = await apiFetch('/api/axel/signup', { method: 'POST', body: { email: email.trim(), password, nome: nome?.trim() } })
+      const json = await res.json().catch(() => ({})) as { ok?: boolean; error?: string; fallback?: boolean }
+      if (res.ok && json.ok)
+      {
+        const login = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+        if (login.error) return { error: translateAuthError(login.error.message) }
+        return get().applySession()
+      }
+      // rota ainda não publicada ou servidor sem chave: segue o cadastro normal
+      if (res.status !== 404 && !json.fallback) return { error: json.error || 'Não foi possível criar a conta.' }
+    }
+    catch
+    {
+      // sem rede para o servidor: tenta o cadastro normal
     }
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),

@@ -8,6 +8,8 @@ import {
   formatSleepHours,
   demoFinanceCards,
   isDemoFinanceCard,
+  localTodayIso,
+  parseBlocoFala,
   type CarePace,
   type NotifyCadence,
   type GamificationMode,
@@ -20,6 +22,7 @@ import { useAuthStore } from '../src/store/authStore'
 import { usePrefsStore } from '../src/store/prefsStore'
 import { useDataStore } from '../src/store/dataStore'
 import { useGamificationStore } from '../src/store/gamificationStore'
+import { newBlocoId, useMeuMundoStore } from '../src/store/meuMundoStore'
 import { widgetsForModuleOrder, type DashboardPriority } from '../src/lib/dashboardWidgets'
 import {
   HOME_METRIC_CATALOG,
@@ -76,6 +79,7 @@ type StepId =
   | 'guide'
   | 'modules'
   | 'tasks'
+  | 'mundo'
   | 'health'
   | 'finance'
   | 'cards'
@@ -94,11 +98,19 @@ const AXEL_INTRO: { title: string; hint: string }[] = [
 
 const SUNFY_GUIDE: { title: string; hint: string }[] = [
   { title: 'Início', hint: 'Humor e o botão + para tirar o dia da cabeça.' },
-  { title: 'Tarefas', hint: 'A lista. Marque o que terminou.' },
+  { title: 'Tarefas', hint: 'A lista e o Meu Mundo, a sua semana em formato de planilha.' },
   { title: 'Saúde', hint: 'Hoje, Cuidados e Diário. Água, comida, academia e remédios.' },
   { title: 'Carteira', hint: 'Saldo, extrato, contas e para onde o dinheiro foi.' },
   { title: 'Calendário', hint: 'O mês e a agenda, se você ligar.' },
   { title: 'Mais', hint: 'Perfil, preferências e sair. Fechar só esconde o menu.' },
+]
+
+const MUNDO_INTRO: { title: string; hint: string }[] = [
+  { title: 'Semana e dia', hint: 'Veja a semana em grade ou o dia em linha do tempo, com o tempo livre entre um bloco e outro.' },
+  { title: 'Repete sozinho', hint: 'Todo dia, em certos dias da semana ou a cada 2 semanas. "academia seg qua sex 7h" já entende.' },
+  { title: 'Avisa antes', hint: 'Um aviso antes de cada bloco e, se quiser, a pergunta "deu para fazer?" no fim.' },
+  { title: 'Aponta conflitos', hint: 'Se dois horários batem, ele mostra e sugere o próximo horário livre.' },
+  { title: 'Encaixa o flexível', hint: 'O que não tem hora certa, como "estudar 1h", vai para os espaços livres com o botão Ajeitar.' },
 ]
 
 const PRIORITY_MODULES: Record<DashboardPriority, AppModuleId[]> = {
@@ -160,6 +172,9 @@ export default function SetupScreen()
   const [invitesSent, setInvitesSent] = useState(0)
   const [reviewing, setReviewing] = useState(false)
   const [editing, setEditing] = useState<StepId | null>(null)
+  const [mundoFala, setMundoFala] = useState('')
+  const [mundoMsg, setMundoMsg] = useState('')
+  const saveMundoBloco = useMeuMundoStore((s) => s.save)
 
   useEffect(() =>
   {
@@ -191,7 +206,7 @@ export default function SetupScreen()
   const steps = useMemo<StepId[]>(() =>
   {
     const list: StepId[] = ['welcome', 'name', 'axel', 'modules']
-    if (on('tasks') || on('routine')) list.push('tasks')
+    if (on('tasks') || on('routine')) list.push('tasks', 'mundo')
     if (on('water') || on('sleep') || on('food') || on('gym') || on('meds')) list.push('health')
     if (on('spend') || on('bills') || on('goals')) list.push('finance')
     if (on('cards')) list.push('cards')
@@ -235,6 +250,34 @@ export default function SetupScreen()
       return
     }
     setStep((s) => Math.max(0, s - 1))
+  }
+
+  const saveMundo = () =>
+  {
+    if (!mundoFala.trim())
+    {
+      next()
+      return
+    }
+    const fala = parseBlocoFala(mundoFala)
+    if (!fala)
+    {
+      setMundoMsg('Não achei a repetição. Tente com os dias, como "inglês toda terça 19h", ou pule.')
+      return
+    }
+    void saveMundoBloco({
+      ...fala,
+      id: newBlocoId(),
+      tipo: fala.horaMinutos == null ? 'flexivel' : 'fixo',
+      dataInicio: localTodayIso(),
+      repeteAte: null,
+      avisoMinutos: fala.horaMinutos == null ? null : 10,
+      avisoFim: false,
+      cor: null,
+      categoria: null,
+    })
+    setMundoFala('')
+    next()
   }
 
   const toggleModule = (id: AppModuleId) =>
@@ -598,6 +641,40 @@ export default function SetupScreen()
             onSkip={next}
           >
             <TasksStartForm value={tasksDraft} onChange={setTasksDraft} enabled={modules} />
+          </OnbStep>
+        ) : null}
+
+        {current === 'mundo' ? (
+          <OnbStep
+            {...stepProps}
+            kicker="Meu Mundo"
+            title="Sua agenda em formato de planilha"
+            subtitle="Fica em Tarefas, na aba Meu Mundo. Cada compromisso vira um bloco na semana."
+            onNext={saveMundo}
+            nextLabel={mundoFala.trim() ? 'Salvar e continuar' : 'Continuar'}
+            onSkip={next}
+          >
+            <OnbBlock title="O que ele faz por você">
+              {MUNDO_INTRO.map((b) => (
+                <View key={b.title} style={{ gap: 2, paddingVertical: 4 }}>
+                  <Text variant="bodyStrong">{b.title}</Text>
+                  <Text variant="caption" muted>{b.hint}</Text>
+                </View>
+              ))}
+            </OnbBlock>
+            <OnbBlock title="Comece com algo que se repete" hint="Opcional. Escreva do seu jeito; dá para mudar depois.">
+              <Field
+                label="O que se repete na sua semana"
+                value={mundoFala}
+                onChangeText={(t) =>
+                {
+                  setMundoFala(t)
+                  setMundoMsg('')
+                }}
+                placeholder="academia seg qua sex 7h"
+              />
+              {mundoMsg ? <Text variant="caption" muted>{mundoMsg}</Text> : null}
+            </OnbBlock>
           </OnbStep>
         ) : null}
 

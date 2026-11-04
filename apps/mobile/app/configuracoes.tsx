@@ -24,6 +24,8 @@ import { useCalendarStore } from '../src/store/calendarStore'
 import { authedApi } from '../src/lib/integrationsApi'
 import { getApiBaseUrl } from '../src/lib/apiBase'
 import { supabase } from '../src/lib/supabase'
+import Constants from 'expo-constants'
+import * as Updates from 'expo-updates'
 
 type Tab = 'integracoes' | 'webhooks' | 'sistema' | 'gamificacao'
 
@@ -361,6 +363,18 @@ export default function ConfiguracoesScreen()
         ) : null}
 
         {tab === 'gamificacao' ? <GamificationPanel /> : null}
+
+        {/* versão sempre à vista: ajuda a saber se o APK precisa ser trocado ou se a atualização chegou */}
+        <View style={{ gap: 2, alignItems: 'center', paddingVertical: space.md }}>
+          <Text variant="caption" muted>SunFy versão {Constants.expoConfig?.version ?? '-'}</Text>
+          <Text variant="micro" muted>
+            {Platform.OS === 'web'
+              ? 'Versão do site'
+              : Updates.isEmbeddedLaunch || !Updates.createdAt
+                ? 'Sem atualização baixada, igual ao APK instalado'
+                : `Atualização de ${Updates.createdAt.toLocaleDateString('pt-BR')} às ${Updates.createdAt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+          </Text>
+        </View>
       </View>
     </Screen>
   )

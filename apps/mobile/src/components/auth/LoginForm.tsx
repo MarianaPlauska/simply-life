@@ -144,7 +144,7 @@ export function LoginForm({
     const res = await Promise.race([
       signUp(email, password, nome),
       new Promise<{ error?: string; needsConfirm?: boolean }>((resolve) =>
-        setTimeout(() => resolve({ error: 'A criação da conta demorou. Tente de novo em instantes.' }), 12000)),
+        setTimeout(() => resolve({ error: 'A criação da conta demorou. Tente de novo em instantes.' }), 20000)),
     ])
     if (res.error) setError(res.error)
     else if (res.needsConfirm)

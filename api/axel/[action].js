@@ -21,6 +21,7 @@ import parseTaskPrompt from '../_lib/handlers/axel/parse-task-prompt.js';
 import classifyDump from '../_lib/handlers/axel/classify-dump.js';
 import sharedGoalCheer from '../_lib/handlers/axel/shared-goal-cheer.js';
 import leaguePot from '../_lib/handlers/axel/league-pot.js';
+import signup from '../_lib/handlers/axel/signup.js';
 import { withUser } from '../_lib/withUser.js';
 
 const ROUTES = {
@@ -45,6 +46,7 @@ const ROUTES = {
   'classify-dump': classifyDump,
   'shared-goal-cheer': sharedGoalCheer,
   'league-pot': leaguePot,
+  signup,
 };
 
 function pickQuery(value)
