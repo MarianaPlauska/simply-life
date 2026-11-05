@@ -3,7 +3,7 @@ import { Screen, Text } from '../src/ui'
 import { useTheme } from '../src/theme/ThemeProvider'
 
 const CONTATO = 'marianaplauska.c@gmail.com'
-const ATUALIZADO = '1 de novembro de 2026'
+const ATUALIZADO = '4 de novembro de 2026'
 
 const SECOES: { titulo: string; itens: string[] }[] = [
   {
@@ -17,6 +17,7 @@ const SECOES: { titulo: string; itens: string[] }[] = [
     itens: [
       'Conta: e-mail, nome de exibição e foto, se você enviar. Login com Google usa só o seu e-mail e nome.',
       'O que você registra: tarefas, pastas, anotações, metas e hábitos.',
+      'No aparelho, o app aprende por assunto quais tarefas você conclui ou deixa para depois, para ajustar a ordem das sugestões. Esse histórico não é enviado nem sincronizado.',
       'Saúde e bem-estar: humor, água, sono, remédios, treinos e alimentação. A câmera é usada só para ler o código de barras de alimentos; nenhuma foto é guardada.',
       'Finanças: gastos, contas fixas, salário e cartões (apelido e limite; nunca o número do cartão).',
       'Localização aproximada, só se você permitir, para mostrar o clima do dia. Não guardamos o histórico de onde você esteve.',

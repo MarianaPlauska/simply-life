@@ -717,7 +717,7 @@ export default function SetupScreen()
             {...stepProps}
             kicker="Carteira"
             title="Seus cartões"
-            subtitle="Débito e PIX saem do saldo na hora. No crédito, só quando você paga a fatura."
+            subtitle="Não precisa vincular seu banco. A ideia é registrar seus cartões e gastos no app para entender sua rotina e ajustá-la."
             onNext={next}
             onSkip={cardFormOpen ? undefined : next}
             nextLabel={cards.length ? 'Continuar' : 'Pular por agora'}
@@ -783,7 +783,7 @@ export default function SetupScreen()
                 />
               ))}
             </OnbBlock>
-            <OnbBlock title="Foco e TDAH" hint="Não é diagnóstico. Deixa as tarefas em passos menores e a linha do dia mais visível.">
+            <OnbBlock title="Foco e TDAH" hint="Não é diagnóstico. Ajuda a dividir tarefas em passos menores e mostra os horários do dia com mais clareza na tela inicial.">
               <OnbChoice
                 kind="radio"
                 title="Quero esse apoio"

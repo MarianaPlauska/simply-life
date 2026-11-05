@@ -3,10 +3,10 @@
  */
 
 export const BODY_CHECKS = [
-  { id: 'comi', label: 'Comi' },
-  { id: 'bebi', label: 'Bebi' },
-  { id: 'banheiro', label: 'Banheiro' },
-  { id: 'corpo', label: 'Dói ou está alto' },
+  { id: 'comi', label: 'Comi algo' },
+  { id: 'bebi', label: 'Bebi água' },
+  { id: 'banheiro', label: 'Fui ao banheiro' },
+  { id: 'corpo', label: 'Algo incomoda' },
 ] as const
 
 export type BodyCheckId = (typeof BODY_CHECKS)[number]['id']

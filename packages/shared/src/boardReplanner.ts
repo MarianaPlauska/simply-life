@@ -13,6 +13,7 @@ import type { MobileTask } from './tasks'
 import { localTodayIso } from './dates'
 import { taskDependsOnId } from './lifeCategories'
 import { addDaysIso, diffDaysIso, isTaskDeadlineRigid, parseTaskEnergy, type TaskEnergy } from './taskPrompt'
+import { taskHabitKeepAdjustment, taskHabitTopic, type TaskTopicStats } from './taskHabits'
 import { buildDayLoad, describeDayPt, effectiveCapacity, formatMinutesPt, taskEstimateFactor, type OrchestratorContext } from './taskOrchestrator'
 
 export type ReplanTrigger = 'morning' | 'overdue' | 'completed' | 'manual'
@@ -36,6 +37,8 @@ export type ReplanOptions = {
   recentlyMoved?: string[]
   /** dias que o usuário aceitou cheios (desfez um adiamento): não alivia de novo */
   acceptOverloadDays?: string[]
+  /** hábitos recentes por assunto; usado apenas para desempatar tarefas */
+  topicStats?: Record<string, TaskTopicStats>
   maxMoves?: number
 }
 
@@ -50,7 +53,7 @@ const HORIZON = 14
 const OVERLOAD_WINDOW = 6
 
 export const BOARD_MOVE_LABEL: Record<BoardMoveKind, string> = {
-  rescued_overdue: 'Atrasada replanejada',
+  rescued_overdue: 'Tarefa reorganizada',
   deferred_load: 'Adiada para aliviar o dia',
   pulled_forward: 'Adiantada',
 }
@@ -100,6 +103,7 @@ export function replanBoard(
   const pinned = new Set(opts.pinned ?? [])
   const recent = new Set(opts.recentlyMoved ?? [])
   const acceptedDays = new Set(opts.acceptOverloadDays ?? [])
+  const habitAdjustment = (task: MobileTask) => taskHabitKeepAdjustment(taskHabitTopic(task), opts.topicStats)
   const maxMoves = opts.maxMoves ?? (opts.trigger === 'completed' ? 3 : 8)
 
   const open = tasks.filter((t) => t.status !== 'done')
@@ -162,14 +166,17 @@ export function replanBoard(
   {
     const overdue = items
       .filter((i) => i.movable && i.task.dataVencimento!.slice(0, 10) < today)
-      .sort((a, b) => a.task.prioridade - b.task.prioridade || (a.rigid === b.rigid ? 0 : a.rigid ? -1 : 1))
+      .sort((a, b) => a.task.prioridade - b.task.prioridade
+        || habitAdjustment(b.task) - habitAdjustment(a.task)
+        || (a.rigid === b.rigid ? 0 : a.rigid ? -1 : 1))
     for (const i of overdue)
     {
       if (!room()) break
-      const from = i.task.dataVencimento!.slice(0, 10)
       load[today] = Math.max(0, (load[today] ?? 0) - i.remaining)
       const minDay = minDayFor(i)
-      const urgent = i.rigid || i.task.prioridade === 1
+      // Prioridade ajuda a ordenar, mas não força uma tarefa sem prazo firme
+      // a permanecer num dia que já está cheio.
+      const urgent = i.rigid
       let target: string | null = null
       for (let d = 0; d <= HORIZON; d += 1)
       {
@@ -182,14 +189,15 @@ export function replanBoard(
           break
         }
       }
-      // urgente fica hoje mesmo sem espaço; o resto espera o primeiro dia livre
+      // Prazo firme fica hoje mesmo sem espaço; o resto espera o primeiro dia livre.
       const to = urgent || !target ? today : target
       load[today] = (load[today] ?? 0) + i.remaining
       i.day = today
-      const late = diffDaysIso(from, today)
       const reason = to === today
-        ? `Passou ${late === 1 ? 'de ontem' : `há ${late} dias`}. ${urgent ? 'É urgente: fica para hoje.' : 'Hoje tem espaço para ela.'}`
-        : `Passou ${late === 1 ? 'de ontem' : `há ${late} dias`}. Hoje está cheio; ${describeDayPt(to, ref).toLowerCase()} é o primeiro dia com espaço.`
+        ? urgent
+          ? `Tem prazo firme e continua no plano de hoje.`
+          : `Essa tarefa continua disponível para hoje.`
+        : `Hoje está cheio; ${describeDayPt(to, ref).toLowerCase()} é o próximo dia com espaço para ela.`
       move(i, to, 'rescued_overdue', reason)
     }
   }
@@ -207,7 +215,8 @@ export function replanBoard(
         guard += 1
         const candidates = items
           .filter((i) => i.day === day && i.movable && !i.rigid && !movedNow.has(i.task.id) && !recent.has(i.task.id))
-          .sort((a, b) => keepScore(a, day) - keepScore(b, day) || b.remaining - a.remaining)
+          .sort((a, b) => (keepScore(a, day) + habitAdjustment(a.task))
+            - (keepScore(b, day) + habitAdjustment(b.task)) || b.remaining - a.remaining)
         let done = false
         for (const c of candidates)
         {

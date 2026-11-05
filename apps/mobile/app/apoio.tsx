@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { Screen, Text, Card, GroupedList, GroupedRow, RowGlyph } from '../src/ui'
+import { Screen, Text, GroupedList, GroupedRow, RowGlyph } from '../src/ui'
 import { StackHeader } from '../src/components/layout/StackHeader'
 import { CareHomeStrip } from '../src/components/care/CareHomeStrip'
 import { BodyCheckRow } from '../src/components/care/BodyCheckRow'
@@ -20,7 +20,7 @@ export default function ApoioScreen()
     <Screen scroll tabBarInset={false}>
       <StackHeader
         title="Apoio do dia"
-        subtitle="Nada daqui muda o plano, a carteira ou o foco até você ligar."
+        subtitle="Cuidados simples para acompanhar seu dia, no seu ritmo."
       />
       <View style={{ gap: space.lg }}>
         <View style={{ gap: space.sm }}>
@@ -29,15 +29,14 @@ export default function ApoioScreen()
         </View>
 
         <View style={{ gap: space.sm }}>
-          <Text variant="section">Corpo</Text>
           <BodyCheckRow />
         </View>
 
         <GroupedList>
           <GroupedRow
             leading={<RowGlyph name="volume-mute" color={colors.health} />}
-            title="Está demais"
-            subtitle="Roteiro curto de sobrecarga. O CVV continua no fim."
+            title="Precisa de uma pausa?"
+            subtitle="Se o dia pesou, vamos encontrar um próximo passo juntos."
             onPress={() => router.push('/sobrecarga' as never)}
           />
           <GroupedRow
@@ -55,7 +54,7 @@ export default function ApoioScreen()
           <GroupedRow
             leading={<RowGlyph name="timer-outline" color={colors.axel} />}
             title="Checar o corpo no foco"
-            subtitle="Os quatro toques também aparecem no timer."
+            subtitle="Faça esse registro enquanto se concentra."
             onPress={() => router.push('/foco' as never)}
           />
           <GroupedRow

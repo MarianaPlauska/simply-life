@@ -226,7 +226,7 @@ export function HomePlay()
                 <AxelFaceSun size={56} />
                 <Text variant="bodyStrong">Uma carta para você</Text>
                 <Text variant="caption" muted style={{ textAlign: 'center' }}>
-                  Se quiser, toque para ler. Pode fechar sem ler.
+                  Se quiser, toque para ler. Uma ideia simples pode ajudar você a dar o próximo passo.
                 </Text>
               </>
             )}

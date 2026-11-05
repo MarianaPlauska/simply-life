@@ -14,6 +14,7 @@ import { useDataStore } from './dataStore'
 import { useTaskWaitStore } from './taskWaitStore'
 import { useAuthStore } from './authStore'
 import { useNeuroStore } from './neuroStore'
+import { useTaskHabitsStore } from './taskHabitsStore'
 
 const KEY = 'simply-life-board-replan-v1'
 const PIN_DAYS = 7
@@ -187,11 +188,13 @@ export const useBoardReplanStore = create<State>((set, get) => ({
       const mem = reconcile(get())
       // tarefa esperando outra pessoa não se move nem pesa na carga do dia
       await useTaskWaitStore.getState().hydrate()
+      await useTaskHabitsStore.getState().hydrate()
       const tasks = actionableTasks(useDataStore.getState().tasks ?? [], useTaskWaitStore.getState().waits)
       const ctx = orchestratorContextNow()
       const dayAgo = Date.now() - 86400000
       const result = replanBoard(tasks, ctx, {
         trigger,
+        topicStats: useTaskHabitsStore.getState().topicStats(),
         pinned: Object.keys(mem.pinned),
         recentlyMoved: Object.entries(mem.axelMoved)
           .filter(([, v]) => new Date(v.at).getTime() > dayAgo)

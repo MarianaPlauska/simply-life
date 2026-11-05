@@ -1,11 +1,32 @@
 import { useEffect, useRef } from 'react'
 import { AppState } from 'react-native'
-import { localTodayIso } from '@simply-life/shared'
+import { localTodayIso, type MobileTask } from '@simply-life/shared'
 import { useDataStore } from '../store/dataStore'
 import { useBoardReplanStore } from '../store/boardReplanStore'
 import { useOrchestratorPrefsStore } from '../store/orchestratorPrefsStore'
+import { useTaskHabitsStore } from '../store/taskHabitsStore'
 
 const COMPLETED_DEBOUNCE_MS = 1500
+
+async function recordTaskOutcomes(tasks: MobileTask[]): Promise<void>
+{
+  const habits = useTaskHabitsStore.getState()
+  await habits.hydrate()
+  const today = localTodayIso()
+  await Promise.all(tasks.map((task) =>
+  {
+    if (task.status === 'done' && task.concluidoEm)
+    {
+      const at = new Date(task.concluidoEm)
+      return Number.isNaN(at.getTime()) ? undefined : habits.recordCompleted(task, at)
+    }
+    if (task.status !== 'done' && task.dataVencimento && task.dataVencimento.slice(0, 10) < today)
+    {
+      return habits.recordLeftForLater(task, task.dataVencimento)
+    }
+    return undefined
+  }))
+}
 
 /**
  * Fase 2 - gatilhos do replanejamento automático do quadro:
@@ -40,6 +61,7 @@ export function useBoardAutoReplan(): void
     if (!ready || !autoReplan) return
     const maybeMorning = async () =>
     {
+      await recordTaskOutcomes(useDataStore.getState().tasks ?? [])
       await useBoardReplanStore.getState().hydrate()
       if (useBoardReplanStore.getState().lastMorning !== localTodayIso())
       {
@@ -53,6 +75,13 @@ export function useBoardAutoReplan(): void
     })
     return () => sub.remove()
   }, [ready, autoReplan, run])
+
+  // Registra o que ficou para depois mesmo quando a pessoa desliga o remanejamento automático.
+  useEffect(() =>
+  {
+    if (!ready) return
+    void recordTaskOutcomes(tasks ?? [])
+  }, [ready, tasks])
 
   // Concluiu algo de hoje (ou atrasado): sobra tempo, o Axel tenta adiantar
   useEffect(() =>

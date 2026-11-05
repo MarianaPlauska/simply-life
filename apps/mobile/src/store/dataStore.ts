@@ -76,6 +76,7 @@ import {
 } from '../lib/sync/habitDayBoundary'
 import { fetchHabitHistoricoRows, upsertHabitHistoricoCups } from '../lib/sync/habitHistorico'
 import { saveHabitDay } from '../lib/habitDailyTotals'
+import { useTaskHabitsStore } from './taskHabitsStore'
 import {
   deleteMedicamento,
   fetchMedicamentos,
@@ -1018,6 +1019,7 @@ export const useDataStore = create<DataState>((set, get) => ({
 
     if (done)
     {
+      void useTaskHabitsStore.getState().recordCompleted(current)
       void cancelTaskReminder(taskId).catch(() => undefined)
       rewardTaskDone(current.titulo)
     }
@@ -1050,6 +1052,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     if (status === 'done' && current.status !== 'done')
     {
+      void useTaskHabitsStore.getState().recordCompleted(current)
       rewardTaskDone(current.titulo)
     }
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
@@ -1772,6 +1775,7 @@ export const useDataStore = create<DataState>((set, get) => ({
     })
     if (next.status === 'done' && current.status !== 'done')
     {
+      void useTaskHabitsStore.getState().recordCompleted(current)
       rewardTaskDone(current.titulo)
     }
     if (useLocal(isGuest) || taskId.startsWith('local-')) return
