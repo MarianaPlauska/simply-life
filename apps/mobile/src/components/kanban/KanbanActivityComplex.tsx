@@ -54,13 +54,13 @@ export function KanbanActivityComplex({ tasks }: Props)
     <View style={{ gap: 16, padding: 20, borderRadius: 20, backgroundColor: cardBg }}>
       <View>
         <Text variant="caption" muted style={{ fontWeight: '700', letterSpacing: 0.6 }}>
-          CONSTÂNCIA
+          SEUS DIAS
         </Text>
         <Text variant="section" style={{ marginTop: 4 }}>
-          Elo de {elo.atual} dia{elo.atual === 1 ? '' : 's'}
+          {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} com algo seu nesta semana
         </Text>
         <Text variant="caption" muted>
-          Recorde {elo.recorde} · {elo.cumpridosNaSemana} dia{elo.cumpridosNaSemana === 1 ? '' : 's'} cumprido{elo.cumpridosNaSemana === 1 ? '' : 's'} nesta semana
+          Sem meta e sem cobrança. Descansar também faz parte.
         </Text>
       </View>
 

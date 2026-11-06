@@ -343,8 +343,8 @@ export function eloDetalheDoDia(c: EloMapaCelula): string
   }
   if (c.status === 'cumprido')
   {
-    if (plano) return `Dia cumprido · ${plano}`
-    return c.acoes > 1 ? `Dia cumprido · ${c.acoes} tipos de registro` : 'Dia cumprido'
+    if (plano) return `Dia com algo seu · ${plano}`
+    return c.acoes > 1 ? `Dia com algo seu · ${c.acoes} tipos de registro` : 'Dia com algo seu'
   }
   return plano ?? 'Sem registro'
 }

@@ -201,7 +201,7 @@ describe('mapa de dias', () =>
     expect(dia.feitasDoPlano).toBe(2)
     expect(dia.essenciaisFeitas).toBe(1)
     expect(dia.nivel).toBe(3) // (2 + 1) / 4 = 0,75
-    expect(eloDetalheDoDia(dia)).toBe('Dia cumprido · 2 de 3 planejadas')
+    expect(eloDetalheDoDia(dia)).toBe('Dia com algo seu · 2 de 3 planejadas')
     const seg = mapa.colunas[1]![0]!
     expect(seg.nivel).toBe(3)
     expect(eloDetalheDoDia(mapa.colunas[1]!.find((c) => c.iso === '2026-09-29')!)).toBe('Descanso')

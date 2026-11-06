@@ -217,7 +217,7 @@ export function DashProgress({ done, total }: { done: number; total: number })
   const router = useRouter()
   const elo = useElo()
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
-  const line = pct >= 100 ? 'Dia cumprido. Descanse sem culpa.' : pct >= 50 ? 'Você está no caminho.' : done > 0 ? 'Já começou. Siga no seu ritmo.' : 'Começar é o passo mais difícil.'
+  const line = pct >= 100 ? 'Tudo do plano feito.' : pct >= 50 ? 'Você está no caminho.' : done > 0 ? 'Já começou. Siga no seu ritmo.' : 'Começar é o passo mais difícil.'
   return (
     <WhiteCard style={{ flex: 1 }}>
       <SectionTitle title="Progresso de hoje" action="Ver tarefas" onAction={() => router.push('/(tabs)/kanban')} />
