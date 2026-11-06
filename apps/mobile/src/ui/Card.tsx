@@ -96,6 +96,8 @@ export function Card({ children, style, tone = 'default', accentTop, bare, ...re
               borderTopColor: colors.hairline,
             },
             style,
+            // canto arredondado e recuo lateral fariam o traço virar caixa de novo
+            { borderRadius: 0, paddingHorizontal: 0, borderWidth: 0, borderTopWidth: StyleSheet.hairlineWidth, overflow: 'visible' },
           ]}
           {...rest}
         >

@@ -169,6 +169,81 @@ export function cardFaturaAbertaDisplay(
   return creditExpenseTotal(cardCreditTxs(txsInCalendarMonth(txs, ref), card))
 }
 
+function isoLocal(d: Date): string
+{
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/**
+ * Ciclo atual do cartão. O dia do fechamento já abre o ciclo novo.
+ * Sem fechamento, o ciclo é o mês. `chave` (AAAA-MM do início) guarda o adicional do ciclo.
+ */
+export function cardCycle(diaFechamento: number | null | undefined, ref = new Date()): { inicio: string; fim: string; chave: string }
+{
+  const y = ref.getFullYear()
+  const m = ref.getMonth()
+  if (!diaFechamento)
+  {
+    const inicio = isoLocal(new Date(y, m, 1))
+    return { inicio, fim: isoLocal(new Date(y, m + 1, 0)), chave: inicio.slice(0, 7) }
+  }
+  const close = (yy: number, mm: number) => new Date(yy, mm, Math.min(diaFechamento, new Date(yy, mm + 1, 0).getDate()))
+  const today = new Date(y, m, ref.getDate())
+  const start = close(y, m) <= today ? close(y, m) : close(y, m - 1)
+  const next = close(start.getFullYear(), start.getMonth() + 1)
+  const inicio = isoLocal(start)
+  return { inicio, fim: isoLocal(new Date(next.getFullYear(), next.getMonth(), next.getDate() - 1)), chave: inicio.slice(0, 7) }
+}
+
+export type CardUso = {
+  /** quanto já foi usado no ciclo */
+  fatura: number
+  /** limite + adicional do ciclo */
+  limite: number
+  adicional: number
+  disponivel: number
+  usadoPct: number
+  ciclo: { inicio: string; fim: string; chave: string }
+  /** true: no fechamento o disponível volta ao limite cheio (sem parcelas) */
+  reseta: boolean
+}
+
+/**
+ * Disponível do cartão. Com dia de fechamento e sem parcelas, só conta o que
+ * foi gasto desde o último fechamento (ex.: VR que recarrega). Com parcelas,
+ * segue a fatura aberta de sempre. O adicional soma só no ciclo em que foi lançado.
+ */
+export function cardUso(
+  card: { id: string; nome: string; limite: number; faturaAberta?: number; diaFechamento?: number; adicionais?: Record<string, number> },
+  txs: FinanceTx[],
+  ref = new Date(),
+): CardUso
+{
+  const ciclo = cardCycle(card.diaFechamento, ref)
+  const adicional = Math.max(0, Number(card.adicionais?.[ciclo.chave]) || 0)
+  const doCartao = cardCreditTxs(txs ?? [], card)
+  const parcelado = doCartao.some((t) => installmentGroupKey(t) != null && String(t.data).slice(0, 10) >= ciclo.inicio)
+  const reseta = Boolean(card.diaFechamento) && !parcelado
+  const hoje = isoLocal(ref)
+  const fatura = reseta
+    ? creditExpenseTotal(doCartao.filter((t) =>
+    {
+      const d = String(t.data).slice(0, 10)
+      return d >= ciclo.inicio && d <= hoje
+    }))
+    : cardFaturaAbertaDisplay(card, txs ?? [], ref)
+  const limite = card.limite + adicional
+  return {
+    fatura,
+    limite,
+    adicional,
+    disponivel: Math.max(0, limite - fatura),
+    usadoPct: limite > 0 ? Math.min(100, Math.round((fatura / limite) * 100)) : 0,
+    ciclo,
+    reseta,
+  }
+}
+
 export function monthDateFromOffset(offset: number, ref = new Date()): Date
 {
   return new Date(ref.getFullYear(), ref.getMonth() - offset, 1)

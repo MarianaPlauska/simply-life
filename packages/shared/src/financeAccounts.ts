@@ -26,6 +26,10 @@ export interface FinanceCard
   nome: string
   limite: number
   diaVencimento: number
+  /** dia em que a fatura fecha; nele o disponível volta ao limite cheio se não houver parcelas */
+  diaFechamento?: number
+  /** valor extra por ciclo (chave AAAA-MM do início do ciclo); não muda o limite */
+  adicionais?: Record<string, number>
   status: 'ativo' | 'bloqueado'
   bandeira: 'visa' | 'mastercard'
   tipoGradiente?: FinanceCardGradient

@@ -192,15 +192,10 @@ export function eloStatusDoDia(elo: EloResumo, iso: string): EloStatus
 /** Frase curta e gentil sobre o elo (sem culpa). */
 export function eloFrase(elo: EloResumo): string
 {
-  if (elo.atual <= 0)
-  {
-    return elo.cumpridoHoje
-      ? 'Dia cumprido. O elo começa aqui.'
-      : 'Uma ação hoje já começa o seu elo.'
-  }
-  if (elo.cumpridoHoje) return 'Dia cumprido. Amanhã tem mais, no seu ritmo.'
-  if (elo.emRisco) return 'Uma ação pequena hoje segura o elo.'
-  return 'Hoje ainda está aberto. Se não der, o descanso da semana cobre.'
+  // nunca cobra: só conta o que já aconteceu
+  if (elo.cumpridoHoje) return 'Hoje já tem algo seu aqui. O resto do dia é livre.'
+  if (elo.cumpridosNaSemana > 0) return 'Seus dias desta semana estão guardados. Hoje é no seu ritmo.'
+  return 'Quando você registrar algo, o dia aparece aqui. Sem pressa.'
 }
 
 // ----- mapa de dias (heatmap) -----

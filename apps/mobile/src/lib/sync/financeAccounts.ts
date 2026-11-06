@@ -52,6 +52,8 @@ export async function fetchFinanceCards(): Promise<FinanceCard[]>
       nome: String(r.nome || 'Cartão'),
       limite: Number(r.limite) || 0,
       diaVencimento: Number(r.dia_vencimento) || 1,
+      diaFechamento: Number(r.dia_fechamento) || undefined,
+      adicionais: r.adicionais && typeof r.adicionais === 'object' ? (r.adicionais as Record<string, number>) : undefined,
       status: r.status === 'bloqueado' ? 'bloqueado' : 'ativo',
       bandeira: r.bandeira === 'visa' ? 'visa' : 'mastercard',
       tipoGradiente,
@@ -251,6 +253,9 @@ function cardRow(card: FinanceCard): Record<string, unknown>
     bandeira: card.bandeira,
     tipo_gradiente: card.tipoGradiente ?? 'copper',
     banco: card.banco ?? null,
+    dia_fechamento: card.diaFechamento ?? null,
+    // só manda quando existe: antes da migração 085 a coluna não está no banco
+    ...(card.adicionais ? { adicionais: card.adicionais } : {}),
   }
 }
 

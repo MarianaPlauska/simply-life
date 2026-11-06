@@ -34,13 +34,13 @@ export function PillTabs<T extends string>({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spec.gap,
-        padding: 4,
+        paddingVertical: 4,
         minHeight: spec.height + 8,
       }}
       style={{
         alignSelf: 'stretch',
         borderRadius: radius.pill,
-        backgroundColor: colors.fill,
+        backgroundColor: 'transparent',
         maxHeight: spec.height + 8,
       }}
     >
@@ -66,7 +66,7 @@ export function PillTabs<T extends string>({
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
-              backgroundColor: active ? colors.surface : 'transparent',
+              backgroundColor: active ? colors.fill : 'transparent',
             }}
           >
             <Text

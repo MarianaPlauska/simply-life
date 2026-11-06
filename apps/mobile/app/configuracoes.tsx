@@ -26,6 +26,7 @@ import { getApiBaseUrl } from '../src/lib/apiBase'
 import { supabase } from '../src/lib/supabase'
 import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
+import { friendlyError } from '../src/lib/friendlyError'
 
 type Tab = 'integracoes' | 'webhooks' | 'sistema' | 'gamificacao'
 
@@ -72,7 +73,7 @@ export default function ConfiguracoesScreen()
     }
     catch (e)
     {
-      setMsg(e instanceof Error ? e.message : 'Falha ao carregar integrações')
+      setMsg(friendlyError(e, 'Falha ao carregar integrações'))
     }
   }, [isGuest])
 
@@ -169,7 +170,7 @@ export default function ConfiguracoesScreen()
                     }
                     catch (e)
                     {
-                      setMsg(e instanceof Error ? e.message : 'Falha ao salvar')
+                      setMsg(friendlyError(e, 'Falha ao salvar'))
                     }
                     setBusy(false)
                   })()
@@ -192,7 +193,7 @@ export default function ConfiguracoesScreen()
                       }
                       catch (e)
                       {
-                        setMsg(e instanceof Error ? e.message : 'Erro no sync')
+                        setMsg(friendlyError(e, 'Erro no sync'))
                       }
                     })()
                   }}
@@ -213,7 +214,7 @@ export default function ConfiguracoesScreen()
                       }
                       catch (e)
                       {
-                        setMsg(e instanceof Error ? e.message : 'Falha no teste')
+                        setMsg(friendlyError(e, 'Falha no teste'))
                       }
                     })()
                   }}
@@ -244,7 +245,7 @@ export default function ConfiguracoesScreen()
                         }
                         catch (e)
                         {
-                          setMsg(e instanceof Error ? e.message : 'Erro no sync Gmail')
+                          setMsg(friendlyError(e, 'Erro no sync Gmail'))
                         }
                       })()
                     }}
@@ -284,7 +285,7 @@ export default function ConfiguracoesScreen()
                       }
                       catch (e)
                       {
-                        setMsg(e instanceof Error ? e.message : 'Erro ao iniciar OAuth')
+                        setMsg(friendlyError(e, 'Erro ao iniciar OAuth'))
                       }
                     })()
                   }}

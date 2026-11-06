@@ -56,15 +56,6 @@ export function ExpandableSection({
           minHeight: 40,
         }}
       >
-        <View
-          style={{
-            width: 3,
-            alignSelf: 'stretch',
-            borderRadius: 999,
-            backgroundColor: accent,
-            minHeight: 28,
-          }}
-        />
         <View style={{ flex: 1, gap: 4, minWidth: 0 }}>
           <Text variant="section" style={{ fontSize: 16 }}>
             {title}
@@ -76,22 +67,11 @@ export function ExpandableSection({
           ) : null}
         </View>
         {pill ? <StatusPill label={pill} color={pillColor ?? accent} /> : null}
-        <View
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: 8,
-            backgroundColor: colors.fill,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Icon
-            name={expanded ? 'chevron-up' : 'chevron-down'}
-            size={16}
-            color={colors.inkMuted}
-          />
-        </View>
+        <Icon
+          name={expanded ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={colors.inkMuted}
+        />
       </Pressable>
 
       {expanded ? (

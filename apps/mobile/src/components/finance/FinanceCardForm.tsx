@@ -11,6 +11,8 @@ export type CardDraft = {
   nome: string
   limite: string
   dia: string
+  /** dia do fechamento; vazio = sem fechamento */
+  fecha: string
   validade: string
   finais: string
   titular: string
@@ -27,6 +29,7 @@ export function emptyCardDraft(): CardDraft
     nome: '',
     limite: '',
     dia: '10',
+    fecha: '',
     validade: '',
     finais: '',
     titular: '',
@@ -44,6 +47,7 @@ export function cardDraftFrom(card: FinanceCard): CardDraft
     nome: card.nome,
     limite: String(card.limite),
     dia: String(card.diaVencimento),
+    fecha: card.diaFechamento ? String(card.diaFechamento) : '',
     validade: card.validadeMesAno ?? '',
     finais: (card.numeroMascarado || '').replace(/\D/g, '').slice(-4),
     titular: card.titular ?? '',
@@ -68,6 +72,8 @@ export function validateCardDraft(d: CardDraft): string | null
   if (!d.nome.trim()) return 'Dê um nome ao cartão, por exemplo Cartão do dia a dia.'
   if (!Number.isFinite(lim) || lim <= 0) return 'Informe o limite do cartão.'
   if (!Number.isInteger(dia) || dia < 1 || dia > 28) return 'O vencimento precisa ser um dia entre 1 e 28.'
+  const fecha = Number(d.fecha)
+  if (d.fecha && (!Number.isInteger(fecha) || fecha < 1 || fecha > 28)) return 'O fechamento precisa ser um dia entre 1 e 28.'
   if (d.validade && !/^(0[1-9]|1[0-2])\/\d{2}$/.test(d.validade)) return 'Validade no formato MM/AA, por exemplo 08/29.'
   if (d.finais && d.finais.length !== 4) return 'Use os 4 últimos dígitos do cartão.'
   return null
@@ -81,6 +87,7 @@ export function cardDraftToPatch(d: CardDraft): Omit<FinanceCard, 'id' | 'status
     nome: d.nome.trim(),
     limite: parseMoney(d.limite),
     diaVencimento: Math.round(Number(d.dia)),
+    diaFechamento: d.fecha ? Math.round(Number(d.fecha)) : undefined,
     bandeira: d.bandeira,
     tipoGradiente: d.grad,
     titular: d.titular.trim() || d.nome.trim(),
@@ -183,7 +190,7 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
         placeholder="5000"
       />
       <Text variant="caption" muted style={{ marginTop: -space.sm }}>
-        O disponível no cartão é o limite menos a fatura, e se atualiza sozinho conforme você registra as compras.
+        O disponível é o limite menos o que foi gasto. Com dia de fechamento e sem parcelas (como um VR), ele volta ao valor cheio no dia em que fecha.
       </Text>
       <View style={{ flexDirection: 'row', gap: space.sm }}>
         <View style={{ flex: 1 }}>
@@ -197,11 +204,11 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
         </View>
         <View style={{ flex: 1 }}>
           <Field
-            label="Validade"
+            label="Fecha todo dia"
             keyboardType="number-pad"
-            value={d.validade}
-            onChangeText={(t) => set('validade', maskValidade(t))}
-            placeholder="MM/AA"
+            value={d.fecha}
+            onChangeText={(t) => set('fecha', t.replace(/\D/g, '').slice(0, 2))}
+            placeholder="Opcional"
           />
         </View>
       </View>
@@ -217,14 +224,21 @@ export function FinanceCardForm({ value: d, onChange, base, previewWidth = 300 }
         </View>
         <View style={{ flex: 1 }}>
           <Field
-            label="Nome no cartão"
-            value={d.titular}
-            onChangeText={(t) => set('titular', t)}
-            placeholder="Opcional"
-            autoCapitalize="characters"
+            label="Validade"
+            keyboardType="number-pad"
+            value={d.validade}
+            onChangeText={(t) => set('validade', maskValidade(t))}
+            placeholder="MM/AA"
           />
         </View>
       </View>
+      <Field
+        label="Nome no cartão"
+        value={d.titular}
+        onChangeText={(t) => set('titular', t)}
+        placeholder="Opcional"
+        autoCapitalize="characters"
+      />
 
       <View style={{ gap: 12 }}>
         <Text variant="label">Bandeira</Text>

@@ -16,6 +16,7 @@ import { useDataStore } from '../../store/dataStore'
 import { useBodyWeekStore } from '../../store/bodyWeekStore'
 import { useWaterLogStore } from '../../store/waterLogStore'
 import { useAuthStore } from '../../store/authStore'
+import { useModules } from '../../hooks/useModules'
 
 type Care = 'alimentacao' | 'hidratacao' | 'sono' | 'academia'
 
@@ -24,6 +25,7 @@ export function PersonalSummaryGrid()
 {
   const { colors } = useTheme()
   const router = useRouter()
+  const { on } = useModules()
   const isGuest = useAuthStore((s) => s.isGuest)
   const habits = useDataStore((s) => s.habits)
   const sleepHours = useBodyWeekStore((s) => s.sleepHours)
@@ -69,6 +71,8 @@ export function PersonalSummaryGrid()
   const trainColor = colors.health
   const ink = colors.ink
 
+  if (!on('food') && !on('water') && !on('sleep') && !on('gym')) return null
+
   return (
     <View style={{ gap: 12 }}>
       <View style={{ gap: 4 }}>
@@ -79,8 +83,9 @@ export function PersonalSummaryGrid()
           Corpo na semana. Toque em um card para registrar.
         </Text>
       </View>
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <MetricCard
+      {/* só o que a pessoa deixou ligado no início (ou em Configurações) */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+        {on('food') ? <MetricCard
           label="Proteína"
           icon="flame"
           value={`${proteina?.progressoAtual ?? 0}`}
@@ -98,8 +103,8 @@ export function PersonalSummaryGrid()
               showLabel={false}
             />
           }
-        />
-        <MetricCard
+        /> : null}
+        {on('water') ? <MetricCard
           label="Água"
           icon="water"
           value={`${((agua?.progressoAtual ?? 0) * ml).toLocaleString('pt-BR')}`}
@@ -117,10 +122,8 @@ export function PersonalSummaryGrid()
               showLabel={false}
             />
           }
-        />
-      </View>
-      <View style={{ flexDirection: 'row', gap: 12 }}>
-        <MetricCard
+        /> : null}
+        {on('sleep') ? <MetricCard
           label="Sono"
           icon="moon"
           value={todaySleep > 0 ? formatSleepHours(todaySleep) : 'Sem'}
@@ -136,8 +139,8 @@ export function PersonalSummaryGrid()
               color={sleepColor}
             />
           }
-        />
-        <MetricCard
+        /> : null}
+        {on('gym') ? <MetricCard
           label="Treino"
           icon="barbell"
           value={treino?.progressoAtual ? 'Feito' : 'Sem'}
@@ -147,7 +150,7 @@ export function PersonalSummaryGrid()
           washBg={colors.healthMuted}
           onPress={() => open('academia')}
           viz={<MiniSparkline values={workoutSeries.map((v) => v * 3 + 1)} color={trainColor} />}
-        />
+        /> : null}
       </View>
 
     </View>
@@ -182,7 +185,8 @@ function MetricCard({
       accessibilityRole="button"
       accessibilityLabel={`${label}: ${value} ${unit}`}
       style={{
-        flex: 1,
+        flexGrow: 1,
+        flexBasis: '40%',
         minHeight: 148,
         borderRadius: 20,
         padding: 16,

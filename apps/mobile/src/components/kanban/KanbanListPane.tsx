@@ -256,9 +256,6 @@ export function KanbanListPane({ tasks, onSeeDone }: Props)
           onPress={onSeeDone}
           style={{
             minHeight: 44,
-            paddingHorizontal: 14,
-            borderRadius: 14,
-            backgroundColor: colors.surface,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',

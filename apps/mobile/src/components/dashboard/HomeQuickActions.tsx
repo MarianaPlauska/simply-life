@@ -38,28 +38,18 @@ export function HomeQuickActions({ actions }: { actions: HomeShortcut[] })
           accessibilityLabel={a.value ? `${a.label} ${a.value}` : a.label}
           style={{ width: 72, alignItems: 'center', gap: 6 }}
         >
+          {/* só o círculo, direto no fundo: sem o quadrado em volta */}
           <View
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 18,
-              backgroundColor: colors.fill,
+              width: 52,
+              height: 52,
+              borderRadius: 999,
+              backgroundColor: a.tint ?? colors.axelMuted,
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <View
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 999,
-                backgroundColor: a.tint ?? colors.axelMuted,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Icon name={a.icon} size={20} color={a.iconColor ?? (a.tint ? colors.glyphInk : colors.ink)} />
-            </View>
+            <Icon name={a.icon} size={22} color={a.iconColor ?? (a.tint ? colors.glyphInk : colors.ink)} />
           </View>
           {a.value ? (
             <Text variant="bodyStrong" numberOfLines={1} style={{ fontSize: 13, maxWidth: '100%' }}>

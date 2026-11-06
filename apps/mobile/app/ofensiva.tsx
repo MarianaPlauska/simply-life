@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { Modal } from '../src/ui/Modal'
 import { Redirect, useRouter } from 'expo-router'
 import { Icon } from '../src/ui/Icon'
@@ -8,7 +8,6 @@ import {
   CHAMA_WEEK_GOAL_DAYS,
   ELO_ACAO_LABEL,
   isEloAcao,
-  nextStreakMilestone,
 } from '@simply-life/shared'
 import { Screen, Text, PillTabs, PrimaryButton } from '../src/ui'
 import { safeBack } from '../src/lib/safeBack'
@@ -22,7 +21,7 @@ import { useElo } from '../src/hooks/useElo'
 import { METAS_HREF } from '../src/lib/sharedGoalRoutes'
 import { PersonalDivisionCard } from '../src/components/rewards/TrilhaCards'
 
-type Tab = 'sequencia' | 'ativos'
+type Tab = 'semana' | 'historico'
 
 export default function OfensivaScreen()
 {
@@ -35,7 +34,7 @@ export default function OfensivaScreen()
   const markOpen = useActivityStore((s) => s.markOpen)
   const elo = useElo()
 
-  const [tab, setTab] = useState<Tab>('sequencia')
+  const [tab, setTab] = useState<Tab>('semana')
   const [help, setHelp] = useState(false)
 
   useEffect(() =>
@@ -53,8 +52,6 @@ export default function OfensivaScreen()
     [elo.dias],
   )
   const week = useMemo(() => buildStreakWeek(actions, opens, new Date(), rests), [actions, opens, rests])
-  const next = nextStreakMilestone(elo.atual)
-  const barPct = next ? Math.min(100, Math.round((elo.atual / next) * 100)) : 100
 
   const recent = useMemo(() =>
   {
@@ -64,171 +61,112 @@ export default function OfensivaScreen()
       .map((iso) => ({ iso, kinds: (days[iso]?.actions ?? []).filter(isEloAcao) }))
   }, [actions, days])
 
-  const hojeTitulo = elo.cumpridoHoje ? 'Hoje está cumprido.' : 'Hoje ainda está aberto.'
+  const semana = elo.cumpridosNaSemana
+  // sem cobrança: o texto só descreve o que já aconteceu
   const hojeTexto = elo.cumpridoHoje
-    ? 'Volte amanhã, ou continue no seu ritmo agora.'
-    : elo.emRisco
-      ? 'O descanso desta semana já foi usado. Uma ação pequena hoje segura o elo.'
-      : 'Uma ação pequena já cumpre o dia. Se não der, o descanso da semana cobre, sem castigo.'
+    ? 'Hoje já tem algo seu guardado. O resto do dia é livre.'
+    : 'Hoje está livre. Se fizer algo por você, aparece aqui. Se não der, tudo bem.'
 
   if (!userId) return <Redirect href="/login" />
 
+  const row = (pressed: boolean) => ({
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 14,
+    minHeight: 64,
+    paddingVertical: 12,
+    backgroundColor: pressed ? colors.fill : 'transparent',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.hairline,
+  })
+
   return (
     <Screen scroll tabBarInset={false}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8, marginHorizontal: -10 }}>
         <Pressable
           onPress={() => safeBack(router, '/(tabs)')}
           accessibilityLabel="Voltar"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 999,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: colors.elevated,
-          }}
+          style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Icon name="chevron-back" size={22} color={colors.ink} />
+          <Icon name="chevron-back" size={24} color={colors.ink} />
         </Pressable>
         <View style={{ flex: 1 }} />
         <Pressable
           onPress={() => setHelp(true)}
           accessibilityLabel="Como funciona"
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 999,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: colors.elevated,
-          }}
+          style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
         >
-          <Icon name="help" size={18} color={colors.ink} />
+          <Icon name="help-circle" size={22} color={colors.ink} />
         </Pressable>
       </View>
       <Text variant="hero" style={{ fontSize: 32, letterSpacing: -0.8, marginBottom: 8 }}>
-        Elo
+        Seus dias
       </Text>
-      <Text variant="body" muted style={{ marginBottom: 6 }}>
-        Elo é a sequência de dias em que você fez alguma coisa. Não é nota e não é dinheiro.
-      </Text>
-      <Text variant="caption" muted style={{ marginBottom: 12 }}>
-        Pontos e moedas ficam no Perfil, em Pontos. Eles sobem com o dia. O elo só conta se o dia teve uma ação. Um descanso por semana não quebra a sequência.
+      <Text variant="body" muted style={{ marginBottom: 16 }}>
+        Aqui ficam guardados os dias em que você fez algo por você. Não é meta, não é nota, e nada se perde se você parar um tempo.
       </Text>
 
       <PillTabs
         tabs={[
-          { id: 'sequencia', label: 'Sequência' },
-          { id: 'ativos', label: 'Dias cumpridos' },
+          { id: 'semana', label: 'Semana' },
+          { id: 'historico', label: 'Histórico' },
         ]}
         value={tab}
         onChange={setTab}
       />
 
-      {tab === 'sequencia' ? (
-        <View style={{ gap: 28, paddingTop: 8, alignItems: 'center' }}>
+      {tab === 'semana' ? (
+        <View style={{ gap: 24, paddingTop: 12 }}>
           <StreakWeekRow cells={week} />
 
-          <View style={{ alignItems: 'center', gap: 6 }}>
-            <Icon name="flame" size={88} color={colors.axel} />
-            <Text
-              variant="hero"
-              style={{
-                marginTop: -36,
-                fontSize: 56,
-                letterSpacing: -2,
-                lineHeight: 60,
-              }}
-            >
-              {elo.atual}
+          <View style={{ gap: 4 }}>
+            <Text variant="hero" style={{ fontSize: 44, letterSpacing: -1.5, lineHeight: 50 }}>
+              {semana}
             </Text>
-            <Text variant="caption" muted>
-              {elo.atual === 1 ? 'dia cumprido seguido' : 'dias cumpridos seguidos'}
+            <Text variant="bodyStrong">
+              {semana === 1 ? 'dia com algo seu nesta semana' : 'dias com algo seu nesta semana'}
             </Text>
-            <Text variant="bodyStrong" style={{ marginTop: 8 }}>
-              Recorde pessoal: {elo.recorde}
-            </Text>
-            <Text variant="caption" muted style={{ textAlign: 'center' }}>
-              {elo.descansoUsadoNestaSemana
-                ? 'Descanso desta semana já usado'
-                : 'Descanso desta semana disponível'}
-            </Text>
-          </View>
-
-          <View style={{ alignSelf: 'stretch' }}>
-            <EloHeatmap semanas={26} />
-          </View>
-
-          <View style={{ alignSelf: 'stretch', gap: 12 }}>
-            <View
-              style={{
-                height: 10,
-                borderRadius: 999,
-                backgroundColor: colors.hairline,
-                overflow: 'hidden',
-              }}
-            >
-              <View
-                style={{
-                  width: `${barPct}%`,
-                  height: '100%',
-                  backgroundColor: accents.data,
-                  borderRadius: 999,
-                }}
-              />
-            </View>
-            <Text variant="caption" muted>
-              {next
-                ? `Próximo marco: ${next} dias`
-                : 'Você passou de todos os marcos desta trilha.'}
-            </Text>
-          </View>
-
-          <View style={{ alignSelf: 'stretch', gap: 8 }}>
-            <Text variant="bodyStrong">{hojeTitulo}</Text>
-            <Text variant="caption" muted>
+            <Text variant="caption" muted style={{ marginTop: 4 }}>
               {hojeTexto}
             </Text>
           </View>
 
-          <PrimaryButton
-            label="Executar uma tarefa"
-            onPress={() => router.push('/(tabs)/kanban')}
-            style={{ alignSelf: 'stretch' }}
-          />
+          <EloHeatmap semanas={26} />
         </View>
       ) : (
-        <View style={{ gap: 16, paddingTop: 12 }}>
-          <Text variant="caption" muted>
-            Dias com pelo menos uma ação: tarefa ou rotina, foco terminado, humor, água, refeição, gasto ou anotação.
+        <View style={{ paddingTop: 12 }}>
+          <Text variant="caption" muted style={{ marginBottom: 12 }}>
+            Tudo conta: tarefa ou rotina, foco, humor, água, refeição, gasto ou anotação.
           </Text>
           {recent.length === 0 ? (
-            <Text variant="body">Nenhum dia cumprido ainda. Uma ação pequena já acende o fogo.</Text>
+            <Text variant="body" muted>
+              Ainda não tem dias aqui. Quando você registrar algo, ele aparece, no seu tempo.
+            </Text>
           ) : (
-            recent.map((row) => (
-              <View
-                key={row.iso}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  gap: 16,
-                  minHeight: 52,
-                  paddingHorizontal: 14,
-                  borderRadius: 14,
-                  backgroundColor: colors.elevated,
-                }}
-              >
-                <Icon name="flame" size={18} color={colors.axel} />
+            recent.map((r) => (
+              <View key={r.iso} style={row(false)}>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 999,
+                    backgroundColor: `${accents.data}26`,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Icon name="leaf" size={16} color={accents.data} />
+                </View>
                 <View style={{ flex: 1 }}>
                   <Text variant="bodyStrong">
-                    {new Date(`${row.iso}T12:00:00`).toLocaleDateString('pt-BR', {
+                    {new Date(`${r.iso}T12:00:00`).toLocaleDateString('pt-BR', {
                       weekday: 'short',
                       day: 'numeric',
                       month: 'short',
                     })}
                   </Text>
                   <Text variant="caption" muted numberOfLines={1}>
-                    {row.kinds.map((k) => ELO_ACAO_LABEL[k]).join(' · ')}
+                    {r.kinds.map((k) => ELO_ACAO_LABEL[k]).join(' · ')}
                   </Text>
                 </View>
               </View>
@@ -237,63 +175,43 @@ export default function OfensivaScreen()
         </View>
       )}
 
-      <View style={{ marginTop: space.lg }}>
+      <View style={{ marginTop: space.xl }}>
         <PersonalDivisionCard />
       </View>
 
-      <Pressable
-        onPress={() => router.push('/colecao' as never)}
-        accessibilityRole="button"
-        accessibilityLabel="Álbum e prêmios"
-        style={({ pressed }) => ({
-          marginTop: space.lg,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 16,
-          padding: space.md,
-          borderRadius: 20,
-          backgroundColor: colors.surface,
-          borderWidth: 1,
-          borderColor: colors.cardRim,
-          opacity: pressed ? 0.88 : 1,
-        })}
-      >
-        <Icon name="gift-outline" size={22} color={colors.ink} />
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Álbum e prêmios</Text>
-          <Text variant="caption" muted>
-            Cada semana com {CHAMA_WEEK_GOAL_DAYS} dias de registro vira uma peça e conta para o prêmio que você escolheu.
-          </Text>
-        </View>
-        <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
-      </Pressable>
+      <View style={{ marginTop: space.lg }}>
+        <Pressable
+          onPress={() => router.push('/colecao' as never)}
+          accessibilityRole="button"
+          accessibilityLabel="Álbum e prêmios"
+          style={({ pressed }) => row(pressed)}
+        >
+          <Icon name="gift" size={22} color={colors.ink} />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">Álbum e prêmios</Text>
+            <Text variant="caption" muted>
+              Semanas com {CHAMA_WEEK_GOAL_DAYS} dias de registro viram peças da sua coleção.
+            </Text>
+          </View>
+          <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
+        </Pressable>
 
-      <Pressable
-        onPress={() => router.push(METAS_HREF)}
-        accessibilityRole="button"
-        accessibilityLabel="Metas juntos"
-        style={({ pressed }) => ({
-          marginTop: space.lg,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 16,
-          padding: space.md,
-          borderRadius: 20,
-          backgroundColor: colors.surface,
-          borderWidth: 1,
-          borderColor: colors.cardRim,
-          opacity: pressed ? 0.88 : 1,
-        })}
-      >
-        <Icon name="people-outline" size={22} color={colors.ink} />
-        <View style={{ flex: 1 }}>
-          <Text variant="bodyStrong">Metas juntos</Text>
-          <Text variant="caption" muted>
-            Semana vale mais que dia. Com amigos, sem ver o número de ninguém.
-          </Text>
-        </View>
-        <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
-      </Pressable>
+        <Pressable
+          onPress={() => router.push(METAS_HREF)}
+          accessibilityRole="button"
+          accessibilityLabel="Metas juntos"
+          style={({ pressed }) => ({ ...row(pressed), borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.hairline })}
+        >
+          <Icon name="people" size={22} color={colors.ink} />
+          <View style={{ flex: 1 }}>
+            <Text variant="bodyStrong">Metas juntos</Text>
+            <Text variant="caption" muted>
+              Com amigos, sem ver o número de ninguém.
+            </Text>
+          </View>
+          <Icon name="chevron-forward" size={18} color={colors.inkMuted} />
+        </Pressable>
+      </View>
 
       <Modal visible={help} transparent animationType="fade" onRequestClose={() => setHelp(false)}>
         <Pressable
@@ -314,25 +232,19 @@ export default function OfensivaScreen()
               gap: 12,
             }}
           >
-            <Text variant="section">Como conta</Text>
+            <Text variant="section">Como funciona</Text>
             <ScrollView style={{ maxHeight: 420 }} contentContainerStyle={{ gap: 12 }}>
               <Text variant="body" muted>
-                Um dia fica cumprido quando você faz pelo menos uma coisa de verdade: concluir uma tarefa, marcar uma rotina, terminar um foco, registrar humor, água, refeição ou gasto, ou escrever uma anotação. Só abrir o app não cumpre o dia.
+                Um dia entra aqui quando você faz alguma coisa por você: conclui uma tarefa, marca uma rotina, termina um foco, registra humor, água, refeição ou gasto, ou escreve uma anotação.
               </Text>
               <Text variant="body" muted>
-                Descanso sem castigo: em cada semana, de segunda a domingo, o primeiro dia sem registro vira descanso e não quebra o elo. Se faltar mais um dia na mesma semana, o elo recomeça do zero, e tudo bem.
+                Dias sem registro não são falta. Descansar faz parte, e nada do que você já guardou se perde.
               </Text>
               <Text variant="body" muted>
-                Hoje fica em aberto até a meia-noite e nunca quebra o elo antes disso. O elo conta os dias cumpridos; o descanso segura a sequência, mas não soma.
+                No mapa de dias, a cor mais forte mostra quanto do que você planejou foi feito. Sem plano, mostra quantos tipos de registro o dia teve. O ponto marca descanso.
               </Text>
               <Text variant="body" muted>
-                O recorde fica guardado para sempre, e os seus dias vão junto com a conta para qualquer aparelho.
-              </Text>
-              <Text variant="body" muted>
-                No mapa de dias, a cor mais forte mostra quanto do que você planejou foi feito, e os essenciais pesam mais. Sem plano, conta quantos tipos de registro o dia teve. O ponto marca o descanso.
-              </Text>
-              <Text variant="body" muted>
-                Semana fechada: {CHAMA_WEEK_GOAL_DAYS} dias com registro entre segunda e domingo. Cada semana fechada adiciona uma peça à sua coleção e conta para os seus prêmios.
+                Seus dias vão junto com a conta para qualquer aparelho.
               </Text>
             </ScrollView>
             <PrimaryButton label="Entendi" onPress={() => setHelp(false)} />

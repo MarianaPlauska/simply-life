@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { ContactlessPaymentIcon } from 'phosphor-react-native/src/icons/ContactlessPayment'
-import { cardFaturaAbertaDisplay, formatBRL, type FinanceCard, type FinanceCardGradient } from '@simply-life/shared'
+import { cardUso, formatBRL, type FinanceCard, type FinanceCardGradient } from '@simply-life/shared'
 import { useDataStore } from '../../store/dataStore'
 import { Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
@@ -64,10 +64,8 @@ export function CreditCardVisual({ card, width, selected, onPress }: Props)
   const txs = useDataStore((s) => s.finance)
   const skin = CARD_SKINS[card.tipoGradiente ?? 'copper'] ?? CARD_SKINS.copper
   // fatura pelas compras do cartão no mês; sem gasto, o disponível é o limite cheio
-  const fatura = cardFaturaAbertaDisplay(card, txs)
-  const disponivel = Math.max(0, card.limite - fatura)
+  const { fatura, disponivel, usadoPct: usage } = cardUso(card, txs)
   const dueIn = daysUntilDay(card.diaVencimento)
-  const usage = card.limite > 0 ? Math.min(100, (fatura / card.limite) * 100) : 0
   const blocked = card.status === 'bloqueado'
   const digits = (card.numeroMascarado || '').replace(/\D/g, '').slice(-4) || '0000'
   const titular = (card.titular?.trim() || card.nome).toUpperCase()

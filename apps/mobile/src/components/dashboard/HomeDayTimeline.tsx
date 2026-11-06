@@ -41,6 +41,43 @@ function blockStyle(
   return { top: Math.max(0, top), color }
 }
 
+function blockHeight(task: MobileTask): number
+{
+  return Math.max(SLOT_HEIGHT, ((task.estimativaMinutos ?? 30) / 60) * SLOT_HEIGHT)
+}
+
+// tarefas que se cruzam dividem a largura em colunas, em vez de ficarem uma em cima da outra
+function laneLayout(items: { id: string; top: number; bottom: number }[]): Map<string, { lane: number; lanes: number }>
+{
+  const out = new Map<string, { lane: number; lanes: number }>()
+  const sorted = [...items].sort((a, b) => a.top - b.top)
+  let cluster: string[] = []
+  let laneEnds: number[] = []
+  let clusterEnd = -1
+  const flush = () =>
+  {
+    for (const id of cluster) out.get(id)!.lanes = laneEnds.length
+    cluster = []
+    laneEnds = []
+  }
+  for (const it of sorted)
+  {
+    if (it.top >= clusterEnd) flush()
+    let lane = laneEnds.findIndex((end) => end <= it.top)
+    if (lane === -1)
+    {
+      lane = laneEnds.length
+      laneEnds.push(it.bottom)
+    }
+    else laneEnds[lane] = it.bottom
+    out.set(it.id, { lane, lanes: 1 })
+    cluster.push(it.id)
+    clusterEnd = Math.max(clusterEnd, it.bottom)
+  }
+  flush()
+  return out
+}
+
 /**
  * Faixa visual do dia (estilo Tiimo) — tarefas de hoje por horário.
  */
@@ -71,6 +108,18 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
   const timed = useMemo(
     () => withTime.filter((t) => t.horaMinutos != null),
     [withTime],
+  )
+
+  const lanes = useMemo(
+    () =>
+      laneLayout(
+        timed.map((t) =>
+        {
+          const top = blockStyle(t, colors).top
+          return { id: t.id, top, bottom: top + blockHeight(t) }
+        }),
+      ),
+    [timed, colors],
   )
 
   const trackHeight = (DAY_END - DAY_START) * SLOT_HEIGHT + SLOT_HEIGHT
@@ -151,34 +200,43 @@ export function HomeDayTimeline({ tasks, fill = false }: Props)
               {timed.map((task) =>
               {
                 const { top, color } = blockStyle(task, colors)
-                const duration = task.estimativaMinutos ?? 30
-                const height = Math.max(SLOT_HEIGHT * 0.6, (duration / 60) * SLOT_HEIGHT)
+                const height = blockHeight(task)
+                const { lane, lanes: count } = lanes.get(task.id) ?? { lane: 0, lanes: 1 }
                 return (
-                  <PressableScale
+                  <View
                     key={task.id}
-                    onPress={() => openEvolve(task.id)}
                     style={{
                       position: 'absolute',
-                      left: 8,
-                      right: 8,
-                      top,
-                      minHeight: height,
-                      borderRadius: radius.control,
-                      backgroundColor: `${color}22`,
-                      borderLeftWidth: 3,
-                      borderLeftColor: color,
-                      paddingHorizontal: 10,
-                      paddingVertical: 8,
-                      justifyContent: 'center',
+                      left: `${(lane / count) * 100}%`,
+                      width: `${100 / count}%`,
+                      top: top + 1,
+                      height: height - 2,
+                      paddingLeft: 6,
+                      paddingRight: lane === count - 1 ? 6 : 0,
                     }}
                   >
-                    <Text variant="caption" muted>
-                      {task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : 'Sem hora'}
-                    </Text>
-                    <Text variant="bodyStrong" numberOfLines={2}>
-                      {task.titulo}
-                    </Text>
-                  </PressableScale>
+                    <PressableScale
+                      onPress={() => openEvolve(task.id)}
+                      style={{
+                        flex: 1,
+                        borderRadius: radius.control,
+                        backgroundColor: `${color}22`,
+                        borderLeftWidth: 3,
+                        borderLeftColor: color,
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Text variant="caption" muted numberOfLines={1}>
+                        {task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : 'Sem hora'}
+                      </Text>
+                      <Text variant="bodyStrong" numberOfLines={height > SLOT_HEIGHT ? 2 : 1}>
+                        {task.titulo}
+                      </Text>
+                    </PressableScale>
+                  </View>
                 )
               })}
             </View>
