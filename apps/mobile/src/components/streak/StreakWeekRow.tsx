@@ -11,11 +11,10 @@ function glyph(
   colors: { axel: string; attention: string; inkMuted: string },
 ): { name: keyof typeof Icon.glyphMap; color: string } | 'num'
 {
-  if (kind === 'action') return { name: 'flame', color: colors.axel }
+  if (kind === 'action') return { name: 'leaf', color: colors.axel }
   // descanso automático: lua, em tom neutro (não é falta)
   if (kind === 'rest') return { name: 'moon', color: colors.inkMuted }
-  if (kind === 'open' || kind === 'today') return { name: 'alert-circle', color: colors.attention }
-  // dia sem registro fica só com o número, sem marca de erro
+  // hoje em aberto e dia sem registro ficam só com o número, sem alerta
   return 'num'
 }
 
@@ -42,10 +41,10 @@ export function StreakWeekRow({ cells }: Props)
                 borderRadius: 999,
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderWidth: future ? 1 : 0,
+                borderWidth: future || cell.kind === 'today' ? 1 : 0,
                 borderStyle: future ? 'dashed' : 'solid',
-                borderColor: colors.hairline,
-                backgroundColor: future ? 'transparent' : colors.elevated,
+                borderColor: cell.kind === 'today' ? colors.inkMuted : colors.hairline,
+                backgroundColor: g === 'num' ? 'transparent' : colors.fill,
               }}
             >
               {g === 'num' ? (

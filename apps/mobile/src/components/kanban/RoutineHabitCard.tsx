@@ -1,4 +1,4 @@
-import { View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Icon } from '../../ui/Icon'
 import {
   dayCount,
@@ -83,12 +83,12 @@ export function RoutineHabitCard({
   return (
     <View
       style={{
-        padding: 16,
-        borderRadius: 20,
-        backgroundColor: colors.elevated,
+        // linha direto no fundo, separada por traço fino
+        paddingVertical: 14,
+        paddingLeft: nested ? 16 : 0,
         gap: 16,
-        borderWidth: nested || groupHeader ? 1 : 0,
-        borderColor: colors.hairline,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: colors.hairline,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -114,7 +114,7 @@ export function RoutineHabitCard({
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: colors.surface,
+                backgroundColor: colors.fill,
               }}
             >
               <Icon name="pencil-outline" size={16} color={colors.inkMuted} />
@@ -132,7 +132,7 @@ export function RoutineHabitCard({
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: colors.surface,
+                backgroundColor: colors.fill,
               }}
             >
               <Icon name="trash-outline" size={16} color={colors.danger} />
@@ -150,7 +150,7 @@ export function RoutineHabitCard({
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: colors.surface,
+                backgroundColor: colors.fill,
               }}
             >
               <Icon

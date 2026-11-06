@@ -1,8 +1,10 @@
 import { Children, type ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import { Text } from './Text'
 import { Icon, type IconName } from './Icon'
 import { useInPanel } from './Panel'
+import { useInSheet } from './surface'
+import { useWebBox } from '../components/dashboard/web/webBox'
 import { useRipple } from './ripple'
 import { useTheme } from '../theme/ThemeProvider'
 
@@ -11,19 +13,25 @@ export function GroupedList({ children }: { children: ReactNode })
 {
   const { colors, elevation } = useTheme()
   const inPanel = useInPanel()
+  const inSheet = useInSheet()
+  const webBox = useWebBox()
   const rows = Children.toArray(children).filter(Boolean)
   if (!rows.length) return null
+  // celular: as linhas ficam direto no fundo da tela, separadas só por traço (como app de banco)
+  const flat = !inPanel && !inSheet && !webBox
   return (
     <View
       style={
         inPanel
           ? { marginHorizontal: -20, marginVertical: -16 }
-          : { borderRadius: 16, backgroundColor: colors.elevated, overflow: 'hidden', ...elevation.card }
+          : flat
+            ? { marginHorizontal: -16 }
+            : { borderRadius: 16, backgroundColor: colors.elevated, overflow: 'hidden', ...elevation.card }
       }
     >
       {rows.map((row, i) => (
         <View key={i}>
-          {i > 0 ? <View style={{ height: 1, marginLeft: 16, backgroundColor: colors.hairline }} /> : null}
+          {i > 0 ? <View style={{ height: StyleSheet.hairlineWidth, marginLeft: flat ? 62 : 16, backgroundColor: colors.hairline }} /> : null}
           {row}
         </View>
       ))}

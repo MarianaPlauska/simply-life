@@ -62,9 +62,9 @@ export function FinanceCardEditSheet({
     const patch = cardDraftToPatch(draft)
     if (isCreate)
     {
-      const { validadeMesAno, banco, enderecoCobranca, cep, ...base } = patch
+      const { validadeMesAno, banco, enderecoCobranca, cep, diaFechamento, ...base } = patch
       const created = addCard(base)
-      updateCard(created.id, { validadeMesAno, banco, enderecoCobranca, cep })
+      updateCard(created.id, { validadeMesAno, banco, enderecoCobranca, cep, diaFechamento })
       onCreated?.(created.id)
       onClose()
       return

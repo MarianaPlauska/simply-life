@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Icon } from '../../ui/Icon'
-import { formatBRL, cardFaturaAbertaDisplay, type FinanceCard } from '@simply-life/shared'
+import { formatBRL, cardFaturaAbertaDisplay, cardUso, type FinanceCard } from '@simply-life/shared'
 import {
   Card,
   Text,
@@ -19,6 +19,7 @@ import { FinanceCardDetailSheet } from './FinanceCardDetailSheet'
 import { CardInvoiceSpendSheet } from './CardInvoiceSpendSheet'
 import { FinanceCardEditSheet } from './FinanceCardEditSheet'
 import { FinanceCardLedgerSheet } from './FinanceCardLedgerSheet'
+import { CardExtraSheet } from './CardExtraSheet'
 import { Panel } from '../../ui/Panel'
 import { useWebDesk } from '../dashboard/web/webBox'
 import { WebHoverable } from '../dashboard/web/WebHoverable'
@@ -38,6 +39,7 @@ const ACTIONS = [
   { id: 'gasto', label: 'Gasto', icon: 'arrow-up-outline' as const },
   { id: 'lancamentos', label: 'Lançam.', icon: 'list-outline' as const },
   { id: 'editar', label: 'Editar', icon: 'create-outline' as const },
+  { id: 'adicional', label: 'Adicional', icon: 'add-outline' as const },
   { id: 'fatura', label: 'Fatura', icon: 'receipt-outline' as const },
 ]
 
@@ -63,11 +65,14 @@ export function FinanceCardsHub({
   const deskGrid = useFinanceDeskGrid()
   const detailCard = cards.find((c) => c.id === detailId) ?? null
   const sheetCard = primary
-  const faturaPrimary = primary ? cardFaturaAbertaDisplay(primary, txs) : 0
-  const usadoPct =
-    primary && primary.limite > 0
-      ? Math.min(100, Math.round((faturaPrimary / primary.limite) * 100))
-      : 0
+  const [extraOpen, setExtraOpen] = useState(false)
+  const uso = primary ? cardUso(primary, txs) : null
+  const faturaPrimary = uso?.fatura ?? 0
+  const usadoPct = uso?.usadoPct ?? 0
+  // limite de {x}, mais o adicional do ciclo quando houver
+  const limiteTexto = uso
+    ? `${formatBRL(primary!.limite)}${uso.adicional > 0 ? ` + ${formatBRL(uso.adicional)} de adicional` : ''}`
+    : ''
 
   useEffect(() =>
   {
@@ -80,6 +85,7 @@ export function FinanceCardsHub({
     if (id === 'gasto') setSheetMode('spend')
     else if (id === 'lancamentos') setLedgerOpen(true)
     else if (id === 'editar') setEditOpen(true)
+    else if (id === 'adicional') setExtraOpen(true)
     else if (id === 'fatura') setSheetMode('invoice')
   }
 
@@ -145,6 +151,7 @@ export function FinanceCardsHub({
         onClose={() => setCreateOpen(false)}
         onCreated={(id) => setVisibleId(id)}
       />
+      <CardExtraSheet card={primary ?? null} visible={extraOpen} onClose={() => setExtraOpen(false)} />
       <FinanceCardLedgerSheet
         card={primary ?? null}
         visible={ledgerOpen}
@@ -162,6 +169,7 @@ export function FinanceCardsHub({
       gasto: 'Gasto no cartão',
       lancamentos: 'Lançamentos',
       editar: 'Editar',
+      adicional: 'Adicional do mês',
       fatura: 'Ver fatura',
     }
     return (
@@ -206,7 +214,7 @@ export function FinanceCardsHub({
                   <View style={{ gap: 2 }}>
                     <Text variant="caption" muted>Disponível</Text>
                     <Text style={{ fontFamily: WEB_DISPLAY_FONT, fontSize: 32, lineHeight: 40, color: colors.health }}>
-                      {formatBRL(Math.max(0, primary.limite - faturaPrimary))}
+                      {formatBRL(uso?.disponivel ?? 0)}
                     </Text>
                   </View>
                   <View style={{ gap: 2 }}>
@@ -227,7 +235,7 @@ export function FinanceCardsHub({
                     <View style={{ width: `${usadoPct}%`, height: '100%', backgroundColor: colors.axelFill }} />
                   </View>
                   <Text variant="caption" muted>
-                    {usadoPct}% do limite de {formatBRL(primary.limite)}. O crédito só sai do saldo quando a fatura é paga.
+                    {usadoPct}% do limite de {limiteTexto}. {uso?.reseta ? 'Volta ao valor cheio no dia do fechamento.' : 'O crédito só sai do saldo quando a fatura é paga.'}
                   </Text>
                 </View>
                 {faturaPrimary > 0 ? (
@@ -381,7 +389,7 @@ export function FinanceCardsHub({
                 Disponível
               </Text>
               <Text variant="title" color={colors.health} style={{ fontSize: 19 }}>
-                {formatBRL(Math.max(0, primary.limite - faturaPrimary))}
+                {formatBRL(uso?.disponivel ?? 0)}
               </Text>
             </View>
             <View style={{ flex: 1, gap: 6 }}>
@@ -410,7 +418,7 @@ export function FinanceCardsHub({
             />
           </View>
           <Text variant="caption" muted>
-            {formatBRL(faturaPrimary)} / {formatBRL(primary.limite)} · crédito não sai do saldo até pagar
+            {formatBRL(faturaPrimary)} / {limiteTexto} · {uso?.reseta ? 'volta ao valor cheio no fechamento' : 'crédito não sai do saldo até pagar'}
           </Text>
           {faturaPrimary > 0 ? (
             <PrimaryButton

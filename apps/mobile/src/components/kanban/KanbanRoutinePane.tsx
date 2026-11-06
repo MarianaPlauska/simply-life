@@ -363,12 +363,7 @@ export function KanbanRoutinePane()
                   flexDirection: 'row',
                   alignItems: 'center',
                   gap: 12,
-                  paddingHorizontal: 20,
                   paddingVertical: 16,
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: colors.hairline,
-                  backgroundColor: colors.elevated,
                 }}
               >
                 <Icon name="sunny-outline" size={18} color={colors.inkMuted} />
@@ -422,7 +417,7 @@ export function KanbanRoutinePane()
               width: 40,
               height: 40,
               borderRadius: 12,
-              backgroundColor: colors.elevated,
+              backgroundColor: 'transparent',
               alignItems: 'center',
               justifyContent: 'center',
             }}
@@ -462,7 +457,7 @@ export function KanbanRoutinePane()
               width: 40,
               height: 40,
               borderRadius: 12,
-              backgroundColor: colors.elevated,
+              backgroundColor: 'transparent',
               alignItems: 'center',
               justifyContent: 'center',
             }}

@@ -23,5 +23,13 @@ export function friendlyError(e: unknown, fallback = 'Não foi possível salvar.
     console.warn('[banco] valor recusado:', raw)
     return 'Algum campo ficou com um valor que não vale. Confira e tente de novo.'
   }
+  if (/não autenticado|jwt|session/i.test(raw)) return 'Sua sessão expirou. Saia e entre de novo.'
+  if (/too many|rate limit|\b429\b/i.test(raw)) return 'Muitas tentativas seguidas. Aguarde um minuto e tente de novo.'
+  // código, inglês ou nome de serviço não aparecem para a pessoa; ficam no log
+  if (/supabase|PGRST|\bHTTP\b|\b[45]\d\d\b|error|failed|invalid|unexpected|undefined|cannot|could not|\bthe\b/i.test(raw))
+  {
+    console.warn('[erro]', raw)
+    return fallback
+  }
   return raw
 }

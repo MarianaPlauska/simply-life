@@ -47,6 +47,15 @@ O SunFy foi feito para o dia difícil:
 
 > O SunFy organiza a rotina. Ele não faz diagnóstico e não substitui terapia ou atendimento médico. Em crise, ligue para o CVV no **188** (gratuito, 24 horas). Em risco imediato à vida, ligue para o SAMU no **192**.
 
+## Por que AXEL
+
+O nome sai do próprio girassol:
+
+* **Gira + sol.** Girassol é a flor que gira com o sol. Para girar, é preciso um eixo, que em inglês é *axle*. O AXEL é o eixo do seu dia: o SunFy é o sol, o AXEL gira com ele.
+* **Acompanha o ritmo.** O girassol jovem segue a luz durante o dia e, à noite, já se vira para a manhã seguinte. Um relógio interno, como o nosso, comanda esse movimento ([Atamian e colegas, *Science*, 2016](https://harmerlab.plantclock.org/papers/Atamian-Science)). O AXEL faz igual: acompanha o seu dia e prepara o amanhã.
+* **Cresce com você.** Adulto, o girassol para de girar e fica de frente para o nascer do sol. Assim ele aquece mais cedo e recebe mais abelhas. No app, o AXEL vai de broto a flor e a girassol conforme você usa.
+* **Um sentido antigo.** Axel é a forma escandinava de Absalão, nome hebraico traduzido como "pai da paz" ([Wikipedia](https://en.wikipedia.org/wiki/Axel_(name))). Combina com um assistente que cuida sem cobrar.
+
 ## O que dá para fazer
 
 | Parte do app | Para que serve |

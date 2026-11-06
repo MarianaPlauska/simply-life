@@ -200,7 +200,6 @@ export function KanbanGanttPane({ tasks }: Props)
                 flexDirection: 'row',
                 borderBottomWidth: 1,
                 borderBottomColor: colors.hairline,
-                backgroundColor: colors.surface,
               }}
             >
               <View style={{ width: labelW, padding: 12, paddingHorizontal: desk ? 16 : 12, justifyContent: 'center' }}>
@@ -259,7 +258,7 @@ export function KanbanGanttPane({ tasks }: Props)
                     width: labelW + timelineW,
                     paddingHorizontal: desk ? 16 : 10,
                     paddingVertical: 8,
-                    backgroundColor: colors.surface,
+                    paddingTop: 14,
                   }}
                 >
                   <Text variant="micro" style={desk ? [LEX.medium, { fontSize: 14, lineHeight: 20 }] : { fontFamily: 'Lexend_700Bold' }}>

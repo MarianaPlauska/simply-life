@@ -10,6 +10,7 @@ import {
 import { supabase, supabaseConfigured } from '../lib/supabase'
 import { appOrigin } from '../lib/appOrigin'
 import { apiFetch } from '../lib/apiBase'
+import * as ExpoLinking from 'expo-linking'
 import { unregisterExpoPushAsync } from '../lib/pushRegister'
 import { stashAndClearUserLocal } from '../lib/userLocalData'
 
@@ -104,7 +105,25 @@ export function translateAuthError(raw: string): string
   {
     return 'Sessão de recuperação expirada. Solicite um novo link.'
   }
-  return msg
+  if (lower.includes('network') || lower.includes('failed to fetch') || lower.includes('timeout'))
+  {
+    return 'Sem conexão. Confira a internet e tente de novo.'
+  }
+  if (lower.includes('signup') && (lower.includes('disabled') || lower.includes('not allowed')))
+  {
+    return 'Novas contas estão pausadas no momento. Tente de novo mais tarde.'
+  }
+  if (lower.includes('weak') || lower.includes('pwned'))
+  {
+    return 'Essa senha é fácil de adivinhar. Escolha outra, misturando letras e números.'
+  }
+  if (lower.includes('email') && lower.includes('invalid'))
+  {
+    return 'Esse e-mail parece incompleto. Confira se está escrito certo.'
+  }
+  // mensagem técnica (inglês, Supabase, código HTTP) não aparece para a pessoa
+  console.warn('[auth]', msg)
+  return 'Algo deu errado ao entrar. Tente de novo em instantes.'
 }
 
 async function sessionEmail(): Promise<string | null>
@@ -438,7 +457,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signInWithGoogle: async () =>
   {
     if (!supabaseConfigured) return { error: 'Google indisponível offline' }
-    const redirectTo = buildAuthCallbackUrl(appOrigin(), '/auth/callback')
+    // no app instalado o Google volta para o próprio app (simplylife://auth/callback), não para o site
+    const redirectTo = Platform.OS === 'web'
+      ? buildAuthCallbackUrl(appOrigin(), '/auth/callback')
+      : ExpoLinking.createURL('auth/callback')
     // skipBrowserRedirect: controlamos a navegação e podemos explicar 400 de redirect
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -447,32 +469,27 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         skipBrowserRedirect: true,
       },
     })
+    // a pessoa vê uma frase simples; o detalhe técnico fica só no log, para quem mantém o app
+    const googleOff = 'O login com Google está indisponível agora. Entre com e-mail e senha, ou tente mais tarde.'
     if (error)
     {
-      const hint =
-        /redirect|allowlist|not allowed|invalid request/i.test(error.message)
-          ? ` Cadastre esta URL em Authentication → URL Configuration → Redirect URLs: ${redirectTo}`
-          : ''
-      return { error: `${error.message}.${hint}` }
+      console.warn('[google-login]', error.message, 'redirect:', redirectTo)
+      return { error: /network|fetch/i.test(error.message) ? 'Sem conexão. Confira a internet e tente de novo.' : googleOff }
     }
     if (!data?.url)
     {
-      return {
-        error:
-          `URL do Google indisponível. Confira se o provider Google está ativo e se ${redirectTo} está nas Redirect URLs do Supabase.`,
-      }
+      console.warn('[google-login] sem URL de autorização. Provider Google ligado? redirect:', redirectTo)
+      return { error: googleOff }
     }
 
-    // Preflight: authorize 400 = redirect fora da allowlist ou Google desligado
+    // Preflight: 400 = Google desligado no Supabase ou endereço de retorno não liberado
     try
     {
       const probe = await fetch(data.url, { method: 'GET', redirect: 'manual' })
       if (probe.status === 400 || probe.status === 401 || probe.status === 403)
       {
-        return {
-          error:
-            `Google OAuth recusado (${probe.status}). No Supabase → Authentication → URL Configuration, adicione: ${redirectTo} (e o Site URL). Ative o provider Google.`,
-        }
+        console.warn(`[google-login] authorize ${probe.status}. Ative o Google em Authentication > Providers e libere ${redirectTo} em URL Configuration.`)
+        return { error: googleOff }
       }
     }
     catch

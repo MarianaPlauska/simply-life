@@ -18,6 +18,7 @@ import {
 import { Card, Text } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
+import { useModules } from '../../hooks/useModules'
 import { PeriodFilter } from './PeriodFilter'
 import { StatsMatrix } from './StatsMatrix'
 import { WeekEvolutionChart } from './WeekEvolutionChart'
@@ -42,6 +43,7 @@ export function LifeSummaryReport({ variant = 'life', snapshots }: Props)
   const humor = useDataStore((s) => s.humor) ?? []
   const finance = useDataStore((s) => s.finance) ?? []
   const habits = useDataStore((s) => s.habits) ?? []
+  const { on } = useModules()
 
   const scoped = useMemo(() => filterTasksByPeriod(tasks, period), [tasks, period])
   const series = useMemo(() => weekEvolution(tasks, 7), [tasks])
@@ -62,14 +64,15 @@ export function LifeSummaryReport({ variant = 'life', snapshots }: Props)
       humor.length === 0
         ? null
         : Math.round((humor.reduce((s, h) => s + h.humor, 0) / humor.length) * 10) / 10
-    return [
-      { label: 'Humor', value: moodAvg != null ? moodAvg.toFixed(1) : '--' },
-      { label: 'Água', value: `${habitPct(agua)}%` },
-      { label: 'Treino', value: treino && treino.progressoAtual > 0 ? 'Feito' : 'Pendente' },
-      { label: 'Gastos', value: formatBRL(monthExpenseTotal(finance)) },
-      { label: 'Receitas', value: formatBRL(monthIncomeTotal(finance)) },
+    const chips: (LifeChip | null)[] = [
+      on('mood') ? { label: 'Humor', value: moodAvg != null ? moodAvg.toFixed(1) : '--' } : null,
+      on('water') ? { label: 'Água', value: `${habitPct(agua)}%` } : null,
+      on('gym') ? { label: 'Treino', value: treino && treino.progressoAtual > 0 ? 'Feito' : 'Pendente' } : null,
+      on('spend') ? { label: 'Gastos', value: formatBRL(monthExpenseTotal(finance)) } : null,
+      on('spend') ? { label: 'Receitas', value: formatBRL(monthIncomeTotal(finance)) } : null,
     ]
-  }, [variant, habits, humor, finance])
+    return chips.filter((c): c is LifeChip => c != null)
+  }, [variant, habits, humor, finance, on])
 
   return (
     <View style={{ gap: space.md }}>

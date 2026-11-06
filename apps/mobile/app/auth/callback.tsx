@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, View } from 'react-native'
+import { ActivityIndicator, Platform, View } from 'react-native'
+import * as ExpoLinking from 'expo-linking'
 import { Redirect, useRouter } from 'expo-router'
 import { parseAuthCallbackParams } from '@simply-life/shared'
 import { Screen, Text, PrimaryButton } from '../../src/ui'
@@ -17,9 +18,21 @@ export default function AuthCallbackScreen()
   const [error, setError] = useState('')
   const [recovery, setRecovery] = useState(false)
 
+  // app instalado: o Google devolve simplylife://auth/callback?code=...
+  const nativeUrl = ExpoLinking.useURL()
   useEffect(() =>
   {
-    if (typeof window === 'undefined') return
+    if (Platform.OS === 'web' || !nativeUrl || !nativeUrl.includes('auth/callback')) return
+    void completeSessionFromUrl(nativeUrl).then((res) =>
+    {
+      if (res.recovery) setRecovery(true)
+      if (res.error) setError(res.error)
+    })
+  }, [nativeUrl, completeSessionFromUrl])
+
+  useEffect(() =>
+  {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return
     const params = parseAuthCallbackParams(window.location.href)
     if (params.type === 'recovery')
     {

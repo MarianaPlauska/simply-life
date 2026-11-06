@@ -113,7 +113,7 @@ function CalendarPaneStack({ tasks }: Props)
                 justifyContent: 'center',
                 gap: 6,
                 paddingVertical: 8,
-                backgroundColor: active ? colors.axelFill : colors.elevated,
+                backgroundColor: active ? colors.axelFill : 'transparent',
               }}
             >
               <Text
