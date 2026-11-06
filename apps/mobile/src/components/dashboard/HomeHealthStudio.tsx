@@ -21,6 +21,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { useDataStore } from '../../store/dataStore'
 import { useAuthStore } from '../../store/authStore'
 import { ExpandableSection } from './ExpandableSection'
+import { useModules } from '../../hooks/useModules'
 
 
 /**
@@ -37,6 +38,7 @@ export function HomeHealthStudio()
   const humor = useDataStore((s) => s.humor) ?? []
   const addWaterCup = useDataStore((s) => s.addWaterCup)
   const isGuest = useAuthStore((s) => s.isGuest)
+  const { on } = useModules()
 
   const agua = findHabit(habits, 'agua')
   const proteina = findHabit(habits, 'proteina')
@@ -88,7 +90,7 @@ export function HomeHealthStudio()
       color: colors.attention,
       progress: medsTotal ? Math.round((medsDone / medsTotal) * 100) : 0,
     },
-  ]
+  ].filter((k) => on(({ agua: 'water', proteina: 'food', treino: 'gym', meds: 'meds' } as const)[k.id as 'agua']))
 
   return (
     <ExpandableSection

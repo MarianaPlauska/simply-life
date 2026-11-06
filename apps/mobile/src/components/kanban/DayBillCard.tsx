@@ -1,4 +1,4 @@
-import { View, Pressable } from 'react-native'
+import { View, Pressable, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import { formatBRL, type DayDueBill } from '@simply-life/shared'
@@ -14,18 +14,12 @@ type Props = {
 /** Conta do mês no topo da Lista — mesmo recorte visual da agenda. */
 export function DayBillCard({ bill, onToggle }: Props)
 {
-  const { colors, mode } = useTheme()
+  const { colors } = useTheme()
   const router = useRouter()
   const openContas = useFinanceFocusStore((s) => s.openContas)
   const muted = bill.locked ? colors.axel : colors.inkMuted
-  const bg = bill.locked
-    ? mode === 'dark'
-      ? 'rgba(232, 115, 74, 0.18)'
-      : 'rgba(232, 115, 74, 0.14)'
-    : mode === 'dark'
-      ? 'rgba(212, 184, 150, 0.14)'
-      : 'rgba(212, 184, 150, 0.18)'
 
+  // linha direto no fundo, igual às tarefas: a cor do ícone e do texto já diz que é conta
   return (
     <Pressable
       onPress={() =>
@@ -33,31 +27,21 @@ export function DayBillCard({ bill, onToggle }: Props)
         openContas(bill.kind === 'fixa' ? 'contas-fixas' : 'faturas')
         router.push('/(tabs)/financeiro')
       }}
-      style={{
+      style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 16,
-        paddingVertical: 14,
-        paddingRight: 14,
-        paddingLeft: 10,
-        borderRadius: 20,
-        backgroundColor: bg,
-        minHeight: 72,
-        overflow: 'hidden',
-      }}
+        gap: 14,
+        paddingVertical: 10,
+        minHeight: 64,
+        backgroundColor: pressed ? colors.fill : 'transparent',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: colors.hairline,
+      })}
     >
       <View
         style={{
-          width: 5,
-          alignSelf: 'stretch',
-          borderRadius: 999,
-          backgroundColor: bill.locked ? colors.axelFill : colors.finance,
-        }}
-      />
-      <View
-        style={{
-          width: 40,
-          height: 40,
+          width: 32,
+          height: 32,
           borderRadius: 999,
           backgroundColor: bill.locked ? `${colors.axelFill}26` : `${colors.finance}26`,
           alignItems: 'center',

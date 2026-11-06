@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Pressable, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
+import { Pressable, StyleSheet, View, type GestureResponderEvent, type LayoutChangeEvent } from 'react-native'
 import { useRouter } from 'expo-router'
 import {
   completionDays,
@@ -116,23 +116,23 @@ export function EloHeatmap({ semanas = 26, compact }: Props)
   const cumpridos = mapa.colunas.flat().filter((c) => c.status === 'cumprido').length
 
   return (
-    <View style={inPanel ? { gap: 16 } : { gap: 16, padding: compact ? 16 : 20, borderRadius: 20, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardRim }}>
+    <View style={inPanel ? { gap: 16 } : { gap: 16, paddingTop: 16, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.hairline }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
         <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text variant={compact ? 'bodyStrong' : 'section'}>Mapa de dias</Text>
           <Text variant="caption" muted>
-            {cumpridos} dia{cumpridos === 1 ? '' : 's'} cumprido{cumpridos === 1 ? '' : 's'} · {faixaPt(mapa.de, mapa.ate)}
+            {cumpridos} dia{cumpridos === 1 ? '' : 's'} com algo seu · {faixaPt(mapa.de, mapa.ate)}
           </Text>
         </View>
         {compact ? (
           <Pressable
             onPress={() => router.push('/ofensiva' as never)}
             accessibilityRole="button"
-            accessibilityLabel="Ver o elo"
+            accessibilityLabel="Ver seus dias"
             style={{ minHeight: 44, minWidth: 44, justifyContent: 'center', alignItems: 'flex-end' }}
           >
             <Text variant="label" style={{ color: accents.selectInk, fontWeight: '700' }}>
-              Ver elo
+              Ver tudo
             </Text>
           </Pressable>
         ) : null}

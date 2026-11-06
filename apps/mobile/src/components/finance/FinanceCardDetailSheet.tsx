@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Icon } from '../../ui/Icon'
 import {
-  cardFaturaAbertaDisplay,
+  cardUso,
   cardInstallments,
   formatBRL,
   type FinanceCard,
@@ -75,9 +75,7 @@ export function FinanceCardDetailSheet({
     { label: 'CEP', value: card.cep || '--' },
   ]
 
-  const fatura = cardFaturaAbertaDisplay(card, txs)
-  const disponivel = Math.max(0, card.limite - fatura)
-  const usadoPct = card.limite > 0 ? Math.min(100, Math.round((fatura / card.limite) * 100)) : 0
+  const { fatura, disponivel, usadoPct, limite } = cardUso(card, txs)
   const parcelas = cardInstallments(txs, card).filter((p) => p.total > 1).slice(0, 8)
 
   const pagarFatura = async () =>
@@ -221,7 +219,7 @@ export function FinanceCardDetailSheet({
                 Limite da fatura
               </Text>
               <Text variant="bodyStrong">
-                {formatBRL(fatura)} / {formatBRL(card.limite)}
+                {formatBRL(fatura)} / {formatBRL(limite)}
               </Text>
               <View
                 style={{

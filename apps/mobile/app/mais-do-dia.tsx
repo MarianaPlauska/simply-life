@@ -24,6 +24,7 @@ import { HomePanorama } from '../src/components/dashboard/HomePanorama'
 import { HomeCollapsible } from '../src/components/dashboard/HomeCollapsible'
 import { useDataStore } from '../src/store/dataStore'
 import { useTheme } from '../src/theme/ThemeProvider'
+import { useModules } from '../src/hooks/useModules'
 
 /**
  * O que saiu da frente do Início. Continua no app, numa tela só,
@@ -35,6 +36,7 @@ export default function MaisDoDiaScreen()
   const router = useRouter()
   const tasks = useDataStore((s) => s.tasks)
   const patterns = useLifePatterns().patterns
+  const { on } = useModules()
   const today = useMemo(() => partitionTodayTimeline(tasks), [tasks])
 
   return (
@@ -61,9 +63,9 @@ export default function MaisDoDiaScreen()
           <LifeSummaryReport variant="compact" />
           <HomeAgendaStudio tasks={tasks} />
           <HomeActivityHeatmap tasks={tasks} />
-          <HomeHealthStudio />
-          <HomeMentalStudio />
-          <HomeMedsStudio />
+          {on('water') ? <HomeHealthStudio /> : null}
+          {on('mood') ? <HomeMentalStudio /> : null}
+          {on('meds') ? <HomeMedsStudio /> : null}
           <HomeCollapsible title="Atalhos extras" subtitle="Humor, água e tarefas críticas" defaultOpen={false}>
             <DashboardQuickWidgets />
           </HomeCollapsible>

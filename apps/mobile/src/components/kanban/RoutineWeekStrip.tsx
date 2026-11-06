@@ -32,7 +32,7 @@ export function RoutineWeekStrip({ cells, selectedIso, onSelect }: Props)
                 ? `${colors.danger}33`
                 : cell.tone === 'today'
                   ? colors.axelMuted
-                  : colors.elevated
+                  : desk ? colors.elevated : 'transparent'
         return (
           <PressableScale
             key={cell.iso}

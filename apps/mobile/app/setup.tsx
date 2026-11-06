@@ -96,7 +96,15 @@ const AXEL_INTRO: { title: string; hint: string }[] = [
   { title: 'Descobre o que mexe com você', hint: 'Com o tempo, mostra padrões entre sono, humor, treino, gastos e tarefas.' },
 ]
 
-const SUNFY_GUIDE: { title: string; hint: string }[] = [
+// de onde vem o nome: girassol (gira + sol), o eixo (axle) e a origem antiga de Axel
+const AXEL_NOME = [
+  'Girassol é a flor que gira com o sol. Para girar, é preciso um eixo, que em inglês é "axle". O AXEL é o eixo do seu dia.',
+  'O girassol jovem acompanha a luz durante o dia e, à noite, já se vira para a manhã seguinte. O AXEL faz igual: segue o seu ritmo e prepara o amanhã.',
+  'Adulto, ele fica de frente para o nascer do sol, aquece antes e recebe mais abelhas. Por isso o AXEL cresce de broto a girassol com você.',
+  'E o nome guarda um sentido antigo: Axel vem de Absalão, "pai da paz".',
+]
+
+const SUNFY_GUIDE:{ title: string; hint: string }[] = [
   { title: 'Início', hint: 'Humor e o botão + para tirar o dia da cabeça.' },
   { title: 'Tarefas', hint: 'A lista e o Meu Mundo, a sua semana em formato de planilha.' },
   { title: 'Saúde', hint: 'Hoje, Cuidados e Diário. Água, comida, academia e remédios.' },
@@ -599,6 +607,11 @@ export default function SetupScreen()
             <View style={{ alignItems: 'center', paddingVertical: space.sm }}>
               <AxelSun size={88} mood="happy" />
             </View>
+            <OnbBlock title="Por que AXEL?">
+              {AXEL_NOME.map((linha) => (
+                <Text key={linha} variant="caption" muted style={{ paddingVertical: 2 }}>{linha}</Text>
+              ))}
+            </OnbBlock>
             <OnbBlock title="O que ele faz por você">
               {AXEL_INTRO.map((b) => (
                 <View key={b.title} style={{ gap: 2, paddingVertical: 4 }}>

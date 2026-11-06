@@ -6,18 +6,14 @@ import { useTheme } from '../../../theme/ThemeProvider'
 /** Número grande com legenda: a leitura em 5 segundos do relatório. */
 export function ReportStat({ value, label, hint }: { value: string; label: string; hint?: string })
 {
-  const { colors, space, radius } = useTheme()
+  const { space } = useTheme()
   return (
     <View
       style={{
         flex: 1,
         minWidth: 96,
         gap: 4,
-        padding: space.md,
-        borderRadius: radius.control,
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.hairline,
+        paddingVertical: space.sm,
       }}
     >
       <Text variant="hero" style={{ fontSize: 24, lineHeight: 28 }}>

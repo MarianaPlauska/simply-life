@@ -17,6 +17,7 @@ import {
   exportFinanceExcel,
   exportFinancePdf,
 } from '../../lib/shareFinanceExport'
+import { friendlyError } from '../../lib/friendlyError'
 
 type Props = {
   txs: FinanceTx[]
@@ -50,7 +51,7 @@ export function FinanceExportBar({ txs, title }: Props)
     }
     catch (e)
     {
-      setMsg(e instanceof Error ? e.message : 'Não foi possível exportar')
+      setMsg(friendlyError(e, 'Não foi possível exportar'))
     }
   }
 

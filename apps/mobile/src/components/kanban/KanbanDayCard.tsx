@@ -1,8 +1,7 @@
-import { View, Pressable } from 'react-native'
+import { View, Pressable, StyleSheet } from 'react-native'
 import { useRouter } from 'expo-router'
 import { Icon } from '../../ui/Icon'
 import {
-  inferLifeCategory,
   minutesToLabel,
   taskMarkColor,
   timelineIconForTask,
@@ -11,16 +10,6 @@ import {
 import { Text, PressableScale } from '../../ui'
 import { useTheme } from '../../theme/ThemeProvider'
 import { useKanbanListsStore } from '../../store/kanbanListsStore'
-
-type TintKey = 'brandMuted' | 'healthMuted' | 'financeMuted' | 'tasksMuted'
-
-/** Fundo suave por categoria de vida (tokens do tema, claro e escuro). */
-const CATEGORY_TINT: Record<string, TintKey> = {
-  importante: 'brandMuted',
-  saude: 'healthMuted',
-  crescimento: 'financeMuted',
-  carreira: 'tasksMuted',
-}
 
 function statusLabel(task: MobileTask): string
 {
@@ -34,81 +23,64 @@ type Props = {
   onToggle: () => void
 }
 
-/** Card pastel da timeline do dia (marca esquerda = urgência/pasta). */
+/** Linha da timeline do dia (a cor do botão = urgência/pasta). */
 export function KanbanDayCard({ task, onToggle }: Props)
 {
-  const { colors, chart, mode } = useTheme()
+  const { colors, chart } = useTheme()
   const router = useRouter()
   const lists = useKanbanListsStore((s) => s.lists)
-  const cat = inferLifeCategory(task)
-  const bg = colors[CATEGORY_TINT[cat] ?? 'tasksMuted']
   const mark = taskMarkColor(task, lists, colors.danger, chart)
   const icon = timelineIconForTask(task) as keyof typeof Icon.glyphMap
   const pct = Math.round((task.progresso ?? 0) * 100)
 
+  const done = task.status === 'done'
+  // linha direto no fundo: botão redondo na cor da marca, texto e uma barra fina de progresso
   return (
     <Pressable
       onPress={() => router.push(`/task/${task.id}`)}
-      style={{
+      style={({ pressed }) => ({
         flex: 1,
         flexDirection: 'row',
-        borderRadius: 20,
-        backgroundColor: bg,
-        overflow: 'hidden',
-        minHeight: 88,
-      }}
+        alignItems: 'center',
+        gap: 12,
+        minHeight: 64,
+        paddingVertical: 10,
+        backgroundColor: pressed ? colors.fill : 'transparent',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: colors.hairline,
+      })}
     >
-      <View style={{ width: 5, backgroundColor: mark }} />
-      <View style={{ flex: 1, padding: 16, gap: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Text variant="micro" style={{ fontWeight: '700', color: colors.inkMuted }}>
-            {statusLabel(task)}
-          </Text>
-          <Text variant="micro" muted>
-            {pct}%
-          </Text>
-        </View>
-        <View
-          style={{
-            height: 3,
-            borderRadius: 999,
-            backgroundColor: colors.hairline,
-            overflow: 'hidden',
-          }}
+      <PressableScale
+        accessibilityLabel={done ? 'Reabrir' : 'Concluir'}
+        onPress={onToggle}
+        hitSlop={8}
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 999,
+          backgroundColor: done ? colors.health : `${mark}2E`,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Icon name={done ? 'checkmark' : icon} size={16} color={done ? colors.canvas : mark} />
+      </PressableScale>
+      <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
+        <Text
+          variant="bodyStrong"
+          numberOfLines={2}
+          style={{ color: done ? colors.inkMuted : colors.ink, textDecorationLine: done ? 'line-through' : 'none' }}
         >
-          <View
-            style={{
-              width: `${Math.max(6, pct)}%`,
-              height: '100%',
-              backgroundColor: colors.ink,
-              borderRadius: 999,
-            }}
-          />
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <PressableScale
-            accessibilityLabel={task.status === 'done' ? 'Reabrir' : 'Concluir'}
-            onPress={onToggle}
-            style={{
-              width: 36,
-              height: 36,
-              borderRadius: 10,
-              backgroundColor: mode === 'dark' ? colors.elevated : colors.surface,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Icon name={task.status === 'done' ? 'checkmark' : icon} size={16} color={colors.ink} />
-          </PressableScale>
-          <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
-            <Text variant="bodyStrong" numberOfLines={2} style={{ fontSize: 14 }}>
-              {task.titulo}
-            </Text>
-            <Text variant="caption" muted numberOfLines={1} style={{ fontSize: 12 }}>
-              {task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : 'Sem horário'}
-            </Text>
+          {task.titulo}
+        </Text>
+        <Text variant="caption" muted numberOfLines={1}>
+          {[task.horaMinutos != null ? minutesToLabel(task.horaMinutos) : 'Sem horário', statusLabel(task), `${pct}%`].join(' · ')}
+        </Text>
+        {pct > 0 && !done ? (
+          <View style={{ height: 2, borderRadius: 999, backgroundColor: colors.hairline, overflow: 'hidden', marginTop: 2 }}>
+            <View style={{ width: `${pct}%`, height: '100%', backgroundColor: mark }} />
           </View>
-        </View>
+        ) : null}
       </View>
     </Pressable>
   )

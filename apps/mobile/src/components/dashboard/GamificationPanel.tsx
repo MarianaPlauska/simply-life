@@ -42,7 +42,7 @@ export function GamificationPanel()
           Pontos sobem ao concluir tarefa, registrar água ou anotar um gasto. A cada 500 pontos, sobe 1 nível. O dia para em 90 pontos, para não virar obrigação.
         </Text>
         <Text variant="caption" muted>
-          Moedas compram só aparência na loja. Elo é outra coisa: conta quantos dias seguidos você fez alguma ação. Um descanso por semana não quebra o elo.
+          Moedas compram só aparência na loja. Seus dias são outra coisa: guardam os dias em que você fez algo por você, sem cobrança.
         </Text>
       </View>
       <Card tone="hero" style={{ gap: space.sm }}>
