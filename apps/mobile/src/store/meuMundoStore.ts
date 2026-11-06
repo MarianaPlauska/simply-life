@@ -4,11 +4,13 @@ import {
   expandBlocos,
   fitFlexiveis,
   minutesToLabel,
+  rotinaDaSugestao,
   todayIso,
   type Bloco,
   type BlocoMarca,
   type BlocoStatus,
   type CalendarEvent,
+  type RotinaSugestao,
 } from '@simply-life/shared'
 import { readPersisted, writePersisted } from '../lib/persistStorage'
 import { archiveBloco, fetchBlocos, upsertBloco, upsertMarca } from '../lib/sync/blocos'
@@ -18,6 +20,7 @@ import { useAuthStore } from './authStore'
 import { readPhoneCalendarEvents } from '../lib/phoneCalendar'
 
 const KEY = 'simply-life-mundo-v1'
+const ROTINAS_OFF_KEY = 'simply-life-mundo-rotinas-off'
 
 type State = {
   blocos: Bloco[]
@@ -29,6 +32,10 @@ type State = {
   remove: (id: string) => Promise<void>
   mark: (blocoId: string, dia: string, patch: { status?: BlocoStatus | null; horaMinutos?: number | null }) => Promise<void>
   clearError: () => void
+  /** sugestões de rotina que a pessoa dispensou ("Agora não") */
+  rotinasOff: string[]
+  adoptRotina: (s: RotinaSugestao) => Promise<void>
+  dismissRotina: (chave: string) => Promise<void>
   /** agenda do celular (só app instalado), próximos 14 dias */
   phoneEvents: CalendarEvent[]
   phoneLinked: boolean
@@ -114,6 +121,7 @@ export const useMeuMundoStore = create<State>((set, get) =>
     marcas: [],
     loaded: false,
     error: null,
+    rotinasOff: [],
 
     hydrate: async () =>
     {
@@ -129,6 +137,15 @@ export const useMeuMundoStore = create<State>((set, get) =>
       catch
       {
         // cache corrompido: começa do banco
+      }
+      try
+      {
+        const off = await readPersisted(ROTINAS_OFF_KEY)
+        if (off) set({ rotinasOff: JSON.parse(off) as string[] })
+      }
+      catch
+      {
+        // sem lista: mostra as sugestões de novo
       }
       if (!isGuest())
       {
@@ -176,6 +193,19 @@ export const useMeuMundoStore = create<State>((set, get) =>
     },
 
     clearError: () => set({ error: null }),
+
+    adoptRotina: async (sug) =>
+    {
+      await get().save(rotinaDaSugestao(sug, newBlocoId(), todayIso()))
+      for (const id of sug.futuros) await get().remove(id)
+    },
+
+    dismissRotina: async (chave) =>
+    {
+      const rotinasOff = [...get().rotinasOff.filter((c) => c !== chave), chave]
+      set({ rotinasOff })
+      await writePersisted(ROTINAS_OFF_KEY, JSON.stringify(rotinasOff)).catch(() => undefined)
+    },
 
     phoneEvents: [],
     phoneLinked: false,

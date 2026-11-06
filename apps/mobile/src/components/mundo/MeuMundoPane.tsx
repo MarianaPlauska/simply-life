@@ -17,6 +17,7 @@ import { useMeuMundoStore } from '../../store/meuMundoStore'
 import { MundoWeekGrid } from './MundoWeekGrid'
 import { MundoDayTimeline } from './MundoDayTimeline'
 import { MundoBlocoSheet } from './MundoBlocoSheet'
+import { MundoRotinaCard } from './MundoRotinaCard'
 import { useMundoEvents } from './useMundoEvents'
 
 type View_ = 'semana' | 'dia'
@@ -154,6 +155,7 @@ export function MeuMundoPane({ initialDia }: { initialDia?: string })
           {temFlex ? <PrimaryButton label="Ajeitar" size="sm" variant="secondary" onPress={() => void ajeitar()} /> : null}
         </View>
       ) : null}
+      <MundoRotinaCard />
       {notice ? <PrimaryButton label={notice} variant="link" size="sm" onPress={() => setNotice('')} /> : null}
       {Platform.OS !== 'web' && !phoneLinked ? (
         <PrimaryButton

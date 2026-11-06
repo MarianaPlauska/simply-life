@@ -6,6 +6,9 @@ import {
   nextFreeSlot,
   parseBlocoFala,
   resumoDia,
+  rotinaDaSugestao,
+  rotinaSugestaoTexto,
+  sugerirRotinas,
   type Bloco,
 } from '../meuMundo'
 
@@ -124,5 +127,47 @@ describe('encaixe e resumo', () =>
     expect(r.total).toBe(3)
     expect(r.conflitos).toBe(1)
     expect(r.livre).toEqual({ inicio: 9 * 60 + 30, fim: 21 * 60 })
+  })
+})
+
+describe('sugerirRotinas', () =>
+{
+  const hoje = '2026-11-06' // sexta
+  const solto = (id: string, dia: string, hora = 7 * 60, titulo = 'Academia') =>
+    bloco({ id, dataInicio: dia, horaMinutos: hora, titulo, avisoMinutos: 10 })
+
+  it('3 segundas no mesmo horario viram sugestao', () =>
+  {
+    const bs = [solto('a', '2026-10-19'), solto('b', '2026-10-26', 7 * 60 + 15, 'academia'), solto('c', '2026-11-02'), solto('d', '2026-11-09')]
+    const [s] = sugerirRotinas(bs, hoje)
+    expect(s.diasSemana).toEqual([1])
+    expect(s.horaMinutos).toBe(7 * 60)
+    expect(s.vezes).toBe(3)
+    expect(s.futuros).toEqual(['d'])
+    expect(rotinaSugestaoTexto(s)).toEqual({
+      frase: 'Você colocou Academia às 7h nas últimas 3 segundas. Quer que isso se repita?',
+      botao: 'Repetir toda segunda',
+    })
+    const r = rotinaDaSugestao(s, 'novo', hoje)
+    expect(r).toMatchObject({ id: 'novo', repete: 'semanal', diasSemana: [1], dataInicio: '2026-11-07', avisoMinutos: 10 })
+  })
+
+  it('junta dias diferentes no mesmo horario', () =>
+  {
+    const dias = ['2026-10-19', '2026-10-26', '2026-11-02', '2026-10-21', '2026-10-28', '2026-11-04', '2026-10-23', '2026-10-30', '2026-11-06']
+    const [s, ...resto] = sugerirRotinas(dias.map((d, i) => solto(String(i), d)), hoje)
+    expect(resto).toHaveLength(0)
+    expect(s.diasSemana).toEqual([1, 3, 5])
+    expect(rotinaSugestaoTexto(s).botao).toBe('Repetir seg, qua e sex')
+  })
+
+  it('nao sugere com menos de 3, horario longe, ja repetindo ou dispensada', () =>
+  {
+    expect(sugerirRotinas([solto('a', '2026-10-26'), solto('b', '2026-11-02')], hoje)).toEqual([])
+    expect(sugerirRotinas([solto('a', '2026-10-19'), solto('b', '2026-10-26', 9 * 60), solto('c', '2026-11-02')], hoje)).toEqual([])
+    const tres = [solto('a', '2026-10-19'), solto('b', '2026-10-26'), solto('c', '2026-11-02')]
+    expect(sugerirRotinas([...tres, bloco({ id: 'r', repete: 'semanal', diasSemana: [1], dataInicio: '2026-11-09' })], hoje)).toEqual([])
+    expect(sugerirRotinas(tres, hoje, ['academia|420'])).toEqual([])
+    expect(sugerirRotinas([solto('x', '2026-09-07'), ...tres.slice(1)], hoje)).toEqual([])
   })
 })

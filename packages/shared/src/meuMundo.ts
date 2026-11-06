@@ -336,3 +336,147 @@ export function resumoDia(dia: string, ocorrencias: BlocoOcorrencia[], events: C
     .sort((a, b) => (b.fim - b.inicio) - (a.fim - a.inicio))[0] ?? null
   return { total: doDia.length + busyEvents(events, dia).length, conflitos, livre }
 }
+
+export type RotinaSugestao = {
+  /** título normalizado + hora; usado para "Agora não" */
+  chave: string
+  titulo: string
+  horaMinutos: number
+  diasSemana: number[]
+  /** vezes no dia da semana mais frequente */
+  vezes: number
+  /** bloco mais recente do padrão: aviso, cor, tipo, duração */
+  modelo: Bloco
+  /** blocos soltos depois de hoje que a rotina substitui */
+  futuros: string[]
+}
+
+const ROTINA_JANELA = 42
+const ROTINA_MIN = 3
+const ROTINA_TOLERANCIA = 30
+
+function normTitulo(t: string): string
+{
+  return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Blocos soltos com o mesmo nome, no mesmo dia da semana e perto do mesmo horário
+ * (3 vezes ou mais nas últimas 6 semanas) viram sugestão de rotina.
+ */
+export function sugerirRotinas(blocos: Bloco[], hoje: string, dispensadas: string[] = []): RotinaSugestao[]
+{
+  const desde = addDaysToIso(hoje, -ROTINA_JANELA)
+  const soltos = blocos.filter((b) => b.repete === 'nao' && b.horaMinutos != null)
+  const passados = soltos.filter((b) => b.dataInicio >= desde && b.dataInicio <= hoje)
+  const porTitulo = new Map<string, Bloco[]>()
+  for (const b of passados)
+  {
+    const k = normTitulo(b.titulo)
+    if (k) porTitulo.set(k, [...(porTitulo.get(k) ?? []), b])
+  }
+
+  const out: RotinaSugestao[] = []
+  for (const [nome, lista] of porTitulo)
+  {
+    type Cand = { dow: number; hora: number; itens: Bloco[] }
+    let cands: Cand[] = []
+    for (let dow = 0; dow < 7; dow++)
+    {
+      const doDia = lista.filter((b) => dowOfIso(b.dataInicio) === dow)
+      if (doDia.length < ROTINA_MIN) continue
+      // hora mais comum; empate fica com a mais recente
+      const freq = new Map<number, { n: number; ultimo: string }>()
+      for (const b of doDia)
+      {
+        const f = freq.get(b.horaMinutos!) ?? { n: 0, ultimo: '' }
+        freq.set(b.horaMinutos!, { n: f.n + 1, ultimo: b.dataInicio > f.ultimo ? b.dataInicio : f.ultimo })
+      }
+      const hora = [...freq].sort((a, b) => b[1].n - a[1].n || (a[1].ultimo < b[1].ultimo ? 1 : -1))[0][0]
+      const itens = doDia.filter((b) => Math.abs(b.horaMinutos! - hora) <= ROTINA_TOLERANCIA)
+      if (new Set(itens.map((b) => b.dataInicio)).size < ROTINA_MIN) continue
+      const jaRepete = blocos.some((b) =>
+        b.repete !== 'nao' && normTitulo(b.titulo) === nome && b.horaMinutos != null
+        && Math.abs(b.horaMinutos - hora) <= ROTINA_TOLERANCIA
+        && (b.repete === 'diario' || (b.diasSemana.length ? b.diasSemana : [dowOfIso(b.dataInicio)]).includes(dow))
+        && (!b.repeteAte || b.repeteAte >= hoje))
+      if (!jaRepete) cands.push({ dow, hora, itens })
+    }
+
+    while (cands.length)
+    {
+      cands.sort((a, b) => b.itens.length - a.itens.length)
+      const base = cands[0]
+      const juntos = cands.filter((c) => Math.abs(c.hora - base.hora) <= ROTINA_TOLERANCIA)
+      cands = cands.filter((c) => !juntos.includes(c))
+      const chave = `${nome}|${base.hora}`
+      if (dispensadas.includes(chave)) continue
+      const dias = juntos.map((c) => c.dow).sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7))
+      const modelo = juntos.flatMap((c) => c.itens).sort((a, b) => (a.dataInicio < b.dataInicio ? 1 : -1))[0]
+      out.push({
+        chave,
+        titulo: modelo.titulo,
+        horaMinutos: base.hora,
+        diasSemana: dias,
+        vezes: base.itens.length,
+        modelo,
+        futuros: soltos
+          .filter((b) => b.dataInicio > hoje && normTitulo(b.titulo) === nome && dias.includes(dowOfIso(b.dataInicio))
+            && Math.abs(b.horaMinutos! - base.hora) <= ROTINA_TOLERANCIA)
+          .map((b) => b.id),
+      })
+    }
+  }
+  return out
+}
+
+const DIA_CURTO = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']
+const DIA_LONGO = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado']
+const DIA_PLURAL = ['domingos', 'segundas', 'terças', 'quartas', 'quintas', 'sextas', 'sábados']
+
+function listaPt(itens: string[]): string
+{
+  return itens.length < 2 ? itens.join('') : `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}`
+}
+
+function horaPt(min: number): string
+{
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`
+}
+
+/** "Você colocou Academia às 7h nas últimas 3 segundas. Quer que isso se repita?" + texto do botão. */
+export function rotinaSugestaoTexto(s: RotinaSugestao): { frase: string; botao: string }
+{
+  const hora = horaPt(s.horaMinutos)
+  if (s.diasSemana.length === 1)
+  {
+    const d = s.diasSemana[0]
+    const masc = d === 0 || d === 6
+    return {
+      frase: `Você colocou ${s.titulo} às ${hora} ${masc ? 'nos últimos' : 'nas últimas'} ${s.vezes} ${DIA_PLURAL[d]}. Quer que isso se repita?`,
+      botao: `Repetir ${masc ? 'todo' : 'toda'} ${DIA_LONGO[d]}`,
+    }
+  }
+  const dias = listaPt(s.diasSemana.map((d) => DIA_CURTO[d]))
+  return {
+    frase: `Nas últimas semanas, você colocou ${s.titulo} toda ${dias} às ${hora}. Quer que isso se repita?`,
+    botao: `Repetir ${dias}`,
+  }
+}
+
+/** Bloco que repete, criado a partir da sugestão; começa amanhã para não duplicar o de hoje. */
+export function rotinaDaSugestao(s: RotinaSugestao, id: string, hoje: string): Bloco
+{
+  return {
+    ...s.modelo,
+    id,
+    dataInicio: addDaysToIso(hoje, 1),
+    horaMinutos: s.horaMinutos,
+    repete: 'semanal',
+    diasSemana: s.diasSemana,
+    intervaloSemanas: 1,
+    repeteAte: null,
+  }
+}
