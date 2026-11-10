@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
-import type { NotifyCadence } from '@simply-life/shared'
+import type { CadenceNotice, NotifyCadence } from '@simply-life/shared'
 
 const AXEL_CATEGORY = 'axel-actions'
 
@@ -209,33 +209,6 @@ export async function scheduleMorningFirstStep(when: Date, firstStep: string): P
 }
 
 const FOCUS_END_ID = 'axel-focus-end'
-const CURIOSITY_ID = 'axel-curiosity-card'
-
-/** Aviso diário que abre a carta. Não mexe no lembrete da noite. */
-export async function scheduleCuriosityCard(): Promise<void>
-{
-  const perm = await Notifications.getPermissionsAsync()
-  if (!perm.granted) return
-  await Notifications.cancelScheduledNotificationAsync(CURIOSITY_ID).catch(() => undefined)
-  await Notifications.scheduleNotificationAsync({
-    identifier: CURIOSITY_ID,
-    content: {
-      title: 'O AXEL descobriu uma coisa sobre a sua semana',
-      body: 'Se quiser ler, ela está aqui. Sem pressa.',
-      data: { url: '/?carta=1' },
-    },
-    trigger: withAlertChannel({
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 16,
-      minute: 0,
-    }),
-  })
-}
-
-export async function cancelCuriosityCard(): Promise<void>
-{
-  await Notifications.cancelScheduledNotificationAsync(CURIOSITY_ID).catch(() => undefined)
-}
 
 /** Aviso de fim do timer mesmo com o app em segundo plano. */
 export async function scheduleFocusEnd(seconds: number, taskTitle: string | null): Promise<void>
@@ -384,42 +357,39 @@ export async function scheduleBlocoReminders(items: BlocoReminder[]): Promise<vo
   }
 }
 
-const CADENCE_IDS =['axel-cadence-9', 'axel-cadence-11', 'axel-cadence-15', 'axel-cadence-21']
+const CADENCE_PREFIX = 'axel-cadence-'
+/** aviso fixo antigo das 16h; sai de quem já tinha agendado */
+const OLD_CURIOSITY_ID = 'axel-curiosity-card'
 
-/** Avisos locais do ritmo escolhido. O servidor também envia, se o aparelho estiver inscrito. */
-export async function scheduleCadenceAlerts(cadence: NotifyCadence): Promise<void>
+/** Troca os avisos do ritmo escolhido pelos da lista (hoje e amanhã com conteúdo real). */
+export async function scheduleCadenceAlerts(cadence: NotifyCadence, notices: CadenceNotice[] = []): Promise<void>
 {
-  for (const id of CADENCE_IDS)
+  await Notifications.cancelScheduledNotificationAsync(OLD_CURIOSITY_ID).catch(() => undefined)
+  const all = await Notifications.getAllScheduledNotificationsAsync().catch(() => [])
+  for (const n of all)
   {
-    await Notifications.cancelScheduledNotificationAsync(id).catch(() => undefined)
+    if (n.identifier.startsWith(CADENCE_PREFIX))
+    {
+      await Notifications.cancelScheduledNotificationAsync(n.identifier).catch(() => undefined)
+    }
   }
-  if (cadence === 'off') return
+  if (cadence === 'off' || !notices.length) return
   await setNativeAndroidChannel()
   const perm = await Notifications.getPermissionsAsync()
   if (!perm.granted) return
-  const slots = cadence === 'once'
-    ? [{ id: 'axel-cadence-11', hour: 11, body: 'O essencial está organizado. Abra quando fizer sentido.' }]
-    : [
-        { id: 'axel-cadence-9', hour: 9, body: 'Quando quiser, o dia cabe em um toque.' },
-        { id: 'axel-cadence-15', hour: 15, body: 'Se couber, um olhar no que ficou para hoje.' },
-        { id: 'axel-cadence-21', hour: 21, body: 'O essencial está organizado. Amanhã continua de onde parou.' },
-      ]
-  for (const slot of slots)
+  for (const n of notices)
   {
+    if (n.at.getTime() <= Date.now() + 30000) continue
     await Notifications.scheduleNotificationAsync({
-      identifier: slot.id,
+      identifier: `${CADENCE_PREFIX}${n.key}`,
       content: {
-        title: 'SunFy',
-        body: slot.body,
+        title: n.title,
+        body: n.body,
         sound: 'default',
         color: '#E8734A',
-        data: { url: '/' },
+        data: { url: n.url },
       },
-      trigger: withAlertChannel({
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour: slot.hour,
-        minute: 0,
-      }),
-    })
+      trigger: withAlertChannel({ type: Notifications.SchedulableTriggerInputTypes.DATE, date: n.at }),
+    }).catch(() => undefined)
   }
 }

@@ -11,10 +11,8 @@ import {
 import { mapPushUrlToRoute } from '../lib/pushDeepLink'
 import {
   addNativePushResponseListener,
-  cancelCuriosityCard,
   getLastNativePushResponse,
   scheduleCadenceAlerts,
-  scheduleCuriosityCard,
 } from '../lib/pushNotifications'
 
 function navigateFromPush(
@@ -46,7 +44,6 @@ export function usePushBootstrap(): void
     {
       registeredFor.current = null
       void unregisterExpoPushAsync()
-      void cancelCuriosityCard()
       void scheduleCadenceAlerts('off')
       return
     }
@@ -54,11 +51,8 @@ export function usePushBootstrap(): void
     if (registeredFor.current === userId) return
     registeredFor.current = userId
     // web: sem toque da pessoa, só renova se a permissão já foi dada
-    void registerExpoPushAsync(Platform.OS !== 'web').then((res) =>
-    {
-      if (res.ok) void scheduleCadenceAlerts(notifyCadence || 'off')
-    })
-    if (Platform.OS !== 'web') void scheduleCuriosityCard()
+    // os avisos do ritmo são montados em useCadenceNotices, com o conteúdo do dia
+    void registerExpoPushAsync(Platform.OS !== 'web')
   }, [userId, isGuest, prefsLoaded, notifyCadence])
 
   useEffect(() =>

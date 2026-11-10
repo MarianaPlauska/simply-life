@@ -57,14 +57,6 @@ export async function scheduleMorningFirstStep(_when: Date, _firstStep: string):
 {
 }
 
-export async function scheduleCuriosityCard(): Promise<void>
-{
-}
-
-export async function cancelCuriosityCard(): Promise<void>
-{
-}
-
 export async function scheduleFocusEnd(_seconds: number, _taskTitle: string | null): Promise<void>
 {
 }
@@ -109,6 +101,6 @@ export async function scheduleBlocoReminders(_items: BlocoReminder[]): Promise<v
 }
 
 /** No navegador o aviso chega pelo servidor, não por um alarme local. */
-export async function scheduleCadenceAlerts(_cadence: 'off' | 'once' | 'batch3'): Promise<void>
+export async function scheduleCadenceAlerts(_cadence: 'off' | 'once' | 'batch3', _notices: unknown[] = []): Promise<void>
 {
 }

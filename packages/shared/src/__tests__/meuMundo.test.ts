@@ -170,4 +170,30 @@ describe('sugerirRotinas', () =>
     expect(sugerirRotinas(tres, hoje, ['academia|420'])).toEqual([])
     expect(sugerirRotinas([solto('x', '2026-09-07'), ...tres.slice(1)], hoje)).toEqual([])
   })
+
+  it('a cada 15 dias vira sugestao quinzenal e comeca na semana certa', () =>
+  {
+    const bs = [solto('a', '2026-09-28', 19 * 60, 'Terapia'), solto('b', '2026-10-12', 19 * 60, 'Terapia'), solto('c', '2026-10-26', 19 * 60, 'Terapia'), solto('d', '2026-11-09', 19 * 60, 'Terapia'), solto('e', '2026-11-16', 19 * 60, 'Terapia')]
+    const [s] = sugerirRotinas(bs, hoje)
+    expect(s.intervaloSemanas).toBe(2)
+    expect(s.futuros).toEqual(['d'])
+    expect(rotinaSugestaoTexto(s)).toEqual({
+      frase: 'Você colocou Terapia às 19h a cada 15 dias, na segunda. Quer que isso se repita?',
+      botao: 'Repetir a cada 15 dias',
+    })
+    const r = rotinaDaSugestao(s, 'n', hoje)
+    expect(r.dataInicio).toBe('2026-11-09')
+    expect(r.intervaloSemanas).toBe(2)
+  })
+
+  it('conta tarefas com data e hora', () =>
+  {
+    const tarefa = (id: string, dia: string) => ({
+      id, titulo: 'Inglês', status: 'done' as const, dataVencimento: dia, horaMinutos: 18 * 60,
+      estimativaMinutos: 45, progresso: 0, checklist: [], anotacao: '', prioridade: 2 as const,
+    })
+    const [s] = sugerirRotinas([], hoje, [], [tarefa('1', '2026-10-21'), tarefa('2', '2026-10-28'), tarefa('3', '2026-11-04')])
+    expect(s.diasSemana).toEqual([3])
+    expect(rotinaDaSugestao(s, 'n', hoje)).toMatchObject({ titulo: 'Inglês', duracaoMinutos: 45, repete: 'semanal' })
+  })
 })

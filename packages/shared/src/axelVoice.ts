@@ -59,13 +59,13 @@ export const NOTIFY_CADENCE_OPTIONS: {
   },
   {
     id: 'once',
-    label: 'Um resumo por dia',
-    hint: 'No máximo um aviso, em horário comercial. Sem cobrança de sequência.',
+    label: 'Um resumo por semana',
+    hint: 'Segunda às 11h: como foi a semana e o que vem. Um aviso por semana, sem cobrança.',
   },
   {
     id: 'batch3',
     label: 'Até três no dia',
-    hint: '9h, 15h e 21h, como no estudo da Duke sobre bem-estar digital. Sem urgência.',
+    hint: '9h, 15h e 21h, com o que você tem no dia. Como no estudo da Duke sobre bem-estar digital.',
   },
 ]
 

@@ -31,6 +31,7 @@ import { useEloSync } from '../src/hooks/useEloSync'
 import { WebTopNav } from '../src/components/layout/WebTopNav'
 import { useWorkspace } from '../src/layout/useWorkspace'
 import { useMeuMundoStore } from '../src/store/meuMundoStore'
+import { CadenceNoticesSync } from '../src/components/CadenceNoticesSync'
 
 // a splash nativa fica até fontes, sessão e preferências carregarem (sem tela de "carregando")
 void SplashScreen.preventAutoHideAsync().catch(() => undefined)
@@ -54,6 +55,7 @@ function RootNavigator()
   const hydrateCare = useCareExtrasStore((s) => s.hydrate)
   const markOpen = useActivityStore((s) => s.markOpen)
   usePushBootstrap()
+  const notifyCadence = usePrefsStore((s) => s.prefs.notify_cadence)
   const pathname = usePathname()
   const { showRail } = useWorkspace()
   // web no computador: a barra lateral fica em todas as telas da conta, não só nas abas
@@ -148,6 +150,9 @@ function RootNavigator()
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
+      {Platform.OS !== 'web' && userId && !isGuest && prefsLoaded && notifyCadence && notifyCadence !== 'off' ? (
+        <CadenceNoticesSync cadence={notifyCadence} />
+      ) : null}
       {/* computador: menu no topo (faixa petróleo com submenus suspensos), no lugar da barra lateral */}
       <View style={{ flex: 1, flexDirection: 'column', backgroundColor: colors.canvas }}>
         {withSidebar ? <WebTopNav /> : null}

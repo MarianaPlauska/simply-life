@@ -78,6 +78,8 @@ export type WorkspacePrefs = {
   /** Metas escondidas da Home até este dia (inclusive). Sempre tem fim. */
   life_goals_paused_until?: string | null
   mood_report_dismissed_week?: string | null
+  /** Meu Mundo: sugestões de rotina dispensadas ("Agora não"), por título + hora */
+  mundo_rotinas_off?: string[]
   /** Wizard Montar seu AXEL concluído */
   setup_completed_at?: string | null
   /** O que a pessoa usa no app. Ausente = tudo ligado (contas de antes das boas-vindas). */
@@ -284,6 +286,7 @@ function mergePrefs(raw: Partial<WorkspacePrefs> | null | undefined): WorkspaceP
     chama_premios: Array.isArray(raw?.chama_premios) ? raw.chama_premios : [],
     life_goals_paused_until: typeof raw?.life_goals_paused_until === 'string' ? raw.life_goals_paused_until : null,
     mood_report_dismissed_week: raw?.mood_report_dismissed_week ?? null,
+    mundo_rotinas_off: Array.isArray(raw?.mundo_rotinas_off) ? raw.mundo_rotinas_off : [],
     color_scheme: scheme,
     enabled_modules: normalizeModules(raw?.enabled_modules),
     habit_goals: raw?.habit_goals && typeof raw.habit_goals === 'object' ? raw.habit_goals : undefined,

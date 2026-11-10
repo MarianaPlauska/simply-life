@@ -1,4 +1,5 @@
 import { freeSlots, type CalendarEvent } from './icsCalendar'
+import type { MobileTask } from './tasks'
 
 export type BlocoTipo = 'fixo' | 'flexivel'
 export type BlocoRepete = 'nao' | 'diario' | 'semanal'
@@ -343,15 +344,20 @@ export type RotinaSugestao = {
   titulo: string
   horaMinutos: number
   diasSemana: number[]
+  /** 1 = toda semana, 2 = a cada 15 dias */
+  intervaloSemanas: number
   /** vezes no dia da semana mais frequente */
   vezes: number
-  /** bloco mais recente do padrão: aviso, cor, tipo, duração */
+  /** dia mais recente do padrão; acerta a semana certa do "a cada 15 dias" */
+  ultimo: string
+  /** bloco (ou tarefa) mais recente do padrão: aviso, cor, tipo, duração */
   modelo: Bloco
   /** blocos soltos depois de hoje que a rotina substitui */
   futuros: string[]
 }
 
 const ROTINA_JANELA = 42
+const ROTINA_JANELA_QUINZENAL = 70
 const ROTINA_MIN = 3
 const ROTINA_TOLERANCIA = 30
 
@@ -360,15 +366,49 @@ function normTitulo(t: string): string
   return t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
-/**
- * Blocos soltos com o mesmo nome, no mesmo dia da semana e perto do mesmo horário
- * (3 vezes ou mais nas últimas 6 semanas) viram sugestão de rotina.
- */
-export function sugerirRotinas(blocos: Bloco[], hoje: string, dispensadas: string[] = []): RotinaSugestao[]
+function semanasEntre(a: string, b: string): number
 {
-  const desde = addDaysToIso(hoje, -ROTINA_JANELA)
+  return Math.round((isoToUtc(mondayOfIso(b)) - isoToUtc(mondayOfIso(a))) / (7 * DAY_MS))
+}
+
+/** Tarefa com data e hora entra na conta como se fosse um bloco solto. */
+function tarefaComoBloco(t: MobileTask): Bloco
+{
+  return {
+    id: `tarefa:${t.id}`,
+    titulo: t.titulo,
+    tipo: 'fixo',
+    dataInicio: (t.dataVencimento ?? '').slice(0, 10),
+    horaMinutos: t.horaMinutos,
+    duracaoMinutos: t.estimativaMinutos > 0 ? t.estimativaMinutos : 30,
+    repete: 'nao',
+    diasSemana: [],
+    intervaloSemanas: 1,
+    repeteAte: null,
+    avisoMinutos: null,
+    avisoFim: false,
+    cor: null,
+    categoria: null,
+  }
+}
+
+/**
+ * Blocos soltos (e tarefas com hora) com o mesmo nome, no mesmo dia da semana e perto do
+ * mesmo horário viram sugestão de rotina: 3 vezes em 6 semanas (toda semana) ou
+ * 3 vezes de 15 em 15 dias em 10 semanas.
+ */
+export function sugerirRotinas(
+  blocos: Bloco[],
+  hoje: string,
+  dispensadas: string[] = [],
+  tarefas: MobileTask[] = [],
+): RotinaSugestao[]
+{
+  const desde = addDaysToIso(hoje, -ROTINA_JANELA_QUINZENAL)
+  const recente = addDaysToIso(hoje, -ROTINA_JANELA)
   const soltos = blocos.filter((b) => b.repete === 'nao' && b.horaMinutos != null)
-  const passados = soltos.filter((b) => b.dataInicio >= desde && b.dataInicio <= hoje)
+  const deTarefas = tarefas.filter((t) => t.dataVencimento && t.horaMinutos != null).map(tarefaComoBloco)
+  const passados = [...soltos, ...deTarefas].filter((b) => b.dataInicio >= desde && b.dataInicio <= hoje)
   const porTitulo = new Map<string, Bloco[]>()
   for (const b of passados)
   {
@@ -379,7 +419,7 @@ export function sugerirRotinas(blocos: Bloco[], hoje: string, dispensadas: strin
   const out: RotinaSugestao[] = []
   for (const [nome, lista] of porTitulo)
   {
-    type Cand = { dow: number; hora: number; itens: Bloco[] }
+    type Cand = { dow: number; hora: number; itens: Bloco[]; datas: string[]; intervalo: number }
     let cands: Cand[] = []
     for (let dow = 0; dow < 7; dow++)
     {
@@ -394,37 +434,53 @@ export function sugerirRotinas(blocos: Bloco[], hoje: string, dispensadas: strin
       }
       const hora = [...freq].sort((a, b) => b[1].n - a[1].n || (a[1].ultimo < b[1].ultimo ? 1 : -1))[0][0]
       const itens = doDia.filter((b) => Math.abs(b.horaMinutos! - hora) <= ROTINA_TOLERANCIA)
-      if (new Set(itens.map((b) => b.dataInicio)).size < ROTINA_MIN) continue
+      const datas = [...new Set(itens.map((b) => b.dataInicio))].sort()
+      if (datas.length < ROTINA_MIN) continue
+      const gaps = datas.slice(1).map((d, i) => semanasEntre(datas[i], d))
+      let intervalo = 0
+      if (gaps.every((g) => g === 2 || g === 4) && datas[datas.length - 1] >= addDaysToIso(hoje, -28)) intervalo = 2
+      else if (datas.filter((d) => d >= recente).length >= ROTINA_MIN) intervalo = 1
+      if (!intervalo) continue
       const jaRepete = blocos.some((b) =>
         b.repete !== 'nao' && normTitulo(b.titulo) === nome && b.horaMinutos != null
         && Math.abs(b.horaMinutos - hora) <= ROTINA_TOLERANCIA
         && (b.repete === 'diario' || (b.diasSemana.length ? b.diasSemana : [dowOfIso(b.dataInicio)]).includes(dow))
         && (!b.repeteAte || b.repeteAte >= hoje))
-      if (!jaRepete) cands.push({ dow, hora, itens })
+      if (!jaRepete) cands.push({ dow, hora, itens, datas, intervalo })
     }
 
     while (cands.length)
     {
-      cands.sort((a, b) => b.itens.length - a.itens.length)
+      cands.sort((a, b) => b.datas.length - a.datas.length)
       const base = cands[0]
-      const juntos = cands.filter((c) => Math.abs(c.hora - base.hora) <= ROTINA_TOLERANCIA)
+      const ultimoBase = base.datas[base.datas.length - 1]
+      const juntos = cands.filter((c) =>
+        c.intervalo === base.intervalo && Math.abs(c.hora - base.hora) <= ROTINA_TOLERANCIA
+        && (c.intervalo === 1 || semanasEntre(ultimoBase, c.datas[c.datas.length - 1]) % 2 === 0))
       cands = cands.filter((c) => !juntos.includes(c))
       const chave = `${nome}|${base.hora}`
       if (dispensadas.includes(chave)) continue
       const dias = juntos.map((c) => c.dow).sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7))
-      const modelo = juntos.flatMap((c) => c.itens).sort((a, b) => (a.dataInicio < b.dataInicio ? 1 : -1))[0]
-      out.push({
+      const todos = juntos.flatMap((c) => c.itens).sort((a, b) => (a.dataInicio < b.dataInicio ? 1 : -1))
+      // prefere um bloco de verdade como modelo (tem aviso e cor)
+      const modelo = todos.find((b) => !b.id.startsWith('tarefa:')) ?? todos[0]
+      const sug: RotinaSugestao = {
         chave,
         titulo: modelo.titulo,
         horaMinutos: base.hora,
         diasSemana: dias,
-        vezes: base.itens.length,
+        intervaloSemanas: base.intervalo,
+        vezes: base.datas.length,
+        ultimo: todos[0].dataInicio,
         modelo,
-        futuros: soltos
-          .filter((b) => b.dataInicio > hoje && normTitulo(b.titulo) === nome && dias.includes(dowOfIso(b.dataInicio))
-            && Math.abs(b.horaMinutos! - base.hora) <= ROTINA_TOLERANCIA)
-          .map((b) => b.id),
-      })
+        futuros: [],
+      }
+      const rotina = rotinaDaSugestao(sug, '', hoje)
+      sug.futuros = soltos
+        .filter((b) => b.dataInicio > hoje && normTitulo(b.titulo) === nome
+          && Math.abs(b.horaMinutos! - base.hora) <= ROTINA_TOLERANCIA && blocoOccursOn(rotina, b.dataInicio))
+        .map((b) => b.id)
+      out.push(sug)
     }
   }
   return out
@@ -450,13 +506,23 @@ function horaPt(min: number): string
 export function rotinaSugestaoTexto(s: RotinaSugestao): { frase: string; botao: string }
 {
   const hora = horaPt(s.horaMinutos)
+  const masc = (d: number) => d === 0 || d === 6
+  if (s.intervaloSemanas === 2)
+  {
+    const quando = s.diasSemana.length === 1
+      ? `${masc(s.diasSemana[0]) ? 'no' : 'na'} ${DIA_LONGO[s.diasSemana[0]]}`
+      : listaPt(s.diasSemana.map((d) => DIA_CURTO[d]))
+    return {
+      frase: `Você colocou ${s.titulo} às ${hora} a cada 15 dias, ${quando}. Quer que isso se repita?`,
+      botao: 'Repetir a cada 15 dias',
+    }
+  }
   if (s.diasSemana.length === 1)
   {
     const d = s.diasSemana[0]
-    const masc = d === 0 || d === 6
     return {
-      frase: `Você colocou ${s.titulo} às ${hora} ${masc ? 'nos últimos' : 'nas últimas'} ${s.vezes} ${DIA_PLURAL[d]}. Quer que isso se repita?`,
-      botao: `Repetir ${masc ? 'todo' : 'toda'} ${DIA_LONGO[d]}`,
+      frase: `Você colocou ${s.titulo} às ${hora} ${masc(d) ? 'nos últimos' : 'nas últimas'} ${s.vezes} ${DIA_PLURAL[d]}. Quer que isso se repita?`,
+      botao: `Repetir ${masc(d) ? 'todo' : 'toda'} ${DIA_LONGO[d]}`,
     }
   }
   const dias = listaPt(s.diasSemana.map((d) => DIA_CURTO[d]))
@@ -469,14 +535,17 @@ export function rotinaSugestaoTexto(s: RotinaSugestao): { frase: string; botao: 
 /** Bloco que repete, criado a partir da sugestão; começa amanhã para não duplicar o de hoje. */
 export function rotinaDaSugestao(s: RotinaSugestao, id: string, hoje: string): Bloco
 {
+  let inicio = addDaysToIso(hoje, 1)
+  // a cada 15 dias: começa numa semana com o mesmo passo da última vez
+  if (s.intervaloSemanas === 2 && semanasEntre(s.ultimo, inicio) % 2 !== 0) inicio = addDaysToIso(mondayOfIso(inicio), 7)
   return {
     ...s.modelo,
     id,
-    dataInicio: addDaysToIso(hoje, 1),
+    dataInicio: inicio,
     horaMinutos: s.horaMinutos,
     repete: 'semanal',
     diasSemana: s.diasSemana,
-    intervaloSemanas: 1,
+    intervaloSemanas: s.intervaloSemanas,
     repeteAte: null,
   }
 }

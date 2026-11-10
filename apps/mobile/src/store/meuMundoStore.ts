@@ -17,10 +17,10 @@ import { archiveBloco, fetchBlocos, upsertBloco, upsertMarca } from '../lib/sync
 import { scheduleBlocoReminders, type BlocoReminder } from '../lib/pushNotifications'
 import { friendlyError } from '../lib/friendlyError'
 import { useAuthStore } from './authStore'
+import { usePrefsStore } from './prefsStore'
 import { readPhoneCalendarEvents } from '../lib/phoneCalendar'
 
 const KEY = 'simply-life-mundo-v1'
-const ROTINAS_OFF_KEY = 'simply-life-mundo-rotinas-off'
 
 type State = {
   blocos: Bloco[]
@@ -32,8 +32,6 @@ type State = {
   remove: (id: string) => Promise<void>
   mark: (blocoId: string, dia: string, patch: { status?: BlocoStatus | null; horaMinutos?: number | null }) => Promise<void>
   clearError: () => void
-  /** sugestões de rotina que a pessoa dispensou ("Agora não") */
-  rotinasOff: string[]
   adoptRotina: (s: RotinaSugestao) => Promise<void>
   dismissRotina: (chave: string) => Promise<void>
   /** agenda do celular (só app instalado), próximos 14 dias */
@@ -121,7 +119,6 @@ export const useMeuMundoStore = create<State>((set, get) =>
     marcas: [],
     loaded: false,
     error: null,
-    rotinasOff: [],
 
     hydrate: async () =>
     {
@@ -137,15 +134,6 @@ export const useMeuMundoStore = create<State>((set, get) =>
       catch
       {
         // cache corrompido: começa do banco
-      }
-      try
-      {
-        const off = await readPersisted(ROTINAS_OFF_KEY)
-        if (off) set({ rotinasOff: JSON.parse(off) as string[] })
-      }
-      catch
-      {
-        // sem lista: mostra as sugestões de novo
       }
       if (!isGuest())
       {
@@ -202,9 +190,10 @@ export const useMeuMundoStore = create<State>((set, get) =>
 
     dismissRotina: async (chave) =>
     {
-      const rotinasOff = [...get().rotinasOff.filter((c) => c !== chave), chave]
-      set({ rotinasOff })
-      await writePersisted(ROTINAS_OFF_KEY, JSON.stringify(rotinasOff)).catch(() => undefined)
+      // fica nas preferências da conta: vale em qualquer aparelho
+      const prefs = usePrefsStore.getState()
+      const off = prefs.prefs.mundo_rotinas_off ?? []
+      await prefs.patch({ mundo_rotinas_off: [...off.filter((c) => c !== chave), chave] })
     },
 
     phoneEvents: [],
